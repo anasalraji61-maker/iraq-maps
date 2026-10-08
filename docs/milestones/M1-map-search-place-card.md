@@ -1,0 +1,228 @@
+---
+id: M1
+slug: map-search-place-card
+status: not_started
+branch: claude/iraq-smart-maps-app-aybpjn
+owners:
+  builder-geo-data:
+    - "geo-services/pipeline/**"
+    - ".github/workflows/geo-data.yml"
+    - "docs/DATA_SOURCES.md"
+  builder-tiles:
+    - "geo-services/tiles/**"
+  builder-places:
+    - "modules/places/**"
+  builder-map-kit:
+    - "packages/map-kit/**"
+    - "packages/geo/**"
+  builder-map-app:
+    - "mobile-features/map/**"
+    - "packages/ui/**"
+  builder-e2e-m1:
+    - "e2e/**"
+    - "tools/bench/**"
+  integrator:
+    - "package.json"
+    - "pnpm-workspace.yaml"
+    - "pnpm-lock.yaml"
+    - "turbo.json"
+    - ".gitignore"
+    - ".env.example"
+    - ".gitleaks.toml"
+    - "packages/tooling/**"
+    - "packages/contracts/**"
+    - "packages/testing/**"
+    - "tools/ownership/**"
+    - "apps/api/**"
+    - "apps/mobile/*"
+    - "apps/mobile/app/**"
+    - "apps/mobile/src/shell/**"
+    - ".github/workflows/ci.yml"
+    - ".github/workflows/android.yml"
+    - "docs/milestones/**"
+    - "docs/adr/**"
+    - "CLAUDE.md"
+auditors:
+  auditor-architecture-m1: architecture-contracts
+  auditor-qa-m1: qa-build
+  auditor-licensing-m1: licensing-data
+  auditor-rtl-m1: arabic-rtl-a11y
+  auditor-security-m1: security-privacy
+---
+
+# M1 — خريطة المدينة والبحث العربي وبطاقة المكان
+
+**الحالة:** لم تبدأ · **التقدير:** 3–4 ساعة · **يعتمد على:** [M0](M0-walking-skeleton-login-gates.md) · **الفرع:** `claude/iraq-smart-maps-app-aybpjn`
+
+> العملية العامة (التجميد، البناء المتوازي، التكامل، التدقيق، الإغلاق) في [README.md](README.md) ولا تتكرر هنا. هذا الملف يحدد ما يخص المرحلة فقط.
+
+## الهدف
+
+يفتح المستخدم تبويب الخريطة فيرى خريطة vector لأربيل (أو المدينة التي يختارها ADR-0002). الأسماء تظهر بالعربية، ثم بالكردية إن غابت العربية، ثم بالاسم الأصلي، ويستطيع تغيير لغة الخريطة. إسناد OpenStreetMap ظاهر دائماً.
+
+يستطيع المستخدم:
+- التمركز على موقعه بزر «موقعي».
+- البحث بالعربية بأي إملاء عن أماكن وشوارع وأحياء، مرتبة حسب التشابه والقرب.
+- فتح بطاقة مكان فيها: الاسم، والفئة، والحي، وساعات العمل مع «مفتوح الآن»، وبيانات OSM العامة بشارة مصدرها، وزر مشاركة برابط iraqmaps://place/<id>.
+
+الأزرار التي لم تُسلَّم ميزاتها بعد لا تظهر.
+
+بيانات المدينة الحقيقية تُبنى في CI وتُرفع كـ artifacts من geo-data.yml، وكل شيء يعمل محلياً على بيانات fixture.
+
+## الميزات المطلوبة
+
+- [ ] **pipeline المدينة**
+  - قص المستخرج بـ osmium حسب ملف المدينة.
+  - استخراج الأماكن والشوارع والأحياء إلى NDJSON وفق PlaceImportRecord، بالأسماء الأربعة والوسوم المفيدة (opening_hours و phone و website).
+  - fixture يدوي erbil-mini.osm بترخيص CC0، مسجّل في DATA_SOURCES.
+  - job في geo-data.yml يبني بيانات المدينة الحقيقية: ‏PMTiles و glyphs و NDJSON كـ artifact باسم data-<city>-<date>، ثم يقيس p95 للبحث على PostGIS داخل CI.
+- [ ] **بلاطات vector و glyphs عربية**
+  - مشروع Maven يعتمد planetiler-core من Maven Central، بملف profile واحد مخصص لـ OSM فقط ومطابق لـ TileSchema.
+  - الطبقات: transportation و place و poi و building و water و landuse و boundary، مع name و name:ar و name:ckb و name:en.
+  - لا حاجة لـ Natural Earth أو مضلّعات المحيطات، لأن المدينة داخلية.
+  - glyphs بنطاقات العربية واللاتينية من خط Noto المسجّل.
+- [ ] **map-kit و geo**
+  - MapCanvas يغلّف MapLibre Native.
+  - ستايل لكل لغة من قالب واحد: coalesce(name:<lang>، name:ar، name:ckb، name).
+  - مصدر pmtiles:// أو XYZ حسب واصف المدينة.
+  - نقطة الموقع، وإسناد لا يمكن إخفاؤه، وطبقة علامات النتائج، و mock جاهز لـ Jest.
+  - packages/geo: ‏bbox، والمسافات، وحدود الكاميرا.
+- [ ] **وحدة places والبحث العربي**
+  - استيراد NDJSON إلى جداول OSM في schema ‏places، بشكل idempotent.
+  - بحث pg_trgm على الأسماء المطبّعة بثلاث لغات، مع ترتيب يجمع التشابه والقرب والنوع.
+  - المسارات: ‎/v1/search و ‎/v1/places/:id و ‎/v1/places/nearby و ‎/v1/cities.
+  - مسارا احتياط لتقديم البلاطات والـ glyphs من ملف محلي أو رابط يحدده واصف المدينة، عبر مكتبة pmtiles.
+  - تنفيذ PlacesQueryPort.
+  - Photon مؤجل حسب ADR-0005.
+- [ ] **ميزة الخريطة في التطبيق**
+  حزمة feature-map:
+  - شريط بحث بتأخير (debounce) مع إلغاء الطلب السابق.
+  - النتائج مع المسافة، وحالات: بلا نتائج، بلا شبكة، تحميل.
+  - البطاقة مع «مفتوح الآن» وشارة المصدر.
+  - مشاركة الرابط.
+  - زر «موقعي» مع طلب الإذن والتعامل مع رفضه.
+  - تبديل لغة أسماء الخريطة.
+  - الإجراءات المستقبلية تبقى مخفية عبر useRouteAvailable.
+- [ ] **اختبار البحث على المحاكي**
+  - الـ harness يحمّل fixture الأماكن ويقدّم بلاطات fixture عبر مسار الاحتياط في الخادم.
+  - Maestro: البحث عن «قلعه»، ثم الضغط على النتيجة، ثم ظهور البطاقة.
+
+## خارج النطاق
+
+- المسارات والملاحة والأقمار (M2).
+- بيانات المزوّد على البطاقة (M3)، والأسعار والزحمة (M5).
+- أزرار الحفظ والمراسلة والمساعد (تظهر آلياً عند تسليمها).
+- Photon (مؤجل بـ ADR-0005)، والخرائط offline.
+
+## العقود
+
+يجمّدها المكامل في commit `chore(M1): freeze contracts` قبل أن يبدأ أي بنّاء (القواعد في [سياسة العقود](README.md#سياسة-العقود)). المحتوى المطلوب:
+
+The integrator freezes contracts in 30 min or less. It adds:
+- cities router: GET /v1/cities returning CityDescriptor {id, names{ar,ckb,en}, bbox, center, tilesUrl, glyphsUrl, attribution}, plus the fallback routes GET /v1/cities/:id/tiles/:z/:x/:y and GET /v1/cities/:id/glyphs/:fontstack/:range
+- places router: GET /v1/search?q&city&near&lang&limit returning SearchResult with kind place|street|area; GET /v1/places/:id returning PlaceDetails {id, names, category, area, hoursRaw, osmContacts{phone?, website?}, source:'osm', attribution}; GET /v1/places/nearby
+- the PlaceCategory enum
+- PlacesQueryPort, with FakePlacesQueryPort and a conformance suite
+- TileSchema constants
+- PlaceImportRecord
+- CLI contracts for geo-services tiles build --input --output --bbox, for the pipeline extract, and for the bench CLI
+- typed stubs: map-kit (MapCanvas props, markers, camera), geo, ui PlaceSummaryCard
+- route links: map, place/:id
+- testIDs
+- ownership front-matter
+
+No event is added, because nothing consumes one yet.
+
+## توزيع الوكلاء
+
+### البنّاؤون
+
+يعملون بالتوازي كوكلاء في الخلفية، كلٌّ داخل مساراته فقط (انظر [البناء المتوازي](README.md#دورة-حياة-المرحلة)).
+
+| الوكيل | يملك حصرياً | يسلّم |
+|---|---|---|
+| `builder-geo-data` | `geo-services/pipeline/**`<br>`.github/workflows/geo-data.yml`<br>`docs/DATA_SOURCES.md` | • القص والاستخراج إلى NDJSON.<br>• fixture ‏erbil-mini.osm.<br>• jobs المدينة والأداء في geo-data.yml مع رفعها كـ artifacts.<br>• تسجيل fixture والمصادر في DATA_SOURCES. |
+| `builder-tiles` | `geo-services/tiles/**` | • profile ‏Planetiler مطابق لـ TileSchema.<br>• CLI موحّد للبناء.<br>• توليد glyphs عربية ولاتينية، والأداة تُختار وتُسجَّل عند التجميد.<br>• اختبار بناء الـ fixture وفك بلاطة منه. |
+| `builder-places` | `modules/places/**` | وحدة places مع اختباراتها على PostGIS المحلي:<br>• الاستيراد idempotent.<br>• فهارس GIN و GiST على الأعمدة المطبّعة.<br>• البحث المرتب، والتفاصيل، والقريب، وسجل المدن.<br>• مسارا احتياط البلاطات والـ glyphs.<br>• اجتياز conformance suite. |
+| `builder-map-kit` | `packages/map-kit/**`<br>`packages/geo/**` | • MapCanvas، والستايل لكل لغة من قالب واحد، ومصدر PMTiles أو XYZ.<br>• الموقع والإسناد والعلامات، و mock لـ Jest.<br>• دوال geo الأساسية. |
+| `builder-map-app` | `mobile-features/map/**`<br>`packages/ui/**` | • feature-map: شاشة الخريطة، والبحث، والبطاقة، و«موقعي»، وتبديل لغة الخريطة، ونصوص مساحة الأسماء map، واختبارات RNTL، وتدفق Maestro.<br>• PlaceSummaryCard المشترك في packages/ui. |
+| `builder-e2e-m1` | `e2e/**`<br>`tools/bench/**` | • سيناريوهات e2e/api للمدن والبحث والبطاقة.<br>• توسيع الـ harness لتحميل fixture الأماكن والبلاطات.<br>• أداة tools/bench لقياس p95. |
+
+### المكامل (integrator)
+
+**يملك:** `package.json`، `pnpm-workspace.yaml`، `pnpm-lock.yaml`، `turbo.json`، `.gitignore`، `.env.example`، `.gitleaks.toml`، `packages/tooling/**`، `packages/contracts/**`، `packages/testing/**`، `tools/ownership/**`، `apps/api/**`، `apps/mobile/*`، `apps/mobile/app/**`، `apps/mobile/src/shell/**`، `.github/workflows/ci.yml`، `.github/workflows/android.yml`، `docs/milestones/**`، `docs/adr/**`، `CLAUDE.md`
+
+- ربط places و PlacesQueryPort في apps/api.
+- app.config: ‏plugin ‏MapLibre، وأذونات الموقع.
+- مسار تبويب الخريطة، ورابط iraqmaps://place/:id.
+- إضافة متغيرات TILES_SOURCE و GLYPHS_SOURCE إلى .env.example.
+- كتابة ADR-0005 (البحث في PostGIS وتأجيل Photon)، و ADR-0008 (البلاطات واستضافة بيانات التطوير كـ Actions artifacts).
+
+### المدققون
+
+لم يكتب أيٌّ منهم كود هذه المرحلة، ولا يعدّلون الكود؛ يرفعون الملاحظات لمالك الملف.
+
+| الوكيل | العدسة | يفحص |
+|---|---|---|
+| `auditor-architecture-m1` | `architecture-contracts` | • البلاطات والستايل مشتقان من TileSchema بلا تكرار.<br>• الميزات لا تستورد بعضها، و places لا تستورد وحدة أخرى.<br>• لا JOIN بين schemas.<br>• نجاح knip و jscpd، والملكية سليمة. |
+| `auditor-qa-m1` | `qa-build` | • يشغّل البوابة ومعايير القبول.<br>• يتحقق من رقم p95 من تشغيل CI الحقيقي.<br>• يتحقق من اختبارات حالات الإملاء والقرب والفشل (شبكة، 404، 400).<br>• يتحقق من نجاح android.yml بجزأيه. |
+| `auditor-licensing-m1` | `licensing-data` | • إسناد © OpenStreetMap contributors ظاهر دائماً.<br>• عدم استخدام tile.openstreetmap.org.<br>• تسجيل fixture (CC0) و Planetiler و glyphs.<br>• فصل جداول OSM.<br>• الـ artifact يحمل ملف الإسناد. |
+| `auditor-rtl-m1` | `arabic-rtl-a11y` | • ترتيب لغة التسميات.<br>• تشكّل الحروف العربية في لقطة المحاكي.<br>• البطاقة والنتائج في RTL.<br>• الأرقام والمسافات حسب اللغة.<br>• تسميات قارئ الشاشة لأزرار الخريطة. |
+| `auditor-security-m1` | `security-privacy` | • التحقق بـ zod وحدود الطول على البحث.<br>• حد المعدّل.<br>• غياب SQL injection في استعلامات trigram.<br>• عدم تسجيل الإحداثيات الدقيقة.<br>• مسارا الاحتياط لا يسمحان بقراءة ملفات خارج المصدر المحدد. |
+
+## معايير القبول
+
+| # | المعيار | طريقة التحقق |
+|---|---|---|
+| 1 | pipeline يستخرج من الـ fixture الأعداد والأسماء المتوقعة | `pnpm --filter @iraq-maps/geo-pipeline test` checks the exact counts of POIs, streets and areas, and validates every line against the PlaceImportRecord zod schema (via its JSON Schema export) |
+| 2 | البلاطات و glyphs تُبنى من الـ fixture بالطبقات والحقول المتفق عليها | `pnpm --filter @iraq-maps/geo-tiles test`:<br>• Maven runs the profile on the fixture pbf<br>• the test reads the PMTiles header and decodes one MVT tile<br>• layers and fields equal the TileSchema in contracts<br>• the Arabic and Latin glyph ranges exist |
+| 3 | الستايل يتبع ترتيب اللغة ويجتاز التحقق، والإسناد ظاهر دائماً | `pnpm --filter @iraq-maps/map-kit test`:<br>• the label expression order is correct for ar, ckb and en<br>• @maplibre/maplibre-gl-style-spec validate passes<br>• the attribution component always renders and cannot be hidden |
+| 4 | البحث العربي يوحّد الإملاء ويعيد أماكن وشوارع وأحياء مرتبة بالقرب | `pnpm --filter @iraq-maps/e2e-api test -- places`:<br>• اربيل, أربيل and إربيل return the same top id<br>• قلعه and قلعة return the same top id<br>• street and area kinds are returned<br>• `near` reorders results by distance<br>• GET /v1/places/:id returns details; a missing id returns 404 Problem<br>• an invalid query returns 400<br>• GET /v1/cities returns the descriptor with tilesUrl and attribution<br>• the tiles fallback returns a valid MVT |
+| 5 | المنفذ الحقيقي والمزيّف يجتازان نفس مجموعة الاختبار | `pnpm --filter @iraq-maps/places test` runs the PlacesQueryPort conformance suite from packages/testing against the PostGIS implementation; the fake passes the same suite |
+| 6 | جداول OSM منفصلة وجاهزة لفصل بيانات المزوّد (ODbL) | places SQL test: the places.osm_* tables hold only OSM-derived columns; depcruise is green |
+| 7 | ميزة الخريطة تعمل في اختبارات الواجهة | `pnpm --filter @iraq-maps/feature-map test` (RNTL):<br>• debounced search with cancellation<br>• results and their empty, offline and loading states<br>• the card with open-now and the source badge<br>• the share link<br>• locate-me with a mocked location, and with permission denied<br>• the attribution is visible<br>• actions without a route are hidden |
+| 8 | بيانات المدينة الحقيقية تُبنى، والبحث عليها ضمن الميزانية | The geo-data.yml city and perf jobs on a GitHub runner conclude success:<br>• the artifact data-<city>-<date> holds the PMTiles, glyphs and NDJSON<br>• the data is imported into a CI PostGIS<br>• `pnpm --filter @iraq-maps/bench search` runs 200 queries with server-side p95 under 800ms<br>• the counts and p95 are written to the job summary and copied into the milestone file |
+| 9 | بناء أندرويد ينجح والحجم ضمن الميزانية مع MapLibre | android.yml build job green for the head SHA; arm64 APK 40MB or less |
+| 10 | البحث وفتح البطاقة يعملان على محاكي أندرويد | android.yml e2e job green: the M0 flows plus mobile-features/map/maestro/search-place.yaml (map-view and osm-attribution visible, type قلعه, tap the result, place-card shows the name, category and source). The screenshot artifact is reviewed by auditor-rtl-m1 for Arabic label shaping. |
+| 11 | بوابة الجودة و CI خضراء وموافقة المدققين | `pnpm gate` exits 0; ci.yml is green for the head SHA; the audit log shows every auditor APPROVED |
+
+## المتطلبات البيئية والبدائل المؤقتة
+
+- Java 21 + Maven, with planetiler-core on Maven Central (reachable).
+- osmium-tool is installed; pyosmium installs via pip.
+- Noto Sans Arabic TTF from npm, for example @expo-google-fonts/noto-sans-arabic. The glyph tool is chosen at the freeze.
+- Real city data is processed only in geo-data.yml on GitHub runners. Outputs are uploaded as workflow artifacts and inspected through GitHub MCP; no GitHub Releases are used.
+- A KVM emulator on the GitHub runner.
+- Default applied under autonomous execution: OSM phone and website tags are shown on unclaimed place cards with a 'From OpenStreetMap' label, and used only for manual handoff in M4.
+- Optional: trying the real map and search on a phone needs a reachable API and hosted city data (see MOCKS.md). The gate does not depend on it.
+
+**البدائل المؤقتة (mocks) في هذه المرحلة:** رابط API عام للتجربة على هاتف حقيقي، بيانات Geofabrik (في CI فقط)، Photon (geocoding)، نطاق لروابط المشاركة، Android SDK محلياً. التفاصيل وما يلزم للتشغيل الحقيقي في [MOCKS.md](MOCKS.md).
+
+## بوابة الإغلاق
+
+كل البنود على **نفس الـ SHA** (التفاصيل في [بوابة الإغلاق](README.md#بوابة-الإغلاق)):
+
+- [ ] `pnpm infra:local up && pnpm install --frozen-lockfile && pnpm gate` ينجح من نسخة نظيفة
+- [ ] `pnpm android:precheck` ينجح
+- [ ] `ci.yml` ناجح
+- [ ] `android.yml`: job ‏build ناجح (APK ‏arm64 ≤ 40MB ومرفوع كـ artifact)، و job ‏e2e ناجح (تدفقات Maestro لهذه المرحلة وكل ما قبلها)
+- [ ] `geo-data.yml` ناجح
+- [ ] كل معايير القبول أعلاه مُثبتة بدليلها في «ما تم إنجازه»
+- [ ] كل المدققين (5) سجّلوا `APPROVED <sha>` بلا ملاحظات حاجبة مفتوحة
+- [ ] commit و push إلى `claude/iraq-smart-maps-app-aybpjn`، وتسجيل الـ SHA في الجدول أدناه، وتحديث الفهرس
+
+## المخاطر
+
+- دعم pmtiles:// عبر إعادة توجيه GitHub في MapLibre Native 13.6.1 غير مؤكد. البديل XYZ من الخادم جاهز في نفس المرحلة.
+- تشكّل الحروف العربية بالـ glyphs في MapLibre Native قد يحتاج ضبطاً. نتحقق منه بلقطة المحاكي ومراجعة RTL.
+- name:ar ناقص لأماكن كثيرة في أربيل، فتظهر الكردية لمستخدم عربي. نعالج ذلك بفهرسة كل name:* والعرض الاحتياطي، والتقرير يقيس النقص.
+- أداء pg_trgm على العربية. نستخدم فهارس GIN على أعمدة مطبّعة، ونقيس على بيانات حقيقية في نفس المرحلة.
+- ملف profile ‏Planetiler بـ Java يجب أن يبقى صغيراً ومشتقاً من TileSchema.
+
+## ما تم إنجازه
+
+لم تبدأ بعد.
+
+| التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
+|---|---|---|---|
+| | | | |
