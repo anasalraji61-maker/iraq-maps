@@ -5,14 +5,17 @@ pnpm scripts wrap both so turbo can run `test`, and geo-data.yml calls the CLI.
 
 - **Tiles:** a PMTiles v3 archive of MVT tiles built from OSM only (no Natural Earth, no ocean polygons). Layers,
   geometry types, classes, fields and zooms come from `TileSchema`, read at runtime from
-  `packages/contracts/schemas/tile-schema.json`. `CityProfile` holds only the OSM tag to class mapping, and refuses to
-  start unless its classes equal the schema's, layer by layer. Each feature has `class` plus whichever of `name`,
+  `packages/contracts/schemas/tile-schema.json`. poi classes come from the shared OSM tag to `PlaceCategory` rules in
+  `packages/contracts/schemas/osm-categories.json`, which the pipeline extract reads too. `CityProfile` holds only the
+  tag mapping of the other layers, and refuses to start unless the classes equal the schema's, layer by layer. Each feature has `class` plus whichever of `name`,
   `name:ar`, `name:ckb`, `name:en` the element has. Tiles are gzip-compressed (Planetiler's default). Feature ids are
   Planetiler's: OSM id × 10 + 1 (node), 2 (way) or 3 (relation).
 - **Glyphs:** fontnik renders every 256-codepoint range of the BMP (about 1.9 MB) from the registered
-  `NotoSansArabic_400Regular.ttf`. The fontstack directory is named from the font, `Noto Sans Arabic Regular`
-  (`Glyphs.fontstack`), and covers `Glyphs.requiredRanges`, including the Arabic presentation forms. It also holds
-  the font's licence as `OFL.txt` (see below).
+  `NotoSansArabic_400Regular.ttf`. The fontstack and the required ranges come from
+  `packages/contracts/schemas/glyphs.json`: the directory is `Glyphs.fontstack` (`Noto Sans Arabic Regular`; the script
+  fails if the font's own name differs) and covers `Glyphs.requiredRanges`, including the Arabic presentation forms
+  (the script fails if a required range is not a 256-codepoint block). It also holds the font's licence as `OFL.txt`
+  (see below).
 
 ## CLI (`CliContracts.tilesBuild` and `glyphsBuild`)
 
@@ -27,7 +30,7 @@ including an `--output` that is a directory, print the problem and the usage and
 hidden temporary file beside `--output` and moved over it only on success, so a failed build exits non-zero and leaves
 any previous archive at `--output` as it was.
 
-## Tag mapping (`CityProfile.RULES`)
+## Tag mapping (`CityProfile.RULES` and `osm-categories.json`)
 
 Per layer the first matching rule wins, so one element can land in several layers (a park is landuse and a poi).
 `key=*` matches any value but `no`. Areas in the point layers become a point inside the area. A rule can keep to one
@@ -38,14 +41,14 @@ polygons come only from the area rules.
 |---|---|
 | place | city (4), town (8), village (10), suburb (11), quarter (12), neighbourhood (13) ← `place=<class>` |
 | transportation | motorway (5), trunk (6), primary (8), secondary (9), tertiary (10) ← `highway=<class>` or `<class>_link`; minor (12) ← `highway=residential,unclassified,living_street,road`; service (13) ← `highway=service`; path (13) ← `highway=footway,path,pedestrian,cycleway,steps,track` |
-| poi (14) | food ← `amenity=restaurant,fast_food,food_court,ice_cream`; cafe ← `amenity=cafe,hookah_lounge`; health ← `amenity=hospital,clinic,doctors,dentist,pharmacy`, `healthcare=*`; finance ← `amenity=bank,atm,bureau_de_change,money_transfer`; fuel ← `amenity=fuel`; worship ← `amenity=place_of_worship`; education ← `amenity=school,university,college,kindergarten,library`; government ← `amenity=townhall,police,courthouse,fire_station,post_office`, `office=government`; transport ← `amenity=bus_station,taxi,ferry_terminal`, `railway=station`, `aeroway=aerodrome`; entertainment ← `amenity=cinema,theatre,arts_centre`, `tourism=theme_park,zoo`, `leisure=park,stadium,sports_centre,fitness_centre,water_park,amusement_arcade`; lodging ← `tourism=hotel,hostel,guest_house,motel,apartment`; tourism ← `tourism=attraction,museum,viewpoint,gallery,artwork`, `historic=*`; office ← `office=*`; shopping ← `amenity=marketplace`, `shop=*`. Anything else is dropped. |
+| poi (max zoom, 14) | the `PlaceCategory` that `packages/contracts/schemas/osm-categories.json` gives the element's own tags: rules in order, the first that yields a category wins, an exact value beats `*`, and `no`/`vacant` never match. Anything else is dropped. |
 | building (13) | building ← `building=*` |
 | water | river ← `waterway=river` line (8), `waterway=riverbank` or `natural=water` + `water=river` (4); canal ← `waterway=canal` line (11), `natural=water` + `water=canal` (4); lake ← other `natural=water` (4) |
 | landuse (10) | residential, industrial ← `landuse=<class>`; commercial ← `landuse=commercial,retail`; park ← `leisure=park,garden`; grass ← `landuse=grass,meadow,village_green`; cemetery ← `landuse=cemetery`, `amenity=grave_yard`; farmland ← `landuse=farmland,orchard` |
 | boundary | country (0), province (4), district (8) ← ways of `type=boundary` + `boundary=administrative` relations with the lowest `admin_level` 2, 3–4 or 5–6. Such a way carries only `class`, never its own road or river names, unless it is tagged as that boundary itself. |
 
-The poi rules are the PlaceCategory mapping. The pipeline extract must use the same one (contract request #2 in
-`docs/contract-requests/M1-builder-tiles.md` moves it into `packages/contracts`).
+The tiles show every category the shared table yields; a city config that lists fewer categories filters only the
+pipeline's places.ndjson (search and cards).
 
 ## Test (acceptance #2 of M1)
 
@@ -58,6 +61,8 @@ through `TilesCli`, reads the PMTiles header and decodes every tile, and asserts
   layer and every field;
 - named features carry `name`, `name:ar`, `name:ckb` and `name:en` as tagged, `name:fr` and `amenity=bench` are
   dropped, and POIs start at z14;
+- every POI's class is the category `osm-categories.json` gives its fixture element, and exactly the elements with a
+  category become POIs;
 - a closed `waterway=canal` stays a line, and the river that is also a district boundary gives that boundary no names;
 - bad CLI arguments (including a directory as `--output`) are rejected, and a failed build keeps the previous archive;
 - `tiles glyphs` writes every `Glyphs.requiredRanges` file with glyphs in it, plus `OFL.txt`.

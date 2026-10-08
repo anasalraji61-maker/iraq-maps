@@ -18,15 +18,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Planetiler profile for one city, OSM data only. Layers, geometry types, classes and fields come from TileSchema;
- * this class holds only the OSM tag to class mapping, which must cover exactly the schema's classes.
+ * Planetiler profile for one city, OSM data only. Layers, geometry types, classes and fields come from TileSchema and
+ * poi classes from the shared OsmCategories rules; this class holds only the OSM tag to class mapping of the other
+ * layers. Together they must cover exactly the schema's classes.
  */
 final class CityProfile implements Profile {
   /**
    * layer, class, min zoom, an optional geometry to keep to (a closed waterway=river is still a centreline), then tag
    * conditions that must all match: key=v1,v2 or key=* (any value but "no"). Per layer the first matching rule wins, so
-   * one element can land in several layers (a park is landuse and poi). poi classes are PlaceCategory values; POIs that
-   * fit no rule are dropped.
+   * one element can land in several layers (a park is landuse and poi). The poi layer is not here: an element whose own
+   * tags fit OsmCategories becomes a poi of that category at the schema's max zoom, and POIs that fit none are dropped.
    */
   private static final String RULES = """
       place          city           4 place=city
@@ -43,28 +44,6 @@ final class CityProfile implements Profile {
       transportation minor         12 highway=residential,unclassified,living_street,road
       transportation service       13 highway=service
       transportation path          13 highway=footway,path,pedestrian,cycleway,steps,track
-      poi            food          14 amenity=restaurant,fast_food,food_court,ice_cream
-      poi            cafe          14 amenity=cafe,hookah_lounge
-      poi            health        14 amenity=hospital,clinic,doctors,dentist,pharmacy
-      poi            finance       14 amenity=bank,atm,bureau_de_change,money_transfer
-      poi            fuel          14 amenity=fuel
-      poi            worship       14 amenity=place_of_worship
-      poi            education     14 amenity=school,university,college,kindergarten,library
-      poi            government    14 amenity=townhall,police,courthouse,fire_station,post_office
-      poi            transport     14 amenity=bus_station,taxi,ferry_terminal
-      poi            entertainment 14 amenity=cinema,theatre,arts_centre
-      poi            shopping      14 amenity=marketplace
-      poi            lodging       14 tourism=hotel,hostel,guest_house,motel,apartment
-      poi            entertainment 14 tourism=theme_park,zoo
-      poi            tourism       14 tourism=attraction,museum,viewpoint,gallery,artwork
-      poi            health        14 healthcare=*
-      poi            government    14 office=government
-      poi            office        14 office=*
-      poi            shopping      14 shop=*
-      poi            entertainment 14 leisure=park,stadium,sports_centre,fitness_centre,water_park,amusement_arcade
-      poi            transport     14 railway=station
-      poi            transport     14 aeroway=aerodrome
-      poi            tourism       14 historic=*
       building       building      13 building=*
       water          river          8 line waterway=river
       water          canal         11 line waterway=canal
@@ -104,11 +83,14 @@ final class CityProfile implements Profile {
   private record AdminBoundary(long id, long level) implements OsmRelationInfo {}
 
   private final TileSchema schema;
+  private final OsmCategories categories;
   private final List<Rule> rules = RULES.lines().map(Rule::parse).toList();
 
-  CityProfile(TileSchema schema) {
+  CityProfile(TileSchema schema, OsmCategories categories) {
     this.schema = schema;
+    this.categories = categories;
     var mapped = rules.stream().collect(groupingBy(Rule::layer, mapping(Rule::cls, toSet())));
+    mapped.put("poi", categories.categories());
     var expected = schema.layers().entrySet().stream().collect(toMap(Map.Entry::getKey, e -> Set.copyOf(e.getValue().classes())));
     if (!mapped.equals(expected)) {
       throw new IllegalStateException("the OSM mapping " + mapped + " does not cover exactly the TileSchema classes " + expected);
@@ -142,13 +124,21 @@ final class CityProfile implements Profile {
         continue;
       }
       layers.add(rule.layer());
-      var feature = geometry(features, rule, element);
-      if (feature != null) {
-        // A way that is a boundary only through its relations does not lend the boundary its own (road, river) names.
-        boolean named = rule.matches(element.tags());
-        feature.setMinZoom(rule.minZoom());
-        schema.fields().forEach(f -> feature.setAttr(f, f.equals("class") ? rule.cls() : named ? element.getString(f) : null));
-      }
+      emit(features, rule, element);
+    }
+    String category = categories.categoryOf(element.tags());
+    if (category != null) {
+      emit(features, new Rule("poi", category, schema.maxZoom(), null, Map.of()), element);
+    }
+  }
+
+  private void emit(FeatureCollector features, Rule rule, SourceFeature element) {
+    var feature = geometry(features, rule, element);
+    if (feature != null) {
+      // A way that is a boundary only through its relations does not lend the boundary its own (road, river) names.
+      boolean named = rule.matches(element.tags());
+      feature.setMinZoom(rule.minZoom());
+      schema.fields().forEach(f -> feature.setAttr(f, f.equals("class") ? rule.cls() : named ? element.getString(f) : null));
     }
   }
 

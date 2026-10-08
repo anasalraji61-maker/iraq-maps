@@ -53,7 +53,7 @@ public final class TilesCli {
     Path built = Files.createTempFile(Files.createDirectories(output.toAbsolutePath().getParent()), ".tiles-", ".pmtiles");
     try {
       Planetiler.create(Arguments.of("minzoom", schema.minZoom(), "maxzoom", schema.maxZoom(), "bounds", bbox, "tmpdir", tmp))
-          .setProfile(new CityProfile(schema))
+          .setProfile(new CityProfile(schema, OsmCategories.read()))
           .addOsmSource("osm", input)
           .overwriteOutput(built)
           .run();

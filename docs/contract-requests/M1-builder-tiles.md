@@ -2,7 +2,7 @@
 
 ## 1. Export `Glyphs` to JSON, like `TileSchema` (non-blocking)
 
-**Status: open.**
+**Status: resolved.** Contracts export schemas/glyphs.json (6a610e3); `tiles glyphs` and TilesTest read it.
 
 `TilesTest` (Java) has to check `Glyphs.fontstack` and `Glyphs.requiredRanges`. They exist only in
 `packages/contracts/src/geo-data.ts`, so the test reads them from the TS source with a regular expression for now
@@ -18,7 +18,7 @@ Jackson read of `schemas/glyphs.json`.
 
 ## 2. One shared OSM tag to `PlaceCategory` mapping (blocking for consistency between tiles and search)
 
-**Status: open.**
+**Status: resolved.** Contracts export schemas/osm-categories.json (6a610e3); CityProfile reads it for the poi layer and TilesTest checks every POI against it.
 
 The poi class in the tiles (`geo-services/tiles`) and `PlaceImportRecord.category` from the pipeline extract
 (`geo-services/pipeline`, builder-geo-data) must agree. Otherwise a place shows one category icon on the map and

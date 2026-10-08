@@ -3,15 +3,19 @@ package iq.iraqmaps.tiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onthegomap.planetiler.VectorTile;
 import com.onthegomap.planetiler.geo.GeometryType;
 import com.onthegomap.planetiler.pmtiles.Pmtiles;
 import com.onthegomap.planetiler.pmtiles.ReadablePmtiles;
 import com.onthegomap.planetiler.util.FileUtils;
 import com.onthegomap.planetiler.util.Gzip;
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -24,10 +28,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Element;
 
 /** Acceptance #2 of M1: the fixture builds into PMTiles with exactly the TileSchema layers and fields, plus the glyphs. */
 class TilesTest {
@@ -98,6 +103,38 @@ class TilesTest {
     assertEquals(List.of(schema.maxZoom()), poiZooms);
   }
 
+  /** Each POI's class is what the shared OsmCategories table gives its OSM element's own tags (fixture read with DOM). */
+  @Test
+  void poiCategoriesFollowTheSharedTable() throws Exception {
+    var categories = OsmCategories.read();
+    Map<Long, Map<String, Object>> tags = new HashMap<>();
+    var osm = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("src/test/fixtures/city.osm"));
+    for (var type : List.of("node", "way")) {
+      var elements = osm.getElementsByTagName(type);
+      for (int i = 0; i < elements.getLength(); i++) {
+        var element = (Element) elements.item(i);
+        Map<String, Object> elementTags = new HashMap<>();
+        var tagNodes = element.getElementsByTagName("tag");
+        for (int j = 0; j < tagNodes.getLength(); j++) {
+          var tag = (Element) tagNodes.item(j);
+          elementTags.put(tag.getAttribute("k"), tag.getAttribute("v"));
+        }
+        tags.put(Long.parseLong(element.getAttribute("id")) * 10 + (type.equals("node") ? 1 : 2), elementTags);
+      }
+    }
+    var pois = features.get(schema.maxZoom()).stream().filter(f -> f.layer().equals("poi")).toList();
+    assertFalse(pois.isEmpty());
+    for (var poi : pois) {
+      assertEquals(categories.categoryOf(tags.get(poi.id())), poi.attrs().get("class"), poi.toString());
+    }
+    var expected = tags.entrySet().stream().filter(e -> categories.categoryOf(e.getValue()) != null).map(Map.Entry::getKey).collect(Collectors.toSet());
+    assertEquals(expected, pois.stream().map(VectorTile.Feature::id).collect(Collectors.toSet()));
+    // Semantics the profile relies on: ignored values never match, and an exact value beats "*" within a rule.
+    assertNull(categories.categoryOf(Map.of("shop", "vacant")));
+    assertEquals("government", categories.categoryOf(Map.of("office", "government")));
+    assertEquals("office", categories.categoryOf(Map.of("office", "company")));
+  }
+
   /** The ring canal (way 401) is a closed waterway=canal, still a centreline rather than a filled area. */
   @Test
   void closedWaterwaysStayLines() {
@@ -136,11 +173,9 @@ class TilesTest {
     assertEquals(2, run("sh", "scripts/tiles.sh", "glyphs"));
     FileUtils.delete(Path.of("target/glyphs"));
     assertEquals(0, run("sh", "scripts/tiles.sh", "glyphs", "--output", "target/glyphs"));
-    // Read from the TS contract until Glyphs has a JSON export (docs/contract-requests/M1-builder-tiles.md #1).
-    var glyphs = Files.readString(Path.of("../../packages/contracts/src/geo-data.ts"));
-    var fontstack = Pattern.compile("fontstack: '([^']+)'").matcher(glyphs).results().findFirst().orElseThrow().group(1);
-    var ranges = Pattern.compile("requiredRanges: \\[([^]]+)]").matcher(glyphs).results().findFirst().orElseThrow().group(1);
-    var required = Pattern.compile("'(\\d+-\\d+)'").matcher(ranges).results().map(m -> m.group(1)).toList();
+    var glyphs = new ObjectMapper().readTree(Path.of("../../packages/contracts/schemas/glyphs.json").toFile());
+    var fontstack = glyphs.get("fontstack").asText();
+    var required = glyphs.get("requiredRanges").valueStream().map(JsonNode::asText).toList();
     assertFalse(required.isEmpty());
     for (var range : required) {
       var pbf = Path.of("target/glyphs", fontstack, range + ".pbf");
