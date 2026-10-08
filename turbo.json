@@ -30,6 +30,12 @@
         "OTP_FIXED_CODE"
       ]
     },
+    "@iraq-maps/ownership#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/milestones/*.md"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true,

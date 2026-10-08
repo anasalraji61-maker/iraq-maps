@@ -5,7 +5,7 @@ import { FakeOtpSender, identityTestEnv, randomIp, randomPhone } from '@iraq-map
 import type { AuthenticatedRequest } from '@iraq-maps/identity';
 import { Controller, Get, Req } from '@nestjs/common';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
-import { createApp, moduleMigrations } from './app';
+import { apiConfig, createApp, moduleMigrations } from './app';
 
 const MARKER = 'Secret-Name-Marker';
 const logs = captureLogs();
@@ -88,6 +88,19 @@ it('answers invalid requests with the 400 Problem', async () => {
   const { headers } = await login();
   const emptyName = await app.inject({ method: 'PATCH', url: '/v1/me', headers, payload: { name: '' } });
   expect([emptyName.statusCode, emptyName.json()]).toEqual([400, invalidRequest]);
+});
+
+it('answers a malformed JSON body and an unknown route with Problems', async () => {
+  const res = await app.inject({ method: 'POST', url: '/v1/auth/otp/request', headers: { 'content-type': 'application/json' }, payload: '{"phone":' });
+  expect([res.statusCode, res.json()]).toEqual([400, invalidRequest]);
+  const missing = await app.inject({ method: 'GET', url: '/v1/nope' });
+  expect([missing.statusCode, missing.json()]).toMatchObject([404, { status: 404, code: 'not_found' }]);
+});
+
+it('refuses TRUST_PROXY=true in production (a spoofable X-Forwarded-For defeats the per-IP OTP limit)', () => {
+  const env = { APP_ENV: 'production', DATABASE_URL: 'postgres://db/x', REDIS_URL: 'redis://redis' };
+  expect(() => apiConfig({ ...env, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);
+  expect(apiConfig({ ...env, TRUST_PROXY: '1' }).TRUST_PROXY).toBe('1');
 });
 
 it('never logs error messages or request data', async () => {
