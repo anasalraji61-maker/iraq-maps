@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const phoneHashKey = z.string().min(32);
 
 export function identityConfig(env?: Record<string, string | undefined>) {
-  return defineModuleConfig(
+  const config = defineModuleConfig(
     'identity',
     {
       JWT_ACCESS_SECRET: z.string().min(32),
@@ -22,6 +22,8 @@ export function identityConfig(env?: Record<string, string | undefined>) {
     },
     { env, productionForbidden: { OTP_SENDER: ['fake', 'fixed', 'console'] } },
   );
+  if (config.JWT_ACCESS_SECRET === config.JWT_REFRESH_SECRET) throw new Error('identity config: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ');
+  return config;
 }
 
 export type IdentityConfig = ReturnType<typeof identityConfig>;

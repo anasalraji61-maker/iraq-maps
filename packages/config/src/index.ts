@@ -9,11 +9,12 @@ export interface ModuleConfigOptions<S extends z.ZodRawShape> {
   productionForbidden?: Partial<Record<keyof S, readonly string[]>>;
 }
 
-const AppEnvSchema = z.enum(['development', 'test', 'e2e', 'production']).default('development');
+const AppEnvSchema = z.enum(['development', 'test', 'e2e', 'production']);
 
 /**
  * Validates one module's env vars with zod. Throws at boot listing the missing/invalid variable NAMES only;
- * never prints a value. `appEnv` comes from APP_ENV (default 'development'). Empty strings count as unset.
+ * never prints a value. `appEnv` comes from APP_ENV, which is required: there is no default, so a deployment that forgets it
+ * fails at boot instead of running as development. Empty strings count as unset.
  */
 export function defineModuleConfig<S extends z.ZodRawShape>(
   module: string,

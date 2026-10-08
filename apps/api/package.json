@@ -7,7 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "tsx watch --tsconfig tsconfig.run.json src/main.ts",
+    "dev": "APP_ENV=${APP_ENV:-development} tsx watch --tsconfig tsconfig.run.json src/main.ts",
     "start": "tsx --tsconfig tsconfig.run.json src/main.ts",
     "migrate": "tsx --tsconfig tsconfig.run.json src/migrate.ts",
     "lint": "eslint .",
@@ -24,6 +24,7 @@
     "@nestjs/core": "^11.2.7",
     "@nestjs/platform-fastify": "^11.2.7",
     "@ts-rest/nest": "3.52.1",
+    "@ts-rest/open-api": "3.52.1",
     "fastify": "^5.11.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

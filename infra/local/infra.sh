@@ -23,7 +23,8 @@ ensure_db() { # $1 = name, $2 = extra CREATE DATABASE options
   if [ -z "$(sql -d postgres -c "SELECT 1 FROM pg_database WHERE datname = '$1'")" ]; then
     sql -d postgres -c "CREATE DATABASE $1 OWNER $DB_USER ENCODING 'UTF8' LOCALE 'C.UTF-8' TEMPLATE template0 $2"
   fi
-  sql -d "$1" -c 'CREATE EXTENSION IF NOT EXISTS postgis' -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm'
+  # public holds only the extensions; owned by postgres it is read-only for $DB_USER, so migrations cannot write there.
+  sql -d "$1" -c 'CREATE EXTENSION IF NOT EXISTS postgis' -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm' -c 'ALTER SCHEMA public OWNER TO postgres'
 }
 
 up() {
@@ -34,7 +35,7 @@ up() {
   END \$\$" -c "ALTER ROLE $DB_USER LOGIN CREATEDB PASSWORD '$DB_PASSWORD'"
   ensure_db "$TEMPLATE_DB" "IS_TEMPLATE true"
   ensure_db "$DB_NAME" ""
-  redis_running || redis-server --daemonize yes --port "$REDIS_PORT" --save "" --appendonly no >/dev/null
+  redis_running || redis-server --daemonize yes --bind 127.0.0.1 --port "$REDIS_PORT" --save "" --appendonly no >/dev/null
   until redis_running; do sleep 0.2; done
   echo "postgres and redis are up"
   echo "DATABASE_URL=postgres://$DB_USER:$DB_PASSWORD@localhost:$PG_PORT/$DB_NAME"

@@ -18,5 +18,8 @@
     "@eslint/js": "^10.0.1",
     "eslint-plugin-i18next": "^6.1.5",
     "typescript-eslint": "^8.71.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0"
   }
 }

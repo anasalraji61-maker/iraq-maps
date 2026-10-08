@@ -5,36 +5,51 @@ Phone + OTP login, sessions, roles and account deletion. Owns the Postgres schem
 ## API
 
 ```ts
-import { identityModule, identityMigrationsDir } from '@iraq-maps/identity';
+import { IdentityAuthGuard, identityModule, identityMigrationsDir, type AuthenticatedRequest } from '@iraq-maps/identity';
 
 runModuleMigrations({ url, schema: 'identity', migrationsDir: identityMigrationsDir });
-@Module({ imports: [identityModule({ db, redisUrl, outbox, erasers, otpSender?, clock?, env? })] })
+@Module({
+  imports: [identityModule({ db, redisUrl, outbox, erasers, otpSender?, clock?, env? })],
+  providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }],
+})
 ```
+
+`IdentityAuthGuard` is the only auth check, and `/v1/me` relies on it. Every route except `/health` and `/v1/auth/*`
+(matched on the route pattern) needs a valid, unrevoked access token. The guard sets `req.principal`
+(`AuthenticatedRequest`) or answers 401 `{type, title, status: 401, code: 'unauthorized'}`.
 
 `identityModule` is a global Nest module. It serves the `authContract` and `meContract` routers and provides:
 
 | Token | Implementation |
 |---|---|
 | `PortTokens.IdentityPort` | `verifyAccessToken` (JWT + live-session check, current roles from the DB) and `getUser` |
-| `PortTokens.PhoneVerificationPort` | the same OTP machinery under a random `verificationId`; `start` throws `otp_rate_limited` when limited |
+| `PortTokens.PhoneVerificationPort` | the same OTP machinery and limits under a random `verificationId`; `start` throws `otp_<refusal>` when refused |
 
 It consumes `OutboxPublisher<DbTx>`, the bound `UserDataEraser[]`, and optionally an `OtpSender` and a `Clock`.
 
 | Route | Behaviour |
 |---|---|
-| `POST /v1/auth/otp/request` | 202 `{expiresAt, resendAfterSec: 60}`; 429 `otp_rate_limited` |
-| `POST /v1/auth/otp/verify` | 200 tokens + `user` + `isNewUser`; a new user writes `identity.user.registered.v1` to the outbox in the same transaction. 401 `otp_invalid` / `otp_expired`; 429 `otp_too_many_attempts` |
+| `POST /v1/auth/otp/request` | 202 `{expiresAt, resendAfterSec: 60}`; 429 `otp_resend_too_soon` / `otp_rate_limited` / `otp_locked` |
+| `POST /v1/auth/otp/verify` | 200 tokens + `user` + `isNewUser`; a new user writes `identity.user.registered.v1` to the outbox in the same transaction. 401 `otp_invalid` / `otp_expired`; 429 `otp_too_many_attempts` / `otp_locked` |
 | `POST /v1/auth/refresh` | 200 new pair; 401 `refresh_invalid` |
 | `POST /v1/auth/logout` | 204; revokes the session (refresh and access tokens) |
-| `GET` / `PATCH /v1/me` | profile; `PATCH` takes `name` and `locale`; 401 `unauthorized` |
-| `DELETE /v1/me` | 204. Runs every bound eraser, then deletes the identity rows and writes `identity.user.deleted.v1` in one transaction. If an eraser throws, nothing is deleted and the client can retry. |
+| `GET` / `PATCH /v1/me` | profile; `PATCH` takes `name` and `locale`; 401 `unauthorized` (from the guard) |
+| `DELETE /v1/me` | 204. Runs every bound eraser, then deletes the identity rows and writes `identity.user.deleted.v1` in one transaction. Erasers must be idempotent. If one throws, the account is kept and DELETE can be retried; erasers that already ran will run again. |
 
 ## Security model
 
-- **OTP:** a 6-digit code stored in Redis only as an HMAC, with a 5-minute TTL. A correct code is consumed. The 5th wrong
-  code deletes it (checked atomically in Lua). Requests are limited per 15-minute window: 5 per phone and 20 per IP (the
-  IP limit is higher because of carrier CGNAT). Behind a reverse proxy, enable Fastify `trustProxy` so that `req.ip`
-  is the client's address.
+- **OTP:** a 6-digit code stored in Redis only as an HMAC, with a 5-minute TTL. A correct code is consumed. Checks run
+  atomically in Lua:
+  - The 5th wrong code deletes the code.
+  - Wrong codes also count against the phone across codes: the 10th in 24h locks the phone for the rest of that day.
+    Both verify and request then return 429 `otp_locked`.
+- **OTP requests:** refused with 429 when any of these limits is hit:
+  - 1 per 60s per phone, enforced on the server (`otp_resend_too_soon`).
+  - 5 per 15 minutes and 10 per 24h per phone (`otp_rate_limited`).
+  - 20 per 15 minutes per client network (`otp_rate_limited`). That is one IPv4 address, or one IPv6 /64; IPv4-mapped
+    IPv6 counts as IPv4. The limit is higher than per phone because of carrier CGNAT.
+- **Proxy:** behind a reverse proxy, set Fastify `trustProxy` to the hop count or to the proxy CIDRs, so that `req.ip`
+  is the client's address. `true` is forbidden in production; the integrator enforces this in `apps/api`.
 - **Phone:** stored as AES-256-GCM ciphertext (`PHONE_ENCRYPTION_KEY`) plus an HMAC for lookup (`PHONE_HASH_KEY`), in
   `identity.users` and in pending verification challenges. Redis keys use the HMAC. The phone is never logged, and
   the console sender prints only the code.
@@ -42,6 +57,8 @@ It consumes `OutboxPublisher<DbTx>`, the bound `UserDataEraser[]`, and optionall
   - The access token is a 15-minute HS256 JWT (`JWT_ACCESS_SECRET`) that carries the session id. It is rejected once
     the session is revoked.
   - The refresh token is a 30-day HS256 JWT (`JWT_REFRESH_SECRET`) that carries the session id and a generation.
+  - The two token kinds have different secrets (equal secrets refuse to boot) and a verified `aud` (`access` or
+    `refresh`), so neither is accepted as the other.
   - Only the current generation can rotate. A validly signed older token is a reuse, and it revokes the whole family.
     Unsigned tokens are rejected and revoke nothing.
 - **Roles:** `user` (the default), `provider`, `moderator` and `admin`.
@@ -61,7 +78,7 @@ Production refuses `fake`, `fixed` and `console` (both through `packages/config`
 
 | Var | |
 |---|---|
-| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | ≥ 32 chars each, different |
+| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | ≥ 32 chars each; must differ (checked at boot) |
 | `PHONE_ENCRYPTION_KEY` | base64 of 32 random bytes (`openssl rand -base64 32`) |
 | `PHONE_HASH_KEY` | ≥ 32 chars |
 | `OTP_SENDER`, `OTP_FIXED_CODE` | see above; not needed when a sender is injected |
@@ -81,4 +98,5 @@ The command is idempotent. It exits 1 when the user does not exist and 2 on bad 
 
 Run `pnpm infra:local up`, then `pnpm --filter @iraq-maps/identity test`. The tests use an isolated database from
 `createTestDatabase` and the local Redis. Each test uses a fresh phone and IP, because rate-limit counters stay in the
-shared Redis for 15 minutes.
+shared Redis (up to 24h). Tests that need several codes for one phone clear the 60s resend key, which stands in for
+waiting.

@@ -4,6 +4,8 @@ import i18next from 'eslint-plugin-i18next';
 import tseslint from 'typescript-eslint';
 
 // Paths are relative to the repo root (the root eslint.config.js re-exports this).
+// Arabic, Arabic Supplement, Arabic Extended-A and the presentation forms (Arabic and Kurdish Sorani).
+const ARABIC = '/[\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB50-\\uFDFF\\uFE70-\\uFEFF]/';
 const UI = ['packages/ui/src/**', 'packages/mobile-kit/src/**', 'mobile-features/*/src/**', 'apps/mobile/app/**', 'apps/mobile/src/**', 'apps/admin/src/**'];
 
 export default defineConfig(
@@ -19,7 +21,15 @@ export default defineConfig(
     files: UI.map((p) => `${p}/*.{ts,tsx}`),
     ignores: ['**/*.test.{ts,tsx}', '**/test/**'],
     plugins: { i18next },
-    rules: { 'i18next/no-literal-string': ['error', { mode: 'jsx-only' }] },
+    rules: {
+      'i18next/no-literal-string': ['error', { mode: 'jsx-only' }],
+      // jsx-only misses `const label = 'تسجيل الخروج'`: any Arabic-script string in UI code belongs in an i18n catalog.
+      'no-restricted-syntax': [
+        'error',
+        { selector: `Literal[value=${ARABIC}]`, message: 'Arabic-script text belongs in an i18n namespace, not in code.' },
+        { selector: `TemplateElement[value.raw=${ARABIC}]`, message: 'Arabic-script text belongs in an i18n namespace, not in code.' },
+      ],
+    },
   },
   {
     files: ['**/*.cjs'],

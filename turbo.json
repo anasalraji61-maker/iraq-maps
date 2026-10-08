@@ -19,7 +19,6 @@
         "REDIS_URL",
         "APP_ENV",
         "OTP_SENDER",
-        "OUTBOX_TARGET",
         "TRUST_PROXY",
         "PG*"
       ],
@@ -33,7 +32,18 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": [
+        "APP_ENV",
+        "API_PORT",
+        "LOG_LEVEL",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "TRUST_PROXY",
+        "JWT_*",
+        "PHONE_*",
+        "OTP_*"
+      ]
     }
   }
 }

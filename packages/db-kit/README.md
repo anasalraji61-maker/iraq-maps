@@ -2,7 +2,7 @@
 
 Drizzle (node-postgres) access, per-schema migrations, isolated test databases, and the transactional outbox.
 
-- **Provides:** `OutboxPublisher<DbTx>` and `startOutboxRelay`, which delivers to an `EventBus` or to BullMQ.
+- **Provides:** `OutboxPublisher<DbTx>`, `startOutboxRelay` (which delivers to an `EventBus` or to BullMQ), and `createInProcessEventBus`.
 - **Consumes:** `EventBus`, through the relay target.
 
 ## API
@@ -15,16 +15,30 @@ Drizzle (node-postgres) access, per-schema migrations, isolated test databases, 
 | `createTestDatabase({ modules? })` | Returns `{ url, db, drop }`: a fresh database cloned from `iraqmaps_template`, with `platform` and the given modules' migrations applied. |
 | `createOutboxPublisher(db)` | `publish(event, tx?)` validates the event against `packages/contracts` and inserts it into `platform.outbox` inside `tx`. |
 | `startOutboxRelay({ db, target, pollIntervalMs? })` | Polls every `pollIntervalMs` (default 1000). Returns `{ drainOnce, stop }`. |
+| `createInProcessEventBus()` | An `EventBus` for the relay's in-process target. It awaits handlers one after another, and unsubscribing twice is a no-op. |
 
 ### Migrations
 
-`runModuleMigrations` records applied files in `<schema>._migrations`. All pending files run in one transaction, under a per-schema advisory lock, with `search_path = <schema>, public`. Unqualified names therefore land in the module's own schema.
+`runModuleMigrations` records applied files in `<schema>._migrations`. All pending files run in one transaction, under a per-schema advisory lock, with `search_path = <schema>, public`:
+- Unqualified creates land in the module's own schema.
+- `public` only provides extension types and functions, such as `geometry` and `gin_trgm_ops`.
+- `pnpm infra:local up` gives `public` to `postgres`, so the dev role can read it but not write to it.
 
-**Boundary check.** The check is lexical and simple. In a migration's SQL, outside comments and string literals:
-- Every qualified name `a.b` must have `a` = the module's schema. `other.table`, `public.x`, a three-part `db.schema.table` and `"other"."t"` are all rejected.
-- `search_path` must not appear.
+**Boundary check.** This is a simple lexical guardrail against mistakes in our own reviewed migrations. It is not a sandbox. **Separate database roles per module, for production, are deferred to M7.** Until then, the migrating role can technically reach every schema, and in CI and docker-compose it is a superuser.
 
-So write column references unqualified: table aliases such as `u.id` are rejected too. A rejected file fails the whole run, and nothing is applied.
+A file is rejected when:
+- **Anywhere in the raw file, comments included:**
+  - a `$`, which also covers dollar quoting;
+  - an `E'...'` string;
+  - `search_path` or `set_config`.
+- **Outside comments, with string literals still checked because they can be function bodies:**
+  - **SCHEMA clauses:** any `SCHEMA` keyword, such as `DROP`/`ALTER`/`CREATE SCHEMA`, `SET SCHEMA` or `IN SCHEMA`.
+  - **Dynamic SQL:** `EXECUTE`, which also rules out triggers' `EXECUTE FUNCTION` for now.
+  - **Cross-schema ownership commands:** `DROP OWNED` and `REASSIGN OWNED`.
+  - **Session statements:** a statement starting with `DO`, `SET`, `RESET` or `DISCARD`.
+  - **Qualifiers:** any `.` outside a number whose left side is not the module's schema. This rejects `other.t`, `public.t`, `"other"."t"`, `U&"..."`, three-part names, table aliases such as `u.id`, and dotted text such as `'v1.2'` in literals.
+
+So write column references unqualified. A rejected file fails the whole run, and nothing is applied. `src/db.test.ts` holds the regression cases from the M0 security audit.
 
 ### Test databases
 
@@ -53,7 +67,9 @@ The relay delivers each event exactly once:
 2. It delivers the event.
 3. It sets `published_at` in the same transaction.
 
-Concurrent relays therefore never deliver the same event. If delivery throws, the transaction rolls back and the event stays pending until a later drain. It also blocks the events after it, so order is kept.
+Concurrent relays therefore never deliver the same event. If delivery throws, the transaction rolls back and the event stays pending until a later drain.
+
+Delivery is in `seq` order only with a single relay, where a failing event blocks the ones after it. With concurrent relays, one relay can deliver seq+1 while another still holds or has failed seq.
 
 The BullMQ target (default queue `domain-events`) adds the job `{ name: event.name, data: event, jobId: event.id }`, with completed jobs kept for 24 hours:
 - The jobId dedupes a re-delivery after a crash between enqueue and commit.

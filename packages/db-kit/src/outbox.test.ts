@@ -4,7 +4,7 @@ import { eventBusConformance, InMemoryEventBus, testUserDeleted } from '@iraq-ma
 import { Queue, Worker } from 'bullmq';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createOutboxPublisher, createTestDatabase, startOutboxRelay, type OutboxRelay, type TestDatabase } from './index';
+import { createInProcessEventBus, createOutboxPublisher, createTestDatabase, startOutboxRelay, type OutboxRelay, type TestDatabase } from './index';
 
 const connection = { url: process.env.REDIS_URL || 'redis://localhost:6379' };
 type Target = Parameters<typeof startOutboxRelay>[0]['target'];
@@ -126,8 +126,38 @@ describe('startOutboxRelay', () => {
   });
 });
 
+describe('createInProcessEventBus', () => {
+  it('unsubscribing twice is a no-op and leaves the other subscribers in place', async () => {
+    const bus = createInProcessEventBus();
+    const got: string[] = [];
+    const off = bus.subscribe('identity.user.deleted.v1', () => void got.push('a'));
+    bus.subscribe('identity.user.deleted.v1', () => void got.push('b'));
+    off();
+    off();
+    await bus.publish(testUserDeleted());
+    expect(got).toEqual(['b']);
+  });
+
+  it('awaits handlers in subscription order and fails publish when one throws', async () => {
+    const bus = createInProcessEventBus();
+    const got: string[] = [];
+    bus.subscribe('identity.user.deleted.v1', async () => {
+      await new Promise((r) => setTimeout(r, 10));
+      got.push('slow');
+    });
+    bus.subscribe('identity.user.deleted.v1', () => {
+      got.push('fast');
+      throw new Error('handler failed');
+    });
+    await expect(bus.publish(testUserDeleted())).rejects.toThrow('handler failed');
+    expect(got).toEqual(['slow', 'fast']);
+  });
+});
+
+eventBusConformance('createInProcessEventBus', () => createInProcessEventBus());
+
 /** The outbox pipeline seen as an EventBus: publish = write to the outbox + drain; subscribers sit behind the target. */
-const viaOutbox = (subscribers: InMemoryEventBus, r: OutboxRelay): EventBus => ({
+const viaOutbox = (subscribers: EventBus, r: OutboxRelay): EventBus => ({
   publish: async (event) => {
     await publisher().publish(event);
     await r.drainOnce();
@@ -136,12 +166,12 @@ const viaOutbox = (subscribers: InMemoryEventBus, r: OutboxRelay): EventBus => (
 });
 
 eventBusConformance('outbox relay to the in-process bus', () => {
-  const subscribers = new InMemoryEventBus();
+  const subscribers = createInProcessEventBus();
   return viaOutbox(subscribers, relay({ bus: subscribers }));
 });
 
 eventBusConformance('outbox relay to BullMQ', () => {
-  const subscribers = new InMemoryEventBus();
+  const subscribers = createInProcessEventBus();
   const queue = testQueue();
   consume(queue.name, (event) => subscribers.publish(event));
   return viaOutbox(subscribers, relay({ redisUrl: connection.url, queue: queue.name }));

@@ -1,4 +1,4 @@
-import { parseEvent, type DomainEvent, type EventBus, type OutboxPublisher } from '@iraq-maps/contracts';
+import { parseEvent, type DomainEvent, type EventBus, type EventHandler, type EventName, type OutboxPublisher } from '@iraq-maps/contracts';
 import { createLogger } from '@iraq-maps/observability';
 import { Queue } from 'bullmq';
 import { sql } from 'drizzle-orm';
@@ -23,13 +23,34 @@ export interface OutboxRelay {
 }
 
 /**
- * Delivers outbox events in `seq` order to an in-process EventBus, or to a BullMQ queue (default `domain-events`) as
+ * In-process EventBus, the relay's target inside apps/api. Handlers run one after another and are awaited, so a
+ * throwing handler fails publish() and the relay keeps the event pending. Unsubscribing twice is a no-op.
+ */
+export function createInProcessEventBus(): EventBus {
+  const handlers = new Map<EventName, Set<EventHandler>>();
+  return {
+    async publish(event) {
+      for (const handler of [...(handlers.get(event.name) ?? [])]) await handler(event);
+    },
+    subscribe(name, handler) {
+      const set = handlers.get(name) ?? new Set();
+      handlers.set(name, set.add(handler as EventHandler));
+      return () => void set.delete(handler as EventHandler);
+    },
+  };
+}
+
+/**
+ * Delivers outbox events to an EventBus, or to a BullMQ queue (default `domain-events`) as
  * job `{ name: event.name, data: event, jobId: event.id }`. Polls every `pollIntervalMs` (default 1000) until stop().
  *
  * Exactly once: each event is claimed with FOR UPDATE SKIP LOCKED, delivered, and marked `published_at` in that same
  * transaction, so concurrent relays never deliver the same row. If delivery throws, the transaction rolls back and the
- * event stays pending (and blocks the ones after it) until a later drain succeeds. A crash between delivery and commit
- * re-delivers on the next drain; BullMQ then drops the duplicate because the jobId already exists.
+ * event stays pending until a later drain succeeds. A crash between delivery and commit re-delivers on the next drain;
+ * BullMQ then drops the duplicate because the jobId already exists.
+ *
+ * Order: `seq` order only with a single relay, where a failing event blocks the ones after it. With concurrent relays,
+ * one relay can deliver seq+1 while another still holds or has failed seq.
  */
 export function startOutboxRelay({ db, target, pollIntervalMs = 1000 }: {
   db: Db;

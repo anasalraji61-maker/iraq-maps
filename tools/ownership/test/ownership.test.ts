@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { findLargeFixtures, findOutsideOwner, findOverlaps } from '../src/ownership.ts';
+import { findLargeFixtures, findOutsideOwner, findOverlaps, milestoneOwners } from '../src/ownership.ts';
 
 const cli = new URL('../src/cli.ts', import.meta.url).pathname;
 
@@ -18,6 +18,14 @@ describe('ownership', () => {
     const map = { a: ['modules/a/**'], b: ['modules/b/**'] };
     expect(findOutsideOwner(map, ['modules/a/x.ts', 'modules/b/y.ts'], 'a')).toEqual(['modules/b/y.ts']);
     expect(findOutsideOwner(map, ['modules/b/y.ts', 'README.md'])).toEqual(['README.md']);
+  });
+
+  it('reads the owners from the milestone front-matter, the single source of truth', () => {
+    const owners = milestoneOwners('M0');
+    expect(owners.integrator).toContain('apps/api/**');
+    expect(owners['builder-identity']).toEqual(['modules/identity/**', 'docs/contract-requests/M0-builder-identity.md']);
+    expect(findOverlaps(owners)).toEqual([]);
+    expect(() => milestoneOwners('M99')).toThrow(/no docs\/milestones\/M99/);
   });
 
   it('flags fixtures over 500KB', () => {

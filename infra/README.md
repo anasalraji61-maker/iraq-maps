@@ -13,10 +13,10 @@ pnpm infra:local down
 `up` does the following:
 - Starts the PostgreSQL 16 `main` cluster with `pg_ctlcluster`. It uses sudo when not root.
 - Ensures the login role `iraqmaps`, with password `iraqmaps` and CREATEDB (not superuser).
-- Ensures two databases, both UTF8 / `C.UTF-8` with `postgis` and `pg_trgm`:
+- Ensures two databases, both UTF8 / `C.UTF-8` with `postgis` and `pg_trgm`, and with schema `public` owned by `postgres`, so `iraqmaps` can read it but not write to it:
   - `iraqmaps` for dev.
   - `iraqmaps_template`, the template that `createTestDatabase()` clones.
-- Starts `redis-server --daemonize yes` on 6379 without persistence.
+- Starts `redis-server --daemonize yes` on 127.0.0.1:6379 without persistence.
 
 It needs a Debian-style `postgresql-16` + `postgresql-16-postgis-3` install and `redis-server`.
 
@@ -26,7 +26,7 @@ It needs a Debian-style `postgresql-16` + `postgresql-16-postgis-3` install and 
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-This uses the same images as CI: `postgis/postgis:16-3.4` and `redis:7`. Here the `iraqmaps` user is a superuser, so the first `createTestDatabase()` creates `iraqmaps_template` itself.
+This uses the same images as CI: `postgis/postgis:16-3.4` and `redis:7`. Ports are published on 127.0.0.1 only. Here the `iraqmaps` user is a superuser, so the first `createTestDatabase()` creates `iraqmaps_template` itself.
 
 ## Environment
 

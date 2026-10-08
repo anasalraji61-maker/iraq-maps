@@ -39,25 +39,63 @@ describe('runModuleMigrations', () => {
     ]);
   });
 
-  it.each([
-    ['CREATE TABLE other.t (id int);', /other/],
-    ['CREATE TABLE t (id int REFERENCES "alpha"."things" (id));', /alpha/],
-    ['CREATE TABLE public.t (id int);', /public/],
-    ['SET search_path TO other; CREATE TABLE t (id int);', /search_path/],
-  ])('rejects a migration that touches another schema and applies nothing: %s', async (bad, named) => {
-    const dir = migrationsDir({ '0001_ok.sql': 'CREATE TABLE ok (id int);', '0002_bad.sql': bad });
-    const run = runModuleMigrations({ url: tdb.url, schema: 'beta', migrationsDir: dir });
-    await expect(run).rejects.toThrow(/0002_bad\.sql of schema beta references another schema/);
-    await expect(run).rejects.toThrow(named);
-    expect(await rows(tdb, "SELECT 1 FROM pg_namespace WHERE nspname = 'beta'")).toEqual([]);
-  });
-
-  it('ignores schema-like text inside comments and string literals', async () => {
-    const dir = migrationsDir({
-      '0001_notes.sql': "/* other.table */ CREATE TABLE notes (body text DEFAULT 'see other.table', n numeric DEFAULT 1.5); -- public.x",
+  describe('schema boundary', () => {
+    beforeAll(async () => {
+      await runModuleMigrations({ url: tdb.url, schema: 'places', migrationsDir: migrationsDir({ '0001.sql': 'CREATE TABLE p (id int);' }) });
+      await runModuleMigrations({ url: tdb.url, schema: 'victim', migrationsDir: migrationsDir({ '0001.sql': 'CREATE TABLE t (id int);' }) });
     });
-    await runModuleMigrations({ url: tdb.url, schema: 'gamma', migrationsDir: dir });
-    expect(await rows(tdb, "SELECT to_regclass('gamma.notes')::text AS t")).toEqual([{ t: 'gamma.notes' }]);
+
+    it.each([
+      // security audit M0 round 1: each of these was applied before the fix
+      ['DROP SCHEMA places CASCADE;', 'SCHEMA'],
+      ['CREATE TABLE t (id int); ALTER TABLE t SET SCHEMA places;', 'SCHEMA'],
+      ['GRANT ALL ON ALL TABLES IN SCHEMA places TO PUBLIC;', 'SCHEMA'],
+      ["SELECT set_config('search_path', 'places', true); CREATE TABLE pwn (id int);", 'set_config'],
+      ["DO $$ BEGIN EXECUTE 'CREATE TABLE ' || 'places' || '.pwn (id int)'; END $$;", '$'],
+      ["SELECT E'\\''; CREATE TABLE places.pwn (id int);", "E'"],
+      ["SELECT $q$ ' $q$; CREATE TABLE places.pwn (id int);", '$'],
+      // security audit M0 round 1, second auditor (M8)
+      ['CREATE SCHEMA places;', 'SCHEMA'],
+      ["DO $$ EXECUTE 'CREATE TABLE victim.planted' $$;", '$'],
+      ['CREATE TABLE x (id int); ALTER TABLE x SET SCHEMA victim;', 'SCHEMA'],
+      ['DROP SCHEMA victim CASCADE;', 'SCHEMA'],
+      // further variants
+      ['CREATE TABLE other.t (id int);', 'other.'],
+      ['CREATE TABLE t (id int REFERENCES "places"."p" (id));', '"places".'],
+      ['CREATE TABLE public.t (id int);', 'public.'],
+      ['SET search_path TO places; CREATE TABLE pwn (id int);', 'search_path'],
+      ['RESET ALL; CREATE TABLE pwn (id int);', 'RESET'],
+      ["DO 'BEGIN DROP TABLE p; END';", 'DO'],
+      ["CREATE FUNCTION f() RETURNS void LANGUAGE sql AS 'DROP TABLE places.p'; SELECT f();", 'places.'],
+      ["CREATE FUNCTION f() RETURNS void LANGUAGE plpgsql AS 'BEGIN EXECUTE ''DROP TABLE pla'' || ''ces.p''; END'; SELECT f();", 'EXECUTE'],
+      ['DROP OWNED BY CURRENT_USER;', 'DROP OWNED'],
+      ['CREATE TABLE places/* x */./* y */pwn (id int);', 'places.'],
+      ['CREATE TABLE "x\'" (id int); SELECT \'--\'; DROP TABLE places.p;', 'places.'],
+      ['SELECT 1; -- line comment ended by CR\rDROP TABLE places.p;', 'places.'],
+      ['CREATE TABLE U&"\\0070laces".pwn (id int);', '0070laces'],
+    ])('rejects %j and applies nothing', async (bad, violation) => {
+      const dir = migrationsDir({ '0001_ok.sql': 'CREATE TABLE ok (id int);', '0002_bad.sql': bad });
+      const run = runModuleMigrations({ url: tdb.url, schema: 'beta', migrationsDir: dir });
+      await expect(run).rejects.toThrow('0002_bad.sql of schema beta breaks the schema boundary');
+      await expect(run).rejects.toThrow(violation);
+      const effects = `SELECT to_regclass('places.p')::text AS p, to_regclass('victim.t')::text AS t, to_regnamespace('beta') AS beta,
+        (SELECT count(*)::int FROM pg_class WHERE relname IN ('pwn', 'planted')) AS planted`;
+      expect(await rows(tdb, effects)).toEqual([{ p: 'places.p', t: 'victim.t', beta: null, planted: 0 }]);
+    });
+
+    it('accepts ordinary DDL and DML, extension types from public, and ignores rejected words inside comments', async () => {
+      const dir = migrationsDir({
+        '0001_notes.sql': `-- Comments may say e.g. other.table, DROP SCHEMA x, DO or EXECUTE.
+          /* block comment: public.x */
+          CREATE TABLE notes (id int PRIMARY KEY, body text DEFAULT 'it''s fine', ratio numeric DEFAULT 1.5, share numeric DEFAULT .5, geom geometry(Point, 4326));
+          ALTER TABLE gamma.notes ALTER COLUMN body SET NOT NULL;
+          CREATE INDEX notes_body_trgm ON gamma.notes USING gin (body gin_trgm_ops);
+          INSERT INTO notes (id) VALUES (1) ON CONFLICT DO NOTHING;
+          UPDATE notes SET ratio = 2.0 WHERE id = 1;`,
+      });
+      await runModuleMigrations({ url: tdb.url, schema: 'gamma', migrationsDir: dir });
+      expect(await rows(tdb, 'SELECT id, body, ratio, share FROM gamma.notes')).toEqual([{ id: 1, body: "it's fine", ratio: '2.0', share: '0.5' }]);
+    });
   });
 
   it('rejects an invalid schema name', async () => {

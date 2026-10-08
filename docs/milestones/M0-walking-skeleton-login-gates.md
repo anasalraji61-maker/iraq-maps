@@ -9,26 +9,33 @@ owners:
     - "packages/db-kit/**"
     - "packages/observability/**"
     - "infra/**"
+    - "docs/contract-requests/M0-builder-platform.md"
   builder-identity:
     - "modules/identity/**"
+    - "docs/contract-requests/M0-builder-identity.md"
   builder-ui-i18n:
     - "packages/ui/**"
     - "packages/i18n/**"
     - "docs/DATA_SOURCES.md"
+    - "docs/contract-requests/M0-builder-ui-i18n.md"
   builder-mobile-shell:
     - "apps/mobile/src/shell/**"
     - "packages/mobile-kit/**"
     - "packages/api-client/**"
+    - "docs/contract-requests/M0-builder-mobile-shell.md"
   builder-account-app:
     - "mobile-features/account/**"
+    - "docs/contract-requests/M0-builder-account-app.md"
   builder-osm-quality:
     - "geo-services/pipeline/**"
     - ".github/workflows/geo-data.yml"
     - "docs/reports/**"
+    - "docs/contract-requests/M0-builder-osm-quality.md"
   builder-gates-e2e:
     - ".github/workflows/ci.yml"
     - ".github/workflows/android.yml"
     - "e2e/**"
+    - "docs/contract-requests/M0-builder-gates-e2e.md"
   integrator:
     - "package.json"
     - "pnpm-workspace.yaml"
@@ -51,6 +58,8 @@ owners:
     - "docs/adr/**"
     - "docs/TASKS.md"
     - "docs/ARCHITECTURE.md"
+    - "docs/MVP.md"
+    - "README.md"
     - "CLAUDE.md"
 auditors:
   auditor-architecture-m0: architecture-contracts

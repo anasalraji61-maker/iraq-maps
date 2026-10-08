@@ -23,12 +23,6 @@ export type Profile = { id: UserId; name: string | null; locale: Locale; roles: 
 
 export const toMe = (user: Profile): Me => ({ ...user, createdAt: user.createdAt.toISOString() });
 
-const deleteUser = async (db: Db | DbTx, id: UserId) =>
-  (await db.delete(users).where(eq(users.id, id)).returning({ id: users.id })).length > 0;
-
-/** identity's own UserDataEraser (sessions cascade). DELETE /v1/me already runs it, so it is not bound with the others. */
-export const identityEraser = (db: Db): UserDataEraser => ({ module: 'identity', erase: async (id) => void (await deleteUser(db, id)) });
-
 export class Users {
   constructor(
     private readonly db: Db,
@@ -66,11 +60,16 @@ export class Users {
     return user ?? null;
   }
 
-  /** Every bound eraser first (a failure keeps the account so the client can retry), then identity's rows and the event, atomically. */
+  /**
+   * DELETE /v1/me, and identity's own erasure: every bound (idempotent) eraser first, then identity's rows (sessions
+   * cascade) and identity.user.deleted.v1 in one transaction. If an eraser throws, the account is kept and the call can
+   * be retried; erasers that already ran simply run again. The event is written only when a row was deleted, so once.
+   */
   async remove(id: UserId): Promise<void> {
     for (const eraser of this.erasers) await eraser.erase(id);
     await this.db.transaction(async (tx) => {
-      if (await deleteUser(tx, id)) await this.outbox.publish(this.event('identity.user.deleted.v1', { userId: id }), tx);
+      const [deleted] = await tx.delete(users).where(eq(users.id, id)).returning({ id: users.id });
+      if (deleted) await this.outbox.publish(this.event('identity.user.deleted.v1', { userId: id }), tx);
     });
     this.log.info({ userId: id }, 'user deleted');
   }

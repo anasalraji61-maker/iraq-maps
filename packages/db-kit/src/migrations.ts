@@ -7,29 +7,45 @@ import { withClient } from './db';
 export const platformMigrationsDir = fileURLToPath(new URL('../migrations', import.meta.url));
 
 const SCHEMA_NAME = /^[a-z][a-z0-9_]*$/;
-// Comments and '...' literals are blanked first, so text inside them is never checked.
-const COMMENT_OR_STRING = /--[^\n]*|\/\*[\s\S]*?\*\/|'(?:[^']|'')*'/g;
-// The qualifier `a` of every qualified name `a.b` (or "a"."b"); a lookbehind skips the `b` in `a.b.c`.
-const QUALIFIER = /(?<![\w$."])"?([A-Za-z_][\w$]*)"?\s*\.\s*"?[A-Za-z_]/g;
+// Checked on the raw file. `$` (dollar quoting) and E'...' strings are rejected because the comment scan below
+// cannot lex them; search_path and set_config change what unqualified names mean.
+const RAW_FORBIDDEN = /\$|\bE'|search_path|set_config/i;
+// Comments, '...' literals and "..." identifiers, scanned left to right. Only comments are blanked: literals stay
+// checked because they can be function bodies. PostgreSQL ends a line comment at \n or \r.
+const TOKEN = /--[^\n\r]*|\/\*[\s\S]*?\*\/|'(?:[^']|'')*'|"(?:[^"]|"")*"/g;
+// Checked on the code: any SCHEMA clause (DROP/ALTER/CREATE SCHEMA, SET SCHEMA, IN SCHEMA), dynamic SQL,
+// cross-schema ownership commands, and session-level statements (DO, SET, RESET, DISCARD).
+const CODE_FORBIDDEN = /\bSCHEMAS?\b|\bEXECUTE\b|\b(?:DROP|REASSIGN)\s+OWNED\b|(?:^|;)\s*(?:DO|SET|RESET|DISCARD)\b/i;
 
-/**
- * Schema boundary check, kept lexical and simple: a migration may qualify names only with its own schema
- * (`identity.users`), never with another one (`places.places`, `public.x`, `other.table`), and may not touch
- * `search_path`. Unqualified names land in the module schema (the runner sets search_path to it), so write
- * column references unqualified: table aliases such as `u.id` are rejected too.
- */
-function assertOwnSchema(sql: string, schema: string, file: string): void {
-  const code = sql.replace(COMMENT_OR_STRING, ' ');
-  const foreign = [...code.matchAll(QUALIFIER)].map((m) => m[1]!).filter((q) => q.toLowerCase() !== schema);
-  if (foreign.length || /\bsearch_path\b/i.test(code)) {
-    throw new Error(`migration ${file} of schema ${schema} references another schema: ${[...new Set(foreign)].join(', ') || 'search_path'}`);
+/** The first name before a `.` that is not the module schema. Dots inside numbers (1.5, 1., .5) are skipped. */
+function foreignQualifier(code: string, schema: string): string | undefined {
+  for (const { index } of code.matchAll(/\./g)) {
+    const before = code.slice(0, index);
+    if (/(?<!\w)\d+$/.test(before) || (/^\d/.test(code.slice(index + 1)) && !/[\w"]$/.test(before))) continue;
+    const name = (/(?:"[^"]*"|\w*)\s*$/.exec(before)?.[0] ?? '').trim();
+    if (name.replaceAll('"', '').toLowerCase() !== schema) return `${name}.`;
   }
 }
 
 /**
- * Applies a module's migrations; rejects any migration that touches a schema other than `schema`.
+ * Schema boundary check. It is a lexical guardrail against mistakes in reviewed migrations, not a sandbox: per-module
+ * database roles are deferred to M7. Outside comments, every `a.b` must have `a` = the module schema (so `other.t`,
+ * `public.t`, table aliases like `u.id` and dotted text in literals are rejected), and the patterns above must not appear.
+ */
+function assertOwnSchema(sql: string, schema: string, file: string): void {
+  const code = sql.replace(TOKEN, (token) => (token.startsWith('--') || token.startsWith('/*') ? ' ' : token));
+  const violation = RAW_FORBIDDEN.exec(sql)?.[0] ?? CODE_FORBIDDEN.exec(code)?.[0].trim() ?? foreignQualifier(code, schema);
+  if (violation !== undefined) throw new Error(`migration ${file} of schema ${schema} breaks the schema boundary: ${violation}`);
+}
+
+/**
+ * Applies a module's migrations after the lexical schema-boundary guardrail above, which rejects references to other
+ * schemas and the constructs that could hide them. It catches mistakes in reviewed migrations; it is not a security
+ * boundary (per-module database roles come in M7).
  * Files are the `*.sql` in `migrationsDir`, applied in name order, each once, tracked in `<schema>._migrations`.
  * All pending files run in one transaction under a per-schema advisory lock, so a rejected or failing file applies nothing.
+ * search_path is `<schema>, public`: unqualified creates land in the module schema, and `public` only serves extension
+ * types and functions (geometry, gin_trgm_ops). `pnpm infra:local up` makes `public` read-only for the dev role.
  */
 export async function runModuleMigrations({ url, schema, migrationsDir }: { url: string; schema: string; migrationsDir: string }): Promise<void> {
   if (!SCHEMA_NAME.test(schema)) throw new Error(`invalid schema name: ${schema}`);

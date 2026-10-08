@@ -64,7 +64,7 @@ export const meContract = c.router(
     update: {
       method: 'PATCH',
       path: '/me',
-      body: z.object({ name: z.string().trim().min(1).max(80).optional(), locale: Locale.optional() }),
+      body: z.object({ name: z.string().trim().min(1).max(80).regex(/^[^\p{Cc}]*$/u).optional(), locale: Locale.optional() }),
       responses: { 200: Me, 400: Problem, 401: Problem },
     },
     remove: { method: 'DELETE', path: '/me', body: c.noBody(), responses: { 204: c.noBody(), 401: Problem } },

@@ -2,7 +2,7 @@
 
 `defineModuleConfig(module, shape, { env?, productionForbidden? })` validates one module's env vars with a zod shape at boot. It returns the parsed values plus `appEnv`.
 
-- `APP_ENV` is one of `development | test | e2e | production`. The default is `development`.
+- `APP_ENV` is **required** and must be one of `development | test | e2e | production`. It has no default, so a deployment that forgets it fails at boot instead of running as development with a test OTP sender.
 - Empty strings count as unset, so blank lines copied from `.env.example` fall back to defaults or fail as missing.
 - A failure throws one error that lists only the missing or invalid variable **names**. Values are never printed, and no zod error is attached as `cause`.
 - When `APP_ENV=production`, any value listed in `productionForbidden` is rejected the same way.

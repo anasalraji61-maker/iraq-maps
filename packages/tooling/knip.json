@@ -8,5 +8,26 @@
   ],
   "ignoreBinaries": [
     "gitleaks"
-  ]
+  ],
+  "includeEntryExports": true,
+  "workspaces": {
+    "apps/mobile": {
+      "includeEntryExports": false
+    },
+    "mobile-features/*": {
+      "includeEntryExports": false
+    },
+    "packages/ui": {
+      "includeEntryExports": false
+    },
+    "packages/i18n": {
+      "includeEntryExports": false
+    },
+    "packages/mobile-kit": {
+      "includeEntryExports": false
+    },
+    "packages/api-client": {
+      "includeEntryExports": false
+    }
+  }
 }

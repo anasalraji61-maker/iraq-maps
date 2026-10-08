@@ -8,13 +8,13 @@ I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
 
 const tabs = [
-  { name: 'index', label: 'الخريطة', testID: testIDs.tabs.map },
-  { name: 'discover', label: 'اكتشف', testID: testIDs.tabs.discover },
-  { name: 'messages', label: 'الرسائل', testID: testIDs.tabs.messages },
-  { name: 'activity', label: 'نشاطي', testID: testIDs.tabs.activity },
-  { name: 'account', label: 'الحساب', testID: testIDs.tabs.account },
+  { name: 'index', label: 'map', testID: testIDs.tabs.map },
+  { name: 'discover', label: 'discover', testID: testIDs.tabs.discover },
+  { name: 'messages', label: 'messages', testID: testIDs.tabs.messages },
+  { name: 'activity', label: 'activity', testID: testIDs.tabs.activity },
+  { name: 'account', label: 'account', testID: testIDs.tabs.account },
 ] as const;
-const pendingLabel = 'قريباً';
+const pendingLabel = 'pending';
 
 export function RootLayout() {
   return <Stack screenOptions={{ headerShown: false }} />;

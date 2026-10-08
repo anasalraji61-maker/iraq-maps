@@ -1,1 +1,1 @@
-export { default } from './vitest.preset';
+export { default } from './vitest.preset.ts';

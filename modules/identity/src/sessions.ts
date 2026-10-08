@@ -14,15 +14,16 @@ interface Claims {
   sid: string;
   gen: number;
 }
+type Audience = 'access' | 'refresh';
 
 /**
  * A session is a refresh-token family. Refresh tokens are JWTs carrying the session id and a generation; only the
  * current generation rotates. A validly signed older one is a reuse and revokes the family. Access tokens carry the
  * session id, so revoking a session (logout, reuse, account deletion) also rejects its access tokens.
+ * The two kinds have separate secrets and a checked `aud`, so neither is accepted as the other.
  */
 export class Sessions {
-  private readonly accessKey: Uint8Array;
-  private readonly refreshKey: Uint8Array;
+  private readonly keys: Record<Audience, Uint8Array>;
 
   constructor(
     private readonly db: Db,
@@ -30,8 +31,8 @@ export class Sessions {
     private readonly clock: Clock,
     private readonly log: Logger,
   ) {
-    this.accessKey = new TextEncoder().encode(secrets.JWT_ACCESS_SECRET);
-    this.refreshKey = new TextEncoder().encode(secrets.JWT_REFRESH_SECRET);
+    const encode = (secret: string) => new TextEncoder().encode(secret);
+    this.keys = { access: encode(secrets.JWT_ACCESS_SECRET), refresh: encode(secrets.JWT_REFRESH_SECRET) };
   }
 
   async start(userId: UserId): Promise<TokenPair> {
@@ -41,7 +42,7 @@ export class Sessions {
   }
 
   async rotate(refreshToken: string): Promise<TokenPair | null> {
-    const claims = await this.read(refreshToken, this.refreshKey);
+    const claims = await this.read(refreshToken, 'refresh');
     if (!claims) return null;
     const { sid, gen } = claims;
     const [current] = await this.db
@@ -55,12 +56,12 @@ export class Sessions {
   }
 
   async logout(refreshToken: string): Promise<void> {
-    const claims = await this.read(refreshToken, this.refreshKey);
+    const claims = await this.read(refreshToken, 'refresh');
     if (claims) await this.revoke(claims.sid);
   }
 
   async verify(accessToken: string): Promise<AuthPrincipal | null> {
-    const claims = await this.read(accessToken, this.accessKey);
+    const claims = await this.read(accessToken, 'access');
     if (!claims) return null;
     const [live] = await this.db
       .select({ roles: users.roles })
@@ -81,23 +82,24 @@ export class Sessions {
 
   private async tokens({ sub, sid, gen }: Claims): Promise<TokenPair> {
     const now = this.clock.now();
-    const sign = (claims: object, ttlMs: number, key: Uint8Array) =>
+    const sign = (claims: object, audience: Audience, ttlMs: number) =>
       new SignJWT({ ...claims })
         .setProtectedHeader({ alg: 'HS256' })
         .setSubject(sub)
+        .setAudience(audience)
         .setIssuedAt(now)
         .setExpirationTime(new Date(now.getTime() + ttlMs))
-        .sign(key);
+        .sign(this.keys[audience]);
     return {
-      accessToken: await sign({ sid }, ACCESS_TTL_MS, this.accessKey),
-      refreshToken: await sign({ sid, gen }, REFRESH_TTL_MS, this.refreshKey),
+      accessToken: await sign({ sid }, 'access', ACCESS_TTL_MS),
+      refreshToken: await sign({ sid, gen }, 'refresh', REFRESH_TTL_MS),
       accessExpiresAt: new Date(now.getTime() + ACCESS_TTL_MS).toISOString(),
     };
   }
 
-  private async read(token: string, key: Uint8Array): Promise<Claims | null> {
+  private async read(token: string, audience: Audience): Promise<Claims | null> {
     try {
-      const { payload } = await jwtVerify(token, key, { algorithms: ['HS256'], currentDate: this.clock.now() });
+      const { payload } = await jwtVerify(token, this.keys[audience], { algorithms: ['HS256'], audience, currentDate: this.clock.now() });
       return payload as unknown as Claims;
     } catch {
       return null;

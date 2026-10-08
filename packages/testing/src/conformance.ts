@@ -41,6 +41,18 @@ export function eventBusConformance(name: string, make: () => EventBus | Promise
       expect(got).toHaveLength(1);
       expect(other).toHaveLength(0);
     });
+    it('unsubscribe is idempotent and removes only its own handler', async () => {
+      const bus = await make();
+      const a: DomainEvent[] = [];
+      const b: DomainEvent[] = [];
+      const offA = bus.subscribe('identity.user.deleted.v1', (e) => void a.push(e));
+      bus.subscribe('identity.user.deleted.v1', (e) => void b.push(e));
+      offA();
+      offA();
+      await bus.publish(testUserDeleted());
+      await expect.poll(() => b.length).toBe(1);
+      expect(a).toHaveLength(0);
+    });
   });
 }
 

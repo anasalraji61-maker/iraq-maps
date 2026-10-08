@@ -6,11 +6,13 @@ import { identityConfig } from './config';
 import { otpDelivery } from './senders';
 
 type Selection = Parameters<typeof otpDelivery>[0];
+const secret = () => randomBytes(32).toString('base64');
+const env = { APP_ENV: 'production', JWT_ACCESS_SECRET: secret(), JWT_REFRESH_SECRET: secret(), PHONE_ENCRYPTION_KEY: secret(), PHONE_HASH_KEY: secret() };
 
 otpSenderConformance('console (development)', () => otpDelivery({ appEnv: 'development', OTP_SENDER: 'console' }).sender);
 otpSenderConformance('fixed (e2e)', () => otpDelivery({ appEnv: 'e2e', OTP_SENDER: 'fixed', OTP_FIXED_CODE: '246810' }).sender);
 
-describe('OTP sender selection', () => {
+describe('OTP sender selection and config', () => {
   it('console prints the code but never the phone', async () => {
     const print = vi.spyOn(console, 'info').mockImplementation(() => {});
     await otpDelivery({ appEnv: 'development', OTP_SENDER: 'console' }).sender.send({ phone: '+9647701234567' as IraqiPhone, code: '135790', locale: 'ar' });
@@ -38,12 +40,17 @@ describe('OTP sender selection', () => {
   });
 
   it('production refuses every test sender, from OTP_SENDER or injected', () => {
-    const secret = () => randomBytes(32).toString('base64');
-    const env = { APP_ENV: 'production', JWT_ACCESS_SECRET: secret(), JWT_REFRESH_SECRET: secret(), PHONE_ENCRYPTION_KEY: secret(), PHONE_HASH_KEY: secret() };
     for (const sender of ['fake', 'fixed', 'console']) {
       expect(() => identityConfig({ ...env, OTP_SENDER: sender, OTP_FIXED_CODE: '246810' })).toThrow(/not allowed in production.*OTP_SENDER/);
     }
     expect(() => otpDelivery({ appEnv: 'production' }, new FakeOtpSender())).toThrow(/not allowed in production/);
     expect(identityConfig({ ...env, OTP_SENDER: 'sms' }).PHONE_ENCRYPTION_KEY).toHaveLength(32);
+  });
+
+  it('refuses equal JWT secrets at boot, naming the variables only', () => {
+    const shared = secret();
+    expect(() => identityConfig({ ...env, APP_ENV: 'test', JWT_ACCESS_SECRET: shared, JWT_REFRESH_SECRET: shared })).toThrow(
+      /^identity config: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ$/,
+    );
   });
 });

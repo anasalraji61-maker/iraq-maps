@@ -121,3 +121,6 @@ logs/
 *.log
 tmp/
 .cache/
+
+# turbo-generated agent notes (not project docs)
+AGENTS.md

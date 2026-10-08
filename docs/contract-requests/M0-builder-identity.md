@@ -21,6 +21,8 @@ each `meContract` route (or type `authed` as `{ 401: typeof Problem }`). After i
 **Status: deferred** to the milestone where the providers module first consumes the port. Until then `start()` throws
 `Error('otp_rate_limited')`, as documented in `modules/identity/README.md`.
 
-`start()` is limited per phone like login codes (5 per 15 minutes). The port's return type has no variant for that, so
-identity throws `Error('otp_rate_limited')`. Consider adding `| { rateLimited: true }` (or documenting the error) before
-the providers module consumes the port in M3.
+`start()` shares the login limits per phone: a 60s resend wait, 5 per 15 minutes, 10 per 24h, and a lock after 10
+wrong codes in 24h. The port's return type has no variant for a refusal, so identity throws
+`Error('otp_resend_too_soon' | 'otp_rate_limited' | 'otp_locked')`. Consider adding
+`| { refused: 'resend_too_soon' | 'rate_limited' | 'locked' }` (or documenting the error) before the providers module
+consumes the port in M3. `confirm()` reports a locked phone as `too_many_attempts`.

@@ -5,11 +5,7 @@ import type { DomainEvent, EventName } from './events';
 export const PortTokens = {
   IdentityPort: 'port:IdentityPort',
   PhoneVerificationPort: 'port:PhoneVerificationPort',
-  OtpSender: 'port:OtpSender',
-  UserDataErasers: 'port:UserDataErasers',
   EventBus: 'port:EventBus',
-  OutboxPublisher: 'port:OutboxPublisher',
-  Clock: 'port:Clock',
 } as const;
 
 export interface Clock {

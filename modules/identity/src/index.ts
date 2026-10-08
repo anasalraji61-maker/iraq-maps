@@ -6,6 +6,8 @@ import { Inject, Module, type DynamicModule, type OnModuleDestroy } from '@nestj
 import { Redis } from 'ioredis';
 import { identityConfig } from './config';
 import { AuthController, INTERNALS, MeController } from './http';
+
+export { IdentityAuthGuard, type AuthenticatedRequest } from './http';
 import { Otp, phoneVerification } from './otp';
 import { otpDelivery } from './senders';
 import { Sessions } from './sessions';

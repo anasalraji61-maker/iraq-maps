@@ -20,13 +20,20 @@ const errorOf = (fn: () => unknown) => {
 };
 
 describe('defineModuleConfig', () => {
-  it('parses and coerces values, defaulting appEnv to development', () => {
-    const cfg = load({ JWT_SECRET: 'x'.repeat(64), API_PORT: '8080', OTP_SENDER: 'console' });
+  it('parses and coerces values and returns appEnv', () => {
+    const cfg = load({ JWT_SECRET: 'x'.repeat(64), API_PORT: '8080', OTP_SENDER: 'console', APP_ENV: 'development' });
     expect(cfg).toEqual({ JWT_SECRET: 'x'.repeat(64), API_PORT: 8080, OTP_SENDER: 'console', appEnv: 'development' });
   });
 
   it('treats empty strings as unset, so defaults apply', () => {
-    expect(load({ JWT_SECRET: 'x'.repeat(64), API_PORT: '', OTP_SENDER: 'fake', APP_ENV: '' })).toMatchObject({ API_PORT: 3000, appEnv: 'development' });
+    expect(load({ JWT_SECRET: 'x'.repeat(64), API_PORT: '', OTP_SENDER: 'fake', APP_ENV: 'test' })).toMatchObject({ API_PORT: 3000, appEnv: 'test' });
+  });
+
+  it('requires APP_ENV: unset or empty fails boot even when NODE_ENV=production, so a test sender never runs by default', () => {
+    for (const APP_ENV of [undefined, '']) {
+      const message = errorOf(() => load({ JWT_SECRET: 'x'.repeat(64), OTP_SENDER: 'console', NODE_ENV: 'production', APP_ENV }));
+      expect(message).toBe('identity config: missing or invalid env vars: APP_ENV');
+    }
   });
 
   it('fails boot naming every missing or invalid variable, never its value', () => {
@@ -54,8 +61,9 @@ describe('defineModuleConfig', () => {
   });
 
   it('reads process.env by default', () => {
-    process.env.CONFIG_TEST_VAR = 'from-process';
-    expect(defineModuleConfig('test', { CONFIG_TEST_VAR: z.string() }).CONFIG_TEST_VAR).toBe('from-process');
+    Object.assign(process.env, { CONFIG_TEST_VAR: 'from-process', APP_ENV: 'test' });
+    expect(defineModuleConfig('test', { CONFIG_TEST_VAR: z.string() })).toEqual({ CONFIG_TEST_VAR: 'from-process', appEnv: 'test' });
     delete process.env.CONFIG_TEST_VAR;
+    delete process.env.APP_ENV;
   });
 });

@@ -1,4 +1,4 @@
-import type { Clock, DomainEvent, EventBus, EventHandler, EventName, IraqiPhone, OtpSender, OutboxPublisher, UserDataEraser, UserId } from '@iraq-maps/contracts';
+import type { Clock, DomainEvent, EventBus, EventHandler, EventName, IraqiPhone, OtpSender, UserDataEraser, UserId } from '@iraq-maps/contracts';
 
 export class FixedClock implements Clock {
   constructor(private current = new Date('2026-01-01T00:00:00.000Z')) {}
@@ -7,9 +7,6 @@ export class FixedClock implements Clock {
   }
   advance(ms: number): void {
     this.current = new Date(this.current.getTime() + ms);
-  }
-  set(date: Date): void {
-    this.current = new Date(date);
   }
 }
 
@@ -37,14 +34,6 @@ export class InMemoryEventBus implements EventBus {
     set.add(handler as EventHandler);
     this.handlers.set(name, set);
     return () => set.delete(handler as EventHandler);
-  }
-}
-
-/** Records events as the outbox would store them; `tx` is ignored. */
-export class InMemoryOutbox implements OutboxPublisher {
-  readonly events: DomainEvent[] = [];
-  async publish(event: DomainEvent): Promise<void> {
-    this.events.push(event);
   }
 }
 

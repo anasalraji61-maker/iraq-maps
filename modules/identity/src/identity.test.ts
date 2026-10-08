@@ -1,17 +1,20 @@
 import { randomBytes, randomInt, randomUUID } from 'node:crypto';
 import { PortTokens, type IdentityPort, type IraqiPhone, type PhoneVerificationPort, type UserId } from '@iraq-maps/contracts';
 import { createOutboxPublisher, createTestDatabase, startOutboxRelay, type OutboxRelay, type TestDatabase } from '@iraq-maps/db-kit';
-import { captureLogs } from '@iraq-maps/observability';
+import { captureLogs, createLogger } from '@iraq-maps/observability';
 import { FakeOtpSender, FixedClock, InMemoryEventBus, InMemoryUserDataEraser, userDataEraserConformance } from '@iraq-maps/testing';
-import { NestFactory } from '@nestjs/core';
+import { APP_GUARD, NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { sql } from 'drizzle-orm';
 import { Redis } from 'ioredis';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { decrypt, mac } from './crypto';
-import { identityMigrationsDir, identityModule } from './index';
+import { INTERNALS, type Internals } from './http';
+import { IdentityAuthGuard, identityMigrationsDir, identityModule } from './index';
+import { ipBucket } from './otp';
 import { sessions, users } from './schema';
-import { grantRole, identityEraser } from './users';
+import { Sessions } from './sessions';
+import { grantRole } from './users';
 
 const secret = () => randomBytes(32).toString('base64');
 const env = { APP_ENV: 'test', JWT_ACCESS_SECRET: secret(), JWT_REFRESH_SECRET: secret(), PHONE_ENCRYPTION_KEY: secret(), PHONE_HASH_KEY: secret() };
@@ -34,8 +37,14 @@ let redis: Redis;
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: [{ schema: 'identity', migrationsDir: identityMigrationsDir }] });
   const outbox = createOutboxPublisher(tdb.db);
+  // Bound like apps/api does: identity's guard is the app-wide auth check.
+  class TestApp {}
   app = await NestFactory.create<NestFastifyApplication>(
-    identityModule({ db: tdb.db, redisUrl, otpSender: sender, erasers: [places, media], outbox, clock, env }),
+    {
+      module: TestApp,
+      imports: [identityModule({ db: tdb.db, redisUrl, otpSender: sender, erasers: [places, media], outbox, clock, env })],
+      providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }],
+    },
     new FastifyAdapter(),
     { logger: false },
   );
@@ -60,9 +69,16 @@ const refresh = (refreshToken: string) => post('/v1/auth/refresh', { refreshToke
 const me = (accessToken: string, method: 'GET' | 'PATCH' | 'DELETE' = 'GET', payload?: object) =>
   app.inject({ method, url: '/v1/me', headers: { authorization: `Bearer ${accessToken}` }, payload });
 const otherThan = (code: string) => (code === '000000' ? '111111' : '000000');
+/** Stands in for waiting out the 60s resend cooldown. */
+const skipResendWait = (phone: string) => redis.del(`identity:otp-resend:${mac(env.PHONE_HASH_KEY, phone)}`);
+async function newCode(phone: string) {
+  await skipResendWait(phone);
+  expect((await requestOtp(phone)).statusCode).toBe(202);
+  return sender.lastCodeFor(phone)!;
+}
 
 async function login(phone = newPhone()) {
-  expect((await requestOtp(phone)).statusCode).toBe(202);
+  await newCode(phone);
   const res = await verifyOtp(phone, sender.lastCodeFor(phone)!);
   expect(res.statusCode).toBe(200);
   return { phone, ...(res.json() as { accessToken: string; refreshToken: string; isNewUser: boolean; user: { id: UserId } }) };
@@ -103,30 +119,70 @@ describe('OTP login', () => {
     expect((await verifyOtp(phone, code)).json()).toMatchObject({ status: 401, code: 'otp_expired' });
   });
 
+  it('enforces the 60s resend wait on the server', async () => {
+    const phone = newPhone();
+    expect((await requestOtp(phone)).statusCode).toBe(202);
+    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_resend_too_soon' });
+    expect(await redis.ttl(`identity:otp-resend:${mac(env.PHONE_HASH_KEY, phone)}`)).toBeGreaterThan(55);
+    expect(sender.sent.filter((m) => m.phone === phone)).toHaveLength(1);
+  });
+
   it('answers the 6th code request for a phone inside the window with 429', async () => {
     const phone = newPhone();
-    for (let i = 0; i < 5; i++) expect((await requestOtp(phone)).statusCode).toBe(202);
-    const res = await requestOtp(phone);
-    expect(res.statusCode).toBe(429);
-    expect(res.json()).toMatchObject({ code: 'otp_rate_limited' });
+    for (let i = 0; i < 5; i++) await newCode(phone);
+    await skipResendWait(phone);
+    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
     expect(sender.sent.filter((m) => m.phone === phone)).toHaveLength(5);
   });
 
-  it('limits code requests per IP across phones (20 per window)', async () => {
-    const ip = newIp();
-    for (let i = 0; i < 20; i++) expect((await requestOtp(newPhone(), ip)).statusCode).toBe(202);
-    expect((await requestOtp(newPhone(), ip)).statusCode).toBe(429);
+  it('caps a phone at 10 codes per 24h, across 15-minute windows', async () => {
+    const phone = newPhone();
+    const nextWindow = () => redis.del(`identity:otp-rate:phone:${mac(env.PHONE_HASH_KEY, phone)}`);
+    for (let i = 0; i < 10; i++) {
+      if (i === 5) await nextWindow();
+      await newCode(phone);
+    }
+    await nextWindow();
+    await skipResendWait(phone);
+    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+  });
+
+  it('limits code requests per client network: an IPv4 address (mapped or not) or an IPv6 /64', async () => {
+    const v4 = newIp();
+    const v6 = `2001:db8:${randomInt(0x10000).toString(16)}:${randomInt(0x10000).toString(16)}`;
+    for (const address of [(i: number) => (i % 2 ? `::ffff:${v4}` : v4), (i: number) => `${v6}::${(i + 1).toString(16)}`]) {
+      for (let i = 0; i < 20; i++) expect((await requestOtp(newPhone(), address(i))).statusCode).toBe(202);
+      expect((await requestOtp(newPhone(), address(20))).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+    }
     expect((await requestOtp(newPhone())).statusCode).toBe(202);
+    expect(ipBucket('2001:0DB8:0001:0002:ffff:ffff:ffff:ffff')).toBe(ipBucket('2001:db8:1:2::1'));
+    expect(ipBucket('2001:db8:1:3::1')).not.toBe(ipBucket('2001:db8:1:2::1'));
   });
 
   it('invalidates the code after 5 wrong attempts', async () => {
     const phone = newPhone();
-    await requestOtp(phone);
-    const code = sender.lastCodeFor(phone)!;
+    const code = await newCode(phone);
     const statuses = [];
     for (let i = 0; i < 5; i++) statuses.push((await verifyOtp(phone, otherThan(code))).statusCode);
     expect(statuses).toEqual([401, 401, 401, 401, 429]);
     expect((await verifyOtp(phone, code)).json()).toMatchObject({ status: 401, code: 'otp_expired' });
+  });
+
+  it('locks a phone for the day after 10 wrong codes, across codes and challenges', async () => {
+    const phone = newPhone();
+    const guess = async (code: string) => ((await verifyOtp(phone, code)).json() as { code?: string }).code;
+    const first = await newCode(phone);
+    for (let i = 0; i < 5; i++) await guess(otherThan(first));
+    const login = await newCode(phone);
+    for (let i = 0; i < 4; i++) expect(await guess(otherThan(login))).toBe('otp_invalid');
+    await skipResendWait(phone);
+    const port = app.get<PhoneVerificationPort>(PortTokens.PhoneVerificationPort);
+    const { verificationId } = await port.start({ phone, locale: 'ar', purpose: 'provider_phone' });
+    const wrong = otherThan(sender.lastCodeFor(phone)!);
+    expect(await port.confirm({ verificationId, code: wrong })).toEqual({ verified: false, reason: 'too_many_attempts' });
+    expect(await guess(login)).toBe('otp_locked');
+    await skipResendWait(phone);
+    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_locked' });
   });
 });
 
@@ -143,6 +199,17 @@ describe('sessions', () => {
     expect((await refresh(next.refreshToken)).statusCode).toBe(401);
     expect((await me(next.accessToken)).statusCode).toBe(401);
     expect((await me((await login(session.phone)).accessToken)).statusCode).toBe(200);
+  });
+
+  it('never accepts one token kind as the other, even if both secrets were equal', async () => {
+    const session = await login();
+    expect((await me(session.refreshToken)).statusCode).toBe(401);
+    const shared = { JWT_ACCESS_SECRET: env.JWT_ACCESS_SECRET, JWT_REFRESH_SECRET: env.JWT_ACCESS_SECRET };
+    const sameKey = new Sessions(tdb.db, shared, clock, createLogger({ name: 'identity-test' }));
+    const pair = await sameKey.start(session.user.id);
+    expect(await sameKey.verify(pair.refreshToken)).toBeNull();
+    expect(await sameKey.rotate(pair.accessToken)).toBeNull();
+    expect(await sameKey.verify(pair.accessToken)).toMatchObject({ userId: session.user.id });
   });
 
   it('ignores garbage refresh tokens without revoking anything', async () => {
@@ -167,12 +234,14 @@ describe('sessions', () => {
 });
 
 describe('/v1/me', () => {
-  it('reads and updates name and locale, and rejects missing tokens', async () => {
+  it('reads and updates name and locale; the guard rejects missing tokens with the 401 Problem', async () => {
     const session = await login();
     expect((await me(session.accessToken, 'PATCH', { name: 'زينب', locale: 'en' })).json()).toMatchObject({ id: session.user.id, name: 'زينب', locale: 'en' });
     expect((await me(session.accessToken, 'PATCH', {})).json()).toMatchObject({ name: 'زينب', locale: 'en' });
     expect((await me(session.accessToken)).json()).toMatchObject({ name: 'زينب', locale: 'en', roles: ['user'] });
-    expect((await app.inject({ method: 'GET', url: '/v1/me' })).json()).toMatchObject({ status: 401, code: 'unauthorized' });
+    const anonymous = await app.inject({ method: 'GET', url: '/v1/me' });
+    expect(anonymous.statusCode).toBe(401);
+    expect(anonymous.json()).toEqual({ type: 'about:blank', title: 'Missing, invalid or revoked access token', status: 401, code: 'unauthorized' });
   });
 
   it('DELETE runs every eraser, removes identity rows, then emits identity.user.deleted.v1 exactly once', async () => {
@@ -223,8 +292,9 @@ describe('ports and grant-role', () => {
   });
 });
 
+// identity's own erasure is the DELETE /v1/me path itself (Users.remove), run here as an eraser.
 userDataEraserConformance('identity', () => ({
-  eraser: identityEraser(tdb.db),
+  eraser: { module: 'identity', erase: (id) => app.get<Internals>(INTERNALS).users.remove(id) },
   async seed(id) {
     await tdb.db.insert(users).values({ id, phoneHash: randomUUID(), phoneEnc: 'x', locale: 'ar', roles: ['user'], createdAt: new Date() });
     await tdb.db.insert(sessions).values({ id: randomUUID(), userId: id, generation: 0 });

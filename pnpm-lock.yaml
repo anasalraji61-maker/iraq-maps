@@ -68,6 +68,9 @@ importers:
       '@ts-rest/nest':
         specifier: 3.52.1
         version: 3.52.1(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.7(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@ts-rest/core@3.52.1(@types/node@22.20.5)(zod@3.25.76))(rxjs@7.8.2)(zod@3.25.76)
+      '@ts-rest/open-api':
+        specifier: 3.52.1
+        version: 3.52.1(@ts-rest/core@3.52.1(@types/node@22.20.5)(zod@3.25.76))(zod@3.25.76)
       fastify:
         specifier: ^5.11.3
         version: 5.11.3
@@ -177,6 +180,9 @@ importers:
       ioredis:
         specifier: ^5.11.1
         version: 5.11.1
+      ipaddr.js:
+        specifier: ^2.5.0
+        version: 2.5.0
       jose:
         specifier: ^6.2.12
         version: 6.2.12
@@ -294,6 +300,10 @@ importers:
       typescript-eslint:
         specifier: ^8.71.1
         version: 8.71.1(eslint@10.12.0(jiti@2.7.0))(typescript@6.0.3)
+    devDependencies:
+      eslint:
+        specifier: ^10.12.0
+        version: 10.12.0(jiti@2.7.0)
 
   packages/ui:
     devDependencies:
@@ -306,12 +316,21 @@ importers:
       picomatch:
         specifier: ^4.0.7
         version: 4.0.7
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
     devDependencies:
       '@types/picomatch':
         specifier: ^4.0.3
         version: 4.0.3
 
 packages:
+
+  '@anatine/zod-openapi@1.14.2':
+    resolution: {integrity: sha512-q0qHfnuNYVKu0Swrnnvfj9971AEyW7c8v9jCOZGCl5ZbyGMNG4RPyJkRcMi/JC8CRfdOe0IDfNm1nNsi2avprg==}
+    peerDependencies:
+      openapi3-ts: ^2.0.0 || ^3.0.0
+      zod: ^3.20.0
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1889,6 +1908,12 @@ packages:
     peerDependenciesMeta:
       zod:
         optional: true
+
+  '@ts-rest/open-api@3.52.1':
+    resolution: {integrity: sha512-VY91g6HFzCe1/fNgX4Y3HzaJbIdztCGHTg34drkh7bKgtNOizLJLXV0wwIkMwLGvjhRHojJxnwYxHjGMIkScwg==}
+    peerDependencies:
+      '@ts-rest/core': ~3.52.0
+      zod: ^3.22.3
 
   '@turbo/darwin-64@2.11.7':
     resolution: {integrity: sha512-Z2LFOxwbiJueD1miByXJS/BrW21vv6YaQXZustty5jEX4vQYw6zyh101Sz1QO7WG0mqBzKagZ/DoAeeujI0/Sw==}
@@ -3648,6 +3673,9 @@ packages:
     resolution: {integrity: sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==}
     engines: {node: '>=8'}
 
+  openapi3-ts@2.0.2:
+    resolution: {integrity: sha512-TxhYBMoqx9frXyOgnRHufjQfPXomTIHYKhSKJ6jHfj13kS8OEIhvmE8CTuQyKtjjWttAjX5DPxM1vmalEpo8Qw==}
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -4308,6 +4336,10 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  ts-deepmerge@6.2.1:
+    resolution: {integrity: sha512-8CYSLazCyj0DJDpPIxOFzJG46r93uh6EynYjuey+bxcLltBeqZL7DMfaE5ZPzZNFlav7wx+2TDa/mBl8gkTYzw==}
+    engines: {node: '>=14.13.1'}
+
   tsconfig-paths-webpack-plugin@4.2.0:
     resolution: {integrity: sha512-zbem3rfRS8BgeNK50Zz5SIQgXzLafiHjOwUAvk/38/o1jHn/V5QAgVUcz884or7WYcPaH3N2CIfUc2u0ul7UcA==}
     engines: {node: '>=10.13.0'}
@@ -4624,6 +4656,10 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
+  yaml@1.10.3:
+    resolution: {integrity: sha512-vIYeF1u3CjlhAFekPPAk2h/Kv4T3mAkMox5OymRiJQB0spDP10LHvt+K7G9Ny6NuuMAb25/6n1qyUjAcGNf/AA==}
+    engines: {node: '>= 6'}
+
   yaml@2.9.1:
     resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
     engines: {node: '>= 14.6'}
@@ -4648,6 +4684,12 @@ packages:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
 snapshots:
+
+  '@anatine/zod-openapi@1.14.2(openapi3-ts@2.0.2)(zod@3.25.76)':
+    dependencies:
+      openapi3-ts: 2.0.2
+      ts-deepmerge: 6.2.1
+      zod: 3.25.76
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -6279,6 +6321,13 @@ snapshots:
       '@ts-rest/core': 3.52.1(@types/node@22.20.5)(zod@3.25.76)
       rxjs: 7.8.2
     optionalDependencies:
+      zod: 3.25.76
+
+  '@ts-rest/open-api@3.52.1(@ts-rest/core@3.52.1(@types/node@22.20.5)(zod@3.25.76))(zod@3.25.76)':
+    dependencies:
+      '@anatine/zod-openapi': 1.14.2(openapi3-ts@2.0.2)(zod@3.25.76)
+      '@ts-rest/core': 3.52.1(@types/node@22.20.5)(zod@3.25.76)
+      openapi3-ts: 2.0.2
       zod: 3.25.76
 
   '@turbo/darwin-64@2.11.7':
@@ -8240,6 +8289,10 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
+  openapi3-ts@2.0.2:
+    dependencies:
+      yaml: 1.10.3
+
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -8924,6 +8977,8 @@ snapshots:
     dependencies:
       typescript: 6.0.3
 
+  ts-deepmerge@6.2.1: {}
+
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
       chalk: 4.1.2
@@ -9138,6 +9193,8 @@ snapshots:
   y18n@5.0.8: {}
 
   yallist@3.1.1: {}
+
+  yaml@1.10.3: {}
 
   yaml@2.9.1: {}
 
