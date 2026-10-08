@@ -2,13 +2,24 @@ import { testIDs } from '@iraq-maps/contracts';
 import { t } from '@iraq-maps/i18n';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { AccessibilityInfo } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { NameScreen, OtpScreen, PhoneScreen } from '../src';
+import { LanguageScreen, NameScreen, OtpScreen, PhoneScreen } from '../src';
 import { reply, setup, tokens, user } from './render';
 
 const { auth } = testIDs;
 const phone = '+9647701234567';
 const sent = { expiresAt: '2026-10-08T00:05:00.000Z', resendAfterSec: 60 };
+
+it.each([
+  ['PhoneScreen', <PhoneScreen key="p" />, 'phone'],
+  ['OtpScreen', <OtpScreen key="o" />, 'otp'],
+  ['NameScreen', <NameScreen key="n" />, 'name'],
+  ['LanguageScreen', <LanguageScreen key="l" />, 'language'],
+])('%s starts with its title as a heading that TalkBack exposes', async (_, ui, key) => {
+  const { view } = await setup(ui, { signedIn: false });
+  expect(view.getByRole('header', { name: t(`account:${key}.title`) })).toBeTruthy();
+});
 
 describe('PhoneScreen', () => {
   it('shows the validation message and calls nothing for a number that is not an Iraqi mobile', async () => {
@@ -17,6 +28,17 @@ describe('PhoneScreen', () => {
     await fireEvent.press(view.getByTestId(auth.phoneSubmit));
     expect(view.getByText(t('account:phone.invalid'))).toBeTruthy();
     expect(api.auth.requestOtp).not.toHaveBeenCalled();
+  });
+
+  it('keeps the phone field left-to-right, and announces the same error again on a second failed submit', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    const { view } = await setup(<PhoneScreen />, { signedIn: false });
+    expect(view.getByTestId(auth.phoneInput)).toHaveStyle({ direction: 'ltr' });
+    await fireEvent.changeText(view.getByTestId(auth.phoneInput), '0612345678');
+    await fireEvent.press(view.getByTestId(auth.phoneSubmit));
+    await fireEvent.press(view.getByTestId(auth.phoneSubmit));
+    await waitFor(() => expect(announce.mock.calls.filter(([m]) => m === t('account:phone.invalid'))).toHaveLength(2));
+    announce.mockRestore();
   });
 
   it('normalizes Arabic-Indic 07 input, requests a code and opens the OTP screen', async () => {
@@ -39,6 +61,11 @@ describe('OtpScreen', () => {
     await fireEvent.changeText(view.getByTestId(auth.otpInput), code);
     await fireEvent.press(view.getByTestId(auth.otpSubmit));
   };
+
+  it('keeps the code field left-to-right', async () => {
+    const { view } = await setup(<OtpScreen />, { signedIn: false });
+    expect(view.getByTestId(auth.otpInput)).toHaveStyle({ direction: 'ltr' });
+  });
 
   it('counts down the 60s the server asked for in Arabic-Indic m:ss, then requests a new code and restarts the timer', async () => {
     jest.useFakeTimers();

@@ -2,7 +2,7 @@ import { createClient, type ApiClient } from '@iraq-maps/api-client';
 import { Me, TokenPair } from '@iraq-maps/contracts';
 import * as SecureStore from 'expo-secure-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ApiContext, SessionContext, type Session, type SessionState } from './context';
+import { ApiBaseUrlContext, ApiContext, SessionContext, type Session, type SessionState } from './context';
 
 const TOKENS_KEY = 'session.tokens';
 const USER_KEY = 'session.user';
@@ -22,6 +22,7 @@ export function SessionProvider({ children, apiBaseUrl }: { children: ReactNode;
   const tokens = useRef<TokenPair | null>(null);
   const baseUrl = useRef(apiBaseUrl);
   baseUrl.current = apiBaseUrl;
+  const currentBaseUrl = useCallback(() => baseUrl.current(), []);
 
   const setTokens = useCallback(async (next: TokenPair | null) => {
     tokens.current = next;
@@ -30,7 +31,7 @@ export function SessionProvider({ children, apiBaseUrl }: { children: ReactNode;
     await Promise.all([SecureStore.deleteItemAsync(TOKENS_KEY), SecureStore.deleteItemAsync(USER_KEY)]);
   }, []);
 
-  const api = useMemo(() => createClient({ baseUrl: () => baseUrl.current(), getTokens: () => tokens.current, onTokens: setTokens }), [setTokens]);
+  const api = useMemo(() => createClient({ baseUrl: currentBaseUrl, getTokens: () => tokens.current, onTokens: setTokens }), [currentBaseUrl, setTokens]);
 
   const updateUser = useCallback((user: Me) => {
     if (!tokens.current) return;
@@ -70,7 +71,9 @@ export function SessionProvider({ children, apiBaseUrl }: { children: ReactNode;
 
   return (
     <SessionContext.Provider value={session}>
-      <ApiContext.Provider value={api}>{children}</ApiContext.Provider>
+      <ApiContext.Provider value={api}>
+        <ApiBaseUrlContext.Provider value={currentBaseUrl}>{children}</ApiBaseUrlContext.Provider>
+      </ApiContext.Provider>
     </SessionContext.Provider>
   );
 }
@@ -85,4 +88,11 @@ export function useApi(): ApiClient {
   const api = useContext(ApiContext);
   if (!api) throw new Error('useApi() needs a <SessionProvider> (or renderWithProviders in tests)');
   return api;
+}
+
+/** The API base URL the client uses now (the dev settings can change it), e.g. to resolve the city's root-relative tile URLs. */
+export function useApiBaseUrl(): string {
+  const baseUrl = useContext(ApiBaseUrlContext);
+  if (!baseUrl) throw new Error('useApiBaseUrl() needs a <SessionProvider> (or renderWithProviders in tests)');
+  return baseUrl();
 }

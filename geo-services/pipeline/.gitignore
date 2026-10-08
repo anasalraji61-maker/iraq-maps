@@ -6,3 +6,4 @@ __pycache__/
 .ruff_cache/
 .venv.lock
 .venv.lockdir/
+tests/fixtures/baghdad-mini/*.osm.pbf

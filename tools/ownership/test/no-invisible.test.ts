@@ -17,6 +17,7 @@ it('reports Cf characters by position and code point, except a leading BOM', () 
 
 it('checks code files, not locale catalogs or Markdown', () => {
   expect(['a.ts', 'b.tsx', 'c.py', 'd.sql', 'e.yml', 'f.json', 'g.java', 'h.sh', 'i.cjs'].every(checkedPath)).toBe(true);
+  expect(['.gitleaks.toml', 'pom.xml', 'build.gradle', 'settings.gradle.kts', 'gradle.properties', '.env.example'].every(checkedPath)).toBe(true);
   expect(['src/i18n/ar.json', 'packages/i18n/src/locales/ckb.json', 'docs/x.md', 'a.png'].some(checkedPath)).toBe(false);
 });
 

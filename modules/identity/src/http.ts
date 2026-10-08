@@ -22,12 +22,14 @@ export interface AuthenticatedRequest {
   principal: AuthPrincipal;
 }
 
-const PUBLIC_ROUTE = /^\/(health$|v1\/auth\/)/;
+/** Exact public route patterns: health, auth, and the M1 places and cities routes. A prefix would also open future routes. */
+const PUBLIC_ROUTE =
+  /^\/(health|v1\/auth\/.+|v1\/search|v1\/places\/(nearby|:id)|v1\/cities(\/:id\/(tiles\/:z\/:x\/:y|glyphs\/:fontstack\/:range))?)$/;
 
 /**
- * The one auth check: bind it as APP_GUARD. Every route needs a valid, unrevoked access token except /health and
- * /v1/auth/*; it sets `req.principal` or answers the 401 Problem. Public routes are matched on the registered route
- * pattern, so the query string and URL spelling do not matter.
+ * The one auth check: bind it as APP_GUARD. Every route needs a valid, unrevoked access token except /health,
+ * /v1/auth/* and the public places routes (PUBLIC_ROUTE); it sets `req.principal` or answers the 401 Problem.
+ * Public routes are matched on the registered route pattern, so the query string and URL spelling do not matter.
  */
 @Injectable()
 export class IdentityAuthGuard implements CanActivate {

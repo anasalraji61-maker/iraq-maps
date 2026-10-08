@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original work, not derived from OpenStreetMap or any other dataset. Dedicated to the public domain under CC0 1.0
+     (https://creativecommons.org/publicdomain/zero/1.0/). Hand-made, Baghdad-like synthetic data: names are
+     invented or generic, coordinates are made up inside cities/baghdad.yaml. Phones are fake, websites use the
+     reserved example.com/example.org domains.
+     Expected output: tests/fixtures/baghdad-mini/places.ndjson and city.json (regenerate as in README.md).
+     Counts: 15 places, 4 streets, 4 areas (worked out in tests/test_extract.py).
+     Search spelling variants: قلعة (searched as قلعه) and أربيل (searched as اربيل/إربيل). -->
+<osm version="0.6" generator="hand">
+  <!-- street nodes -->
+  <node id="1" lat="33.3000" lon="44.4100"/>
+  <node id="2" lat="33.3010" lon="44.4120"/>
+  <node id="3" lat="33.3020" lon="44.4140"/>
+  <node id="4" lat="33.3030" lon="44.4160"/>
+  <node id="5" lat="33.3040" lon="44.4180"/>
+  <node id="6" lat="33.3200" lon="44.4000"/>
+  <node id="7" lat="33.3210" lon="44.4000"/>
+  <node id="8" lat="33.2900" lon="44.4300"/>
+  <node id="9" lat="33.2910" lon="44.4300"/>
+  <node id="10" lat="33.3400" lon="44.3900"/>
+  <node id="11" lat="33.3410" lon="44.3910"/>
+  <node id="12" lat="33.3100" lon="44.3950"/>
+  <node id="13" lat="33.3110" lon="44.3950"/>
+  <node id="14" lat="33.3050" lon="44.4200"/>
+
+  <!-- POI nodes: 101-113 are places; 114-116 are dropped (no category, no name); 117 lies outside the city -->
+  <node id="101" lat="33.3105" lon="44.4210">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="مطعم أربيل"/>
+    <tag k="name:ckb" v="چێشتخانەی هەولێر"/>
+    <tag k="name:en" v="Erbil Restaurant"/>
+    <tag k="opening_hours" v="Mo-Su 11:00-23:00"/>
+    <tag k="phone" v="+964 770 100 0101"/>
+    <tag k="website" v="https://example.com/erbil-restaurant"/>
+  </node>
+  <node id="102" lat="33.3420" lon="44.3990">
+    <tag k="historic" v="castle"/>
+    <tag k="tourism" v="attraction"/>
+    <tag k="name" v="قلعة الرصافة"/>
+    <tag k="name:en" v="Rusafa Citadel"/>
+    <tag k="opening_hours" v="Sa-Th 09:00-17:00"/>
+  </node>
+  <node id="103" lat="33.3060" lon="44.4190">
+    <tag k="amenity" v="cafe"/>
+    <tag k="name" v="مقهى دجلة"/>
+    <tag k="name:en" v="Tigris Cafe"/>
+    <tag k="opening_hours" v="Mo-Su 16:00-02:00"/>
+    <tag k="contact:phone" v="+964 770 100 0103"/>
+  </node>
+  <node id="104" lat="33.3045" lon="44.4170">
+    <tag k="amenity" v="pharmacy"/>
+    <tag k="name" v="  صيدلية الكرادة  "/>
+    <tag k="opening_hours" v="Mo-Sa 09:00-22:00"/>
+    <tag k="phone" v="+964 780 100 0104"/>
+  </node>
+  <node id="105" lat="33.3150" lon="44.4100">
+    <tag k="amenity" v="bank"/>
+    <tag k="name" v="مصرف النهرين"/>
+    <tag k="opening_hours" v="Su-Th 08:00-14:00"/>
+    <tag k="contact:website" v="https://example.org/nahrain-bank"/>
+  </node>
+  <node id="106" lat="33.2880" lon="44.4050">
+    <tag k="amenity" v="fuel"/>
+    <tag k="name" v="محطة وقود الجادرية"/>
+    <tag k="opening_hours" v="24/7"/>
+  </node>
+  <node id="107" lat="33.3080" lon="44.4060">
+    <tag k="tourism" v="hotel"/>
+    <tag k="name" v="فندق دجلة الكبير"/>
+    <tag k="name:en" v="Grand Tigris Hotel"/>
+    <tag k="phone" v="+964 770 100 0107"/>
+    <tag k="website" v="https://example.com/grand-tigris"/>
+  </node>
+  <node id="108" lat="33.3200" lon="44.4400">
+    <tag k="amenity" v="place_of_worship"/>
+    <tag k="religion" v="muslim"/>
+    <tag k="name" v="جامع الوحدة"/>
+  </node>
+  <node id="109" lat="33.3030" lon="44.4150">
+    <tag k="shop" v="supermarket"/>
+    <tag k="name" v="أسواق الكرادة"/>
+    <tag k="opening_hours" v="Mo-Su 08:00-24:00"/>
+  </node>
+  <node id="110" lat="33.3170" lon="44.4120">
+    <tag k="office" v="company"/>
+    <tag k="name" v="شركة النخيل للمقاولات"/>
+  </node>
+  <node id="111" lat="33.3180" lon="44.4130">
+    <tag k="office" v="government"/>
+    <tag k="name" v="دائرة بلدية الكرادة"/>
+  </node>
+  <node id="112" lat="33.3000" lon="44.4000">
+    <tag k="leisure" v="park"/>
+    <tag k="name" v="متنزه دجلة"/>
+  </node>
+  <node id="113" lat="33.3210" lon="44.4410">
+    <tag k="amenity" v="school"/>
+    <tag k="name:ar" v="مدرسة الوحدة الابتدائية"/>
+  </node>
+  <node id="114" lat="33.3101" lon="44.4211">
+    <tag k="amenity" v="bench"/>
+  </node>
+  <node id="115" lat="33.3102" lon="44.4212">
+    <tag k="amenity" v="parking"/>
+    <tag k="name" v="موقف الكرادة"/>
+  </node>
+  <node id="116" lat="33.3103" lon="44.4213">
+    <tag k="shop" v="bakery"/>
+  </node>
+  <node id="117" lat="33.3000" lon="44.6000">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="مطعم خارج المدينة"/>
+  </node>
+
+  <!-- hospital outline (w2001), university outer ring (w2002, for r3001) -->
+  <node id="201" lat="33.3095" lon="44.4245"/>
+  <node id="202" lat="33.3095" lon="44.4255"/>
+  <node id="203" lat="33.3105" lon="44.4255"/>
+  <node id="204" lat="33.3105" lon="44.4245"/>
+  <node id="211" lat="33.2740" lon="44.3790"/>
+  <node id="212" lat="33.2740" lon="44.3810"/>
+  <node id="213" lat="33.2760" lon="44.3810"/>
+  <node id="214" lat="33.2760" lon="44.3790"/>
+  <!-- quarter outline (w2003), sub-district outer ring (w2004, for r4001) -->
+  <node id="221" lat="33.3130" lon="44.4330"/>
+  <node id="222" lat="33.3130" lon="44.4370"/>
+  <node id="223" lat="33.3170" lon="44.4370"/>
+  <node id="224" lat="33.3170" lon="44.4330"/>
+  <node id="231" lat="33.2850" lon="44.3950"/>
+  <node id="232" lat="33.2850" lon="44.4050"/>
+  <node id="233" lat="33.2950" lon="44.4050"/>
+  <node id="234" lat="33.2950" lon="44.3950"/>
+
+  <!-- area nodes: 301 and 302 are areas; 303 (place=city) is not -->
+  <node id="301" lat="33.3205" lon="44.4405">
+    <tag k="place" v="neighbourhood"/>
+    <tag k="name" v="حي الوحدة"/>
+    <tag k="name:en" v="Al-Wahda"/>
+  </node>
+  <node id="302" lat="33.3050" lon="44.4150">
+    <tag k="place" v="suburb"/>
+    <tag k="name" v="الكرادة"/>
+    <tag k="name:ckb" v="کەڕادە"/>
+    <tag k="name:en" v="Karrada"/>
+  </node>
+  <node id="303" lat="33.3250" lon="44.3850">
+    <tag k="place" v="city"/>
+    <tag k="name" v="بغداد"/>
+  </node>
+
+  <!-- streets: 1001+1002 share node 3 and merge; 1003 and 1004 share a name but not a node -->
+  <way id="1001">
+    <nd ref="1"/><nd ref="2"/><nd ref="3"/>
+    <tag k="highway" v="primary"/>
+    <tag k="name" v="شارع الكرادة داخل"/>
+    <tag k="name:en" v="Karrada Dakhil Street"/>
+  </way>
+  <way id="1002">
+    <nd ref="3"/><nd ref="4"/><nd ref="5"/>
+    <tag k="highway" v="primary"/>
+    <tag k="name" v="شارع الكرادة داخل"/>
+    <tag k="name:ar" v="شارع الكرادة داخل"/>
+  </way>
+  <way id="1003">
+    <nd ref="6"/><nd ref="7"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="شارع 62"/>
+  </way>
+  <way id="1004">
+    <nd ref="8"/><nd ref="9"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="شارع 62"/>
+  </way>
+  <way id="1005">
+    <nd ref="10"/><nd ref="11"/>
+    <tag k="highway" v="pedestrian"/>
+    <tag k="name" v="شارع المتنبي"/>
+    <tag k="name:en" v="Al-Mutanabbi Street"/>
+  </way>
+  <!-- not streets: a footway, and an unnamed residential road -->
+  <way id="1006">
+    <nd ref="12"/><nd ref="13"/>
+    <tag k="highway" v="footway"/>
+    <tag k="name" v="ممشى النهر"/>
+  </way>
+  <way id="1007">
+    <nd ref="5"/><nd ref="14"/>
+    <tag k="highway" v="residential"/>
+  </way>
+
+  <way id="2001">
+    <nd ref="201"/><nd ref="202"/><nd ref="203"/><nd ref="204"/><nd ref="201"/>
+    <tag k="amenity" v="hospital"/>
+    <tag k="building" v="yes"/>
+    <tag k="name" v="مستشفى الكرادة"/>
+    <tag k="phone" v="+964 770 100 2001"/>
+  </way>
+  <way id="2002">
+    <nd ref="211"/><nd ref="212"/><nd ref="213"/><nd ref="214"/><nd ref="211"/>
+  </way>
+  <way id="2003">
+    <nd ref="221"/><nd ref="222"/><nd ref="223"/><nd ref="224"/><nd ref="221"/>
+    <tag k="place" v="quarter"/>
+    <tag k="name" v="محلة 929"/>
+  </way>
+  <way id="2004">
+    <nd ref="231"/><nd ref="232"/><nd ref="233"/><nd ref="234"/><nd ref="231"/>
+  </way>
+
+  <relation id="3001">
+    <member type="way" ref="2002" role="outer"/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="amenity" v="university"/>
+    <tag k="name" v="جامعة دجلة"/>
+    <tag k="name:en" v="Tigris University"/>
+    <tag k="website" v="https://example.org/tigris-university"/>
+  </relation>
+  <relation id="4001">
+    <member type="way" ref="2004" role="outer"/>
+    <tag k="type" v="boundary"/>
+    <tag k="boundary" v="administrative"/>
+    <tag k="admin_level" v="8"/>
+    <tag k="name" v="ناحية الجادرية"/>
+    <tag k="name:en" v="Jadriya"/>
+  </relation>
+</osm>

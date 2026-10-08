@@ -1,0 +1,61 @@
+# Search and the place card on the emulator (M1 acceptance criterion 10): the map with its OSM attribution, an Arabic
+# search typed with the other spelling (قلعه, matching قلعة through the shared normalizer), the first result, and
+# its card with the name, category and source badge (testIDs from packages/contracts testIDs.map and testIDs.place).
+# Needs the e2e harness: an API with the baghdad-mini fixture places loaded and the fixture tiles served through the
+# cities fallback route. Typing Arabic relies on Maestro's Unicode input on Android (its own IME, Maestro 2.x).
+# It selects Arabic first, so it does not depend on the language an earlier flow left the app in. The screenshots
+# (relative names: run-flows.sh passes --test-output-dir) are for the RTL review of label shaping and the card.
+appId: iq.iraqmaps.app
+name: search-place
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: tab.account
+    timeout: 60000
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.language
+- tapOn:
+    id: auth.locale.ar
+# From another language the app reloads right to left; from Arabic it goes back to the account tab.
+- extendedWaitUntil:
+    visible: الخريطة
+    timeout: 30000
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.attribution
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: search-place-map
+- tapOn:
+    id: map.search.input
+- inputText: قلعه
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+      index: 0
+    timeout: 20000
+- takeScreenshot: search-place-results
+- tapOn:
+    id: map.search.result
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 20000
+- assertVisible:
+    id: place.name
+    text: .*قلعة.*
+- assertVisible:
+    id: place.category
+- assertVisible:
+    id: place.source
+    text: من OpenStreetMap
+- takeScreenshot: search-place-card

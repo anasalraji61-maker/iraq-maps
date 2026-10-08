@@ -2,10 +2,11 @@ import { testIDs } from '@iraq-maps/contracts';
 import { formatNumber, getLocale, toAsciiDigits } from '@iraq-maps/i18n';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, type ReactElement } from 'react';
 import { isolateLtr } from './phone';
 import { expectStatus, useRequest } from './request';
+import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
 /** Whole seconds left until `deadline` (epoch ms). Wall-clock based, so time spent reading the SMS counts. */
@@ -51,7 +52,7 @@ export function OtpScreen(): ReactElement {
 
   return (
     <Screen scroll>
-      <Stack.Screen options={{ title: t('otp.title') }} />
+      <ScreenTitle title={t('otp.title')} />
       <Text tone="muted">{t('otp.sentTo', { phone: isolateLtr(phone) })}</Text>
       <TextField
         testID={testIDs.auth.otpInput}

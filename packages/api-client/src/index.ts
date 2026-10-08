@@ -14,8 +14,14 @@ export interface CreateClientOptions {
 
 /** ts-rest client that injects the bearer token and, on 401, refreshes once (single-flight) and retries. */
 export function createClient({ baseUrl, getTokens, onTokens, fetch: doFetch = (...args) => fetch(...args) }: CreateClientOptions): ApiClient {
-  const send = async ({ route, path, method, headers, body }: ApiFetcherArgs, accessToken?: string) => {
-    const res = await doFetch(baseUrl() + path, { method, body, headers: accessToken ? { ...headers, authorization: `Bearer ${accessToken}` } : headers });
+  const send = async ({ route, path, method, headers, body, fetchOptions }: ApiFetcherArgs, accessToken?: string) => {
+    const res = await doFetch(baseUrl() + path, {
+      method,
+      body,
+      // A superseded search aborts its request (fetchOptions: { signal }).
+      signal: fetchOptions?.signal,
+      headers: accessToken ? { ...headers, authorization: `Bearer ${accessToken}` } : headers,
+    });
     const json: unknown = res.headers.get('content-type')?.includes('json') ? await res.json() : undefined;
     // Every server answer is validated against the contract (errors are Problem bodies, see apps/api).
     const schema = route.responses[res.status] ?? (res.status >= 400 ? Problem : undefined);

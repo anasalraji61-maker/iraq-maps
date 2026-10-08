@@ -2,9 +2,10 @@ import { Locale, testIDs } from '@iraq-maps/contracts';
 import { getLocale, setLocale, t as translate } from '@iraq-maps/i18n';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, ListItem, Screen } from '@iraq-maps/ui';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { type ReactElement } from 'react';
 import { expectStatus, useRequest } from './request';
+import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
 /** Saves the choice to the profile first when signed in; the shell reacts to setLocale (direction change and reload). */
@@ -27,7 +28,7 @@ export function LanguageScreen(): ReactElement {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: t('language.title') }} />
+      <ScreenTitle title={t('language.title')} />
       {busy ? <Banner kind="info" message={loading} /> : null}
       {error ? <Banner kind="error" message={error} /> : null}
       {Locale.options.map((locale) => (
@@ -36,6 +37,7 @@ export function LanguageScreen(): ReactElement {
           testID={testIDs.auth.locale[locale]}
           title={t(`languages.${locale}`)}
           selected={locale === current}
+          disabled={busy}
           onPress={() => choose(locale)}
         />
       ))}

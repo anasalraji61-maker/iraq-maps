@@ -27,6 +27,23 @@ export interface ListItemProps extends Base {
   trailing?: ReactNode;
   /** On a pressable row: exposes it as a radio option, checked when true (e.g. the language list). */
   selected?: boolean;
+  /** On a pressable row: dims it and ignores presses (e.g. while a choice is being saved). */
+  disabled?: boolean;
+}
+/** A small outlined label, e.g. the data source of a place. */
+export interface BadgeProps extends Base { label: string }
+/** One place in a list (search results and later Discover/assistant). Every text arrives translated and formatted. */
+export interface PlaceSummaryCardProps extends Base {
+  name: string;
+  /** The category label, or the kind for streets and areas. */
+  category?: string;
+  /** The neighbourhood. */
+  area?: string;
+  /** Already formatted for the locale, e.g. "١٫٢ كم". */
+  distance?: string;
+  /** The source badge, e.g. "OpenStreetMap". */
+  source?: string;
+  onPress(): void;
 }
 export interface CardProps extends Base { children: ReactNode; onPress?(): void }
 export interface SheetProps extends Base { visible: boolean; onClose(): void; children: ReactNode }

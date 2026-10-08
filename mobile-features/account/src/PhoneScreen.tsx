@@ -2,10 +2,11 @@ import { testIDs } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { href, useApi } from '@iraq-maps/mobile-kit';
 import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, type ReactElement } from 'react';
 import { normalizeIraqiPhone } from './phone';
 import { expectStatus, useRequest } from './request';
+import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
 export function PhoneScreen(): ReactElement {
@@ -25,7 +26,7 @@ export function PhoneScreen(): ReactElement {
 
   return (
     <Screen scroll>
-      <Stack.Screen options={{ title: t('phone.title') }} />
+      <ScreenTitle title={t('phone.title')} />
       <Text tone="muted">{t('phone.body')}</Text>
       <TextField
         testID={testIDs.auth.phoneInput}

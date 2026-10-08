@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Sourced by the e2e/mobile scripts.
 
 # fail_with_tail <title> <log>: a ::error annotation carrying the log's last lines, then exit 1.

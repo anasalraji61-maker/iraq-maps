@@ -4,6 +4,7 @@ import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, ty
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { createLogger, type Logger } from '@iraq-maps/observability';
+import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
 import {
   Catch,
   Controller,
@@ -26,7 +27,10 @@ import { z } from 'zod';
 // Nest DI note: tsx/esbuild/vite do not emit decorator metadata, so always inject with explicit @Inject(token).
 
 /** Module migrations, in order. The `platform` schema (outbox) always runs before them. */
-export const moduleMigrations = [{ schema: 'identity', migrationsDir: identityMigrationsDir }];
+export const moduleMigrations = [
+  { schema: 'identity', migrationsDir: identityMigrationsDir },
+  { schema: 'places', migrationsDir: placesMigrationsDir },
+];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
   defineModuleConfig(
@@ -82,6 +86,14 @@ class ProblemFilter implements ExceptionFilter {
   }
 }
 
+/**
+ * Fastify's request log line names the route pattern, never the URL: a query such as `near=<lng>,<lat>` would put
+ * precise coordinates in the logs. An unmatched request logs its path without the query string.
+ */
+const reqLog = (req: FastifyRequest) => ({ method: req.method, route: req.routeOptions?.url ?? req.url.split('?')[0], remoteAddress: req.ip });
+const fastifyLogger = (log: Logger) =>
+  (log as unknown as { child(bindings: object, opts: object): FastifyBaseLogger }).child({}, { serializers: { req: reqLog } });
+
 const nestLogger = (log: Logger): LoggerService => ({
   log: (message: unknown) => log.info(String(message)),
   warn: (message: unknown) => log.warn(String(message)),
@@ -133,12 +145,12 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     {
       module: AppModule,
       global: true,
-      imports: [identity],
+      imports: [identity, placesModule({ db, env: opts.env })],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],
       exports: [PortTokens.EventBus],
     },
-    new FastifyAdapter({ trustProxy: trustProxy(config.TRUST_PROXY), loggerInstance: log as FastifyBaseLogger | undefined }),
+    new FastifyAdapter({ trustProxy: trustProxy(config.TRUST_PROXY), loggerInstance: log && fastifyLogger(log) }),
     { logger: log ? nestLogger(log) : false, abortOnError: false },
   );
   app.useGlobalFilters(new ProblemFilter(log));

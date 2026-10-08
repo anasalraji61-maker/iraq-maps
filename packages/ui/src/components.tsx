@@ -6,12 +6,14 @@ import { AccessibilityInfo, ActivityIndicator, I18nManager, Modal, Pressable, Te
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { bannerColors, fonts, tokens } from './tokens';
 import type {
+  BadgeProps,
   BannerProps,
   ButtonProps,
   CardProps,
   EmptyStateProps,
   IconButtonProps,
   ListItemProps,
+  PlaceSummaryCardProps,
   ScreenProps,
   SheetProps,
   TextFieldProps,
@@ -52,16 +54,19 @@ function useAnnounce(message: string | undefined) {
   }, [message]);
 }
 
+type TouchableProps = { onPress?(): void; selected?: boolean; disabled?: boolean; testID?: string; style: StyleProp<ViewStyle>; children: ReactNode };
+
 /** A Pressable with button (or, with `selected`, radio) semantics when `onPress` is set, a plain View otherwise. */
-function Touchable({ onPress, selected, testID, style, children }: { onPress?(): void; selected?: boolean; testID?: string; style: StyleProp<ViewStyle>; children: ReactNode }) {
+function Touchable({ onPress, selected, disabled, testID, style, children }: TouchableProps) {
   const radio = selected !== undefined;
   return onPress ? (
     <Pressable
       testID={testID}
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole={radio ? 'radio' : 'button'}
-      accessibilityState={radio ? { checked: selected } : undefined}
-      style={pressable(style)}
+      accessibilityState={radio ? { checked: selected, disabled } : { disabled }}
+      style={pressable(style, disabled && styles.disabled)}
     >
       {children}
     </Pressable>
@@ -107,7 +112,7 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       accessibilityState={{ disabled: inactive, busy: loading }}
       style={pressable(styles.button, { backgroundColor: bg, borderColor: variant === 'secondary' ? color.primary : bg }, disabled && styles.disabled)}
     >
-      {loading ? <ActivityIndicator color={fg} /> : <RNText style={[text.body, styles.buttonLabel, { color: fg }]}>{label}</RNText>}
+      {loading ? <ActivityIndicator color={fg} /> : <RNText style={[text.body, styles.bold, { color: fg }]}>{label}</RNText>}
     </Pressable>
   );
 }
@@ -132,9 +137,9 @@ export function TextField({ label, error, direction, testID, ...input }: TextFie
   );
 }
 
-export function ListItem({ title, subtitle, onPress, trailing, selected, testID }: ListItemProps): ReactElement {
+export function ListItem({ title, subtitle, onPress, trailing, selected, disabled, testID }: ListItemProps): ReactElement {
   return (
-    <Touchable onPress={onPress} selected={selected} testID={testID} style={[styles.row, selected && styles.selected]}>
+    <Touchable onPress={onPress} selected={selected} disabled={disabled} testID={testID} style={[styles.row, selected && styles.selected]}>
       <View style={styles.fill}>
         <RNText style={text.body}>{title}</RNText>
         {subtitle ? <RNText style={[text.caption, { color: color.textMuted }]}>{subtitle}</RNText> : null}
@@ -155,6 +160,33 @@ export function Card({ children, onPress, testID }: CardProps): ReactElement {
     <Touchable onPress={onPress} testID={testID} style={styles.card}>
       {children}
     </Touchable>
+  );
+}
+
+export function Badge({ label, testID }: BadgeProps): ReactElement {
+  return (
+    <RNText testID={testID} style={[text.caption, styles.badge]}>
+      {label}
+    </RNText>
+  );
+}
+
+/** Name and distance on the first line, category, area and source badge on the second; both lines start at the logical start. */
+export function PlaceSummaryCard({ name, category, area, distance, source, onPress, testID }: PlaceSummaryCardProps): ReactElement {
+  const details = [category, area].filter(Boolean).join(' · ');
+  return (
+    <Card onPress={onPress} testID={testID}>
+      <View style={styles.line}>
+        <RNText style={[text.body, styles.bold, styles.fill]}>{name}</RNText>
+        {distance ? <RNText style={[text.caption, { color: color.textMuted }]}>{distance}</RNText> : null}
+      </View>
+      {details || source ? (
+        <View style={styles.line}>
+          <RNText style={[text.caption, styles.fill, { color: color.textMuted }]}>{details}</RNText>
+          {source ? <Badge label={source} /> : null}
+        </View>
+      ) : null}
+    </Card>
   );
 }
 
@@ -231,7 +263,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonLabel: { fontFamily: fonts.bold },
+  bold: { fontFamily: fonts.bold },
   field: { gap: space.xs },
   input: {
     minHeight: minTouch,
@@ -245,7 +277,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: minTouch, paddingHorizontal: space.m, paddingVertical: space.s },
   // surface keeps text at >= 6:1 (AA); the primary border and check mark are >= 3:1 against it.
   selected: { backgroundColor: color.surface, borderStartWidth: 4, borderStartColor: color.primary },
-  card: { padding: space.m, gap: space.s, borderRadius: radius.l, backgroundColor: color.surface },
+  card: { minHeight: minTouch, padding: space.m, gap: space.s, borderRadius: radius.l, backgroundColor: color.surface },
+  line: { flexDirection: 'row', alignItems: 'center', gap: space.s },
+  badge: { alignSelf: 'flex-start', paddingHorizontal: space.s, borderWidth: 1, borderRadius: radius.s, borderColor: color.border, color: color.textMuted },
   backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.4)' },
   sheet: { padding: space.m, gap: space.m, backgroundColor: color.bg, borderTopStartRadius: radius.l, borderTopEndRadius: radius.l },
   banner: { padding: space.m, borderRadius: radius.m, borderStartWidth: 4 },

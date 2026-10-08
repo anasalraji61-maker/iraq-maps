@@ -117,7 +117,7 @@ export const CliContracts = {
     outputs: ['<output>/<Glyphs.fontstack>/<start>-<end>.pbf, at least Glyphs.requiredRanges'],
   },
   placesImport: {
-    command: 'pnpm --filter @iraq-maps/places import',
+    command: 'pnpm --filter @iraq-maps/places run import',
     args: { '--city': 'city.json', '--input': 'places.ndjson' },
     outputs: ['rows in schema places (DATABASE_URL); idempotent, re-running replaces the city rows'],
   },
@@ -125,9 +125,9 @@ export const CliContracts = {
     command: 'pnpm --filter @iraq-maps/bench search',
     args: { '--api': 'API base URL', '--city': 'city id', '--input': 'places.ndjson to sample query names from', '--count': 'queries (default 200)', '--budget-ms': 'p95 budget (default 800)' },
     outputs: [
-      'stdout: JSON { city, count, errors, p50Ms, p95Ms, maxMs }, latency of /v1/search against an API in the same job',
+      'stdout: JSON { city, count, errors, p50Ms, p95Ms, maxMs }, latency of /v1/search against an API in the same job (callers that parse it run `pnpm -s`, which keeps the pnpm banner off stdout)',
       'a Markdown table appended to $GITHUB_STEP_SUMMARY when set',
-      'exit code 1 when p95Ms > budget or errors > 0',
+      'exit code 1 when p95Ms is at or above the budget, or errors > 0',
     ],
   },
 } as const;

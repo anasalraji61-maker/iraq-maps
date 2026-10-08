@@ -3,7 +3,10 @@ import type { ExpoConfig } from 'expo/config';
 // EXPO_PUBLIC_* values ship inside the APK: never put a secret there.
 // Fail closed: an unset or empty value builds a production app (no cleartext, no dev settings). The runtime reads
 // extra.appEnv, computed here at prebuild, so a stale Metro cache cannot flip it. Dev scripts set development.
+const APP_ENVS = ['development', 'e2e', 'test', 'production'];
 const appEnv = process.env.EXPO_PUBLIC_APP_ENV || 'production';
+// An unknown value (a typo, or "staging") would get cleartext HTTP here while the runtime treats it as production.
+if (!APP_ENVS.includes(appEnv)) throw new Error(`EXPO_PUBLIC_APP_ENV must be one of ${APP_ENVS.join(', ')}, got "${appEnv}"`);
 
 const config: ExpoConfig = {
   name: 'خرائط العراق',
@@ -16,6 +19,16 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
+    '@maplibre/maplibre-react-native',
+    // Foreground location only (locate-me). The Android prompt is the system's own; this text is shown on iOS.
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'يستخدم خرائط العراق موقعك لإظهاره على الخريطة وترتيب نتائج البحث حسب القرب.',
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
     [
       'expo-build-properties',
       {

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { act, render, screen, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Text } from 'react-native';
-import { SessionProvider, useApi, useSession, type Session } from './index';
+import { SessionProvider, useApi, useApiBaseUrl, useSession, type Session } from './index';
 import { memorySecureStore, renderWithProviders } from './testing';
 
 jest.mock('expo-secure-store', () => jest.requireActual<typeof import('./testing')>('./testing').memorySecureStore);
@@ -21,7 +21,12 @@ function Probe() {
   session = useSession();
   api = useApi();
   const { state } = session;
-  return <Text testID="state">{state.status === 'signedIn' ? `signedIn:${state.user.name}` : state.status}</Text>;
+  return (
+    <>
+      <Text testID="state">{state.status === 'signedIn' ? `signedIn:${state.user.name}` : state.status}</Text>
+      <Text testID="baseUrl">{useApiBaseUrl()}</Text>
+    </>
+  );
 }
 const mount = () => render(<SessionProvider apiBaseUrl={() => 'http://api.test'}><Probe /></SessionProvider>);
 const persist = async () => {
@@ -38,6 +43,12 @@ afterEach(() => {
 });
 
 describe('SessionProvider', () => {
+  it('provides the API base URL it was given', async () => {
+    await mount();
+    expect(screen.getByTestId('baseUrl')).toHaveTextContent('http://api.test');
+    await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('signedOut'));
+  });
+
   it('starts signed out when nothing is stored', async () => {
     await mount();
     await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('signedOut'));
@@ -101,5 +112,6 @@ describe('renderWithProviders', () => {
     await renderWithProviders(<Probe />, { session: { state: { status: 'signedIn', user } }, api: { me: { get } as unknown as ApiClient['me'] } });
     expect(screen.getByTestId('state')).toHaveTextContent('signedIn:Ali');
     expect(api.me.get).toBe(get);
+    expect(screen.getByTestId('baseUrl')).toHaveTextContent('http://api.test');
   });
 });

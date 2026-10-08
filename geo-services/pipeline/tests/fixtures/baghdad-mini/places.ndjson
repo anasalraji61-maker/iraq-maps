@@ -1,0 +1,23 @@
+{"id":"n101","kind":"place","names":{"name":"مطعم أربيل","ckb":"چێشتخانەی هەولێر","en":"Erbil Restaurant"},"category":"food","location":[44.421,33.3105],"tags":{"opening_hours":"Mo-Su 11:00-23:00","phone":"+964 770 100 0101","website":"https://example.com/erbil-restaurant"}}
+{"id":"n102","kind":"place","names":{"name":"قلعة الرصافة","en":"Rusafa Citadel"},"category":"tourism","location":[44.399,33.342],"tags":{"opening_hours":"Sa-Th 09:00-17:00"}}
+{"id":"n103","kind":"place","names":{"name":"مقهى دجلة","en":"Tigris Cafe"},"category":"cafe","location":[44.419,33.306],"tags":{"opening_hours":"Mo-Su 16:00-02:00","phone":"+964 770 100 0103"}}
+{"id":"n104","kind":"place","names":{"name":"صيدلية الكرادة"},"category":"health","location":[44.417,33.3045],"tags":{"opening_hours":"Mo-Sa 09:00-22:00","phone":"+964 780 100 0104"}}
+{"id":"n105","kind":"place","names":{"name":"مصرف النهرين"},"category":"finance","location":[44.41,33.315],"tags":{"opening_hours":"Su-Th 08:00-14:00","website":"https://example.org/nahrain-bank"}}
+{"id":"n106","kind":"place","names":{"name":"محطة وقود الجادرية"},"category":"fuel","location":[44.405,33.288],"tags":{"opening_hours":"24/7"}}
+{"id":"n107","kind":"place","names":{"name":"فندق دجلة الكبير","en":"Grand Tigris Hotel"},"category":"lodging","location":[44.406,33.308],"tags":{"phone":"+964 770 100 0107","website":"https://example.com/grand-tigris"}}
+{"id":"n108","kind":"place","names":{"name":"جامع الوحدة"},"category":"worship","location":[44.44,33.32],"tags":{}}
+{"id":"n109","kind":"place","names":{"name":"أسواق الكرادة"},"category":"shopping","location":[44.415,33.303],"tags":{"opening_hours":"Mo-Su 08:00-24:00"}}
+{"id":"n110","kind":"place","names":{"name":"شركة النخيل للمقاولات"},"category":"office","location":[44.412,33.317],"tags":{}}
+{"id":"n111","kind":"place","names":{"name":"دائرة بلدية الكرادة"},"category":"government","location":[44.413,33.318],"tags":{}}
+{"id":"n112","kind":"place","names":{"name":"متنزه دجلة"},"category":"entertainment","location":[44.4,33.3],"tags":{}}
+{"id":"n113","kind":"place","names":{"name":"مدرسة الوحدة الابتدائية","ar":"مدرسة الوحدة الابتدائية"},"category":"education","location":[44.441,33.321],"tags":{}}
+{"id":"r3001","kind":"place","names":{"name":"جامعة دجلة","en":"Tigris University"},"category":"education","location":[44.38,33.275],"tags":{"website":"https://example.org/tigris-university"}}
+{"id":"w2001","kind":"place","names":{"name":"مستشفى الكرادة"},"category":"health","location":[44.425,33.31],"tags":{"phone":"+964 770 100 2001"}}
+{"id":"w1001","kind":"street","names":{"name":"شارع الكرادة داخل","en":"Karrada Dakhil Street","ar":"شارع الكرادة داخل"},"category":null,"location":[44.414,33.302],"tags":{}}
+{"id":"w1003","kind":"street","names":{"name":"شارع 62"},"category":null,"location":[44.4,33.32],"tags":{}}
+{"id":"w1004","kind":"street","names":{"name":"شارع 62"},"category":null,"location":[44.43,33.29],"tags":{}}
+{"id":"w1005","kind":"street","names":{"name":"شارع المتنبي","en":"Al-Mutanabbi Street"},"category":null,"location":[44.391,33.341],"tags":{}}
+{"id":"n301","kind":"area","names":{"name":"حي الوحدة","en":"Al-Wahda"},"category":null,"location":[44.4405,33.3205],"tags":{}}
+{"id":"n302","kind":"area","names":{"name":"الكرادة","ckb":"کەڕادە","en":"Karrada"},"category":null,"location":[44.415,33.305],"tags":{}}
+{"id":"r4001","kind":"area","names":{"name":"ناحية الجادرية","en":"Jadriya"},"category":null,"location":[44.4,33.29],"tags":{}}
+{"id":"w2003","kind":"area","names":{"name":"محلة 929"},"category":null,"location":[44.435,33.315],"tags":{}}

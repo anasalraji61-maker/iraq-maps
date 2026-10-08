@@ -1,0 +1,19 @@
+{
+  "name": "@iraq-maps/bench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "search": "tsx src/cli.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@iraq-maps/contracts": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

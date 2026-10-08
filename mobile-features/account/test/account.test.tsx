@@ -53,6 +53,7 @@ describe('LanguageScreen', () => {
     let respond = (_res: { status: number; body?: unknown }) => {};
     api.me.update.mockReturnValueOnce(new Promise((resolve) => (respond = resolve)));
     await fireEvent.press(en);
+    expect(en).toBeDisabled();
     await fireEvent.press(en);
     expect(view.getByText(t('common:status.loading'))).toBeTruthy();
     respond({ status: 200, body: saved });

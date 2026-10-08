@@ -1,11 +1,17 @@
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { createLogger } from '@iraq-maps/observability';
 import pg from 'pg';
+
+const log = createLogger({ name: 'db' });
 
 export type Db = NodePgDatabase<Record<string, unknown>>;
 export type DbTx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 export function createDb(url: string): { db: Db; close(): Promise<void> } {
   const pool = new pg.Pool({ connectionString: url });
+  // An idle client dies on a database restart or failover; without a listener that 'error' event crashes the process.
+  // The pool replaces the client. Only the SQLSTATE is logged: driver messages can carry data.
+  pool.on('error', (err: Error & { code?: string }) => log.warn({ pgCode: err.code }, 'idle pg client error'));
   return { db: drizzle<Record<string, unknown>>(pool), close: () => pool.end() };
 }
 

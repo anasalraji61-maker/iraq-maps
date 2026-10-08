@@ -94,6 +94,15 @@ describe('createClient', () => {
     expect(crashed).toMatchObject({ status: 500, body: { type: 'about:blank', code: 'internal' } });
   });
 
+  it('passes the abort signal of a superseded call to fetch', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(json(200, { items: [] }));
+    const client = createClient({ baseUrl: () => '', getTokens: () => null, onTokens: vi.fn(), fetch });
+    const controller = new AbortController();
+    controller.abort();
+    await client.places.search({ query: { q: 'قلعه', city: 'baghdad' }, fetchOptions: { signal: controller.signal } });
+    expect(fetch.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  });
+
   it('a network error during refresh does not log out, and the next 401 retries the refresh', async () => {
     let tokens: TokenPair | null = pair(1);
     let refreshes = 0;

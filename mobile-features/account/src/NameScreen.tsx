@@ -1,9 +1,10 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState, type ReactElement } from 'react';
 import { expectStatus, useRequest } from './request';
+import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
 /** Sets the name after a first sign-in, and edits it later from AccountScreen. */
@@ -22,7 +23,7 @@ export function NameScreen(): ReactElement {
 
   return (
     <Screen scroll>
-      <Stack.Screen options={{ title: t('name.title') }} />
+      <ScreenTitle title={t('name.title')} />
       <Text tone="muted">{t('name.body')}</Text>
       <TextField testID={testIDs.auth.nameInput} label={t('name.label')} value={name} onChangeText={setName} error={error} maxLength={80} autoFocus />
       <Button testID={testIDs.auth.nameSubmit} label={t('name.save')} onPress={save} disabled={!name.trim()} loading={busy} />

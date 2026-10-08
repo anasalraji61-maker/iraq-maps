@@ -8,19 +8,26 @@ owners:
     - "geo-services/pipeline/**"
     - ".github/workflows/geo-data.yml"
     - "docs/DATA_SOURCES.md"
+    - "docs/reports/**"
+    - "docs/contract-requests/M1-builder-geo-data.md"
   builder-tiles:
     - "geo-services/tiles/**"
+    - "docs/contract-requests/M1-builder-tiles.md"
   builder-places:
     - "modules/places/**"
+    - "docs/contract-requests/M1-builder-places.md"
   builder-map-kit:
     - "packages/map-kit/**"
     - "packages/geo/**"
+    - "docs/contract-requests/M1-builder-map-kit.md"
   builder-map-app:
     - "mobile-features/map/**"
     - "packages/ui/**"
+    - "docs/contract-requests/M1-builder-map-app.md"
   builder-e2e-m1:
     - "e2e/**"
     - "tools/bench/**"
+    - "docs/contract-requests/M1-builder-e2e-m1.md"
   integrator:
     - "package.json"
     - "pnpm-workspace.yaml"
@@ -37,6 +44,11 @@ owners:
     - "apps/mobile/*"
     - "apps/mobile/app/**"
     - "apps/mobile/src/shell/**"
+    - "packages/mobile-kit/**"
+    - "packages/api-client/**"
+    - "packages/db-kit/**"
+    - "mobile-features/account/**"
+    - "modules/identity/**"
     - ".github/workflows/ci.yml"
     - ".github/workflows/android.yml"
     - "docs/milestones/**"
@@ -231,33 +243,37 @@ No event is added, because nothing consumes one yet.
   - ‏`Glyphs` و `OSM_ATTRIBUTION` و `nameFallback`/`pickName`.
   - testIDs ‏`place.name` و `place.category` و `place.source` لمعيار القبول 10.
 - **روابط المسارات موجودة.** ‏`map` و `place` معرّفان في `packages/mobile-kit/src/routes.tsx` منذ M0، فلا طلب عقد.
+- **ملكية إضافية للمكامل في M1.** حزم M0 التالية بلا مالك في M1، فأخذها المكامل لتطبيق طلبات العقود ومتابعات تدقيق M0: `packages/mobile-kit` ‏(`useApiBaseUrl`)، و `packages/api-client` (تمرير `signal`)، و `packages/db-kit` (مستمع `'error'` على الـ pool)، و `mobile-features/account` (متابعات account و `login.yaml`)، و `modules/identity` (حارس المسارات العامة فقط). كل بنّاء يملك ملف طلباته `docs/contract-requests/M1-<builder>.md`، و builder-geo-data يملك `docs/reports/**`.
+- **إصلاحان في `CliContracts` بعد التجميد** (طلبا M1-builder-geo-data §1 و M1-builder-e2e-m1 §4):
+  - `placesImport.command` أصبح `pnpm --filter @iraq-maps/places run import`، لأن `pnpm import` أمر مدمج في pnpm.
+  - `benchSearch`: الخروج بـ 1 عندما يكون p95 مساوياً للميزانية أو أعلى منها، والمستدعون الذين يقرؤون stdout يشغّلونه بـ `pnpm -s`.
 
 ## متابعات من تدقيق M0
 
 > هذه ملاحظات غير حاجبة من تدقيق إغلاق M0 (الإغلاق على `2937c16`). المكامل يوزّعها على مالكيها في M1 أو بعدها. تُعالَج في M1 ما لم يُذكر غير ذلك.
 
 **أمان**
-- [ ] F-2 (integrator): في `app.config.ts`، إذا كانت قيمة `EXPO_PUBLIC_APP_ENV` غير معروفة (مثل `staging`)، يُسمح بالـ cleartext بينما وقت التشغيل يعاملها كإنتاج. يجب التحقق من القيمة ضمن development و e2e و test و production، ورميُ خطأ عند prebuild لأي قيمة أخرى، مع اختبار لقيمة خاطئة إملائياً.
-- [ ] F-1 (integrator): فحص المحارف الخفية `invisible:check` يجب أن يشمل أيضاً `.toml` و `.xml` و `.gradle` و `.kts` و `.properties` و `.env.example`.
+- [x] F-2 (integrator): في `app.config.ts`، إذا كانت قيمة `EXPO_PUBLIC_APP_ENV` غير معروفة (مثل `staging`)، يُسمح بالـ cleartext بينما وقت التشغيل يعاملها كإنتاج. يجب التحقق من القيمة ضمن development و e2e و test و production، ورميُ خطأ عند prebuild لأي قيمة أخرى، مع اختبار لقيمة خاطئة إملائياً. تم: `app.config.ts` يرمي خطأ لأي قيمة أخرى، مع اختبار.
+- [x] F-1 (integrator): فحص المحارف الخفية `invisible:check` يجب أن يشمل أيضاً `.toml` و `.xml` و `.gradle` و `.kts` و `.properties` و `.env.example`. تم في `tools/ownership/src/no-invisible.ts` مع اختبار.
 - [ ] رفض محارف Cf في الأسماء (حقل `name`) قبل أن يعرض M6 الأسماء للآخرين. ويُعاد تقييم الرابط العميق `iraqmaps://auth/otp?phone=`، لأنه يسمح بملء أي رقم مسبقاً (خطر login-CSRF منخفض).
 
 **معمارية و QA**
 - [ ] (integrator) نقل `invisible:check` من `tools/ownership` إلى `packages/tooling`، أو إعادة تسمية الحزمة إلى repo-checks.
 - [ ] (integrator) قاعدة ESLint لـ left/right تلتقط أي خاصية بهذين الاسمين في كود الواجهة. يجب حصرها بسياقات الأنماط: ‏`StyleSheet.create` و `style={{}}`.
 - [ ] (integrator) ثغرة lint: نص إنجليزي يُمرَّر إلى label عبر ثابت (`const L='…'; <Button label={L}/>`) لا يُلتقط.
-- [ ] (account / e2e-m1) في `login.yaml`، المتغير `OUT` وتعليقه قديمان، وتدفق login يعتمد على أن launch-tabs انتهى بالعربية. الحل: اختيار العربية صراحةً في بداية login، وأسماء لقطات بسيطة.
+- [x] (account / e2e-m1) في `login.yaml`، المتغير `OUT` وتعليقه قديمان، وتدفق login يعتمد على أن launch-tabs انتهى بالعربية. الحل: اختيار العربية صراحةً في بداية login، وأسماء لقطات بسيطة. تم: حُذف `OUT`، وأسماء اللقطات بسيطة. ‏`run-flows.sh` يمسح بيانات التطبيق قبل كل تدفق فيبدأ بلغة ar-IQ، والتعليق يشرح اختيار العربية يدوياً على جهاز آخر.
 - [ ] (integrator) حاجز الـ migrations يمنع الـ triggers (`$` و `EXECUTE` و `NEW.`). يُراجَع إن احتاجتها places؛ والعزل الحقيقي بأدوار لكل وحدة في M7.
 
 **عربي و RTL وإمكانية الوصول**
-- [ ] (account) اختبارات account تتحقق من `direction: 'ltr'` في حقلي الهاتف والرمز.
-- [ ] (account) نفس رسالة الخطأ مرتين لا تُعلَن ثانيةً، والحل مسح الخطأ قبل `setError`.
-- [ ] (account) العناوين انتقلت إلى الترويسة الأصلية التي لا يعرضها TalkBack كعنوان. الحل: عنوان داخل المحتوى بـ `accessibilityRole="header"`، مع إخفائه بصرياً إن تكرر.
-- [ ] (account / map-app) صفوف اللغة لا تُظهر حالة التعطيل أثناء الحفظ.
-- [ ] (e2e-m1) مراجعة لقطات المحاكي بصرياً محجوبة هنا، لأن مضيف الـ artifacts مرفوض في سياسة الشبكة. الحل: تصدير اللقطات في الـ job summary أو السجل بحجم مضغوط، أو أن يفتح المستخدم artifact ‏`e2e-output` (‏11573535777 من run 37828965227) للتحقق من تشكّل الحروف وترتيب أرقام الهاتف.
+- [x] (account) اختبارات account تتحقق من `direction: 'ltr'` في حقلي الهاتف والرمز.
+- [x] (account) نفس رسالة الخطأ مرتين لا تُعلَن ثانيةً، والحل مسح الخطأ قبل `setError`. تم في `useRequest`، مع اختبار.
+- [x] (account) العناوين انتقلت إلى الترويسة الأصلية التي لا يعرضها TalkBack كعنوان. الحل: عنوان داخل المحتوى بـ `accessibilityRole="header"`، مع إخفائه بصرياً إن تكرر. تم: `ScreenTitle` يعرض العنوان في المحتوى، والترويسة بلا عنوان، فلا تكرار.
+- [x] (account / map-app) صفوف اللغة لا تُظهر حالة التعطيل أثناء الحفظ. تم: `ListItem` يقبل `disabled`، و `LanguageScreen` يمرّر `disabled={busy}`.
+- [x] (e2e-m1) مراجعة لقطات المحاكي بصرياً محجوبة هنا، لأن مضيف الـ artifacts مرفوض في سياسة الشبكة. الحل: تصدير اللقطات في الـ job summary أو السجل بحجم مضغوط، أو أن يفتح المستخدم artifact ‏`e2e-output` (‏11573535777 من run 37828965227) للتحقق من تشكّل الحروف وترتيب أرقام الهاتف. تم: `e2e/mobile/screenshots-summary.sh` في نهاية `run-flows.sh`. يُتحقق منه في تشغيل android.yml التالي.
 
 **ترخيص**
-- [ ] (map-app، مالك packages/ui في M1، و geo-data، مالك DATA_SOURCES) إضافة صف SF Symbols ‏(iOS فقط، من النظام ولا يُعاد توزيعه)، وتحديث عمود استخدام Material Symbols: ‏IconButton، وعلامة الاختيار في ListItem، وأيقونات التبويبات.
-- [ ] (geo-data) ملاحظة في `docs/reports/osm-quality-2026-10-08.md` أن سطر الإسناد حُدّث، وأن المخرج الحالي في run 37828965262.
+- [x] (map-app، مالك packages/ui في M1، و geo-data، مالك DATA_SOURCES) إضافة صف SF Symbols ‏(iOS فقط، من النظام ولا يُعاد توزيعه)، وتحديث عمود استخدام Material Symbols: ‏IconButton، وعلامة الاختيار في ListItem، وأيقونات التبويبات.
+- [x] (geo-data) ملاحظة في `docs/reports/osm-quality-2026-10-08.md` أن سطر الإسناد حُدّث، وأن المخرج الحالي في run 37828965262.
 - [ ] (integrator، M7) شاشة التراخيص: بناء القائمة من وحدات حزمة Metro، أو استثناء devDependencies الخاصة بـ workspace ‏(tooling).
 
 **CI**

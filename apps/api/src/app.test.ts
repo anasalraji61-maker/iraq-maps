@@ -74,6 +74,13 @@ it('guards every route but /health and /v1/auth/*, including non-identity ones',
   expect((await app.inject({ method: 'GET', url: '/v1/dummy', headers })).json()).toEqual({ userId });
 });
 
+it('serves the public places search without a token, and logs the route pattern instead of the coordinates', async () => {
+  const res = await app.inject({ method: 'GET', url: `/v1/search?q=${encodeURIComponent('قلعه')}&city=baghdad&near=44.123456,33.654321` });
+  expect([res.statusCode, res.json()]).toEqual([200, { items: [] }]);
+  expect(logs.records).toContainEqual(expect.objectContaining({ req: expect.objectContaining({ method: 'GET', route: '/v1/search' }) }));
+  expect(logs.text()).not.toContain('44.123456');
+});
+
 it('logs in with an OTP, reads GET /v1/me, and the relay delivers identity.user.registered.v1 to the bus', async () => {
   const { userId, headers } = await login();
   const res = await app.inject({ method: 'GET', url: '/v1/me', headers });

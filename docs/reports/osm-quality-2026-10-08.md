@@ -39,6 +39,7 @@
 ## المصدر
 
 - تشغيل CI: [geo-data run 37805977537](https://github.com/anasalraji61-maker/iraq-maps/actions/runs/37805977537)، الـ artifact اسمه `osm-quality-report`، والـ commit هو `8244a7f`.
+- **ملاحظة (LIC-M0-01):** حُدّث سطر الإسناد بعد هذا التشغيل، فصار في التقرير وملفات JSON نصّ الإسناد الكامل لـ OSM مع رابط ODbL (‏`2a8072a`). المخرج الحالي بالسطر المحدَّث في [geo-data run 37828965262](https://github.com/anasalraji61-maker/iraq-maps/actions/runs/37828965262) (artifact ‏`osm-quality-report`).
 - الحدود صناديق تقريبية (bbox) في `geo-services/pipeline/cities/*.yaml`. الكثافة لكل كم² تعتمد على هذه الصناديق.
 
 ## قراءة النتائج

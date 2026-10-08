@@ -1,0 +1,59 @@
+{
+  "search": {
+    "label": "Search for a place, street or neighbourhood",
+    "placeholder": "e.g. citadel, restaurant, Karrada",
+    "empty": "No results for “{query}”. Try another spelling or a shorter name."
+  },
+  "kinds": {
+    "street": "Street",
+    "area": "Neighbourhood"
+  },
+  "categories": {
+    "food": "Restaurant",
+    "cafe": "Café",
+    "lodging": "Hotel",
+    "shopping": "Shopping",
+    "tourism": "Tourism",
+    "health": "Health",
+    "finance": "Bank and exchange",
+    "fuel": "Fuel station",
+    "office": "Office",
+    "worship": "Place of worship",
+    "education": "Education",
+    "government": "Government office",
+    "transport": "Transport",
+    "entertainment": "Entertainment"
+  },
+  "distance": {
+    "m": "{n} m",
+    "km": "{n} km"
+  },
+  "source": {
+    "osm": "From OpenStreetMap"
+  },
+  "locate": {
+    "label": "My location",
+    "denied": "Location access is off, so the map cannot show where you are. You can allow it in your phone's settings.",
+    "unavailable": "Your location could not be found. Make sure location services are on, then try again."
+  },
+  "lang": {
+    "title": "Map label language",
+    "ar": "العربية",
+    "ckb": "کوردی",
+    "en": "English"
+  },
+  "place": {
+    "hours": "Opening hours",
+    "openNow": "Open now",
+    "closedNow": "Closed now",
+    "phone": "Phone",
+    "website": "Website",
+    "share": "Share",
+    "notFound": "This place could not be found. It may have been removed from the map."
+  },
+  "actions": {
+    "directions": "Directions",
+    "message": "Message this place",
+    "assistant": "Ask the assistant"
+  }
+}

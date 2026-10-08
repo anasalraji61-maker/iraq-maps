@@ -1,7 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo, I18nManager } from 'react-native';
-import { Banner, Button, Card, EmptyState, IconButton, ListItem, Screen, Sheet, Text, TextField } from './index';
+import { Badge, Banner, Button, Card, EmptyState, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField } from './index';
 
 const touch = { minHeight: 48 };
 
@@ -87,6 +87,16 @@ describe('ListItem and Card', () => {
     expect(screen.queryByRole('button')).toBeNull();
   });
 
+  it('exposes a disabled row and ignores its presses', async () => {
+    const onPress = jest.fn();
+    await render(<ListItem title="کوردی" selected={false} disabled onPress={onPress} />);
+    const row = screen.getByRole('radio', { name: 'کوردی' });
+    expect(row).toBeDisabled();
+    expect(row).not.toBeChecked();
+    await fireEvent.press(row);
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
   it('shows a check mark and a highlighted background only on the selected row', async () => {
     await render(
       <>
@@ -124,6 +134,32 @@ describe('ListItem and Card', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'بطاقة' }));
     expect(onPress).toHaveBeenCalledTimes(2);
     expect(screen.queryByRole('button', { name: 'الإصدار' })).toBeNull();
+  });
+});
+
+describe('PlaceSummaryCard and Badge', () => {
+  it('is one 48dp button named by all of its texts', async () => {
+    const onPress = jest.fn();
+    await render(
+      <PlaceSummaryCard testID="result" name="قلعة بغداد" category="سياحة" area="الرصافة" distance="١٫٢ كم" source="OpenStreetMap" onPress={onPress} />,
+    );
+    const card = screen.getByRole('button');
+    expect(card.props.testID).toBe('result');
+    expect(card).toHaveAccessibleName(/قلعة بغداد.*١٫٢ كم.*سياحة · الرصافة.*OpenStreetMap/);
+    expect(card).toHaveStyle(touch);
+    await fireEvent.press(card);
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves out the parts it was not given', async () => {
+    await render(<PlaceSummaryCard name="شارع الرشيد" category="شارع" onPress={() => {}} />);
+    expect(screen.getByRole('button')).toHaveAccessibleName('شارع الرشيد شارع');
+  });
+
+  it('renders a badge as an outlined caption', async () => {
+    await render(<Badge label="من OpenStreetMap" testID="source" />);
+    expect(screen.getByTestId('source')).toHaveTextContent('من OpenStreetMap');
+    expect(screen.getByTestId('source')).toHaveStyle({ borderWidth: 1, color: '#545B64' });
   });
 });
 

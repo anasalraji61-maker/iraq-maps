@@ -23,6 +23,10 @@ it('fails closed: an unset EXPO_PUBLIC_APP_ENV builds production without clearte
   expect(build('')).toEqual({ appEnv: 'production', cleartext: false });
 });
 
+it('refuses an unknown EXPO_PUBLIC_APP_ENV at prebuild instead of building a cleartext app the runtime treats as production', () => {
+  for (const value of ['staging', 'developement', 'Production']) expect(() => build(value)).toThrow(/EXPO_PUBLIC_APP_ENV must be one of/);
+});
+
 it('allows cleartext HTTP outside production', () => {
   expect(build('development')).toEqual({ appEnv: 'development', cleartext: true });
   expect(build('e2e')).toEqual({ appEnv: 'e2e', cleartext: true });

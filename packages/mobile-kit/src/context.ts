@@ -14,3 +14,4 @@ export interface Session {
 // Shared by SessionProvider and renderWithProviders (testing), which must not load expo-secure-store.
 export const SessionContext = createContext<Session | null>(null);
 export const ApiContext = createContext<ApiClient | null>(null);
+export const ApiBaseUrlContext = createContext<(() => string) | null>(null);

@@ -1,5 +1,5 @@
 import { t as translate } from '@iraq-maps/i18n';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isKnownError, t } from './strings';
 
 class ProblemError extends Error {
@@ -25,10 +25,22 @@ const messageFor = (err: unknown): string => {
 /** One request at a time per screen: `busy` while it runs, and a localized `error` when it fails. */
 export function useRequest() {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setShownError] = useState<string>();
+  // setError clears the shown error and commits before showing the new one, so a repeated message (the same
+  // validation error twice) changes the field again and the screen reader announces it again.
+  const [next, setNext] = useState<string>();
+  useEffect(() => {
+    if (next === undefined) return;
+    setShownError(next);
+    setNext(undefined);
+  }, [next]);
+  const setError = (message: string) => {
+    setShownError(undefined);
+    setNext(message);
+  };
   const run = async (task: () => Promise<void>) => {
     setBusy(true);
-    setError(undefined);
+    setShownError(undefined);
     try {
       await task();
     } catch (err) {

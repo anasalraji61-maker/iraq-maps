@@ -14,8 +14,10 @@ runModuleMigrations({ url, schema: 'identity', migrationsDir: identityMigrations
 })
 ```
 
-`IdentityAuthGuard` is the only auth check, and `/v1/me` relies on it. Every route except `/health` and `/v1/auth/*`
-(matched on the route pattern) needs a valid, unrevoked access token. The guard sets `req.principal`
+`IdentityAuthGuard` is the only auth check, and `/v1/me` relies on it. Every route except `/health`, `/v1/auth/*` and
+the six public places routes (`/v1/search`, `/v1/places/nearby`, `/v1/places/:id`, `/v1/cities`,
+`/v1/cities/:id/tiles/:z/:x/:y`, `/v1/cities/:id/glyphs/:fontstack/:range`) needs a valid, unrevoked access token.
+Routes are matched on the exact registered pattern, so a new route under `/v1/places/` stays protected. The guard sets `req.principal`
 (`AuthenticatedRequest`) or answers 401 `{type, title, status: 401, code: 'unauthorized'}`.
 
 `identityModule` is a global Nest module. It serves the `authContract` and `meContract` routers and provides:

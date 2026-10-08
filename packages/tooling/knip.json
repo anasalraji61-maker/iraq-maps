@@ -12,23 +12,6 @@
   ],
   "includeEntryExports": true,
   "workspaces": {
-    "modules/places": {
-      // M1 freeze stub: integrator removes at M1 integration
-      "ignoreDependencies": [
-        "@iraq-maps/config",
-        "@iraq-maps/contracts",
-        "@iraq-maps/i18n",
-        "@iraq-maps/observability",
-        "@iraq-maps/testing",
-        "@nestjs/core",
-        "@nestjs/platform-fastify",
-        "@ts-rest/nest",
-        "drizzle-orm",
-        "pmtiles",
-        "tsx",
-        "zod"
-      ]
-    },
     "packages/map-kit": {
       // M1 freeze stub: integrator removes at M1 integration
       "ignoreDependencies": [

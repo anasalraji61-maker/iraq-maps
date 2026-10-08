@@ -2,8 +2,10 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { sql } from 'drizzle-orm';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createTestDatabase, runModuleMigrations, type TestDatabase } from './index';
+import { captureLogs } from '@iraq-maps/observability';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { withClient } from './db';
+import { createDb, createTestDatabase, runModuleMigrations, type TestDatabase } from './index';
 
 const dirs: string[] = [];
 const migrationsDir = (files: Record<string, string>) => {
@@ -133,5 +135,21 @@ describe('createTestDatabase', () => {
     await a.drop();
     expect(await rows(b, `SELECT 1 FROM pg_database WHERE datname = '${name}'`)).toEqual([]);
     await b.drop();
+  });
+});
+
+describe('createDb', () => {
+  it('survives an idle client being terminated, logging only its SQLSTATE', async () => {
+    const logs = captureLogs();
+    const { db, close } = createDb(tdb.url);
+    try {
+      const [{ pid }] = (await db.execute(sql`SELECT pg_backend_pid() AS pid`)).rows as [{ pid: number }];
+      await withClient(tdb.url, (c) => c.query('SELECT pg_terminate_backend($1)', [pid]));
+      await vi.waitFor(() => expect(logs.records).toContainEqual(expect.objectContaining({ pgCode: '57P01', msg: 'idle pg client error' })));
+      expect((await db.execute(sql`SELECT 1 AS one`)).rows).toEqual([{ one: 1 }]);
+    } finally {
+      logs.stop();
+      await close();
+    }
   });
 });

@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import picomatch from 'picomatch';
 
-const isChecked = picomatch('**/*.{ts,tsx,js,cjs,mjs,py,sql,yml,yaml,json,java,sh}', { dot: true });
+const isChecked = picomatch(['**/*.{ts,tsx,js,cjs,mjs,py,sql,yml,yaml,json,java,sh,toml,xml,gradle,kts,properties}', '**/.env.example'], { dot: true });
 const isExempt = picomatch(['**/i18n/*.json', '**/locales/*.json'], { dot: true });
 
 export const checkedPath = (path: string) => isChecked(path) && !isExempt(path);

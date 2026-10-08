@@ -94,8 +94,8 @@ def area_km2(cfg):
     return abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in itertools.pairwise(xy))) / 2
 
 
-def clip(cfg, src, dst):
-    """osmium extract (complete_ways strategy: ways crossing the edge are kept whole)."""
+def clip(cfg, src, dst, *opts):
+    """osmium extract (default complete_ways strategy: ways crossing the edge are kept whole). opts: extra flags."""
     cmd = ["osmium", "extract", "--overwrite", "--output-header=osmosis_replication_timestamp!", "-o", str(dst)]
     with tempfile.TemporaryDirectory() as tmp:
         if cfg.get("polygon"):
@@ -104,7 +104,7 @@ def clip(cfg, src, dst):
             cmd += ["-p", str(geo)]
         else:
             cmd += ["-b", ",".join(str(v) for v in cfg["bbox"])]
-        subprocess.run(cmd + [str(src)], check=True)
+        subprocess.run([*cmd, *opts, str(src)], check=True)
 
 
 def main(argv):
