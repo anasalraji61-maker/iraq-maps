@@ -287,8 +287,8 @@ No event is added, because nothing consumes one yet.
 |---|---|---|
 | builder-tiles | الجلسة B (`session_01Tq53xu86uvPxzMq1ocdsde`) | أُسند 19:28Z |
 | builder-map-kit | الجلسة B | أُسند 19:28Z |
-| builder-geo-data | الجلسة C (`session_01Rd357YBf5SDvHAeqJFtf7Q`) | أُسند 19:28Z |
-| builder-places | الجلسة C | أُسند 19:28Z |
+| builder-geo-data | وكيل القائد في الخلفية | بدأ 19:27Z. الجلسة C اعتذرت لأن نطاقها M0 فقط |
+| builder-places | وكيل القائد في الخلفية | بدأ 19:27Z |
 | builder-map-app | وكيل القائد في الخلفية | بدأ 19:26Z |
 | builder-e2e-m1 | وكيل القائد في الخلفية | بدأ 19:26Z |
 
