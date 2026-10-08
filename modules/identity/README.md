@@ -38,16 +38,20 @@ It consumes `OutboxPublisher<DbTx>`, the bound `UserDataEraser[]`, and optionall
 
 ## Security model
 
-- **OTP:** a 6-digit code stored in Redis only as an HMAC, with a 5-minute TTL. A correct code is consumed. Checks run
-  atomically in Lua:
-  - The 5th wrong code deletes the code.
-  - Wrong codes also count against the phone across codes: the 10th in 24h locks the phone for the rest of that day.
-    Both verify and request then return 429 `otp_locked`.
+- **OTP:** a 6-digit code stored in Redis only as an HMAC, with a 5-minute TTL. A correct code is consumed. The 5th
+  wrong code deletes the code.
 - **OTP requests:** refused with 429 when any of these limits is hit:
   - 1 per 60s per phone, enforced on the server (`otp_resend_too_soon`).
-  - 5 per 15 minutes and 10 per 24h per phone (`otp_rate_limited`).
   - 20 per 15 minutes per client network (`otp_rate_limited`). That is one IPv4 address, or one IPv6 /64; IPv4-mapped
     IPv6 counts as IPv4. The limit is higher than per phone because of carrier CGNAT.
+- **Phone lock:** a phone is locked by either of these:
+  - its 6th code request in 15 minutes (that request gets `otp_rate_limited`);
+  - its 10th wrong code since the last lock, counted across codes and across login and verification.
+
+  While locked, both requests and verifies get 429 `otp_locked`, including a correct pending code. Locks escalate:
+  15 minutes, then 1 hour, then 4 hours for every further lock. The lock level is kept for 24h. Each lock resets the
+  phone's failure and request counters. So someone who only knows the number can keep the owner out for at most 4
+  hours at a time, never a whole day. Both checks run atomically in Lua scripts that share the lock logic.
 - **Proxy:** behind a reverse proxy, set Fastify `trustProxy` to the hop count or to the proxy CIDRs, so that `req.ip`
   is the client's address. `true` is forbidden in production; the integrator enforces this in `apps/api`.
 - **Phone:** stored as AES-256-GCM ciphertext (`PHONE_ENCRYPTION_KEY`) plus an HMAC for lookup (`PHONE_HASH_KEY`), in
@@ -98,5 +102,4 @@ The command is idempotent. It exits 1 when the user does not exist and 2 on bad 
 
 Run `pnpm infra:local up`, then `pnpm --filter @iraq-maps/identity test`. The tests use an isolated database from
 `createTestDatabase` and the local Redis. Each test uses a fresh phone and IP, because rate-limit counters stay in the
-shared Redis (up to 24h). Tests that need several codes for one phone clear the 60s resend key, which stands in for
-waiting.
+shared Redis (up to 24h). Tests stand in for waiting by deleting the relevant key: the 60s resend key, or a lock.

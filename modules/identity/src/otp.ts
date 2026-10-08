@@ -10,31 +10,49 @@ const CODE_TTL_SEC = 5 * 60;
 const WINDOW_SEC = 15 * 60;
 const DAY_SEC = 24 * 3600;
 export const RESEND_AFTER_SEC = 60;
-/** Wrong codes allowed per code, and per phone across codes in 24h before the phone is locked. */
+/** Wrong codes per code, and per phone since its last lock. */
 const MAX_ATTEMPTS = 5;
-const MAX_FAILURES_PER_DAY = 10;
-/** Codes issued per phone (15 min, 24h) and per client network (15 min; higher because Iraqi carriers use CGNAT). */
+const MAX_FAILURES = 10;
+/** Codes per phone and per client network in 15 minutes (the network limit is higher because Iraqi carriers use CGNAT). */
 const MAX_PER_PHONE = 5;
-const MAX_PER_PHONE_DAY = 10;
 const MAX_PER_IP = 20;
+/** A phone that trips a limit is locked, escalating within 24h; the owner is back in at most 4 h, never a whole day. */
+const LOCK_BACKOFF_SEC = [15 * 60, 3600, 4 * 3600];
 
 export type OtpRefusal = 'locked' | 'resend_too_soon' | 'rate_limited';
 export type OtpCheck = { status: 'ok'; data: string } | { status: 'invalid' | 'expired' | 'too_many_attempts' | 'locked' };
 
-const failKey = (phoneHash: string) => `identity:otp-fail:${phoneHash}`;
+// Shared by both scripts. Per-phone keys are derived from the phone hash `p` inside the script (standalone Redis).
+// lock(): the next backoff step (the level lives 24h), and a fresh start for the failure and request counters.
+const LUA_LOCK = `
+local function k(kind, p) return 'identity:otp-' .. kind .. ':' .. p end
+local function count(key, ttl) local n = redis.call('INCR', key) if n == 1 then redis.call('EXPIRE', key, ttl) end return n end
+local backoff = {${LOCK_BACKOFF_SEC.join(', ')}}
+local function lock(p)
+  local level = count(k('locks', p), ${DAY_SEC})
+  redis.call('SET', k('lock', p), 1, 'EX', backoff[math.min(level, #backoff)])
+  redis.call('DEL', k('fail', p), k('rate', p))
+end`;
 
-// Atomic: a match consumes the code. Every miss counts against the code and against the phone's 24h failure budget
-// (ARGV[5] is the failure-key prefix, completed with the phone hash stored in the code's record).
-const CHECK = `
+// ARGV: phone hash, client network ('' when unknown). Returns 'ok' or the refusal.
+const ISSUE = `${LUA_LOCK}
+local p = ARGV[1]
+if redis.call('EXISTS', k('lock', p)) == 1 then return 'locked' end
+if not redis.call('SET', k('resend', p), 1, 'NX', 'EX', ${RESEND_AFTER_SEC}) then return 'resend_too_soon' end
+if count(k('rate', p), ${WINDOW_SEC}) > ${MAX_PER_PHONE} then lock(p) return 'rate_limited' end
+if ARGV[2] ~= '' and count('identity:otp-rate:ip:' .. ARGV[2], ${WINDOW_SEC}) > ${MAX_PER_IP} then return 'rate_limited' end
+return 'ok'`;
+
+// KEYS[1]: the code's record; ARGV[1]: the hash of the presented code. A match consumes the code; every miss counts
+// against the code and against the phone.
+const CHECK = `${LUA_LOCK}
 local h = redis.call('HMGET', KEYS[1], 'code', 'data', 'phone')
 if not h[1] then return {'expired'} end
-local fails = ARGV[5] .. h[3]
-if tonumber(redis.call('GET', fails) or '0') >= tonumber(ARGV[3]) then redis.call('DEL', KEYS[1]) return {'locked'} end
+local p = h[3]
+if redis.call('EXISTS', k('lock', p)) == 1 then redis.call('DEL', KEYS[1]) return {'locked'} end
 if h[1] == ARGV[1] then redis.call('DEL', KEYS[1]) return {'ok', h[2]} end
-local failed = redis.call('INCR', fails)
-if failed == 1 then redis.call('EXPIRE', fails, ARGV[4]) end
-if failed >= tonumber(ARGV[3]) then redis.call('DEL', KEYS[1]) return {'locked'} end
-if redis.call('HINCRBY', KEYS[1], 'attempts', 1) >= tonumber(ARGV[2]) then redis.call('DEL', KEYS[1]) return {'too_many_attempts'} end
+if count(k('fail', p), ${DAY_SEC}) >= ${MAX_FAILURES} then lock(p) redis.call('DEL', KEYS[1]) return {'locked'} end
+if redis.call('HINCRBY', KEYS[1], 'attempts', 1) >= ${MAX_ATTEMPTS} then redis.call('DEL', KEYS[1]) return {'too_many_attempts'} end
 return {'invalid'}`;
 
 /** Rate-limit bucket: one IPv4 address (IPv4-mapped IPv6 included), or one IPv6 /64, which a single client can rotate through. */
@@ -56,8 +74,8 @@ export class Otp {
   /** Sends a fresh code (replacing any previous one for `challenge`) and returns its expiry, or why it was refused. */
   async issue(challenge: string, to: { phone: IraqiPhone; locale: Locale }, data: string, ip?: string): Promise<Date | OtpRefusal> {
     const phone = mac(this.hashKey, to.phone);
-    const refusal = await this.refusal(phone, ip);
-    if (refusal) {
+    const refusal = (await this.redis.eval(ISSUE, 0, phone, ip ? ipBucket(ip) : '')) as OtpRefusal | 'ok';
+    if (refusal !== 'ok') {
       this.log.warn({ refusal }, 'otp request refused');
       return refusal;
     }
@@ -70,25 +88,8 @@ export class Otp {
 
   async check(challenge: string, code: string): Promise<OtpCheck> {
     const key = this.key(challenge);
-    const args = [mac(this.hashKey, `${key}:${code}`), MAX_ATTEMPTS, MAX_FAILURES_PER_DAY, DAY_SEC, failKey('')];
-    const [status, data] = (await this.redis.eval(CHECK, 1, key, ...args)) as [OtpCheck['status'], string];
+    const [status, data] = (await this.redis.eval(CHECK, 1, key, mac(this.hashKey, `${key}:${code}`))) as [OtpCheck['status'], string];
     return status === 'ok' ? { status, data } : { status };
-  }
-
-  private async refusal(phone: string, ip?: string): Promise<OtpRefusal | null> {
-    if (Number(await this.redis.get(failKey(phone))) >= MAX_FAILURES_PER_DAY) return 'locked';
-    if (!(await this.redis.set(`identity:otp-resend:${phone}`, 1, 'EX', RESEND_AFTER_SEC, 'NX'))) return 'resend_too_soon';
-    const counters: [string, number, number][] = [
-      [`phone:${phone}`, MAX_PER_PHONE, WINDOW_SEC],
-      [`phone-day:${phone}`, MAX_PER_PHONE_DAY, DAY_SEC],
-    ];
-    if (ip) counters.push([`ip:${ipBucket(ip)}`, MAX_PER_IP, WINDOW_SEC]);
-    for (const [id, max, windowSec] of counters) {
-      const key = `identity:otp-rate:${id}`;
-      const [[, count] = []] = (await this.redis.multi().incr(key).expire(key, windowSec, 'NX').exec()) ?? [];
-      if (Number(count) > max) return 'rate_limited';
-    }
-    return null;
   }
 
   private key = (challenge: string) => `identity:otp:${challenge}`;

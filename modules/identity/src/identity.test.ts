@@ -69,6 +69,8 @@ const refresh = (refreshToken: string) => post('/v1/auth/refresh', { refreshToke
 const me = (accessToken: string, method: 'GET' | 'PATCH' | 'DELETE' = 'GET', payload?: object) =>
   app.inject({ method, url: '/v1/me', headers: { authorization: `Bearer ${accessToken}` }, payload });
 const otherThan = (code: string) => (code === '000000' ? '111111' : '000000');
+const DAY_SEC = 24 * 3600;
+const lockKey = (phone: string) => `identity:otp-lock:${mac(env.PHONE_HASH_KEY, phone)}`;
 /** Stands in for waiting out the 60s resend cooldown. */
 const skipResendWait = (phone: string) => redis.del(`identity:otp-resend:${mac(env.PHONE_HASH_KEY, phone)}`);
 async function newCode(phone: string) {
@@ -127,24 +129,21 @@ describe('OTP login', () => {
     expect(sender.sent.filter((m) => m.phone === phone)).toHaveLength(1);
   });
 
-  it('answers the 6th code request for a phone inside the window with 429', async () => {
+  it('the 6th code request in 15 minutes gets 429 and locks the phone: 15 min, then 1 h, then 4 h', async () => {
     const phone = newPhone();
-    for (let i = 0; i < 5; i++) await newCode(phone);
-    await skipResendWait(phone);
-    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
-    expect(sender.sent.filter((m) => m.phone === phone)).toHaveLength(5);
-  });
-
-  it('caps a phone at 10 codes per 24h, across 15-minute windows', async () => {
-    const phone = newPhone();
-    const nextWindow = () => redis.del(`identity:otp-rate:phone:${mac(env.PHONE_HASH_KEY, phone)}`);
-    for (let i = 0; i < 10; i++) {
-      if (i === 5) await nextWindow();
-      await newCode(phone);
+    const ttls = [];
+    for (let round = 0; round < 4; round++) {
+      for (let i = 0; i < 5; i++) await newCode(phone);
+      await skipResendWait(phone);
+      expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+      await skipResendWait(phone);
+      expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_locked' });
+      ttls.push(await redis.ttl(lockKey(phone)));
+      await redis.del(lockKey(phone)); // the lock expiring
     }
-    await nextWindow();
-    await skipResendWait(phone);
-    expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+    expect(ttls.map((ttl) => Math.ceil(ttl / 60))).toEqual([15, 60, 240, 240]);
+    expect(await redis.ttl(`identity:otp-locks:${mac(env.PHONE_HASH_KEY, phone)}`)).toBeGreaterThan(DAY_SEC - 60);
+    expect(sender.sent.filter((m) => m.phone === phone)).toHaveLength(20);
   });
 
   it('limits code requests per client network: an IPv4 address (mapped or not) or an IPv6 /64', async () => {
@@ -168,21 +167,27 @@ describe('OTP login', () => {
     expect((await verifyOtp(phone, code)).json()).toMatchObject({ status: 401, code: 'otp_expired' });
   });
 
-  it('locks a phone for the day after 10 wrong codes, across codes and challenges', async () => {
+  it('locks a phone for 15 min after 10 wrong codes across codes and challenges; the owner gets back in after it', async () => {
     const phone = newPhone();
     const guess = async (code: string) => ((await verifyOtp(phone, code)).json() as { code?: string }).code;
     const first = await newCode(phone);
     for (let i = 0; i < 5; i++) await guess(otherThan(first));
-    const login = await newCode(phone);
-    for (let i = 0; i < 4; i++) expect(await guess(otherThan(login))).toBe('otp_invalid');
+    const pending = await newCode(phone);
+    for (let i = 0; i < 4; i++) expect(await guess(otherThan(pending))).toBe('otp_invalid');
     await skipResendWait(phone);
     const port = app.get<PhoneVerificationPort>(PortTokens.PhoneVerificationPort);
     const { verificationId } = await port.start({ phone, locale: 'ar', purpose: 'provider_phone' });
     const wrong = otherThan(sender.lastCodeFor(phone)!);
     expect(await port.confirm({ verificationId, code: wrong })).toEqual({ verified: false, reason: 'too_many_attempts' });
-    expect(await guess(login)).toBe('otp_locked');
+    expect(await guess(pending)).toBe('otp_locked');
     await skipResendWait(phone);
     expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_locked' });
+    expect(Math.ceil((await redis.ttl(lockKey(phone))) / 60)).toBe(15);
+
+    await redis.del(lockKey(phone)); // the lock expiring, with a fresh failure budget
+    const code = await newCode(phone);
+    expect(await guess(otherThan(code))).toBe('otp_invalid');
+    expect((await verifyOtp(phone, code)).statusCode).toBe(200);
   });
 });
 
