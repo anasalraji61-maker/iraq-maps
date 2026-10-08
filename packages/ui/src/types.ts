@@ -15,8 +15,19 @@ export interface TextFieldProps extends Base {
   keyboardType?: TextInputProps['keyboardType'];
   autoFocus?: boolean;
   maxLength?: number;
+  /** 'ltr' for phone numbers, codes and URLs: keeps `0770 123 4567` in order inside an RTL layout. */
+  direction?: 'ltr';
+  autoComplete?: TextInputProps['autoComplete'];
+  textContentType?: TextInputProps['textContentType'];
 }
-export interface ListItemProps extends Base { title: string; subtitle?: string; onPress?(): void; trailing?: ReactNode }
+export interface ListItemProps extends Base {
+  title: string;
+  subtitle?: string;
+  onPress?(): void;
+  trailing?: ReactNode;
+  /** On a pressable row: exposes it as a radio option, checked when true (e.g. the language list). */
+  selected?: boolean;
+}
 export interface CardProps extends Base { children: ReactNode; onPress?(): void }
 export interface SheetProps extends Base { visible: boolean; onClose(): void; children: ReactNode }
 export interface BannerProps extends Base { kind: 'info' | 'success' | 'error'; message: string }

@@ -16,7 +16,6 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
-    ['expo-localization', { supportsRTL: true }],
     [
       'expo-build-properties',
       {

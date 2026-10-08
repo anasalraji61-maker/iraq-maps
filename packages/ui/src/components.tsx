@@ -1,8 +1,8 @@
 import type { AndroidSymbol } from 'expo-symbols';
 import { SymbolView } from 'expo-symbols';
-import type { ReactElement, ReactNode } from 'react';
+import { useEffect, type ReactElement, type ReactNode } from 'react';
 import type { PressableStateCallbackType, StyleProp, ViewStyle } from 'react-native';
-import { ActivityIndicator, I18nManager, Modal, Pressable, Text as RNText, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, I18nManager, Modal, Pressable, Text as RNText, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { bannerColors, fonts, tokens } from './tokens';
 import type {
@@ -34,7 +34,9 @@ const buttonColors = {
   danger: { bg: color.danger, fg: color.onPrimary },
 } as const;
 // i18next/no-literal-string (jsx-only mode) flags every string inside JSX, so non-user-facing prop values live here.
-const prop = { button: 'button', header: 'header', alert: 'alert', polite: 'polite', handled: 'handled', slide: 'slide', bottom: ['bottom'] } as const;
+const prop = { button: 'button', radio: 'radio', header: 'header', alert: 'alert', handled: 'handled', slide: 'slide', bottom: ['bottom'] } as const;
+/** The selected-row check mark (SF Symbol on iOS, Material Symbol elsewhere). */
+const check = { ios: 'checkmark', android: 'check', web: 'check' } as const;
 /** Material Symbols whose direction must follow the layout (back/forward). */
 const MIRRORED = /^(arrow_(back|forward)|chevron_(left|right)|navigate_(before|next)|send)/;
 
@@ -42,10 +44,27 @@ const pressable =
   (...base: StyleProp<ViewStyle>[]) =>
   ({ pressed }: PressableStateCallbackType) => [...base, pressed && styles.pressed];
 
-/** A Pressable with button semantics when `onPress` is set, a plain View otherwise. */
-function Touchable({ onPress, testID, style, children }: { onPress?(): void; testID?: string; style: ViewStyle; children: ReactNode }) {
+/**
+ * Announces a message when it appears or changes. A live region on a node that mounts together with its text
+ * is announced unreliably on Android, so status and error text is announced explicitly.
+ */
+function useAnnounce(message: string | undefined) {
+  useEffect(() => {
+    if (message) AccessibilityInfo.announceForAccessibility(message);
+  }, [message]);
+}
+
+/** A Pressable with button (or, with `selected`, radio) semantics when `onPress` is set, a plain View otherwise. */
+function Touchable({ onPress, selected, testID, style, children }: { onPress?(): void; selected?: boolean; testID?: string; style: StyleProp<ViewStyle>; children: ReactNode }) {
+  const radio = selected !== undefined;
   return onPress ? (
-    <Pressable testID={testID} onPress={onPress} accessibilityRole={prop.button} style={pressable(style)}>
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      accessibilityRole={radio ? prop.radio : prop.button}
+      accessibilityState={radio ? { checked: selected } : undefined}
+      style={pressable(style)}
+    >
       {children}
     </Pressable>
   ) : (
@@ -95,7 +114,8 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
   );
 }
 
-export function TextField({ label, value, onChangeText, error, placeholder, keyboardType, autoFocus, maxLength, testID }: TextFieldProps): ReactElement {
+export function TextField({ label, error, direction, testID, ...input }: TextFieldProps): ReactElement {
+  useAnnounce(error);
   return (
     <View style={styles.field}>
       <RNText aria-hidden style={text.caption}>
@@ -105,32 +125,29 @@ export function TextField({ label, value, onChangeText, error, placeholder, keyb
         testID={testID}
         accessibilityLabel={label}
         accessibilityHint={error}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
+        {...input}
         placeholderTextColor={color.textMuted}
-        keyboardType={keyboardType}
-        autoFocus={autoFocus}
-        maxLength={maxLength}
-        style={[text.body, styles.input, error ? styles.inputError : null]}
+        style={[text.body, styles.input, error ? styles.inputError : null, direction ? styles.ltr : null]}
       />
-      {error ? (
-        <RNText accessibilityLiveRegion={prop.polite} style={[text.caption, { color: color.danger }]}>
-          {error}
-        </RNText>
-      ) : null}
+      {error ? <RNText style={[text.caption, { color: color.danger }]}>{error}</RNText> : null}
     </View>
   );
 }
 
-export function ListItem({ title, subtitle, onPress, trailing, testID }: ListItemProps): ReactElement {
+export function ListItem({ title, subtitle, onPress, trailing, selected, testID }: ListItemProps): ReactElement {
   return (
-    <Touchable onPress={onPress} testID={testID} style={styles.row}>
+    <Touchable onPress={onPress} selected={selected} testID={testID} style={[styles.row, selected && styles.selected]}>
       <View style={styles.fill}>
         <RNText style={text.body}>{title}</RNText>
         {subtitle ? <RNText style={[text.caption, { color: color.textMuted }]}>{subtitle}</RNText> : null}
       </View>
       {trailing}
+      {selected ? (
+        // Visual only: the state is already exposed as the radio's `checked`. Sits at the logical end, so it mirrors in RTL.
+        <View aria-hidden testID={testID && `${testID}.selected`}>
+          <SymbolView name={check} size={24} tintColor={color.primary} />
+        </View>
+      ) : null}
     </Touchable>
   );
 }
@@ -158,12 +175,12 @@ export function Sheet({ visible, onClose, children, testID }: SheetProps): React
 
 export function Banner({ kind, message, testID }: BannerProps): ReactElement {
   const { bg, fg } = bannerColors[kind];
+  useAnnounce(message);
   return (
     <View
       testID={testID}
       accessible
       accessibilityRole={kind === 'error' ? prop.alert : undefined}
-      accessibilityLiveRegion={prop.polite}
       style={[styles.banner, { backgroundColor: bg, borderStartColor: fg }]}
     >
       <RNText style={[text.body, { color: fg }]}>{message}</RNText>
@@ -206,6 +223,8 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.5 },
   mirrored: { transform: [{ scaleX: -1 }] },
+  // Yoga `direction` sets the native input's layoutDirection (Android); writingDirection covers iOS.
+  ltr: { direction: 'ltr', writingDirection: 'ltr' },
   button: {
     minHeight: minTouch,
     paddingHorizontal: space.l,
@@ -226,6 +245,8 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: color.danger, borderWidth: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.m, minHeight: minTouch, paddingHorizontal: space.m, paddingVertical: space.s },
+  // surface keeps text at >= 6:1 (AA); the primary border and check mark are >= 3:1 against it.
+  selected: { backgroundColor: color.surface, borderStartWidth: 4, borderStartColor: color.primary },
   card: { padding: space.m, gap: space.s, borderRadius: radius.l, backgroundColor: color.surface },
   backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.4)' },
   sheet: { padding: space.m, gap: space.m, backgroundColor: color.bg, borderTopStartRadius: radius.l, borderTopEndRadius: radius.l },

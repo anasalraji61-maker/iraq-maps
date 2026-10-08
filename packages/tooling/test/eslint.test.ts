@@ -21,3 +21,14 @@ it('flags English copy in JSX text and text-bearing attributes, not enum props',
   expect(await rulesHit('export const Labelled = () => <Button label="Sign out" />;\n', file)).toEqual(['i18next/no-literal-string']);
   expect(await rulesHit('export const Plain = () => <Text>Hello</Text>;\n', file)).toEqual(['i18next/no-literal-string']);
 });
+
+it('flags hardcoded navigation titles, Alert text and physical left/right styles in UI code', async () => {
+  const file = 'apps/mobile/src/shell/x.tsx';
+  const hit = (code: string) => rulesHit(code, file);
+  expect(await hit("export const options = { title: 'Settings', tabBarLabel: t('map') };\n")).toEqual(['no-restricted-syntax']);
+  expect(await hit("Alert.alert('Delete account?', t('body'));\n")).toEqual(['no-restricted-syntax']);
+  expect(await hit('export const style = { marginLeft: 8, paddingRight: 4, marginStart: 8 };\n')).toEqual(['no-restricted-syntax', 'no-restricted-syntax']);
+  expect(await hit("export const style = { textAlign: 'right' };\n")).toEqual(['no-restricted-syntax']);
+  expect(await hit("export const style = { textAlign: 'auto', start: 0, borderStartWidth: 1 };\n")).toEqual([]);
+  expect(await rulesHit('export const style = { marginLeft: 8 };\n', 'modules/identity/src/x.ts')).toEqual([]);
+});

@@ -6,11 +6,14 @@
 #             Default: a random 077xxxxxxxx per run, so the server always treats it as a new user.
 #   OTP_CODE  the server's OTP_FIXED_CODE. Default: 123456.
 #   NAME      the name to save (ASCII: Android inputText cannot type Arabic). Default: "Maestro <random>".
+#   OUT       directory for the login-phone, login-otp and login-account screenshots (run-flows.sh passes it). Default: ".".
+# The app must be in Arabic (launch-tabs.yaml ends in Arabic): the resend countdown is asserted in Arabic-Indic digits.
 appId: iq.iraqmaps.app
 env:
   PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
   OTP_CODE: ${OTP_CODE || '123456'}
   NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
+  OUT: ${OUT || '.'}
 ---
 # No clearState: it would also wipe the developer server-URL setting.
 - launchApp
@@ -30,16 +33,21 @@ env:
     id: auth.phone.input
 - inputText: ${PHONE}
 - hideKeyboard
+- takeScreenshot: ${OUT}/login-phone
 - tapOn:
     id: auth.phone.submit
 - extendedWaitUntil:
     visible:
       id: auth.otp.input
     timeout: 20000
+- assertVisible:
+    id: auth.otp.resend
+    text: ".*[٠-٩].*"
 - tapOn:
     id: auth.otp.input
 - inputText: ${OTP_CODE}
 - hideKeyboard
+- takeScreenshot: ${OUT}/login-otp
 - tapOn:
     id: auth.otp.submit
 - extendedWaitUntil:
@@ -58,6 +66,7 @@ env:
     timeout: 20000
 - assertVisible:
     id: account.delete
+- takeScreenshot: ${OUT}/login-account
 - tapOn:
     id: account.logout
 - extendedWaitUntil:

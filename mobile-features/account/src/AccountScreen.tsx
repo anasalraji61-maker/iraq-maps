@@ -46,7 +46,6 @@ export function AccountScreen(): ReactElement {
 
   return (
     <Screen scroll>
-      <Text variant="title">{t('profile.title')}</Text>
       {confirmingDelete ? null : banner}
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
       {languageItem}

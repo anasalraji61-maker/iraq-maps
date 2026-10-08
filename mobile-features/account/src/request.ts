@@ -1,3 +1,4 @@
+import { t as translate } from '@iraq-maps/i18n';
 import { useState } from 'react';
 import { isKnownError, t } from './strings';
 
@@ -13,10 +14,12 @@ export function expectStatus<R extends { status: number; body: unknown }, S exte
   return res.body;
 }
 
+/** OTP codes have account-specific messages; the session, network and fallback messages are shared (`common:errors`). */
 const messageFor = (err: unknown): string => {
-  if (err instanceof ProblemError) return err.code && isKnownError(err.code) ? t(`errors.${err.code}`) : t('errors.generic');
+  if (err instanceof ProblemError && err.code && isKnownError(err.code)) return t(`errors.${err.code}`);
+  if (err instanceof ProblemError && err.code === 'unauthorized') return translate('common:errors.sessionExpired');
   // fetch rejects with a TypeError when the server cannot be reached.
-  return err instanceof TypeError ? t('errors.network') : t('errors.generic');
+  return translate(err instanceof TypeError ? 'common:errors.network' : 'common:errors.generic');
 };
 
 /** One request at a time per screen: `busy` while it runs, and a localized `error` when it fails. */

@@ -35,6 +35,16 @@ export default defineConfig(
         'error',
         { selector: `Literal[value=${ARABIC}]`, message: 'Arabic-script text belongs in an i18n namespace, not in code.' },
         { selector: `TemplateElement[value.raw=${ARABIC}]`, message: 'Arabic-script text belongs in an i18n namespace, not in code.' },
+        {
+          selector: 'Property[key.name=/^(title|tabBarLabel|tabBarAccessibilityLabel|headerTitle|headerBackTitle)$/] > Literal[value=/[A-Za-z]/]',
+          message: 'Navigation titles and labels are user-facing: use t().',
+        },
+        { selector: "CallExpression[callee.object.name='Alert'] > Literal", message: 'Alert text is user-facing: use t().' },
+        {
+          selector: 'Property[key.name=/^(left|right|(margin|padding)(Left|Right)|border(Left|Right)(Width|Color)|border(Top|Bottom)(Left|Right)Radius)$/]',
+          message: 'Physical left/right styles do not mirror in RTL: use start/end (start, marginStart, paddingEnd, borderStartWidth, ...).',
+        },
+        { selector: "Property[key.name='textAlign'] > Literal[value=/^(left|right)$/]", message: "Use textAlign 'auto' or the writing direction, not left/right." },
       ],
     },
   },

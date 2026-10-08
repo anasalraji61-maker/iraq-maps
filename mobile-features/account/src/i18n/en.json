@@ -13,7 +13,7 @@
     "label": "Verification code",
     "submit": "Confirm",
     "resend": "Resend code",
-    "resendIn": "You can resend in {seconds} seconds"
+    "resendIn": "You can resend in {time}"
   },
   "name": {
     "title": "What is your name?",
@@ -22,7 +22,6 @@
     "save": "Save"
   },
   "profile": {
-    "title": "My account",
     "signedOutTitle": "Sign in to your account",
     "signedOutBody": "Sign in with your mobile number to save your name and language.",
     "signIn": "Sign in",
@@ -39,8 +38,7 @@
     "cancel": "Cancel"
   },
   "language": {
-    "title": "Language",
-    "current": "Current language"
+    "title": "Language"
   },
   "languages": {
     "ar": "العربية",
@@ -52,11 +50,8 @@
     "otp_expired": "That code has expired. Request a new one.",
     "otp_too_many_attempts": "Too many wrong codes. Request a new one.",
     "otp_locked": "Sign-in with this number is paused for a while after too many attempts. Try again later.",
-    "otp_rate_limited": "Too many requests in a short time. Wait a moment and try again.",
+    "otp_rate_limited": "Too many code requests in a short time. Wait at least 15 minutes, then try again.",
     "otp_resend_too_soon": "Please wait a little before requesting a new code.",
-    "invalid_request": "Check what you entered and try again.",
-    "unauthorized": "Your session has ended. Please sign in again.",
-    "network": "Could not reach the server. Check your internet connection and try again.",
-    "generic": "Something went wrong. Try again."
+    "invalid_request": "Check what you entered and try again."
   }
 }

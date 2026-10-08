@@ -2,7 +2,7 @@ import { testIDs } from '@iraq-maps/contracts';
 import { formatNumber, getLocale } from '@iraq-maps/i18n';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, type ReactElement } from 'react';
 import { isolateLtr, toAsciiDigits } from './phone';
 import { expectStatus, useRequest } from './request';
@@ -19,6 +19,10 @@ function useSecondsLeft(deadline: number): number {
   }, [deadline]);
   return Math.max(0, Math.ceil((deadline - now) / 1000));
 }
+
+/** m:ss in the current locale's digits (Arabic-Indic for ar and ckb). */
+const clock = (seconds: number): string =>
+  `${formatNumber(Math.floor(seconds / 60))}:${formatNumber(seconds % 60, { minimumIntegerDigits: 2 })}`;
 
 /** Route params (set by PhoneScreen): `phone` in E.164, `resendAfterSec` from the server's 202. */
 export function OtpScreen(): ReactElement {
@@ -46,8 +50,8 @@ export function OtpScreen(): ReactElement {
     });
 
   return (
-    <Screen>
-      <Text variant="title">{t('otp.title')}</Text>
+    <Screen scroll>
+      <Stack.Screen options={{ title: t('otp.title') }} />
       <Text tone="muted">{t('otp.sentTo', { phone: isolateLtr(phone) })}</Text>
       <TextField
         testID={testIDs.auth.otpInput}
@@ -56,6 +60,9 @@ export function OtpScreen(): ReactElement {
         onChangeText={(text) => setCode(toAsciiDigits(text).replace(/\D/g, ''))}
         error={error}
         keyboardType="number-pad"
+        direction="ltr"
+        autoComplete="sms-otp"
+        textContentType="oneTimeCode"
         maxLength={6}
         autoFocus
       />
@@ -63,7 +70,7 @@ export function OtpScreen(): ReactElement {
       <Button
         testID={testIDs.auth.otpResend}
         variant="secondary"
-        label={secondsLeft > 0 ? t('otp.resendIn', { seconds: formatNumber(secondsLeft) }) : t('otp.resend')}
+        label={secondsLeft > 0 ? t('otp.resendIn', { time: clock(secondsLeft) }) : t('otp.resend')}
         onPress={resend}
         disabled={secondsLeft > 0 || busy}
       />

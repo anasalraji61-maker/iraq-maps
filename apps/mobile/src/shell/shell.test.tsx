@@ -1,7 +1,8 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { getLocale, setLocale, t } from '@iraq-maps/i18n';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { tokens } from '@iraq-maps/ui';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react-native';
 import { reloadAppAsync } from 'expo';
 import { router } from 'expo-router';
 import { renderRouter } from 'expo-router/testing-library';
@@ -33,6 +34,9 @@ const app = {
   'dev-settings': DevSettingsScreen,
 };
 const tabs = ['map', 'discover', 'messages', 'activity', 'account'] as const;
+
+/** The native-stack header renders as a host element whose `title` prop is what TalkBack announces. */
+const headerTitle = () => screen.container.queryAll((node) => node.type === 'RNSScreenStackHeaderConfig').at(-1)?.props.title;
 
 /** Renders the app and waits until the restore finished and `readyTestID` is on screen. */
 async function launch(initialUrl = '/', readyTestID: string = testIDs.tabs.map) {
@@ -67,6 +71,14 @@ describe('tabs', () => {
     expect(t('common:tabs.map')).not.toBe('common:tabs.map');
   });
 
+  it('tab labels are 12sp with AA colors, and each tab is announced by its localized name', async () => {
+    await launch();
+    const label = (tab: (typeof tabs)[number]) => within(screen.getByTestId(testIDs.tabs[tab])).getByText(t(`common:tabs.${tab}`));
+    expect(label('map')).toHaveStyle({ fontSize: 12, color: tokens.color.primary });
+    expect(label('discover')).toHaveStyle({ fontSize: 12, color: tokens.color.textMuted });
+    for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveProp('accessibilityLabel', t(`common:tabs.${tab}`));
+  });
+
   it('undelivered tabs show the shared coming-soon empty state', async () => {
     await launch('/discover');
     expect(screen.getByText(t('common:comingSoon.title'))).toBeOnTheScreen();
@@ -76,7 +88,7 @@ describe('tabs', () => {
     await launch('/dev-settings', testIDs.dev.serverUrlInput);
     await act(async () => setLocale('ckb'));
     expect(screen.getByTestId(testIDs.dev.serverUrlInput)).toBeOnTheScreen();
-    expect(screen.getByText(t('shell:devSettings.title'))).toBeOnTheScreen();
+    expect(headerTitle()).toBe(t('shell:devSettings.title'));
   });
 });
 
@@ -135,6 +147,8 @@ describe('developer settings', () => {
     await launch('/account');
     expect(screen.getByLabelText(t('shell:devSettings.open'))).toBeOnTheScreen();
     await relaunch('/dev-settings', testIDs.dev.serverUrlInput);
+    expect(headerTitle()).toBe(t('shell:devSettings.title'));
+    expect(screen.getByTestId(testIDs.dev.serverUrlInput)).toHaveStyle({ direction: 'ltr', writingDirection: 'ltr' });
 
     await fireEvent.changeText(screen.getByTestId(testIDs.dev.serverUrlInput), 'ftp://nope');
     await fireEvent.press(screen.getByTestId(testIDs.dev.serverUrlSave));

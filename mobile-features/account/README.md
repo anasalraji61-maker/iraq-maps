@@ -24,8 +24,9 @@ The package exports five screens, each re-exported by one route file in `apps/mo
   - Then calls `setLocale`. The shell persists the locale and handles the RTL reload.
 
 Server Problem codes are shown as localized messages under `errors.*`: `otp_invalid`, `otp_expired`,
-`otp_too_many_attempts`, `otp_locked`, `otp_rate_limited`, `otp_resend_too_soon`, `invalid_request` and `unauthorized`.
-Any other failure shows a generic message, and an unreachable server shows a network message.
+`otp_too_many_attempts`, `otp_locked`, `otp_rate_limited`, `otp_resend_too_soon` and `invalid_request`.
+`unauthorized`, an unreachable server and any other failure use the shared `common:errors.sessionExpired`, `network`
+and `generic` messages.
 
 ## Ports and dependencies
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { I18nManager } from 'react-native';
+import { AccessibilityInfo, I18nManager } from 'react-native';
 import { Banner, Button, Card, EmptyState, IconButton, ListItem, Screen, Sheet, Text, TextField } from './index';
 
 const touch = { minHeight: 48 };
@@ -46,10 +46,66 @@ describe('TextField', () => {
     expect(onChangeText).toHaveBeenCalledWith('07701234567');
     expect(screen.getByText('رقم غير صالح')).toBeOnTheScreen();
     expect(input.props.accessibilityHint).toBe('رقم غير صالح');
+    expect(input).not.toHaveStyle({ direction: 'ltr' });
+  });
+
+  it('keeps phone numbers left-to-right and passes autofill hints through', async () => {
+    await render(<TextField label="رقم الهاتف" value="0770 123 4567" onChangeText={() => {}} direction="ltr" autoComplete="tel" textContentType="telephoneNumber" />);
+    const input = screen.getByLabelText('رقم الهاتف');
+    expect(input).toHaveStyle({ direction: 'ltr', writingDirection: 'ltr' });
+    expect(input.props).toMatchObject({ value: '0770 123 4567', autoComplete: 'tel', textContentType: 'telephoneNumber' });
+  });
+});
+
+describe('announcements', () => {
+  it('announces a TextField error when it appears or changes, and a Banner when shown', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    announce.mockClear(); // the RN jest mock is shared and already saw earlier tests' errors
+    const field = (error?: string) => <TextField label="الرمز" value="" onChangeText={() => {}} error={error} />;
+    const { rerender } = await render(field());
+    expect(announce).not.toHaveBeenCalled();
+    await rerender(field('الرمز غير صحيح'));
+    await rerender(field('الرمز غير صحيح'));
+    await rerender(field('انتهت صلاحية الرمز'));
+    expect(announce.mock.calls).toEqual([['الرمز غير صحيح'], ['انتهت صلاحية الرمز']]);
+    await rerender(<Banner kind="success" message="تم الحفظ" />);
+    expect(announce).toHaveBeenLastCalledWith('تم الحفظ');
+    announce.mockRestore();
   });
 });
 
 describe('ListItem and Card', () => {
+  it('exposes a selectable row as a checked or unchecked radio', async () => {
+    await render(
+      <>
+        <ListItem title="العربية" selected onPress={() => {}} />
+        <ListItem title="English" selected={false} onPress={() => {}} />
+      </>,
+    );
+    expect(screen.getByRole('radio', { name: 'العربية' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'English' })).not.toBeChecked();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('shows a check mark and a highlighted background only on the selected row', async () => {
+    await render(
+      <>
+        <ListItem testID="ar" title="العربية" selected onPress={() => {}} />
+        <ListItem testID="en" title="English" selected={false} onPress={() => {}} />
+        <ListItem testID="plain" title="الإصدار" onPress={() => {}} />
+      </>,
+    );
+    const hidden = { includeHiddenElements: true };
+    // Visual only: screen readers get the radio's checked state instead.
+    expect(screen.queryByTestId('ar.selected')).toBeNull();
+    expect(screen.getByTestId('ar.selected', hidden)).toBeOnTheScreen();
+    expect(screen.getByTestId('ar')).toHaveStyle({ backgroundColor: '#F3F5F7', borderStartColor: '#0A6B4B' });
+    for (const id of ['en', 'plain']) {
+      expect(screen.queryByTestId(`${id}.selected`, hidden)).toBeNull();
+      expect(screen.getByTestId(id)).not.toHaveStyle({ backgroundColor: '#F3F5F7' });
+    }
+  });
+
   it('are buttons only when pressable', async () => {
     const onPress = jest.fn();
     await render(

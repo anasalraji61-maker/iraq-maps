@@ -30,7 +30,7 @@ describe('AccountScreen', () => {
     const { session, view } = await setup(<AccountScreen />);
     await fireEvent.press(view.getByTestId(account.delete));
     await fireEvent.press(view.getByTestId(account.deleteConfirm));
-    expect(await view.findByText(t('account:errors.generic'))).toBeTruthy();
+    expect(await view.findByText(t('common:errors.generic'))).toBeTruthy();
     expect(session.signOut).not.toHaveBeenCalled();
   });
 
@@ -43,12 +43,21 @@ describe('AccountScreen', () => {
 });
 
 describe('LanguageScreen', () => {
-  it('saves the locale to the profile, then switches the app language', async () => {
+  it('marks the current language, saves a new one to the profile once while busy, then switches the app language', async () => {
     const { api, router, session, view } = await setup(<LanguageScreen />);
+    const en = view.getByTestId(testIDs.auth.locale.en);
+    expect(view.getByTestId(testIDs.auth.locale.ar)).toBeChecked();
+    expect(en).not.toBeChecked();
+
     const saved = { ...user, locale: 'en' as const };
-    api.me.update.mockReturnValueOnce(reply(200, saved));
-    await fireEvent.press(view.getByTestId(testIDs.auth.locale.en));
+    let respond = (_res: { status: number; body?: unknown }) => {};
+    api.me.update.mockReturnValueOnce(new Promise((resolve) => (respond = resolve)));
+    await fireEvent.press(en);
+    await fireEvent.press(en);
+    expect(view.getByText(t('common:status.loading'))).toBeTruthy();
+    respond({ status: 200, body: saved });
     await waitFor(() => expect(router.back).toHaveBeenCalled());
+    expect(api.me.update).toHaveBeenCalledTimes(1);
     expect(api.me.update).toHaveBeenCalledWith({ body: { locale: 'en' } });
     expect(session.updateUser).toHaveBeenCalledWith(saved);
     expect(getLocale()).toBe('en');

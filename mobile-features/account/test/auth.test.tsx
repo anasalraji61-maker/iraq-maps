@@ -1,5 +1,5 @@
 import { testIDs } from '@iraq-maps/contracts';
-import { formatNumber, t } from '@iraq-maps/i18n';
+import { t } from '@iraq-maps/i18n';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -40,12 +40,13 @@ describe('OtpScreen', () => {
     await fireEvent.press(view.getByTestId(auth.otpSubmit));
   };
 
-  it('keeps resend disabled for the 60s the server asked for, then requests a new code and restarts the timer', async () => {
+  it('counts down the 60s the server asked for in Arabic-Indic m:ss, then requests a new code and restarts the timer', async () => {
     jest.useFakeTimers();
     const { api, view } = await setup(<OtpScreen />, { signedIn: false });
     const resend = () => view.getByTestId(auth.otpResend);
-    expect(view.getByText(t('account:otp.resendIn', { seconds: formatNumber(60) }))).toBeTruthy();
+    expect(resend()).toHaveAccessibleName(t('account:otp.resendIn', { time: '١:٠٠' }));
     await act(async () => void jest.advanceTimersByTime(59_000));
+    expect(resend()).toHaveAccessibleName(t('account:otp.resendIn', { time: '٠:٠١' }));
     expect(resend()).toBeDisabled();
     await act(async () => void jest.advanceTimersByTime(1_000));
     expect(resend()).toBeEnabled();
@@ -84,13 +85,16 @@ describe('OtpScreen', () => {
     expect(session.signIn).not.toHaveBeenCalled();
   });
 
-  it('falls back to a generic message for an unknown failure and a network message when fetch rejects', async () => {
+  it('uses the shared messages for an unreachable server, an expired session and any other failure', async () => {
     const { api, view } = await setup(<OtpScreen />, { signedIn: false });
     api.auth.verifyOtp.mockRejectedValueOnce(new TypeError('Network request failed'));
     await submitCode(view);
-    expect(await view.findByText(t('account:errors.network'))).toBeTruthy();
+    expect(await view.findByText(t('common:errors.network'))).toBeTruthy();
+    api.auth.verifyOtp.mockReturnValueOnce(reply(401, { type: 'about:blank', title: 'Unauthorized', status: 401, code: 'unauthorized' }));
     await submitCode(view);
-    expect(await view.findByText(t('account:errors.generic'))).toBeTruthy();
+    expect(await view.findByText(t('common:errors.sessionExpired'))).toBeTruthy();
+    await submitCode(view);
+    expect(await view.findByText(t('common:errors.generic'))).toBeTruthy();
   });
 });
 

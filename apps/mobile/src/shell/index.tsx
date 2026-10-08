@@ -1,7 +1,7 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
-import { Banner, Button, EmptyState, IconButton, Screen, Text, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
+import { Banner, Button, EmptyState, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -17,6 +17,14 @@ registerNamespace('shell', { ar, ckb, en });
 type Tab = keyof typeof testIDs.tabs;
 const tabIcons: Record<Tab, AndroidSymbol> = { map: 'map', discover: 'explore', messages: 'chat', activity: 'history', account: 'person' };
 const tabs = Object.keys(tabIcons) as Tab[];
+const font = { fontFamily: tokens.font.family };
+// AA contrast for inactive labels (textMuted) and 12sp labels instead of the 10sp default.
+const tabBarOptions = {
+  tabBarActiveTintColor: tokens.color.primary,
+  tabBarInactiveTintColor: tokens.color.textMuted,
+  tabBarLabelStyle: { ...font, fontSize: 12 },
+  headerTitleStyle: font,
+};
 
 /** Nothing renders until the saved locale, server URL, fonts and session are restored, so nothing flashes. */
 export function RootLayout() {
@@ -43,10 +51,11 @@ export function RootLayout() {
     <SessionProvider apiBaseUrl={apiBaseUrl}>
       <AvailableRoutesProvider routes={availableRoutes()}>
         <SessionRestored>
-          <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: { fontFamily: tokens.font.family } }}>
+          {/* Screens set their own (announced) title; '' only avoids showing a raw route path when one does not. */}
+          <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: font }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Protected guard={!isProduction()}>
-              <Stack.Screen name="dev-settings" />
+              <Stack.Screen name="dev-settings" options={{ title: t('shell:devSettings.title') }} />
             </Stack.Protected>
           </Stack>
         </SessionRestored>
@@ -63,15 +72,16 @@ function SessionRestored({ children }: { children: ReactNode }) {
 export function TabsLayout() {
   const router = useRouter();
   const devSettings = useRouteAvailable('devSettings');
-  const font = { fontFamily: tokens.font.family };
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: tokens.color.primary, tabBarLabelStyle: font, headerTitleStyle: font }}>
+    <Tabs screenOptions={tabBarOptions}>
       {tabs.map((tab) => (
         <Tabs.Screen
           key={tab}
           name={tab === 'map' ? 'index' : tab}
           options={{
             title: t(`common:tabs.${tab}`),
+            // Without it iOS appends an English "tab, N of 5" to the label.
+            tabBarAccessibilityLabel: t(`common:tabs.${tab}`),
             tabBarButtonTestID: testIDs.tabs[tab],
             tabBarIcon: ({ color, size }) => <SymbolView name={{ android: tabIcons[tab], web: tabIcons[tab] }} tintColor={color} size={size} />,
             headerRight:
@@ -108,7 +118,6 @@ export function DevSettingsScreen() {
   };
   return (
     <Screen scroll>
-      <Text variant="title">{t('shell:devSettings.title')}</Text>
       <TextField
         testID={testIDs.dev.serverUrlInput}
         label={t('shell:devSettings.serverUrl')}
@@ -116,6 +125,7 @@ export function DevSettingsScreen() {
         onChangeText={setUrl}
         placeholder={defaultApiUrl()}
         keyboardType="url"
+        direction="ltr"
         error={result === 'invalid' ? t('shell:devSettings.invalidUrl') : undefined}
       />
       {result === 'saved' ? <Banner kind="success" message={t('shell:devSettings.saved', { url: apiBaseUrl() })} /> : null}
