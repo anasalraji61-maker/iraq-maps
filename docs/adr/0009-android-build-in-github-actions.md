@@ -14,7 +14,7 @@
 
 - البوابة هي `.github/workflows/android.yml`، وتعمل عند push إلى `claude/iraq-smart-maps-app-aybpjn`.
 - job ‏build: ‏CNG عبر `expo prebuild -p android --clean --no-install` (مجلد `apps/mobile/android` مستثنى من git)، ثم `./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a` موقّعاً بمفتاح debug القالب، فيُضمَّن JavaScript عبر Metro و Hermes. يفشل إن زاد حجم APK عن 40MB، ويرفع APK كـ **Actions artifact**، ويكتب تعليقات `::error` عند الفشل. صلاحيات الرمز `contents: read`، ولا أسرار، ولا GitHub Releases.
-- job ‏e2e: APK ‏x86_64، وخادم داخل الـ job على حاويتي postgis و redis ببيانات fixture، ومحاكي API 30، وتدفقات Maestro بـ testIDs.
+- job ‏e2e: APK ‏x86_64، وخادم داخل الـ job على حاويتي postgis و redis ببيانات fixture، ومحاكي API 34 ‏(google_apis، x86_64)، وتدفقات Maestro بـ testIDs. *(عُدِّل 2026-10-08: كان API 30 في الخطة، والمنفَّذ والمُتحقَّق منه في CI هو API 34. أجهزة 3GB وأندرويد 8 تُختبر في M7 بمحاكي API 26.)*
 - فحص محلي إلزامي قبل كل push: `pnpm android:precheck` (`expo prebuild --no-install` و `expo export -p android`) بلا SDK.
 - النتائج تُقرأ لنفس الـ SHA عبر GitHub MCP (`actions_list`، `actions_get`، `get_job_logs`).
 
