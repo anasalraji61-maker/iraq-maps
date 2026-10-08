@@ -9,11 +9,25 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "grant-role": "tsx src/grant-role.ts"
   },
   "dependencies": {
+    "@iraq-maps/config": "workspace:*",
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/db-kit": "workspace:*",
-    "@nestjs/common": "^11.2.7"
+    "@iraq-maps/observability": "workspace:*",
+    "@nestjs/common": "^11.2.7",
+    "@ts-rest/nest": "3.52.1",
+    "drizzle-orm": "^0.45.4",
+    "ioredis": "^5.11.1",
+    "jose": "^6.2.12",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@iraq-maps/testing": "workspace:*",
+    "@nestjs/core": "^11.2.7",
+    "@nestjs/platform-fastify": "^11.2.7",
+    "tsx": "^4.23.15"
   }
 }

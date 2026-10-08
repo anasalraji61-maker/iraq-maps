@@ -52,6 +52,7 @@
       "apps/mobile/app/**",
       "modules/tour3d/**",
       "mobile-features/tour3d/**",
+      "docs/contract-requests/**",
       "docs/milestones/**",
       "docs/adr/**",
       "docs/TASKS.md",

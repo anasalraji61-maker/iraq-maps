@@ -13,6 +13,13 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
-    "drizzle-orm": "^0.45.4"
+    "@iraq-maps/observability": "workspace:*",
+    "bullmq": "^5.81.5",
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@iraq-maps/testing": "workspace:*",
+    "@types/pg": "^8.23.1"
   }
 }

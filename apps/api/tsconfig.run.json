@@ -1,0 +1,5 @@
+{
+  // tsx applies a tsconfig only to the files it includes; workspace modules need experimentalDecorators too (Nest @Inject).
+  "extends": "./tsconfig.json",
+  "include": ["src", "../../modules/*/src", "../../packages/*/src"]
+}

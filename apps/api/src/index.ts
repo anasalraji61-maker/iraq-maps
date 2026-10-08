@@ -1,1 +1,1 @@
-export { createApp, type CreateAppOptions } from './app';
+export { createApp, moduleMigrations, type CreateAppOptions } from './app';

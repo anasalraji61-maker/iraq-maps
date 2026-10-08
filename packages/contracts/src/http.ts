@@ -58,18 +58,16 @@ export const authContract = c.router(
   { pathPrefix: '/v1' },
 );
 
-const authed = { 401: Problem } as const;
-
 export const meContract = c.router(
   {
-    get: { method: 'GET', path: '/me', responses: { 200: Me, ...authed } },
+    get: { method: 'GET', path: '/me', responses: { 200: Me, 401: Problem } },
     update: {
       method: 'PATCH',
       path: '/me',
       body: z.object({ name: z.string().trim().min(1).max(80).optional(), locale: Locale.optional() }),
-      responses: { 200: Me, 400: Problem, ...authed },
+      responses: { 200: Me, 400: Problem, 401: Problem },
     },
-    remove: { method: 'DELETE', path: '/me', body: c.noBody(), responses: { 204: c.noBody(), ...authed } },
+    remove: { method: 'DELETE', path: '/me', body: c.noBody(), responses: { 204: c.noBody(), 401: Problem } },
   },
   { pathPrefix: '/v1', strictStatusCodes: true },
 );

@@ -1,4 +1,5 @@
-import { createApp } from './app';
+import { apiConfig, createApp } from './app';
 
 const app = await createApp({ logger: true });
-await app.listen({ port: Number(process.env.API_PORT || 3000), host: '0.0.0.0' });
+app.enableShutdownHooks();
+await app.listen({ port: apiConfig().API_PORT, host: '0.0.0.0' });

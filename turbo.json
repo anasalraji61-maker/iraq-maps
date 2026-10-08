@@ -15,8 +15,20 @@
     "test": {
       "env": [
         "DATABASE_URL",
+        "TEST_DATABASE_ADMIN_URL",
         "REDIS_URL",
+        "APP_ENV",
+        "OTP_SENDER",
+        "OUTBOX_TARGET",
+        "TRUST_PROXY",
         "PG*"
+      ],
+      "passThroughEnv": [
+        "JWT_ACCESS_SECRET",
+        "JWT_REFRESH_SECRET",
+        "PHONE_ENCRYPTION_KEY",
+        "PHONE_HASH_KEY",
+        "OTP_FIXED_CODE"
       ]
     },
     "dev": {
