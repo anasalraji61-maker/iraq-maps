@@ -30,3 +30,12 @@ export const routes = {
 export type RouteName = keyof typeof routes;
 type ParamsOf<P extends string> = P extends `${string}[${infer K}]${infer Rest}` ? { [k in K]: string } & ParamsOf<Rest> : unknown;
 export type RouteParams<N extends RouteName> = ParamsOf<(typeof routes)[N]>;
+
+/** Builds a concrete path, e.g. href('place', { placeId: 'p1' }) => '/place/p1'. */
+export function href<N extends RouteName>(name: N, params?: RouteParams<N>): string {
+  return routes[name].replace(/\[(\w+)\]/g, (_, key: string) => {
+    const value = (params as Record<string, string> | undefined)?.[key];
+    if (value === undefined) throw new Error(`href('${name}') needs the "${key}" param`);
+    return encodeURIComponent(value);
+  });
+}

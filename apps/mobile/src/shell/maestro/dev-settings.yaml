@@ -1,0 +1,43 @@
+# Developer settings: a server URL saved on the device survives an app restart, then is reset for the next flows.
+# Needs a non-production build (EXPO_PUBLIC_APP_ENV != production) and the route file app/dev-settings.tsx.
+# Run: maestro test apps/mobile/src/shell/maestro/dev-settings.yaml
+appId: iq.iraqmaps.app
+---
+- launchApp:
+    clearState: true
+# The first launch forces RTL and reloads once; the tabs appear after that.
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 30000
+- openLink: iraqmaps://dev-settings
+- extendedWaitUntil:
+    visible:
+      id: dev.serverUrl.input
+    timeout: 10000
+# A trailing slash keeps the e2e API reachable (the API client trims it) while differing from the default.
+- tapOn:
+    id: dev.serverUrl.input
+- eraseText: 100
+- inputText: http://10.0.2.2:3000/
+- hideKeyboard
+- tapOn:
+    id: dev.serverUrl.save
+- assertVisible: "تم الحفظ\\..*"
+
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 30000
+- openLink: iraqmaps://dev-settings
+- extendedWaitUntil:
+    visible:
+      id: dev.serverUrl.input
+      text: "http://10\\.0\\.2\\.2:3000/"
+    timeout: 10000
+
+# Leave the default URL for the flows that run after this one.
+- tapOn: "استعادة العنوان الافتراضي"
+- assertVisible: "تم الحفظ\\..*"

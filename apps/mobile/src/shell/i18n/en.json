@@ -1,0 +1,24 @@
+{
+  "tabs": { "map": "Map", "discover": "Discover", "messages": "Messages", "activity": "Activity", "account": "Account" },
+  "pending": {
+    "map": { "title": "The map is on its way", "body": "Browsing the map and searching for places arrive in a later update." },
+    "discover": { "title": "Discover is on its way", "body": "Photos of the city and its places from businesses and people arrive in a later update." },
+    "messages": { "title": "Messages are on their way", "body": "Messaging places and following their replies arrive in a later update." },
+    "activity": { "title": "Activity is on its way", "body": "Your saved places and recent routes will appear here in a later update." },
+    "account": { "title": "Account is on its way", "body": "Sign-in and account settings arrive in a later update." }
+  },
+  "auth": { "title": "Sign in", "close": "Close" },
+  "account": { "language": "Language" },
+  "loading": "Loading",
+  "dev": {
+    "title": "Developer settings",
+    "open": "Open developer settings",
+    "help": "Every app request goes to this address. On a real phone, enter your computer's address on the same Wi-Fi network. Default: {{url}}",
+    "serverUrl": "Server URL",
+    "save": "Save",
+    "reset": "Reset to default",
+    "saved": "Saved. New requests go to {{url}}",
+    "invalid": "Enter an address that starts with http:// or https://, like http://192.168.1.20:3000",
+    "failed": "Could not save the address on this device. Try again."
+  }
+}
