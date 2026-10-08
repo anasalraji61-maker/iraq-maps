@@ -21,7 +21,7 @@ runs only on GitHub runners.
 
 | Script | Does |
 |---|---|
-| `build-apk.sh <abi> <out.apk>` | `expo prebuild`, then Gradle `assembleRelease` for one ABI; a `::error` with the log tail on failure |
+| `build-apk.sh <abi> <out.apk>` | `expo prebuild`, then Gradle `assembleRelease` for one ABI, with `EXPO_PUBLIC_APP_ENV` required and the Metro cache cleared; a `::error` with the log tail on failure |
 | `start-api.sh` | `migrate`, then the API in the background; waits for `/health` |
 | `install-maestro.sh` | the pinned Maestro CLI (`MAESTRO_VERSION`, `MAESTRO_SHA256`) |
 | `run-flows.sh <apk> <out-dir>` | installs the APK, runs `flows/*.yaml` and `mobile-features/*/maestro/*.yaml` |
