@@ -36,7 +36,7 @@
 | الملفات والصور | تخزين متوافق مع **S3** (Cloudflare R2 / MinIO محلياً) + روابط موقّعة | التطبيق يرفع مباشرة بدون أن يرى أي مفتاح. |
 | المساعد الذكي | **Claude API** من الخادم فقط، مع **tool use** على أدواتنا (بحث أماكن، أسعار، زحمة، مسارات) | النموذج لا "يعرف" الأماكن؛ يستدعي أدواتنا التي تعيد بيانات حقيقية. اسم النموذج متغير بيئة (`ASSISTANT_MODEL`). |
 | الإشعارات | **FCM** (أندرويد) ثم APNs | قياسي. |
-| الاختبارات | **Vitest** (حزم وخادم) + **Testcontainers** (Postgres حقيقي) + **Jest/RNTL** (التطبيق) + **Maestro** (E2E للهاتف) | |
+| الاختبارات | **Vitest** (حزم وخادم) + **PostGIS و Redis محليان** (قواعد اختبار معزولة، بلا Testcontainers — [ADR-0004](./adr/0004-local-postgis-instead-of-testcontainers.md)) + **Jest/RNTL** (التطبيق) + **Maestro** (E2E للهاتف) | |
 | الجودة والأمان | ESLint + **dependency-cruiser** (فرض حدود الوحدات) + **gitleaks** (فحص أسرار في pre-commit و CI) + **Changesets** | |
 | CI | **GitHub Actions** | |
 
@@ -57,16 +57,15 @@ iraq-maps/
 │   │   ├── app/                # Expo Router: (tabs)/map, discover, messages, activity, account
 │   │   └── src/
 │   │       ├── shell/          # التنقل، المزوّدات (providers)، تهيئة i18n — يملكه وكيل "mobile-shell" فقط
-│   │       └── features/
-│   │           ├── map/        # الخريطة + البحث + الملاحة + طبقة الأقمار الصناعية
-│   │           ├── assistant/  # واجهة المساعد الذكي (تُفتح من الخريطة)
-│   │           ├── discover/   # تبويب اكتشف
-│   │           ├── messages/   # تبويب المراسلات
-│   │           ├── activity/   # تبويب نشاطي
-│   │           ├── account/    # تبويب حسابي + وضع المزوّد
-│   │           └── tour3d/     # (مستقبلاً) — مجلد محجوز فقط
+│   │   (app/** مسارات Expo Router بسطر واحد؛ src/shell/ التخطيط والتبويبات وبوابة الدخول)
 │   ├── api/                    # Composition root: يجمع الـ modules في خادم NestJS واحد
 │   └── admin/                  # لوحة إدارة ويب صغيرة (توثيق المزوّدين، الإشراف على المحتوى)
+│
+├── mobile-features/            # كل ميزة هاتف حزمة مستقلة @iraq-maps/feature-<x> (ADR-0003)
+│   ├── map/ navigation/ account/ provider/ messages/ assistant/ discover/ activity/
+│   └── tour3d/                 # (مستقبلاً) — README فقط
+│
+├── adapters/                   # محوّل لكل خدمة خارجية @iraq-maps/adapter-<x> (llm-anthropic، whatsapp-cloud…)
 │
 ├── modules/                    # وحدات الخادم — كل وحدة حزمة مستقلة
 │   ├── identity/               # المستخدمون، OTP عبر الهاتف، الجلسات، الأدوار
@@ -86,10 +85,14 @@ iraq-maps/
 ├── packages/                   # حزم مشتركة
 │   ├── contracts/              # ★ العقود: zod schemas، ts-rest routers، ports، events
 │   ├── config/                 # قراءة متغيرات البيئة والتحقق منها (بدون أي قيم سرية)
-│   ├── db-kit/                 # أدوات Drizzle المشتركة، outbox، اختبارات Testcontainers
+│   ├── db-kit/                 # Drizzle، migrations لكل schema، قواعد اختبار معزولة، outbox (schema platform)
+│   ├── observability/          # logger منقّح (هواتف، توكنات، إحداثيات)
+│   ├── testing/                # fakes لكل port + conformance suites
 │   ├── i18n/                   # نصوص ar / ckb / en + أدوات تطبيع العربية
 │   ├── geo/                    # أدوات جغرافية مشتركة (bbox، مسافات، geohash، حدود المدن)
 │   ├── ui/                     # Design system للهاتف (RTL، خطوط عربية، ألوان)
+│   ├── mobile-kit/             # الجلسة، عميل API، روابط المسارات typed
+│   ├── map-kit/                # غلاف MapLibre، الستايل، الإسناد (من M1)
 │   ├── api-client/             # عميل typed مولَّد من العقود للتطبيق والإدارة
 │   └── tooling/                # tsconfig و eslint و dependency-cruiser المشتركة
 │
@@ -100,7 +103,9 @@ iraq-maps/
 │   ├── geocoder/               # إعداد Photon
 │   └── imagery/                # pipeline صور Sentinel-2 → raster PMTiles
 │
-├── infra/                      # docker-compose للتطوير، IaC لاحقاً
+├── tools/ownership/            # فحص ملكية المسارات لكل مرحلة
+├── e2e/                        # اختبارات API (createApp) و Maestro للهاتف
+├── infra/                      # تشغيل Postgres/Redis محلياً بلا Docker، docker-compose للمطوّرين
 ├── docs/                       # المعمارية، ADRs، مصادر البيانات، MVP، المهام
 ├── .env.example                # أسماء المتغيرات فقط — بدون قيم
 └── CLAUDE.md                   # تعليمات الوكلاء
@@ -111,7 +116,9 @@ iraq-maps/
 ```
 apps/*            →  packages/*  ,  modules/* (عبر index العام فقط)
 modules/X         →  packages/*  فقط   (ممنوع: modules/Y)
-packages/contracts →  zod فقط (لا شيء من المشروع)
+packages/contracts →  zod و @ts-rest/core فقط (لا شيء من المشروع)
+mobile-features/X →  packages/* فقط   (ممنوع: mobile-features/Y و modules/*)
+adapters/X        →  packages/contracts و packages/config فقط
 packages/*        →  packages/* أخرى بدون دوائر
 apps/mobile       →  ممنوع: modules/*  (يتكلم مع الخادم عبر api-client فقط)
 ```

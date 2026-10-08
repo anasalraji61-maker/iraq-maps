@@ -47,7 +47,7 @@ Branch and secrets policy:
 
 ## 3. Stack (summary)
 
-TypeScript everywhere · pnpm workspaces + Turborepo · React Native + Expo (Expo Router) + MapLibre Native · NestJS (Fastify) · zod + ts-rest contracts · PostgreSQL + PostGIS + pg_trgm via Drizzle · Redis + BullMQ with transactional outbox · Valhalla (routing) · Photon (geocoding) · Planetiler → PMTiles · S3-compatible storage · Claude API (server-side only, model from `ASSISTANT_MODEL`) · Vitest, Testcontainers, Jest/RNTL, Maestro · ESLint, dependency-cruiser, gitleaks.
+TypeScript everywhere · pnpm workspaces + Turborepo · React Native + Expo (Expo Router) + MapLibre Native · NestJS (Fastify) · zod + ts-rest contracts · PostgreSQL + PostGIS + pg_trgm via Drizzle · Redis + BullMQ with transactional outbox · Valhalla (routing) · Photon (geocoding) · Planetiler → PMTiles · S3-compatible storage · Claude API (server-side only, model from `ASSISTANT_MODEL`) · Vitest on local PostGIS + Redis (no Testcontainers), Jest/RNTL, Maestro · ESLint, dependency-cruiser, gitleaks.
 
 ## 4. Layout
 
