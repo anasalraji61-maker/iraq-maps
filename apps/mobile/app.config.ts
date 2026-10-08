@@ -20,11 +20,14 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     '@maplibre/maplibre-react-native',
-    // Foreground location only (locate-me). The Android prompt is the system's own; this text is shown on iOS.
+    // Foreground location only (locate-me). The Android prompt is the system's own; this text is shown on iOS, and
+    // `false` keeps the NSLocationAlways* keys out of Info.plist.
     [
       'expo-location',
       {
         locationWhenInUsePermission: 'يستخدم خرائط العراق موقعك لإظهاره على الخريطة وترتيب نتائج البحث حسب القرب.',
+        locationAlwaysPermission: false,
+        locationAlwaysAndWhenInUsePermission: false,
         isAndroidBackgroundLocationEnabled: false,
         isAndroidForegroundServiceEnabled: false,
       },

@@ -22,13 +22,15 @@ export interface AuthenticatedRequest {
   principal: AuthPrincipal;
 }
 
-/** Exact public route patterns: health, auth, and the M1 places and cities routes. A prefix would also open future routes. */
-const PUBLIC_ROUTE =
-  /^\/(health|v1\/auth\/.+|v1\/search|v1\/places\/(nearby|:id)|v1\/cities(\/:id\/(tiles\/:z\/:x\/:y|glyphs\/:fontstack\/:range))?)$/;
+/** Exact public route patterns (a prefix would also open future routes): the auth routes for any method, and health and
+ * the M1 places and cities routes for reads only, so a later write on one of those paths stays protected. */
+const PUBLIC_AUTH = /^\/v1\/auth\/.+$/;
+const PUBLIC_READ = /^\/(health|v1\/search|v1\/places\/(nearby|:id)|v1\/cities(\/:id\/(tiles\/:z\/:x\/:y|glyphs\/:fontstack\/:range))?)$/;
+const isPublic = (method: string, route: string) => PUBLIC_AUTH.test(route) || ((method === 'GET' || method === 'HEAD') && PUBLIC_READ.test(route));
 
 /**
- * The one auth check: bind it as APP_GUARD. Every route needs a valid, unrevoked access token except /health,
- * /v1/auth/* and the public places routes (PUBLIC_ROUTE); it sets `req.principal` or answers the 401 Problem.
+ * The one auth check: bind it as APP_GUARD. Every route needs a valid, unrevoked access token except /v1/auth/* and
+ * reads of /health and the public places routes (isPublic); it sets `req.principal` or answers the 401 Problem.
  * Public routes are matched on the registered route pattern, so the query string and URL spelling do not matter.
  */
 @Injectable()
@@ -36,8 +38,8 @@ export class IdentityAuthGuard implements CanActivate {
   constructor(@Inject(PortTokens.IdentityPort) private readonly identity: IdentityPort) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const req = ctx.switchToHttp().getRequest<{ routeOptions: { url?: string }; headers: { authorization?: string } } & Partial<AuthenticatedRequest>>();
-    if (PUBLIC_ROUTE.test(req.routeOptions.url ?? '')) return true;
+    const req = ctx.switchToHttp().getRequest<{ method: string; routeOptions: { url?: string }; headers: { authorization?: string } } & Partial<AuthenticatedRequest>>();
+    if (isPublic(req.method, req.routeOptions.url ?? '')) return true;
     const principal = await this.identity.verifyAccessToken((req.headers.authorization ?? '').replace(/^Bearer /i, ''));
     if (!principal) throw new HttpException(unauthorized.body, 401);
     req.principal = principal;

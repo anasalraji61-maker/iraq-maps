@@ -1,7 +1,7 @@
 // M2: RoutingPort / RoutingEngine fake and conformance suite.
 import { RouteResult, type BBox, type LngLat, type RouteRequest, type RoutingEngine, type RoutingPort } from '@iraq-maps/contracts';
 import { describe, expect, it } from 'vitest';
-import { distanceM } from './geo';
+import { haversineM } from '@iraq-maps/geo';
 
 /** Google polyline at precision 6, the encoding RouteResult.polyline6 uses ([lat, lng] per point). */
 function encodePolyline6(points: LngLat[]): string {
@@ -32,7 +32,7 @@ export class FakeRoutingPort implements RoutingEngine {
   async route(request: RouteRequest): Promise<RouteResult | null> {
     const points = [request.origin, ...request.waypoints, request.destination];
     if (!points.every((p) => inside(this.coverage, p))) return null;
-    const legs = points.slice(1).map((p, i) => distanceM(points[i]!, p));
+    const legs = points.slice(1).map((p, i) => haversineM(points[i]!, p));
     const leg = (i: number) => ({ distanceM: legs[i] ?? 0, durationS: (legs[i] ?? 0) / SPEED_MPS[request.mode] });
     const total = legs.reduce((a, b) => a + b, 0);
     const lngs = points.map((p) => p[0]);

@@ -1,4 +1,4 @@
-import type { Me, TokenPair } from '@iraq-maps/contracts';
+import type { CityId, Me, PlaceId, TokenPair } from '@iraq-maps/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { createClient } from './index';
 
@@ -101,6 +101,19 @@ describe('createClient', () => {
     controller.abort();
     await client.places.search({ query: { q: 'قلعه', city: 'baghdad' }, fetchOptions: { signal: controller.signal } });
     expect(fetch.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+  });
+
+  it('encodes path params, so a place id cannot change the path', async () => {
+    const fetch = vi.fn(async (_url: string | URL | Request) => problem(404, 'not_found'));
+    const client = createClient({ baseUrl: () => 'http://api.test', getTokens: () => null, onTokens: vi.fn(), fetch });
+    await client.places.get({ params: { id: '../me' as PlaceId } });
+    await client.cities.glyphs({ params: { id: 'baghdad' as CityId, fontstack: 'Noto Sans Arabic Regular', range: '0-255.pbf' } });
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      'http://api.test/v1/places/..%2Fme',
+      'http://api.test/v1/cities/baghdad/glyphs/Noto%20Sans%20Arabic%20Regular/0-255.pbf',
+    ]);
+    for (const id of ['', '.', '..']) await expect(client.places.get({ params: { id: id as PlaceId } })).rejects.toThrow('invalid path parameter');
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it('a network error during refresh does not log out, and the next 401 retries the refresh', async () => {

@@ -3,6 +3,7 @@
   "properties": {
     "id": {
       "type": "string",
+      "maxLength": 64,
       "pattern": "^[a-z][a-z0-9-]*$"
     },
     "names": {

@@ -104,6 +104,14 @@ it('answers a malformed JSON body and an unknown route with Problems', async () 
   expect([missing.statusCode, missing.json()]).toMatchObject([404, { status: 404, code: 'not_found' }]);
 });
 
+it('sends nosniff on every answer, and answers a bad URL or an over-long path parameter with a Problem that does not echo it', async () => {
+  for (const url of ['/health', '/openapi.json', '/v1/me', '/v1/nope']) expect([url, (await app.inject({ method: 'GET', url })).headers['x-content-type-options']]).toEqual([url, 'nosniff']);
+  for (const [url, status] of [['/v1/places/%E0%A4%A', 400], [`/v1/places/${'x'.repeat(6010)}`, 414]] as const) {
+    const res = await app.inject({ method: 'GET', url });
+    expect([res.statusCode, res.json(), res.headers['x-content-type-options']]).toEqual([status, { ...invalidRequest, status }, 'nosniff']);
+  }
+});
+
 it('refuses TRUST_PROXY=true in production (a spoofable X-Forwarded-For defeats the per-IP OTP limit)', () => {
   const env = { APP_ENV: 'production', DATABASE_URL: 'postgres://db/x', REDIS_URL: 'redis://redis' };
   expect(() => apiConfig({ ...env, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);

@@ -5,6 +5,8 @@ import { Banner, Button, EmptyState, IconButton, Screen, TextField, tokens, useU
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { useEffect, useState, type ReactNode } from 'react';
+import { useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { availableRoutes } from './available-routes';
 import { apiBaseUrl, defaultApiUrl, isProduction, loadServerUrl, saveServerUrl } from './config';
 import ar from './i18n/ar.json';
@@ -18,13 +20,18 @@ type Tab = keyof typeof testIDs.tabs;
 const tabIcons: Record<Tab, AndroidSymbol> = { map: 'map', discover: 'explore', messages: 'chat', activity: 'history', account: 'person' };
 const tabs = Object.keys(tabIcons) as Tab[];
 const font = { fontFamily: tokens.font.family };
-// AA contrast for inactive labels (textMuted) and 12sp labels instead of the 10sp default.
+// AA contrast for inactive labels (textMuted) and 12sp labels instead of the 10sp default. Noto Sans Arabic's line box
+// is tall, so the label gets a fixed line height without Android's extra font padding.
+const LABEL_LINE_HEIGHT = 18;
 const tabBarOptions = {
   tabBarActiveTintColor: tokens.color.primary,
   tabBarInactiveTintColor: tokens.color.textMuted,
-  tabBarLabelStyle: { ...font, fontSize: 12 },
+  tabBarLabelStyle: { ...font, fontSize: 12, lineHeight: LABEL_LINE_HEIGHT, includeFontPadding: false },
   headerTitleStyle: font,
 };
+// A tab item is 5dp padding above and below a 28dp icon, then the label; 4dp spare. The library's 49dp default clips
+// the label. The bar adds the bottom safe-area inset as padding (gesture navigation), so the height includes it too.
+const TAB_ITEM_CHROME = 5 + 28 + 5 + 4;
 
 /** Nothing renders until the saved locale, server URL, fonts and session are restored, so nothing flashes. */
 export function RootLayout() {
@@ -72,8 +79,11 @@ function SessionRestored({ children }: { children: ReactNode }) {
 export function TabsLayout() {
   const router = useRouter();
   const devSettings = useRouteAvailable('devSettings');
+  const { bottom } = useSafeAreaInsets();
+  const { fontScale } = useWindowDimensions();
+  const tabBarStyle = { height: TAB_ITEM_CHROME + Math.ceil(LABEL_LINE_HEIGHT * fontScale) + bottom };
   return (
-    <Tabs screenOptions={tabBarOptions}>
+    <Tabs screenOptions={{ ...tabBarOptions, tabBarStyle }}>
       {tabs.map((tab) => (
         <Tabs.Screen
           key={tab}

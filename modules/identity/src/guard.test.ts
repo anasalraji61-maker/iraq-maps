@@ -1,5 +1,5 @@
 import { PortTokens, type IdentityPort } from '@iraq-maps/contracts';
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { APP_GUARD, NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, expect, it } from 'vitest';
@@ -10,13 +10,13 @@ const PUBLIC = ['/v1/search', '/v1/places/nearby', '/v1/places/:id', '/v1/cities
 const PROTECTED = ['/v1/me', '/v1/searches', '/v1/places/saved', '/v1/places/:id/reviews', '/v1/cities/:id', '/v1/auth', '/healthz'];
 
 /** One handler per route pattern, so the guard sees exactly these patterns in req.routeOptions.url. */
-function routes(patterns: string[]) {
+function routes(patterns: string[], method = Get) {
   @Controller()
   class Routes {}
   for (const [i, pattern] of patterns.entries()) {
     const name = `r${i}`;
     Object.defineProperty(Routes.prototype, name, { value: () => ({ ok: true }) });
-    Get(pattern)(Routes.prototype, name, Object.getOwnPropertyDescriptor(Routes.prototype, name)!);
+    method(pattern)(Routes.prototype, name, Object.getOwnPropertyDescriptor(Routes.prototype, name)!);
   }
   return Routes;
 }
@@ -29,7 +29,7 @@ beforeAll(async () => {
   app = await NestFactory.create<NestFastifyApplication>(
     {
       module: TestApp,
-      controllers: [routes([...PUBLIC, ...PROTECTED])],
+      controllers: [routes([...PUBLIC, ...PROTECTED]), routes(PUBLIC, Post)],
       providers: [{ provide: PortTokens.IdentityPort, useValue: identity }, { provide: APP_GUARD, useClass: IdentityAuthGuard }],
     },
     new FastifyAdapter(),
@@ -50,6 +50,14 @@ it('lets the six places routes through without a token', async () => {
 it('still answers 401 on /v1/me and on routes that only look like public ones', async () => {
   for (const pattern of PROTECTED) {
     const res = await app.inject({ method: 'GET', url: url(pattern) });
+    expect([pattern, res.statusCode, res.json()]).toMatchObject([pattern, 401, { code: 'unauthorized' }]);
+  }
+});
+
+it('exempts only reads on the public places paths: HEAD passes, a POST on the same path needs a token', async () => {
+  for (const pattern of PUBLIC) {
+    expect([pattern, (await app.inject({ method: 'HEAD', url: url(pattern) })).statusCode]).toEqual([pattern, 200]);
+    const res = await app.inject({ method: 'POST', url: url(pattern) });
     expect([pattern, res.statusCode, res.json()]).toMatchObject([pattern, 401, { code: 'unauthorized' }]);
   }
 });

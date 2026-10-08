@@ -31,14 +31,42 @@ describe('RateLimiter', () => {
     expect([limiter.allow('10.0.0.2'), limiter.allow('10.0.0.1')]).toEqual([false, true]);
   });
 
-  it('holds at most maxKeys windows, evicting the oldest, in constant time per request', () => {
-    const limiter = new RateLimiter(1, 50_000);
-    const ip = (i: number) => `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}`;
-    const start = performance.now();
-    for (let i = 0; i < 100_000; i++) limiter.allow(ip(i));
-    expect(performance.now() - start).toBeLessThan(10_000); // about 1-2 s; the earlier full sweep per new key took ~36 s
-    expect(limiter.size).toBe(50_000);
-    expect([limiter.allow(ip(0)), limiter.allow(ip(99_999))]).toEqual([true, false]);
+  it('holds at most maxKeys windows, evicting the oldest', () => {
+    const limiter = new RateLimiter(1, 3);
+    for (const ip of ['10.0.0.1', '10.0.0.2', '10.0.0.3', '10.0.0.4']) limiter.allow(ip);
+    expect(limiter.size).toBe(3);
+    expect([limiter.allow('10.0.0.4'), limiter.allow('10.0.0.1')]).toEqual([false, true]); // .1 was evicted: a fresh window
+  });
+
+  it('sweeps only expired windows: a request visits them plus at most one live window', () => {
+    let now = 0;
+    const limiter = new RateLimiter(1, 1_000, () => now);
+    const ip = (i: number) => `10.0.${i >> 8}.${i & 255}`;
+    for (let i = 0; i < 1_000; i++) {
+      now = i < 500 ? 0 : 30_000;
+      limiter.allow(ip(i));
+    }
+    // Counts the entries the sweep's for-of reads from the private Map.
+    const windows = (limiter as unknown as { windows: Map<string, unknown> }).windows;
+    const entries = windows[Symbol.iterator].bind(windows);
+    let visits = 0;
+    windows[Symbol.iterator] = () => {
+      const iterator = entries();
+      const next = iterator.next.bind(iterator);
+      iterator.next = () => {
+        const result = next();
+        visits += result.done ? 0 : 1;
+        return result;
+      };
+      return iterator;
+    };
+    limiter.allow(ip(999)); // all 1000 windows live: stops at the first
+    expect(visits).toBe(1);
+    now = 60_000; // the 500 oldest have expired
+    limiter.allow(ip(1_000));
+    expect([visits, limiter.size]).toEqual([1 + 501, 501]);
+    for (let i = 0; i < 100; i++) limiter.allow(ip(2_000 + i));
+    expect(visits).toBe(1 + 501 + 100);
   });
 });
 

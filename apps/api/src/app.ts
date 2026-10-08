@@ -94,6 +94,13 @@ const reqLog = (req: FastifyRequest) => ({ method: req.method, route: req.routeO
 const fastifyLogger = (log: Logger) =>
   (log as unknown as { child(bindings: object, opts: object): FastifyBaseLogger }).child({}, { serializers: { req: reqLog } });
 
+/** Fastify answers a bad URL encoding (400) or an over-long path parameter (414) before routing, with a body that
+ * echoes the URL. These answer the Problem instead; the nosniff hook does not run for them, so they set it here. */
+const frameworkErrors = (err: { statusCode?: number }, _req: FastifyRequest, reply: FastifyReply) => {
+  const status = err.statusCode ?? 400;
+  void reply.code(status).header('x-content-type-options', 'nosniff').send(problem(status, 'invalid_request', 'Invalid request'));
+};
+
 const nestLogger = (log: Logger): LoggerService => ({
   log: (message: unknown) => log.info(String(message)),
   warn: (message: unknown) => log.warn(String(message)),
@@ -150,11 +157,13 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],
       exports: [PortTokens.EventBus],
     },
-    new FastifyAdapter({ trustProxy: trustProxy(config.TRUST_PROXY), loggerInstance: log && fastifyLogger(log) }),
+    new FastifyAdapter({ trustProxy: trustProxy(config.TRUST_PROXY), loggerInstance: log && fastifyLogger(log), frameworkErrors }),
     { logger: log ? nestLogger(log) : false, abortOnError: false },
   );
   app.useGlobalFilters(new ProblemFilter(log));
   const fastify = app.getHttpAdapter().getInstance();
+  // Clients must not sniff a JSON or tile answer into something executable.
+  fastify.addHook('onRequest', async (_req, reply) => void reply.header('x-content-type-options', 'nosniff'));
   // A plain Fastify route: outside Nest routing, so the auth guard never sees it.
   const openApi = generateOpenApi(apiContract, { info: { title: 'iraq-maps API', version: '0.0.0' } }, { setOperationId: 'concatenated-path' });
   fastify.get('/openapi.json', async () => openApi);

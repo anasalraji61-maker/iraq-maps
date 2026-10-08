@@ -8,14 +8,20 @@ const setAppEnv = (value: string | undefined) => {
 };
 afterEach(() => setAppEnv(initial));
 
-function build(appEnv: string | undefined) {
+function load(appEnv: string | undefined) {
   setAppEnv(appEnv);
   let config: ExpoConfig | undefined;
   jest.isolateModules(() => {
     config = jest.requireActual<{ default: ExpoConfig }>('./app.config').default;
   });
-  const [, props] = config!.plugins!.find((p) => Array.isArray(p) && p[0] === 'expo-build-properties') as [string, { android: { usesCleartextTraffic: boolean } }];
-  return { appEnv: config!.extra?.appEnv, cleartext: props.android.usesCleartextTraffic };
+  return config!;
+}
+const pluginProps = <T>(config: ExpoConfig, name: string) => (config.plugins!.find((p) => Array.isArray(p) && p[0] === name) as [string, T])[1];
+
+function build(appEnv: string | undefined) {
+  const config = load(appEnv);
+  const props = pluginProps<{ android: { usesCleartextTraffic: boolean } }>(config, 'expo-build-properties');
+  return { appEnv: config.extra?.appEnv, cleartext: props.android.usesCleartextTraffic };
 }
 
 it('fails closed: an unset EXPO_PUBLIC_APP_ENV builds production without cleartext HTTP', () => {
@@ -30,4 +36,13 @@ it('refuses an unknown EXPO_PUBLIC_APP_ENV at prebuild instead of building a cle
 it('allows cleartext HTTP outside production', () => {
   expect(build('development')).toEqual({ appEnv: 'development', cleartext: true });
   expect(build('e2e')).toEqual({ appEnv: 'e2e', cleartext: true });
+});
+
+it('asks for foreground location only: no NSLocationAlways* keys on iOS and no background location on Android', () => {
+  expect(pluginProps(load('production'), 'expo-location')).toMatchObject({
+    locationAlwaysPermission: false,
+    locationAlwaysAndWhenInUsePermission: false,
+    isAndroidBackgroundLocationEnabled: false,
+    isAndroidForegroundServiceEnabled: false,
+  });
 });

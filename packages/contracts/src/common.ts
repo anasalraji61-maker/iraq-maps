@@ -5,7 +5,7 @@ export type UserId = z.infer<typeof UserId>;
 export const PlaceId = z.string().min(1).brand<'PlaceId'>();
 export type PlaceId = z.infer<typeof PlaceId>;
 /** @public frozen contract, consumed from M1 */
-export const CityId = z.string().regex(/^[a-z][a-z0-9-]*$/).brand<'CityId'>();
+export const CityId = z.string().max(64).regex(/^[a-z][a-z0-9-]*$/).brand<'CityId'>();
 export type CityId = z.infer<typeof CityId>;
 
 export const Locale = z.enum(['ar', 'ckb', 'en']);

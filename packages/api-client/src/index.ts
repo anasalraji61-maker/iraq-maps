@@ -12,6 +12,22 @@ export interface CreateClientOptions {
   fetch?: typeof fetch;
 }
 
+// '', '.' and '..' would drop or climb a path segment even when percent-encoded (URL parsers treat %2E as a dot).
+const encodeParam = (value: unknown) => {
+  const s = String(value);
+  if (/^\.{0,2}$/.test(s)) throw new TypeError(`invalid path parameter "${s}"`);
+  return encodeURIComponent(s);
+};
+
+/** ts-rest inserts path params verbatim: encode each one, so a placeId such as `../me` stays one path segment. */
+function encodingPathParams<T extends object>(client: T): T {
+  const wrap = (route: (args?: { params?: object }) => Promise<unknown>) => async (args?: { params?: object }) =>
+    route(args?.params ? { ...args, params: Object.fromEntries(Object.entries(args.params).map(([k, v]) => [k, encodeParam(v)])) } : args);
+  return Object.fromEntries(
+    Object.entries(client).map(([key, value]) => [key, typeof value === 'function' ? wrap(value as Parameters<typeof wrap>[0]) : encodingPathParams(value as object)]),
+  ) as T;
+}
+
 /** ts-rest client that injects the bearer token and, on 401, refreshes once (single-flight) and retries. */
 export function createClient({ baseUrl, getTokens, onTokens, fetch: doFetch = (...args) => fetch(...args) }: CreateClientOptions): ApiClient {
   const send = async ({ route, path, method, headers, body, fetchOptions }: ApiFetcherArgs, accessToken?: string) => {
@@ -53,5 +69,5 @@ export function createClient({ baseUrl, getTokens, onTokens, fetch: doFetch = (.
     const fresh = await refreshFrom(tokens);
     return fresh ? send(args, fresh.accessToken) : res;
   };
-  return initClient(apiContract, { baseUrl: '', baseHeaders: {}, api });
+  return encodingPathParams(initClient(apiContract, { baseUrl: '', baseHeaders: {}, api }));
 }

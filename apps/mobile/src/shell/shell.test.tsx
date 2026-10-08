@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { renderRouter } from 'expo-router/testing-library';
 import { memorySecureStore } from '@iraq-maps/mobile-kit/testing';
 import * as SecureStore from 'expo-secure-store';
-import { I18nManager } from 'react-native';
+import { Dimensions, I18nManager, StyleSheet } from 'react-native';
 import { apiBaseUrl } from './config';
 import { DevSettingsScreen, PendingScreen, RootLayout, TabsLayout } from './index';
 
@@ -77,6 +77,20 @@ describe('tabs', () => {
     expect(label('map')).toHaveStyle({ fontSize: 12, color: tokens.color.primary });
     expect(label('discover')).toHaveStyle({ fontSize: 12, color: tokens.color.textMuted });
     for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveProp('accessibilityLabel', t(`common:tabs.${tab}`));
+  });
+
+  it('the tab bar fits the 28dp icon and the whole label line at the font scale, above the bottom safe-area inset', async () => {
+    await launch();
+    // A gesture-navigation phone: the native safe-area provider reports a 24dp bottom inset.
+    const provider = screen.container.queryAll((node) => node.type === 'RNCSafeAreaProvider')[0]!;
+    const frame = { x: 0, y: 0, width: 390, height: 844 };
+    await fireEvent(provider, 'insetsChange', { nativeEvent: { frame, insets: { top: 0, left: 0, right: 0, bottom: 24 } } });
+    const label = within(screen.getByTestId(testIDs.tabs.map)).getByText(t('common:tabs.map'));
+    expect(label).toHaveStyle({ lineHeight: 18, includeFontPadding: false });
+    const tablist = screen.container.queryAll((node) => node.props.role === 'tablist')[0]!;
+    const bar = StyleSheet.flatten(tablist.parent!.props.style) as { height: number; paddingBottom: number };
+    expect(bar.paddingBottom).toBe(24);
+    expect(bar.height - bar.paddingBottom).toBeGreaterThanOrEqual(5 + 28 + 5 + 18 * Dimensions.get('window').fontScale);
   });
 
   it('undelivered tabs show the shared coming-soon empty state', async () => {

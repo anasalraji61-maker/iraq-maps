@@ -19,8 +19,8 @@ import {
   type UserDataEraser,
   type UserId,
 } from '@iraq-maps/contracts';
+import { haversineM } from '@iraq-maps/geo';
 import { normalizeArabic } from '@iraq-maps/i18n';
-import { distanceM } from './geo';
 
 export class FixedClock implements Clock {
   constructor(private current = new Date('2026-01-01T00:00:00.000Z')) {}
@@ -86,7 +86,7 @@ export class FakePlacesQueryPort implements PlacesQueryPort {
   async search(q: SearchQuery): Promise<PlaceSummary[]> {
     const needle = normalizeArabic(q.q).toLowerCase();
     const score = (r: Row) => Math.max(...Object.values(r.names).map((n) => normalizeArabic(n).toLowerCase()).map((n) => (n === needle ? 3 : n.startsWith(needle) ? 2 : n.includes(needle) ? 1 : 0)));
-    const hits = this.inCity(q.city).map((r) => ({ r, s: score(r), d: q.near ? distanceM(q.near, r.location) : 0 }));
+    const hits = this.inCity(q.city).map((r) => ({ r, s: score(r), d: q.near ? haversineM(q.near, r.location) : 0 }));
     return hits
       .filter((h) => h.s > 0)
       .sort((a, b) => b.s - a.s || a.d - b.d || KIND_ORDER[a.r.kind] - KIND_ORDER[b.r.kind])
@@ -111,7 +111,7 @@ export class FakePlacesQueryPort implements PlacesQueryPort {
   async nearby(q: NearbyQuery): Promise<PlaceSummary[]> {
     return this.inCity(q.city)
       .filter((r) => r.kind === 'place' && (!q.category || r.category === q.category))
-      .map((r) => ({ r, d: distanceM(q.near, r.location) }))
+      .map((r) => ({ r, d: haversineM(q.near, r.location) }))
       .filter((h) => h.d <= q.radiusM)
       .sort((a, b) => a.d - b.d)
       .slice(0, q.limit)
@@ -124,7 +124,7 @@ export class FakePlacesQueryPort implements PlacesQueryPort {
 
   /** `area` is the nearest area record within 3 km. */
   private summary(r: Row, d: number | null): PlaceSummary {
-    const area = r.kind === 'area' ? undefined : this.inCity(r.city).filter((a) => a.kind === 'area' && distanceM(a.location, r.location) <= 3000).sort((a, b) => distanceM(a.location, r.location) - distanceM(b.location, r.location))[0];
+    const area = r.kind === 'area' ? undefined : this.inCity(r.city).filter((a) => a.kind === 'area' && haversineM(a.location, r.location) <= 3000).sort((a, b) => haversineM(a.location, r.location) - haversineM(b.location, r.location))[0];
     return { id: r.id as PlaceId, kind: r.kind, names: r.names, category: r.category, area: area?.names ?? null, location: r.location, distanceM: d };
   }
 }

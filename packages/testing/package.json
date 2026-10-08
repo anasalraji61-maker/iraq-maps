@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/geo": "workspace:*",
     "@iraq-maps/i18n": "workspace:*"
   },
   "peerDependencies": {
