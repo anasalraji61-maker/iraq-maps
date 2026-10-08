@@ -48,8 +48,9 @@ polygons come only from the area rules.
 | boundary | country (0), province (4), district (8) ← ways of `type=boundary` + `boundary=administrative` relations with the lowest `admin_level` 2, 3–4 or 5–6. Such a way carries only `class`, never its own road or river names, unless it is tagged as that boundary itself. |
 
 `--city` is the city config (`geo-services/pipeline/cities/<id>.yaml`). Its `categories` limit the poi layer the way
-the pipeline extract limits places.ndjson: a rule whose category the city does not enable is skipped (its `*` does not
-stand in), so map POIs and search agree. Without `--city` every category is kept. A config whose list is missing or
+the pipeline extract limits places.ndjson: the first rule that yields a category decides, and if the city does not
+enable that category the element is dropped (a later rule does not stand in), so map POIs and search agree. Both pass
+the shared cases in `packages/contracts/schemas/osm-category-cases.json`. Without `--city` every category is kept. A config whose list is missing or
 holds a value that is not a PlaceCategory is rejected with exit 2.
 
 ## Test (acceptance #2 of M1)
@@ -65,6 +66,7 @@ through `TilesCli`, reads the PMTiles header and decodes every tile, and asserts
   dropped, and POIs start at z14;
 - every POI's class is the category `osm-categories.json` gives its fixture element, and exactly the elements with a
   category become POIs; with `--city` and a config enabling only food and cafe, only those POIs remain;
+- `categoryOf` gives every case of `osm-category-cases.json` its expected category (or drop);
 - a closed `waterway=canal` stays a line, and the river that is also a district boundary gives that boundary no names;
 - bad CLI arguments (including a directory as `--output`, a missing `--city` file or a category that is not a
   PlaceCategory) are rejected, and a failed build keeps the previous archive;

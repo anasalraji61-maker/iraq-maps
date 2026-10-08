@@ -3,10 +3,10 @@ package iq.iraqmaps.tiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onthegomap.planetiler.VectorTile;
@@ -115,15 +115,22 @@ class TilesTest {
   /** Each POI's class is what the shared OsmCategories table gives its OSM element's own tags (fixture read with DOM). */
   @Test
   void poiCategoriesFollowTheSharedTable() throws Exception {
+    assertPois(features, OsmCategories.read().categories());
+  }
+
+  /** The cases the pipeline extract passes too (schemas/osm-category-cases.json): no `enabled` means every category. */
+  @Test
+  void categoryOfPassesTheSharedCases() throws Exception {
     var categories = OsmCategories.read();
-    var all = categories.categories();
-    assertPois(features, all);
-    // Semantics the profile relies on: ignored values never match, and an exact value beats "*" within a rule.
-    assertNull(categories.categoryOf(Map.of("shop", "vacant"), all));
-    assertEquals("government", categories.categoryOf(Map.of("office", "government"), all));
-    assertEquals("office", categories.categoryOf(Map.of("office", "company"), all));
-    // Like the pipeline extract: a rule whose category the city does not enable is skipped, its "*" does not stand in.
-    assertNull(categories.categoryOf(Map.of("office", "government"), Set.of("office")));
+    var mapper = new ObjectMapper();
+    var cases = mapper.readTree(OsmCategories.PATH.resolveSibling("osm-category-cases.json").toFile());
+    assertFalse(cases.isEmpty());
+    for (var c : cases) {
+      Map<String, Object> tags = mapper.convertValue(c.get("tags"), new TypeReference<Map<String, Object>>() {});
+      Set<String> enabled = c.hasNonNull("enabled") ? mapper.convertValue(c.get("enabled"), new TypeReference<Set<String>>() {}) : categories.categories();
+      var category = c.get("category");
+      assertEquals(category == null || category.isNull() ? null : category.asText(), categories.categoryOf(tags, enabled), c.toString());
+    }
   }
 
   /** --city keeps only the POIs of the city config's categories, as places.ndjson does. */

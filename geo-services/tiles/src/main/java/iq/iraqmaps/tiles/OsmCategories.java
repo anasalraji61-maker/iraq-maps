@@ -24,15 +24,16 @@ record OsmCategories(List<String> ignoredValues, List<Rule> rules) {
   }
 
   /**
-   * The element's PlaceCategory among the city's enabled ones, or null when no rule yields one. A rule whose category is
-   * not enabled is skipped (its "*" does not stand in), as in the pipeline extract, so map POIs and search agree.
+   * The element's PlaceCategory, or null when no rule yields one or the city does not enable the one the first rule
+   * yields (the element is dropped, not given a later rule's category). The pipeline extract decides the same way, and
+   * schemas/osm-category-cases.json holds the cases both must pass, so map POIs and search agree.
    */
   String categoryOf(Map<String, Object> tags, Set<String> enabled) {
     for (Rule rule : rules) {
       if (tags.get(rule.key()) instanceof String value && !ignoredValues.contains(value)) {
         String category = rule.values().getOrDefault(value, rule.values().get("*"));
-        if (category != null && enabled.contains(category)) {
-          return category;
+        if (category != null) {
+          return enabled.contains(category) ? category : null;
         }
       }
     }
