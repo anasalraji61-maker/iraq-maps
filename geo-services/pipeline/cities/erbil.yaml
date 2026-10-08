@@ -1,0 +1,11 @@
+# Erbil urban area. bbox is an approximate box around the area inside the 120m ring road
+# (citadel at ~44.009E, 36.191N); it also takes in some fringe beyond the ring at the corners.
+# Replace with a polygon traced from the OSM ring-road ways once we have the extract.
+id: erbil
+names:
+  ar: أربيل
+  ckb: هەولێر
+  en: Erbil
+bbox: [43.92, 36.11, 44.10, 36.27] # [min_lon, min_lat, max_lon, max_lat], WGS84
+default_locales: [ar, ckb, en] # label fallback order
+categories: [food, cafe, lodging, shopping, tourism, health, finance, fuel, office, worship, education, government, transport, entertainment]

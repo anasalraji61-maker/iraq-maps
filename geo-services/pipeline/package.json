@@ -1,0 +1,10 @@
+{
+  "name": "@iraq-maps/geo-pipeline",
+  "version": "0.0.0",
+  "private": true,
+  "description": "OSM city pipeline (Python). pnpm scripts wrap a local venv so turbo can run them.",
+  "scripts": {
+    "test": "sh scripts/py.sh -m pytest -q",
+    "lint": "sh scripts/py.sh -m ruff check ."
+  }
+}

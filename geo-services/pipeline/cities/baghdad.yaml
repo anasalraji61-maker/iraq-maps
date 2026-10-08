@@ -1,0 +1,11 @@
+# Baghdad main urban area on both banks of the Tigris: Kadhimiya/Adhamiya in the north,
+# Sadr City and New Baghdad in the east, Dora in the south, Mansour/Ghazaliya and the airport
+# in the west. Approximate box; replace with a polygon when we prepare Baghdad for real.
+id: baghdad
+names:
+  ar: بغداد
+  ckb: بەغدا
+  en: Baghdad
+bbox: [44.22, 33.20, 44.55, 33.45] # [min_lon, min_lat, max_lon, max_lat], WGS84
+default_locales: [ar, en, ckb]
+categories: [food, cafe, lodging, shopping, tourism, health, finance, fuel, office, worship, education, government, transport, entertainment]

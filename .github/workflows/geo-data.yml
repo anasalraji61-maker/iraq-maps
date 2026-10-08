@@ -1,0 +1,67 @@
+# OSM data-quality report for the first-city decision (MVP.md section 1, task T01).
+# Downloads the public Geofabrik Iraq extract, clips each city in geo-services/pipeline/cities,
+# computes the decision-gate metrics and uploads the report. Read-only: no secrets, no pushes.
+name: geo-data
+on:
+  push:
+    paths:
+      - 'geo-services/pipeline/**'
+      - '.github/workflows/geo-data.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: geo-data-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  osm-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: geo-services/pipeline
+    env:
+      EXTRACT_URL: https://download.geofabrik.de/asia/iraq-latest.osm.pbf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: geo-services/pipeline/requirements.txt
+      - name: Install osmium-tool
+        run: sudo apt-get update -q && sudo apt-get install -y -q osmium-tool
+      - name: Unit tests
+        run: sh scripts/py.sh -m pytest -q
+      - name: Validate city configs
+        run: sh scripts/py.sh -m quality.cities validate cities/*.yaml
+      - name: Download Geofabrik Iraq extract
+        run: |
+          mkdir -p data
+          for f in iraq-latest.osm.pbf iraq-latest.osm.pbf.md5; do
+            curl -fsSL --retry 5 --retry-delay 20 --retry-all-errors --connect-timeout 30 \
+              -o "data/$f" "${EXTRACT_URL%/*}/$f"
+          done
+          (cd data && md5sum -c iraq-latest.osm.pbf.md5)
+          osmium fileinfo data/iraq-latest.osm.pbf
+      - name: Clip cities and compute metrics
+        run: |
+          AS_OF=$(date -u +%F)
+          for cfg in cities/*.yaml; do
+            c=$(basename "$cfg" .yaml)
+            sh scripts/py.sh -m quality.cities clip "$cfg" data/iraq-latest.osm.pbf "data/$c.osm.pbf"
+            sh scripts/py.sh -m quality.metrics --city "$cfg" --input "data/$c.osm.pbf" --as-of "$AS_OF" -o "out/$c.json"
+          done
+      - name: Compare and decide
+        run: |
+          sh scripts/py.sh -m quality.compare --base out/erbil.json --challenger out/baghdad.json \
+            --json out/osm-quality.json --md out/osm-quality.md
+          cat out/osm-quality.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: osm-quality-report
+          path: |
+            geo-services/pipeline/out/*.json
+            geo-services/pipeline/out/*.md
+          if-no-files-found: error
+          retention-days: 90

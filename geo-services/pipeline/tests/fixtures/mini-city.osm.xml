@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-made fixture. Expected metric values are worked out in tests/test_metrics.py.
+     All roads run along meridians in steps of 0.01 deg latitude, so every segment is exactly
+     d = R * pi/180 * 0.01 km (R = libosmium's 6372797.560856 m). No user/uid, like Geofabrik. -->
+<osm version="0.6" generator="hand">
+  <!-- road nodes on lon 44.00 (main component) -->
+  <node id="1" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.15" lon="44.00"/>
+  <node id="2" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.16" lon="44.00">
+    <tag k="highway" v="traffic_signals"/>
+  </node>
+  <node id="3" version="2" timestamp="2025-03-01T00:00:00Z" lat="36.17" lon="44.00"/>
+  <node id="4" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.18" lon="44.00"/>
+  <node id="5" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.19" lon="44.00"/>
+  <node id="6" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.20" lon="44.00"/>
+  <!-- isolated road on lon 44.05 -->
+  <node id="7" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.15" lon="44.05"/>
+  <node id="8" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.16" lon="44.05"/>
+  <!-- footway (not a road) -->
+  <node id="9" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.15" lon="44.01"/>
+  <node id="10" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.16" lon="44.01"/>
+  <!-- POI nodes -->
+  <node id="101" version="3" timestamp="2026-01-15T00:00:00Z" lat="36.155" lon="44.002">
+    <tag k="amenity" v="restaurant"/>
+    <tag k="name" v="مطعم الساعة"/>
+    <tag k="phone" v="+964-000"/>
+  </node>
+  <node id="102" version="1" timestamp="2024-10-08T00:00:00Z" lat="36.165" lon="44.002">
+    <tag k="shop" v="supermarket"/>
+    <tag k="name" v="Family Mall"/>
+    <tag k="name:ar" v="فاميلي مول"/>
+    <tag k="opening_hours" v="24/7"/>
+  </node>
+  <node id="103" version="1" timestamp="2024-10-07T23:59:59Z" lat="36.175" lon="44.002">
+    <tag k="tourism" v="hotel"/>
+    <tag k="name" v="هوتێلی ڕۆتانا"/>
+    <tag k="contact:phone" v="+964-000"/>
+  </node>
+  <node id="104" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.185" lon="44.002">
+    <tag k="office" v="company"/>
+  </node>
+  <node id="105" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.195" lon="44.002">
+    <tag k="amenity" v="bench"/>
+  </node>
+  <!-- cafe outline -->
+  <node id="201" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.170" lon="44.020"/>
+  <node id="202" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.170" lon="44.021"/>
+  <node id="203" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.171" lon="44.021"/>
+  <node id="204" version="1" timestamp="2020-01-01T00:00:00Z" lat="36.171" lon="44.020"/>
+
+  <way id="1001" version="4" timestamp="2025-03-01T00:00:00Z">
+    <nd ref="1"/><nd ref="2"/><nd ref="3"/>
+    <tag k="highway" v="primary"/>
+    <tag k="name" v="شارع 60"/>
+    <tag k="name:ar" v="شارع الستين"/>
+  </way>
+  <way id="1002" version="1" timestamp="2020-01-01T00:00:00Z">
+    <nd ref="3"/><nd ref="4"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="شەقامی گوڵان"/>
+  </way>
+  <way id="1003" version="1" timestamp="2020-01-01T00:00:00Z">
+    <nd ref="4"/><nd ref="5"/>
+    <tag k="highway" v="residential"/>
+    <tag k="name" v="شارع الزهور"/>
+  </way>
+  <way id="1004" version="1" timestamp="2020-01-01T00:00:00Z">
+    <nd ref="5"/><nd ref="6"/>
+    <tag k="highway" v="service"/>
+  </way>
+  <way id="1005" version="1" timestamp="2020-01-01T00:00:00Z">
+    <nd ref="7"/><nd ref="8"/>
+    <tag k="highway" v="tertiary"/>
+  </way>
+  <way id="1006" version="1" timestamp="2020-01-01T00:00:00Z">
+    <nd ref="9"/><nd ref="10"/>
+    <tag k="highway" v="footway"/>
+    <tag k="name" v="ممر"/>
+  </way>
+  <way id="2001" version="2" timestamp="2026-09-30T00:00:00Z">
+    <nd ref="201"/><nd ref="202"/><nd ref="203"/><nd ref="204"/><nd ref="201"/>
+    <tag k="amenity" v="cafe"/>
+    <tag k="shop" v="coffee"/>
+    <tag k="name" v="قهوة"/>
+    <tag k="opening_hours" v="Mo-Su 08:00-23:00"/>
+  </way>
+
+  <relation id="3001" version="1" timestamp="2025-06-01T00:00:00Z">
+    <member type="way" ref="2001" role="outer"/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="tourism" v="attraction"/>
+    <tag k="name" v="Erbil Citadel"/>
+    <tag k="name:ar" v="قلعة أربيل"/>
+  </relation>
+</osm>
