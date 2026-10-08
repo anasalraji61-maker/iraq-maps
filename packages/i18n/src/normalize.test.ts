@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeArabic as n } from './normalize';
+import { normalizeArabic as n, toAsciiDigits } from './normalize';
 
 describe('normalizeArabic', () => {
   it('folds alef forms: أربيل, إربيل and اربيل are equal', () => {
@@ -40,5 +40,13 @@ describe('normalizeArabic', () => {
   it('expands presentation forms and collapses whitespace', () => {
     expect(n('\uFEFB')).toBe('لا');
     expect(n('  شارع   الرشيد \n')).toBe('شارع الرشيد');
+  });
+});
+
+describe('toAsciiDigits', () => {
+  it('converts only the digits and leaves everything else as is', () => {
+    expect(toAsciiDigits('٠٧٧٠ ١٢٣ ٤٥٦٧')).toBe('0770 123 4567');
+    expect(toAsciiDigits('۰۷۵۰-۱۲۳۴۵۶۷')).toBe('0750-1234567');
+    expect(toAsciiDigits('+964 ٧٧٠ أربيل')).toBe('+964 770 أربيل');
   });
 });

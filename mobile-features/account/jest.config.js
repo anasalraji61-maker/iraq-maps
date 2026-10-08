@@ -1,2 +1,4 @@
-// testTimeout: a cold jest-expo transform cache with several RN packages testing in parallel (CI) can exceed the 5 s default.
-export default { preset: 'jest-expo', clearMocks: true, testTimeout: 30000, setupFiles: ['<rootDir>/test/setup.ts'] };
+import preset from '@iraq-maps/tooling/jest';
+
+// clearMocks: the tests share one expo-router mock (test/setup.ts) and assert on its calls per test.
+export default { ...preset, clearMocks: true, setupFiles: ['<rootDir>/test/setup.ts'] };

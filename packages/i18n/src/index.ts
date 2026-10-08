@@ -3,7 +3,8 @@ import ar from './locales/ar.json';
 import ckb from './locales/ckb.json';
 import en from './locales/en.json';
 
-export { normalizeArabic } from './normalize';
+/** @public the shared Arabic/Kurdish search normalizer (M1 search) */
+export { normalizeArabic, toAsciiDigits } from './normalize';
 
 export type Messages = { [key: string]: string | Messages };
 

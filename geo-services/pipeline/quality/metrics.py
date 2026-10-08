@@ -33,8 +33,8 @@ ROADS = {
     "living_street", "road", "service",
     "motorway_link", "trunk_link", "primary_link", "secondary_link", "tertiary_link",
 }
-ARABIC = re.compile("[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]")
-SORANI = re.compile("[ڕۆێڵەھ]")  # ڕ ۆ ێ ڵ ە ھ
+ARABIC = re.compile("[\u0600-\u06ff\u0750-\u077f\ufb50-\ufdff\ufe70-\ufeff]")
+SORANI = re.compile("[\u0695\u06c6\u06ce\u06b5\u06d5\u06be]")  # ڕ ۆ ێ ڵ ە ھ
 RECENT_MONTHS = 24
 SOURCE = {
     "attribution": "© OpenStreetMap contributors",

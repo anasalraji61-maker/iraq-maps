@@ -12,6 +12,7 @@ server can import it too. Locales are `ar` (default), `ckb` (Kurdish Sorani) and
 | `formatNumber(n, Intl options?)` | Formats for the current locale: Arabic-Indic digits for `ar`/`ckb` (`١٬٢٣٤`), Latin for `en`. |
 | `assertKeyParity(ns, { ar, ckb, en })` | The key-parity check, for each namespace's own test. |
 | `normalizeArabic(text)` | Search normalizer (`src/normalize.ts`). Index and query must both go through it. |
+| `toAsciiDigits(text)` | Arabic-Indic ٠-٩ and Persian ۰-۹ digits to ASCII. Nothing else changes. Use it for phone numbers and codes; `normalizeArabic` calls it too. |
 
 `common` is registered on import. It holds the tab labels (`common:tabs.map|discover|messages|activity|account`),
 `comingSoon.title|body`, `actions.retry|cancel|confirm|save|close|back`, `status.loading` and

@@ -18,9 +18,10 @@
     "knip": "knip --config packages/tooling/knip.json",
     "jscpd": "jscpd --config packages/tooling/jscpd.json .",
     "ownership:check": "node tools/ownership/src/cli.ts",
+    "invisible:check": "node tools/ownership/src/no-invisible.ts",
     "infra:local": "sh infra/local/infra.sh",
     "android:precheck": "pnpm --filter @iraq-maps/mobile android:precheck",
-    "gate": "turbo run build lint typecheck test && pnpm depcruise && pnpm gitleaks && pnpm knip && pnpm jscpd && pnpm ownership:check --milestone M0 --base 410b61a"
+    "gate": "turbo run build lint typecheck test && pnpm depcruise && pnpm gitleaks && pnpm knip && pnpm jscpd && pnpm ownership:check --milestone M0 --base 410b61a && pnpm invisible:check"
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",

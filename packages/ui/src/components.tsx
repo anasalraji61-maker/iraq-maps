@@ -33,8 +33,6 @@ const buttonColors = {
   secondary: { bg: color.bg, fg: color.primary },
   danger: { bg: color.danger, fg: color.onPrimary },
 } as const;
-// i18next/no-literal-string (jsx-only mode) flags every string inside JSX, so non-user-facing prop values live here.
-const prop = { button: 'button', radio: 'radio', header: 'header', alert: 'alert', handled: 'handled', slide: 'slide', bottom: ['bottom'] } as const;
 /** The selected-row check mark (SF Symbol on iOS, Material Symbol elsewhere). */
 const check = { ios: 'checkmark', android: 'check', web: 'check' } as const;
 /** Material Symbols whose direction must follow the layout (back/forward). */
@@ -61,7 +59,7 @@ function Touchable({ onPress, selected, testID, style, children }: { onPress?():
     <Pressable
       testID={testID}
       onPress={onPress}
-      accessibilityRole={radio ? prop.radio : prop.button}
+      accessibilityRole={radio ? 'radio' : 'button'}
       accessibilityState={radio ? { checked: selected } : undefined}
       style={pressable(style)}
     >
@@ -78,7 +76,7 @@ export function Screen({ children, scroll = false, testID }: ScreenProps): React
   return (
     <SafeAreaView testID={testID} style={styles.screen}>
       {scroll ? (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps={prop.handled}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {children}
         </ScrollView>
       ) : (
@@ -90,7 +88,7 @@ export function Screen({ children, scroll = false, testID }: ScreenProps): React
 
 export function Text({ children, variant = 'body', tone = 'default', testID }: TextProps): ReactElement {
   return (
-    <RNText testID={testID} accessibilityRole={variant === 'title' ? prop.header : undefined} style={[text[variant], { color: tones[tone] }]}>
+    <RNText testID={testID} accessibilityRole={variant === 'title' ? 'header' : undefined} style={[text[variant], { color: tones[tone] }]}>
       {children}
     </RNText>
   );
@@ -104,7 +102,7 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       testID={testID}
       onPress={onPress}
       disabled={inactive}
-      accessibilityRole={prop.button}
+      accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: inactive, busy: loading }}
       style={pressable(styles.button, { backgroundColor: bg, borderColor: variant === 'secondary' ? color.primary : bg }, disabled && styles.disabled)}
@@ -162,10 +160,10 @@ export function Card({ children, onPress, testID }: CardProps): ReactElement {
 
 export function Sheet({ visible, onClose, children, testID }: SheetProps): ReactElement {
   return (
-    <Modal visible={visible} transparent animationType={prop.slide} onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Pressable style={styles.fill} onPress={onClose} accessible={false} />
-        <SafeAreaView edges={prop.bottom} testID={testID} accessibilityViewIsModal onAccessibilityEscape={onClose} style={styles.sheet}>
+        <SafeAreaView edges={['bottom']} testID={testID} accessibilityViewIsModal onAccessibilityEscape={onClose} style={styles.sheet}>
           {children}
         </SafeAreaView>
       </View>
@@ -180,7 +178,7 @@ export function Banner({ kind, message, testID }: BannerProps): ReactElement {
     <View
       testID={testID}
       accessible
-      accessibilityRole={kind === 'error' ? prop.alert : undefined}
+      accessibilityRole={kind === 'error' ? 'alert' : undefined}
       style={[styles.banner, { backgroundColor: bg, borderStartColor: fg }]}
     >
       <RNText style={[text.body, { color: fg }]}>{message}</RNText>
@@ -191,7 +189,7 @@ export function Banner({ kind, message, testID }: BannerProps): ReactElement {
 export function EmptyState({ title, body, action, testID }: EmptyStateProps): ReactElement {
   return (
     <View testID={testID} style={styles.empty}>
-      <RNText accessibilityRole={prop.header} style={[text.title, styles.center]}>
+      <RNText accessibilityRole="header" style={[text.title, styles.center]}>
         {title}
       </RNText>
       {body ? <RNText style={[text.body, styles.center, { color: color.textMuted }]}>{body}</RNText> : null}
@@ -206,7 +204,7 @@ export function IconButton({ icon, accessibilityLabel, onPress, testID }: IconBu
     <Pressable
       testID={testID}
       onPress={onPress}
-      accessibilityRole={prop.button}
+      accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       style={pressable(styles.icon, I18nManager.isRTL && MIRRORED.test(icon) && styles.mirrored)}
     >

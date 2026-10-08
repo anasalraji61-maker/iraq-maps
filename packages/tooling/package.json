@@ -6,6 +6,7 @@
   "exports": {
     "./eslint": "./eslint.config.js",
     "./vitest": "./vitest.preset.ts",
+    "./jest": "./jest.preset.js",
     "./tsconfig.base.json": "./tsconfig.base.json",
     "./tsconfig.rn.json": "./tsconfig.rn.json"
   },

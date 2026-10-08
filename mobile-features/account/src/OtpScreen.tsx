@@ -1,10 +1,10 @@
 import { testIDs } from '@iraq-maps/contracts';
-import { formatNumber, getLocale } from '@iraq-maps/i18n';
+import { formatNumber, getLocale, toAsciiDigits } from '@iraq-maps/i18n';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, type ReactElement } from 'react';
-import { isolateLtr, toAsciiDigits } from './phone';
+import { isolateLtr } from './phone';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
 

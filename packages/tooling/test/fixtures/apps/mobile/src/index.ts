@@ -1,1 +1,2 @@
-export const mobile = 1;
+import { y } from '../../../mobile-features/y/src/index.ts';
+export const mobile = y;

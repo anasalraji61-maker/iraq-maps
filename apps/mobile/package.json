@@ -11,13 +11,6 @@
     "typecheck": "tsc --noEmit",
     "test": "jest"
   },
-  "jest": {
-    "preset": "jest-expo",
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "testTimeout": 30000
-  },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.16",
     "@iraq-maps/contracts": "workspace:*",
@@ -39,6 +32,7 @@
     "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*",
     "@jest/globals": "^29.7.0",
     "@react-native/jest-preset": "0.86.3",
     "@testing-library/react-native": "^14.1.0",

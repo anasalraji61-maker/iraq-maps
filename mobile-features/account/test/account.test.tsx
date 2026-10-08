@@ -36,7 +36,7 @@ describe('AccountScreen', () => {
 
   it('offers sign-in and the language picker when signed out', async () => {
     const { router, view } = await setup(<AccountScreen />, { signedIn: false });
-    await fireEvent.press(view.getByTestId('account.signIn'));
+    await fireEvent.press(view.getByTestId(account.signIn));
     await fireEvent.press(view.getByTestId(account.language));
     expect(router.push.mock.calls).toEqual([['/auth/phone'], ['/account/language']]);
   });

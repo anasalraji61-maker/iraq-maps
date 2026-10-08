@@ -11,6 +11,8 @@ module.exports = {
     forbid('mobile-to-backend', { path: '^(apps/mobile|mobile-features)/' }, { path: '^(modules|adapters|apps/api)/' }, 'The app reaches the backend only via packages/api-client.'),
     forbid('feature-to-feature', { path: '^mobile-features/([^/]+)/' }, { path: '^mobile-features/', pathNot: '^mobile-features/$1/' }, 'Features navigate via mobile-kit route links, never imports.'),
     forbid('feature-to-app', { path: '^mobile-features/' }, { path: '^apps/' }),
+    forbid('shell-to-feature', { path: '^apps/mobile/src/' }, { path: '^mobile-features/' }, 'The shell never imports features; app/** route files mount them.'),
+    forbid('route-deep-import', { path: '^apps/mobile/app/' }, { path: '^mobile-features/[^/]+/(?!src/index\\.ts$)' }, 'Route files import a feature only through its entry (src/index.ts).'),
     forbid('adapter-imports', { path: '^adapters/([^/]+)/' }, { path: '^(apps|modules|mobile-features|e2e|tools)/|^packages/(?!(contracts|config)/)|^adapters/', pathNot: '^adapters/$1/' }, 'Adapters import only packages/contracts and packages/config.'),
     forbid('package-upward', { path: '^packages/' }, { path: '^(apps|modules|mobile-features|adapters|e2e|tools)/' }, 'Shared packages never depend on apps, modules, features or adapters.'),
     forbid('contracts-deps', { path: '^packages/contracts/' }, { pathNot: '^packages/contracts/|(^|/)node_modules/(zod|@ts-rest/core)/' }, 'Contracts ship to the app too: only zod and @ts-rest/core.'),

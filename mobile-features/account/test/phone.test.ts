@@ -10,7 +10,7 @@ describe('normalizeIraqiPhone', () => {
     '0770-123-4567',
     '٠٧٧٠١٢٣٤٥٦٧',
     '۰۷۷۰۱۲۳۴۵۶۷',
-    '‏+964 770 123 4567‎',
+    '\u200F+964 770 123 4567\u200E',
   ])('normalizes %j to +9647701234567', (input) => {
     expect(normalizeIraqiPhone(input)).toBe('+9647701234567');
   });

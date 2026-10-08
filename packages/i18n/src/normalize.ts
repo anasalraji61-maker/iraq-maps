@@ -22,14 +22,18 @@ const INVISIBLE = /[\u061C\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
 /** Arabic-Indic ٠-٩ and Persian ۰-۹: the low nibble of each code point is its value. */
 const DIGITS = /[\u0660-\u0669\u06F0-\u06F9]/g;
 
+/** Arabic-Indic and Persian digits to ASCII 0-9 (e.g. for phone numbers and codes); everything else is unchanged. */
+export function toAsciiDigits(text: string): string {
+  return text.replace(DIGITS, (d) => String(d.charCodeAt(0) % 16));
+}
+
 /** Shared Arabic/Kurdish search normalizer (server import + search, client search). */
 export function normalizeArabic(text: string): string {
-  return text
-    .normalize('NFKC') // presentation forms and ligatures → base letters; composes decomposed hamza/madda
+  // NFKC: presentation forms and ligatures → base letters; composes decomposed hamza/madda.
+  return toAsciiDigits(text.normalize('NFKC'))
     .replace(INVISIBLE, '')
     .replace(MARKS, '')
     .replace(FOLDABLE, (c) => FOLD[c] ?? c)
-    .replace(DIGITS, (d) => String(d.charCodeAt(0) % 16))
     .replace(/\s+/g, ' ')
     .trim();
 }

@@ -29,6 +29,8 @@ it('reports every boundary violation in the fixtures, and nothing else', async (
     'no-circular: packages/p1/src/index.ts -> packages/p2/src/index.ts',
     'not-to-unresolvable: tools/t/src/index.ts -> @iraq-maps/undeclared',
     'package-upward: packages/p2/src/index.ts -> modules/b/src/index.ts',
+    'route-deep-import: apps/mobile/app/route.tsx -> mobile-features/y/src/internal.ts',
+    'shell-to-feature: apps/mobile/src/index.ts -> mobile-features/y/src/index.ts',
   ]);
   // Every rule has a fixture.
   expect(new Set(found.map((f) => f.split(':')[0]))).toEqual(new Set(ruleSet.forbidden.map((r: { name: string }) => r.name)));

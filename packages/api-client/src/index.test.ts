@@ -68,10 +68,13 @@ describe('createClient', () => {
     expect(b.status).toBe(401);
   });
 
-  it('does not refresh on other 401 codes, nor when signed out', async () => {
+  it.each([
+    ['signed in', pair(1)],
+    ['signed out', null],
+  ])('does not refresh on a 401 with another code (%s)', async (_state, tokens) => {
     const fetch = vi.fn(async () => problem(401, 'otp_invalid'));
     const onTokens = vi.fn();
-    const client = createClient({ baseUrl: () => '', getTokens: () => null, onTokens, fetch });
+    const client = createClient({ baseUrl: () => '', getTokens: () => tokens, onTokens, fetch });
     const res = await client.auth.verifyOtp({ body: { phone: '+9647701234567', code: '123456' } });
     expect(res.status).toBe(401);
     if (res.status === 401) expect(res.body.code).toBe('otp_invalid');
