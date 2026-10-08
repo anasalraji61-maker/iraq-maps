@@ -30,10 +30,19 @@ set_system_locale() {
 mkdir -p "$out"
 set_system_locale ar-IQ || exit 1
 adb install -r "$apk" || exit 1
+# Each flow's device log goes to <out-dir>/<flow>.logcat.txt, and its MapLibre/GL lines to the job log (B1: the artifact
+# host is blocked for reviewers).
 run() {
   mkdir -p "$out/$name"
+  adb logcat -c || true
   { adb shell pm clear iq.iraqmaps.app && maestro test -e OTP_CODE="${OTP_FIXED_CODE:?}" --test-output-dir "$out/$name" \
     --debug-output "$out/$name" --format junit --output "$out/$name.xml" "$flow"; } 2>&1 | tee "$out/$name.log"
+  local status=$?
+  adb logcat -d >"$out/$name.logcat.txt" || true
+  echo "::group::MapLibre logcat ($name)"
+  grep -E 'Mbgl|maplibre|MapLibre|Shader failed|Program failed|Failed to load glyph|EGL|emuglGLES|GL_' "$out/$name.logcat.txt" | tail -n 200 || true
+  echo "::endgroup::"
+  return $status
 }
 failed=0
 for flow in e2e/mobile/flows/*.yaml mobile-features/*/maestro/*.yaml; do
@@ -47,5 +56,14 @@ for flow in e2e/mobile/flows/*.yaml mobile-features/*/maestro/*.yaml; do
   echo "::error title=Maestro flow failed::$flow"
   failed=1
 done
+# B1: status codes of the /v1/cities* requests (descriptor, tiles, glyphs) in the API log, by route and status.
+if [ -f "$out/api.log" ]; then
+  echo "::group::API /v1/cities* requests (route status xcount)"
+  grep '^{' "$out/api.log" | jq -rs '[.[] | select(.reqId)] | group_by(.reqId)
+    | map({route: (map(.req.route // empty) | first), status: (map(.res.statusCode // empty) | first)})
+    | map(select((.route // "") | test("^/v1/cities"))) | group_by([.route, .status]) | .[]
+    | "\(.[0].route) \(.[0].status) x\(length)"' || true
+  echo "::endgroup::"
+fi
 e2e/mobile/screenshots-summary.sh "$out" || echo "::warning title=Screenshot summary::could not write the screenshots"
 exit $failed
