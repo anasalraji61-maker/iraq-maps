@@ -1,0 +1,120 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[nwr][1-9]\\d{0,14}$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "place",
+        "street",
+        "area"
+      ]
+    },
+    "names": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "ar": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "ckb": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "category": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "food",
+            "cafe",
+            "lodging",
+            "shopping",
+            "tourism",
+            "health",
+            "finance",
+            "fuel",
+            "office",
+            "worship",
+            "education",
+            "government",
+            "transport",
+            "entertainment"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "location": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": [
+        {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      ]
+    },
+    "tags": {
+      "type": "object",
+      "properties": {
+        "opening_hours": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "phone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "website": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "names",
+    "category",
+    "location",
+    "tags"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

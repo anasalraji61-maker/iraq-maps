@@ -21,7 +21,7 @@
     "invisible:check": "node tools/ownership/src/no-invisible.ts",
     "infra:local": "sh infra/local/infra.sh",
     "android:precheck": "pnpm --filter @iraq-maps/mobile android:precheck",
-    "gate": "turbo run build lint typecheck test && pnpm depcruise && pnpm gitleaks && pnpm knip && pnpm jscpd && pnpm ownership:check --milestone M0 --base 410b61a && pnpm invisible:check"
+    "gate": "turbo run build lint typecheck test && pnpm depcruise && pnpm gitleaks && pnpm knip && pnpm jscpd && pnpm ownership:check --milestone M1 --base 2937c16 && pnpm invisible:check"
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",

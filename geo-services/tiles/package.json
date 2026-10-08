@@ -1,0 +1,14 @@
+{
+  "name": "@iraq-maps/geo-tiles",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vector tiles (Planetiler, Java 21 + Maven) and glyphs (fontnik) for one city. pnpm scripts wrap Maven so turbo can run them.",
+  "scripts": {
+    "test": "sh scripts/planetiler.sh && mvn -q -B test",
+    "tiles": "sh scripts/tiles.sh"
+  },
+  "dependencies": {
+    "@expo-google-fonts/noto-sans-arabic": "^0.4.3",
+    "fontnik": "0.7.7"
+  }
+}

@@ -7,6 +7,7 @@ packages:
   - e2e/*
   - tools/*
   - geo-services/pipeline
+  - geo-services/tiles
 
 # Expo/React Native + Gradle autolinking are most reliable with a flat node_modules.
 # .npmrc is gitignored, so pnpm settings live here.
@@ -14,6 +15,10 @@ nodeLinker: hoisted
 
 onlyBuiltDependencies:
   - esbuild
+
+# fontnik's install script only checks that its bundled prebuilt binary exists (ADR-0008).
+ignoredBuiltDependencies:
+  - fontnik
 
 # Do not silently pull latest versions of optional peers (reanimated, worklets, ...) that the Expo SDK pins differently.
 autoInstallPeers: false

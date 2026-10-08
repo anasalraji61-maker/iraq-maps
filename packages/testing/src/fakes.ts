@@ -1,4 +1,26 @@
-import type { Clock, DomainEvent, EventBus, EventHandler, EventName, IraqiPhone, OtpSender, UserDataEraser, UserId } from '@iraq-maps/contracts';
+import {
+  OSM_ATTRIBUTION,
+  type CityId,
+  type CityImportRecord,
+  type Clock,
+  type DomainEvent,
+  type EventBus,
+  type EventHandler,
+  type EventName,
+  type IraqiPhone,
+  type LngLat,
+  type NearbyQuery,
+  type OtpSender,
+  type PlaceDetails,
+  type PlaceId,
+  type PlaceImportRecord,
+  type PlacesQueryPort,
+  type PlaceSummary,
+  type SearchQuery,
+  type UserDataEraser,
+  type UserId,
+} from '@iraq-maps/contracts';
+import { normalizeArabic } from '@iraq-maps/i18n';
 
 export class FixedClock implements Clock {
   constructor(private current = new Date('2026-01-01T00:00:00.000Z')) {}
@@ -45,5 +67,70 @@ export class InMemoryUserDataEraser implements UserDataEraser {
   async erase(userId: UserId): Promise<void> {
     this.erased.push(userId);
     this.rows.delete(userId);
+  }
+}
+
+/** Great-circle distance in metres. TODO(M1): use @iraq-maps/geo once builder-map-kit lands it. */
+function distanceM([lng1, lat1]: LngLat, [lng2, lat2]: LngLat): number {
+  const rad = Math.PI / 180;
+  const h = Math.sin(((lat2 - lat1) * rad) / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(((lng2 - lng1) * rad) / 2) ** 2;
+  return 2 * 6_371_008.8 * Math.asin(Math.sqrt(h));
+}
+
+const KIND_ORDER = { place: 0, street: 1, area: 2 } as const;
+type Row = PlaceImportRecord & { city: CityId };
+
+/** In-memory PlacesQueryPort: substring match on normalized names, ranked by exact > prefix > contains, then distance, then kind. */
+export class FakePlacesQueryPort implements PlacesQueryPort {
+  private readonly rows = new Map<string, Row>();
+
+  /** Upserts by id, like the real import. */
+  seed(city: CityImportRecord, records: readonly PlaceImportRecord[]): void {
+    for (const r of records) this.rows.set(r.id, { ...r, city: city.id });
+  }
+
+  async search(q: SearchQuery): Promise<PlaceSummary[]> {
+    const needle = normalizeArabic(q.q).toLowerCase();
+    const score = (r: Row) => Math.max(...Object.values(r.names).map((n) => normalizeArabic(n).toLowerCase()).map((n) => (n === needle ? 3 : n.startsWith(needle) ? 2 : n.includes(needle) ? 1 : 0)));
+    const hits = this.inCity(q.city).map((r) => ({ r, s: score(r), d: q.near ? distanceM(q.near, r.location) : 0 }));
+    return hits
+      .filter((h) => h.s > 0)
+      .sort((a, b) => b.s - a.s || a.d - b.d || KIND_ORDER[a.r.kind] - KIND_ORDER[b.r.kind])
+      .slice(0, q.limit)
+      .map((h) => this.summary(h.r, q.near ? h.d : null));
+  }
+
+  async getById(id: PlaceId): Promise<PlaceDetails | null> {
+    const r = this.rows.get(id);
+    if (!r) return null;
+    const { distanceM: _, ...summary } = this.summary(r, null);
+    const { opening_hours, phone, website } = r.tags;
+    return {
+      ...summary,
+      hoursRaw: opening_hours ?? null,
+      osmContacts: { phone, website: website && /^https?:\/\//.test(website) ? website : undefined },
+      source: 'osm',
+      attribution: OSM_ATTRIBUTION,
+    };
+  }
+
+  async nearby(q: NearbyQuery): Promise<PlaceSummary[]> {
+    return this.inCity(q.city)
+      .filter((r) => r.kind === 'place' && (!q.category || r.category === q.category))
+      .map((r) => ({ r, d: distanceM(q.near, r.location) }))
+      .filter((h) => h.d <= q.radiusM)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, q.limit)
+      .map((h) => this.summary(h.r, h.d));
+  }
+
+  private inCity(city: CityId): Row[] {
+    return [...this.rows.values()].filter((r) => r.city === city);
+  }
+
+  /** `area` is the nearest area record within 3 km. */
+  private summary(r: Row, d: number | null): PlaceSummary {
+    const area = r.kind === 'area' ? undefined : this.inCity(r.city).filter((a) => a.kind === 'area' && distanceM(a.location, r.location) <= 3000).sort((a, b) => distanceM(a.location, r.location) - distanceM(b.location, r.location))[0];
+    return { id: r.id as PlaceId, kind: r.kind, names: r.names, category: r.category, area: area?.names ?? null, location: r.location, distanceM: d };
   }
 }

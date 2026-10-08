@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { DomainEvent, EventBus, IraqiPhone, OtpSender, UserDataEraser, UserId } from '@iraq-maps/contracts';
+import type { CityImportRecord, DomainEvent, EventBus, IraqiPhone, OtpSender, PlaceId, PlaceImportRecord, PlacesQueryPort, UserDataEraser, UserId } from '@iraq-maps/contracts';
 import { describe, expect, it } from 'vitest';
 
 /** Conformance suites: the fake and every real implementation of a port must pass the same suite. */
@@ -78,6 +78,98 @@ export function userDataEraserConformance(name: string, make: () => EraserHarnes
     });
     it('names its module', async () => {
       expect((await make()).eraser.module).toMatch(/^[a-z][a-z0-9-]*$/);
+    });
+  });
+}
+
+const testCity: CityImportRecord = {
+  id: 'baghdad' as CityImportRecord['id'],
+  names: { ar: 'بغداد', ckb: 'بەغدا', en: 'Baghdad' },
+  bbox: [44.22, 33.2, 44.55, 33.45],
+  center: [44.3661, 33.3152],
+};
+
+/** Hand-made records (not OSM data). n103 and n104 share a name so `near` decides their order. */
+const testPlaces: PlaceImportRecord[] = [
+  {
+    id: 'n101',
+    kind: 'place',
+    names: { name: 'مطعم أربيل', en: 'Erbil Restaurant' },
+    category: 'food',
+    location: [44.421, 33.301],
+    tags: { opening_hours: 'Mo-Su 10:00-23:00', phone: '+964 770 000 0001', website: 'https://example.com/erbil' },
+  },
+  { id: 'n102', kind: 'place', names: { name: 'قلعة بغداد', ckb: 'قەڵای بەغدا', en: 'Baghdad Citadel' }, category: 'tourism', location: [44.388, 33.344], tags: {} },
+  { id: 'n103', kind: 'place', names: { name: 'صيدلية الشفاء' }, category: 'health', location: [44.3, 33.3], tags: {} },
+  { id: 'n104', kind: 'place', names: { name: 'صيدلية الشفاء' }, category: 'health', location: [44.5, 33.4], tags: {} },
+  { id: 'w201', kind: 'street', names: { name: 'شارع المتنبي', en: 'Al-Mutanabbi Street' }, category: null, location: [44.388, 33.34], tags: {} },
+  { id: 'n301', kind: 'area', names: { name: 'الكرادة', ckb: 'کەڕادە', en: 'Karrada' }, category: null, location: [44.42, 33.3], tags: {} },
+];
+
+/** @public consumed by the modules/places tests (M1) */
+export interface PlacesHarness {
+  port: PlacesQueryPort;
+  /** Imports the records into the implementation under test; must be idempotent (upsert by id). */
+  seed(city: CityImportRecord, records: readonly PlaceImportRecord[]): Promise<void>;
+}
+
+export function placesQueryConformance(name: string, make: () => PlacesHarness | Promise<PlacesHarness>): void {
+  describe(`PlacesQueryPort conformance: ${name}`, () => {
+    const seeded = async () => {
+      const h = await make();
+      await h.seed(testCity, testPlaces);
+      await h.seed(testCity, testPlaces);
+      return h.port;
+    };
+    const query = (q: string, more: { near?: [number, number]; limit?: number; city?: string } = {}) =>
+      ({ q, city: testCity.id, lang: 'ar', limit: 20, ...more }) as Parameters<PlacesQueryPort['search']>[0];
+    const topId = async (port: PlacesQueryPort, q: string) => (await port.search(query(q)))[0]?.id;
+
+    it('returns OSM details with attribution, and null for a missing id', async () => {
+      const port = await seeded();
+      const d = await port.getById('n101' as PlaceId);
+      expect(d).toMatchObject({ id: 'n101', kind: 'place', category: 'food', hoursRaw: 'Mo-Su 10:00-23:00', source: 'osm' });
+      expect(d?.osmContacts).toEqual({ phone: '+964 770 000 0001', website: 'https://example.com/erbil' });
+      expect(d?.attribution).toContain('OpenStreetMap');
+      expect(await port.getById('n999999' as PlaceId)).toBeNull();
+    });
+
+    it('folds Arabic spelling variants to the same top result, without duplicates after re-import', async () => {
+      const port = await seeded();
+      for (const q of ['اربيل', 'أربيل', 'إربيل']) expect(await topId(port, q)).toBe('n101');
+      for (const q of ['قلعه', 'قلعة']) expect(await topId(port, q)).toBe('n102');
+      expect((await port.search(query('أربيل'))).filter((r) => r.id === 'n101')).toHaveLength(1);
+    });
+
+    it('finds streets and areas', async () => {
+      const port = await seeded();
+      expect(await port.search(query('المتنبي'))).toContainEqual(expect.objectContaining({ id: 'w201', kind: 'street', category: null }));
+      expect(await port.search(query('كرادة'))).toContainEqual(expect.objectContaining({ id: 'n301', kind: 'area' }));
+    });
+
+    it('orders equal names by distance from near, and reports distanceM only with near', async () => {
+      const port = await seeded();
+      const [a] = await port.search(query('صيدلية الشفاء', { near: [44.3, 33.3] }));
+      const [b] = await port.search(query('صيدلية الشفاء', { near: [44.5, 33.4] }));
+      expect([a?.id, b?.id]).toEqual(['n103', 'n104']);
+      expect(a?.distanceM).toBeLessThan(50);
+      expect((await port.search(query('صيدلية الشفاء')))[0]?.distanceM).toBeNull();
+    });
+
+    it('scopes search to the city and honours limit', async () => {
+      const port = await seeded();
+      expect(await port.search(query('صيدلية', { city: 'erbil' }))).toEqual([]);
+      expect(await port.search(query('صيدلية', { limit: 1 }))).toHaveLength(1);
+    });
+
+    it('nearby returns places within the radius, nearest first, filtered by category', async () => {
+      const port = await seeded();
+      const near = { city: testCity.id, near: [44.421, 33.301] as [number, number], radiusM: 2000, limit: 20 };
+      const all = await port.nearby(near);
+      expect(all.map((p) => p.id)).toEqual(['n101']);
+      expect(all[0]?.distanceM).toBeLessThan(1);
+      expect((await port.nearby({ ...near, near: [44.3, 33.3], category: 'health' })).map((p) => p.id)).toEqual(['n103']);
+      expect(await port.nearby({ ...near, near: [44.3, 33.3], category: 'food' })).toEqual([]);
     });
   });
 }

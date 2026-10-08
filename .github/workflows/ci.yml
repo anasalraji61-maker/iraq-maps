@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          fetch-depth: 0 # ownership:check diffs against the M0 freeze commit 410b61a
+          fetch-depth: 0 # ownership:check diffs against the M0 closure commit 2937c16
           persist-credentials: false
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -57,6 +57,18 @@ jobs:
           tar -xzf gitleaks.tgz gitleaks
           sudo install gitleaks /usr/local/bin/
           sudo apt-get update -q && sudo apt-get install -y -q osmium-tool
+      # Java 21 + Maven (preinstalled) for the geo-services/tiles Planetiler test; ~/.m2 cached by pom.xml.
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          cache-dependency-path: geo-services/tiles/pom.xml
+      # planetiler.jar (93MB, SHA-256 checked by scripts/planetiler.sh on every run; ADR-0008).
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: geo-services/tiles/.cache
+          key: planetiler-${{ hashFiles('geo-services/tiles/scripts/planetiler.sh') }}
       - run: sh e2e/ci-secrets.sh
       - run: pnpm install --frozen-lockfile
       - run: pnpm gate

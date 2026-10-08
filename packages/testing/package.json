@@ -10,7 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iraq-maps/contracts": "workspace:*"
+    "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/i18n": "workspace:*"
   },
   "peerDependencies": {
     "vitest": "*"

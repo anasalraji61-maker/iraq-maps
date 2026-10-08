@@ -1,11 +1,13 @@
-import type { IraqiPhone, Locale, Role, UserId } from './common';
+import type { IraqiPhone, Locale, PlaceId, Role, UserId } from './common';
 import type { DomainEvent, EventName } from './events';
+import type { NearbyQuery, PlaceDetails, PlaceSummary, SearchQuery } from './places';
 
 /** DI tokens: modules provide ports under these, consumers inject them, nobody imports another module. */
 export const PortTokens = {
   IdentityPort: 'port:IdentityPort',
   PhoneVerificationPort: 'port:PhoneVerificationPort',
   EventBus: 'port:EventBus',
+  PlacesQueryPort: 'port:PlacesQueryPort',
 } as const;
 
 export interface Clock {
@@ -27,6 +29,15 @@ export interface IdentityPort {
 export interface PhoneVerificationPort {
   start(input: { phone: IraqiPhone; locale: Locale; purpose: 'provider_phone' }): Promise<{ verificationId: string; expiresAt: Date }>;
   confirm(input: { verificationId: string; code: string }): Promise<{ verified: true; phone: IraqiPhone } | { verified: false; reason: 'invalid' | 'expired' | 'too_many_attempts' }>;
+}
+
+/** Read side of modules/places (OSM-derived data only). Consumers: the /v1 places routes; the assistant from M5. */
+export interface PlacesQueryPort {
+  /** Spelling-insensitive name search (packages/i18n normalizer) over places, streets and areas of one city. */
+  search(query: SearchQuery): Promise<PlaceSummary[]>;
+  getById(id: PlaceId): Promise<PlaceDetails | null>;
+  /** Kind `place` only, within query.radiusM of query.near, nearest first. */
+  nearby(query: NearbyQuery): Promise<PlaceSummary[]>;
 }
 
 export interface OtpSender {

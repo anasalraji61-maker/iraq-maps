@@ -1,0 +1,105 @@
+{
+  "minZoom": 0,
+  "maxZoom": 14,
+  "fields": [
+    "class",
+    "name",
+    "name:ar",
+    "name:ckb",
+    "name:en"
+  ],
+  "layers": {
+    "transportation": {
+      "geometry": [
+        "line"
+      ],
+      "classes": [
+        "motorway",
+        "trunk",
+        "primary",
+        "secondary",
+        "tertiary",
+        "minor",
+        "service",
+        "path"
+      ]
+    },
+    "place": {
+      "geometry": [
+        "point"
+      ],
+      "classes": [
+        "city",
+        "town",
+        "village",
+        "suburb",
+        "quarter",
+        "neighbourhood"
+      ]
+    },
+    "poi": {
+      "geometry": [
+        "point"
+      ],
+      "classes": [
+        "food",
+        "cafe",
+        "lodging",
+        "shopping",
+        "tourism",
+        "health",
+        "finance",
+        "fuel",
+        "office",
+        "worship",
+        "education",
+        "government",
+        "transport",
+        "entertainment"
+      ]
+    },
+    "building": {
+      "geometry": [
+        "polygon"
+      ],
+      "classes": [
+        "building"
+      ]
+    },
+    "water": {
+      "geometry": [
+        "polygon",
+        "line"
+      ],
+      "classes": [
+        "river",
+        "canal",
+        "lake"
+      ]
+    },
+    "landuse": {
+      "geometry": [
+        "polygon"
+      ],
+      "classes": [
+        "residential",
+        "commercial",
+        "industrial",
+        "park",
+        "grass",
+        "cemetery",
+        "farmland"
+      ]
+    },
+    "boundary": {
+      "geometry": [
+        "line"
+      ],
+      "classes": [
+        "country",
+        "province",
+        "district"
+      ]
+    }
+  }
+}

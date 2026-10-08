@@ -141,7 +141,7 @@ No event is added, because nothing consumes one yet.
 
 | الوكيل | يملك حصرياً | يسلّم |
 |---|---|---|
-| `builder-geo-data` | `geo-services/pipeline/**`<br>`.github/workflows/geo-data.yml`<br>`docs/DATA_SOURCES.md` | • القص والاستخراج إلى NDJSON.<br>• fixture ‏erbil-mini.osm.<br>• jobs المدينة والأداء في geo-data.yml مع رفعها كـ artifacts.<br>• تسجيل fixture والمصادر في DATA_SOURCES. |
+| `builder-geo-data` | `geo-services/pipeline/**`<br>`.github/workflows/geo-data.yml`<br>`docs/DATA_SOURCES.md` | • القص والاستخراج إلى NDJSON.<br>• fixture ‏baghdad-mini.osm.<br>• jobs المدينة والأداء في geo-data.yml مع رفعها كـ artifacts.<br>• تسجيل fixture والمصادر في DATA_SOURCES. |
 | `builder-tiles` | `geo-services/tiles/**` | • profile ‏Planetiler مطابق لـ TileSchema.<br>• CLI موحّد للبناء.<br>• توليد glyphs عربية ولاتينية، والأداة تُختار وتُسجَّل عند التجميد.<br>• اختبار بناء الـ fixture وفك بلاطة منه. |
 | `builder-places` | `modules/places/**` | وحدة places مع اختباراتها على PostGIS المحلي:<br>• الاستيراد idempotent.<br>• فهارس GIN و GiST على الأعمدة المطبّعة.<br>• البحث المرتب، والتفاصيل، والقريب، وسجل المدن.<br>• مسارا احتياط البلاطات والـ glyphs.<br>• اجتياز conformance suite. |
 | `builder-map-kit` | `packages/map-kit/**`<br>`packages/geo/**` | • MapCanvas، والستايل لكل لغة من قالب واحد، ومصدر PMTiles أو XYZ.<br>• الموقع والإسناد والعلامات، و mock لـ Jest.<br>• دوال geo الأساسية. |
@@ -218,6 +218,56 @@ No event is added, because nothing consumes one yet.
 - name:ar ناقص لأماكن كثيرة (27% فقط من أماكن بغداد عليها name:ar، و81% مسمّاة بالعربية في name). نعالج ذلك بفهرسة كل name:* والعرض الاحتياطي، والتقرير يقيس النقص.
 - أداء pg_trgm على العربية. نستخدم فهارس GIN على أعمدة مطبّعة، ونقيس على بيانات حقيقية في نفس المرحلة.
 - ملف profile ‏Planetiler بـ Java يجب أن يبقى صغيراً ومشتقاً من TileSchema.
+
+## انحرافات مسجّلة
+
+- تجميد عقود M1 تم بينما M0 في الإغلاق؛ المسارات المتداخلة (packages/ui و e2e و apps/mobile) مؤجلة لـ builder-map-app و builder-e2e-m1 إلى ما بعد إغلاق M0
+- توزيع البنّائين: الجلسة B ← builder-tiles + builder-map-kit؛ الجلسة C ← builder-geo-data + builder-places؛ map-app و e2e-m1 بعد إغلاق M0
+- **‏PlaceSummaryCard لم يُجمَّد كـ stub.** ‏`packages/ui` قيد الإغلاق في M0، فيعرّفه builder-map-app بعد الإغلاق، ويستهلك `PlaceSummary` و `PlaceDetails` من العقود.
+- **‏Planetiler من jar التوزيع، لا planetiler-core من Maven Central.** ‏planetiler-core يحتاج GeoTools وقت التشغيل، و GeoTools غير موجود على Maven Central، ومستودعه repo.osgeo.org محجوب هنا. ‏`geo-services/tiles` يعتمد على `planetiler.jar` 0.10.2 من GitHub release، مثبّتاً بـ SHA-256 ([ADR-0008](../adr/0008-tiles-and-dev-data-as-actions-artifacts.md)).
+- **إضافات على قائمة العقود.** تحتاجها geo-data.yml والاختبارات:
+  - عقدا CLI ‏`glyphsBuild` و `placesImport`.
+  - ‏`CityImportRecord` ‏(`city.json`) مع تصدير JSON Schema.
+  - ‏`Glyphs` و `OSM_ATTRIBUTION` و `nameFallback`/`pickName`.
+  - testIDs ‏`place.name` و `place.category` و `place.source` لمعيار القبول 10.
+- **روابط المسارات موجودة.** ‏`map` و `place` معرّفان في `packages/mobile-kit/src/routes.tsx` منذ M0، فلا طلب عقد.
+
+## متابعات من تدقيق M0
+
+> هذه ملاحظات غير حاجبة من تدقيق إغلاق M0 (الإغلاق على `2937c16`). المكامل يوزّعها على مالكيها في M1 أو بعدها. تُعالَج في M1 ما لم يُذكر غير ذلك.
+
+**أمان**
+- [ ] F-2 (integrator): في `app.config.ts`، إذا كانت قيمة `EXPO_PUBLIC_APP_ENV` غير معروفة (مثل `staging`)، يُسمح بالـ cleartext بينما وقت التشغيل يعاملها كإنتاج. يجب التحقق من القيمة ضمن development و e2e و test و production، ورميُ خطأ عند prebuild لأي قيمة أخرى، مع اختبار لقيمة خاطئة إملائياً.
+- [ ] F-1 (integrator): فحص المحارف الخفية `invisible:check` يجب أن يشمل أيضاً `.toml` و `.xml` و `.gradle` و `.kts` و `.properties` و `.env.example`.
+- [ ] رفض محارف Cf في الأسماء (حقل `name`) قبل أن يعرض M6 الأسماء للآخرين. ويُعاد تقييم الرابط العميق `iraqmaps://auth/otp?phone=`، لأنه يسمح بملء أي رقم مسبقاً (خطر login-CSRF منخفض).
+
+**معمارية و QA**
+- [ ] (integrator) نقل `invisible:check` من `tools/ownership` إلى `packages/tooling`، أو إعادة تسمية الحزمة إلى repo-checks.
+- [ ] (integrator) قاعدة ESLint لـ left/right تلتقط أي خاصية بهذين الاسمين في كود الواجهة. يجب حصرها بسياقات الأنماط: ‏`StyleSheet.create` و `style={{}}`.
+- [ ] (integrator) ثغرة lint: نص إنجليزي يُمرَّر إلى label عبر ثابت (`const L='…'; <Button label={L}/>`) لا يُلتقط.
+- [ ] (account / e2e-m1) في `login.yaml`، المتغير `OUT` وتعليقه قديمان، وتدفق login يعتمد على أن launch-tabs انتهى بالعربية. الحل: اختيار العربية صراحةً في بداية login، وأسماء لقطات بسيطة.
+- [ ] (integrator) حاجز الـ migrations يمنع الـ triggers (`$` و `EXECUTE` و `NEW.`). يُراجَع إن احتاجتها places؛ والعزل الحقيقي بأدوار لكل وحدة في M7.
+
+**عربي و RTL وإمكانية الوصول**
+- [ ] (account) اختبارات account تتحقق من `direction: 'ltr'` في حقلي الهاتف والرمز.
+- [ ] (account) نفس رسالة الخطأ مرتين لا تُعلَن ثانيةً، والحل مسح الخطأ قبل `setError`.
+- [ ] (account) العناوين انتقلت إلى الترويسة الأصلية التي لا يعرضها TalkBack كعنوان. الحل: عنوان داخل المحتوى بـ `accessibilityRole="header"`، مع إخفائه بصرياً إن تكرر.
+- [ ] (account / map-app) صفوف اللغة لا تُظهر حالة التعطيل أثناء الحفظ.
+- [ ] (e2e-m1) مراجعة لقطات المحاكي بصرياً محجوبة هنا، لأن مضيف الـ artifacts مرفوض في سياسة الشبكة. الحل: تصدير اللقطات في الـ job summary أو السجل بحجم مضغوط، أو أن يفتح المستخدم artifact ‏`e2e-output` (‏11573535777 من run 37828965227) للتحقق من تشكّل الحروف وترتيب أرقام الهاتف.
+
+**ترخيص**
+- [ ] (map-app، مالك packages/ui في M1، و geo-data، مالك DATA_SOURCES) إضافة صف SF Symbols ‏(iOS فقط، من النظام ولا يُعاد توزيعه)، وتحديث عمود استخدام Material Symbols: ‏IconButton، وعلامة الاختيار في ListItem، وأيقونات التبويبات.
+- [ ] (geo-data) ملاحظة في `docs/reports/osm-quality-2026-10-08.md` أن سطر الإسناد حُدّث، وأن المخرج الحالي في run 37828965262.
+- [ ] (integrator، M7) شاشة التراخيص: بناء القائمة من وحدات حزمة Metro، أو استثناء devDependencies الخاصة بـ workspace ‏(tooling).
+
+**CI**
+- [ ] (integrator) ترقية GitHub Actions إلى إصداراتها الرئيسية الحالية، لأن تحذيرات Node 20 تظهر، مع تثبيت SHAs جديدة.
+- [ ] (M7) المحاكي يعمل الآن بلغة نظام ar-IQ فقط. يُضاف تمرير ثانٍ بلغة en-US.
+
+**ملاحظات الجلسة B** (غير مُتحقَّق منها بعد، والجلسة B ترسل نتائجها مع اختبارات)
+- [ ] mobile-kit: التوكنات تُرسل إلى عنوان خادم مطوّر محفوظ حديثاً أثناء تسجيل الدخول.
+- [ ] mobile-kit: نتيجة refresh أو `/v1/me` قديمة تُطبَّق بعد تسجيل الخروج ثم الدخول.
+- [ ] i18n: تغطية `Intl.PluralRules` وما يشابهها في Hermes، ودالة عزل FSI/PDI عامة في `t()`.
 
 ## ما تم إنجازه
 

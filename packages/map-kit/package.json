@@ -1,0 +1,33 @@
+{
+  "name": "@iraq-maps/map-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@iraq-maps/contracts": "workspace:*",
+    "@maplibre/maplibre-gl-style-spec": "26.2.1",
+    "@maplibre/maplibre-react-native": "~11.5.0"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*",
+    "@jest/globals": "^29.7.0",
+    "@react-native/jest-preset": "0.86.3",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/react": "~19.2.2",
+    "jest": "^29.7.0",
+    "jest-expo": "~57.0.5",
+    "test-renderer": "~1.2.0"
+  }
+}
