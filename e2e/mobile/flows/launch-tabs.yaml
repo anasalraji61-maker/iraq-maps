@@ -1,7 +1,12 @@
-# Cold start: the app opens in Arabic on the tab bar with all five tabs (testIDs from packages/contracts testIDs.tabs),
-# then switching the language to English from the account tab (signed out) flips the tab labels.
+# Cold start: the app opens in Arabic, right to left, on the tab bar with all five tabs (testIDs from
+# packages/contracts testIDs.tabs). Switching to English from the account tab (signed out) flips the labels and the
+# direction, and both survive a relaunch. run-flows.sh sets the device to the ar-IQ system locale, so the English part
+# also checks that the system locale does not force RTL (RTL-3). The flow ends back in Arabic for the flows after it.
+# Screenshots for the RTL review go to ${OUT}.
 appId: iq.iraqmaps.app
 name: launch-tabs
+env:
+  OUT: ${OUT || '.'}
 ---
 - launchApp:
     clearState: true
@@ -18,6 +23,16 @@ name: launch-tabs
 - assertVisible:
     id: tab.account
 - assertVisible: الخريطة
+- assertVisible: اكتشف
+- assertVisible: مراسلات
+- assertVisible: نشاطي
+- assertVisible: حسابي
+# RTL: the first tab is on the right.
+- assertVisible:
+    id: tab.discover
+    leftOf:
+      id: tab.map
+- takeScreenshot: ${OUT}/launch-tabs-ar
 - tapOn:
     id: tab.account
 - tapOn:
@@ -29,3 +44,31 @@ name: launch-tabs
     visible: Map
     timeout: 30000
 - assertNotVisible: الخريطة
+- assertVisible:
+    id: tab.discover
+    rightOf:
+      id: tab.map
+# The language and the direction survive a cold start.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: Map
+    timeout: 60000
+- assertVisible:
+    id: tab.discover
+    rightOf:
+      id: tab.map
+- takeScreenshot: ${OUT}/launch-tabs-en
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.language
+- tapOn:
+    id: auth.locale.ar
+- extendedWaitUntil:
+    visible: الخريطة
+    timeout: 30000
+- assertVisible:
+    id: tab.discover
+    leftOf:
+      id: tab.map

@@ -99,7 +99,7 @@ jobs:
       - name: Start the API (migrate, fixed OTP)
         run: e2e/mobile/start-api.sh
         env:
-          API_LOG: ${{ runner.temp }}/maestro/api.log
+          API_LOG: ${{ runner.temp }}/e2e-output/api.log
       - run: e2e/mobile/install-maestro.sh
       - name: Enable KVM
         run: |
@@ -114,10 +114,11 @@ jobs:
           target: google_apis
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
-          script: e2e/mobile/run-flows.sh "$RUNNER_TEMP/iraq-maps-x86_64.apk" "$RUNNER_TEMP/maestro"
-      - if: failure()
+          script: e2e/mobile/run-flows.sh "$RUNNER_TEMP/iraq-maps-x86_64.apk" "$RUNNER_TEMP/e2e-output"
+      - name: Upload the e2e output (screenshots for the RTL review, JUnit, Maestro and API logs)
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: maestro-debug-output
-          path: ${{ runner.temp }}/maestro
+          name: e2e-output
+          path: ${{ runner.temp }}/e2e-output
           retention-days: 14

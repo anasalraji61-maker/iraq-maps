@@ -4,5 +4,5 @@ set -euo pipefail
 zip=${RUNNER_TEMP:?}/maestro.zip
 curl -fsSL --retry 3 -o "$zip" "https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION:?}/maestro.zip"
 echo "${MAESTRO_SHA256:?}  $zip" | sha256sum -c -
-unzip -q "$zip" -d "$RUNNER_TEMP"
-echo "$RUNNER_TEMP/maestro/bin" >>"$GITHUB_PATH"
+unzip -q "$zip" -d "$RUNNER_TEMP/maestro-cli" # outside the uploaded e2e output
+echo "$RUNNER_TEMP/maestro-cli/maestro/bin" >>"$GITHUB_PATH"

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Runs inside the emulator (reactivecircus/android-emulator-runner): installs the APK, then every Maestro flow,
-# e2e/mobile/flows/*.yaml and each feature's mobile-features/*/maestro/*.yaml. JUnit reports, logs and Maestro
-# debug output (screenshots, view hierarchy) go to <out-dir>. Flows get the job's fixed e2e OTP as ${OTP_CODE}.
+# Runs inside the emulator (reactivecircus/android-emulator-runner): sets the system locale of an Iraqi phone (ar-IQ),
+# installs the APK, then runs every Maestro flow, e2e/mobile/flows/*.yaml and each feature's
+# mobile-features/*/maestro/*.yaml. Flows get the job's fixed e2e OTP as ${OTP_CODE} and their own output directory as
+# ${OUT} (for takeScreenshot). JUnit reports, logs, screenshots and Maestro debug output go to <out-dir>.
 # A flow is rerun once only when its log shows a known emulator-infrastructure failure (INFRA: adb lost the device,
 # or the Maestro driver on the device stopped answering). An app or assertion failure is never retried.
 # Usage: e2e/mobile/run-flows.sh <apk> <out-dir>
@@ -9,9 +10,28 @@ set -uo pipefail
 apk=$1 out=$2
 cd "$(dirname "$0")/../.."
 INFRA='device offline|device .* not found|no devices/emulators found|io\.grpc\.StatusRuntimeException: (UNAVAILABLE|DEADLINE_EXCEEDED)'
+
+# persist.sys.locale is read at boot; google_apis images allow adb root. Waits for the old boot to go away first,
+# because sys.boot_completed is still 1 until the reboot has started.
+set_system_locale() {
+  adb root >/dev/null && adb wait-for-device && adb shell setprop persist.sys.locale "$1" && adb reboot || return 1
+  for _ in $(seq 60); do adb shell true 2>/dev/null || break; sleep 1; done
+  adb wait-for-device
+  for _ in $(seq 150); do
+    [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ] && break
+    sleep 2
+  done
+  [ "$(adb shell getprop persist.sys.locale | tr -d '\r')" = "$1" ] && echo "system locale: $1"
+}
+
 mkdir -p "$out"
+set_system_locale ar-IQ || exit 1
 adb install -r "$apk" || exit 1
-run() { maestro test -e OTP_CODE="${OTP_FIXED_CODE:?}" --format junit --output "$out/$name.xml" --debug-output "$out/$name" "$flow" 2>&1 | tee "$out/$name.log"; }
+run() {
+  mkdir -p "$out/$name"
+  maestro test -e OTP_CODE="${OTP_FIXED_CODE:?}" -e OUT="$out/$name" --format junit --output "$out/$name.xml" \
+    --debug-output "$out/$name" "$flow" 2>&1 | tee "$out/$name.log"
+}
 failed=0
 for flow in e2e/mobile/flows/*.yaml mobile-features/*/maestro/*.yaml; do
   [ -e "$flow" ] || continue

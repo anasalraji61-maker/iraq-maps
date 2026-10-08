@@ -30,7 +30,9 @@ runs only on GitHub runners.
 `API_PORT`, the identity secrets and `API_LOG`. The e2e APK is built with `EXPO_PUBLIC_APP_ENV=e2e` and
 `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000` (the emulator's alias for the runner's localhost).
 
-Flows get the job's fixed OTP as `${OTP_CODE}` (`maestro test -e OTP_CODE=$OTP_FIXED_CODE`).
+`run-flows.sh` first sets the emulator's system locale to `ar-IQ` (an Iraqi phone). Flows get the job's fixed OTP as
+`${OTP_CODE}` and their own output directory as `${OUT}`; `takeScreenshot: ${OUT}/<name>` lands in the `e2e-output`
+artifact of the run (always uploaded: screenshots for the RTL review, JUnit, Maestro and API logs).
 
 Flows select elements by the testIDs in `packages/contracts` (`testIDs`). A flow is rerun once only when its log
 matches a known emulator-infrastructure failure (`INFRA` in `run-flows.sh`); app and assertion failures never are.
