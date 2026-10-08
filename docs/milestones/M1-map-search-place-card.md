@@ -1,7 +1,7 @@
 ---
 id: M1
 slug: map-search-place-card
-status: not_started
+status: in_progress
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-geo-data:
@@ -52,7 +52,7 @@ auditors:
 
 # M1 — خريطة المدينة والبحث العربي وبطاقة المكان
 
-**الحالة:** لم تبدأ · **التقدير:** 3–4 ساعة · **يعتمد على:** [M0](M0-walking-skeleton-login-gates.md) · **الفرع:** `claude/iraq-smart-maps-app-aybpjn`
+**الحالة:** قيد التنفيذ · **التقدير:** 3–4 ساعة · **يعتمد على:** [M0](M0-walking-skeleton-login-gates.md) · **الفرع:** `claude/iraq-smart-maps-app-aybpjn`
 
 > العملية العامة (التجميد، البناء المتوازي، التكامل، التدقيق، الإغلاق) في [README.md](README.md) ولا تتكرر هنا. هذا الملف يحدد ما يخص المرحلة فقط.
 
@@ -271,7 +271,31 @@ No event is added, because nothing consumes one yet.
 
 ## ما تم إنجازه
 
-لم تبدأ بعد.
+قيد التنفيذ.
+
+### حالة التنفيذ (لاستئناف العمل)
+
+آخر تحديث: 2026-10-08 19:30Z.
+
+**ما تم:**
+- العقود مجمّدة في `7ef279a`، والبوابة كانت خضراء عند التجميد.
+- M0 مغلقة في `2937c16`.
+
+**توزيع البنّائين:**
+
+| البنّاء | يعمل في | الحالة |
+|---|---|---|
+| builder-tiles | الجلسة B (`session_01Tq53xu86uvPxzMq1ocdsde`) | أُسند 19:28Z |
+| builder-map-kit | الجلسة B | أُسند 19:28Z |
+| builder-geo-data | الجلسة C (`session_01Rd357YBf5SDvHAeqJFtf7Q`) | أُسند 19:28Z |
+| builder-places | الجلسة C | أُسند 19:28Z |
+| builder-map-app | وكيل القائد في الخلفية | بدأ 19:26Z |
+| builder-e2e-m1 | وكيل القائد في الخلفية | بدأ 19:26Z |
+
+**المهلة:** 20:58Z. بعدها يبني القائد أي جزء ناقص.
+
+**الخطوة التالية بعد البنّائين:** المكامل يربط places في apps/api، ويضيف plugin ‏MapLibre وأذونات الموقع في apps/mobile، وملفات المسارات، ويزيل استثناءات knip الخاصة بالـ stubs، ويطبّق طلبات العقود. ثم البوابة، ثم CI ‏(ci و android و geo-data)، ثم المدققون الخمسة، ثم الإغلاق.
+
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
