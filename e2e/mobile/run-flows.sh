@@ -11,11 +11,11 @@ cd "$(dirname "$0")/../.."
 INFRA='device offline|device .* not found|no devices/emulators found|io\.grpc\.StatusRuntimeException: (UNAVAILABLE|DEADLINE_EXCEEDED)'
 mkdir -p "$out"
 adb install -r "$apk" || exit 1
+run() { maestro test --format junit --output "$out/$name.xml" --debug-output "$out/$name" "$flow" 2>&1 | tee "$out/$name.log"; }
 failed=0
 for flow in e2e/mobile/flows/*.yaml mobile-features/*/maestro/*.yaml; do
   [ -e "$flow" ] || continue
   name=$(echo "${flow%.yaml}" | tr / _)
-  run() { maestro test --format junit --output "$out/$name.xml" --debug-output "$out/$name" "$flow" 2>&1 | tee "$out/$name.log"; }
   if run; then continue; fi
   if grep -Eq "$INFRA" "$out/$name.log"; then
     echo "::warning title=Emulator infrastructure failure::$flow, rerunning once"

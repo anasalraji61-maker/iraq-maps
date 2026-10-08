@@ -44,7 +44,7 @@ jobs:
         run: |
           bytes=$(stat -c %s "$RUNNER_TEMP/iraq-maps-arm64-v8a.apk")
           size="$(awk "BEGIN { printf \"%.1f\", $bytes / 1e6 }") MB ($bytes bytes)"
-          echo "### arm64-v8a release APK: $size, budget 40 MB" >>"$GITHUB_STEP_SUMMARY"
+          echo "### arm64-v8a release APK: $size, budget 40 MB" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$bytes" -le "$APK_BUDGET_BYTES" ] || { echo "::error title=APK over budget::$size is over 40 MB"; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
@@ -74,8 +74,10 @@ jobs:
       API_PORT: 3000
       DATABASE_URL: postgres://postgres@localhost:5432/postgres
       REDIS_URL: redis://localhost:6379
-      MAESTRO_VERSION: ''
-      MAESTRO_SHA256: ''
+      MAESTRO_VERSION: 2.11.0
+      MAESTRO_SHA256: 5384593cb4e7a106489e75a821d157dd43f4e438df6bc308b72e82c685e1283a # maestro.zip of cli-2.11.0
+      MAESTRO_CLI_NO_ANALYTICS: 1
+      MAESTRO_DRIVER_STARTUP_TIMEOUT: 180000 # ms; a cold CI emulator is slow to start the on-device driver
     steps:
       - uses: actions/checkout@v4
       - *pnpm

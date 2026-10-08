@@ -2,7 +2,7 @@
 
 ## 1. pnpm-lock.yaml: e2e/api workspace dependencies (blocking for the AC#4 auth e2e)
 
-**Status: open (integrator).**
+**Status: resolved (integrator, `cb6e2ca`).**
 
 The auth e2e (`e2e/api/test/auth.test.ts`) builds its database and app with `createTestDatabase` (db-kit), the fakes
 and env helpers (testing), `captureLogs` (observability) and `PortTokens` (contracts). `e2e/api/package.json` now
