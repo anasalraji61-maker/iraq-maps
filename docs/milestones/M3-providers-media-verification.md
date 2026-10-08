@@ -6,21 +6,28 @@ branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-providers:
     - "modules/providers/**"
+    - "docs/contract-requests/M3-builder-providers.md"
   builder-media:
     - "modules/media/**"
     - "adapters/storage-s3/**"
-  builder-places-provider:
+    - "docs/contract-requests/M3-builder-media.md"
+  builder-places-map:
     - "modules/places/**"
     - "mobile-features/map/**"
+    - "docs/contract-requests/M3-builder-places-map.md"
   builder-provider-app:
     - "mobile-features/provider/**"
     - "mobile-features/account/**"
-    - "packages/mobile-kit/**"
+    - "packages/mobile-kit/src/upload-asset*"
     - "packages/ui/**"
+    - "docs/contract-requests/M3-builder-provider-app.md"
   builder-admin:
     - "apps/admin/**"
-  builder-e2e-m3:
+    - "docs/contract-requests/M3-builder-admin.md"
+  builder-e2e:
     - "e2e/**"
+    - "tools/bench/**"
+    - "docs/contract-requests/M3-builder-e2e.md"
   integrator:
     - "package.json"
     - "pnpm-workspace.yaml"
@@ -37,6 +44,9 @@ owners:
     - "apps/mobile/*"
     - "apps/mobile/app/**"
     - "apps/mobile/src/shell/**"
+    - "packages/mobile-kit/package.json"
+    - "packages/mobile-kit/README.md"
+    - "packages/mobile-kit/src/index.ts"
     - ".github/workflows/ci.yml"
     - ".github/workflows/android.yml"
     - "docs/milestones/**"
@@ -138,10 +148,10 @@ The integrator freezes contracts in 30 min or less. It adds:
 |---|---|---|
 | `builder-providers` | `modules/providers/**` | وحدة providers كاملة:<br>• التسجيل وتوثيق الهاتف والمطالبة.<br>• الملف وسجل الموافقات بالأدلة.<br>• التوثيق والتعليق بواجهات محمية بالدور.<br>• ProviderProfilePort و ProviderDirectoryPort مع اجتياز conformance suites.<br>• الأحداث عبر outbox، و UserDataEraser. |
 | `builder-media` | `modules/media/**`<br>`adapters/storage-s3/**` | • وحدة media: نية الرفع، ومحرّك الملفات، ومعالجة sharp مع إزالة EXIF، وحدث asset.ready، والروابط الموقّعة، و UserDataEraser.<br>• محوّل S3 يجتاز conformance suite لـ ObjectStorage. |
-| `builder-places-provider` | `modules/places/**`<br>`mobile-features/map/**` | • جدول provider_place المنفصل، يُبنى من أحداث المزوّد ويُدمج في البحث.<br>• قسم المزوّد في التفاصيل عبر ProviderProfilePort وقت الطلب.<br>• في البطاقة: قسم المزوّد، وشارة التوثيق، وزر «هذا مكاني». |
-| `builder-provider-app` | `mobile-features/provider/**`<br>`mobile-features/account/**`<br>`packages/mobile-kit/**`<br>`packages/ui/**` | • حزمة feature-provider: المعالج، والموقع أو المطالبة، والصور، والساعات والأسعار والروابط، والموافقات مع السحب، وحالة التوثيق، وتدفق Maestro.<br>• مدخل «وضع المزوّد» في حسابي.<br>• uploadAsset في mobile-kit، مع ضغط الصورة وإعادة المحاولة.<br>• مكوّنات المفاتيح (toggles) في packages/ui. |
+| `builder-places-map` (مشترك مع M2) | `modules/places/**`<br>`mobile-features/map/**` | • جدول provider_place المنفصل، يُبنى من أحداث المزوّد ويُدمج في البحث.<br>• قسم المزوّد في التفاصيل عبر ProviderProfilePort وقت الطلب.<br>• في البطاقة: قسم المزوّد، وشارة التوثيق، وزر «هذا مكاني». |
+| `builder-provider-app` | `mobile-features/provider/**`<br>`mobile-features/account/**`<br>`packages/mobile-kit/src/upload-asset*`<br>`packages/ui/**` | • حزمة feature-provider: المعالج، والموقع أو المطالبة، والصور، والساعات والأسعار والروابط، والموافقات مع السحب، وحالة التوثيق، وتدفق Maestro.<br>• مدخل «وضع المزوّد» في حسابي.<br>• uploadAsset في mobile-kit، مع ضغط الصورة وإعادة المحاولة.<br>• مكوّنات المفاتيح (toggles) في packages/ui. |
 | `builder-admin` | `apps/admin/**` | لوحة الإدارة على الويب:<br>• الدخول مع التحقق من الدور.<br>• قائمة التوثيق وتفاصيل الأدلة.<br>• التوثيق والتعليق مع السبب، وسجل التدقيق.<br>• i18n و RTL.<br>• اختبارات Vitest، وبناء إنتاجي. |
-| `builder-e2e-m3` | `e2e/**` | • سيناريو التسجيل والتوثيق والسحب والتعليق.<br>• مجموعة التفويض.<br>• في الـ harness: محرّك تخزين الملفات، وخطوة توثيق إداري للمحاكي. |
+| `builder-e2e` (مشترك مع M2) | `e2e/**`<br>`tools/bench/**` | • سيناريو التسجيل والتوثيق والسحب والتعليق.<br>• مجموعة التفويض.<br>• في الـ harness: محرّك تخزين الملفات، وخطوة توثيق إداري للمحاكي. |
 
 ### المكامل (integrator)
 
@@ -208,6 +218,31 @@ The integrator freezes contracts in 30 min or less. It adds:
 - فهرس provider_place يُبنى من الأحداث فقد يتأخر قليلاً. يحوي حقولاً غير حساسة فقط، والحقول المشروطة بموافقة تُقرأ لحظياً.
 - رفع الصور على شبكات ضعيفة. نضغط الصورة على العميل، ونرفع مباشرة برابط موقّع مع إعادة المحاولة.
 - المرحلة فيها ستة بنّائين. لذلك يجب تجميد العقود بدقة لتقليل طلبات التعديل.
+
+## انحرافات مسجّلة
+
+- تجميد العقود تم أثناء إغلاق M1 لتسريع التوازي
+- **التشغيل مع M2 بالتوازي بلا تداخل في الملكية.**
+  - `modules/places` و `mobile-features/map` لبنّاء واحد مشترك، `builder-places-map`، بدل `builder-places-provider` هنا و `builder-map-app-m2` في M2. يسلّم بنود M2 أولاً (وهي صغيرة)، ثم بنود M3.
+  - `e2e/**` و `tools/bench/**` لبنّاء واحد مشترك، `builder-e2e`، بدل `builder-e2e-m3` و `builder-e2e-m2`.
+  - `packages/mobile-kit` مقسوم على مستوى الملفات: `src/upload-asset*` لـ builder-provider-app، و `src/recent-routes*` لـ builder-map-kit-m2 في M2. ‏`package.json` و `README.md` و `src/index.ts` للمكامل.
+  - `packages/ui` لـ M3 وحدها، و `docs/DATA_SOURCES.md` لـ builder-imagery في M2. لذلك تُسجَّل تراخيص sharp و libvips في `modules/media/README.md`، وصفّ في DATA_SOURCES عند الحاجة يُطلب من builder-imagery.
+- **عقود M3 في ملفات خاصة بها:** `packages/contracts/src/providers.ts` و `media.ts`. الملفات المشتركة (`http.ts` و `events.ts` و `ports.ts` و `test-ids.ts` و `places.ts` و `index.ts`) فيها سطر ربط واحد لكل إضافة، معلَّم `M3`.
+- **إضافات على قائمة العقود:**
+  - `publicProfileOf` و `contactChannelsOf` في العقود: منطق الموافقات معرّف مرة واحدة، تستخدمه وحدة providers والـ fakes معاً.
+  - `POST /v1/providers/me/submit`: يعيد 409 قبل توثيق هاتف العمل (معيار القبول 1، الخطوة 1).
+  - مسارا محرّك الملفات الموقّعان `PUT` و `GET /v1/media/fs/:key?exp&sig`. هما عامّان، والتوقيع هو التفويض. عند الربط يُضافان إلى قائمة المسارات العامة لكل الطرق في حارس identity (`PUBLIC_AUTH` اليوم)، لأن `PUBLIC_READ` يقبل GET و HEAD فقط ولا يقبل `PUT`.
+  - `StorageKey`: مفاتيح مسطّحة، فلا `..` ولا مسارات مطلقة.
+  - `SignedUrlString`: رابط مطلق أو نسبي `/v1/...` يحلّه التطبيق مقابل عنوان الخادم، لأن الخادم لا يعرف عنوانه العام.
+  - `providerPlaceId(id) = p<providerId>` لمعرّف مكان المزوّد.
+  - `FakeMediaPort` و `mediaPortConformance`، و `phoneVerificationConformance`.
+  - `ConsentEvidence {textVersion, locale}`: نسخة نص الموافقة الذي رآه المزوّد ولغته.
+- **أسماء env:** ‏`S3_ENDPOINT` و `S3_BUCKET` و `S3_ACCESS_KEY_ID` و `S3_SECRET_ACCESS_KEY` موجودة. تُضاف عند الربط: `S3_REGION`، و `MEDIA_STORAGE_DRIVER` ‏(fs أو s3)، و `MEDIA_STORAGE_DIR` (جذر محرّك الملفات)، و `MEDIA_SIGNING_SECRET`.
+- **روابط المسارات:** روابط المزوّد موجودة منذ M0 ‏(`providerHome` و `providerRegister` و `providerProfile` و `providerConsents`). المطالبة من البطاقة تفتح `providerRegister` بمعامل `placeId`. مسارات لوحة الإدارة داخلية في `apps/admin`.
+- **مؤجل إلى المرحلة B من التجميد، بعد إغلاق M1:**
+  - هيكل `apps/admin`، لأن `apps/**` مجمّد أثناء إغلاق M1.
+  - stub ‏`uploadAsset(api: ApiClient, apiBaseUrl: string, input: { uri: string; purpose: MediaPurpose }): Promise<AssetId>` في `packages/mobile-kit/src/upload-asset.ts`. يضغط الصورة إلى JPEG، ويرفعها برابط موقّع مع إعادة المحاولة، ثم يستدعي complete.
+- **قرار مطلوب من القائد: `PlaceDetails.source` للأماكن التي ينشئها المزوّد.** القيمة الآن `'osm'` حرفياً. مكان المزوّد الجديد يظهر في البحث، لكن تفاصيله ليست من OSM. التوسيع إلى `z.enum(['osm', 'provider'])` تغيير غير إضافي، فلم يُطبَّق في هذا التجميد. المقترح: تطبيقه قبل بدء builder-places-map، مع تسجيله هنا، لأن المستهلك الوحيد هو التطبيق نفسه، ولا إصدار بعد.
 
 ## ما تم إنجازه
 

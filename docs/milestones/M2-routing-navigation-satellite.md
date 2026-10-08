@@ -8,22 +8,28 @@ owners:
     - "geo-services/routing/**"
     - "modules/routing/**"
     - ".github/workflows/geo-data.yml"
+    - "docs/contract-requests/M2-builder-routing.md"
   builder-imagery:
     - "geo-services/imagery/**"
     - ".github/workflows/imagery.yml"
     - "docs/DATA_SOURCES.md"
+    - "docs/contract-requests/M2-builder-imagery.md"
   builder-navigation-app:
     - "mobile-features/navigation/**"
+    - "docs/contract-requests/M2-builder-navigation-app.md"
   builder-map-kit-m2:
     - "packages/map-kit/**"
     - "packages/geo/**"
-    - "packages/mobile-kit/**"
-  builder-map-app-m2:
+    - "packages/mobile-kit/src/recent-routes*"
+    - "docs/contract-requests/M2-builder-map-kit-m2.md"
+  builder-places-map:
     - "mobile-features/map/**"
     - "modules/places/**"
-  builder-e2e-m2:
+    - "docs/contract-requests/M2-builder-places-map.md"
+  builder-e2e:
     - "e2e/**"
     - "tools/bench/**"
+    - "docs/contract-requests/M2-builder-e2e.md"
   integrator:
     - "package.json"
     - "pnpm-workspace.yaml"
@@ -40,6 +46,9 @@ owners:
     - "apps/mobile/*"
     - "apps/mobile/app/**"
     - "apps/mobile/src/shell/**"
+    - "packages/mobile-kit/package.json"
+    - "packages/mobile-kit/README.md"
+    - "packages/mobile-kit/src/index.ts"
     - ".github/workflows/ci.yml"
     - ".github/workflows/android.yml"
     - "docs/milestones/**"
@@ -135,9 +144,9 @@ The integrator freezes contracts in 30 min or less. It adds:
 | `builder-routing` | `geo-services/routing/**`<br>`modules/routing/**`<br>`.github/workflows/geo-data.yml` | • إعداد Valhalla، وسكربت بناء البلاطات وتشغيل الخدمة عبر pyvalhalla.<br>• fixture شبكة طرق: حلقة، وشارع باتجاه واحد، وممر مشاة.<br>• job بلاطات المدينة وقياس p95 في geo-data.yml.<br>• وحدة routing: العميل، والتحويل إلى مناورات منظّمة، وحد المعدّل.<br>• اختبارات باستجابات مسجّلة وتكامل حي محلي. |
 | `builder-imagery` | `geo-services/imagery/**`<br>`.github/workflows/imagery.yml`<br>`docs/DATA_SOURCES.md` | • pipeline الأقمار من sentinel-cogs إلى raster PMTiles، مع اختبار اصطناعي.<br>• imagery.yml مع رفعها كـ artifacts.<br>• تسجيل المصدر والترخيص ونص الإسناد. |
 | `builder-navigation-app` | `mobile-features/navigation/**` | حزمة feature-navigation:<br>• المعاينة والملاحة.<br>• قوالب التعليمات بثلاث لغات.<br>• محرك الانحراف وإعادة التوجيه، والوصول.<br>• تسجيل المسار محلياً.<br>• اختبارات بمسارات GPS مسجّلة، وتدفقا Maestro. |
-| `builder-map-kit-m2` | `packages/map-kit/**`<br>`packages/geo/**`<br>`packages/mobile-kit/**` | • خط المسار، وتتبع الكاميرا، وطبقة raster للأقمار مع الإسناد ومكوّن التنبيه.<br>• دوال الهندسة مع اختبارات الدقة.<br>• مخزن recentRoutes. |
-| `builder-map-app-m2` | `mobile-features/map/**`<br>`modules/places/**` | • واصف طبقة الأقمار في ‎/v1/cities.<br>• مفتاح الطبقة مع التنبيه في الخريطة.<br>• زر «اتجاهات» في البطاقة. |
-| `builder-e2e-m2` | `e2e/**`<br>`tools/bench/**` | • سيناريوهات e2e/api للمسارات.<br>• تشغيل valhalla_service على fixture داخل الـ harness.<br>• أمر route في tools/bench. |
+| `builder-map-kit-m2` | `packages/map-kit/**`<br>`packages/geo/**`<br>`packages/mobile-kit/src/recent-routes*` | • خط المسار، وتتبع الكاميرا، وطبقة raster للأقمار مع الإسناد ومكوّن التنبيه.<br>• دوال الهندسة مع اختبارات الدقة.<br>• مخزن recentRoutes. |
+| `builder-places-map` (مشترك مع M3) | `mobile-features/map/**`<br>`modules/places/**` | • واصف طبقة الأقمار في ‎/v1/cities.<br>• مفتاح الطبقة مع التنبيه في الخريطة.<br>• زر «اتجاهات» في البطاقة. |
+| `builder-e2e` (مشترك مع M3) | `e2e/**`<br>`tools/bench/**` | • سيناريوهات e2e/api للمسارات.<br>• تشغيل valhalla_service على fixture داخل الـ harness.<br>• أمر route في tools/bench. |
 
 ### المكامل (integrator)
 
@@ -203,6 +212,38 @@ The integrator freezes contracts in 30 min or less. It adds:
 - محاكاة الموقع على المحاكي غير مستقرة. منطق الانحراف مثبت بـ Jest، و Maestro يتحقق من الواجهة فقط.
 - دقة 10م قد تخيّب توقعات المستخدم. نعالج ذلك بتنبيه دائم وطبقة اختيارية.
 - الغيوم وتغيّر المواسم تؤثر على المشهد. نختار الأقل غيوماً تلقائياً، ونوثّق تاريخ الالتقاط.
+
+## انحرافات مسجّلة
+
+- تجميد العقود تم أثناء إغلاق M1 لتسريع التوازي
+- **التشغيل مع M3 بالتوازي بلا تداخل في الملكية.**
+  - `modules/places` و `mobile-features/map` لبنّاء واحد مشترك بين المرحلتين، `builder-places-map`، بدل `builder-map-app-m2` في M2 و `builder-places-provider` في M3. يسلّم بنود M2 أولاً (وهي صغيرة)، ثم بنود M3.
+  - `e2e/**` و `tools/bench/**` لبنّاء واحد مشترك، `builder-e2e`، بدل `builder-e2e-m2` و `builder-e2e-m3`.
+  - `packages/mobile-kit` مقسوم على مستوى الملفات: `src/recent-routes*` لـ builder-map-kit-m2، و `src/upload-asset*` لـ builder-provider-app في M3. ‏`package.json` و `README.md` و `src/index.ts` للمكامل، وهو يضيف التصديرات والاعتماديات عند التجميد.
+  - لا يتداخل بنّاء من M2 مع بنّاء من M3 في أي مسار آخر. ‏`docs/DATA_SOURCES.md` لـ builder-imagery وحده. تسجيل Valhalla و pyvalhalla يطلبه builder-routing من builder-imagery عبر `docs/contract-requests/M2-builder-routing.md`.
+- **عقود M2 في ملفات خاصة بها:** `packages/contracts/src/routing.ts` و `imagery.ts`. الملفات المشتركة (`http.ts` و `events.ts` و `ports.ts` و `test-ids.ts` و `places.ts` و `index.ts`) فيها سطر ربط واحد لكل إضافة، معلَّم `M2`.
+- **إضافات على قائمة العقود:**
+  - `imageryContract`: مسار احتياط `GET /v1/cities/:id/satellite/:z/:x/:y` لبلاطات الأقمار (webp) من `IMAGERY_URL`، تقدّمه places. لا استضافة للبيانات قبل M7.
+  - `IMAGERY_URL`: مسار مطلق أو رابط https لملف PMTiles الأقمار، و `{city}` معرّف المدينة. بيانات `SatelliteLayer` (الإسناد والدقة وتاريخ الالتقاط) تُقرأ من بيانات JSON داخل الملف.
+  - `RoutingCliContracts` (‏tiles و serve و bench route) و `ImageryCliContracts` (‏build).
+  - `Maneuver.roundaboutExit` لرقم المخرج، واستجابتا 404 ‏`no_route` و 503 ‏`routing_unavailable`.
+  - `navigationTestIDs` و `satelliteTestIDs`.
+  - `/v1/routes` ومسار الأقمار عامّان مثل البحث. عند الربط في حارس identity (`modules/identity/src/http.ts`): مسار الأقمار (GET) يُضاف إلى `PUBLIC_READ`. أما `/v1/routes` فهو POST، فيُضاف إلى قائمة المسارات العامة لكل الطرق (`PUBLIC_AUTH` اليوم، ويُعمَّم اسمها عند الربط).
+- **روابط المسارات موجودة منذ M0:** المعاينة `routes.routePreview` ‏(`/route/[placeId]`) والملاحة `routes.navigation` ‏(`/navigate/[placeId]`)، والوسيلة معامل بحث `mode`.
+- **stubs مؤجلة إلى المرحلة B من التجميد، بعد إغلاق M1**، لأن الجلسة B ما زالت تبني map-kit و geo في M1. التواقيع مجمّدة هنا:
+  - `packages/geo`:
+    - `decodePolyline6(encoded: string): LngLat[]`
+    - `distanceToPolylineM(point: LngLat, line: readonly LngLat[]): number`
+    - `nearestPointOnLine(point: LngLat, line: readonly LngLat[]): { point: LngLat; index: number; distanceM: number }`
+    - `bearing(from: LngLat, to: LngLat): number` (درجات 0–360 من الشمال)
+  - `packages/map-kit`:
+    - `MapCanvasProps.route?: { polyline6: string }` يرسم `RouteLine`.
+    - `MapCanvasProps.followUser?: boolean` تتبع الكاميرا.
+    - `MapCanvasProps.baseLayer?: 'vector' | 'satellite'`، و `SatelliteDisclaimer` يعرض التنبيه والإسناد.
+  - `packages/mobile-kit` ‏(`src/recent-routes.ts`):
+    - `recentRoutes.list(): Promise<RecentRoute[]>`
+    - `recentRoutes.add(entry: RecentRoute): Promise<void>`
+    - `RecentRoute = { placeId: PlaceId; name: string; mode: TravelMode; distanceM: number; durationS: number; at: string }`، على الجهاز فقط، بحد 20.
 
 ## ما تم إنجازه
 
