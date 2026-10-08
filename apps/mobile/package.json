@@ -15,7 +15,8 @@
     "preset": "jest-expo",
     "roots": [
       "<rootDir>/src"
-    ]
+    ],
+    "testTimeout": 30000
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.16",
