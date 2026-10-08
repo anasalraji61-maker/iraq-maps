@@ -24,7 +24,7 @@ class ProtectedDummy {
 
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
-const delivered: DomainEvent[] = [];
+const delivered: DomainEvent<'identity.user.registered.v1'>[] = [];
 
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: moduleMigrations });

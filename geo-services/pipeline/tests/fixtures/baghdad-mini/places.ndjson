@@ -17,6 +17,7 @@
 {"id":"w1003","kind":"street","names":{"name":"شارع 62"},"category":null,"location":[44.4,33.32],"tags":{}}
 {"id":"w1004","kind":"street","names":{"name":"شارع 62"},"category":null,"location":[44.43,33.29],"tags":{}}
 {"id":"w1005","kind":"street","names":{"name":"شارع المتنبي","en":"Al-Mutanabbi Street"},"category":null,"location":[44.391,33.341],"tags":{}}
+{"id":"w1008","kind":"street","names":{"name":"شارع الجادرية"},"category":null,"location":[44.39,33.28],"tags":{}}
 {"id":"n301","kind":"area","names":{"name":"حي الوحدة","en":"Al-Wahda"},"category":null,"location":[44.4405,33.3205],"tags":{}}
 {"id":"n302","kind":"area","names":{"name":"الكرادة","ckb":"کەڕادە","en":"Karrada"},"category":null,"location":[44.415,33.305],"tags":{}}
 {"id":"r4001","kind":"area","names":{"name":"ناحية الجادرية","en":"Jadriya"},"category":null,"location":[44.4,33.29],"tags":{}}

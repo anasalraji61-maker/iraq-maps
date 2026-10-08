@@ -39,3 +39,12 @@ The credentials are non-secret dev defaults, used only on local machines.
 | `TEST_DATABASE_ADMIN_URL` | unset, which falls back to `DATABASE_URL` and then to the URL above | `createTestDatabase()` (`packages/db-kit`) |
 
 In CI, point `TEST_DATABASE_ADMIN_URL` (or `DATABASE_URL`) at the postgis service container. Its user is a superuser, so the template is created on first use.
+
+## Required extensions (every environment)
+
+Every database needs `postgis` and `pg_trgm` in schema `public`. Module migrations may not create extensions, so
+`pnpm --filter @iraq-maps/api migrate` runs `CREATE EXTENSION IF NOT EXISTS` for both first (`ensureExtensions` in
+`packages/db-kit`). That needs no privilege when they already exist, and creates them when the role may (a superuser,
+as in the CI service containers, whose `postgis/postgis` image has PostGIS but not pg_trgm). Otherwise it stops with
+an error that names the missing extension. **Production databases must have both extensions provisioned by their
+admin before the first migration**, because the application role is not a superuser.

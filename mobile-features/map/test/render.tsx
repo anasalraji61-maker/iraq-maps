@@ -1,5 +1,4 @@
 import { CityDescriptor, OSM_ATTRIBUTION, PlaceSummary, type Locale } from '@iraq-maps/contracts';
-import { MapCanvas, type MapCanvasProps } from '@iraq-maps/map-kit';
 import type { RouteName } from '@iraq-maps/mobile-kit';
 import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
 import { jest } from '@jest/globals';
@@ -52,6 +51,3 @@ export async function show(ui: ReactElement, opts: { api?: ReturnType<typeof fak
   const view = await renderWithProviders(ui, { api: api as never, locale, availableRoutes });
   return { api, view, router: jest.mocked(useRouter()) };
 }
-
-/** The props MapCanvas got on its last render. */
-export const mapProps = (): MapCanvasProps => jest.mocked(MapCanvas).mock.lastCall![0];

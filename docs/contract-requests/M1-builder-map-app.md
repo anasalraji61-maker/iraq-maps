@@ -74,20 +74,11 @@ signal is aborted. Proposed fix:
 
 A test in `packages/api-client` would abort a call and expect the fake fetch to receive an aborted signal.
 
-## 4. map-kit (builder-map-kit): what feature-map relies on, and one additive prop (non-blocking)
+## 4. map-kit (builder-map-kit)
 
-feature-map uses only the frozen `MapCanvas` and `MapCamera`, and relies on the following:
-
-- `MapCanvas` fills its parent. feature-map puts it in `StyleSheet.absoluteFill` and overlays the search panel at
-  the top and the locate button at the end side, 64dp above the bottom edge. The attribution should sit at the bottom,
-  clear of both.
-- MapCanvas renders `testIDs.map.view` and `testIDs.map.attribution`. feature-map's Jest stand-in (`test/setup.ts`)
-  renders the same two testIDs. When map-kit ships its Jest mock, feature-map can switch to it.
-- `onMarkerPress(id)` receives the `MapMarker.id`, which here is the PlaceId.
-
-Gap (additive): MapCanvas does not report camera moves, so search `near` is the user's location after locate-me, else
-the city centre, and not where the user has panned. Proposed: `onCameraChanged?(center: LngLat, zoom: number)` on
-`MapCanvasProps`, called when a gesture ends. feature-map would then send that centre as `near`.
+**Status: resolved (map-kit, `f7e1e0b`).** feature-map uses the real `MapCanvas`, and its tests use
+`@iraq-maps/map-kit/jest-mock`. `onCameraChanged` feeds search `near`, so the next search follows the panned map. The
+search panel (top) and the locate button (end side, 64dp up) stay clear of the bottom-end attribution corner.
 
 ## 5. For information
 

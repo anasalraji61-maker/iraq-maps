@@ -4,7 +4,9 @@
      invented or generic, coordinates are made up inside cities/baghdad.yaml. Phones are fake, websites use the
      reserved example.com/example.org domains.
      Expected output: tests/fixtures/baghdad-mini/places.ndjson and city.json (regenerate as in README.md).
-     Counts: 15 places, 4 streets, 4 areas (worked out in tests/test_extract.py).
+     Counts: 15 places, 5 streets, 4 areas (worked out in tests/test_extract.py).
+     Broken real-data cases: way 1008 refers to a missing node 98; the outer ring of relation 3002 does not close
+     (the rest of its outer is missing), so osmium yields an area with no rings; node 118 has a whitespace-only name.
      Search spelling variants: قلعة (searched as قلعه) and أربيل (searched as اربيل/إربيل). -->
 <osm version="0.6" generator="hand">
   <!-- street nodes -->
@@ -22,8 +24,9 @@
   <node id="12" lat="33.3100" lon="44.3950"/>
   <node id="13" lat="33.3110" lon="44.3950"/>
   <node id="14" lat="33.3050" lon="44.4200"/>
+  <node id="15" lat="33.2800" lon="44.3900"/>
 
-  <!-- POI nodes: 101-113 are places; 114-116 are dropped (no category, no name); 117 lies outside the city -->
+  <!-- POI nodes: 101-113 are places; 114-116 and 118 are dropped (no category, no name); 117 lies outside the city -->
   <node id="101" lat="33.3105" lon="44.4210">
     <tag k="amenity" v="restaurant"/>
     <tag k="name" v="مطعم أربيل"/>
@@ -111,6 +114,10 @@
     <tag k="amenity" v="restaurant"/>
     <tag k="name" v="مطعم خارج المدينة"/>
   </node>
+  <node id="118" lat="33.3104" lon="44.4214">
+    <tag k="amenity" v="cafe"/>
+    <tag k="name" v="   "/>
+  </node>
 
   <!-- hospital outline (w2001), university outer ring (w2002, for r3001) -->
   <node id="201" lat="33.3095" lon="44.4245"/>
@@ -130,6 +137,10 @@
   <node id="232" lat="33.2850" lon="44.4050"/>
   <node id="233" lat="33.2950" lon="44.4050"/>
   <node id="234" lat="33.2950" lon="44.3950"/>
+  <!-- the only outer way of the broken multipolygon r3002, an open line -->
+  <node id="241" lat="33.3300" lon="44.4300"/>
+  <node id="242" lat="33.3300" lon="44.4310"/>
+  <node id="243" lat="33.3310" lon="44.4310"/>
 
   <!-- area nodes: 301 and 302 are areas; 303 (place=city) is not -->
   <node id="301" lat="33.3205" lon="44.4405">
@@ -187,6 +198,12 @@
     <nd ref="5"/><nd ref="14"/>
     <tag k="highway" v="residential"/>
   </way>
+  <!-- a street whose second node (98) is missing from the extract: kept, located on node 15 -->
+  <way id="1008">
+    <nd ref="15"/><nd ref="98"/>
+    <tag k="highway" v="secondary"/>
+    <tag k="name" v="شارع الجادرية"/>
+  </way>
 
   <way id="2001">
     <nd ref="201"/><nd ref="202"/><nd ref="203"/><nd ref="204"/><nd ref="201"/>
@@ -206,6 +223,9 @@
   <way id="2004">
     <nd ref="231"/><nd ref="232"/><nd ref="233"/><nd ref="234"/><nd ref="231"/>
   </way>
+  <way id="2005">
+    <nd ref="241"/><nd ref="242"/><nd ref="243"/>
+  </way>
 
   <relation id="3001">
     <member type="way" ref="2002" role="outer"/>
@@ -214,6 +234,13 @@
     <tag k="name" v="جامعة دجلة"/>
     <tag k="name:en" v="Tigris University"/>
     <tag k="website" v="https://example.org/tigris-university"/>
+  </relation>
+  <!-- broken multipolygon: its outer ring is missing a part, so it is skipped -->
+  <relation id="3002">
+    <member type="way" ref="2005" role="outer"/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="amenity" v="hospital"/>
+    <tag k="name" v="مستشفى الحدود الناقصة"/>
   </relation>
   <relation id="4001">
     <member type="way" ref="2004" role="outer"/>

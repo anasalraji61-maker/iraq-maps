@@ -8,6 +8,11 @@ export const PortTokens = {
   PhoneVerificationPort: 'port:PhoneVerificationPort',
   EventBus: 'port:EventBus',
   PlacesQueryPort: 'port:PlacesQueryPort',
+  RoutingPort: 'port:RoutingPort', // M2
+  ProviderProfilePort: 'port:ProviderProfilePort', // M3
+  ProviderDirectoryPort: 'port:ProviderDirectoryPort', // M3
+  MediaPort: 'port:MediaPort', // M3
+  ObjectStorage: 'port:ObjectStorage', // M3
 } as const;
 
 export interface Clock {

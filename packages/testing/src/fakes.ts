@@ -8,7 +8,6 @@ import {
   type EventHandler,
   type EventName,
   type IraqiPhone,
-  type LngLat,
   type NearbyQuery,
   type OtpSender,
   type PlaceDetails,
@@ -21,6 +20,7 @@ import {
   type UserId,
 } from '@iraq-maps/contracts';
 import { normalizeArabic } from '@iraq-maps/i18n';
+import { distanceM } from './geo';
 
 export class FixedClock implements Clock {
   constructor(private current = new Date('2026-01-01T00:00:00.000Z')) {}
@@ -70,12 +70,6 @@ export class InMemoryUserDataEraser implements UserDataEraser {
   }
 }
 
-/** Great-circle distance in metres. TODO(M1): use @iraq-maps/geo once builder-map-kit lands it. */
-function distanceM([lng1, lat1]: LngLat, [lng2, lat2]: LngLat): number {
-  const rad = Math.PI / 180;
-  const h = Math.sin(((lat2 - lat1) * rad) / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(((lng2 - lng1) * rad) / 2) ** 2;
-  return 2 * 6_371_008.8 * Math.asin(Math.sqrt(h));
-}
 
 const KIND_ORDER = { place: 0, street: 1, area: 2 } as const;
 type Row = PlaceImportRecord & { city: CityId };

@@ -1,7 +1,7 @@
 # OSM city data from the public Geofabrik Iraq extract (ADR-0008). Read-only: no secrets, no pushes, no releases.
 # - osm-quality: the first-city quality report (MVP.md section 1, task T01).
-# - city-data: the data-<city>-<date> artifact for Baghdad: places.ndjson, city.json, ATTRIBUTION.txt, and
-#   <city>.pmtiles + glyphs/ once geo-services/tiles is implemented (geo-services/pipeline/scripts/city-data.sh).
+# - city-data: the data-<city>-<date> artifact for Baghdad (geo-services/pipeline/scripts/city-data.sh): places.ndjson,
+#   city.json, <city>.pmtiles, glyphs/<fontstack>/ with OFL.txt, and ATTRIBUTION.txt.
 # - perf: imports that artifact into a CI PostGIS and measures /v1/search p95 against the budget (M1 criterion 8).
 name: geo-data
 on:
@@ -85,7 +85,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - *python
-      # Java 21 + Maven and planetiler.jar for geo-services/tiles, as in ci.yml.
+      # Java 21 + Maven and planetiler.jar (SHA-256 checked by scripts/planetiler.sh) for `tiles build`, as in ci.yml.
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
@@ -153,14 +153,12 @@ jobs:
           name: ${{ needs.city-data.outputs.artifact }}
           path: ${{ runner.temp }}/data
       - run: sh e2e/ci-secrets.sh
-      - name: Migrate, then import the city (CliContracts.placesImport)
-        run: |
-          pnpm --filter @iraq-maps/api migrate
-          cd modules/places # `pnpm run` from the package fails on a missing script; `import` is also a pnpm command
-          pnpm run import --city "$RUNNER_TEMP/data/city.json" --input "$RUNNER_TEMP/data/places.ndjson"
-      - name: Start the API
+      # Migrates, imports the artifact (CliContracts.placesImport) and serves its tiles and glyphs. With CITY_DATA
+      # holding places.ndjson, <city>.pmtiles and glyphs/, it neither copies the fixture city nor builds anything.
+      - name: Migrate, import the city data and start the API
         run: e2e/mobile/start-api.sh
         env:
+          CITY_DATA: ${{ runner.temp }}/data
           API_LOG: ${{ runner.temp }}/api.log
       - name: Search p95 within 800ms (CliContracts.benchSearch)
         working-directory: tools/bench

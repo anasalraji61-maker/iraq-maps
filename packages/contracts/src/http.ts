@@ -1,7 +1,11 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 import { IraqiPhone, Locale, Problem, Role, UserId } from './common';
+import { imageryContract } from './imagery';
+import { mediaContract } from './media';
 import { citiesContract, placesContract } from './places';
+import { adminProvidersContract, providersContract } from './providers';
+import { routesContract } from './routing';
 
 const c = initContract();
 
@@ -73,5 +77,18 @@ export const meContract = c.router(
   { pathPrefix: '/v1', strictStatusCodes: true },
 );
 
-export const apiContract = c.router({ health: healthContract, auth: authContract, me: meContract, cities: citiesContract, places: placesContract });
+export const apiContract = c.router({
+  health: healthContract,
+  auth: authContract,
+  me: meContract,
+  cities: citiesContract,
+  places: placesContract,
+  // M2
+  routes: routesContract,
+  imagery: imageryContract,
+  // M3
+  providers: providersContract,
+  adminProviders: adminProvidersContract,
+  media: mediaContract,
+});
 export type ApiContract = typeof apiContract;

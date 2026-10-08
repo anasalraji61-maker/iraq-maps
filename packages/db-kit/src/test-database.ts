@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { createDb, withClient, type Db } from './db';
-import { platformMigrationsDir, runModuleMigrations } from './migrations';
+import { ensureExtensions, platformMigrationsDir, runModuleMigrations } from './migrations';
 
 export interface TestDatabase {
   url: string;
@@ -21,7 +21,7 @@ const withDatabase = (url: string, database: string) => Object.assign(new URL(ur
 async function createTemplate(admin: pg.Client, adminUrl: string): Promise<void> {
   await admin.query(`CREATE DATABASE ${TEMPLATE} ENCODING 'UTF8' LOCALE 'C.UTF-8' TEMPLATE template0`);
   try {
-    await withClient(withDatabase(adminUrl, TEMPLATE), (c) => c.query('CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS pg_trgm'));
+    await ensureExtensions(withDatabase(adminUrl, TEMPLATE));
     await admin.query(`ALTER DATABASE ${TEMPLATE} IS_TEMPLATE true`);
   } catch (error) {
     await admin.query(`DROP DATABASE ${TEMPLATE}`);

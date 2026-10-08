@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 const logs = captureLogs();
 const sender = new FakeOtpSender();
 const eraser = new InMemoryUserDataEraser('x');
-const deleted: DomainEvent[] = [];
+const deleted: DomainEvent<'identity.user.deleted.v1'>[] = [];
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;

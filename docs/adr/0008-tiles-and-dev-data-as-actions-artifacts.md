@@ -28,7 +28,7 @@
    - الاعتماد بنطاق `system` في `pom.xml`.
    - `scripts/planetiler.sh` ينزّله إلى `.cache/` ويتحقق من SHA-256 المثبّت.
    - جُرّب هنا: بنى PMTiles من fixture الـ pipeline.
-5. **أداة الـ glyphs: fontnik 0.7.7** (npm، BSD-2-Clause، Mapbox).
+5. **أداة الـ glyphs: fontnik 0.7.7** (npm، BSD-3-Clause، Mapbox).
    - الحزمة تحمل ملفات native مبنية مسبقاً لـ linux-x64 و linux-arm64 و darwin، فلا تنزيل وقت التثبيت.
    - جُرّبت هنا على Node 22: ولّدت النطاقات 0-255 و 1536-1791 و 64256-65279 من `NotoSansArabic_400Regular.ttf`.
    - الخط Noto Sans Arabic من `@expo-google-fonts/noto-sans-arabic` (OFL 1.1، مسجّل في DATA_SOURCES). يغطي اللاتينية الأساسية أيضاً، فيكفي fontstack واحد: `Noto Sans Arabic Regular` (`Glyphs` في العقود).

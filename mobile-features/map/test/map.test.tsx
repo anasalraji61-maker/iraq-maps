@@ -3,12 +3,15 @@ import { t } from '@iraq-maps/i18n';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent } from '@testing-library/react-native';
 import * as Location from 'expo-location';
+import { buildStyle, resolveSource } from '@iraq-maps/map-kit';
+import { mapPartIDs, markerTestID } from '@iraq-maps/map-kit/jest-mock';
 import { MapScreen } from '../src';
-import { citadel, city, fakeApi, later, mapProps, respond, show, street } from './render';
+import { citadel, city, fakeApi, later, respond, show, street } from './render';
 
 const { map } = testIDs;
 const screen = <MapScreen />;
 const wait = (ms: number) => act(async () => void jest.advanceTimersByTime(ms));
+const style = (lang: 'ar' | 'ckb') => buildStyle(lang, resolveSource(city, 'http://api.test'));
 
 /** Shows the map, types `text` and lets the 300ms debounce run out. */
 async function search(text: string, api = fakeApi(), locale?: 'en') {
@@ -28,10 +31,12 @@ afterEach(() => {
 describe('map', () => {
   it('shows the city from GET /v1/cities with the OSM attribution, labels in the app language', async () => {
     const { view } = await show(screen);
-    expect(await view.findByTestId(map.view)).toBeVisible();
+    expect(await view.findByTestId(map.view)).toHaveProp('mapStyle', style('ar'));
     expect(view.getByTestId(map.attribution)).toHaveTextContent(OSM_ATTRIBUTION);
     expect(view.getByTestId(map.attribution)).toBeVisible();
-    expect(mapProps()).toMatchObject({ city, apiBaseUrl: 'http://api.test', lang: 'ar', camera: { bounds: city.bbox }, markers: [], showUserLocation: false });
+    // Opens on the city bbox (MapCanvas's default view): no camera move, no location puck.
+    expect(view.getByTestId(mapPartIDs.camera).props.setStop).not.toHaveBeenCalled();
+    expect(view.queryByTestId(mapPartIDs.userLocation)).toBeNull();
   });
 
   it('offers a retry when the city list cannot be reached', async () => {
@@ -49,7 +54,7 @@ describe('map', () => {
     await fireEvent.press(await view.findByTestId(map.lang));
     expect(view.getByRole('radio', { name: 'العربية' })).toBeChecked();
     await fireEvent.press(view.getByTestId(`${map.lang}.ckb`));
-    expect(mapProps().lang).toBe('ckb');
+    expect(view.getByTestId(map.view)).toHaveProp('mapStyle', style('ckb'));
   });
 });
 
@@ -97,12 +102,11 @@ describe('search', () => {
     const [first, second] = view.getAllByTestId(map.searchResult);
     expect(first).toHaveAccessibleName(`قلعة بغداد ١٫٢ كم سياحة · الرصافة ${t('map:source.osm')}`);
     expect(second).toHaveAccessibleName(`شارع القلعة ٣٥٠ م شارع ${t('map:source.osm')}`);
-    expect(mapProps().markers).toEqual([
-      { id: 'n1001', location: citadel.location },
-      { id: 'w2002', location: street.location },
-    ]);
     await fireEvent.press(first!);
-    expect(router.push).toHaveBeenCalledWith('/place/n1001');
+    expect(router.push).toHaveBeenLastCalledWith('/place/n1001');
+    // The results are markers too, and a marker opens its place.
+    await fireEvent.press(view.getByTestId(markerTestID('w2002')));
+    expect(router.push).toHaveBeenLastCalledWith('/place/w2002');
   });
 
   it('names results in the chosen map language, with Latin digits in English', async () => {
@@ -139,6 +143,18 @@ describe('search', () => {
     expect(view.getByRole('alert')).toHaveTextContent(t('common:errors.rateLimited'));
   });
 
+  it('searches near where the map was panned to, without re-running the search on screen', async () => {
+    const api = fakeApi();
+    api.places.search.mockReturnValue(respond(200, { items: [citadel] }));
+    const { view } = await search('قلعه', api);
+    await fireEvent(view.getByTestId(map.view), 'regionDidChange', { nativeEvent: { center: [44.4213, 33.2871], zoom: 14 } });
+    await wait(300);
+    expect(api.places.search).toHaveBeenCalledTimes(1);
+    await fireEvent.changeText(view.getByTestId(map.searchInput), 'قلعة');
+    await wait(300);
+    expect(api.places.search.mock.calls.map(([req]) => req?.query?.near)).toEqual(['44.366100,33.315200', '44.421300,33.287100']);
+  });
+
   it('hides the results when the query is cleared', async () => {
     const api = fakeApi();
     api.places.search.mockReturnValue(respond(200, { items: [citadel] }));
@@ -158,7 +174,8 @@ describe('locate me', () => {
     position.mockResolvedValue({ coords: { longitude: 44.4012, latitude: 33.3005 } } as never);
     const { api, view } = await show(screen);
     await fireEvent.press(await view.findByRole('button', { name: t('map:locate.label') }));
-    expect(mapProps()).toMatchObject({ camera: { center: [44.4012, 33.3005], zoom: 15 }, showUserLocation: true });
+    expect(view.getByTestId(mapPartIDs.camera).props.setStop).toHaveBeenLastCalledWith(expect.objectContaining({ center: [44.4012, 33.3005], zoom: 15 }));
+    expect(view.getByTestId(mapPartIDs.userLocation)).toBeOnTheScreen();
     await fireEvent.changeText(view.getByTestId(map.searchInput), 'قلعه');
     await wait(300);
     expect(api.places.search.mock.calls[0]?.[0]?.query).toMatchObject({ near: '44.401200,33.300500' });
@@ -170,7 +187,8 @@ describe('locate me', () => {
     await fireEvent.press(await view.findByTestId(map.locate));
     expect(view.getByRole('alert')).toHaveTextContent(t('map:locate.denied'));
     expect(position).not.toHaveBeenCalled();
-    expect(mapProps()).toMatchObject({ camera: { bounds: city.bbox }, showUserLocation: false });
+    expect(view.getByTestId(mapPartIDs.camera).props.setStop).not.toHaveBeenCalled();
+    expect(view.queryByTestId(mapPartIDs.userLocation)).toBeNull();
     expect(view.getByTestId(map.view)).toBeVisible();
   });
 

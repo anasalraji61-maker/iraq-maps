@@ -47,6 +47,7 @@ owners:
     - "packages/mobile-kit/**"
     - "packages/api-client/**"
     - "packages/db-kit/**"
+    - "infra/README.md"
     - "mobile-features/account/**"
     - "modules/identity/**"
     - ".github/workflows/ci.yml"
@@ -247,6 +248,10 @@ No event is added, because nothing consumes one yet.
 - **إصلاحان في `CliContracts` بعد التجميد** (طلبا M1-builder-geo-data §1 و M1-builder-e2e-m1 §4):
   - `placesImport.command` أصبح `pnpm --filter @iraq-maps/places run import`، لأن `pnpm import` أمر مدمج في pnpm.
   - `benchSearch`: الخروج بـ 1 عندما يكون p95 مساوياً للميزانية أو أعلى منها، والمستدعون الذين يقرؤون stdout يشغّلونه بـ `pnpm -s`.
+- **إضافتان للعقود بعد التجميد** (طلبا builder-tiles، إضافيتان فقط):
+  - `OsmCategoryRules` في `packages/contracts/src/osm-categories.ts`: جدول واحد يربط وسوم OSM بـ `PlaceCategory`، مصدَّر إلى `schemas/osm-categories.json`. الـ pipeline و profile البلاطات يقرآنه بدل نسختين منفصلتين. الجدول هو جدول الـ pipeline الحالي (القواعد بالترتيب، وأول تطابق يفوز، و `*` لأي قيمة، و `no` و `vacant` لا تطابق).
+  - `Glyphs` مصدَّر إلى `schemas/glyphs.json` ليقرأه CLI البلاطات.
+  - اختبار `geo-data.test.ts` يفشل إن انحرف أيّ ملف JSON عن مصدره في TS.
 
 ## متابعات من تدقيق M0
 
@@ -291,18 +296,21 @@ No event is added, because nothing consumes one yet.
 
 ### حالة التنفيذ (لاستئناف العمل)
 
-آخر تحديث: 2026-10-08 19:30Z.
+آخر تحديث: 2026-10-08 20:30Z.
 
 **ما تم:**
 - العقود مجمّدة في `7ef279a`، والبوابة كانت خضراء عند التجميد.
 - M0 مغلقة في `2937c16`.
+- خطوة الدمج 1 في `b6dc05b`: places و geo-data و map-app و e2e-m1، وربط places في apps/api، وتبعيات التطبيق و plugins ‏MapLibre و expo-location، ومسار المكان، و `useApiBaseUrl`.
+- الجلسة B سلّمت builder-tiles في `38ebb1e` و builder-map-kit في `f7e1e0b`.
+- خطوة الدمج 2: تبويب الخريطة يعرض `MapScreen` و `map` في المسارات المتاحة، وحُذفت استثناءات knip الأخيرة (map-kit)، ومدخلات turbo لاختبار geo-tiles، وترخيص fontnik في ADR-0008. ‏`migrate` في apps/api ينشئ postgis و pg_trgm أولاً (`ensureExtensions` في db-kit)، لأن قاعدة CI ‏(postgis/postgis) بلا pg_trgm فسقطت مهمة android e2e على b6dc05b. الإنتاج يجهّز الامتدادين مسبقاً (`infra/README.md`).
 
 **توزيع البنّائين:**
 
 | البنّاء | يعمل في | الحالة |
 |---|---|---|
-| builder-tiles | الجلسة B (`session_01Tq53xu86uvPxzMq1ocdsde`) | أُسند 19:28Z |
-| builder-map-kit | الجلسة B | أُسند 19:28Z |
+| builder-tiles | الجلسة B (`session_01Tq53xu86uvPxzMq1ocdsde`) | سُلّم في `38ebb1e` |
+| builder-map-kit | الجلسة B | سُلّم في `f7e1e0b` |
 | builder-geo-data | وكيل القائد في الخلفية | بدأ 19:27Z. الجلسة C اعتذرت لأن نطاقها M0 فقط |
 | builder-places | وكيل القائد في الخلفية | بدأ 19:27Z |
 | builder-map-app | وكيل القائد في الخلفية | بدأ 19:26Z |
@@ -310,7 +318,7 @@ No event is added, because nothing consumes one yet.
 
 **المهلة:** 20:58Z. بعدها يبني القائد أي جزء ناقص.
 
-**الخطوة التالية بعد البنّائين:** المكامل يربط places في apps/api، ويضيف plugin ‏MapLibre وأذونات الموقع في apps/mobile، وملفات المسارات، ويزيل استثناءات knip الخاصة بالـ stubs، ويطبّق طلبات العقود. ثم البوابة، ثم CI ‏(ci و android و geo-data)، ثم المدققون الخمسة، ثم الإغلاق.
+**الخطوة التالية:** map-app ينتقل إلى mock ‏map-kit، وتُطبَّق إضافتا العقود (`OsmCategoryRules` و `Glyphs` JSON) في tiles و pipeline. ثم البوابة، ثم CI ‏(ci و android و geo-data)، ثم المدققون الخمسة، ثم الإغلاق.
 
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |

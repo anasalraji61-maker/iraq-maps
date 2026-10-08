@@ -30,6 +30,13 @@
         "OTP_FIXED_CODE"
       ]
     },
+    "@iraq-maps/geo-tiles#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/contracts/schemas/*.json",
+        "$TURBO_ROOT$/packages/contracts/src/geo-data.ts"
+      ]
+    },
     "@iraq-maps/ownership#test": {
       "inputs": [
         "$TURBO_DEFAULT$",

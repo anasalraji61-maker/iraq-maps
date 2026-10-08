@@ -1,10 +1,14 @@
 import { z } from 'zod';
 import { Locale, UserId } from './common';
+import { mediaEventPayloads } from './media';
+import { providerEventPayloads } from './providers';
 
 /** Versioned domain events `<module>.<entity>.<verb>.v1`, published only through the outbox. */
 const eventPayloads = {
   'identity.user.registered.v1': z.object({ userId: UserId, locale: Locale }),
   'identity.user.deleted.v1': z.object({ userId: UserId }),
+  ...providerEventPayloads, // M3
+  ...mediaEventPayloads, // M3
 } as const;
 
 export type EventName = keyof typeof eventPayloads;

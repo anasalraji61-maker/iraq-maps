@@ -1,3 +1,7 @@
+import { satelliteTestIDs } from './imagery';
+import { providerTestIDs } from './providers';
+import { navigationTestIDs } from './routing';
+
 /** Stable testIDs shared by RNTL tests and Maestro flows. */
 export const testIDs = {
   tabs: { map: 'tab.map', discover: 'tab.discover', messages: 'tab.messages', activity: 'tab.activity', account: 'tab.account' },
@@ -21,5 +25,8 @@ export const testIDs = {
     lang: 'map.lang',
   },
   place: { card: 'place.card', name: 'place.name', category: 'place.category', source: 'place.source', share: 'place.share' },
+  navigation: navigationTestIDs, // M2
+  satellite: satelliteTestIDs, // M2
+  provider: providerTestIDs, // M3
   dev: { serverUrlInput: 'dev.serverUrl.input', serverUrlSave: 'dev.serverUrl.save' },
 } as const;

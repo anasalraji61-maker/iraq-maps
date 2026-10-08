@@ -1,6 +1,7 @@
 """Acceptance criterion M1 #1: the extract of tests/fixtures/baghdad-mini.osm.xml (see its header)."""
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -10,10 +11,12 @@ from pipeline import extract
 FIX = Path(__file__).parent / "fixtures"
 GOLDEN = FIX / "baghdad-mini"  # committed output, read by the places and e2e tests
 EXPECTED = {
-    # 117 lies outside the bbox; 114-116 have no category or no name; 303 is place=city
+    # 117 lies outside the bbox; 114-116 and 118 (blank name) have no category or no name; 303 is place=city;
+    # r3002 is a broken multipolygon (no rings)
     "place": [f"n{i}" for i in range(101, 114)] + ["r3001", "w2001"],
-    # 1002 merges into 1001 (shared node 3); 1003 and 1004 share a name but not a node; 1006 footway, 1007 unnamed
-    "street": ["w1001", "w1003", "w1004", "w1005"],
+    # 1002 merges into 1001 (shared node 3); 1003 and 1004 share a name but not a node; 1006 footway, 1007 unnamed;
+    # 1008 keeps its one node that exists
+    "street": ["w1001", "w1003", "w1004", "w1005", "w1008"],
     "area": ["n301", "n302", "r4001", "w2003"],
 }
 
@@ -32,7 +35,7 @@ def lines(d):
 def test_exact_counts_and_ids(out):
     recs = lines(out)
     assert {k: [r["id"] for r in recs if r["kind"] == k] for k in EXPECTED} == EXPECTED
-    assert len(recs) == 23 and (out / "baghdad.osm.pbf").stat().st_size > 0
+    assert len(recs) == 24
 
 
 def test_every_line_matches_the_contract_schema(out):
@@ -48,6 +51,12 @@ def test_committed_fixture_output_is_current(out):
     # Regenerate with the command in README.md when the fixture or the extract changes.
     for f in ("places.ndjson", "city.json"):
         assert (out / f).read_text(encoding="utf-8") == (GOLDEN / f).read_text(encoding="utf-8"), f
+    # the clipped pbf (e2e builds its tiles from it) is compared as OPL: its header names the osmium version
+    assert opl(out / "baghdad.osm.pbf") == opl(GOLDEN / "baghdad.osm.pbf")
+
+
+def opl(path):
+    return subprocess.run(["osmium", "cat", "-f", "opl", str(path)], check=True, capture_output=True).stdout
 
 
 def test_record_details(out):
@@ -64,6 +73,7 @@ def test_record_details(out):
     assert r["w1001"]["location"] == [44.414, 33.302] and r["w1001"]["category"] is None
     assert r["w2001"]["location"] == [44.425, 33.31] and r["r3001"]["location"] == [44.38, 33.275]
     assert r["r4001"]["names"]["en"] == "Jadriya" and r["r4001"]["tags"] == {}
+    assert r["w1008"]["location"] == [44.39, 33.28]  # node 98 is missing
 
 
 @pytest.mark.parametrize(
@@ -79,6 +89,7 @@ def test_category(tags, allowed, cat):
     assert extract.category(tags, allowed) == cat
 
 
-def test_names_are_capped_at_255():
+def test_names_are_trimmed_and_capped_like_zod():
     assert extract.names({"name": "x" * 300 + " ", "name:en": " "}) == {"name": "x" * 255}
-    assert extract.names({"name": "  "}) is None
+    assert extract.names({"name": "  \ufeff"}) is None and extract.names({"name": "\ufeff a\u3000"}) == {"name": "a"}
+    assert extract.text("😀" * 200) == "😀" * 127  # 255 UTF-16 code units, never half a surrogate pair

@@ -10,15 +10,5 @@
   "ignoreBinaries": [
     "gitleaks"
   ],
-  "includeEntryExports": true,
-  "workspaces": {
-    "packages/map-kit": {
-      // M1 freeze stub: integrator removes at M1 integration
-      "ignoreDependencies": [
-        "@jest/globals",
-        "@testing-library/react-native",
-        "test-renderer"
-      ]
-    }
-  }
+  "includeEntryExports": true
 }

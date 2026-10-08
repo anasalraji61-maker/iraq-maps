@@ -1,0 +1,131 @@
+{
+  "ignoredValues": [
+    "no",
+    "vacant"
+  ],
+  "rules": [
+    {
+      "key": "amenity",
+      "values": {
+        "restaurant": "food",
+        "fast_food": "food",
+        "food_court": "food",
+        "ice_cream": "food",
+        "cafe": "cafe",
+        "hookah_lounge": "cafe",
+        "bank": "finance",
+        "atm": "finance",
+        "bureau_de_change": "finance",
+        "money_transfer": "finance",
+        "fuel": "fuel",
+        "charging_station": "fuel",
+        "hospital": "health",
+        "clinic": "health",
+        "doctors": "health",
+        "dentist": "health",
+        "pharmacy": "health",
+        "place_of_worship": "worship",
+        "school": "education",
+        "university": "education",
+        "college": "education",
+        "kindergarten": "education",
+        "library": "education",
+        "language_school": "education",
+        "townhall": "government",
+        "courthouse": "government",
+        "police": "government",
+        "fire_station": "government",
+        "post_office": "government",
+        "embassy": "government",
+        "bus_station": "transport",
+        "ferry_terminal": "transport",
+        "taxi": "transport",
+        "cinema": "entertainment",
+        "theatre": "entertainment",
+        "arts_centre": "entertainment",
+        "nightclub": "entertainment",
+        "events_venue": "entertainment",
+        "marketplace": "shopping"
+      }
+    },
+    {
+      "key": "shop",
+      "values": {
+        "*": "shopping"
+      }
+    },
+    {
+      "key": "tourism",
+      "values": {
+        "hotel": "lodging",
+        "motel": "lodging",
+        "guest_house": "lodging",
+        "hostel": "lodging",
+        "apartment": "lodging",
+        "attraction": "tourism",
+        "museum": "tourism",
+        "gallery": "tourism",
+        "zoo": "tourism",
+        "theme_park": "tourism",
+        "viewpoint": "tourism",
+        "aquarium": "tourism"
+      }
+    },
+    {
+      "key": "office",
+      "values": {
+        "government": "government",
+        "diplomatic": "government",
+        "*": "office"
+      }
+    },
+    {
+      "key": "healthcare",
+      "values": {
+        "*": "health"
+      }
+    },
+    {
+      "key": "leisure",
+      "values": {
+        "park": "entertainment",
+        "sports_centre": "entertainment",
+        "stadium": "entertainment",
+        "fitness_centre": "entertainment",
+        "water_park": "entertainment",
+        "amusement_arcade": "entertainment",
+        "bowling_alley": "entertainment"
+      }
+    },
+    {
+      "key": "historic",
+      "values": {
+        "castle": "tourism",
+        "fort": "tourism",
+        "monument": "tourism",
+        "memorial": "tourism",
+        "archaeological_site": "tourism",
+        "ruins": "tourism"
+      }
+    },
+    {
+      "key": "public_transport",
+      "values": {
+        "station": "transport"
+      }
+    },
+    {
+      "key": "railway",
+      "values": {
+        "station": "transport"
+      }
+    },
+    {
+      "key": "aeroway",
+      "values": {
+        "aerodrome": "transport",
+        "terminal": "transport"
+      }
+    }
+  ]
+}

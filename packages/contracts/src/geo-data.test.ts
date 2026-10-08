@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { CityDescriptor, CityImportRecord, PlaceImportRecord, SearchQuery, TileSchema, apiContract, pickName } from './index';
+import { CityDescriptor, CityImportRecord, Glyphs, OsmCategoryRules, PlaceCategory, PlaceImportRecord, SearchQuery, TileSchema, apiContract, pickName } from './index';
 
 const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
 const jsonSchema = (schema: Parameters<typeof zodToJsonSchema>[0]) => json(zodToJsonSchema(schema, { $refStrategy: 'none' }));
@@ -11,6 +11,14 @@ describe('M1 geo-data contracts', () => {
     await expect(jsonSchema(PlaceImportRecord)).toMatchFileSnapshot('../schemas/place-import-record.schema.json');
     await expect(jsonSchema(CityImportRecord)).toMatchFileSnapshot('../schemas/city-import-record.schema.json');
     await expect(json(TileSchema)).toMatchFileSnapshot('../schemas/tile-schema.json');
+    await expect(json(Glyphs)).toMatchFileSnapshot('../schemas/glyphs.json');
+    await expect(json(OsmCategoryRules)).toMatchFileSnapshot('../schemas/osm-categories.json');
+  });
+
+  it('maps OSM tags only to PlaceCategory values, each key once', () => {
+    const keys = OsmCategoryRules.rules.map((r) => r.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const rule of OsmCategoryRules.rules) for (const category of Object.values(rule.values)) expect(PlaceCategory.options).toContain(category);
   });
 
   it('labels fall back name:<lang>, name:ar, name:ckb, then name', () => {

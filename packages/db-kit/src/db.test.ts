@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 import { captureLogs } from '@iraq-maps/observability';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { withClient } from './db';
-import { createDb, createTestDatabase, runModuleMigrations, type TestDatabase } from './index';
+import { createDb, createTestDatabase, ensureExtensions, runModuleMigrations, type TestDatabase } from './index';
 
 const dirs: string[] = [];
 const migrationsDir = (files: Record<string, string>) => {
@@ -114,6 +114,21 @@ describe('runModuleMigrations', () => {
 
   it('rejects an invalid schema name', async () => {
     await expect(runModuleMigrations({ url: tdb.url, schema: 'Bad;Name', migrationsDir: migrationsDir({}) })).rejects.toThrow('invalid schema name');
+  });
+});
+
+describe('ensureExtensions', () => {
+  it('passes where postgis and pg_trgm exist, without needing the privilege to create them (dev: non-superuser)', async () => {
+    await expect(ensureExtensions(tdb.url)).resolves.toBeUndefined();
+  });
+
+  it('accepts a refused CREATE EXTENSION for an extension that exists, and names a missing one', async () => {
+    // A read-only session refuses CREATE EXTENSION before its IF NOT EXISTS check, as a locked-down server would.
+    const readOnly = `${tdb.url}?options=${encodeURIComponent('-c default_transaction_read_only=on')}`;
+    await expect(ensureExtensions(readOnly)).resolves.toBeUndefined();
+    await expect(ensureExtensions(readOnly, ['pg_trgm', 'no_such_ext'])).rejects.toThrow(
+      'PostgreSQL extension no_such_ext is missing and this role cannot create it',
+    );
   });
 });
 

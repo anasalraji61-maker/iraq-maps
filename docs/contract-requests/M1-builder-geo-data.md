@@ -2,6 +2,8 @@
 
 ## 1. `CliContracts.placesImport.command` runs pnpm's own `import` command (blocking for anyone using it verbatim)
 
+**Status: resolved (integrator, b6dc05b).** The command is now `pnpm --filter @iraq-maps/places run import`.
+
 `pnpm --filter @iraq-maps/places import --city … --input …` does not run the package script. `import` is a built-in
 pnpm command, so pnpm 10.28.0 answers `ERROR Unknown options: 'city', 'recursive'` and exits 1.
 
@@ -13,8 +15,8 @@ filters") or has no such script ("None of the selected packages has a … script
   `import-city`).
 - **Note for every CLI contract:** callers that must fail on a missing CLI run `pnpm run <script>` from the package
   directory (`ERR_PNPM_NO_SCRIPT`, exit 1).
-- **What geo-data.yml does now:** the `perf` job does exactly this, with `cd modules/places && pnpm run import …` and
-  `pnpm run search` in `tools/bench`.
+- **What geo-data.yml does now:** the `perf` job imports through `e2e/mobile/start-api.sh` (with `CITY_DATA` set to the
+  downloaded artifact), and runs `pnpm run search` from `tools/bench`.
 
 ## 2. `PlaceImportRecord` cannot carry the area name that `PlaceDetails.area` needs (non-blocking)
 

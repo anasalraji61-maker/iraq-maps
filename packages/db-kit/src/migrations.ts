@@ -6,6 +6,24 @@ import { withClient } from './db';
 /** Migrations of schema `platform` (the shared outbox). Run them like any module's. */
 export const platformMigrationsDir = fileURLToPath(new URL('../migrations', import.meta.url));
 
+/**
+ * Creates the extensions every database needs (in `public`, which serves their types and operator classes to the
+ * migrations). Migrations themselves may not create extensions. `IF NOT EXISTS` needs no privilege when the extension
+ * is there, and a refused CREATE is accepted when the extension exists: production has them provisioned by its admin.
+ */
+export async function ensureExtensions(url: string, names: readonly string[] = ['postgis', 'pg_trgm']): Promise<void> {
+  await withClient(url, async (client) => {
+    for (const name of names) {
+      try {
+        await client.query(`CREATE EXTENSION IF NOT EXISTS ${client.escapeIdentifier(name)} SCHEMA public`);
+      } catch (error) {
+        const { rowCount } = await client.query('SELECT 1 FROM pg_extension WHERE extname = $1', [name]);
+        if (!rowCount) throw new Error(`PostgreSQL extension ${name} is missing and this role cannot create it: run CREATE EXTENSION ${name} as a superuser`, { cause: error });
+      }
+    }
+  });
+}
+
 const SCHEMA_NAME = /^[a-z][a-z0-9_]*$/;
 // Checked on the raw file. `$` (dollar quoting) and E'...' strings are rejected because the comment scan below
 // cannot lex them; U&"..." escapes could spell any identifier below; search_path, set_config and pg_settings change

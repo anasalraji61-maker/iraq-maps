@@ -72,11 +72,13 @@ CONTACT = {
     "website": ("website", "contact:website", "url"),
 }
 KINDS = ("place", "street", "area")
+WS = "".join(c for c in map(chr, range(0x3001)) if c.isspace()) + "\ufeff"
 
 
 def text(v):
-    """Trimmed and capped at the contract's 255 characters, or None."""
-    return (v or "").strip()[:255].strip() or None
+    """Trimmed like zod's trim() (which also strips U+FEFF) and capped at 255 UTF-16 code units like zod's max(255)."""
+    v = (v or "").strip(WS).encode("utf-16-le")[:510].decode("utf-16-le", "ignore")
+    return v.strip(WS) or None
 
 
 def names(t):
@@ -162,9 +164,8 @@ def records(path, cfg):
                 pts = [(nd.ref, nd.location.lon, nd.location.lat) for nd in o.nodes if nd.location.valid()]
                 if pts:
                     streets[n["name"]].append((o.id, n, pts))
-        elif o.is_area():
-            ring = max(o.outer_rings(), key=len)
-            pts = [(nd.lon, nd.lat) for nd in ring][:-1]  # a ring repeats its first node at the end
+        elif o.is_area() and (rings := list(o.outer_rings())):  # a broken multipolygon yields no rings
+            pts = [(nd.lon, nd.lat) for nd in max(rings, key=len)][:-1]  # a ring repeats its first node at the end
             loc = (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
             out.append(feature(f"{'w' if o.from_way() else 'r'}{o.orig_id()}", t, loc, allowed))
     x0, y0, x1, y1 = cfg["bbox"]

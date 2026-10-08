@@ -25,7 +25,8 @@ For local runs, builder-map-kit created the same link that pnpm makes with `node
 
 ## 2. apps/mobile/app.config.ts: MapLibre config plugin (non-blocking on Android, required for iOS)
 
-**Status: open.**
+**Status: resolved** (b6dc05b). `'@maplibre/maplibre-react-native'` is in `plugins` without options. The iOS location text
+comes from the `expo-location` plugin's `locationWhenInUsePermission` (Arabic).
 
 Add `'@maplibre/maplibre-react-native'` to `plugins`, without options. Its `app.plugin.js` (`withMapLibre`) writes
 `org.maplibre.reactnative.*` Gradle properties only for options that are passed, so Android keeps the library defaults
@@ -38,14 +39,16 @@ Add `'@maplibre/maplibre-react-native'` to `plugins`, without options. Its `app.
 
 ## 3. packages/tooling/knip.json: drop the map-kit freeze-stub ignores (non-blocking)
 
-**Status: resolved upstream.** (b6dc05b removed the freeze-stub ignores).
+**Status: resolved** (M1 integration step 2). b6dc05b removed only the places block; step 2 removes the map-kit block, and
+`pnpm knip` reports no unused map-kit dependency.
 
 `@jest/globals`, `@testing-library/react-native` and `test-renderer` are now used by the map-kit tests.
 `pnpm knip` exits 0 but prints "Remove from ignoreDependencies" for all three under `workspaces["packages/map-kit"]`.
 
 ## 4. packages/mobile-kit: expose the API base URL to features (blocking for feature-map, not for map-kit)
 
-**Status: open.**
+**Status: resolved** (b6dc05b). `useApiBaseUrl()` is exported, and `renderWithProviders` takes `apiBaseUrl` (default
+`'http://api.test'`).
 
 `MapCanvasProps.apiBaseUrl` (frozen) resolves root-relative `tilesUrl`/`glyphsUrl`, such as the XYZ fallback
 `/v1/cities/:id/tiles/{z}/{x}/{y}`. Features cannot read that URL today: `SessionProvider` receives
@@ -55,7 +58,8 @@ server override. Add it to `renderWithProviders` options with a default such as 
 
 ## 5. Locate-me position source (question for the integrator and builder-map-app)
 
-**Status: open.**
+**Status: resolved** (b6dc05b): `expo-location`. feature-map requests the foreground permission and the position with it;
+`apps/mobile` depends on it and lists its config plugin (foreground only). map-kit needs no position API.
 
 `MapCanvas` shows the puck, and the caller owns the permission and the position used for the camera. The frozen
 contracts do not say which API feature-map uses for this. There are two options:

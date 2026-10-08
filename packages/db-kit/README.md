@@ -11,6 +11,7 @@ Drizzle (node-postgres) access, per-schema migrations, isolated test databases, 
 |---|---|
 | `createDb(url)` | Returns `{ db, close }` over a `pg.Pool`. |
 | `runModuleMigrations({ url, schema, migrationsDir })` | Creates `schema`, then applies the `*.sql` files in name order, each once. |
+| `ensureExtensions(url)` | Creates `postgis` and `pg_trgm` in `public` if missing. Accepts a refused CREATE when the extension exists; otherwise it fails naming the extension. `apps/api` migrate and the test template call it. |
 | `platformMigrationsDir` | Migrations of schema `platform`, the outbox. Run them with `schema: 'platform'` before any module that publishes events. |
 | `createTestDatabase({ modules? })` | Returns `{ url, db, drop }`: a fresh database cloned from `iraqmaps_template`, with `platform` and the given modules' migrations applied. |
 | `createOutboxPublisher(db)` | `publish(event, tx?)` validates the event against `packages/contracts` and inserts it into `platform.outbox` inside `tx`. |

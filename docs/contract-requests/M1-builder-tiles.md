@@ -63,7 +63,7 @@ reads the same file in the extract. Until then, builder-geo-data should mirror t
 
 ## 3. Turbo inputs for the geo-tiles test (non-blocking)
 
-**Status: open.**
+**Status: resolved** (M1 integration step 2): `turbo.json` has exactly this task entry.
 
 The geo-tiles test reads `packages/contracts/schemas/tile-schema.json` and `packages/contracts/src/geo-data.ts`, which
 are outside the package and not workspace dependencies of it. With turbo's cache, a contract change would replay a
@@ -94,7 +94,7 @@ No CI change is needed: `ci.yml` already installs `osmium-tool`, sets up Java 21
 
 ## 5. ADR-0008: fontnik is BSD-3-Clause (for the integrator, the owner of `docs/adr/`) (non-blocking)
 
-**Status: open.**
+**Status: resolved** (M1 integration step 2).
 
 ADR-0008 decision 5 ("أداة الـ glyphs: fontnik 0.7.7 (npm، BSD-2-Clause، Mapbox)") names the wrong licence.
 `node_modules/fontnik/LICENSE.txt` has three clauses, the third being "Neither the name of [project] nor the names of

@@ -2,6 +2,8 @@ import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 import { CityId, LngLat, Locale, PlaceId, Problem } from './common';
 import { CityImportRecord, PlaceCategory, PlaceKind, PlaceNames, TileSchema } from './geo-data';
+import { SatelliteLayer } from './imagery';
+import { PlaceProviderSection } from './providers';
 
 const c = initContract();
 
@@ -65,6 +67,8 @@ export const PlaceDetails = PlaceSummary.omit({ distanceM: true }).extend({
   }),
   source: z.literal('osm'),
   attribution: z.string(),
+  /** M3: a verified provider's consent-filtered section, read per request (ProviderProfilePort). */
+  provider: PlaceProviderSection.optional(),
 });
 export type PlaceDetails = z.infer<typeof PlaceDetails>;
 
@@ -83,6 +87,8 @@ export const CityDescriptor = CityImportRecord.extend({
     .max(512)
     .regex(new RegExp(`^${origin}/\\S*\\{fontstack\\}/\\{range\\}\\.pbf$`)),
   attribution: z.string(),
+  /** M2: the optional Sentinel-2 layer. */
+  satellite: SatelliteLayer.optional(),
 });
 export type CityDescriptor = z.infer<typeof CityDescriptor>;
 

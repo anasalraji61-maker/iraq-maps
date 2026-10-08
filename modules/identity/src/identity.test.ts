@@ -93,7 +93,7 @@ async function login(phone = randomPhone()) {
 
 async function eventsFor(userId: string) {
   await relay.drainOnce();
-  return bus.published.filter((e) => e.payload.userId === userId).map((e) => e.name);
+  return bus.published.filter((e) => 'userId' in e.payload && e.payload.userId === userId).map((e) => e.name);
 }
 
 describe('OTP login', () => {
