@@ -9,6 +9,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iraq-maps/api": "workspace:*"
+    "@iraq-maps/api": "workspace:*",
+    "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/db-kit": "workspace:*",
+    "@iraq-maps/observability": "workspace:*",
+    "@iraq-maps/testing": "workspace:*"
   }
 }

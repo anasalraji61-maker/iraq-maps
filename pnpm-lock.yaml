@@ -145,6 +145,18 @@ importers:
       '@iraq-maps/api':
         specifier: workspace:*
         version: link:../../apps/api
+      '@iraq-maps/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@iraq-maps/db-kit':
+        specifier: workspace:*
+        version: link:../../packages/db-kit
+      '@iraq-maps/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@iraq-maps/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
 
   geo-services/pipeline: {}
 
