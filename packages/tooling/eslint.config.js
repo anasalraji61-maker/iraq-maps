@@ -22,7 +22,14 @@ export default defineConfig(
     ignores: ['**/*.test.{ts,tsx}', '**/test/**'],
     plugins: { i18next },
     rules: {
-      'i18next/no-literal-string': ['error', { mode: 'jsx-only' }],
+      // JSX text and the attributes that carry copy; enum props (variant="title", keyboardType, accessibilityRole) are not copy.
+      'i18next/no-literal-string': [
+        'error',
+        {
+          mode: 'jsx-only',
+          'jsx-attributes': { include: ['label', 'title', 'subtitle', 'body', 'message', 'error', 'placeholder', 'accessibilityLabel', 'accessibilityHint'] },
+        },
+      ],
       // jsx-only misses `const label = 'تسجيل الخروج'`: any Arabic-script string in UI code belongs in an i18n catalog.
       'no-restricted-syntax': [
         'error',

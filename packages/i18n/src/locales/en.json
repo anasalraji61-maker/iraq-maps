@@ -1,0 +1,30 @@
+{
+  "tabs": {
+    "map": "Map",
+    "discover": "Discover",
+    "messages": "Messages",
+    "activity": "Activity",
+    "account": "Account"
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "body": "We're working on this feature. It will be available soon."
+  },
+  "actions": {
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back"
+  },
+  "status": {
+    "loading": "Loading…"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Couldn't reach the server. Check your internet connection and try again.",
+    "rateLimited": "Too many attempts. Wait a moment and try again.",
+    "sessionExpired": "Your session has ended. Please sign in again."
+  }
+}

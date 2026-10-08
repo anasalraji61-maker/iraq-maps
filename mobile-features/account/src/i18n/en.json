@@ -1,0 +1,62 @@
+{
+  "phone": {
+    "title": "Sign in",
+    "body": "Enter your Iraqi mobile number and we will text you a verification code.",
+    "label": "Mobile number",
+    "placeholder": "07xx xxx xxxx",
+    "invalid": "Enter a valid Iraqi mobile number: 11 digits starting with 07.",
+    "submit": "Send code"
+  },
+  "otp": {
+    "title": "Enter the verification code",
+    "sentTo": "We sent a 6-digit code to {phone}.",
+    "label": "Verification code",
+    "submit": "Confirm",
+    "resend": "Resend code",
+    "resendIn": "You can resend in {seconds} seconds"
+  },
+  "name": {
+    "title": "What is your name?",
+    "body": "This name appears on your account.",
+    "label": "Name",
+    "save": "Save"
+  },
+  "profile": {
+    "title": "My account",
+    "signedOutTitle": "Sign in to your account",
+    "signedOutBody": "Sign in with your mobile number to save your name and language.",
+    "signIn": "Sign in",
+    "name": "Name",
+    "noName": "No name added yet",
+    "language": "Language",
+    "logout": "Sign out",
+    "delete": "Delete account"
+  },
+  "deleteSheet": {
+    "title": "Delete your account permanently?",
+    "body": "Your name and all your account data will be deleted permanently and cannot be recovered.",
+    "confirm": "Yes, delete my account",
+    "cancel": "Cancel"
+  },
+  "language": {
+    "title": "Language",
+    "current": "Current language"
+  },
+  "languages": {
+    "ar": "العربية",
+    "ckb": "کوردی",
+    "en": "English"
+  },
+  "errors": {
+    "otp_invalid": "That code is not correct. Try again.",
+    "otp_expired": "That code has expired. Request a new one.",
+    "otp_too_many_attempts": "Too many wrong codes. Request a new one.",
+    "otp_locked": "Sign-in with this number is paused for a while after too many attempts. Try again later.",
+    "otp_rate_limited": "Too many requests in a short time. Wait a moment and try again.",
+    "otp_resend_too_soon": "Please wait a little before requesting a new code.",
+    "invalid_request": "Check what you entered and try again.",
+    "unauthorized": "Your session has ended. Please sign in again.",
+    "network": "Could not reach the server. Check your internet connection and try again.",
+    "generic": "Something went wrong. Try again."
+  }
+}

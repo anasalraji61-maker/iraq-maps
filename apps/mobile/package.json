@@ -9,11 +9,21 @@
     "android:precheck": "expo prebuild --platform android --no-install --clean && expo export --platform android --output-dir dist",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'shell RNTL tests: builder-mobile-shell (jest-expo)'"
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "roots": [
+      "<rootDir>/src"
+    ]
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.16",
     "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/feature-account": "workspace:*",
+    "@iraq-maps/i18n": "workspace:*",
+    "@iraq-maps/mobile-kit": "workspace:*",
+    "@iraq-maps/ui": "workspace:*",
     "expo": "~57.0.27",
     "expo-build-properties": "~57.0.22",
     "expo-constants": "~57.0.21",
@@ -21,6 +31,7 @@
     "expo-localization": "~57.0.2",
     "expo-router": "~57.0.25",
     "expo-secure-store": "~57.0.4",
+    "expo-symbols": "~57.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
@@ -28,6 +39,12 @@
     "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2"
+    "@jest/globals": "^29.7.0",
+    "@react-native/jest-preset": "0.86.3",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/react": "~19.2.2",
+    "jest": "^29.7.0",
+    "jest-expo": "~57.0.5",
+    "test-renderer": "~1.2.0"
   }
 }

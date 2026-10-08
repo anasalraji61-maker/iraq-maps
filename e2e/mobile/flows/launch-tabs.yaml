@@ -1,4 +1,5 @@
-# Cold start: the app opens on the tab bar with all five tabs (testIDs from packages/contracts testIDs.tabs).
+# Cold start: the app opens in Arabic on the tab bar with all five tabs (testIDs from packages/contracts testIDs.tabs),
+# then switching the language to English from the account tab (signed out) flips the tab labels.
 appId: iq.iraqmaps.app
 name: launch-tabs
 ---
@@ -16,3 +17,15 @@ name: launch-tabs
     id: tab.activity
 - assertVisible:
     id: tab.account
+- assertVisible: الخريطة
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.language
+- tapOn:
+    id: auth.locale.en
+# ar -> en flips the layout direction, so the app reloads before the labels change.
+- extendedWaitUntil:
+    visible: Map
+    timeout: 30000
+- assertNotVisible: الخريطة

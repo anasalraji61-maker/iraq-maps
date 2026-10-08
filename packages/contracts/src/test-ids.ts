@@ -11,6 +11,6 @@ export const testIDs = {
     nameSubmit: 'auth.name.submit',
     locale: { ar: 'auth.locale.ar', ckb: 'auth.locale.ckb', en: 'auth.locale.en' },
   },
-  account: { logout: 'account.logout', delete: 'account.delete', deleteConfirm: 'account.delete.confirm', language: 'account.language' },
+  account: { signIn: 'account.signIn', logout: 'account.logout', delete: 'account.delete', deleteConfirm: 'account.delete.confirm', language: 'account.language' },
   dev: { serverUrlInput: 'dev.serverUrl.input', serverUrlSave: 'dev.serverUrl.save' },
 } as const;

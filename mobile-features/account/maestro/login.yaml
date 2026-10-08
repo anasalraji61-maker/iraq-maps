@@ -1,0 +1,66 @@
+# Phone login end to end: sign in with a fresh number, set a name, see it on the account tab, sign out.
+# Needs an API with APP_ENV=e2e and OTP_SENDER=fixed (every code is OTP_FIXED_CODE) that the app can reach.
+#
+# Env (all optional), e.g. `maestro test -e PHONE=07701234567 mobile-features/account/maestro/login.yaml`:
+#   PHONE     an Iraqi mobile number that is NOT registered yet (07xxxxxxxxx or +9647xxxxxxxxx).
+#             Default: a random 077xxxxxxxx per run, so the server always treats it as a new user.
+#   OTP_CODE  the server's OTP_FIXED_CODE. Default: 123456.
+#   NAME      the name to save (ASCII: Android inputText cannot type Arabic). Default: "Maestro <random>".
+appId: iq.iraqmaps.app
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
+---
+# No clearState: it would also wipe the developer server-URL setting.
+- launchApp
+- tapOn:
+    id: tab.account
+# A session left over from an earlier run would skip the sign-in entry.
+- runFlow:
+    when:
+      visible:
+        id: account.logout
+    commands:
+      - tapOn:
+          id: account.logout
+- tapOn:
+    id: account.signIn
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+- assertVisible:
+    id: account.delete
+- tapOn:
+    id: account.logout
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 20000

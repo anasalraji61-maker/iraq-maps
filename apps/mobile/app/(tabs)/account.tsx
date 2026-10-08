@@ -1,1 +1,1 @@
-export { PendingScreen as default } from '../../src/shell';
+export { AccountScreen as default } from '@iraq-maps/feature-account';

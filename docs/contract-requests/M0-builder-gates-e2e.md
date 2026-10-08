@@ -33,7 +33,7 @@ It must land in the same push as `e2e/api/package.json`.
 
 ## 2. apps/mobile/app.config.ts: allow cleartext HTTP in the e2e build only (blocking for login.yaml, AC#13)
 
-**Status: open (integrator).**
+**Status: resolved (integrator, M0). Cleartext is allowed whenever `appEnv !== 'production'`, so a phone using `pnpm dev:api` works too.**
 
 The e2e job's x86_64 build is a release build (ADR-0009) and talks to the API inside the job at
 `http://10.0.2.2:3000`. Release manifests from `expo prebuild` do not set `android:usesCleartextTraffic` (only the

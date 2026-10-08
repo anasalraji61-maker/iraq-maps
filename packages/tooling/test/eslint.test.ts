@@ -13,3 +13,11 @@ it('refuses Arabic-script string literals and templates in UI code only', async 
   expect(await rulesHit(code, 'modules/identity/src/labels.ts')).toEqual([]);
   expect(await rulesHit("export const label = 'Sign out';\n", 'apps/mobile/src/shell/labels.ts')).toEqual([]);
 });
+
+it('flags English copy in JSX text and text-bearing attributes, not enum props', async () => {
+  const file = 'mobile-features/account/src/x.tsx';
+  const enums = 'export const Enums = () => <Text variant="title" keyboardType="phone-pad" accessibilityRole="button" onPress={() => go(href(\'authName\'))}>{t(\'x\')}</Text>;\n';
+  expect(await rulesHit(enums, file)).toEqual([]);
+  expect(await rulesHit('export const Labelled = () => <Button label="Sign out" />;\n', file)).toEqual(['i18next/no-literal-string']);
+  expect(await rulesHit('export const Plain = () => <Text>Hello</Text>;\n', file)).toEqual(['i18next/no-literal-string']);
+});

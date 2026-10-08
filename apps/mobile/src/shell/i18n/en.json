@@ -1,0 +1,9 @@
+{
+  "devSettings": {
+    "title": "Developer settings",
+    "open": "Open developer settings",
+    "serverUrl": "Server URL",
+    "invalidUrl": "Enter a URL that starts with http:// or https://, or leave it empty to use the default.",
+    "saved": "Server URL saved: {url}"
+  }
+}
