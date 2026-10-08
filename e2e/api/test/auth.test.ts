@@ -80,6 +80,8 @@ describe('phone login on the composed API', () => {
     const { user, accessToken, refreshToken } = await login();
     expect((await call('DELETE', '/v1/me', { token: accessToken })).statusCode).toBe(204);
     expect(eraser.erased).toEqual([user.id]);
+    const outbox = await tdb.db.execute<{ event: DomainEvent }>(`SELECT event FROM platform.outbox WHERE event->>'name' = 'identity.user.deleted.v1'`);
+    expect(outbox.rows.map(({ event }) => event.payload)).toEqual([{ userId: user.id }]);
     await vi.waitFor(() => expect(deleted.map((e) => e.payload.userId)).toEqual([user.id]), { timeout: 5000 });
     expect((await me(accessToken)).statusCode).toBe(401);
     expect((await refresh(refreshToken)).statusCode).toBe(401);
