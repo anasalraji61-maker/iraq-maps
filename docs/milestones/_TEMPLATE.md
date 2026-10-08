@@ -3,7 +3,7 @@ id: Mx
 slug: <slug>
 status: not_started   # not_started | in_progress | done
 branch: claude/iraq-smart-maps-app-aybpjn
-owners:               # globs منفصلة؛ نفس الخريطة في tools/ownership/milestones/Mx.json
+owners:               # globs منفصلة؛ يقرؤها ownership:check مباشرة
   builder-<name>:
     - "<path>/**"
   integrator:

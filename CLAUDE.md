@@ -19,7 +19,7 @@ The product language is Arabic. User-facing text is Arabic first, then Kurdish S
    - Read secrets only from environment variables, through `packages/config`. Add a new variable to `.env.example` with **an empty value** and a comment.
    - Anything prefixed `EXPO_PUBLIC_` ships inside the app binary, so it is public. Never put a secret there. The mobile app must reach paid or keyed services through our backend.
    - If you find a leaked secret, stop. Report it so the key gets rotated. Deleting the commit does not help in a public repo.
-2. **Stay inside your owned paths**, as listed in the current milestone file and `tools/ownership/milestones/Mx.json`. If you need a change in a shared path (`packages/contracts`, `apps/api/src`, the mobile shell, root configs), write a request in `docs/contract-requests/Mx-<builder>.md`. Do not edit those paths yourself.
+2. **Stay inside your owned paths**, as listed in the YAML front-matter of the current milestone file (`docs/milestones/Mx-*.md`), which `pnpm ownership:check` reads directly. If you need a change in a shared path (`packages/contracts`, `apps/api/src`, the mobile shell, root configs), write a request in `docs/contract-requests/Mx-<builder>.md`. Do not edit those paths yourself.
 3. **Module boundaries:** `modules/X` may import only from `packages/*`, never from `modules/Y`. Cross-module calls go through ports in `packages/contracts`. Each module owns its own Postgres schema, and joins across schemas are not allowed. `apps/mobile` never imports from `modules/*`.
 4. **Data licensing:** use only sources listed in `docs/DATA_SOURCES.md` with a commercial-compatible license. Never use `tile.openstreetmap.org`, Esri, Google, Bing or Mapbox imagery or tiles. Keep provider-owned data in separate tables from OSM-derived data (ODbL). Show OSM attribution at all times.
 5. **No invented data:** prices and crowding always carry `source`, `observedAt` and `confidence` (`Estimate<T>`). The AI assistant may only mention places, prices or crowding that came from a tool result.
@@ -62,7 +62,7 @@ modules/*        backend domain modules (identity, providers, places, routing, g
                  insights, assistant, messaging, discover, media, activity, notifications, tour3d*)
 packages/*       contracts, config, db-kit, observability, testing, i18n, geo, ui, mobile-kit, map-kit,
                  api-client, tooling
-tools/ownership  checks that a diff stays inside its owner's globs (tools/ownership/milestones/Mx.json)
+tools/ownership  checks that a diff stays inside its owner's globs (read from milestone front-matter)
 e2e/             API e2e (createApp) and mobile Maestro harness
 geo-services/*   OSM pipeline, tiles, routing, geocoder, imagery (data, not app code)
 infra/           docker-compose for local dev; deployment later

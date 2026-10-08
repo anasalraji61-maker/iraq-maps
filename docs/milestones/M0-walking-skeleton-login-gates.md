@@ -236,7 +236,7 @@ The integrator runs this freeze; it is the only long one, 60 min or less.
 
 6. Docs: docs/milestones/README.md, _TEMPLATE.md, and the M0 file with its ownership front-matter.
 
-Then run pnpm install, check that typecheck is green, and run ownership:check --plan.
+Then run pnpm install, check that typecheck is green, and run ownership:check (globs must not overlap).
 
 ## توزيع الوكلاء
 
@@ -359,3 +359,10 @@ Then run pnpm install, check that typecheck is green, and run ownership:check --
 - **أدوار قاعدة بيانات لكل وحدة مؤجلة إلى M7.** فحص حدود الـ migrations في db-kit حاجز معجمي ضد الأخطاء في كود مُراجَع، وليس عزلاً أمنياً. العزل الحقيقي يكون بدور migrator لكل schema لا يملك غيرها، وأُضيف إلى نطاق M7.
 - **وسوم الشريط مؤقتة.** في shell الـ freeze الوسوم ASCII مؤقتة حتى يسلّم builder-mobile-shell وسوم i18n.
 - **`AGENTS.md`.** ملف يولّده turbo تلقائياً، وأُضيف إلى `.gitignore` بدل حذفه.
+- **تغييرات على العقود بعد التجميد.** كلها قبل أي إصدار، فلا مستهلك خارجي يتأثر:
+  - `meContract`: كُتب `401: Problem` صراحةً في كل route (طلب العقد #1). التغيير إضافي في الأنواع فقط.
+  - `PATCH /v1/me`: حقل `name` يرفض محارف التحكم، فتصبح 400 بدل 500. تضييق ناتج عن تدقيق الأمان.
+  - `PortTokens`: حُذفت `OtpSender` و `UserDataErasers` و `OutboxPublisher` و `Clock` لأنها لم تُحقن في أي مكان (knip). تُعاد عند أول مستهلك.
+  - `events.ts`: لم يعد `eventPayloads` و `DomainEventSchema` مُصدَّرين، لأنهما يُستخدمان داخل الملف فقط.
+- **مخلّفات حاجز الـ migrations (n8) لـ M1/M7.** الكتابة غير المؤهَّلة على كائنات `public` لا يمنعها إلا ملكية القاعدة محلياً، ودور CI superuser. والـ triggers غير ممكنة حالياً لأن `$` و `EXECUTE` و `NEW.` مرفوضة. نعيد النظر عندما يحتاجها M1، والعزل الحقيقي بأدوار لكل وحدة في M7.
+- **CI يحتاج تاريخ git كاملاً.** البوابة تقارن مع `410b61a`، لذلك يجب أن يستخدم `ci.yml` الإعداد `fetch-depth: 0` (مسؤولية builder-gates-e2e).
