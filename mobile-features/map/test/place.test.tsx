@@ -16,6 +16,14 @@ const details = PlaceDetails.parse({
   source: 'osm',
   attribution: OSM_ATTRIBUTION,
 });
+const actionRoutes: ['directions' | 'message' | 'assistant', RouteName][] = [
+  ['directions', 'routePreview'],
+  ['message', 'messageCompose'],
+  ['assistant', 'assistant'],
+];
+/** The action buttons on screen, found by their accessible names. */
+const shownActions = (view: Awaited<ReturnType<typeof show>>['view']) =>
+  actionRoutes.map(([key]) => key).filter((key) => view.queryByRole('button', { name: t(`map:actions.${key}`) }));
 const isolated = (text: string) => `\u2068${text}\u2069`;
 
 /** Opens the card for `body` (a PlaceDetails, or the given status) with the clock at `now` (Baghdad is UTC+3). */
@@ -92,9 +100,25 @@ describe('PlaceScreen', () => {
     expect(await view.findByTestId(place.card)).toBeVisible();
   });
 
+  it.each([undefined, '', '../me', 'n1/../../me', '%2e%2e', 'n1?x=1', 'x'.repeat(65)])(
+    'shows not found for the deep-link id %j without calling the API',
+    async (placeId) => {
+      jest.mocked(useLocalSearchParams).mockReturnValue(placeId === undefined ? {} : { placeId });
+      const { api, view } = await show(<PlaceScreen />);
+      expect(view.getByRole('alert')).toHaveTextContent(t('map:place.notFound'));
+      expect(api.places.get).not.toHaveBeenCalled();
+    },
+  );
+
   it('hides the directions, message and assistant actions while their screens are not delivered', async () => {
     const { view } = await open(details, { availableRoutes: ['map', 'place'] });
-    expect(view.getAllByRole('button').map((b) => b.props.testID)).toEqual([place.share]);
+    expect(shownActions(view)).toEqual([]);
+    expect(view.getByTestId(place.share)).toBeVisible();
+  });
+
+  it.each(actionRoutes)('shows %s only once %s is delivered', async (key, route) => {
+    const { view } = await open(details, { availableRoutes: ['map', 'place', route] });
+    expect(shownActions(view)).toEqual([key]);
   });
 
   it('shows each action once its screen is delivered, and opens it for this place', async () => {

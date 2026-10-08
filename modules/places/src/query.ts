@@ -78,6 +78,10 @@ export class PgPlaces implements PlacesQueryPort {
     };
   }
 
+  async hasCity(id: string): Promise<boolean> {
+    return (await this.db.execute(sql`SELECT 1 FROM places.cities WHERE id = ${id}`)).rows.length > 0;
+  }
+
   async listCities(): Promise<CityImportRecord[]> {
     const { rows } = await this.db.execute<CityImportRecord>(sql`SELECT id, names, bbox, center FROM places.cities ORDER BY id`);
     return rows;

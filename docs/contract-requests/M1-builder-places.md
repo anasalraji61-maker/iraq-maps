@@ -65,11 +65,30 @@ paths or env values. Its only log is a warning with the city id and an error cod
 
 Proposal: `pool.on('error', (err) => log.warn({ code: err.code }, 'idle pg client error'))` in `createDb`.
 
-## 7. For information
+## 7. `429: Problem` on the tile and glyph routes (integrator, additive contract change, non-blocking)
 
-- **Rate limit.** `/v1/search` and `/v1/places/nearby` share 300 requests a minute per client IP, in memory, and
-  answer 429 `rate_limited`. `bench search` (200 queries by default) stays under it. A larger `--count` against one
-  API within a minute would get 429s.
+The security audit (S1, minor #1) put tiles and glyphs behind their own rate limit: 1200 a minute per client network.
+`citiesContract.tile` and `citiesContract.glyphs` declare no 429, and `strictStatusCodes` is on. So places throws
+`HttpException(<Problem rate_limited>, 429)`, and ProblemFilter returns the Problem body unchanged. Please add
+`429: Problem` to both routes' `responses`. The handlers can then return the 429 the same way search does. The client
+behaviour does not change: MapLibre retries a 429 later.
+
+## 8. One shared client-network helper (integrator, non-blocking)
+
+identity (`ipBucket` in `src/otp.ts`) and places (`ipBucket` in `src/http.ts`) both reduce `req.ip` to a client
+network: an IPv4 address, or an IPv6 /64. Modules cannot import each other, so places has its own copy, written
+differently (it uses the normalized-string prefix and also handles unparsable addresses). jscpd reports 0 clones. If
+the integrator wants a single definition, it could go in a shared package (for example
+`clientNetwork(ip)` with `ipaddr.js`) for both modules.
+
+## 9. For information
+
+- **Rate limits.** `/v1/search` and `/v1/places/nearby` share 300 requests a minute per client network (IPv4, or
+  IPv6 /64). They answer 429 `rate_limited`. `bench search` (200 queries by default) stays under it; a larger `--count`
+  against one API within a minute would get 429s. Tiles and glyphs have their own 1200 a minute (§7). Carrier CGNAT
+  puts many users behind one IPv4, so these numbers may need tuning in production.
+- **Lockfile.** `modules/places` now depends on `ipaddr.js ^2.5.0`, which identity already uses. The only
+  `pnpm-lock.yaml` change is 3 lines in the places importer.
 - **Area derivation** (M1-builder-geo-data §2, option a). This is done: at import, `area` is the nearest
   `kind: 'area'` record within 3 km, the same as `FakePlacesQueryPort`.
 - **Duplicate test helper (optional).** `modules/places/src/places.test.ts` and `e2e/api/test/places.test.ts` each

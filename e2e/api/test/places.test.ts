@@ -15,8 +15,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // baghdad-mini.osm.xml (geo-services/pipeline/tests/fixtures/baghdad-mini), imported with the places import CLI
 // (CliContracts.placesImport) twice, since an import must be idempotent. The tiles and glyphs fallbacks read a
 // one-tile PMTiles archive and a glyph directory written here (TILES_SOURCE, GLYPHS_SOURCE).
-// Until apps/api wires placesModule, which adds the `places` migrations to moduleMigrations, the suite is skipped.
-const wired = moduleMigrations.some((m) => m.schema === 'places');
 const fixture = (name: string) => fileURLToPath(new URL(`../../../geo-services/pipeline/tests/fixtures/baghdad-mini/${name}`, import.meta.url));
 /** One MVT layer "poi" (version 2, extent 4096) and no features: the protobuf the tile route must hand back. */
 const mvt = Uint8Array.of(0x1a, 10, 0x78, 2, 0x0a, 3, ...Buffer.from('poi'), 0x28, 0x80, 0x20);
@@ -26,7 +24,7 @@ let dir: string;
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
 
-describe.skipIf(!wired)('places and cities on the composed API', () => {
+describe('places and cities on the composed API', () => {
   beforeAll(async () => {
     tdb = await createTestDatabase({ modules: moduleMigrations });
     // `run`: a bare `pnpm import` is pnpm's own command.

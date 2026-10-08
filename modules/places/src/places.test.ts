@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,17 +7,16 @@ import { promisify } from 'node:util';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { CityDescriptor, OSM_ATTRIBUTION, type CityId, type CityImportRecord, type PlaceId, type PlaceImportRecord } from '@iraq-maps/contracts';
 import { createTestDatabase, type TestDatabase } from '@iraq-maps/db-kit';
-import { captureLogs, createLogger } from '@iraq-maps/observability';
+import { captureLogs } from '@iraq-maps/observability';
 import { placesQueryConformance, randomIp } from '@iraq-maps/testing';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { SEARCH_PER_MINUTE } from './http';
+import { SEARCH_PER_MINUTE, TILES_PER_MINUTE } from './http';
 import { importCity, importFiles } from './import';
 import { placesMigrationsDir, placesModule } from './index';
 import { PgPlaces } from './query';
-import { fillSource, TileFiles } from './tiles';
 
 const logs = captureLogs();
 let tdb: TestDatabase;
@@ -172,14 +171,14 @@ describe('HTTP', () => {
     });
   });
 
-  it(`rate-limits search and nearby to ${SEARCH_PER_MINUTE} per minute per client IP`, async () => {
-    const ip = randomIp();
+  it(`rate-limits search and nearby to ${SEARCH_PER_MINUTE} a minute per IPv6 /64`, async () => {
+    // One address per request, all in one /64: rotating addresses inside a subscriber's prefix does not reset the limit.
     const url = '/v1/places/nearby?city=testville&near=44.4,33.3';
-    const codes = await Promise.all(Array.from({ length: SEARCH_PER_MINUTE }, () => get(url, ip).then((r) => r.statusCode)));
+    const codes = await Promise.all(Array.from({ length: SEARCH_PER_MINUTE }, (_, i) => get(url, `2001:db8:7:7::${(i + 1).toString(16)}`).then((r) => r.statusCode)));
     expect(new Set(codes)).toEqual(new Set([200]));
-    const limited = await get(`/v1/search?q=a&city=testville`, ip);
+    const limited = await get('/v1/search?q=a&city=testville', '2001:db8:7:7:ffff::1');
     expect([limited.statusCode, limited.json().code]).toEqual([429, 'rate_limited']);
-    expect((await get(url, randomIp())).statusCode).toBe(200);
+    expect((await get(url, '2001:db8:7:8::1')).statusCode).toBe(200);
   });
 });
 
@@ -190,22 +189,35 @@ describe('tile and glyph fallback', () => {
     expect(res.headers).toMatchObject({ 'content-type': 'application/vnd.mapbox-vector-tile', 'content-encoding': 'gzip' });
     expect(gunzipSync(res.rawPayload)).toEqual(MVT);
     expect((await get('/v1/cities/baghdad/tiles/1/1/1')).statusCode).toBe(204);
-    expect((await get('/v1/cities/erbil/tiles/0/0/0')).statusCode).toBe(404);
     expect((await get('/v1/cities/baghdad/tiles/0/1/0')).statusCode).toBe(400);
+  });
+
+  it('answers 404 for a city outside the registry or without a readable archive, and warns once', async () => {
+    await writeFile(join(dir, 'erbil.pmtiles'), pmtilesArchive(gzipSync(MVT))); // present, but erbil is not imported
+    expect((await get('/v1/cities/erbil/tiles/0/0/0')).statusCode).toBe(404);
+    expect((await get(`/v1/cities/erbil/glyphs/${encodeURIComponent('Noto Sans Arabic Regular')}/0-255.pbf`)).statusCode).toBe(404);
+    expect((await get('/v1/cities/testville/tiles/0/0/0')).statusCode).toBe(404); // registered, no archive
+    await writeFile(join(dir, 'testville.pmtiles'), 'not a pmtiles archive');
+    for (let i = 0; i < 3; i++) expect((await get('/v1/cities/testville/tiles/0/0/0')).statusCode).toBe(404);
+    expect(logs.records.filter((r) => r.msg === 'tile source unreadable')).toEqual([expect.objectContaining({ city: 'testville', errorCode: 'Error' })]);
     expect(logs.text()).not.toContain(dir);
   });
+
+  it(`rate-limits tiles and glyphs to ${TILES_PER_MINUTE} a minute per client network`, async () => {
+    const ip = randomIp();
+    const codes = await Promise.all(Array.from({ length: TILES_PER_MINUTE }, () => get('/v1/cities/erbil/tiles/0/0/0', ip).then((r) => r.statusCode)));
+    expect(new Set(codes)).toEqual(new Set([404]));
+    const limited = await get(`/v1/cities/baghdad/glyphs/${encodeURIComponent('Noto Sans Arabic Regular')}/0-255.pbf`, ip);
+    expect([limited.statusCode, limited.json().code]).toEqual([429, 'rate_limited']);
+  }, 30_000);
 
   it('serves glyph ranges, trying each font of the stack, and 404 for a missing range', async () => {
     const res = await get(`/v1/cities/baghdad/glyphs/${encodeURIComponent('Missing Font,Noto Sans Arabic Regular')}/0-255.pbf`);
     expect([res.statusCode, res.headers['content-type']]).toEqual([200, 'application/x-protobuf']);
     expect(res.rawPayload).toEqual(GLYPHS);
     expect((await get(`/v1/cities/baghdad/glyphs/${encodeURIComponent('Noto Sans Arabic Regular')}/256-511.pbf`)).statusCode).toBe(404);
-  });
-
-  it('hands a public https source to the client directly, in the CityDescriptor URL formats', () => {
-    const urls = new TileFiles({ TILES_SOURCE: 'https://cdn.example/{city}.pmtiles', GLYPHS_SOURCE: 'https://cdn.example/glyphs' }, createLogger({ name: 'test' })).urls('baghdad');
-    expect(urls).toEqual({ tilesUrl: 'pmtiles://https://cdn.example/baghdad.pmtiles', glyphsUrl: 'https://cdn.example/glyphs/{fontstack}/{range}.pbf' });
-    expect(() => CityDescriptor.parse({ ...city, ...urls, attribution: OSM_ATTRIBUTION })).not.toThrow();
+    // Only the first 3 fonts of a stack are tried.
+    expect((await get(`/v1/cities/baghdad/glyphs/${encodeURIComponent('A,B,C,Noto Sans Arabic Regular')}/0-255.pbf`)).statusCode).toBe(404);
   });
 
   it('rejects path traversal at the contract and again when resolving the path', async () => {
@@ -217,12 +229,11 @@ describe('tile and glyph fallback', () => {
     ])
       expect((await get(url)).statusCode, url).toBe(400);
     expect((await get('/v1/cities/baghdad/tiles/../../../../etc/passwd')).statusCode).toBe(404);
-    expect(fillSource('/srv/glyphs/{fontstack}/{range}', { fontstack: '..', range: '0-255.pbf' })).toBeNull();
-    expect(fillSource('/srv/glyphs/{fontstack}/{range}', { fontstack: 'a', range: '../../../etc/passwd' })).toBeNull();
-    expect(fillSource('/srv/{city}.pmtiles', { city: '../etc/x' })).toBeNull();
-    expect(fillSource('/srv/{city}.pmtiles', { city: 'baghdad' })).toBe('/srv/baghdad.pmtiles');
-    expect(fillSource('/srv/glyphs/{fontstack}/{range}', { fontstack: 'Noto Sans', range: '0-255.pbf' })).toBe('/srv/glyphs/Noto Sans/0-255.pbf');
-    expect(fillSource('https://cdn.example/{city}/{fontstack}', { city: 'baghdad', fontstack: '../a b' })).toBe('https://cdn.example/baghdad/..%2Fa%20b');
+    // A symlink inside the glyph directory that points outside it is not followed.
+    await mkdir(join(dir, 'secret'));
+    await writeFile(join(dir, 'secret', '0-255.pbf'), 'secret');
+    await symlink(join(dir, 'secret'), join(dir, 'glyphs', 'Linked'));
+    expect((await get('/v1/cities/baghdad/glyphs/Linked/0-255.pbf')).statusCode).toBe(404);
   });
 });
 

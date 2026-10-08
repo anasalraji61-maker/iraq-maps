@@ -17,8 +17,8 @@ local Redis. It runs inside `pnpm gate`; alone: `pnpm infra:local up && pnpm --f
   `GET /v1/places/:id` details, a 404 Problem, and 400 Problems for invalid queries; `GET /v1/cities` with the
   fallback `tilesUrl`/`glyphsUrl` and the OSM attribution; the tiles fallback at that `tilesUrl` serving a valid MVT
   (gzip or bare protobuf) from a one-tile PMTiles archive the test writes, 204 and 400; the glyphs fallback, and a
-  path-traversal attempt refused with 400. It is skipped until `apps/api` wires `placesModule` (the `places` schema
-  in `moduleMigrations`). `pnpm --filter @iraq-maps/e2e-api test places` runs this file alone.
+  path-traversal attempt refused with 400.
+  `pnpm --filter @iraq-maps/e2e-api test places` runs this file alone.
 - Env: `REDIS_URL` (default `redis://localhost:6379`), `TEST_DATABASE_ADMIN_URL` or `DATABASE_URL` (default: the
   `pnpm infra:local` database).
 

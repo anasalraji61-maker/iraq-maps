@@ -69,7 +69,7 @@ describe('search', () => {
     expect(api.places.search).not.toHaveBeenCalled();
     await wait(100);
     expect(api.places.search).toHaveBeenCalledTimes(1);
-    expect(api.places.search.mock.calls[0]?.[0]?.query).toEqual({ q: 'قلعه', city: 'baghdad', near: '44.366100,33.315200', lang: 'ar' });
+    expect(api.places.search.mock.calls[0]?.[0]?.query).toEqual({ q: 'قلعه', city: 'baghdad', near: '44.3661,33.3152', lang: 'ar' });
   });
 
   it('aborts the request in flight when the query changes, and ignores its late answer', async () => {
@@ -147,12 +147,12 @@ describe('search', () => {
     const api = fakeApi();
     api.places.search.mockReturnValue(respond(200, { items: [citadel] }));
     const { view } = await search('قلعه', api);
-    await fireEvent(view.getByTestId(map.view), 'regionDidChange', { nativeEvent: { center: [44.4213, 33.2871], zoom: 14 } });
+    await fireEvent(view.getByTestId(map.view), 'regionDidChange', { nativeEvent: { center: [44.421347, 33.287061], zoom: 14 } });
     await wait(300);
     expect(api.places.search).toHaveBeenCalledTimes(1);
     await fireEvent.changeText(view.getByTestId(map.searchInput), 'قلعة');
     await wait(300);
-    expect(api.places.search.mock.calls.map(([req]) => req?.query?.near)).toEqual(['44.366100,33.315200', '44.421300,33.287100']);
+    expect(api.places.search.mock.calls.map(([req]) => req?.query?.near)).toEqual(['44.3661,33.3152', '44.4213,33.2871']);
   });
 
   it('hides the results when the query is cleared', async () => {
@@ -169,16 +169,16 @@ describe('locate me', () => {
   const permission = jest.mocked(Location.requestForegroundPermissionsAsync);
   const position = jest.mocked(Location.getCurrentPositionAsync);
 
-  it('centres on the user, shows the location dot and searches near them', async () => {
+  it('centres on the user, shows the location dot and searches near them (to 4 decimals)', async () => {
     permission.mockResolvedValue({ granted: true } as never);
-    position.mockResolvedValue({ coords: { longitude: 44.4012, latitude: 33.3005 } } as never);
+    position.mockResolvedValue({ coords: { longitude: 44.401234, latitude: 33.300567 } } as never);
     const { api, view } = await show(screen);
     await fireEvent.press(await view.findByRole('button', { name: t('map:locate.label') }));
-    expect(view.getByTestId(mapPartIDs.camera).props.setStop).toHaveBeenLastCalledWith(expect.objectContaining({ center: [44.4012, 33.3005], zoom: 15 }));
+    expect(view.getByTestId(mapPartIDs.camera).props.setStop).toHaveBeenLastCalledWith(expect.objectContaining({ center: [44.401234, 33.300567], zoom: 15 }));
     expect(view.getByTestId(mapPartIDs.userLocation)).toBeOnTheScreen();
     await fireEvent.changeText(view.getByTestId(map.searchInput), 'قلعه');
     await wait(300);
-    expect(api.places.search.mock.calls[0]?.[0]?.query).toMatchObject({ near: '44.401200,33.300500' });
+    expect(api.places.search.mock.calls[0]?.[0]?.query).toMatchObject({ near: '44.4012,33.3006' });
   });
 
   it('explains a denied permission and keeps the map as it was', async () => {

@@ -16,7 +16,7 @@ The package exports two screens, mounted by route files in `apps/mobile/app`:
     old query is dropped.
     - `near` is where the map last settled (`MapCanvas` `onCameraChanged`, after a pan or locate-me), the city
       centre at first. It is read when the request starts, so a pan changes the next search without re-running the
-      one on screen.
+      one on screen. It is sent rounded to 4 decimals (about 11m).
     - `lang` is the map label language.
   - **Results.** Each result is a `PlaceSummaryCard` with the name (`pickName` in the map language), category (or
     street/area), neighbourhood, distance (`formatNumber`: Arabic-Indic digits in ar and ckb) and an OpenStreetMap
@@ -29,6 +29,9 @@ The package exports two screens, mounted by route files in `apps/mobile/app`:
     and the map stays as it was.
   - **Map label language.** A sheet sets the map labels to ar, ckb or en. It starts in the app language.
 - `PlaceScreen` (`/place/[placeId]`, also the target of `iraqmaps://place/<id>`): `GET /v1/places/:id` as a card.
+  - The deep-link id must match the contract's path format (`placesContract.get.pathParams`), or the screen shows
+    «لم نجد هذا المكان» without calling the API. ts-rest does not encode path params, so an id like `../me` would
+    otherwise reach another route with the user's token.
   - It shows the name (`pickName` in the app language), category, neighbourhood and a «من OpenStreetMap» source badge.
   - Opening hours show «مفتوح الآن» or «مغلق الآن» (`src/hours.ts`, Iraq time UTC+3). The parser covers `24/7` and
     `;`-separated rules of weekday ranges or lists with time spans or `off`, including spans past midnight.

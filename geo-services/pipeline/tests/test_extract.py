@@ -76,17 +76,24 @@ def test_record_details(out):
     assert r["w1008"]["location"] == [44.39, 33.28]  # node 98 is missing
 
 
-@pytest.mark.parametrize(
-    "tags, allowed, cat",
-    [
-        ({"shop": "vacant", "amenity": "cafe"}, {"shopping", "cafe"}, "cafe"),
-        ({"amenity": "restaurant", "shop": "bakery"}, {"shopping"}, "shopping"),  # first allowed match
-        ({"office": "diplomatic"}, {"government", "office"}, "government"),
-        ({"amenity": "parking"}, {"food"}, None),
-    ],
-)
-def test_category(tags, allowed, cat):
-    assert extract.category(tags, allowed) == cat
+CATEGORIES = json.loads((extract.SCHEMAS / "osm-categories.json").read_text(encoding="utf-8"))
+EVERY = {c for rule in CATEGORIES["rules"] for c in rule["values"].values()}
+CASES = json.loads((extract.SCHEMAS / "osm-category-cases.json").read_text(encoding="utf-8"))
+
+
+# OsmCategoryCases from packages/contracts: the first rule that yields a category decides; not enabled means dropped
+@pytest.mark.parametrize("case", CASES, ids=[f"{c['tags']}-{c.get('enabled', 'all')}" for c in CASES])
+def test_category(case):
+    assert extract.category(case["tags"], set(case.get("enabled", EVERY))) == case["category"]
+
+
+def test_category_reads_the_shared_contract_table():
+    # packages/contracts/schemas/osm-categories.json, also read by the tiles profile: no second copy here
+    for rule in CATEGORIES["rules"]:
+        for value, cat in rule["values"].items():
+            assert extract.category({rule["key"]: "any" if value == "*" else value}, EVERY) == cat, (rule["key"], value)
+        for ignored in CATEGORIES["ignoredValues"]:
+            assert extract.category({rule["key"]: ignored}, EVERY) is None
 
 
 def test_names_are_trimmed_and_capped_like_zod():

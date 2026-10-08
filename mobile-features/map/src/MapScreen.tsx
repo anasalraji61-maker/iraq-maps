@@ -47,10 +47,11 @@ function CityMap({ city }: { city: CityDescriptor }) {
   const q = query.trim();
 
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
+  // 4 decimals (about 11m) are enough to rank by distance and send no more of the user's location than that.
   const search = useLatest(
     q ? `${mapLang}:${q}` : null,
     async (signal) => {
-      const params = { q, city: city.id, near: near.map((v) => v.toFixed(6)).join(','), lang: mapLang };
+      const params = { q, city: city.id, near: near.map((v) => v.toFixed(4)).join(','), lang: mapLang };
       return ok(await api.places.search({ query: params, fetchOptions: { signal } })).items;
     },
     SEARCH_DELAY_MS,

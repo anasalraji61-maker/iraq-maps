@@ -1,7 +1,7 @@
-import { pickName, testIDs, type PlaceDetails } from '@iraq-maps/contracts';
+import { pickName, placesContract, testIDs, type PlaceDetails } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { href, routes, useApi, useRouteAvailable } from '@iraq-maps/mobile-kit';
-import { Badge, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
+import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import type { ReactElement } from 'react';
 import { Share } from 'react-native';
@@ -15,8 +15,22 @@ const actions = { routePreview: 'actions.directions', messageCompose: 'actions.m
 /** `place/[placeId]`: GET /v1/places/:id as a card. Also the target of iraqmaps://place/<id>. */
 export function PlaceScreen(): ReactElement {
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
+  // A deep link is untrusted, and ts-rest does not encode path params: only an id in the contract's format reaches the
+  // API, so `../me` cannot call another route with the user's token.
+  const params = placesContract.get.pathParams.safeParse({ id: placeId });
+  if (!params.success) {
+    return (
+      <Screen>
+        <Banner kind="error" message={t('place.notFound')} />
+      </Screen>
+    );
+  }
+  return <PlaceLoader id={params.data.id} />;
+}
+
+function PlaceLoader({ id }: { id: string }) {
   const api = useApi();
-  const place = useLatest(placeId ?? null, async () => ok(await api.places.get({ params: { id: placeId ?? '' } })));
+  const place = useLatest(id, async () => ok(await api.places.get({ params: { id } })));
   if (place.state?.status === 'ready') return <PlaceCard place={place.state.data} />;
   return (
     <Screen>

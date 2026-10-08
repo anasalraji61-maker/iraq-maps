@@ -6,7 +6,7 @@ and the fallback tile and glyph server (ADR-0008). Owns the Postgres schema `pla
 ## API
 
 ```ts
-import { importCity, importFiles, placesMigrationsDir, placesModule } from '@iraq-maps/places';
+import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
 
 runModuleMigrations({ url, schema: 'places', migrationsDir: placesMigrationsDir });
 @Module({ imports: [placesModule({ db, env? })] })
@@ -21,12 +21,22 @@ runModuleMigrations({ url, schema: 'places', migrationsDir: placesMigrationsDir 
 | `GET /v1/places/nearby?city&near&radiusM&category&limit` | Kind `place` within `radiusM`, nearest first. 429 `rate_limited` |
 | `GET /v1/places/:id` | `PlaceDetails`, `source: 'osm'` and `OSM_ATTRIBUTION`. 404 Problem `place_not_found` |
 | `GET /v1/cities` | `CityDescriptor[]` from `places.cities` (see "Tiles and glyphs" for the URLs) |
-| `GET /v1/cities/:id/tiles/:z/:x/:y` | The tile as stored in the PMTiles archive, `application/vnd.mapbox-vector-tile`, with `content-encoding: gzip` when the archive is gzipped (Planetiler's default; HTTP clients decode it). 204 for an empty address; 404 `not_found` without an archive |
-| `GET /v1/cities/:id/glyphs/:fontstack/:range` | `<GLYPHS_SOURCE>/<font>/<range>`, `application/x-protobuf`, from the first font of a comma-separated stack that has it. 404 `not_found` otherwise |
+| `GET /v1/cities/:id/tiles/:z/:x/:y` | Only for a city in `places.cities` (else 404). The tile as stored in the PMTiles archive, `application/vnd.mapbox-vector-tile`, with `content-encoding: gzip` when the archive is gzipped (Planetiler's default; HTTP clients decode it). 204 for an empty address; 404 `not_found` without an archive |
+| `GET /v1/cities/:id/glyphs/:fontstack/:range` | Only for a city in `places.cities`. `<GLYPHS_SOURCE>/<font>/<range>`, `application/x-protobuf`, from the first of the stack's first 3 fonts that has it. 404 `not_found` otherwise |
 
 All routes are public (no token). 400s come from the contract's zod schemas; the API's ProblemFilter turns them into
-Problems. Search and nearby share a limit of 300 requests a minute per client IP (`req.ip`, so behind a proxy set
-`TRUST_PROXY`). The limiter is in memory: the MVP runs one API instance.
+Problems.
+
+Rate limits, per client network and minute:
+- Search and nearby share 300 requests. Over the limit they answer 429 `rate_limited`.
+- Tiles and glyphs share 1200 requests. Their frozen contract has no 429, so it is thrown as an HttpException carrying
+  the Problem.
+
+A client network is one IPv4 address (IPv4-mapped IPv6 counts as its IPv4) or one IPv6 /64, as in identity. It comes
+from `req.ip`, so behind a proxy set `TRUST_PROXY`; every unparsable address shares one budget. The windows live in
+memory (the MVP runs one API instance): at most 100k per limiter, oldest evicted first, and a sweep costs O(expired).
+Carrier CGNAT puts many users behind one IPv4, so watch for 429s in production and tune `SEARCH_PER_MINUTE` /
+`TILES_PER_MINUTE` in `src/http.ts`.
 
 ## Import (CliContracts.placesImport)
 
@@ -36,8 +46,8 @@ APP_ENV=development DATABASE_URL=postgres://... pnpm --filter @iraq-maps/places 
 
 `run` is required: `pnpm import` is pnpm's own command. The CLI applies the `places` migrations, validates every line
 with `PlaceImportRecord` (and the city with `CityImportRecord`), and prints `{"place":n,"street":n,"area":n}`. A bad
-line fails the whole import with its line number. `importFiles(db, { city, input })` and `importCity(db, city,
-records)` do the same from code (the e2e harness, the tests).
+line fails the whole import with its line number. The CLI is the only entry point; the tests call `src/import.ts`
+directly.
 
 An import replaces one city in a single transaction: it upserts the city, deletes the city's old rows and any row with an
 incoming id, then inserts the records. Re-running it changes nothing. It then sets each place's and street's `area` to
@@ -73,15 +83,25 @@ Local fixture: `geo-services/pipeline/tests/fixtures/baghdad-mini/{city.json,pla
 | `GLYPHS_SOURCE` | Absolute directory or http(s) URL holding `<fontstack>/<range>.pbf` (`{city}` allowed) |
 | `APP_ENV` | Required by `defineModuleConfig` |
 
-Both are optional. Values are never logged.
+Both sources are optional. Boot fails, naming only the variable, for:
+- a relative path;
+- a URL with `user:pass@`;
+- `http://` when `APP_ENV=production`.
+
+Values are never logged. An unreadable archive is logged once per city and process, with the city and an error code.
 
 - `CityDescriptor.tilesUrl` is `pmtiles://<url>` when `TILES_SOURCE` is a URL, else the relative fallback template
   `/v1/cities/<id>/tiles/{z}/{x}/{y}`. `glyphsUrl` is `<url>/{fontstack}/{range}.pbf` for a URL source, else the
   fallback route. A URL source is handed to every client, so it must be public: no credentials or signed queries.
 - The archive is read with the `pmtiles` library, one ranged read per request. Its header and directories are cached
   per process, so restart the API after replacing a local file.
-- Path traversal: `:id`, `:fontstack` and `:range` must match strict contract regexes (no `.` or `/` in a city or a
-  font). Then the resolved path must stay inside the directory that holds the source's first placeholder (`fillSource`).
+- Path traversal is checked in layers:
+  - `:id`, `:fontstack` and `:range` must match strict contract regexes (no `.` or `/` in a city or a font).
+  - `:id` must be in the city registry.
+  - Then `resolveSource` refuses `.`/`..` values and percent-encodes values in URLs.
+  - A local path must exist and stay inside the directory that holds the source's first placeholder, both as written
+    and after `realpath`. A symlink that leads out of the source directory is not served, so point the variable at the
+    real directory.
 
 ## Tests
 
@@ -91,6 +111,7 @@ Both are optional. Values are never logged.
 - the import CLI on the pipeline fixture;
 - idempotent re-import;
 - the OSM-only columns;
-- the HTTP routes, including 400, 404 and 429;
-- tiles (200 gzip, 204, 404), glyphs and traversal attempts;
+- the HTTP routes, including 400, 404 and 429 (per /64);
+- tiles (200 gzip, 204, 404 for unregistered or unreadable), glyphs (font cap) and traversal attempts, symlinks included;
+- `src/guards.test.ts`: network bucketing, the limiter's expiry, cap and cost, the config rules, and source resolution;
 - search performance on 20k synthetic rows.

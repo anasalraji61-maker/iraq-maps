@@ -7,7 +7,8 @@ Usage (pnpm runs it from geo-services/pipeline, so pass absolute paths):
 --city is a city id (cities/<id>.yaml) or a path to a city YAML. Writes to --output:
 - <city>.osm.pbf: osmium extract of the city (smart strategy: multipolygons and boundaries kept whole).
 - places.ndjson: PlaceImportRecord lines, unique ids sorted by kind then id. Records outside the city bbox are dropped.
-  - place: a named node or area whose tags map to one of the city's categories (CATEGORIES, first match wins).
+  - place: a named node or area whose tags map to a PlaceCategory by packages/contracts/schemas/osm-categories.json
+    (shared with the tiles profile; see category()) that the city config lists.
   - street: named STREETS ways, merged per name into connected chains. The id is the chain's lowest way id and
     the location is the chain vertex closest to the mean of its vertices.
   - area: place=suburb|quarter|neighbourhood (node or area), or boundary=administrative with admin_level 6-10.
@@ -36,42 +37,13 @@ STREETS = {
 }
 AREA_PLACES = {"suburb", "quarter", "neighbourhood"}
 ADMIN_LEVELS = {"6", "7", "8", "9", "10"}
-CATEGORIES = {  # OSM key -> {value or "*": PlaceCategory}
-    "amenity": {
-        **dict.fromkeys(["restaurant", "fast_food", "food_court", "ice_cream"], "food"),
-        **dict.fromkeys(["cafe", "hookah_lounge"], "cafe"),
-        **dict.fromkeys(["bank", "atm", "bureau_de_change", "money_transfer"], "finance"),
-        **dict.fromkeys(["fuel", "charging_station"], "fuel"),
-        **dict.fromkeys(["hospital", "clinic", "doctors", "dentist", "pharmacy"], "health"),
-        "place_of_worship": "worship",
-        **dict.fromkeys(["school", "university", "college", "kindergarten", "library", "language_school"], "education"),
-        **dict.fromkeys(["townhall", "courthouse", "police", "fire_station", "post_office", "embassy"], "government"),
-        **dict.fromkeys(["bus_station", "ferry_terminal", "taxi"], "transport"),
-        **dict.fromkeys(["cinema", "theatre", "arts_centre", "nightclub", "events_venue"], "entertainment"),
-        "marketplace": "shopping",
-    },
-    "shop": {"*": "shopping"},
-    "tourism": {
-        **dict.fromkeys(["hotel", "motel", "guest_house", "hostel", "apartment"], "lodging"),
-        **dict.fromkeys(["attraction", "museum", "gallery", "zoo", "theme_park", "viewpoint", "aquarium"], "tourism"),
-    },
-    "office": {"government": "government", "diplomatic": "government", "*": "office"},
-    "healthcare": {"*": "health"},
-    "leisure": dict.fromkeys(
-        ["park", "sports_centre", "stadium", "fitness_centre", "water_park", "amusement_arcade", "bowling_alley"],
-        "entertainment",
-    ),
-    "historic": dict.fromkeys(["castle", "fort", "monument", "memorial", "archaeological_site", "ruins"], "tourism"),
-    "public_transport": {"station": "transport"},
-    "railway": {"station": "transport"},
-    "aeroway": {"aerodrome": "transport", "terminal": "transport"},
-}
 CONTACT = {
     "opening_hours": ("opening_hours",),
     "phone": ("phone", "contact:phone", "mobile", "contact:mobile"),
     "website": ("website", "contact:website", "url"),
 }
 KINDS = ("place", "street", "area")
+OSM_CATEGORIES = json.loads((SCHEMAS / "osm-categories.json").read_text(encoding="utf-8"))
 WS = "".join(c for c in map(chr, range(0x3001)) if c.isspace()) + "\ufeff"
 
 
@@ -88,10 +60,13 @@ def names(t):
 
 
 def category(t, allowed):
-    for key, table in CATEGORIES.items():
-        v = t.get(key)
-        if v and v not in ("no", "vacant") and (c := table.get(v, table.get("*"))) in allowed:
-            return c
+    """The PlaceCategory that osm-categories.json gives these tags, as in the tiles profile: rules in order, the first
+    that yields a category wins, an exact value beats "*", ignoredValues never match. None when no rule fits or the
+    city does not list that category."""
+    for rule in OSM_CATEGORIES["rules"]:
+        v, values = t.get(rule["key"]), rule["values"]
+        if v and v not in OSM_CATEGORIES["ignoredValues"] and (c := values.get(v, values.get("*"))):
+            return c if c in allowed else None
     return None
 
 
@@ -154,7 +129,7 @@ def merge_streets(groups):
 def records(path, cfg):
     allowed = set(cfg["categories"])
     out, streets = [], defaultdict(list)
-    keys = osmium.filter.KeyFilter(*CATEGORIES, "highway", "place", "boundary")
+    keys = osmium.filter.KeyFilter(*(r["key"] for r in OSM_CATEGORIES["rules"]), "highway", "place", "boundary")
     for o in osmium.FileProcessor(str(path)).with_areas().with_filter(keys):
         t = dict(o.tags)
         if o.is_node():
