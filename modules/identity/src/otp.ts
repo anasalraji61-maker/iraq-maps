@@ -34,13 +34,14 @@ local function lock(p)
   redis.call('DEL', k('fail', p), k('rate', p))
 end`;
 
-// ARGV: phone hash, client network ('' when unknown). Returns 'ok' or the refusal.
+// ARGV: phone hash, client network ('' when unknown). Returns 'ok' or the refusal. The network is checked first, so a
+// request it refuses never touches the phone's state: one network cannot lock other people's phones.
 const ISSUE = `${LUA_LOCK}
 local p = ARGV[1]
+if ARGV[2] ~= '' and count('identity:otp-rate:ip:' .. ARGV[2], ${WINDOW_SEC}) > ${MAX_PER_IP} then return 'rate_limited' end
 if redis.call('EXISTS', k('lock', p)) == 1 then return 'locked' end
 if not redis.call('SET', k('resend', p), 1, 'NX', 'EX', ${RESEND_AFTER_SEC}) then return 'resend_too_soon' end
 if count(k('rate', p), ${WINDOW_SEC}) > ${MAX_PER_PHONE} then lock(p) return 'rate_limited' end
-if ARGV[2] ~= '' and count('identity:otp-rate:ip:' .. ARGV[2], ${WINDOW_SEC}) > ${MAX_PER_IP} then return 'rate_limited' end
 return 'ok'`;
 
 // KEYS[1]: the code's record; ARGV[1]: the hash of the presented code. A match consumes the code; every miss counts

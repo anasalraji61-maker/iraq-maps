@@ -163,6 +163,18 @@ describe('OTP login', () => {
     expect(ipBucket('2001:db8:1:3::1')).not.toBe(ipBucket('2001:db8:1:2::1'));
   });
 
+  it('a request refused by the network limit leaves the phone untouched, so one network cannot lock other phones', async () => {
+    const ip = randomIp();
+    for (let i = 0; i < 20; i++) expect((await requestOtp(randomPhone(), ip)).statusCode).toBe(202);
+    const victim = randomPhone();
+    for (let i = 0; i < 6; i++) {
+      await skipResendWait(victim); // an attacker pacing requests 60s apart
+      expect((await requestOtp(victim, ip)).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+    }
+    expect((await requestOtp(victim)).statusCode).toBe(202);
+    expect(sender.sent.filter((m) => m.phone === victim)).toHaveLength(1);
+  });
+
   it('invalidates the code after 5 wrong attempts', async () => {
     const phone = randomPhone();
     const code = await newCode(phone);
