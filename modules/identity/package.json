@@ -1,0 +1,19 @@
+{
+  "name": "@iraq-maps/identity",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/db-kit": "workspace:*",
+    "@nestjs/common": "^11.2.7"
+  }
+}

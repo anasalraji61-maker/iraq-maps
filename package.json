@@ -1,0 +1,37 @@
+{
+  "name": "iraq-maps",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "dev": "turbo run dev --filter=@iraq-maps/api --filter=@iraq-maps/mobile",
+    "dev:api": "pnpm --filter @iraq-maps/api dev",
+    "depcruise": "depcruise --config packages/tooling/dependency-cruiser.cjs apps modules packages mobile-features e2e tools",
+    "gitleaks": "if command -v gitleaks >/dev/null; then gitleaks git --no-banner --redact --config .gitleaks.toml .; else echo 'gitleaks not installed, skipped (go install github.com/zricethezav/gitleaks/v8@latest)'; fi",
+    "knip": "knip --config packages/tooling/knip.json",
+    "jscpd": "jscpd --config packages/tooling/jscpd.json .",
+    "ownership:check": "node tools/ownership/src/cli.ts",
+    "infra:local": "sh infra/local/infra.sh",
+    "android:precheck": "pnpm --filter @iraq-maps/mobile android:precheck",
+    "gate": "turbo run build lint typecheck test && pnpm depcruise && pnpm gitleaks && pnpm knip && pnpm jscpd && pnpm ownership:check --milestone M0"
+  },
+  "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*",
+    "@types/node": "^22.19.0",
+    "dependency-cruiser": "^18.5.0",
+    "eslint": "^10.12.0",
+    "jscpd": "^5.4.0",
+    "knip": "^6.40.0",
+    "turbo": "^2.11.7",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  }
+}

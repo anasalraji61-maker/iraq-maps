@@ -1,0 +1,9 @@
+{
+  "threshold": 0,
+  "minTokens": 60,
+  "format": ["typescript", "tsx", "javascript"],
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/.expo/**", "**/android/**", "**/ios/**", "**/fixtures/**", "**/coverage/**", "**/.turbo/**", "**/*.d.ts", "geo-services/**"],
+  "reporters": ["console"],
+  "gitignore": true,
+  "absolute": false
+}

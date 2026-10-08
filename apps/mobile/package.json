@@ -1,0 +1,33 @@
+{
+  "name": "@iraq-maps/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "android:precheck": "expo prebuild --platform android --no-install --clean && expo export --platform android --output-dir dist",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'shell RNTL tests: builder-mobile-shell (jest-expo)'"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~57.0.16",
+    "@iraq-maps/contracts": "workspace:*",
+    "expo": "~57.0.27",
+    "expo-build-properties": "~57.0.22",
+    "expo-constants": "~57.0.21",
+    "expo-linking": "~57.0.12",
+    "expo-localization": "~57.0.2",
+    "expo-router": "~57.0.25",
+    "expo-secure-store": "~57.0.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2"
+  }
+}

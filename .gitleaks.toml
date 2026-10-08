@@ -1,0 +1,12 @@
+title = "iraq-maps gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Lockfiles and generated output"
+paths = [
+  '''pnpm-lock\.yaml''',
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+]

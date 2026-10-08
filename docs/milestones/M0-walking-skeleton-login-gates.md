@@ -37,6 +37,7 @@ owners:
     - ".gitignore"
     - ".env.example"
     - ".gitleaks.toml"
+    - "eslint.config.js"
     - "packages/tooling/**"
     - "packages/contracts/**"
     - "packages/testing/**"

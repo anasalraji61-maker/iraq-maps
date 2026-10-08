@@ -1,0 +1,19 @@
+packages:
+  - apps/*
+  - packages/*
+  - modules/*
+  - mobile-features/*
+  - adapters/*
+  - e2e/*
+  - tools/*
+  - geo-services/pipeline
+
+# Expo/React Native + Gradle autolinking are most reliable with a flat node_modules.
+# .npmrc is gitignored, so pnpm settings live here.
+nodeLinker: hoisted
+
+onlyBuiltDependencies:
+  - esbuild
+
+# Do not silently pull latest versions of optional peers (reanimated, worklets, ...) that the Expo SDK pins differently.
+autoInstallPeers: false

@@ -85,6 +85,11 @@ geo-services/**/tiles-out/
 geo-services/**/valhalla_tiles/
 geo-services/**/photon_data/
 geo-services/**/cache/
+# Small hand-made fixtures are tracked (<=500KB, checked by tools/ownership). Never under a data/ dir.
+!**/fixtures/**/*.osm
+!**/fixtures/**/*.osm.pbf
+!**/fixtures/**/*.pmtiles
+!**/fixtures/**/*.tif
 
 # ─────────────────────────────────────────────
 # Docker / قواعد بيانات محلية

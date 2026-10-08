@@ -1,0 +1,29 @@
+{
+  "name": "@iraq-maps/mobile-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.tsx"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@iraq-maps/api-client": "workspace:*",
+    "@iraq-maps/contracts": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "@testing-library/react-native": "*"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^14.1.0",
+    "@types/react": "~19.2.2",
+    "test-renderer": "~1.2.0"
+  }
+}

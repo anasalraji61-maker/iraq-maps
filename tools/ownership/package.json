@@ -1,0 +1,18 @@
+{
+  "name": "@iraq-maps/ownership",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": { "ownership-check": "./src/cli.ts" },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.7"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^4.0.3"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": [],
+    "jsx": "react-jsx",
+    "customConditions": ["react-native"]
+  },
+  "include": ["${configDir}/src", "${configDir}/app", "${configDir}/test", "${configDir}/*.ts", "${configDir}/*.tsx", "${configDir}/expo-env.d.ts"]
+}
