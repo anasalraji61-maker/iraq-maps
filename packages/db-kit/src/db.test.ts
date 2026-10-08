@@ -72,7 +72,19 @@ describe('runModuleMigrations', () => {
       ['CREATE TABLE places/* x */./* y */pwn (id int);', 'places.'],
       ['CREATE TABLE "x\'" (id int); SELECT \'--\'; DROP TABLE places.p;', 'places.'],
       ['SELECT 1; -- line comment ended by CR\rDROP TABLE places.p;', 'places.'],
-      ['CREATE TABLE U&"\\0070laces".pwn (id int);', '0070laces'],
+      ['CREATE TABLE U&"\\0070laces".pwn (id int);', 'U&'],
+      // security audit M0 round 2 (R2-1)
+      ["UPDATE pg_settings SET setting = 'places' WHERE name LIKE 'search%'; CREATE TABLE pwn (id int);", 'pg_settings'],
+      ["UPDATE pg_settings SET setting = 'places' WHERE name LIKE 'search%'; DROP TABLE p;", 'pg_settings'],
+      [
+        "CREATE FUNCTION f() RETURNS void LANGUAGE sql AS 'UPDATE pg_settings SET setting = ''places'' WHERE name LIKE ''search%'''; SELECT f(); CREATE TABLE pwn (id int);",
+        'pg_settings',
+      ],
+      ['UPDATE U&"pg\\005fsettings" SET setting = \'places\' WHERE name LIKE \'search%\'; CREATE TABLE pwn (id int);', 'U&'],
+      ['ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO PUBLIC;', 'DEFAULT PRIVILEGES'],
+      ['ALTER DEFAULT/* x */PRIVILEGES GRANT ALL ON TABLES TO PUBLIC;', 'PRIVILEGES'],
+      ['CREATE EXTENSION IF NOT EXISTS hstore;', 'CREATE EXTENSION'],
+      ['DROP EXTENSION pg_trgm CASCADE;', 'DROP EXTENSION'],
     ])('rejects %j and applies nothing', async (bad, violation) => {
       const dir = migrationsDir({ '0001_ok.sql': 'CREATE TABLE ok (id int);', '0002_bad.sql': bad });
       const run = runModuleMigrations({ url: tdb.url, schema: 'beta', migrationsDir: dir });
@@ -87,7 +99,7 @@ describe('runModuleMigrations', () => {
       const dir = migrationsDir({
         '0001_notes.sql': `-- Comments may say e.g. other.table, DROP SCHEMA x, DO or EXECUTE.
           /* block comment: public.x */
-          CREATE TABLE notes (id int PRIMARY KEY, body text DEFAULT 'it''s fine', ratio numeric DEFAULT 1.5, share numeric DEFAULT .5, geom geometry(Point, 4326));
+          CREATE TABLE notes (id int PRIMARY KEY, body text DEFAULT 'it''s fine', ratio numeric DEFAULT 1.5, share numeric DEFAULT .5, extension text, geom geometry(Point, 4326));
           ALTER TABLE gamma.notes ALTER COLUMN body SET NOT NULL;
           CREATE INDEX notes_body_trgm ON gamma.notes USING gin (body gin_trgm_ops);
           INSERT INTO notes (id) VALUES (1) ON CONFLICT DO NOTHING;

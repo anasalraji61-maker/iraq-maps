@@ -30,13 +30,15 @@ A file is rejected when:
 - **Anywhere in the raw file, comments included:**
   - a `$`, which also covers dollar quoting;
   - an `E'...'` string;
-  - `search_path` or `set_config`.
+  - a `U&` escape, which could spell any identifier;
+  - `search_path`, `set_config` or `pg_settings`.
 - **Outside comments, with string literals still checked because they can be function bodies:**
   - **SCHEMA clauses:** any `SCHEMA` keyword, such as `DROP`/`ALTER`/`CREATE SCHEMA`, `SET SCHEMA` or `IN SCHEMA`.
   - **Dynamic SQL:** `EXECUTE`, which also rules out triggers' `EXECUTE FUNCTION` for now.
-  - **Cross-schema ownership commands:** `DROP OWNED` and `REASSIGN OWNED`.
+  - **Cross-schema ownership commands:** `DROP OWNED`, `REASSIGN OWNED` and `DEFAULT PRIVILEGES`.
+  - **Extension DDL:** `CREATE`, `ALTER` and `DROP EXTENSION`. Extensions live in the template only, but a column may still be named `extension`.
   - **Session statements:** a statement starting with `DO`, `SET`, `RESET` or `DISCARD`.
-  - **Qualifiers:** any `.` outside a number whose left side is not the module's schema. This rejects `other.t`, `public.t`, `"other"."t"`, `U&"..."`, three-part names, table aliases such as `u.id`, and dotted text such as `'v1.2'` in literals.
+  - **Qualifiers:** any `.` outside a number whose left side is not the module's schema. This rejects `other.t`, `public.t`, `"other"."t"`, three-part names, table aliases such as `u.id`, and dotted text such as `'v1.2'` in literals.
 
 So write column references unqualified. A rejected file fails the whole run, and nothing is applied. `src/db.test.ts` holds the regression cases from the M0 security audit.
 

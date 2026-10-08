@@ -8,14 +8,17 @@ export const platformMigrationsDir = fileURLToPath(new URL('../migrations', impo
 
 const SCHEMA_NAME = /^[a-z][a-z0-9_]*$/;
 // Checked on the raw file. `$` (dollar quoting) and E'...' strings are rejected because the comment scan below
-// cannot lex them; search_path and set_config change what unqualified names mean.
-const RAW_FORBIDDEN = /\$|\bE'|search_path|set_config/i;
+// cannot lex them; U&"..." escapes could spell any identifier below; search_path, set_config and pg_settings change
+// what unqualified names mean.
+const RAW_FORBIDDEN = /\$|\bE'|\bU&|search_path|set_config|pg_settings/i;
 // Comments, '...' literals and "..." identifiers, scanned left to right. Only comments are blanked: literals stay
 // checked because they can be function bodies. PostgreSQL ends a line comment at \n or \r.
 const TOKEN = /--[^\n\r]*|\/\*[\s\S]*?\*\/|'(?:[^']|'')*'|"(?:[^"]|"")*"/g;
 // Checked on the code: any SCHEMA clause (DROP/ALTER/CREATE SCHEMA, SET SCHEMA, IN SCHEMA), dynamic SQL,
-// cross-schema ownership commands, and session-level statements (DO, SET, RESET, DISCARD).
-const CODE_FORBIDDEN = /\bSCHEMAS?\b|\bEXECUTE\b|\b(?:DROP|REASSIGN)\s+OWNED\b|(?:^|;)\s*(?:DO|SET|RESET|DISCARD)\b/i;
+// cross-schema ownership and default-privilege commands, extension DDL (extensions live in the template only),
+// and session-level statements (DO, SET, RESET, DISCARD).
+const CODE_FORBIDDEN =
+  /\bSCHEMAS?\b|\bEXECUTE\b|\b(?:DROP|REASSIGN)\s+OWNED\b|\bDEFAULT\s+PRIVILEGES\b|\b(?:CREATE|ALTER|DROP)\s+EXTENSION\b|(?:^|;)\s*(?:DO|SET|RESET|DISCARD)\b/i;
 
 /** The first name before a `.` that is not the module schema. Dots inside numbers (1.5, 1., .5) are skipped. */
 function foreignQualifier(code: string, schema: string): string | undefined {
