@@ -1,7 +1,7 @@
 ---
 id: M0
 slug: walking-skeleton-login-gates
-status: in_progress
+status: done
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-platform:
@@ -71,7 +71,7 @@ auditors:
 
 # M0 — الهيكل الأولي العامل: تطبيق عربي بخمسة تبويبات وتسجيل دخول بالهاتف، مع بوابتَي CI وبناء أندرويد وتقرير جودة OSM
 
-**الحالة:** قيد التنفيذ · **التقدير:** 3.5–4 ساعة (منها نحو 45 دقيقة انتظار لدورات CI) · **يعتمد على:** — · **الفرع:** `claude/iraq-smart-maps-app-aybpjn`
+**الحالة:** مكتملة (`2937c16`) · **التقدير:** 3.5–4 ساعة (منها نحو 45 دقيقة انتظار لدورات CI) · **يعتمد على:** — · **الفرع:** `claude/iraq-smart-maps-app-aybpjn`
 
 > العملية العامة (التجميد، البناء المتوازي، التكامل، التدقيق، الإغلاق) في [README.md](README.md) ولا تتكرر هنا. هذا الملف يحدد ما يخص المرحلة فقط.
 
@@ -346,7 +346,42 @@ Then run pnpm install, check that typecheck is green, and run ownership:check (g
 
 ## ما تم إنجازه
 
-قيد التنفيذ.
+**مكتملة: أُغلقت على `2937c16` بتاريخ 2026-10-08.** كل بنود بوابة الإغلاق تحققت على نفس الـ SHA:
+
+- `pnpm install --frozen-lockfile && pnpm gate` ينجح من نسخة نظيفة: 50/50 مهمة، و depcruise و gitleaks و knip و jscpd و ownership و invisible كلها سليمة. تحقق منه المدقق أكثر من مرة.
+- `CI=1 pnpm android:precheck` ينجح.
+- `ci.yml` ‏run 37828965187: success.
+- `android.yml` ‏run 37828965227:
+  - job ‏build ناجح: APK ‏arm64 بحجم **16.7MB** من ميزانية 40MB، artifact رقم 11572574639.
+  - job ‏e2e ناجح على محاكي API 34 بلغة نظام ar-IQ: `launch-tabs` (خمسة وسوم عربية، وترتيب RTL، والتبديل للإنجليزية والعودة) و `login` (تسجيل دخول كامل بالهاتف) كلاهما Passed.
+- `geo-data.yml` ‏run 37828965262: success.
+- موافقات المدققين، كلها على `2937c16`:
+  - architecture-contracts و qa-build: APPROVED 2937c16 (أربع جولات).
+  - security-privacy: APPROVED 2937c16 (أربع جولات).
+  - licensing-data: APPROVED 2937c16 (جولتان).
+  - arabic-rtl-a11y: APPROVED 2937c16 (جولتان).
+- كل الملاحظات غير الحاجبة نُقلت كمتابعات إلى [M1](M1-map-search-place-card.md#متابعات-من-تدقيق-m0).
+
+**الأدلة لمعايير القبول:**
+
+| # | الدليل |
+|---|---|
+| 1 | البوابة من نسخة نظيفة كما أعلاه |
+| 2 | الملكية من front-matter وفحص الفرق، وقواعد depcruise بـ fixture لكل قاعدة |
+| 3 | اختبارات config: رفض النقص، وعدم كشف القيم، وAPP_ENV إلزامي |
+| 4 | `e2e/api/test/auth.test.ts`: المسار الكامل عبر createApp |
+| 5 | identity: حدود الهاتف والشبكة (/64)، والقفل المتصاعد 15د/1س/4س |
+| 6 | الهاتف مشفّر AES-GCM؛ وسجلات e2e بلا هاتف ولا JWT ولا رمز |
+| 7 | outbox بتسليم مرة واحدة؛ وحاجز الـ migrations |
+| 8 | اختبارات shell (RTL، اللغة، إعدادات المطوّر مغلقة في الإنتاج) |
+| 9 | اختبارات feature-account (36) |
+| 10 | قواعد ESLint للنصوص؛ وتطابق المفاتيح؛ والمطبّع |
+| 11 | android:precheck |
+| 12 | job البناء أعلاه |
+| 13 | job المحاكي أعلاه |
+| 14 | تقرير OSM و ADR-0002 (بغداد) |
+| 15 | Tour3DPort في العقود؛ ومجلدا tour3d فيهما README فقط |
+| 16 | موافقات المدققين أعلاه |
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
@@ -354,6 +389,8 @@ Then run pnpm install, check that typecheck is green, and run ownership:check (g
 | 2026-10-08 | T00: تجميد العقود وهيكل الـ monorepo («FREEZE PUSHED») | `410b61a` | — |
 | 2026-10-08 | builder-platform و builder-identity، وربط apps/api | `8936467` | جولة 1: الأمان 4 major + 7 minor، المعمارية/QA 2 blocker + 8 major + 8 minor |
 | 2026-10-08 | إصلاح ملاحظات الجولة 1 في أماكنها (venv race في `8fda357`) | `d74a00c` | الأمان جولة 2: **APPROVED d74a00c** (بقي 2 minor، أُرسلا للمالكين) |
+| 2026-10-08 | بناء الجلستين B و C بعد المهلة: ui و i18n و shell و account، و CI وأندرويد و e2e | `f19420f` … `877be63` | الأمان جولة 3 APPROVED؛ الترخيص APPROVED؛ RTL جولة 1: 6 major |
+| 2026-10-08 | إصلاح ملاحظات الأمان R3، والترخيص LIC-01..09، و RTL-1..16، والمعمارية/QA جولة 3، وفحص المحارف الخفية | `c21427d` … `2937c16` | **الإغلاق: 4/4 APPROVED 2937c16** |
 
 ### انحرافات مسجّلة
 - **أدوار قاعدة بيانات لكل وحدة مؤجلة إلى M7.** فحص حدود الـ migrations في db-kit حاجز معجمي ضد الأخطاء في كود مُراجَع، وليس عزلاً أمنياً. العزل الحقيقي يكون بدور migrator لكل schema لا يملك غيرها، وأُضيف إلى نطاق M7.
