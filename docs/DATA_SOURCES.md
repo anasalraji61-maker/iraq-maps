@@ -4,7 +4,8 @@
 
 | المصدر | الرابط | الترخيص | استخدام تجاري | نص الإسناد | الحالة | آخر تحقق |
 |---|---|---|---|---|---|---|
-| OpenStreetMap (Geofabrik Iraq extract) | https://download.geofabrik.de/asia/iraq.html | ODbL 1.0 | نعم، مع share-alike لقاعدة البيانات المشتقة | © OpenStreetMap contributors | معتمد | — |
+| OpenStreetMap (Geofabrik Iraq extract) | https://download.geofabrik.de/asia/iraq.html | ODbL 1.0 | نعم، مع share-alike لقاعدة البيانات المشتقة | © OpenStreetMap contributors | معتمد. استُخدم في `geo-data.yml` (التشغيل 37805977537). المستخرج العام لا يتضمن بيانات المستخدمين (uid/user)، لذلك عدد المساهمين غير متاح | 2026-10-08 |
+| Fixture اختبار يدوي `geo-services/pipeline/tests/fixtures/mini-city.osm.xml` | — (داخل المستودع) | CC0 1.0 | نعم | لا يلزم | معتمد. عمل أصلي مكتوب يدوياً، غير مشتق من OSM | 2026-10-08 |
 | Copernicus Sentinel-2 L2A | https://dataspace.copernicus.eu | Copernicus open data licence | نعم | Contains modified Copernicus Sentinel data [year] | معتمد مبدئياً، بانتظار تحقق R3 | — |
 | EOX Sentinel-2 cloudless | https://s2maps.eu | 2016: CC BY 4.0، والإصدارات اللاحقة: CC BY-NC-SA 4.0 | إصدار 2016 فقط | Sentinel-2 cloudless by EOX IT Services GmbH | **قيد التحقق، والإصدارات NC ممنوعة** | — |
 | Landsat (USGS) | https://www.usgs.gov/landsat-missions | Public domain | نعم | Landsat imagery courtesy of USGS | احتياطي | — |
