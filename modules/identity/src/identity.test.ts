@@ -1,8 +1,17 @@
-import { randomBytes, randomInt, randomUUID } from 'node:crypto';
-import { PortTokens, type IdentityPort, type IraqiPhone, type PhoneVerificationPort, type UserId } from '@iraq-maps/contracts';
+import { randomInt, randomUUID } from 'node:crypto';
+import { PortTokens, type IdentityPort, type PhoneVerificationPort, type UserId } from '@iraq-maps/contracts';
 import { createOutboxPublisher, createTestDatabase, startOutboxRelay, type OutboxRelay, type TestDatabase } from '@iraq-maps/db-kit';
 import { captureLogs, createLogger } from '@iraq-maps/observability';
-import { FakeOtpSender, FixedClock, InMemoryEventBus, InMemoryUserDataEraser, userDataEraserConformance } from '@iraq-maps/testing';
+import {
+  FakeOtpSender,
+  FixedClock,
+  identityTestEnv,
+  InMemoryEventBus,
+  InMemoryUserDataEraser,
+  randomIp,
+  randomPhone,
+  userDataEraserConformance,
+} from '@iraq-maps/testing';
 import { APP_GUARD, NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { sql } from 'drizzle-orm';
@@ -16,12 +25,8 @@ import { sessions, users } from './schema';
 import { Sessions } from './sessions';
 import { grantRole } from './users';
 
-const secret = () => randomBytes(32).toString('base64');
-const env = { APP_ENV: 'test', JWT_ACCESS_SECRET: secret(), JWT_REFRESH_SECRET: secret(), PHONE_ENCRYPTION_KEY: secret(), PHONE_HASH_KEY: secret() };
+const env = identityTestEnv();
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-// Fresh phones and IPs per test keep the shared Redis rate-limit counters from leaking between tests and runs.
-const newPhone = () => `+9647${randomInt(1e9).toString().padStart(9, '0')}` as IraqiPhone;
-const newIp = () => `10.${randomInt(256)}.${randomInt(256)}.${randomInt(256)}`;
 
 const logs = captureLogs();
 const sender = new FakeOtpSender();
@@ -62,7 +67,7 @@ afterAll(async () => {
   await tdb?.drop();
 });
 
-const post = (url: string, payload: object, ip = newIp()) => app.inject({ method: 'POST', url, payload, remoteAddress: ip });
+const post = (url: string, payload: object, ip = randomIp()) => app.inject({ method: 'POST', url, payload, remoteAddress: ip });
 const requestOtp = (phone: string, ip?: string) => post('/v1/auth/otp/request', { phone, locale: 'ckb' }, ip);
 const verifyOtp = (phone: string, code: string) => post('/v1/auth/otp/verify', { phone, code });
 const refresh = (refreshToken: string) => post('/v1/auth/refresh', { refreshToken });
@@ -79,7 +84,7 @@ async function newCode(phone: string) {
   return sender.lastCodeFor(phone)!;
 }
 
-async function login(phone = newPhone()) {
+async function login(phone = randomPhone()) {
   await newCode(phone);
   const res = await verifyOtp(phone, sender.lastCodeFor(phone)!);
   expect(res.statusCode).toBe(200);
@@ -109,7 +114,7 @@ describe('OTP login', () => {
   });
 
   it('stores the code hashed with a 5 minute TTL, and accepts it only once', async () => {
-    const phone = newPhone();
+    const phone = randomPhone();
     const res = await requestOtp(phone);
     expect(res.json()).toMatchObject({ resendAfterSec: 60 });
     const code = sender.lastCodeFor(phone)!;
@@ -122,7 +127,7 @@ describe('OTP login', () => {
   });
 
   it('enforces the 60s resend wait on the server', async () => {
-    const phone = newPhone();
+    const phone = randomPhone();
     expect((await requestOtp(phone)).statusCode).toBe(202);
     expect((await requestOtp(phone)).json()).toMatchObject({ status: 429, code: 'otp_resend_too_soon' });
     expect(await redis.ttl(`identity:otp-resend:${mac(env.PHONE_HASH_KEY, phone)}`)).toBeGreaterThan(55);
@@ -130,7 +135,7 @@ describe('OTP login', () => {
   });
 
   it('the 6th code request in 15 minutes gets 429 and locks the phone: 15 min, then 1 h, then 4 h', async () => {
-    const phone = newPhone();
+    const phone = randomPhone();
     const ttls = [];
     for (let round = 0; round < 4; round++) {
       for (let i = 0; i < 5; i++) await newCode(phone);
@@ -147,19 +152,19 @@ describe('OTP login', () => {
   });
 
   it('limits code requests per client network: an IPv4 address (mapped or not) or an IPv6 /64', async () => {
-    const v4 = newIp();
+    const v4 = randomIp();
     const v6 = `2001:db8:${randomInt(0x10000).toString(16)}:${randomInt(0x10000).toString(16)}`;
     for (const address of [(i: number) => (i % 2 ? `::ffff:${v4}` : v4), (i: number) => `${v6}::${(i + 1).toString(16)}`]) {
-      for (let i = 0; i < 20; i++) expect((await requestOtp(newPhone(), address(i))).statusCode).toBe(202);
-      expect((await requestOtp(newPhone(), address(20))).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
+      for (let i = 0; i < 20; i++) expect((await requestOtp(randomPhone(), address(i))).statusCode).toBe(202);
+      expect((await requestOtp(randomPhone(), address(20))).json()).toMatchObject({ status: 429, code: 'otp_rate_limited' });
     }
-    expect((await requestOtp(newPhone())).statusCode).toBe(202);
+    expect((await requestOtp(randomPhone())).statusCode).toBe(202);
     expect(ipBucket('2001:0DB8:0001:0002:ffff:ffff:ffff:ffff')).toBe(ipBucket('2001:db8:1:2::1'));
     expect(ipBucket('2001:db8:1:3::1')).not.toBe(ipBucket('2001:db8:1:2::1'));
   });
 
   it('invalidates the code after 5 wrong attempts', async () => {
-    const phone = newPhone();
+    const phone = randomPhone();
     const code = await newCode(phone);
     const statuses = [];
     for (let i = 0; i < 5; i++) statuses.push((await verifyOtp(phone, otherThan(code))).statusCode);
@@ -168,7 +173,7 @@ describe('OTP login', () => {
   });
 
   it('locks a phone for 15 min after 10 wrong codes across codes and challenges; the owner gets back in after it', async () => {
-    const phone = newPhone();
+    const phone = randomPhone();
     const guess = async (code: string) => ((await verifyOtp(phone, code)).json() as { code?: string }).code;
     const first = await newCode(phone);
     for (let i = 0; i < 5; i++) await guess(otherThan(first));
@@ -283,12 +288,12 @@ describe('ports and grant-role', () => {
     expect(await port.verifyAccessToken(session.accessToken)).toEqual({ userId: session.user.id, roles: ['user', 'admin'] });
     expect(await port.getUser(session.user.id)).toMatchObject({ id: session.user.id, roles: ['user', 'admin'] });
     expect(await port.verifyAccessToken('not-a-token')).toBeNull();
-    expect(await grantRole(tdb.db, env.PHONE_HASH_KEY, newPhone(), 'moderator')).toBe(false);
+    expect(await grantRole(tdb.db, env.PHONE_HASH_KEY, randomPhone(), 'moderator')).toBe(false);
   });
 
   it('PhoneVerificationPort confirms a phone with the code sent to it, once', async () => {
     const port = app.get<PhoneVerificationPort>(PortTokens.PhoneVerificationPort);
-    const phone = newPhone();
+    const phone = randomPhone();
     const { verificationId } = await port.start({ phone, locale: 'ar', purpose: 'provider_phone' });
     const code = sender.lastCodeFor(phone)!;
     expect(await port.confirm({ verificationId, code: otherThan(code) })).toEqual({ verified: false, reason: 'invalid' });

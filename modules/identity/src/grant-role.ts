@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { phoneHashKey } from './config';
 import { grantRole } from './users';
 
-// Usage: DATABASE_URL=... PHONE_HASH_KEY=... pnpm --filter @iraq-maps/identity grant-role <userId|+9647xxxxxxxxx> <role>
+// Usage: APP_ENV=... DATABASE_URL=... PHONE_HASH_KEY=... pnpm --filter @iraq-maps/identity grant-role <userId|+9647xxxxxxxxx> <role>
 const [who, role] = process.argv.slice(2).filter((arg) => arg !== '--');
 const parsedRole = Role.safeParse(role);
 if (!who || !parsedRole.success) {

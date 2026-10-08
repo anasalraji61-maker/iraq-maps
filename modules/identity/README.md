@@ -86,14 +86,14 @@ Production refuses `fake`, `fixed` and `console` (both through `packages/config`
 | `PHONE_ENCRYPTION_KEY` | base64 of 32 random bytes (`openssl rand -base64 32`) |
 | `PHONE_HASH_KEY` | ≥ 32 chars |
 | `OTP_SENDER`, `OTP_FIXED_CODE` | see above; not needed when a sender is injected |
-| `APP_ENV` | via `packages/config` |
+| `APP_ENV` | required: `development`, `test`, `e2e` or `production` (via `packages/config`) |
 
 `DATABASE_URL` and `REDIS_URL` are read by the composition root, which passes `db` and `redisUrl`.
 
 ## grant-role
 
 ```sh
-DATABASE_URL=... PHONE_HASH_KEY=... pnpm --filter @iraq-maps/identity grant-role <userId|+9647xxxxxxxxx> <user|provider|moderator|admin>
+APP_ENV=... DATABASE_URL=... PHONE_HASH_KEY=... pnpm --filter @iraq-maps/identity grant-role <userId|+9647xxxxxxxxx> <user|provider|moderator|admin>
 ```
 
 The command is idempotent. It exits 1 when the user does not exist and 2 on bad arguments.

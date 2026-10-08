@@ -1,13 +1,11 @@
-import { randomBytes } from 'node:crypto';
 import type { IraqiPhone } from '@iraq-maps/contracts';
-import { FakeOtpSender, otpSenderConformance } from '@iraq-maps/testing';
+import { FakeOtpSender, identityTestEnv, otpSenderConformance } from '@iraq-maps/testing';
 import { describe, expect, it, vi } from 'vitest';
 import { identityConfig } from './config';
 import { otpDelivery } from './senders';
 
 type Selection = Parameters<typeof otpDelivery>[0];
-const secret = () => randomBytes(32).toString('base64');
-const env = { APP_ENV: 'production', JWT_ACCESS_SECRET: secret(), JWT_REFRESH_SECRET: secret(), PHONE_ENCRYPTION_KEY: secret(), PHONE_HASH_KEY: secret() };
+const env = { ...identityTestEnv(), APP_ENV: 'production' };
 
 otpSenderConformance('console (development)', () => otpDelivery({ appEnv: 'development', OTP_SENDER: 'console' }).sender);
 otpSenderConformance('fixed (e2e)', () => otpDelivery({ appEnv: 'e2e', OTP_SENDER: 'fixed', OTP_FIXED_CODE: '246810' }).sender);
@@ -48,8 +46,7 @@ describe('OTP sender selection and config', () => {
   });
 
   it('refuses equal JWT secrets at boot, naming the variables only', () => {
-    const shared = secret();
-    expect(() => identityConfig({ ...env, APP_ENV: 'test', JWT_ACCESS_SECRET: shared, JWT_REFRESH_SECRET: shared })).toThrow(
+    expect(() => identityConfig({ ...env, APP_ENV: 'test', JWT_REFRESH_SECRET: env.JWT_ACCESS_SECRET })).toThrow(
       /^identity config: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ$/,
     );
   });
