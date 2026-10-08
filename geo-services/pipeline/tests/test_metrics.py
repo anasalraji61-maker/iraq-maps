@@ -97,6 +97,12 @@ def test_cli_writes_json(tmp_path):
     metrics.main(["--city", str(city), "--input", str(FIX), "--as-of", "2026-10-08", "-o", str(out)])
     j = json.loads(out.read_text(encoding="utf-8"))
     assert j["city"] == "erbil" and j["names"]["ar"] == "أربيل" and j["data_timestamp"] is None
+    assert j["source"] == {
+        "attribution": "© OpenStreetMap contributors",
+        "license": "ODbL-1.0",
+        "url": "https://www.openstreetmap.org/copyright",
+        "extract": "Geofabrik iraq-latest",
+    }
     assert j["area_km2"] == round(cities.area_km2(cities.load(city)), 3)
     assert j["pois"]["arabic_named_per_km2"] == round(4 / cities.area_km2(cities.load(city)), 3)
 

@@ -1,6 +1,8 @@
 # Baghdad main urban area on both banks of the Tigris: Kadhimiya/Adhamiya in the north,
 # Sadr City and New Baghdad in the east, Dora in the south, Mansour/Ghazaliya and the airport
 # in the west. Approximate box; replace with a polygon when we prepare Baghdad for real.
+# A polygon traced from OSM is derived from OSM: the file then needs an ODbL attribution header
+# (© OpenStreetMap contributors, ODbL 1.0) and a row in docs/DATA_SOURCES.md.
 id: baghdad
 names:
   ar: بغداد

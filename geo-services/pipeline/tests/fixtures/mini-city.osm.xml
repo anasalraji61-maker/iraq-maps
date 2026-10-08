@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Hand-made fixture. Expected metric values are worked out in tests/test_metrics.py.
+<!-- Original work, not derived from OpenStreetMap data. Dedicated to the public domain under CC0 1.0.
+     Hand-made fixture. Expected metric values are worked out in tests/test_metrics.py.
      All roads run along meridians in steps of 0.01 deg latitude, so every segment is exactly
      d = R * pi/180 * 0.01 km (R = libosmium's 6372797.560856 m). No user/uid, like Geofabrik. -->
 <osm version="0.6" generator="hand">

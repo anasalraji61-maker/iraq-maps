@@ -1,7 +1,7 @@
 # تقرير جودة OSM: أربيل مقابل بغداد
 
 - تاريخ المرجع (as-of): 2026-10-08، وتاريخ بيانات المستخرج: 2026-10-07T20:20:35Z
-- المصدر: Geofabrik iraq-latest.osm.pbf (ODbL، © مساهمو OpenStreetMap).
+- المصدر: Geofabrik iraq-latest.osm.pbf — © OpenStreetMap contributors، ترخيص ODbL 1.0 (https://www.openstreetmap.org/copyright)
 
 | المقياس | أربيل | بغداد |
 |---|---:|---:|

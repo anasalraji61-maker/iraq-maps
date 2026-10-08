@@ -49,4 +49,15 @@ def test_cli_report(tmp_path):
     assert "| المقياس | أربيل | بغداد |" in md
     assert "المدينة المختارة: أربيل (`erbil`)" in md
     assert "عدد المساهمين غير متاح" in md
-    assert json.loads((tmp_path / "r.json").read_text())["decision"]["choice"] == "erbil"
+    assert (
+        "- المصدر: Geofabrik iraq-latest.osm.pbf — © OpenStreetMap contributors، ترخيص ODbL 1.0 "
+        "(https://www.openstreetmap.org/copyright)\n" in md
+    )
+    report = json.loads((tmp_path / "r.json").read_text(encoding="utf-8"))
+    assert report["decision"]["choice"] == "erbil"
+    assert report["source"] == {
+        "attribution": "© OpenStreetMap contributors",
+        "license": "ODbL-1.0",
+        "url": "https://www.openstreetmap.org/copyright",
+        "extract": "Geofabrik iraq-latest",
+    }

@@ -1,5 +1,7 @@
 # تقارير جودة بيانات OSM
 
+تحتوي التقارير على إحصاءات مشتقة من بيانات OpenStreetMap: © OpenStreetMap contributors، ODbL 1.0، https://www.openstreetmap.org/copyright
+
 هذا المجلد يحفظ تقارير جودة OSM التي تحسم اختيار المدينة الأولى (بوابة القرار في [`MVP.md`](../MVP.md) §1، المهمة T01). كل تقرير محفوظ باسم `osm-quality-<date>.md`، وتاريخه هو تاريخ تشغيل CI.
 
 ## كيف يُنتَج التقرير

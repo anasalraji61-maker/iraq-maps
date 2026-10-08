@@ -14,7 +14,10 @@ import json
 import sys
 from pathlib import Path
 
+from quality import metrics
+
 MARGIN = 0.30
+ATTRIBUTION = "© OpenStreetMap contributors، ترخيص ODbL 1.0 (https://www.openstreetmap.org/copyright)"
 
 ROWS = [
     ("area_km2", "مساحة المنطقة المقصوصة (كم²)"),
@@ -75,7 +78,7 @@ def render(base, challenger, d):
         "# تقرير جودة OSM: " + f"{a} مقابل {b}",
         "",
         f"- تاريخ المرجع (as-of): {base['as_of']}، وتاريخ بيانات المستخرج: {base.get('data_timestamp') or 'غير مذكور'}",
-        "- المصدر: Geofabrik iraq-latest.osm.pbf (ODbL، © مساهمو OpenStreetMap).",
+        f"- المصدر: Geofabrik iraq-latest.osm.pbf — {ATTRIBUTION}",
         "",
         f"| المقياس | {a} | {b} |",
         "|---|---:|---:|",
@@ -108,7 +111,7 @@ def main(argv=None):
     base, ch = (json.loads(Path(p).read_text(encoding="utf-8")) for p in (a.base, a.challenger))
     d = decide(base, ch)
     Path(a.json).write_text(
-        json.dumps({"decision": d, "cities": [base, ch]}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps({"source": metrics.SOURCE, "decision": d, "cities": [base, ch]}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     Path(a.md).write_text(render(base, ch, d), encoding="utf-8")
     print(f"choice: {d['choice']}")

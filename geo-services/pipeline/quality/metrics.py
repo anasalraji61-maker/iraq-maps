@@ -36,6 +36,12 @@ ROADS = {
 ARABIC = re.compile("[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]")
 SORANI = re.compile("[ڕۆێڵەھ]")  # ڕ ۆ ێ ڵ ە ھ
 RECENT_MONTHS = 24
+SOURCE = {
+    "attribution": "© OpenStreetMap contributors",
+    "license": "ODbL-1.0",
+    "url": "https://www.openstreetmap.org/copyright",
+    "extract": "Geofabrik iraq-latest",
+}
 
 
 def is_arabic_named(tags):
@@ -160,7 +166,7 @@ def main(argv=None):
     header = osmium.io.Reader(a.input, osmium.osm.osm_entity_bits.NOTHING)
     data_ts = header.header().get("osmosis_replication_timestamp") or None
     header.close()
-    m = {"city": cfg["id"], "names": cfg["names"], "data_timestamp": data_ts}
+    m = {"city": cfg["id"], "names": cfg["names"], "source": SOURCE, "data_timestamp": data_ts}
     m.update(compute(a.input, as_of, cities.area_km2(cfg)))
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(m, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
