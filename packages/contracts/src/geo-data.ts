@@ -108,7 +108,12 @@ export const CliContracts = {
   },
   tilesBuild: {
     command: 'pnpm --filter @iraq-maps/geo-tiles tiles build',
-    args: { '--input': 'clipped .osm.pbf', '--output': '.pmtiles file', '--bbox': 'west,south,east,north (WGS84)' },
+    args: {
+      '--input': 'clipped .osm.pbf',
+      '--output': '.pmtiles file',
+      '--bbox': 'west,south,east,north (WGS84)',
+      '--city': 'cities/<id>.yaml: the poi layer keeps only its categories (OsmCategoryCases), as places.ndjson does',
+    },
     outputs: ['<output>: PMTiles v3 with exactly the TileSchema layers and fields, zooms minZoom..maxZoom'],
   },
   glyphsBuild: {

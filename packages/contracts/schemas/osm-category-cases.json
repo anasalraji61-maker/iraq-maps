@@ -1,0 +1,93 @@
+[
+  {
+    "tags": {
+      "amenity": "restaurant",
+      "shop": "bakery"
+    },
+    "category": "food"
+  },
+  {
+    "tags": {
+      "amenity": "restaurant",
+      "shop": "bakery"
+    },
+    "enabled": [
+      "shopping"
+    ],
+    "category": null
+  },
+  {
+    "tags": {
+      "amenity": "bench",
+      "shop": "kiosk"
+    },
+    "enabled": [
+      "shopping"
+    ],
+    "category": "shopping"
+  },
+  {
+    "tags": {
+      "shop": "vacant",
+      "amenity": "cafe"
+    },
+    "enabled": [
+      "cafe"
+    ],
+    "category": "cafe"
+  },
+  {
+    "tags": {
+      "shop": "no",
+      "office": "company"
+    },
+    "category": "office"
+  },
+  {
+    "tags": {
+      "shop": "vacant"
+    },
+    "category": null
+  },
+  {
+    "tags": {
+      "office": "diplomatic"
+    },
+    "category": "government"
+  },
+  {
+    "tags": {
+      "office": "government"
+    },
+    "enabled": [
+      "office"
+    ],
+    "category": null
+  },
+  {
+    "tags": {
+      "office": "ngo"
+    },
+    "enabled": [
+      "government",
+      "office"
+    ],
+    "category": "office"
+  },
+  {
+    "tags": {
+      "amenity": "parking"
+    },
+    "category": null
+  },
+  {
+    "tags": {
+      "historic": "castle",
+      "tourism": "hotel"
+    },
+    "enabled": [
+      "tourism"
+    ],
+    "category": null
+  }
+]

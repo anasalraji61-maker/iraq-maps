@@ -44,3 +44,24 @@ export const OsmCategoryRules = {
     { key: 'aeroway', values: each(['aerodrome', 'terminal'], 'transport') },
   ],
 };
+
+/**
+ * Cases every implementation of OsmCategoryRules runs (pipeline extract.category, tiles OsmCategories.categoryOf), from
+ * schemas/osm-category-cases.json: the tags and the city's enabled categories (all of them when absent) → the category,
+ * or null. The first rule that yields a category decides. When the city does not enable that category the element is
+ * dropped: a later rule, or a rule's "*", never stands in, so the poi layer and places.ndjson keep the same elements.
+ * @public frozen contract (M1, post-freeze)
+ */
+export const OsmCategoryCases: { tags: Record<string, string>; enabled?: PlaceCategory[]; category: PlaceCategory | null }[] = [
+  { tags: { amenity: 'restaurant', shop: 'bakery' }, category: 'food' },
+  { tags: { amenity: 'restaurant', shop: 'bakery' }, enabled: ['shopping'], category: null },
+  { tags: { amenity: 'bench', shop: 'kiosk' }, enabled: ['shopping'], category: 'shopping' },
+  { tags: { shop: 'vacant', amenity: 'cafe' }, enabled: ['cafe'], category: 'cafe' },
+  { tags: { shop: 'no', office: 'company' }, category: 'office' },
+  { tags: { shop: 'vacant' }, category: null },
+  { tags: { office: 'diplomatic' }, category: 'government' },
+  { tags: { office: 'government' }, enabled: ['office'], category: null },
+  { tags: { office: 'ngo' }, enabled: ['government', 'office'], category: 'office' },
+  { tags: { amenity: 'parking' }, category: null },
+  { tags: { historic: 'castle', tourism: 'hotel' }, enabled: ['tourism'], category: null },
+];
