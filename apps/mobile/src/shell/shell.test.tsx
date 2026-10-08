@@ -13,6 +13,13 @@ import { DevSettingsScreen, PendingScreen, RootLayout, TabsLayout } from './inde
 
 jest.mock('expo-secure-store', () => jest.requireActual<typeof import('@iraq-maps/mobile-kit/testing')>('@iraq-maps/mobile-kit/testing').memorySecureStore);
 jest.mock('expo', () => ({ ...jest.requireActual<object>('expo'), reloadAppAsync: jest.fn(async () => {}) }));
+// app.config `extra.appEnv`, as prebuild writes it into the APK; every other Constants field stays real.
+let mockAppEnv: string | undefined;
+jest.mock('expo-constants', () => {
+  const actual = jest.requireActual<typeof import('expo-constants')>('expo-constants');
+  const get = (target: object, key: string | symbol) => (key === 'expoConfig' ? { ...actual.default.expoConfig, extra: { appEnv: mockAppEnv } } : Reflect.get(target, key));
+  return { ...actual, __esModule: true, default: new Proxy(actual.default, { get }) };
+});
 
 // The same files as apps/mobile/app (each route file re-exports one of these).
 const app = {
@@ -41,7 +48,7 @@ const forceRTL = jest.spyOn(I18nManager, 'forceRTL');
 const allowRTL = jest.spyOn(I18nManager, 'allowRTL');
 
 beforeEach(() => {
-  delete process.env.EXPO_PUBLIC_APP_ENV;
+  mockAppEnv = 'development';
   setLocale('ar');
 });
 afterEach(() => {
@@ -123,7 +130,8 @@ describe('locale and direction', () => {
 });
 
 describe('developer settings', () => {
-  it('outside production: reachable from the account tab, and the saved URL becomes the API base URL', async () => {
+  it.each(['development', 'e2e'])('%s build: reachable from the account tab, and the saved URL becomes the API base URL', async (appEnv) => {
+    mockAppEnv = appEnv;
     await launch('/account');
     expect(screen.getByLabelText(t('shell:devSettings.open'))).toBeOnTheScreen();
     await relaunch('/dev-settings', testIDs.dev.serverUrlInput);
@@ -138,14 +146,18 @@ describe('developer settings', () => {
     expect(await SecureStore.getItemAsync('dev.serverUrl')).toBe('http://192.168.1.20:3000');
   });
 
-  it('in production: no entry, no screen, and a stored override is ignored', async () => {
-    await SecureStore.setItemAsync('dev.serverUrl', 'http://192.168.1.20:3000');
-    process.env.EXPO_PUBLIC_APP_ENV = 'production';
-    await launch('/account');
-    expect(screen.queryByLabelText(t('shell:devSettings.open'))).toBeNull();
-    await act(async () => router.push('/dev-settings'));
-    expect(screen.queryByTestId(testIDs.dev.serverUrlInput)).toBeNull();
-    expect(screen.getByTestId(testIDs.tabs.account)).toBeOnTheScreen();
-    expect(apiBaseUrl()).not.toBe('http://192.168.1.20:3000');
+  it.each<[string, string | undefined]>([
+    ['production', 'production'],
+    ['missing', undefined],
+    ['unknown', 'staging'],
+  ])('fails closed for a %s app env: no entry, no screen, and a stored override is ignored', async (_label, appEnv) => {
+      await SecureStore.setItemAsync('dev.serverUrl', 'http://192.168.1.20:3000');
+      mockAppEnv = appEnv;
+      await launch('/account');
+      expect(screen.queryByLabelText(t('shell:devSettings.open'))).toBeNull();
+      await act(async () => router.push('/dev-settings'));
+      expect(screen.queryByTestId(testIDs.dev.serverUrlInput)).toBeNull();
+      expect(screen.getByTestId(testIDs.tabs.account)).toBeOnTheScreen();
+      expect(apiBaseUrl()).not.toBe('http://192.168.1.20:3000');
   });
 });

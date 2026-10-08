@@ -97,5 +97,7 @@ removed).
   `I18nManager.allowRTL/forceRTL`, and calls `reloadAppAsync()` from `expo` when the direction flips. A change that keeps
   the direction (ar <-> ckb) re-keys the root navigator, so every screen re-reads `t()` in place. Features only call
   `setLocale`.
-- `EXPO_PUBLIC_APP_ENV` (`production` hides developer settings and ignores a stored override) and `EXPO_PUBLIC_API_URL`
-  (defaults to `http://10.0.2.2:3000`) are read in `src/shell/config.ts`. Both are already in `.env.example`.
+- `src/shell/config.ts` reads the app env at runtime from `Constants.expoConfig.extra.appEnv` (app.config `extra.appEnv`,
+  set at prebuild, the same source as the cleartext flag). It fails closed (security R3-3): only `development`, `e2e`
+  and `test` enable developer settings and the stored server-URL override, and a missing or unknown value counts as
+  production. `EXPO_PUBLIC_API_URL` (defaults to `http://10.0.2.2:3000`) remains the build's API address.

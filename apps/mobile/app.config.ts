@@ -1,7 +1,9 @@
 import type { ExpoConfig } from 'expo/config';
 
 // EXPO_PUBLIC_* values ship inside the APK: never put a secret there.
-const appEnv = process.env.EXPO_PUBLIC_APP_ENV ?? 'development';
+// Fail closed: an unset or empty value builds a production app (no cleartext, no dev settings). The runtime reads
+// extra.appEnv, computed here at prebuild, so a stale Metro cache cannot flip it. Dev scripts set development.
+const appEnv = process.env.EXPO_PUBLIC_APP_ENV || 'production';
 
 const config: ExpoConfig = {
   name: 'خرائط العراق',

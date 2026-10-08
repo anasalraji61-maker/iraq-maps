@@ -4,8 +4,8 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
+    "start": "EXPO_PUBLIC_APP_ENV=${EXPO_PUBLIC_APP_ENV:-development} expo start",
+    "android": "EXPO_PUBLIC_APP_ENV=${EXPO_PUBLIC_APP_ENV:-development} expo run:android",
     "android:precheck": "expo prebuild --platform android --no-install --clean && expo export --platform android --output-dir dist",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

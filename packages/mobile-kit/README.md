@@ -22,4 +22,4 @@ Testing (`@iraq-maps/mobile-kit/testing`, Jest + RNTL 14):
   `jest.mock('expo-secure-store', () => jest.requireActual<typeof import('@iraq-maps/mobile-kit/testing')>('@iraq-maps/mobile-kit/testing').memorySecureStore)`.
   Call `memorySecureStore.clear()` between tests.
 
-**Ports:** none. **Env:** none. The shell reads `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_APP_ENV` and passes `apiBaseUrl`.
+**Ports:** none. **Env:** none. The shell reads `EXPO_PUBLIC_API_URL` and app.config `extra.appEnv`, and passes `apiBaseUrl`.
