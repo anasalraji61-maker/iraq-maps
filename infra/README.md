@@ -26,7 +26,7 @@ It needs a Debian-style `postgresql-16` + `postgresql-16-postgis-3` install and 
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-This uses the same images as CI: `postgis/postgis:16-3.4` and `redis:7`. Ports are published on 127.0.0.1 only. Here the `iraqmaps` user is a superuser, so the first `createTestDatabase()` creates `iraqmaps_template` itself.
+It runs `postgis/postgis:16-3.4`, the same image as CI, and `redis:7.2`. Redis is pinned to 7.2, the last BSD-3 line, because 7.4+ is RSALv2/SSPLv1. Ports are published on 127.0.0.1 only. Here the `iraqmaps` user is a superuser, so the first `createTestDatabase()` creates `iraqmaps_template` itself.
 
 ## Environment
 

@@ -1,5 +1,5 @@
 # Developer machines with Docker only. The agent environment has no Docker: use `pnpm infra:local up` (ADR-0004).
-# Same images as the CI service containers, and the same non-secret dev credentials as infra/local/infra.sh,
+# PostGIS matches the CI service container. The dev credentials match infra/local/infra.sh and are not secret,
 # so DATABASE_URL=postgres://iraqmaps:iraqmaps@localhost:5432/iraqmaps and REDIS_URL=redis://localhost:6379 work unchanged.
 services:
   postgres:
@@ -11,7 +11,8 @@ services:
     ports: ["127.0.0.1:5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
   redis:
-    image: redis:7
+    # 7.2 is the last BSD-3 Redis line; 7.4+ is RSALv2/SSPLv1, which is not OSI-licensed (licensing audit LIC-08).
+    image: redis:7.2
     ports: ["127.0.0.1:6379:6379"]
 volumes:
   pgdata:
