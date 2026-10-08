@@ -465,6 +465,9 @@ importers:
       '@iraq-maps/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@iraq-maps/geo':
+        specifier: workspace:*
+        version: link:../geo
       '@maplibre/maplibre-gl-style-spec':
         specifier: 26.2.1
         version: 26.2.1

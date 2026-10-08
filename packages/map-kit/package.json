@@ -4,15 +4,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./jest-mock": "./src/jest-mock.tsx"
   },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/geo": "workspace:*",
     "@maplibre/maplibre-gl-style-spec": "26.2.1",
     "@maplibre/maplibre-react-native": "~11.5.0"
   },
