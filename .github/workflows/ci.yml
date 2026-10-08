@@ -1,3 +1,5 @@
+# Closure gate (CLAUDE.md §2.5): `pnpm gate` on PostGIS + Redis service containers, then the Android precheck.
+# No secrets: the identity keys are generated per run (e2e/ci-secrets.sh) and masked.
 name: ci
 on:
   push:
@@ -7,8 +9,57 @@ on:
 permissions:
   contents: read
 jobs:
-  probe:
+  gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 30
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      APP_ENV: e2e
+      OTP_SENDER: fixed
+      OTP_FIXED_CODE: '123456'
+      # The container's superuser: createTestDatabase() creates the PostGIS + pg_trgm template database.
+      DATABASE_URL: postgres://postgres@localhost:5432/postgres
+      TEST_DATABASE_ADMIN_URL: postgres://postgres@localhost:5432/postgres
+      REDIS_URL: redis://localhost:6379
+      GITLEAKS_VERSION: 8.30.1
     steps:
       - uses: actions/checkout@v4
-      - run: echo "Actions runner OK"; ls "$ANDROID_HOME" || true
+        with:
+          fetch-depth: 0 # ownership:check diffs against the M0 freeze commit 410b61a
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: geo-services/pipeline/requirements.txt
+      - name: Install gitleaks (checksum-verified) and osmium-tool
+        run: |
+          base=https://github.com/gitleaks/gitleaks/releases/download/v$GITLEAKS_VERSION
+          tgz=gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+          cd "$RUNNER_TEMP"
+          curl -fsSL --retry 3 -O "$base/$tgz" -O "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " $tgz\$" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
+          sha256sum "$tgz"
+          tar -xzf "$tgz" gitleaks
+          sudo install gitleaks /usr/local/bin/
+          sudo apt-get update -q && sudo apt-get install -y -q osmium-tool
+      - run: sh e2e/ci-secrets.sh
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm gate
+      - run: pnpm android:precheck
+        env:
+          CI: 1

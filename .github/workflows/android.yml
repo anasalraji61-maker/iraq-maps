@@ -1,0 +1,116 @@
+# Android gate (ADR-0009): no EAS and no secrets. The release APKs are signed with the template debug key.
+# build: the arm64 APK people install, 40 MB budget, uploaded as a run artifact.
+# e2e:   an x86_64 e2e build against the API running inside the job, then every Maestro flow on an emulator.
+name: android
+on:
+  push:
+    branches: [main, 'claude/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  APK_BUDGET_BYTES: 40000000 # 40 MB
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - &pnpm
+        uses: pnpm/action-setup@v4
+      - &node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - &java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - &gradle-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: gradle-${{ runner.os }}-
+      - &install
+        run: pnpm install --frozen-lockfile
+      - name: Build the arm64-v8a release APK
+        run: e2e/mobile/build-apk.sh arm64-v8a "$RUNNER_TEMP/iraq-maps-arm64-v8a.apk"
+      - name: Check the APK size budget
+        run: |
+          bytes=$(stat -c %s "$RUNNER_TEMP/iraq-maps-arm64-v8a.apk")
+          size="$(awk "BEGIN { printf \"%.1f\", $bytes / 1e6 }") MB ($bytes bytes)"
+          echo "### arm64-v8a release APK: $size, budget 40 MB" >>"$GITHUB_STEP_SUMMARY"
+          [ "$bytes" -le "$APK_BUDGET_BYTES" ] || { echo "::error title=APK over budget::$size is over 40 MB"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iraq-maps-arm64-v8a-release-apk
+          path: ${{ runner.temp }}/iraq-maps-arm64-v8a.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 30
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      APP_ENV: e2e
+      OTP_SENDER: fixed
+      OTP_FIXED_CODE: '123456'
+      API_PORT: 3000
+      DATABASE_URL: postgres://postgres@localhost:5432/postgres
+      REDIS_URL: redis://localhost:6379
+      MAESTRO_VERSION: ''
+      MAESTRO_SHA256: ''
+    steps:
+      - uses: actions/checkout@v4
+      - *pnpm
+      - *node
+      - *java
+      - *gradle-cache
+      - *install
+      - name: Build the x86_64 e2e release APK
+        run: e2e/mobile/build-apk.sh x86_64 "$RUNNER_TEMP/iraq-maps-x86_64.apk"
+        env:
+          EXPO_PUBLIC_APP_ENV: e2e
+          EXPO_PUBLIC_API_URL: http://10.0.2.2:3000 # the emulator's alias for the runner's localhost
+      - run: sh e2e/ci-secrets.sh
+      - name: Start the API (migrate, fixed OTP)
+        run: e2e/mobile/start-api.sh
+        env:
+          API_LOG: ${{ runner.temp }}/maestro/api.log
+      - run: e2e/mobile/install-maestro.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Maestro flows on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          script: e2e/mobile/run-flows.sh "$RUNNER_TEMP/iraq-maps-x86_64.apk" "$RUNNER_TEMP/maestro"
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-debug-output
+          path: ${{ runner.temp }}/maestro
+          retention-days: 14

@@ -1,0 +1,18 @@
+# Cold start: the app opens on the tab bar with all five tabs (testIDs from packages/contracts testIDs.tabs).
+appId: iq.iraqmaps.app
+name: launch-tabs
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 60000
+- assertVisible:
+    id: tab.discover
+- assertVisible:
+    id: tab.messages
+- assertVisible:
+    id: tab.activity
+- assertVisible:
+    id: tab.account
