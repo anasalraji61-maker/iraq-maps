@@ -25,7 +25,7 @@
 | Monorepo | **pnpm workspaces + Turborepo** | عزل الحزم، بناء واختبار تزايدي (فقط ما تغيّر)، مناسب لعمل عدة وكلاء بالتوازي. |
 | تطبيق الهاتف | **React Native + Expo (dev client / prebuild) + Expo Router** | أندرويد الآن و iOS لاحقاً من نفس الكود، دعم RTL ناضج، تحديثات OTA عبر EAS Update، و Expo Router يجعل كل تبويب ملفات منفصلة. |
 | محرك الخريطة | **MapLibre Native** عبر `@maplibre/maplibre-react-native` | مفتوح المصدر بالكامل (لا مفاتيح Mapbox)، vector tiles، يدعم fill-extrusion للمباني ثلاثية الأبعاد (أساس للتجول 3D لاحقاً). |
-| بلاطات الخريطة | **Planetiler → PMTiles** بمخطط OpenMapTiles، مستضافة على تخزين كائنات + CDN | ملف واحد لكل مدينة، بدون خادم بلاطات، رخيص جداً. **ممنوع** استخدام `tile.openstreetmap.org` (سياسة الاستخدام تمنع التطبيقات). |
+| بلاطات الخريطة | **Planetiler → PMTiles** بمخططنا الخاص `TileSchema` من العقود (ليس مخطط OpenMapTiles؛ أي اعتماد لمخطط أو ستايل OpenMapTiles يستلزم إسناد «© OpenMapTiles» — ADR-0008)، مستضافة على تخزين كائنات + CDN | ملف واحد لكل مدينة، بدون خادم بلاطات، رخيص جداً. **ممنوع** استخدام `tile.openstreetmap.org` (سياسة الاستخدام تمنع التطبيقات). |
 | الملاحة/التوجيه | **Valhalla** (مستضاف ذاتياً) | سيارة + مشي + (لاحقاً) نقل عام، costing ديناميكي يقبل أوزان زحمة مستقبلاً، تعليمات خطوة بخطوة مع دعم لغات، ويمكن تشغيله offline على الجهاز لاحقاً. |
 | البحث الجغرافي (geocoding) | **Photon** (مبني على بيانات OSM) + بحث الأماكن الخاص بنا في PostGIS | Photon خفيف وجيد مع العربية؛ وأماكن المزوّدين المسجّلين تُبحث في قاعدتنا. |
 | الخادم | **NestJS (Fastify adapter)** | نظام modules + DI يطابق فكرة modular monolith، OpenAPI، ناضج. |
