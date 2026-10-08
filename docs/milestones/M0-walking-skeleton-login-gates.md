@@ -350,4 +350,12 @@ Then run pnpm install, check that typecheck is green, and run ownership:check --
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
-| | | | |
+| 2026-10-08 | T01: تقرير جودة OSM على بيانات Geofabrik الحقيقية في CI. اختارت القاعدة **بغداد** ([ADR-0002](../adr/0002-first-city.md)) | `8244a7f`, `2e86410` | — |
+| 2026-10-08 | T00: تجميد العقود وهيكل الـ monorepo («FREEZE PUSHED») | `410b61a` | — |
+| 2026-10-08 | builder-platform و builder-identity، وربط apps/api | `8936467` | جولة 1: الأمان 4 major + 7 minor، المعمارية/QA 2 blocker + 8 major + 8 minor |
+| 2026-10-08 | إصلاح ملاحظات الجولة 1 في أماكنها (venv race في `8fda357`) | `d74a00c` | الأمان جولة 2: **APPROVED d74a00c** (بقي 2 minor، أُرسلا للمالكين) |
+
+### انحرافات مسجّلة
+- **أدوار قاعدة بيانات لكل وحدة مؤجلة إلى M7.** فحص حدود الـ migrations في db-kit حاجز معجمي ضد الأخطاء في كود مُراجَع، وليس عزلاً أمنياً. العزل الحقيقي يكون بدور migrator لكل schema لا يملك غيرها، وأُضيف إلى نطاق M7.
+- **وسوم الشريط مؤقتة.** في shell الـ freeze الوسوم ASCII مؤقتة حتى يسلّم builder-mobile-shell وسوم i18n.
+- **`AGENTS.md`.** ملف يولّده turbo تلقائياً، وأُضيف إلى `.gitignore` بدل حذفه.
