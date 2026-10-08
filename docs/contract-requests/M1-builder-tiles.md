@@ -112,3 +112,16 @@ docs/contract-requests/M1-builder-tiles.md` (and the map-kit one) and fails, alt
 channel. Exact change: add `"docs/contract-requests/M1-<builder>.md"` to each M1 builder's `owners` list (the
 front-matter is the only source `tools/ownership` reads), e.g. under `builder-tiles:` add
 `- "docs/contract-requests/M1-builder-tiles.md"`.
+
+## 7. Pass the city config to `tiles build` (for the integrator: contracts + `geo-services/pipeline/scripts/city-data.sh`) (non-blocking for Baghdad)
+
+**Status: open.**
+
+Audit finding m6: the poi layer must keep only the city's `categories`, as the pipeline extract does for
+places.ndjson. `tiles build` now takes an optional `--city <city.yaml>` (the city config); without it every category
+is kept, so Baghdad, which enables all 14, is unchanged. To make it effective for every city:
+
+- `packages/contracts/src/geo-data.ts`, `CliContracts.tilesBuild.args`: add
+  `'--city': 'city config geo-services/pipeline/cities/<id>.yaml; its categories limit the poi layer (optional, default all)'`.
+- `geo-services/pipeline/scripts/city-data.sh` (it runs from geo-services/pipeline): append
+  `--city "$PWD/cities/$city.yaml"` to the `tiles build` line.

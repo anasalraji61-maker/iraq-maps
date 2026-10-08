@@ -49,14 +49,23 @@ class TilesTest {
     schema = TileSchema.read();
     assertEquals(0, run("osmium", "cat", "--overwrite", "-o", PBF.toString(), "src/test/fixtures/city.osm"));
     tiles(PBF, PMTILES, BBOX);
-    try (var archive = new ReadablePmtiles(FileChannel.open(PMTILES)); var tiles = archive.getAllTiles()) {
+    try (var archive = new ReadablePmtiles(FileChannel.open(PMTILES))) {
       header = archive.getHeader();
+    }
+    features.putAll(decode(PMTILES));
+  }
+
+  /** Every feature of every tile of an archive, keyed by its zoom. */
+  private static Map<Integer, List<VectorTile.Feature>> decode(Path pmtiles) throws IOException {
+    Map<Integer, List<VectorTile.Feature>> byZoom = new HashMap<>();
+    try (var archive = new ReadablePmtiles(FileChannel.open(pmtiles)); var tiles = archive.getAllTiles()) {
+      boolean gzip = archive.getHeader().tileCompression() == Pmtiles.Compression.GZIP;
       while (tiles.hasNext()) {
         var tile = tiles.next();
-        byte[] mvt = header.tileCompression() == Pmtiles.Compression.GZIP ? Gzip.gunzip(tile.bytes()) : tile.bytes();
-        features.computeIfAbsent(tile.coord().z(), z -> new ArrayList<>()).addAll(VectorTile.decode(mvt));
+        byZoom.computeIfAbsent(tile.coord().z(), z -> new ArrayList<>()).addAll(VectorTile.decode(gzip ? Gzip.gunzip(tile.bytes()) : tile.bytes()));
       }
     }
+    return byZoom;
   }
 
   @Test
@@ -107,6 +116,41 @@ class TilesTest {
   @Test
   void poiCategoriesFollowTheSharedTable() throws Exception {
     var categories = OsmCategories.read();
+    var all = categories.categories();
+    assertPois(features, all);
+    // Semantics the profile relies on: ignored values never match, and an exact value beats "*" within a rule.
+    assertNull(categories.categoryOf(Map.of("shop", "vacant"), all));
+    assertEquals("government", categories.categoryOf(Map.of("office", "government"), all));
+    assertEquals("office", categories.categoryOf(Map.of("office", "company"), all));
+    // Like the pipeline extract: a rule whose category the city does not enable is skipped, its "*" does not stand in.
+    assertNull(categories.categoryOf(Map.of("office", "government"), Set.of("office")));
+  }
+
+  /** --city keeps only the POIs of the city config's categories, as places.ndjson does. */
+  @Test
+  void cityCategoriesLimitThePois() throws Exception {
+    var reduced = Path.of("target/food-and-cafe.pmtiles");
+    TilesCli.build("--input", PBF.toString(), "--output", reduced.toString(), "--bbox", BBOX, "--city", "src/test/fixtures/food-and-cafe-city.yaml");
+    var ids = assertPois(decode(reduced), Set.of("food", "cafe"));
+    assertEquals(Set.of(21L, 2002L), ids);
+  }
+
+  /** The POIs at max zoom are exactly the fixture elements with an enabled category, each with that class; returns their ids. */
+  private static Set<Long> assertPois(Map<Integer, List<VectorTile.Feature>> byZoom, Set<String> enabled) throws Exception {
+    var categories = OsmCategories.read();
+    var tags = fixtureTags();
+    var pois = byZoom.get(schema.maxZoom()).stream().filter(f -> f.layer().equals("poi")).toList();
+    assertFalse(pois.isEmpty());
+    for (var poi : pois) {
+      assertEquals(categories.categoryOf(tags.get(poi.id()), enabled), poi.attrs().get("class"), poi.toString());
+    }
+    var ids = pois.stream().map(VectorTile.Feature::id).collect(Collectors.toSet());
+    assertEquals(tags.keySet().stream().filter(id -> categories.categoryOf(tags.get(id), enabled) != null).collect(Collectors.toSet()), ids);
+    return ids;
+  }
+
+  /** Tags of the fixture's nodes and ways, keyed by Planetiler feature id (OSM id * 10 + 1 for a node, 2 for a way). */
+  private static Map<Long, Map<String, Object>> fixtureTags() throws Exception {
     Map<Long, Map<String, Object>> tags = new HashMap<>();
     var osm = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("src/test/fixtures/city.osm"));
     for (var type : List.of("node", "way")) {
@@ -122,17 +166,7 @@ class TilesTest {
         tags.put(Long.parseLong(element.getAttribute("id")) * 10 + (type.equals("node") ? 1 : 2), elementTags);
       }
     }
-    var pois = features.get(schema.maxZoom()).stream().filter(f -> f.layer().equals("poi")).toList();
-    assertFalse(pois.isEmpty());
-    for (var poi : pois) {
-      assertEquals(categories.categoryOf(tags.get(poi.id())), poi.attrs().get("class"), poi.toString());
-    }
-    var expected = tags.entrySet().stream().filter(e -> categories.categoryOf(e.getValue()) != null).map(Map.Entry::getKey).collect(Collectors.toSet());
-    assertEquals(expected, pois.stream().map(VectorTile.Feature::id).collect(Collectors.toSet()));
-    // Semantics the profile relies on: ignored values never match, and an exact value beats "*" within a rule.
-    assertNull(categories.categoryOf(Map.of("shop", "vacant")));
-    assertEquals("government", categories.categoryOf(Map.of("office", "government")));
-    assertEquals("office", categories.categoryOf(Map.of("office", "company")));
+    return tags;
   }
 
   /** The ring canal (way 401) is a closed waterway=canal, still a centreline rather than a filled area. */
@@ -153,6 +187,9 @@ class TilesTest {
     var dir = Files.createDirectories(Path.of("target/dir.pmtiles"));
     assertThrows(IllegalArgumentException.class, () -> tiles(PBF, dir, BBOX));
     assertThrows(IllegalArgumentException.class, () -> TilesCli.build("--input", PBF.toString(), "--bbox", BBOX, "--force"));
+    assertThrows(IllegalArgumentException.class, () -> TilesCli.build("--input", PBF.toString(), "--output", "x.pmtiles", "--bbox", BBOX, "--city", "missing.yaml"));
+    var unknown = Files.writeString(Path.of("target/unknown-category-city.yaml"), "categories: [food, bakery]\n");
+    assertThrows(IllegalArgumentException.class, () -> TilesCli.build("--input", PBF.toString(), "--output", "x.pmtiles", "--bbox", BBOX, "--city", unknown.toString()));
   }
 
   /** Planetiler empties its output before it reads the input, so the build must not write to --output until it succeeds. */

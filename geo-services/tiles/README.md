@@ -7,8 +7,8 @@ pnpm scripts wrap both so turbo can run `test`, and geo-data.yml calls the CLI.
   geometry types, classes, fields and zooms come from `TileSchema`, read at runtime from
   `packages/contracts/schemas/tile-schema.json`. poi classes come from the shared OSM tag to `PlaceCategory` rules in
   `packages/contracts/schemas/osm-categories.json`, which the pipeline extract reads too. `CityProfile` holds only the
-  tag mapping of the other layers, and refuses to start unless the classes equal the schema's, layer by layer. Each feature has `class` plus whichever of `name`,
-  `name:ar`, `name:ckb`, `name:en` the element has. Tiles are gzip-compressed (Planetiler's default). Feature ids are
+  tag mapping of the other layers, and refuses to start unless the classes equal the schema's, layer by layer. Each
+  feature has `class` plus whichever of `name`, `name:ar`, `name:ckb`, `name:en` the element has. Tiles are gzip-compressed (Planetiler's default). Feature ids are
   Planetiler's: OSM id × 10 + 1 (node), 2 (way) or 3 (relation).
 - **Glyphs:** fontnik renders every 256-codepoint range of the BMP (about 1.9 MB) from the registered
   `NotoSansArabic_400Regular.ttf`. The fontstack and the required ranges come from
@@ -20,7 +20,7 @@ pnpm scripts wrap both so turbo can run `test`, and geo-data.yml calls the CLI.
 ## CLI (`CliContracts.tilesBuild` and `glyphsBuild`)
 
 ```
-pnpm --filter @iraq-maps/geo-tiles tiles build --input <clipped.osm.pbf> --output <city.pmtiles> --bbox w,s,e,n
+pnpm --filter @iraq-maps/geo-tiles tiles build --input <clipped.osm.pbf> --output <city.pmtiles> --bbox w,s,e,n [--city <city.yaml>]
 pnpm --filter @iraq-maps/geo-tiles tiles glyphs --output <dir>     # writes <dir>/Noto Sans Arabic Regular/<start>-<end>.pbf and OFL.txt
 ```
 
@@ -47,8 +47,10 @@ polygons come only from the area rules.
 | landuse (10) | residential, industrial ← `landuse=<class>`; commercial ← `landuse=commercial,retail`; park ← `leisure=park,garden`; grass ← `landuse=grass,meadow,village_green`; cemetery ← `landuse=cemetery`, `amenity=grave_yard`; farmland ← `landuse=farmland,orchard` |
 | boundary | country (0), province (4), district (8) ← ways of `type=boundary` + `boundary=administrative` relations with the lowest `admin_level` 2, 3–4 or 5–6. Such a way carries only `class`, never its own road or river names, unless it is tagged as that boundary itself. |
 
-The tiles show every category the shared table yields; a city config that lists fewer categories filters only the
-pipeline's places.ndjson (search and cards).
+`--city` is the city config (`geo-services/pipeline/cities/<id>.yaml`). Its `categories` limit the poi layer the way
+the pipeline extract limits places.ndjson: a rule whose category the city does not enable is skipped (its `*` does not
+stand in), so map POIs and search agree. Without `--city` every category is kept. A config whose list is missing or
+holds a value that is not a PlaceCategory is rejected with exit 2.
 
 ## Test (acceptance #2 of M1)
 
@@ -62,9 +64,10 @@ through `TilesCli`, reads the PMTiles header and decodes every tile, and asserts
 - named features carry `name`, `name:ar`, `name:ckb` and `name:en` as tagged, `name:fr` and `amenity=bench` are
   dropped, and POIs start at z14;
 - every POI's class is the category `osm-categories.json` gives its fixture element, and exactly the elements with a
-  category become POIs;
+  category become POIs; with `--city` and a config enabling only food and cafe, only those POIs remain;
 - a closed `waterway=canal` stays a line, and the river that is also a district boundary gives that boundary no names;
-- bad CLI arguments (including a directory as `--output`) are rejected, and a failed build keeps the previous archive;
+- bad CLI arguments (including a directory as `--output`, a missing `--city` file or a category that is not a
+  PlaceCategory) are rejected, and a failed build keeps the previous archive;
 - `tiles glyphs` writes every `Glyphs.requiredRanges` file with glyphs in it, plus `OFL.txt`.
 
 ## Requirements

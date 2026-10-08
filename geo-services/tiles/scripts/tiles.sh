@@ -1,7 +1,7 @@
 #!/bin/sh
 # Unified build CLI (CliContracts.tilesBuild and glyphsBuild in packages/contracts). It runs from the package directory,
 # like pnpm does, so callers pass absolute paths.
-#   tiles build --input <clipped.osm.pbf> --output <city.pmtiles> --bbox w,s,e,n   Planetiler (Java 21 + Maven)
+#   tiles build --input <clipped.osm.pbf> --output <city.pmtiles> --bbox w,s,e,n [--city <city.yaml>]   Planetiler (Java 21 + Maven)
 #   tiles glyphs --output <dir>                                                    fontnik, Noto Sans Arabic (ADR-0008)
 set -eu
 cd "$(dirname "$0")/.."

@@ -27,7 +27,8 @@ final class CityProfile implements Profile {
    * layer, class, min zoom, an optional geometry to keep to (a closed waterway=river is still a centreline), then tag
    * conditions that must all match: key=v1,v2 or key=* (any value but "no"). Per layer the first matching rule wins, so
    * one element can land in several layers (a park is landuse and poi). The poi layer is not here: an element whose own
-   * tags fit OsmCategories becomes a poi of that category at the schema's max zoom, and POIs that fit none are dropped.
+   * tags fit OsmCategories becomes a poi of that category at the schema's max zoom if the city enables it, and POIs that
+   * fit none are dropped.
    */
   private static final String RULES = """
       place          city           4 place=city
@@ -84,11 +85,14 @@ final class CityProfile implements Profile {
 
   private final TileSchema schema;
   private final OsmCategories categories;
+  private final Set<String> enabled;
   private final List<Rule> rules = RULES.lines().map(Rule::parse).toList();
 
-  CityProfile(TileSchema schema, OsmCategories categories) {
+  /** {@code enabled}: the city config's categories, which the pipeline extract applies to places.ndjson too. */
+  CityProfile(TileSchema schema, OsmCategories categories, Set<String> enabled) {
     this.schema = schema;
     this.categories = categories;
+    this.enabled = enabled;
     var mapped = rules.stream().collect(groupingBy(Rule::layer, mapping(Rule::cls, toSet())));
     mapped.put("poi", categories.categories());
     var expected = schema.layers().entrySet().stream().collect(toMap(Map.Entry::getKey, e -> Set.copyOf(e.getValue().classes())));
@@ -126,7 +130,7 @@ final class CityProfile implements Profile {
       layers.add(rule.layer());
       emit(features, rule, element);
     }
-    String category = categories.categoryOf(element.tags());
+    String category = categories.categoryOf(element.tags(), enabled);
     if (category != null) {
       emit(features, new Rule("poi", category, schema.maxZoom(), null, Map.of()), element);
     }

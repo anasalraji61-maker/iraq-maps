@@ -1,0 +1,3 @@
+# Test city config (CC0): only two categories enabled, so the poi layer keeps food and cafe POIs only.
+id: food-and-cafe
+categories: [food, cafe]
