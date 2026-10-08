@@ -11,13 +11,13 @@ const logs = captureLogs();
 const sender = new FakeOtpSender();
 const eraser = new InMemoryUserDataEraser('x');
 const deleted: DomainEvent[] = [];
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
 
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: moduleMigrations });
-  const env = { ...identityTestEnv(), DATABASE_URL: tdb.url, REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379' };
-  app = await createApp({ env, otpSender: sender, erasers: [eraser], logger: true });
+  app = await createApp({ env: { ...identityTestEnv(), DATABASE_URL: tdb.url, REDIS_URL: redisUrl }, otpSender: sender, erasers: [eraser], logger: true });
   app.get<EventBus>(PortTokens.EventBus).subscribe('identity.user.deleted.v1', (e) => void deleted.push(e));
 });
 
