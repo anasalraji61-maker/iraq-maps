@@ -2,11 +2,9 @@
 # packages/contracts testIDs.tabs). Switching to English from the account tab (signed out) flips the labels and the
 # direction, and both survive a relaunch. run-flows.sh sets the device to the ar-IQ system locale, so the English part
 # also checks that the system locale does not force RTL (RTL-3). The flow ends back in Arabic for the flows after it.
-# Screenshots for the RTL review go to ${OUT}.
+# The screenshots are for the RTL review.
 appId: iq.iraqmaps.app
 name: launch-tabs
-env:
-  OUT: ${OUT || '.'}
 ---
 - launchApp:
     clearState: true
@@ -32,7 +30,7 @@ env:
     id: tab.discover
     leftOf:
       id: tab.map
-- takeScreenshot: ${OUT}/launch-tabs-ar
+- takeScreenshot: launch-tabs-ar
 - tapOn:
     id: tab.account
 - tapOn:
@@ -58,7 +56,7 @@ env:
     id: tab.discover
     rightOf:
       id: tab.map
-- takeScreenshot: ${OUT}/launch-tabs-en
+- takeScreenshot: launch-tabs-en
 - tapOn:
     id: tab.account
 - tapOn:

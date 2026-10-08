@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Runs inside the emulator (reactivecircus/android-emulator-runner): sets the system locale of an Iraqi phone (ar-IQ),
 # installs the APK, then runs every Maestro flow, e2e/mobile/flows/*.yaml and each feature's
-# mobile-features/*/maestro/*.yaml. Flows get the job's fixed e2e OTP as ${OTP_CODE} and their own output directory as
-# ${OUT} (for takeScreenshot). JUnit reports, logs, screenshots and Maestro debug output go to <out-dir>.
+# mobile-features/*/maestro/*.yaml. Flows get the job's fixed e2e OTP as ${OTP_CODE}. Each flow's screenshots
+# (takeScreenshot with a relative name; Maestro 2 refuses paths outside its output folder), JUnit report, log and
+# Maestro debug output go to <out-dir>.
 # A flow is rerun once only when its log shows a known emulator-infrastructure failure (INFRA: adb lost the device,
 # or the Maestro driver on the device stopped answering). An app or assertion failure is never retried.
 # Usage: e2e/mobile/run-flows.sh <apk> <out-dir>
@@ -29,8 +30,8 @@ set_system_locale ar-IQ || exit 1
 adb install -r "$apk" || exit 1
 run() {
   mkdir -p "$out/$name"
-  maestro test -e OTP_CODE="${OTP_FIXED_CODE:?}" -e OUT="$out/$name" --format junit --output "$out/$name.xml" \
-    --debug-output "$out/$name" "$flow" 2>&1 | tee "$out/$name.log"
+  maestro test -e OTP_CODE="${OTP_FIXED_CODE:?}" --test-output-dir "$out/$name" --debug-output "$out/$name" \
+    --format junit --output "$out/$name.xml" "$flow" 2>&1 | tee "$out/$name.log"
 }
 failed=0
 for flow in e2e/mobile/flows/*.yaml mobile-features/*/maestro/*.yaml; do

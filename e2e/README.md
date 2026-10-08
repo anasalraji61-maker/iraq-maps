@@ -31,8 +31,9 @@ runs only on GitHub runners.
 `EXPO_PUBLIC_API_URL=http://10.0.2.2:3000` (the emulator's alias for the runner's localhost).
 
 `run-flows.sh` first sets the emulator's system locale to `ar-IQ` (an Iraqi phone). Flows get the job's fixed OTP as
-`${OTP_CODE}` and their own output directory as `${OUT}`; `takeScreenshot: ${OUT}/<name>` lands in the `e2e-output`
-artifact of the run (always uploaded: screenshots for the RTL review, JUnit, Maestro and API logs).
+`${OTP_CODE}`. `takeScreenshot: <name>` (a relative name: Maestro 2 refuses paths outside the flow's output folder)
+lands in the `e2e-output` artifact of the run, which is always uploaded with the JUnit reports and the Maestro and
+API logs.
 
 Flows select elements by the testIDs in `packages/contracts` (`testIDs`). A flow is rerun once only when its log
 matches a known emulator-infrastructure failure (`INFRA` in `run-flows.sh`); app and assertion failures never are.
