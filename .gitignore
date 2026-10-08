@@ -124,3 +124,13 @@ tmp/
 
 # turbo-generated agent notes (not project docs)
 AGENTS.md
+
+# More OSM data formats (licensing audit LIC-M0-07); hand-made fixtures stay tracked
+*.osm.bz2
+*.osm.gz
+*.osc
+*.osc.gz
+*.osh.pbf
+*.o5c
+*.osm.xml
+!**/fixtures/**/*.osm.xml

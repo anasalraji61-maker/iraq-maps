@@ -96,6 +96,10 @@ auditors:
   - كل schema يُرحَّل بدور `<schema>_migrator` يملكها وحدها، بلا CREATE أو USAGE على غيرها.
   - التطبيق يعمل بدور تشغيل بصلاحيات DML فقط على schemas وحداته.
   - هذا يحوّل فحص db-kit المعجمي إلى عزل حقيقي في الإنتاج.
+- [ ] **شاشة «تراخيص المصادر المفتوحة» داخل التطبيق (من تدقيق ترخيص M0، LIC-M0-06)**
+  - تُولَّد عند البناء من `pnpm licenses list --prod --json --filter "@iraq-maps/mobile..."` ومن تقرير تراخيص Gradle، بلا مكتبة تراخيص Play-services وقت التشغيل.
+  - تضم النصوص الكاملة لتراخيص Apache-2.0 (منها Material Symbols) و OFL-1.1 (Noto Sans Arabic) و MIT، ومحتوى ملفات NOTICE (مثل Apache Commons).
+  - تحتوي إسناد OSM ورابط https://www.openstreetmap.org/copyright.
 
 ## خارج النطاق
 
