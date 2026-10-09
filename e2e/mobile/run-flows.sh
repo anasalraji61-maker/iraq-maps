@@ -30,6 +30,7 @@ set_system_locale() {
 mkdir -p "$out"
 set_system_locale ar-IQ || exit 1
 adb install -r "$apk" || exit 1
+echo "::group::SurfaceFlinger GLES"; adb shell dumpsys SurfaceFlinger | grep -i GLES || true; echo "::endgroup::"
 # Each flow's device log goes to <out-dir>/<flow>.logcat.txt, and its MapLibre/GL lines to the job log (B1: the artifact
 # host is blocked for reviewers).
 run() {
@@ -41,6 +42,9 @@ run() {
   adb logcat -d >"$out/$name.logcat.txt" || true
   echo "::group::MapLibre logcat ($name)"
   grep -E 'Mbgl|maplibre|MapLibre|Shader failed|Program failed|Failed to load glyph|EGL|emuglGLES|GL_' "$out/$name.logcat.txt" | tail -n 200 || true
+  echo "::endgroup::"
+  echo "::group::Device warnings and errors ($name)"
+  grep -E ' [WEF] ' "$out/$name.logcat.txt" | grep -vE 'ViewManagerPropertyUpdater|OpenGLRenderer' | tail -n 120 || true
   echo "::endgroup::"
   return $status
 }

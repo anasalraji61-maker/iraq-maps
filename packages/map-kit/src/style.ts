@@ -86,6 +86,19 @@ export function buildStyle(lang: Locale, { tilesUrl, glyphsUrl }: StyleSource): 
     { id: 'poi-dot', type: 'circle', ...from('poi'), minzoom: 15, paint: { 'circle-radius': 3, 'circle-color': '#8a6d4b', 'circle-stroke-width': 1, 'circle-stroke-color': '#ffffff' } },
     { id: 'poi-label', type: 'symbol', ...from('poi'), minzoom: 15, layout: { ...label(12), 'text-anchor': 'top', 'text-offset': [0, 0.5] }, paint: LABEL_PAINT },
     { id: 'place-label', type: 'symbol', ...from('place'), layout: { ...label(placeSize), 'symbol-sort-key': ['-', 0, placeSize] }, paint: LABEL_PAINT },
+    // B1 PROBES (temporary, reverted right after the CI run that reads them):
+    // dot = the place feature is in the CI tile; const = same Arabic text, constant size, no sort key;
+    // latin = Latin text from the same font; overlap = the label with collision checks off.
+    { id: 'probe-dot', type: 'circle', ...from('place'), paint: { 'circle-radius': 6, 'circle-color': '#d0021b' } },
+    { id: 'probe-const', type: 'symbol', ...from('place'), layout: { ...label(18), 'text-offset': [0, 2] }, paint: LABEL_PAINT },
+    { id: 'probe-latin', type: 'symbol', ...from('place'), layout: { ...label(18), 'text-field': expr('get', 'class'), 'text-offset': [0, 4] }, paint: LABEL_PAINT },
+    {
+      id: 'probe-overlap',
+      type: 'symbol',
+      ...from('place'),
+      layout: { ...label(placeSize), 'symbol-sort-key': ['-', 0, placeSize], 'text-allow-overlap': true, 'text-ignore-placement': true, 'text-offset': [0, -2] },
+      paint: LABEL_PAINT,
+    },
   ];
   return {
     version: 8,

@@ -61,6 +61,10 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    strategy: # B1 experiment (temporary): the same flows on two software GPU modes
+      fail-fast: false
+      matrix:
+        gpu: [swiftshader_indirect, swangle_indirect]
     services:
       postgres:
         image: postgis/postgis:16-3.4@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5
@@ -125,12 +129,12 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
+          emulator-options: -no-window -gpu ${{ matrix.gpu }} -noaudio -no-boot-anim -camera-back none -no-snapshot
           script: e2e/mobile/run-flows.sh "$RUNNER_TEMP/iraq-maps-x86_64.apk" "$RUNNER_TEMP/e2e-output"
       - name: Upload the e2e output (screenshots for the RTL review, JUnit, Maestro and API logs)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: e2e-output
+          name: e2e-output-${{ matrix.gpu }}
           path: ${{ runner.temp }}/e2e-output
           retention-days: 14
