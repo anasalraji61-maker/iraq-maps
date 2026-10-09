@@ -253,6 +253,9 @@ No event is added, because nothing consumes one yet.
   - `OsmCategoryRules` في `packages/contracts/src/osm-categories.ts`: جدول واحد يربط وسوم OSM بـ `PlaceCategory`، مصدَّر إلى `schemas/osm-categories.json`. الـ pipeline و profile البلاطات يقرآنه بدل نسختين منفصلتين. الجدول هو جدول الـ pipeline الحالي (القواعد بالترتيب، وأول تطابق يفوز، و `*` لأي قيمة، و `no` و `vacant` لا تطابق).
   - `Glyphs` مصدَّر إلى `schemas/glyphs.json` ليقرأه CLI البلاطات.
   - اختبار `geo-data.test.ts` يفشل إن انحرف أيّ ملف JSON عن مصدره في TS.
+- **`OsmCategoryCases` و `--city` بعد التجميد** (طلب #7 من builder-tiles، وتدقيق المعمارية m6):
+  - ‏`OsmCategoryCases` في `osm-categories.ts`، مصدَّر إلى `schemas/osm-category-cases.json`: حالات `{tags, enabled?, category}` يشغّلها الـ pipeline (`extract.category`) و profile البلاطات (`OsmCategories.categoryOf`). القاعدة الموحَّدة: أول قاعدة تعطي فئة تحسم، وإن لم تفعّلها المدينة يُسقط العنصر ولا تحلّ محلها قاعدة لاحقة، فتتطابق نقاط البلاطات مع صفوف `places.ndjson`.
+  - ‏`--city` (اختياري) في `CliContracts.tilesBuild.args`. دون الخيار تُحفظ كل الفئات، فيمرّره `city-data.sh` دائماً.
 - **تضييق `CityId` بعد التجميد** (تدقيق الأمان M1، الملاحظة 5): حد أقصى 64 حرفاً (`.max(64)`)، لأن `city` بطول 6010 أحرف كان يُقبل. التصدير `schemas/city-import-record.schema.json` صار فيه `maxLength: 64`.
 
 - **إضافات عقود M2 و M3 أثناء M1** (ملاحظة m7 من تدقيق M1). هذه إضافات فقط، وهي المرحلة A من تجميد M2 و M3:

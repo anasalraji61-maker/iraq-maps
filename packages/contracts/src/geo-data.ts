@@ -112,7 +112,7 @@ export const CliContracts = {
       '--input': 'clipped .osm.pbf',
       '--output': '.pmtiles file',
       '--bbox': 'west,south,east,north (WGS84)',
-      '--city': 'cities/<id>.yaml: the poi layer keeps only its categories (OsmCategoryCases), as places.ndjson does',
+      '--city': 'optional, cities/<id>.yaml: the poi layer keeps only its categories (OsmCategoryCases), as places.ndjson does. Without it every category is kept, so pass it whenever the city restricts its categories',
     },
     outputs: ['<output>: PMTiles v3 with exactly the TileSchema layers and fields, zooms minZoom..maxZoom'],
   },
