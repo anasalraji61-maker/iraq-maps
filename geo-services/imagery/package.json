@@ -1,0 +1,8 @@
+{
+  "name": "@iraq-maps/geo-imagery",
+  "private": true,
+  "scripts": {
+    "test": "pytest test_pipeline.py -v",
+    "build": "python pipeline.py --city baghdad --bbox '44.1,33.0,44.7,33.5' --output ./tiles/"
+  }
+}

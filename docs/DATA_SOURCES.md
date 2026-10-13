@@ -30,5 +30,17 @@
 | pyosmium 4.3.1 (PyPI ‏`osmium`) | https://osmcode.org/pyosmium/ | BSD-2-Clause | نعم | لا يلزم، لأنه أداة بناء فقط | معتمد كمكتبة Python في `geo-services/pipeline` (القراءة وتجميع المضلّعات). لا يُوزَّع في التطبيق | 2026-10-08 |
 | fontnik 0.7.7 (npm، مع ملفات native مبنية مسبقاً) | https://github.com/mapbox/node-fontnik | BSD-3-Clause، حسب `LICENSE.txt` في الحزمة، وفيه بند عدم التزكية. ملف package.json بلا حقل ترخيص | نعم | لا يلزم، لأنه أداة بناء فقط | معتمد كأداة بناء للـ glyphs في `tiles glyphs`. لا يُوزَّع في التطبيق | 2026-10-08 |
 
+## Sentinel-2 L2A COGs (AWS Open Data)
+
+| الحقل | القيمة |
+|---|---|
+| **Source** | s3://sentinel-cogs (ESA / AWS Open Data program) |
+| **License** | Copernicus Open Access — CC BY 4.0 equivalent for Sentinel data |
+| **Attribution text** | "Contains modified Copernicus Sentinel data [YEAR]" |
+| **Resolution** | 10 m (TCI bands — R, G, B) |
+| **Usage** | Optional satellite base layer (user-toggled, 10 m disclaimer shown in-app alongside OSM attribution) |
+| **Access** | Anonymous public S3 (us-west-2), no credentials required |
+| **Verified** | 2026-10-13 |
+
 ## ممنوع
 Esri World Imagery · Google Maps/Earth · Bing Maps · Mapbox Satellite · `tile.openstreetmap.org` (سياسة الاستخدام) · أي محتوى مسحوب (scraped) من Instagram أو Facebook.

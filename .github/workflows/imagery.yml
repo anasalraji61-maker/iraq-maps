@@ -1,0 +1,54 @@
+name: Imagery
+on:
+  workflow_dispatch:
+    inputs:
+      city:
+        description: City identifier
+        required: true
+        default: baghdad
+      bbox:
+        description: 'west,south,east,north'
+        required: true
+        default: '44.1,33.0,44.7,33.5'
+      max_cloud:
+        description: Maximum cloud cover percent
+        required: false
+        default: '20'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install rasterio boto3 numpy pytest shapely
+          pip install rio-pmtiles || echo "rio-pmtiles not available; to_pmtiles will raise if invoked"
+        working-directory: geo-services/imagery
+
+      - name: Run synthetic tests
+        run: pytest test_pipeline.py -v
+        working-directory: geo-services/imagery
+
+      - name: Build tiles
+        run: |
+          python pipeline.py \
+            --city "${{ inputs.city }}" \
+            --bbox "${{ inputs.bbox }}" \
+            --output ./tiles/ \
+            --max-cloud "${{ inputs.max_cloud }}"
+        working-directory: geo-services/imagery
+
+      - name: Show metadata
+        run: cat geo-services/imagery/tiles/metadata.json
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: imagery-${{ inputs.city }}
+          path: geo-services/imagery/tiles/
