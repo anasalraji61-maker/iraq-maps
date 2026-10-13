@@ -1,7 +1,9 @@
 ---
 id: M1
 slug: map-search-place-card
-status: in_progress
+status: closed
+closed_sha: 038fa90b34e636faf6bd3b5ee46c509090634b39
+closed_at: 2026-10-13T18:51Z
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-geo-data:
@@ -324,10 +326,10 @@ No event is added, because nothing consumes one yet.
 > - الجلسة الرئيسية `session_013ZViADKJJWidtxd4c9pAtN` استأنفت المشروع.
 > - قرأنا diff الـ probe commit (`00fdcea`) الذي أكّد الفرضية: `symbol-sort-key` بتعبير match على البيانات + `text-size` بتعبير match → MapLibre Native ≤ 13.6 يسقط كل الـ symbols.
 > - `1580f6c`: حُذف `symbol-sort-key` من طبقة place-label وحُذفت طبقات الـ probe. 26 اختبار map-kit و 67 اختبار feature-map ناجحة.
-> - CI و Android يعملان الآن على `1580f6c` — ننتظر النتيجة.
-> - بعد أخضر CI: إعادة تدقيق RTL مع لقطات المحاكي (إن طلبها المدقق)، ثم جمع الموافقات والإغلاق، ثم المرحلة B.
+> - CI ✅ Android ✅ على `1580f6c` و `038fa90`. M1 مغلقة.
 
-آخر تحديث: 2026-10-13 18:40Z.
+
+آخر تحديث: 2026-10-13 18:51Z. **مغلقة.**
 
 **ما تم:**
 - العقود مجمّدة في `7ef279a`، والبوابة كانت خضراء عند التجميد.
