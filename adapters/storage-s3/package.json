@@ -1,0 +1,22 @@
+{
+  "name": "@iraq-maps/adapter-storage-s3",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.806.0",
+    "@aws-sdk/s3-request-presigner": "^3.806.0",
+    "@iraq-maps/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*"
+  }
+}
