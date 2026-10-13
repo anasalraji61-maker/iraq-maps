@@ -3,8 +3,12 @@ import { defineModuleConfig } from '@iraq-maps/config';
 import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, type UserDataEraser } from '@iraq-maps/contracts';
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
+import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
 import { createLogger, type Logger } from '@iraq-maps/observability';
 import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
+import { providersMigrationsDir, providersModule } from '@iraq-maps/providers';
+import { routingModule } from '@iraq-maps/routing';
+import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
 import {
   Catch,
   Controller,
@@ -30,6 +34,8 @@ import { z } from 'zod';
 export const moduleMigrations = [
   { schema: 'identity', migrationsDir: identityMigrationsDir },
   { schema: 'places', migrationsDir: placesMigrationsDir },
+  { schema: 'media', migrationsDir: mediaMigrationsDir },
+  { schema: 'providers', migrationsDir: providersMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -148,11 +154,18 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     clock: opts.clock,
     env: opts.env,
   });
+  const storage = createS3StorageFromEnv() ?? undefined;
   const app = await NestFactory.create<NestFastifyApplication>(
     {
       module: AppModule,
       global: true,
-      imports: [identity, placesModule({ db, env: opts.env })],
+      imports: [
+        identity,
+        placesModule({ db, env: opts.env }),
+        routingModule({ env: opts.env }),
+        mediaModule({ db, storage }),
+        providersModule({ db, phoneVerification: null }),
+      ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],
       exports: [PortTokens.EventBus],

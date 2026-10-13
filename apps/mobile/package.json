@@ -16,6 +16,7 @@
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/feature-account": "workspace:*",
     "@iraq-maps/feature-map": "workspace:*",
+    "@iraq-maps/feature-navigation": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
     "@maplibre/maplibre-react-native": "~11.5.0",
     "@iraq-maps/mobile-kit": "workspace:*",

@@ -173,6 +173,9 @@ importers:
       '@iraq-maps/feature-map':
         specifier: workspace:*
         version: link:../../mobile-features/map
+      '@iraq-maps/feature-navigation':
+        specifier: workspace:*
+        version: link:../../mobile-features/navigation
       '@iraq-maps/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
