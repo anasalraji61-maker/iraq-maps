@@ -1,0 +1,32 @@
+# Reroute banner appears when the user goes off-route (M2 acceptance criterion).
+# Relies on the fake RoutingEngine in the e2e harness responding quickly.
+# The test mocks location through the Maestro mock-location API so 3 off-route fixes fire DeviaionDetector.
+appId: iq.iraqmaps.app
+name: reroute
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: nav.instruction
+    timeout: 60000
+# Inject 3 off-route GPS fixes via Maestro mock location (lat/lng outside the route corridor)
+- setLocation:
+    lat: 33.3200
+    lng: 44.3600
+- setLocation:
+    lat: 33.3205
+    lng: 44.3605
+- setLocation:
+    lat: 33.3210
+    lng: 44.3610
+- extendedWaitUntil:
+    visible:
+      id: nav.reroute
+    timeout: 15000
+- takeScreenshot: reroute-banner
+- extendedWaitUntil:
+    notVisible:
+      id: nav.reroute
+    timeout: 20000
+- assertVisible:
+    id: nav.instruction

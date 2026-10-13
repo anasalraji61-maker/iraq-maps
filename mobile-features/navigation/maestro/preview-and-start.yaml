@@ -1,0 +1,56 @@
+# Route preview and start navigation (M2 acceptance criterion): tap Directions from a place card,
+# see the preview screen with distance/duration/mode picker, then tap Start.
+# Needs the e2e harness: API with routing module wired to the fake RoutingEngine and the baghdad-mini fixture.
+appId: iq.iraqmaps.app
+name: preview-and-start
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 60000
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- tapOn:
+    id: map.search.input
+- inputText: القلعة
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+      index: 0
+    timeout: 20000
+- tapOn:
+    id: map.search.result
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 20000
+- tapOn:
+    id: place.directions
+- extendedWaitUntil:
+    visible:
+      id: route.preview
+    timeout: 20000
+- assertVisible:
+    id: route.summary
+- assertVisible:
+    id: route.mode.car
+- assertVisible:
+    id: route.mode.walk
+- tapOn:
+    id: route.mode.walk
+- takeScreenshot: preview-walk-mode
+- tapOn:
+    id: route.mode.car
+- tapOn:
+    id: route.start
+- extendedWaitUntil:
+    visible:
+      id: nav.instruction
+    timeout: 20000
+- takeScreenshot: navigation-active
