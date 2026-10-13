@@ -1,0 +1,3 @@
+pyvalhalla==3.9.1
+pytest
+requests

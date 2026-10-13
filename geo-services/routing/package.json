@@ -1,0 +1,12 @@
+{
+  "name": "@iraq-maps/geo-routing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Valhalla tile builder and service wrapper for Iraq Maps routing.",
+  "scripts": {
+    "test": "pytest test_routing.py -v",
+    "build": "python build_tiles.py",
+    "tiles": "python build_tiles.py",
+    "serve": "python serve.py"
+  }
+}

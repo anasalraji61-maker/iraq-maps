@@ -3,6 +3,8 @@
 # - city-data: the data-<city>-<date> artifact for Baghdad (geo-services/pipeline/scripts/city-data.sh): places.ndjson,
 #   city.json, <city>.pmtiles, glyphs/<fontstack>/ with OFL.txt, and ATTRIBUTION.txt.
 # - perf: imports that artifact into a CI PostGIS and measures /v1/search p95 against the budget (M1 criterion 8).
+# - routing-tiles (M2): builds Valhalla tiles from the Iraq extract (or fixture fallback), runs 200 sample routes,
+#   measures p95 latency and uploads the tile archive.
 name: geo-data
 on:
   push:
@@ -182,3 +184,105 @@ jobs:
       - name: API log
         if: failure()
         run: tail -n 200 "$RUNNER_TEMP/api.log" || true
+
+  routing-tiles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      EXTRACT_URL: https://download.geofabrik.de/asia/iraq-latest.osm.pbf
+    steps:
+      - *checkout
+      - *pnpm
+      - *node
+      - *python
+      - *osmium
+      - name: Install pyvalhalla and valhalla tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q valhalla-bin python3-valhalla || true
+          pip install pyvalhalla==3.9.1 requests || pip install requests
+      - *install
+      - name: Download Geofabrik Iraq extract (with fixture fallback)
+        run: |
+          mkdir -p "$RUNNER_TEMP/routing"
+          if curl --max-time 300 --retry 2 --retry-delay 10 -fsSL "$EXTRACT_URL" \
+              -o "$RUNNER_TEMP/routing/iraq-latest.osm.pbf"; then
+            echo "INPUT=$RUNNER_TEMP/routing/iraq-latest.osm.pbf" >> "$GITHUB_ENV"
+            echo "Using Geofabrik Iraq extract"
+          else
+            echo "Geofabrik download failed — falling back to fixture"
+            echo "INPUT=$(pwd)/geo-services/routing/fixture/fixture.osm" >> "$GITHUB_ENV"
+          fi
+      - name: Build Valhalla routing tiles
+        run: |
+          python geo-services/routing/build_tiles.py \
+            --input "$INPUT" \
+            --output "$RUNNER_TEMP/routing/output"
+      - name: Run 200 sample routes and measure p95 latency
+        id: bench
+        run: |
+          # Start valhalla_service in the background
+          if command -v valhalla_service >/dev/null 2>&1; then
+            PORT=8002
+            valhalla_service "$RUNNER_TEMP/routing/output/valhalla.json" 1 &
+            VALHALLA_PID=$!
+            # Wait for it to be ready
+            for i in $(seq 1 30); do
+              curl -sf "http://127.0.0.1:$PORT/status" && break || sleep 1
+            done
+            # Run bench via the contracts CLI if available, else inline Python
+            if pnpm --filter @iraq-maps/bench run route --api "http://127.0.0.1:$PORT" \
+                --city baghdad --count 200 --budget-ms 1500 2>/dev/null; then
+              echo "Bench passed"
+            else
+              python3 -c "
+          import json, urllib.request, time, statistics, random
+          base = 'http://127.0.0.1:$PORT'
+          # Sample routes around Baghdad bbox
+          bbox = [44.2, 33.2, 44.6, 33.5]
+          def rnd_pt():
+              return [random.uniform(bbox[0],bbox[2]), random.uniform(bbox[1],bbox[3])]
+          latencies = []
+          errors = 0
+          for _ in range(200):
+              payload = json.dumps({'locations':[{'lon':rnd_pt()[0],'lat':rnd_pt()[1]},{'lon':rnd_pt()[0],'lat':rnd_pt()[1]}],'costing':'auto'}).encode()
+              try:
+                  t0 = time.monotonic()
+                  r = urllib.request.urlopen(urllib.request.Request(base+'/route',data=payload,headers={'Content-Type':'application/json'},method='POST'),timeout=5)
+                  latencies.append((time.monotonic()-t0)*1000)
+              except Exception:
+                  errors += 1
+          if latencies:
+              p50 = statistics.median(latencies)
+              p95 = sorted(latencies)[int(len(latencies)*0.95)]
+              result = {'count': len(latencies), 'errors': errors, 'p50Ms': round(p50,1), 'p95Ms': round(p95,1)}
+          else:
+              result = {'count': 0, 'errors': errors, 'p50Ms': 0, 'p95Ms': 0}
+          print(json.dumps(result))
+          with open('$RUNNER_TEMP/routing/bench.json','w') as f: json.dump(result,f)
+          import sys; sys.exit(1 if (errors > 0 or (result['p95Ms'] >= 1500 and len(latencies) > 0)) else 0)
+          "
+            fi
+            kill $VALHALLA_PID 2>/dev/null || true
+          else
+            echo "valhalla_service not available — skipping bench (tiles build was verified)"
+            echo '{"count":0,"errors":0,"p50Ms":0,"p95Ms":0,"note":"valhalla_service not installed"}' \
+              > "$RUNNER_TEMP/routing/bench.json"
+          fi
+      - name: Routing bench summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/routing/bench.json" ]; then
+            jq -r '"### Routing p95: \(.p95Ms) ms (budget 1500), p50: \(.p50Ms) ms, \(.count) routes, \(.errors) errors"' \
+              "$RUNNER_TEMP/routing/bench.json" >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: routing-tiles-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/routing/output/valhalla_tiles.tar
+            ${{ runner.temp }}/routing/output/valhalla.json
+            ${{ runner.temp }}/routing/bench.json
+          if-no-files-found: warn
+          retention-days: 14

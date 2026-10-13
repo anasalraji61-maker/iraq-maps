@@ -1,0 +1,36 @@
+{
+  "mjolnir": {
+    "tile_dir": "valhalla_tiles",
+    "timezone": "/usr/share/zoneinfo/Asia/Baghdad",
+    "admin": ""
+  },
+  "loki": {
+    "actions": ["locate", "route", "status"],
+    "logging": { "type": "std_out", "color": false, "file_name": "" },
+    "service": { "proxy": "ipc:///tmp/loki" }
+  },
+  "thor": {
+    "logging": { "type": "std_out", "color": false, "file_name": "" },
+    "service": { "proxy": "ipc:///tmp/thor" }
+  },
+  "odin": {
+    "logging": { "type": "std_out", "color": false, "file_name": "" },
+    "service": { "proxy": "ipc:///tmp/odin" }
+  },
+  "tyr": {
+    "actions": ["route"],
+    "logging": { "type": "std_out", "color": false, "file_name": "" },
+    "service": { "proxy": "ipc:///tmp/tyr" }
+  },
+  "httpd": {
+    "service": {
+      "listen": "tcp://127.0.0.1:8002",
+      "loopback": "ipc:///tmp/loopback",
+      "interrupt": "ipc:///tmp/interrupt"
+    }
+  },
+  "service_limits": {
+    "auto": { "max_distance": 5000000.0, "max_locations": 20 },
+    "pedestrian": { "max_distance": 250000.0, "max_locations": 20 }
+  }
+}
