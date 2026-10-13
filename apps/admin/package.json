@@ -13,8 +13,10 @@
   "dependencies": {
     "@iraq-maps/api-client": "workspace:*",
     "@iraq-maps/contracts": "workspace:*",
+    "@types/react-router-dom": "^5.3.3",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
