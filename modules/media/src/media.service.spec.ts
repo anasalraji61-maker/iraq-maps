@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { createTestDatabase, type TestDatabase } from '@iraq-maps/db-kit';
-import type { AssetId, UserId } from '@iraq-maps/contracts';
+import type { UserId } from '@iraq-maps/contracts';
 import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mediaMigrationsDir, MediaService, FileObjectStorage } from './index.js';

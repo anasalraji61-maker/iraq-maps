@@ -1,4 +1,4 @@
-import { pgEnum, pgSchema, uuid, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgSchema, uuid, varchar, integer, timestamp } from 'drizzle-orm/pg-core';
 
 export const mediaSchema = pgSchema('media');
 
