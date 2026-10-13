@@ -55,5 +55,8 @@
     "directions": "Directions",
     "message": "Message this place",
     "assistant": "Ask the assistant"
+  },
+  "satellite": {
+    "label": "Satellite"
   }
 }

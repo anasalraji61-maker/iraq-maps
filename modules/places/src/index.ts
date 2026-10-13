@@ -31,6 +31,8 @@ const SOURCES = ['TILES_SOURCE', 'GLYPHS_SOURCE'] as const;
 @Module({})
 class PlacesModule {}
 
+export { registerProviderPlaceHandler } from './provider-place';
+
 /** Nest module serving citiesContract and placesContract, and providing PortTokens.PlacesQueryPort.
  * @public frozen stub (M1) */
 export function placesModule(opts: PlacesModuleOptions): DynamicModule {

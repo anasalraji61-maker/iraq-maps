@@ -1,12 +1,14 @@
 import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceSummary } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
-import { MapCanvas, type MapCamera } from '@iraq-maps/map-kit';
+import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
 import { href, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
-import { Banner, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
+import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useMemo, useState, type ReactElement } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { SatelliteToggle } from './components/SatelliteToggle';
+import { useMapStyle, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
 import { formatDistance, isolate, kindLabel, t } from './strings';
 
@@ -44,6 +46,9 @@ function CityMap({ city }: { city: CityDescriptor }) {
   const [near, setNear] = useState<LngLat>(city.center);
   const [locateError, setLocateError] = useState<string>();
   const [query, setQuery] = useState('');
+  const [mapMode, setMapMode] = useState<MapMode>('street');
+  const baseLayer = useMapStyle(mapMode);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
   const q = query.trim();
 
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
@@ -57,8 +62,11 @@ function CityMap({ city }: { city: CityDescriptor }) {
     SEARCH_DELAY_MS,
   );
   const results = search.state?.status === 'ready' ? search.state.data : NO_RESULTS;
-  const markers = useMemo(() => results.map(({ id, location }) => ({ id, location })), [results]);
-  const open = (placeId: string) => router.push(href('place', { placeId }));
+  const markers = useMemo(() => results.map(({ id, location }) => ({ id, location, selected: id === selectedPlaceId })), [results, selectedPlaceId]);
+  const open = (placeId: string) => {
+    setSelectedPlaceId(placeId);
+    router.push(href('place', { placeId }));
+  };
 
   const locate = async () => {
     setLocateError(undefined);
@@ -86,13 +94,16 @@ function CityMap({ city }: { city: CityDescriptor }) {
           onMarkerPress={open}
           showUserLocation={located}
           onCameraChanged={setNear}
+          baseLayer={baseLayer}
         />
+        {mapMode === 'satellite' && city.satellite ? <SatelliteDisclaimer layer={city.satellite} /> : null}
       </View>
       <View style={styles.panel}>
         <View style={styles.searchRow}>
           <View style={styles.fill}>
             <TextField testID={testIDs.map.searchInput} label={t('search.label')} placeholder={t('search.placeholder')} value={query} onChangeText={setQuery} />
           </View>
+          <SatelliteToggle active={mapMode === 'satellite'} onToggle={() => setMapMode((m) => (m === 'satellite' ? 'street' : 'satellite'))} />
           <IconButton testID={testIDs.map.lang} icon="translate" accessibilityLabel={t('lang.title')} onPress={() => setChoosingLang(true)} />
         </View>
         {locateError ? <Banner kind="error" message={locateError} /> : null}
@@ -117,6 +128,12 @@ function CityMap({ city }: { city: CityDescriptor }) {
       </View>
       <View style={styles.locate}>
         <IconButton testID={testIDs.map.locate} icon="my_location" accessibilityLabel={t('locate.label')} onPress={locate} />
+        {selectedPlaceId ? (
+          <Button
+            label={t('actions.directions')}
+            onPress={() => router.push(href('navigation', { placeId: selectedPlaceId }))}
+          />
+        ) : null}
       </View>
       <Sheet visible={choosingLang} onClose={() => setChoosingLang(false)}>
         <Text variant="subtitle">{t('lang.title')}</Text>

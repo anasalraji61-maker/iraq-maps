@@ -55,5 +55,8 @@
     "directions": "الاتجاهات",
     "message": "راسِل المكان",
     "assistant": "اسأل المساعد"
+  },
+  "satellite": {
+    "label": "القمر الصناعي"
   }
 }
