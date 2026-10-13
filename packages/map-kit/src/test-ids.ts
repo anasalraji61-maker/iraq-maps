@@ -6,4 +6,6 @@ export const mapPartIDs = {
   camera: `${testIDs.map.view}.camera`,
   markers: `${testIDs.map.view}.markers`,
   userLocation: `${testIDs.map.view}.userLocation`,
+  /** M2: route polyline GeoJSONSource. */
+  route: `${testIDs.map.view}.route`,
 } as const;

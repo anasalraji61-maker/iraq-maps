@@ -1,4 +1,4 @@
-import { Glyphs, nameFallback, OSM_ATTRIBUTION, TileSchema, type CityDescriptor, type Locale } from '@iraq-maps/contracts';
+import { Glyphs, nameFallback, OSM_ATTRIBUTION, TileSchema, type CityDescriptor, type Locale, type SatelliteLayer } from '@iraq-maps/contracts';
 import type { ExpressionSpecification, LayerSpecification, StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
 
 /** Absolute tile and glyph URLs for one city.
@@ -17,6 +17,14 @@ const absolute = (url: string, apiBaseUrl: string) => (url.startsWith('/') ? api
  * @public frozen stub (M1) */
 export function resolveSource(city: CityDescriptor, apiBaseUrl: string): StyleSource {
   return { tilesUrl: absolute(city.tilesUrl, apiBaseUrl), glyphsUrl: absolute(city.glyphsUrl, apiBaseUrl) };
+}
+
+/**
+ * Resolves the satellite layer's URL against the API base URL. Returns null when the city has no satellite data.
+ * @public frozen stub (M2)
+ */
+export function buildSatelliteSource(layer: SatelliteLayer, apiBaseUrl: string): string {
+  return absolute(layer.url, apiBaseUrl);
 }
 
 type SchemaLayer = keyof typeof TileSchema.layers;
@@ -64,9 +72,12 @@ const placeSize = byClass('place', (c) => PLACE_TEXT_SIZE[c]);
 // Near-black text on a near-opaque white halo: above 12:1 against the halo, whatever map colour lies underneath.
 const LABEL_PAINT = { 'text-color': '#1f2328', 'text-halo-color': 'rgba(255, 255, 255, 0.92)', 'text-halo-width': 1.5 };
 
-/** One template for every locale: layers from TileSchema, labels coalesce(nameFallback(lang)..., name), fontstack Glyphs.fontstack.
- * @public frozen stub (M1) */
-export function buildStyle(lang: Locale, { tilesUrl, glyphsUrl }: StyleSource): StyleSpecification {
+/**
+ * One template for every locale: layers from TileSchema, labels coalesce(nameFallback(lang)..., name), fontstack Glyphs.fontstack.
+ * Pass a resolved satellite URL to add a raster base layer underneath the vector labels.
+ * @public frozen stub (M1); satelliteUrl param added in M2 Phase B freeze
+ */
+export function buildStyle(lang: Locale, { tilesUrl, glyphsUrl }: StyleSource, satelliteUrl: string | null = null): StyleSpecification {
   const label = (size: ExpressionSpecification | number) => ({
     'text-field': expr('coalesce', ...nameFallback(lang).map((l) => ['get', `name:${l}`]), ['get', 'name']),
     'text-font': [Glyphs.fontstack],
@@ -74,8 +85,11 @@ export function buildStyle(lang: Locale, { tilesUrl, glyphsUrl }: StyleSource): 
     'text-max-width': 8,
   });
   const layers: LayerSpecification[] = [
-    { id: 'background', type: 'background', paint: { 'background-color': '#f4f1ea' } },
-    { id: 'landuse', type: 'fill', ...from('landuse'), paint: { 'fill-color': byClass('landuse', (c) => LANDUSE[c]) } },
+    // When a satellite URL is provided, swap the opaque background for a raster layer and reduce fill opacities.
+    ...(satelliteUrl
+      ? [{ id: 'satellite', type: 'raster' as const, source: 'satellite', paint: { 'raster-opacity': 1 } }]
+      : [{ id: 'background', type: 'background' as const, paint: { 'background-color': '#f4f1ea' } }]),
+    { id: 'landuse', type: 'fill', ...from('landuse'), paint: { 'fill-color': byClass('landuse', (c) => LANDUSE[c]), 'fill-opacity': satelliteUrl ? 0 : 1 } },
     { id: 'water', type: 'fill', ...from('water'), filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': WATER } },
     { id: 'waterway', type: 'line', ...from('water'), filter: ['==', ['geometry-type'], 'LineString'], paint: { 'line-color': WATER, 'line-width': zoomWidth(1, 1) } },
     { id: 'building', type: 'fill', ...from('building'), minzoom: 13, paint: { 'fill-color': '#e0d9ce', 'fill-outline-color': '#cbc2b4' } },
@@ -98,6 +112,13 @@ export function buildStyle(lang: Locale, { tilesUrl, glyphsUrl }: StyleSource): 
       [SOURCE]: tilesUrl.startsWith('pmtiles://')
         ? { type: 'vector', url: tilesUrl, attribution: OSM_ATTRIBUTION }
         : { type: 'vector', tiles: [tilesUrl], minzoom: TileSchema.minZoom, maxzoom: TileSchema.maxZoom, attribution: OSM_ATTRIBUTION },
+      ...(satelliteUrl
+        ? {
+            satellite: satelliteUrl.startsWith('pmtiles://')
+              ? { type: 'raster' as const, url: satelliteUrl, tileSize: 256 }
+              : { type: 'raster' as const, tiles: [satelliteUrl], tileSize: 256, minzoom: 10, maxzoom: 14 },
+          }
+        : {}),
     },
     layers,
   };
