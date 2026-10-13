@@ -3,8 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "bench-route": "src/route-cli.ts"
+  },
   "scripts": {
     "search": "tsx src/cli.ts",
+    "route": "tsx src/route-cli.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
