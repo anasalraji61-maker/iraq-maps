@@ -15,6 +15,8 @@ nodeLinker: hoisted
 
 onlyBuiltDependencies:
   - esbuild
+  - sharp
+  - msgpackr-extract
 
 # fontnik's install script only checks that its bundled prebuilt binary exists (ADR-0008).
 ignoredBuiltDependencies:
