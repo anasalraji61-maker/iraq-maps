@@ -65,7 +65,8 @@ export const PlaceDetails = PlaceSummary.omit({ distanceM: true }).extend({
     phone: z.string().max(64).optional(),
     website: z.string().max(255).url().regex(/^https?:\/\//).optional(),
   }),
-  source: z.literal('osm'),
+  /** M3: 'provider' when the place was created by a verified provider; 'osm' for OSM-derived places. */
+  source: z.enum(['osm', 'provider']),
   attribution: z.string(),
   /** M3: a verified provider's consent-filtered section, read per request (ProviderProfilePort). */
   provider: PlaceProviderSection.optional(),

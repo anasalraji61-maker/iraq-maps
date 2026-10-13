@@ -5,3 +5,5 @@ export { AvailableRoutesProvider, href, routes, useRouteAvailable, type RouteNam
 export { SessionProvider, useApi, useApiBaseUrl, useSession } from './session';
 /** @public frozen stub (M2) */
 export { recentRoutes, type RecentRoute } from './recent-routes';
+/** @public frozen stub (M3) */
+export { uploadAsset } from './upload-asset';
