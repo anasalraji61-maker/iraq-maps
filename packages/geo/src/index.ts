@@ -40,6 +40,36 @@ export function cameraBounds([w, s, e, n]: BBox, padRatio = 0.1): BBox {
 // ── M2 stubs (frozen Phase B) ────────────────────────────────────────────────
 
 /**
+ * Encodes an array of [lng, lat] pairs to a Google / Valhalla polyline6 string (1e-6 degree precision).
+ * @public M2
+ */
+export function encodePolyline6(coords: LngLat[]): string {
+  let result = '';
+  let prevLat = 0;
+  let prevLng = 0;
+  for (const [lng, lat] of coords) {
+    const latE6 = Math.round(lat * 1e6);
+    const lngE6 = Math.round(lng * 1e6);
+    result += encodeValue(latE6 - prevLat);
+    result += encodeValue(lngE6 - prevLng);
+    prevLat = latE6;
+    prevLng = lngE6;
+  }
+  return result;
+}
+
+function encodeValue(value: number): string {
+  let v = value < 0 ? ~(value << 1) : value << 1;
+  let out = '';
+  while (v >= 0x20) {
+    out += String.fromCharCode(((0x20 | (v & 0x1f)) + 63));
+    v >>= 5;
+  }
+  out += String.fromCharCode(v + 63);
+  return out;
+}
+
+/**
  * Decodes a Google / Valhalla polyline6 string (1e-6 degree precision) to LngLat pairs.
  * @public frozen stub (M2)
  */
