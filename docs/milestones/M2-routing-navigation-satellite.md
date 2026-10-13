@@ -1,7 +1,8 @@
 ---
 id: M2
 slug: routing-navigation-satellite
-status: in_progress
+status: builders_done
+build_sha: 505678d
 phase_b_freeze_sha: 4071c67
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
