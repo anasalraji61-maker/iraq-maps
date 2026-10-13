@@ -1,0 +1,3 @@
+import preset from '@iraq-maps/tooling/jest';
+
+export default { ...preset, clearMocks: true, setupFiles: ['<rootDir>/test/setup.ts'] };

@@ -1,0 +1,72 @@
+{
+  "registration": {
+    "title": "تسجيل النشاط التجاري",
+    "step": "الخطوة {current} من {total}",
+    "next": "التالي",
+    "back": "السابق",
+    "submit": "إرسال الطلب"
+  },
+  "name": {
+    "title": "اسم النشاط التجاري",
+    "label": "الاسم",
+    "placeholder": "مثال: مطعم النخيل",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "07xx xxx xxxx"
+  },
+  "category": {
+    "title": "نوع النشاط",
+    "label": "اختر الفئة",
+    "food": "مطعم",
+    "cafe": "كافيه",
+    "lodging": "فندق",
+    "shopping": "تسوق",
+    "tourism": "سياحة",
+    "health": "صحة",
+    "finance": "مالية",
+    "fuel": "وقود",
+    "office": "مكتب",
+    "worship": "دور عبادة",
+    "education": "تعليم",
+    "government": "حكومي",
+    "transport": "نقل",
+    "entertainment": "ترفيه"
+  },
+  "photos": {
+    "title": "صور النشاط",
+    "body": "أضف صوراً تعريفية لنشاطك التجاري.",
+    "add": "إضافة صورة"
+  },
+  "consents": {
+    "title": "الموافقات",
+    "body": "حدد البيانات التي توافق على إظهارها للزوار.",
+    "photos": "إظهار الصور",
+    "social_links": "إظهار روابط التواصل الاجتماعي",
+    "whatsapp_messages": "السماح بالرسائل عبر واتساب",
+    "show_phone": "إظهار رقم الهاتف",
+    "show_prices": "إظهار الأسعار"
+  },
+  "otp": {
+    "title": "تحقق من رقم الهاتف",
+    "sentTo": "أرسلنا رمزاً من ٦ أرقام إلى {phone}.",
+    "label": "رمز التحقق",
+    "submit": "تأكيد",
+    "resend": "أعد إرسال الرمز",
+    "resendIn": "يمكنك إعادة الإرسال بعد {time}"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "status": "حالة الحساب",
+    "draft": "مسودة",
+    "pending": "قيد المراجعة",
+    "verified": "موثّق",
+    "suspended": "موقوف"
+  },
+  "common": {
+    "selected": "محدد"
+  },
+  "errors": {
+    "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",
+    "phone_not_verified": "يجب التحقق من رقم الهاتف أولاً.",
+    "invalid_request": "تحقّق من البيانات المُدخلة وحاول مرة أخرى."
+  }
+}

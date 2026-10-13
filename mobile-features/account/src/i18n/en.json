@@ -29,7 +29,8 @@
     "noName": "No name added yet",
     "language": "Language",
     "logout": "Sign out",
-    "delete": "Delete account"
+    "delete": "Delete account",
+    "registerBusiness": "Register your business"
   },
   "deleteSheet": {
     "title": "Delete your account permanently?",

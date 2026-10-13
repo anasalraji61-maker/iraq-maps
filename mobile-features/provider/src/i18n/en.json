@@ -1,0 +1,72 @@
+{
+  "registration": {
+    "title": "Register Your Business",
+    "step": "Step {current} of {total}",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit Application"
+  },
+  "name": {
+    "title": "Business Name",
+    "label": "Name",
+    "placeholder": "e.g. Al-Nakheel Restaurant",
+    "phone": "Phone Number",
+    "phonePlaceholder": "07xx xxx xxxx"
+  },
+  "category": {
+    "title": "Business Category",
+    "label": "Select category",
+    "food": "Restaurant",
+    "cafe": "Cafe",
+    "lodging": "Hotel",
+    "shopping": "Shopping",
+    "tourism": "Tourism",
+    "health": "Health",
+    "finance": "Finance",
+    "fuel": "Fuel",
+    "office": "Office",
+    "worship": "Place of Worship",
+    "education": "Education",
+    "government": "Government",
+    "transport": "Transport",
+    "entertainment": "Entertainment"
+  },
+  "photos": {
+    "title": "Business Photos",
+    "body": "Add photos to introduce your business.",
+    "add": "Add Photo"
+  },
+  "consents": {
+    "title": "Consents",
+    "body": "Choose what information visitors can see.",
+    "photos": "Show photos",
+    "social_links": "Show social media links",
+    "whatsapp_messages": "Allow WhatsApp messages",
+    "show_phone": "Show phone number",
+    "show_prices": "Show prices"
+  },
+  "otp": {
+    "title": "Verify Phone Number",
+    "sentTo": "We sent a 6-digit code to {phone}.",
+    "label": "Verification Code",
+    "submit": "Confirm",
+    "resend": "Resend Code",
+    "resendIn": "Resend available in {time}"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "status": "Account Status",
+    "draft": "Draft",
+    "pending": "Under Review",
+    "verified": "Verified",
+    "suspended": "Suspended"
+  },
+  "common": {
+    "selected": "Selected"
+  },
+  "errors": {
+    "provider_already_exists": "You already have a registered business.",
+    "phone_not_verified": "You must verify your phone number first.",
+    "invalid_request": "Check your input and try again."
+  }
+}

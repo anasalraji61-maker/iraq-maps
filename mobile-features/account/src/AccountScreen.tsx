@@ -48,6 +48,7 @@ export function AccountScreen(): ReactElement {
     <Screen scroll>
       {confirmingDelete ? null : banner}
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
+      <ListItem testID={testIDs.provider.entry} title={t('profile.registerBusiness')} onPress={() => router.push(href('providerRegister'))} />
       {languageItem}
       <Button testID={testIDs.account.logout} variant="secondary" label={t('profile.logout')} onPress={() => run(() => session.signOut())} loading={busy} />
       <Button testID={testIDs.account.delete} variant="danger" label={t('profile.delete')} onPress={() => setConfirmingDelete(true)} disabled={busy} />
