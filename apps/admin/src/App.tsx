@@ -3,6 +3,8 @@ import { api } from './api';
 import { LoginPage } from './pages/LoginPage';
 import { VerificationPage } from './pages/VerificationPage';
 import { AuditPage } from './pages/AuditPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { ReportedPostsPage } from './pages/ReportedPostsPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -36,8 +38,14 @@ function NavBar() {
       <span style={{ padding: '14px 0', color: '#fff', fontWeight: 700, fontSize: 16, marginInlineEnd: 24 }}>
         خرائط العراق — الإدارة
       </span>
+      <NavLink to="/dashboard" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        الرئيسية
+      </NavLink>
       <NavLink to="/verification" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         التوثيق
+      </NavLink>
+      <NavLink to="/reported-posts" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        المنشورات المُبلَّغ عنها
       </NavLink>
       <NavLink to="/audit" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         السجل
@@ -75,10 +83,26 @@ export function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
+            path="/dashboard"
+            element={
+              <AuthGate>
+                <Layout><DashboardPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
             path="/verification"
             element={
               <AuthGate>
                 <Layout><VerificationPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/reported-posts"
+            element={
+              <AuthGate>
+                <Layout><ReportedPostsPage /></Layout>
               </AuthGate>
             }
           />
@@ -90,7 +114,7 @@ export function App() {
               </AuthGate>
             }
           />
-          <Route path="*" element={<Navigate to="/verification" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
     </BrowserRouter>

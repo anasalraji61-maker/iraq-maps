@@ -12,6 +12,21 @@ export interface Provider {
   mediaAssetId?: string;
 }
 
+export interface ReportedPost {
+  id: string;
+  body: string;
+  authorName: string;
+  reportCount: number;
+  firstReportAt: string;
+}
+
+export interface Metrics {
+  totalUsers: number;
+  totalProviders: number;
+  postsToday: number;
+  pendingVerification: number;
+}
+
 export interface AuditEntry {
   id: string;
   action: string;
@@ -87,6 +102,14 @@ const mockAudit: AuditEntry[] = Array.from({ length: 20 }, (_, i) => ({
   providerNameAr: `متجر ${i + 1}`,
   adminUser: 'admin@iraq-maps.iq',
   timestamp: new Date(Date.now() - i * 3_600_000).toISOString(),
+}));
+
+let mockReportedPosts: ReportedPost[] = Array.from({ length: 8 }, (_, i) => ({
+  id: String(i + 1),
+  body: `هذا نص منشور تجريبي رقم ${i + 1} تم الإبلاغ عنه من قِبل المستخدمين.`,
+  authorName: `مستخدم ${i + 1}`,
+  reportCount: Math.floor(Math.random() * 10) + 1,
+  firstReportAt: new Date(Date.now() - i * 7_200_000).toISOString(),
 }));
 
 let useMock = false;
@@ -206,6 +229,44 @@ export const api = {
         adminUser: 'admin@iraq-maps.iq',
         timestamp: new Date().toISOString(),
       });
+    }
+  },
+
+  // TODO: connect to API
+  async getMetrics(): Promise<Metrics> {
+    try {
+      return await request<Metrics>('/v1/admin/metrics');
+    } catch {
+      return {
+        totalUsers: 1240,
+        totalProviders: mockProviders.length + 47,
+        postsToday: 34,
+        pendingVerification: mockProviders.length,
+      };
+    }
+  },
+
+  async getReportedPosts(): Promise<ReportedPost[]> {
+    try {
+      return await request<ReportedPost[]>('/v1/admin/posts/reported');
+    } catch {
+      return mockReportedPosts;
+    }
+  },
+
+  async approvePost(id: string): Promise<void> {
+    try {
+      await request<void>(`/v1/admin/posts/${id}/approve`, { method: 'PATCH' });
+    } catch {
+      mockReportedPosts = mockReportedPosts.filter((p) => p.id !== id);
+    }
+  },
+
+  async removePost(id: string): Promise<void> {
+    try {
+      await request<void>(`/v1/admin/posts/${id}`, { method: 'DELETE' });
+    } catch {
+      mockReportedPosts = mockReportedPosts.filter((p) => p.id !== id);
     }
   },
 
