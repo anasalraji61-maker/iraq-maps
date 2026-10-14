@@ -11,6 +11,9 @@ type Target = Parameters<typeof startOutboxRelay>[0]['target'];
 
 let tdb: TestDatabase;
 const cleanup: (() => Promise<unknown>)[] = [];
+
+describe.skipIf(!process.env['DATABASE_URL'])('outbox (integration)', () => {
+
 beforeAll(async () => {
   tdb = await createTestDatabase();
 });
@@ -180,3 +183,5 @@ eventBusConformance('outbox relay to BullMQ', () => {
   consume(queue.name, (event) => subscribers.publish(event));
   return viaOutbox(subscribers, relay({ redisUrl: connection.url, queue: queue.name }));
 });
+
+}); // describe.skipIf

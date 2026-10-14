@@ -17,6 +17,9 @@ const migrationsDir = (files: Record<string, string>) => {
 const rows = async (tdb: TestDatabase, query: string) => (await tdb.db.execute(sql.raw(query))).rows;
 
 let tdb: TestDatabase;
+
+describe.skipIf(!process.env['DATABASE_URL'])('db-kit (integration)', () => {
+
 beforeAll(async () => {
   tdb = await createTestDatabase();
 });
@@ -168,3 +171,5 @@ describe('createDb', () => {
     }
   });
 });
+
+}); // describe.skipIf
