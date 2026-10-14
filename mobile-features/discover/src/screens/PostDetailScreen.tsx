@@ -110,11 +110,15 @@ function CommentRow({ item }: { item: DiscoverCommentType }): ReactElement {
 }
 
 export function PostDetailScreen(): ReactElement {
-  const { postId } = useLocalSearchParams<{ postId: string }>();
+  const { postId, postJson } = useLocalSearchParams<{ postId: string; postJson?: string }>();
   const api = useDiscoverClient();
-  const [post, setPost] = useState<DiscoverPostType | undefined>();
+
+  // Parse post from navigation params (passed by DiscoverFeedScreen to avoid a redundant feed fetch)
+  const initialPost = postJson ? (() => { try { return JSON.parse(postJson) as DiscoverPostType; } catch { return undefined; } })() : undefined;
+
+  const [post] = useState<DiscoverPostType | undefined>(initialPost);
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPost);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [commentText, setCommentText] = useState('');
@@ -123,17 +127,10 @@ export function PostDetailScreen(): ReactElement {
 
   const loadData = useCallback(async (isRefresh = false) => {
     if (!postId) return;
-    if (isRefresh) setRefreshing(true); else setLoading(true);
+    if (isRefresh) setRefreshing(true); else if (!post) setLoading(true);
     setError(undefined);
     try {
-      const [feedRes, commentsRes] = await Promise.all([
-        api.listFeed({ query: { limit: 1 } }),
-        api.listComments({ params: { postId }, query: { limit: 20 } }),
-      ]);
-      if (feedRes.status === 200) {
-        const found = feedRes.body.items.find((p) => p.id === postId);
-        if (found) setPost(found);
-      }
+      const commentsRes = await api.listComments({ params: { postId }, query: { limit: 20 } });
       if (commentsRes.status === 200) {
         setComments(commentsRes.body.items);
       }
@@ -143,7 +140,7 @@ export function PostDetailScreen(): ReactElement {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [api, postId]);
+  }, [api, post, postId]);
 
   useEffect(() => { void loadData(false); }, [loadData]);
 

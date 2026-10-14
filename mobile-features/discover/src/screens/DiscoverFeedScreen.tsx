@@ -54,7 +54,7 @@ const PostItem = memo(function PostItem({
   placeName?: string;
   firstImageUrl?: string;
   onLike: (post: DiscoverPostType) => void;
-  onComment: (postId: string) => void;
+  onComment: (post: DiscoverPostType) => void;
   onPlacePress: (placeId: string) => void;
 }): ReactElement {
   const theme = useTheme();
@@ -108,7 +108,7 @@ const PostItem = memo(function PostItem({
         <Pressable
           testID={discoverTestIDs.commentButton(post.id)}
           style={[styles.actionBtn, { backgroundColor: theme.border }]}
-          onPress={() => onComment(post.id)}
+          onPress={() => onComment(post)}
           accessibilityRole="button"
         >
           <Text style={[styles.actionBtnText, { color: theme.textSecondary }]}>
@@ -251,8 +251,11 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api]);
 
-  const handleComment = useCallback((postId: string) => {
-    router.push({ pathname: '/discover/[postId]/index', params: { postId } });
+  const handleComment = useCallback((post: DiscoverPostType) => {
+    router.push({
+      pathname: '/discover/[postId]/index',
+      params: { postId: post.id, postJson: JSON.stringify(post) },
+    });
   }, [router]);
 
   const handlePlacePress = useCallback((placeId: string) => {
