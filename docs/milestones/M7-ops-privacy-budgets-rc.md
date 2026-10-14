@@ -251,3 +251,5 @@ No new events.
 | 2026-10-14 | post-M7 polish: assistant typing indicator, timestamps, place cards, quick replies | `80fea35` | — |
 | 2026-10-14 | post-M7 polish: provider dashboard analytics, inbox badges, profile photo | `d109852` | — |
 | 2026-10-14 | fix(activity): add missing tsconfig.json to fix typecheck | — | — |
+| 2026-10-14 | post-M7 polish: accessibility labels, dark mode tokens, map category icons | `7521174`, `fc77455`, `55b8993` | — |
+| 2026-10-14 | fix(ui,map): composite accessibility label for PlaceSummaryCard (test fixes) | `1c71715` | — |
