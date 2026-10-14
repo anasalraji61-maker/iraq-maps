@@ -3,46 +3,45 @@ import { Screen } from '@iraq-maps/ui';
 import { type ReactElement } from 'react';
 import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
+import licensesData from './licenses.generated.json';
 
 interface LicenseEntry {
   name: string;
+  version: string;
   license: string;
+  url: string;
+  summary?: boolean;
 }
 
-/** Key open-source packages used in the app and their SPDX license identifiers. */
-const OSS_LICENSES: LicenseEntry[] = [
-  { name: 'React Native', license: 'MIT' },
-  { name: 'Expo', license: 'MIT' },
-  { name: 'MapLibre GL Native', license: 'BSD-2-Clause' },
-  { name: 'OpenStreetMap data', license: 'ODbL-1.0' },
-  { name: 'Valhalla', license: 'MIT' },
-  { name: 'Photon', license: 'Apache-2.0' },
-  { name: 'PostgreSQL', license: 'PostgreSQL' },
-  { name: 'PostGIS', license: 'GPL-2.0' },
-  { name: 'NestJS', license: 'MIT' },
-  { name: 'pino', license: 'MIT' },
-  { name: 'zod', license: 'MIT' },
-  { name: 'ts-rest', license: 'MIT' },
-  { name: 'BullMQ', license: 'MIT' },
-  { name: 'Drizzle ORM', license: 'Apache-2.0' },
-];
+const LICENSES = licensesData as LicenseEntry[];
 
 function LicenseRow({ item }: { item: LicenseEntry }): ReactElement {
+  if (item.summary) {
+    return (
+      <View style={styles.summaryRow}>
+        <RNText style={styles.summaryText}>{item.name}</RNText>
+        <RNText style={styles.badge}>{item.license}</RNText>
+      </View>
+    );
+  }
   return (
     <View style={styles.row}>
-      <RNText style={styles.name}>{item.name}</RNText>
+      <View style={styles.nameCol}>
+        <RNText style={styles.name}>{item.name}</RNText>
+        {item.version ? <RNText style={styles.version}>{item.version}</RNText> : null}
+      </View>
       <RNText style={styles.badge}>{item.license}</RNText>
     </View>
   );
 }
 
-/** OSS licenses screen: lists all key open-source dependencies with their SPDX identifiers. */
+/** OSS licenses screen: generated from pnpm licenses list at build time. */
 export function LicensesScreen(): ReactElement {
   return (
     <Screen>
       <ScreenTitle title={t('licenses.title')} />
       <FlatList
-        data={OSS_LICENSES}
+        data={LICENSES}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => <LicenseRow item={item} />}
         ItemSeparatorComponent={() => <View style={styles.sep} />}
@@ -52,8 +51,12 @@ export function LicensesScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 },
-  name: { flex: 1, fontSize: 15 },
-  badge: { marginStart: 12, fontSize: 13, color: '#6B7280' },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
+  summaryRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, backgroundColor: '#F3F4F6', paddingHorizontal: 4, borderRadius: 6 },
+  nameCol: { flex: 1 },
+  name: { fontSize: 14 },
+  version: { fontSize: 11, color: '#9CA3AF', marginTop: 1 },
+  summaryText: { flex: 1, fontSize: 14, fontWeight: '600' },
+  badge: { marginStart: 8, fontSize: 11, color: '#6B7280' },
   sep: { height: StyleSheet.hairlineWidth, backgroundColor: '#E5E7EB' },
 });

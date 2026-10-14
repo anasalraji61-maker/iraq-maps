@@ -1,0 +1,723 @@
+[
+  {
+    "name": "MIT packages (627 total)",
+    "version": "",
+    "license": "MIT",
+    "url": "https://opensource.org/license/mit",
+    "summary": true
+  },
+  {
+    "name": "@eslint/config-array",
+    "version": "0.23.5",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/rewrite/tree/main/packages/config-array#readme"
+  },
+  {
+    "name": "@eslint/config-helpers",
+    "version": "0.7.0",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/rewrite/tree/main/packages/config-helpers#readme"
+  },
+  {
+    "name": "@eslint/core",
+    "version": "1.2.1",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/rewrite/tree/main/packages/core#readme"
+  },
+  {
+    "name": "@eslint/object-schema",
+    "version": "3.0.5",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/rewrite/tree/main/packages/object-schema#readme"
+  },
+  {
+    "name": "@eslint/plugin-kit",
+    "version": "0.7.3",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/rewrite/tree/main/packages/plugin-kit#readme"
+  },
+  {
+    "name": "@expo-google-fonts/material-symbols",
+    "version": "0.4.49",
+    "license": "MIT AND Apache-2.0",
+    "url": "https://github.com/expo/google-fonts/tree/master/font-packages/material-symbols#readme"
+  },
+  {
+    "name": "@expo-google-fonts/noto-sans-arabic",
+    "version": "0.4.3",
+    "license": "MIT AND OFL-1.1",
+    "url": "https://github.com/expo/google-fonts/tree/master/font-packages/noto-sans-arabic#readme"
+  },
+  {
+    "name": "@humanfs/core",
+    "version": "0.19.2",
+    "license": "Apache-2.0",
+    "url": "https://github.com/humanwhocodes/humanfs#readme"
+  },
+  {
+    "name": "@humanfs/node",
+    "version": "0.16.8",
+    "license": "Apache-2.0",
+    "url": "https://github.com/humanwhocodes/humanfs#readme"
+  },
+  {
+    "name": "@humanfs/types",
+    "version": "0.15.0",
+    "license": "Apache-2.0",
+    "url": "https://github.com/humanwhocodes/humanfs#readme"
+  },
+  {
+    "name": "@humanwhocodes/module-importer",
+    "version": "1.0.1",
+    "license": "Apache-2.0",
+    "url": "https://github.com/humanwhocodes/module-importer#readme"
+  },
+  {
+    "name": "@humanwhocodes/retry",
+    "version": "0.4.3",
+    "license": "Apache-2.0",
+    "url": "https://github.com/humanwhocodes/retry#readme"
+  },
+  {
+    "name": "@isaacs/ttlcache",
+    "version": "1.4.1",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/ttlcache#readme"
+  },
+  {
+    "name": "@istanbuljs/load-nyc-config",
+    "version": "1.1.0",
+    "license": "ISC",
+    "url": "https://github.com/istanbuljs/load-nyc-config#readme"
+  },
+  {
+    "name": "@mapbox/unitbezier",
+    "version": "1.0.0",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/mapbox/unitbezier"
+  },
+  {
+    "name": "@maplibre/maplibre-gl-style-spec",
+    "version": "26.2.1",
+    "license": "ISC",
+    "url": "https://maplibre.org/maplibre-style-spec/"
+  },
+  {
+    "name": "@maplibre/maplibre-react-native",
+    "version": "11.5.0",
+    "license": "MIT",
+    "url": "https://github.com/maplibre/maplibre-react-native#readme"
+  },
+  {
+    "name": "@react-native/debugger-frontend",
+    "version": "0.86.3",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/react/react-native/tree/HEAD/packages/debugger-frontend#readme"
+  },
+  {
+    "name": "@sinonjs/commons",
+    "version": "3.0.1",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/sinonjs/commons#readme"
+  },
+  {
+    "name": "@sinonjs/fake-timers",
+    "version": "10.3.0",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/sinonjs/fake-timers"
+  },
+  {
+    "name": "@ungap/structured-clone",
+    "version": "1.4.0",
+    "license": "ISC",
+    "url": "https://github.com/ungap/structured-clone#readme"
+  },
+  {
+    "name": "anymatch",
+    "version": "3.1.3",
+    "license": "ISC",
+    "url": "https://github.com/micromatch/anymatch"
+  },
+  {
+    "name": "argparse",
+    "version": "2.0.1",
+    "license": "Python-2.0",
+    "url": "https://github.com/nodeca/argparse#readme"
+  },
+  {
+    "name": "babel-plugin-istanbul",
+    "version": "6.1.1",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/istanbuljs/babel-plugin-istanbul#readme"
+  },
+  {
+    "name": "baseline-browser-mapping",
+    "version": "2.11.27",
+    "license": "Apache-2.0",
+    "url": "https://github.com/web-platform-dx/baseline-browser-mapping#readme"
+  },
+  {
+    "name": "big-integer",
+    "version": "1.6.52",
+    "license": "Unlicense",
+    "url": "https://github.com/peterolson/BigInteger.js#readme"
+  },
+  {
+    "name": "bser",
+    "version": "2.1.1",
+    "license": "Apache-2.0",
+    "url": "https://facebook.github.io/watchman/docs/bser.html"
+  },
+  {
+    "name": "caniuse-lite",
+    "version": "1.0.30001815",
+    "license": "CC-BY-4.0",
+    "url": "https://github.com/browserslist/caniuse-lite#readme"
+  },
+  {
+    "name": "chrome-launcher",
+    "version": "0.15.2",
+    "license": "Apache-2.0",
+    "url": "https://github.com/GoogleChrome/chrome-launcher#readme"
+  },
+  {
+    "name": "chromium-edge-launcher",
+    "version": "0.3.0",
+    "license": "Apache-2.0",
+    "url": "https://github.com/cezaraugusto/chromium-edge-launcher#readme"
+  },
+  {
+    "name": "cliui",
+    "version": "8.0.1",
+    "license": "ISC",
+    "url": "https://github.com/yargs/cliui#readme"
+  },
+  {
+    "name": "detect-libc",
+    "version": "2.1.2",
+    "license": "Apache-2.0",
+    "url": "https://github.com/lovell/detect-libc#readme"
+  },
+  {
+    "name": "electron-to-chromium",
+    "version": "1.5.451",
+    "license": "ISC",
+    "url": "https://github.com/Kilian/electron-to-chromium#readme"
+  },
+  {
+    "name": "eslint-plugin-i18next",
+    "version": "6.1.5",
+    "license": "ISC",
+    "url": "https://github.com/edvardchen/eslint-plugin-i18next#readme"
+  },
+  {
+    "name": "eslint-scope",
+    "version": "9.1.2",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/eslint/js/blob/main/packages/eslint-scope/README.md"
+  },
+  {
+    "name": "eslint-visitor-keys",
+    "version": "3.4.3",
+    "license": "Apache-2.0",
+    "url": "https://github.com/eslint/js/blob/main/packages/eslint-visitor-keys/README.md"
+  },
+  {
+    "name": "espree",
+    "version": "11.2.0",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/eslint/js/blob/main/packages/espree/README.md"
+  },
+  {
+    "name": "esprima",
+    "version": "4.0.1",
+    "license": "BSD-2-Clause",
+    "url": "http://esprima.org"
+  },
+  {
+    "name": "esquery",
+    "version": "1.7.0",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/estools/esquery/"
+  },
+  {
+    "name": "esrecurse",
+    "version": "4.3.0",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/estools/esrecurse"
+  },
+  {
+    "name": "estraverse",
+    "version": "5.3.0",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/estools/estraverse"
+  },
+  {
+    "name": "esutils",
+    "version": "2.0.3",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/estools/esutils"
+  },
+  {
+    "name": "expo",
+    "version": "57.0.27",
+    "license": "MIT",
+    "url": "https://github.com/expo/expo/tree/main/packages/expo"
+  },
+  {
+    "name": "exponential-backoff",
+    "version": "3.1.3",
+    "license": "Apache-2.0",
+    "url": "https://github.com/coveooss/exponential-backoff#readme"
+  },
+  {
+    "name": "fast-uri",
+    "version": "3.1.8",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/fastify/fast-uri"
+  },
+  {
+    "name": "fb-dotslash",
+    "version": "0.5.8",
+    "license": "(MIT OR Apache-2.0)",
+    "url": "https://dotslash-cli.com/"
+  },
+  {
+    "name": "fb-watchman",
+    "version": "2.0.2",
+    "license": "Apache-2.0",
+    "url": "https://facebook.github.io/watchman/"
+  },
+  {
+    "name": "flatted",
+    "version": "3.4.4",
+    "license": "ISC",
+    "url": "https://github.com/WebReflection/flatted#readme"
+  },
+  {
+    "name": "fontfaceobserver",
+    "version": "2.3.0",
+    "license": "BSD-2-Clause",
+    "url": "https://fontfaceobserver.com/"
+  },
+  {
+    "name": "fs.realpath",
+    "version": "1.0.0",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/fs.realpath#readme"
+  },
+  {
+    "name": "get-caller-file",
+    "version": "2.0.5",
+    "license": "ISC",
+    "url": "https://github.com/stefanpenner/get-caller-file#readme"
+  },
+  {
+    "name": "glob",
+    "version": "7.2.3",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/node-glob#readme"
+  },
+  {
+    "name": "glob",
+    "version": "13.0.6",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/node-glob#readme"
+  },
+  {
+    "name": "glob-parent",
+    "version": "6.0.2",
+    "license": "ISC",
+    "url": "https://github.com/gulpjs/glob-parent#readme"
+  },
+  {
+    "name": "graceful-fs",
+    "version": "4.2.11",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/node-graceful-fs#readme"
+  },
+  {
+    "name": "hosted-git-info",
+    "version": "7.0.2",
+    "license": "ISC",
+    "url": "https://github.com/npm/hosted-git-info"
+  },
+  {
+    "name": "human-signals",
+    "version": "2.1.0",
+    "license": "Apache-2.0",
+    "url": "https://git.io/JeluP"
+  },
+  {
+    "name": "inflight",
+    "version": "1.0.6",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/inflight"
+  },
+  {
+    "name": "inherits",
+    "version": "2.0.4",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/inherits#readme"
+  },
+  {
+    "name": "isexe",
+    "version": "2.0.0",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/isexe#readme"
+  },
+  {
+    "name": "istanbul-lib-coverage",
+    "version": "3.2.2",
+    "license": "BSD-3-Clause",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "istanbul-lib-instrument",
+    "version": "5.2.1",
+    "license": "BSD-3-Clause",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "istanbul-lib-report",
+    "version": "3.0.1",
+    "license": "BSD-3-Clause",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "istanbul-lib-source-maps",
+    "version": "4.0.1",
+    "license": "BSD-3-Clause",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "istanbul-reports",
+    "version": "3.2.0",
+    "license": "BSD-3-Clause",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "jsc-safe-url",
+    "version": "0.2.4",
+    "license": "0BSD",
+    "url": "https://github.com/robhogan/jsc-safe-url#readme"
+  },
+  {
+    "name": "lighthouse-logger",
+    "version": "1.4.2",
+    "license": "Apache-2.0",
+    "url": ""
+  },
+  {
+    "name": "lightningcss",
+    "version": "1.33.0",
+    "license": "MPL-2.0",
+    "url": "https://github.com/parcel-bundler/lightningcss#readme"
+  },
+  {
+    "name": "lightningcss-linux-x64-gnu",
+    "version": "1.33.0",
+    "license": "MPL-2.0",
+    "url": "https://github.com/parcel-bundler/lightningcss#readme"
+  },
+  {
+    "name": "lightningcss-linux-x64-musl",
+    "version": "1.33.0",
+    "license": "MPL-2.0",
+    "url": "https://github.com/parcel-bundler/lightningcss#readme"
+  },
+  {
+    "name": "lru-cache",
+    "version": "5.1.1",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/node-lru-cache#readme"
+  },
+  {
+    "name": "lru-cache",
+    "version": "11.5.3",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/node-lru-cache#readme"
+  },
+  {
+    "name": "makeerror",
+    "version": "1.0.12",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/daaku/nodejs-makeerror#readme"
+  },
+  {
+    "name": "marky",
+    "version": "1.3.0",
+    "license": "Apache-2.0",
+    "url": "https://github.com/nolanlawson/marky#readme"
+  },
+  {
+    "name": "minimatch",
+    "version": "3.1.5",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/minimatch#readme"
+  },
+  {
+    "name": "minimatch",
+    "version": "10.2.6",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/minimatch#readme"
+  },
+  {
+    "name": "minipass",
+    "version": "7.1.3",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/minipass#readme"
+  },
+  {
+    "name": "node-forge",
+    "version": "1.4.0",
+    "license": "(BSD-3-Clause OR GPL-2.0)",
+    "url": "https://github.com/digitalbazaar/forge"
+  },
+  {
+    "name": "npm-package-arg",
+    "version": "11.0.3",
+    "license": "ISC",
+    "url": "https://github.com/npm/npm-package-arg"
+  },
+  {
+    "name": "once",
+    "version": "1.4.0",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/once#readme"
+  },
+  {
+    "name": "OpenStreetMap contributors",
+    "version": "",
+    "license": "ODbL-1.0",
+    "url": "https://www.openstreetmap.org/copyright"
+  },
+  {
+    "name": "path-scurry",
+    "version": "2.0.2",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/path-scurry#readme"
+  },
+  {
+    "name": "picocolors",
+    "version": "1.1.1",
+    "license": "ISC",
+    "url": "https://github.com/alexeyraspopov/picocolors#readme"
+  },
+  {
+    "name": "proc-log",
+    "version": "4.2.0",
+    "license": "ISC",
+    "url": "https://github.com/npm/proc-log#readme"
+  },
+  {
+    "name": "quickselect",
+    "version": "3.0.0",
+    "license": "ISC",
+    "url": "https://github.com/mourner/quickselect#readme"
+  },
+  {
+    "name": "react",
+    "version": "19.2.3",
+    "license": "MIT",
+    "url": "https://react.dev/"
+  },
+  {
+    "name": "react-helmet-async",
+    "version": "1.3.0",
+    "license": "Apache-2.0",
+    "url": "https://github.com/staylor/react-helmet-async#readme"
+  },
+  {
+    "name": "react-native",
+    "version": "0.86.3",
+    "license": "MIT",
+    "url": "https://reactnative.dev/"
+  },
+  {
+    "name": "react-native-helmet-async",
+    "version": "2.0.4",
+    "license": "Apache-2.0",
+    "url": "https://github.com/staylor/react-helmet-async#readme"
+  },
+  {
+    "name": "regjsparser",
+    "version": "0.13.4",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/jviereck/regjsparser"
+  },
+  {
+    "name": "sax",
+    "version": "1.6.1",
+    "license": "BlueOak-1.0.0",
+    "url": "https://github.com/isaacs/sax-js#readme"
+  },
+  {
+    "name": "semver",
+    "version": "6.3.1",
+    "license": "ISC",
+    "url": "https://github.com/npm/node-semver#readme"
+  },
+  {
+    "name": "setprototypeof",
+    "version": "1.2.0",
+    "license": "ISC",
+    "url": "https://github.com/wesleytodd/setprototypeof"
+  },
+  {
+    "name": "signal-exit",
+    "version": "3.0.7",
+    "license": "ISC",
+    "url": "https://github.com/tapjs/signal-exit"
+  },
+  {
+    "name": "source-map",
+    "version": "0.5.7",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/mozilla/source-map"
+  },
+  {
+    "name": "source-map-js",
+    "version": "1.2.2",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/7rulnik/source-map-js"
+  },
+  {
+    "name": "split2",
+    "version": "4.2.0",
+    "license": "ISC",
+    "url": "https://github.com/mcollina/split2#readme"
+  },
+  {
+    "name": "sprintf-js",
+    "version": "1.0.3",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/alexei/sprintf.js#readme"
+  },
+  {
+    "name": "stream-buffers",
+    "version": "2.2.0",
+    "license": "Unlicense",
+    "url": "https://github.com/samcday/node-stream-buffer#readme"
+  },
+  {
+    "name": "terser",
+    "version": "5.51.2",
+    "license": "BSD-2-Clause",
+    "url": "https://terser.org"
+  },
+  {
+    "name": "test-exclude",
+    "version": "6.0.0",
+    "license": "ISC",
+    "url": "https://istanbul.js.org/"
+  },
+  {
+    "name": "tinyqueue",
+    "version": "3.0.0",
+    "license": "ISC",
+    "url": "https://github.com/mourner/tinyqueue"
+  },
+  {
+    "name": "tmpl",
+    "version": "1.0.5",
+    "license": "BSD-3-Clause",
+    "url": "https://github.com/daaku/nodejs-tmpl"
+  },
+  {
+    "name": "tslib",
+    "version": "2.8.1",
+    "license": "0BSD",
+    "url": "https://www.typescriptlang.org/"
+  },
+  {
+    "name": "type-fest",
+    "version": "0.7.1",
+    "license": "(MIT OR CC0-1.0)",
+    "url": "https://github.com/sindresorhus/type-fest#readme"
+  },
+  {
+    "name": "typescript",
+    "version": "6.0.3",
+    "license": "Apache-2.0",
+    "url": "https://www.typescriptlang.org/"
+  },
+  {
+    "name": "uri-js",
+    "version": "4.4.1",
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/garycourt/uri-js"
+  },
+  {
+    "name": "v8-to-istanbul",
+    "version": "9.3.0",
+    "license": "ISC",
+    "url": "https://github.com/istanbuljs/v8-to-istanbul#readme"
+  },
+  {
+    "name": "validate-npm-package-name",
+    "version": "5.0.1",
+    "license": "ISC",
+    "url": "https://github.com/npm/validate-npm-package-name"
+  },
+  {
+    "name": "walker",
+    "version": "1.0.8",
+    "license": "Apache-2.0",
+    "url": "https://github.com/daaku/nodejs-walker"
+  },
+  {
+    "name": "which",
+    "version": "2.0.2",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/node-which#readme"
+  },
+  {
+    "name": "wrappy",
+    "version": "1.0.2",
+    "license": "ISC",
+    "url": "https://github.com/npm/wrappy"
+  },
+  {
+    "name": "write-file-atomic",
+    "version": "4.0.2",
+    "license": "ISC",
+    "url": "https://github.com/npm/write-file-atomic"
+  },
+  {
+    "name": "xcode",
+    "version": "3.0.1",
+    "license": "Apache-2.0",
+    "url": "https://github.com/apache/cordova-node-xcode#readme"
+  },
+  {
+    "name": "y18n",
+    "version": "5.0.8",
+    "license": "ISC",
+    "url": "https://github.com/yargs/y18n"
+  },
+  {
+    "name": "yallist",
+    "version": "3.1.1",
+    "license": "ISC",
+    "url": "https://github.com/isaacs/yallist#readme"
+  },
+  {
+    "name": "yaml",
+    "version": "2.9.1",
+    "license": "ISC",
+    "url": "https://eemeli.org/yaml/"
+  },
+  {
+    "name": "yargs-parser",
+    "version": "21.1.1",
+    "license": "ISC",
+    "url": "https://github.com/yargs/yargs-parser#readme"
+  },
+  {
+    "name": "zod",
+    "version": "3.25.76",
+    "license": "MIT",
+    "url": "https://zod.dev"
+  }
+]
