@@ -5,6 +5,7 @@
     "send": "Send",
     "compose": "Message Provider",
     "loading": "Thinking...",
-    "error": "An error occurred, please try again"
+    "error": "An error occurred, please try again",
+    "showOnMap": "Show on Map"
   }
 }

@@ -1,6 +1,6 @@
 import { assistantTestIDs } from '@iraq-maps/contracts';
 import { useRouter } from 'expo-router';
-import { useState, useRef, type ReactElement } from 'react';
+import { useState, useRef, useEffect, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -13,7 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useAssistantChat } from '../hooks/useAssistantChat';
+import { useAssistantChat, loadPersistedSessionId } from '../hooks/useAssistantChat';
 import { t } from '../strings';
 
 // Force RTL for Arabic
@@ -23,7 +23,6 @@ function generateSessionId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-  // Fallback for older environments
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -31,19 +30,33 @@ function generateSessionId(): string {
   });
 }
 
+function formatTime(ts: number): string {
+  const d = new Date(ts);
+  const h = d.getHours().toString().padStart(2, '0');
+  const m = d.getMinutes().toString().padStart(2, '0');
+  return `${h}:${m}`;
+}
+
 export function AssistantChatScreen(): ReactElement {
-  const [sessionId] = useState<string>(generateSessionId);
+  const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
-  const { messages, send, isLoading, composeParams, error } = useAssistantChat(sessionId);
+  const { messages, send, isLoading, composeParams, focusPlaceId, error } =
+    useAssistantChat(sessionId);
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
+
+  // Resume the persisted session on mount
+  useEffect(() => {
+    loadPersistedSessionId().then((saved) => {
+      if (saved) setSessionId(saved);
+    });
+  }, []);
 
   const handleSend = async () => {
     const text = inputText.trim();
     if (!text || isLoading) return;
     setInputText('');
     await send(text);
-    // Scroll to bottom after send
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
@@ -75,20 +88,35 @@ export function AssistantChatScreen(): ReactElement {
         contentContainerStyle={styles.listContent}
         renderItem={({ item, index }) => (
           <View
-            testID={assistantTestIDs.messageItem(index)}
             style={[
-              styles.bubble,
-              item.role === 'user' ? styles.userBubble : styles.assistantBubble,
+              styles.messageRow,
+              item.role === 'user' ? styles.messageRowEnd : styles.messageRowStart,
             ]}
           >
-            <Text
+            <View
+              testID={assistantTestIDs.messageItem(index)}
               style={[
-                styles.bubbleText,
-                item.role === 'user' ? styles.userText : styles.assistantText,
+                styles.bubble,
+                item.role === 'user' ? styles.userBubble : styles.assistantBubble,
               ]}
             >
-              {item.content}
-            </Text>
+              <Text
+                style={[
+                  styles.bubbleText,
+                  item.role === 'user' ? styles.userText : styles.assistantText,
+                ]}
+              >
+                {item.content}
+              </Text>
+              <Text
+                style={[
+                  styles.timestamp,
+                  item.role === 'user' ? styles.timestampUser : styles.timestampAssistant,
+                ]}
+              >
+                {formatTime(item.timestamp)}
+              </Text>
+            </View>
           </View>
         )}
         ListFooterComponent={
@@ -105,6 +133,16 @@ export function AssistantChatScreen(): ReactElement {
         <View style={styles.errorRow}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
+      ) : null}
+
+      {focusPlaceId ? (
+        <Pressable
+          testID="assistant.map.deeplink"
+          style={styles.mapBtn}
+          onPress={() => router.push(`/?focusPlaceId=${focusPlaceId}`)}
+        >
+          <Text style={styles.mapBtnText}>{t('chat.showOnMap')}</Text>
+        </Pressable>
       ) : null}
 
       {composeParams ? (
@@ -145,7 +183,7 @@ export function AssistantChatScreen(): ReactElement {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FAFAFA',
   },
   header: {
     backgroundColor: '#1976D2',
@@ -162,22 +200,30 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 8,
   },
+  messageRow: {
+    marginVertical: 4,
+  },
+  messageRowEnd: {
+    alignItems: 'flex-end',
+  },
+  messageRowStart: {
+    alignItems: 'flex-start',
+  },
   bubble: {
     maxWidth: '80%',
-    marginVertical: 4,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 16,
   },
   userBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#1976D2',
+    backgroundColor: '#1565C0',
     borderBottomEndRadius: 4,
   },
   assistantBubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#F5F5F5',
     borderBottomStartRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   bubbleText: {
     fontSize: 15,
@@ -188,7 +234,19 @@ const styles = StyleSheet.create({
     textAlign: 'auto',
   },
   assistantText: {
-    color: '#222',
+    color: '#212121',
+    textAlign: 'auto',
+  },
+  timestamp: {
+    fontSize: 11,
+    marginTop: 4,
+  },
+  timestampUser: {
+    color: 'rgba(255,255,255,0.7)',
+    textAlign: 'auto',
+  },
+  timestampAssistant: {
+    color: '#9E9E9E',
     textAlign: 'auto',
   },
   loadingRow: {
@@ -211,6 +269,20 @@ const styles = StyleSheet.create({
     color: '#C62828',
     fontSize: 13,
     textAlign: 'auto',
+  },
+  mapBtn: {
+    marginHorizontal: 12,
+    marginBottom: 4,
+    backgroundColor: '#1976D2',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  mapBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   composeBtn: {
     marginHorizontal: 12,
