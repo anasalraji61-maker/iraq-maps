@@ -251,7 +251,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             ListHeaderComponent={
               <>
                 {search.state?.status === 'failed' && search.state.message === globalT('common:errors.network')
-                  ? <Banner kind="error" message={t('search.networkError')} />
+                  ? <Banner kind="error" message={globalT('common:errors.network')} onRetry={search.retry} retryLabel={globalT('common:actions.retry')} />
                   : <LoadStatus {...search} />}
                 {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
               </>

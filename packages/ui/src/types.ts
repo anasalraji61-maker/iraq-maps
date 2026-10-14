@@ -55,7 +55,7 @@ export interface PlaceSummaryCardProps extends Base {
 }
 export interface CardProps extends Base { children: ReactNode; onPress?(): void; accessibilityLabel?: string }
 export interface SheetProps extends Base { visible: boolean; onClose(): void; children: ReactNode }
-export interface BannerProps extends Base { kind: 'info' | 'success' | 'error'; message: string }
+export interface BannerProps extends Base { kind: 'info' | 'success' | 'error'; message: string; onRetry?(): void; retryLabel?: string }
 export interface EmptyStateProps extends Base { title: string; body?: string; action?: { label: string; onPress(): void } }
 export interface IconButtonProps extends Base { icon: string; accessibilityLabel: string; onPress(): void }
 

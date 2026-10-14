@@ -208,18 +208,30 @@ export function Sheet({ visible, onClose, children, testID }: SheetProps): React
   );
 }
 
-export function Banner({ kind, message, testID }: BannerProps): ReactElement {
+export function Banner({ kind, message, onRetry, retryLabel, testID }: BannerProps): ReactElement {
   const { bg, fg } = bannerColors[kind];
   useAnnounce(message);
   return (
-    <View
-      testID={testID}
-      accessible
-      accessibilityRole={kind === 'error' ? 'alert' : undefined}
-      style={[styles.banner, { backgroundColor: bg, borderStartColor: fg }]}
-    >
-      <RNText style={[text.body, { color: fg }]}>{message}</RNText>
-    </View>
+    <>
+      <View
+        testID={testID}
+        accessible
+        accessibilityRole={kind === 'error' ? 'alert' : undefined}
+        style={[styles.banner, { backgroundColor: bg, borderStartColor: fg }]}
+      >
+        <RNText style={[text.body, { color: fg }]}>{message}</RNText>
+      </View>
+      {onRetry ? (
+        <Pressable
+          onPress={onRetry}
+          accessibilityRole="button"
+          accessibilityLabel={retryLabel}
+          style={{ paddingVertical: tokens.space.xs }}
+        >
+          <RNText style={[text.body, { color: fg }]}>{retryLabel}</RNText>
+        </Pressable>
+      ) : null}
+    </>
   );
 }
 
