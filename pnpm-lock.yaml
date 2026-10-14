@@ -503,6 +503,9 @@ importers:
       '@iraq-maps/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@iraq-maps/geo':
+        specifier: workspace:*
+        version: link:../../packages/geo
       '@iraq-maps/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

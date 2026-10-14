@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/geo": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/map-kit": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",

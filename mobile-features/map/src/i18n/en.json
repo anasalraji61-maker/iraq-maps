@@ -46,6 +46,7 @@
   },
   "locate": {
     "label": "My location",
+    "addressLabel": "Your current location",
     "denied": "Location access is off, so the map cannot show where you are. You can allow it in your phone's settings.",
     "unavailable": "Your location could not be found. Make sure location services are on, then try again."
   },

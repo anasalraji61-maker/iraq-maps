@@ -71,19 +71,35 @@ interface Props {
   onStart: () => void;
   isLoading?: boolean;
   error?: string;
+  /** Formatted address of the origin (current location). Shown at the top of the preview. */
+  originAddress?: string;
+  /** Formatted address of the destination. Shown below the route summary. */
+  destinationAddress?: string;
 }
 
-export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoading, error }: Props): ReactElement {
+export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoading, error, originAddress, destinationAddress }: Props): ReactElement {
   const eta = new Date(Date.now() + route.durationS * 1000);
   // Show all maneuvers except the final "arrive" step in the step list
   const steps = route.maneuvers.filter((m) => m.type !== 'arrive');
 
   return (
     <Screen testID={navigationTestIDs.preview.view}>
+      {originAddress ? (
+        <View style={styles.addressRow}>
+          <Text variant="caption" tone="muted">{'من: '}</Text>
+          <Text variant="caption" tone="muted">{originAddress}</Text>
+        </View>
+      ) : null}
       <Text variant="title" testID={navigationTestIDs.preview.summary}>
         {fmtDist(route.distanceM)} · {fmtDuration(route.durationS)}
       </Text>
       <Text tone="muted">{`تصل الساعة ${fmtEta(eta)}`}</Text>
+      {destinationAddress ? (
+        <View style={styles.addressRow}>
+          <Text variant="caption" tone="muted">{'إلى: '}</Text>
+          <Text variant="caption" tone="muted">{destinationAddress}</Text>
+        </View>
+      ) : null}
 
       <View style={styles.modeRow}>
         <Button
@@ -124,4 +140,5 @@ const styles = StyleSheet.create({
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.s, paddingVertical: space.xs, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.border },
   stepIcon: { width: 28, alignItems: 'center' },
   stepBody: { flex: 1, gap: 2 },
+  addressRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 2 },
 });

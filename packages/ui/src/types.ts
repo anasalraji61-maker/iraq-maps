@@ -43,6 +43,8 @@ export interface PlaceSummaryCardProps extends Base {
   category?: string;
   /** The neighbourhood. */
   area?: string;
+  /** Formatted Iraqi address shown as a subtitle below area, e.g. "شارع الرشيد، الكرخ، بغداد". */
+  address?: string;
   /** Already formatted for the locale, e.g. "١٫٢ كم". */
   distance?: string;
   /** The source badge, e.g. "OpenStreetMap". */

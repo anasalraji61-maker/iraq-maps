@@ -1,4 +1,5 @@
 import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceSummary } from '@iraq-maps/contracts';
+import { formatIraqiAddress } from '@iraq-maps/geo';
 import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
 import { href, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
@@ -74,6 +75,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   // Search ranks near the last place the map settled on (a pan, or locate-me), the city centre at first.
   const [near, setNear] = useState<LngLat>(city.center);
   const [locateError, setLocateError] = useState<string>();
+  const [locationAddress, setLocationAddress] = useState<string>();
   const [query, setQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
@@ -147,6 +149,24 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
       setLocated(true);
       setNear(point);
       setCamera({ center: point, zoom: LOCATED_ZOOM });
+      // Reverse geocode: find nearest named places to build an address label
+      try {
+        const nearbyResult = await api.places.nearby({
+          query: { city: city.id, near: point.map((v) => v.toFixed(6)).join(','), radiusM: 200, limit: 5 },
+        });
+        if (nearbyResult.status === 200) {
+          const items = nearbyResult.body.items;
+          const area = items.find((p) => p.kind === 'area');
+          const street = items.find((p) => p.kind === 'street');
+          const addr = formatIraqiAddress({
+            street: street ? pickName(street.names, mapLang) : undefined,
+            neighborhood: area ? pickName(area.names, mapLang) : undefined,
+          });
+          if (addr) setLocationAddress(addr);
+        }
+      } catch {
+        // address display is best-effort; ignore errors
+      }
     } catch {
       setLocateError(t('locate.unavailable'));
     }
@@ -195,6 +215,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           <SatelliteToggle active={mapMode === 'satellite'} onToggle={() => setMapMode((m) => (m === 'satellite' ? 'street' : 'satellite'))} />
           <IconButton testID={testIDs.map.lang} icon="translate" accessibilityLabel={t('lang.title')} onPress={() => setChoosingLang(true)} />
         </View>
+        {locationAddress ? (
+          <Text variant="caption" tone="muted">{`${t('locate.addressLabel')}: ${locationAddress}`}</Text>
+        ) : null}
         {locateError ? <Banner kind="error" message={locateError} /> : null}
         {focusBanner ? <Banner kind="info" message={focusBanner} /> : null}
         {searchPanelOpen && !q && recentSearches.length > 0 ? (

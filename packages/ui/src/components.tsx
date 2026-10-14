@@ -172,10 +172,10 @@ export function Badge({ label, testID }: BadgeProps): ReactElement {
   );
 }
 
-/** Name and distance on the first line, category, area and source badge on the second; both lines start at the logical start. */
-export function PlaceSummaryCard({ name, category, area, distance, source, onPress, testID, accessibilityLabel }: PlaceSummaryCardProps): ReactElement {
+/** Name and distance on the first line, category, area and source badge on the second, address on a third line; both lines start at the logical start. */
+export function PlaceSummaryCard({ name, category, area, address, distance, source, onPress, testID, accessibilityLabel }: PlaceSummaryCardProps): ReactElement {
   const details = [category, area].filter(Boolean).join(' · ');
-  const autoLabel = [name, distance, details, source].filter(Boolean).join(' ');
+  const autoLabel = [name, distance, details, address, source].filter(Boolean).join(' ');
   return (
     <Card onPress={onPress} testID={testID} accessibilityLabel={accessibilityLabel ?? autoLabel}>
       <View style={styles.line}>
@@ -187,6 +187,9 @@ export function PlaceSummaryCard({ name, category, area, distance, source, onPre
           <RNText style={[text.caption, styles.fill, { color: color.textMuted }]}>{details}</RNText>
           {source ? <Badge label={source} /> : null}
         </View>
+      ) : null}
+      {address ? (
+        <RNText style={[text.caption, { color: color.textMuted }]} numberOfLines={1}>{address}</RNText>
       ) : null}
     </Card>
   );

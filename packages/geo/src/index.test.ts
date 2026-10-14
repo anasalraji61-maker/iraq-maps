@@ -1,6 +1,6 @@
 import type { BBox, LngLat } from '@iraq-maps/contracts';
 import { describe, expect, it } from 'vitest';
-import { bboxContains, bboxOf, cameraBounds, haversineM } from './index';
+import { bboxContains, bboxOf, cameraBounds, formatIraqiAddress, haversineM } from './index';
 
 const baghdad: LngLat = [44.3661, 33.3152];
 const erbil: LngLat = [44.0092, 36.1911];
@@ -47,6 +47,25 @@ describe('bboxContains', () => {
 
   it('excludes points outside on any side', () => {
     for (const p of [[43.999, 33.5], [45.001, 33.5], [44.5, 32.999], [44.5, 34.001]] satisfies LngLat[]) expect(bboxContains(box, p)).toBe(false);
+  });
+});
+
+describe('formatIraqiAddress', () => {
+  it('joins all parts with Arabic comma', () => {
+    expect(formatIraqiAddress({ street: 'شارع الرشيد', neighborhood: 'الكرخ', city: 'بغداد' }))
+      .toBe('شارع الرشيد، الكرخ، بغداد');
+  });
+
+  it('omits null and undefined parts gracefully', () => {
+    expect(formatIraqiAddress({ street: undefined, neighborhood: 'الكرادة', city: 'بغداد' }))
+      .toBe('الكرادة، بغداد');
+    expect(formatIraqiAddress({ street: null, neighborhood: null, city: 'بغداد' }))
+      .toBe('بغداد');
+  });
+
+  it('returns empty string when all parts are absent', () => {
+    expect(formatIraqiAddress({})).toBe('');
+    expect(formatIraqiAddress({ street: null, neighborhood: null, city: null })).toBe('');
   });
 });
 

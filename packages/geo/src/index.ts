@@ -137,6 +137,15 @@ function closestOnSegment([px, py]: LngLat, [ax, ay]: LngLat, [bx, by]: LngLat):
 }
 
 /**
+ * Iraqi address format: `{streetName}، {neighborhood}، {city}` (Arabic comma ،).
+ * Missing parts are omitted; returns an empty string when all parts are absent.
+ * @public
+ */
+export function formatIraqiAddress(parts: { street?: string | null; neighborhood?: string | null; city?: string | null }): string {
+  return [parts.street, parts.neighborhood, parts.city].filter((p): p is string => Boolean(p)).join('، ');
+}
+
+/**
  * Initial bearing from `from` to `to` in degrees clockwise from north (0–360).
  * Returns 0 when the points are identical.
  * @public frozen stub (M2)
