@@ -59,7 +59,8 @@
     "draft": "پێشنووس",
     "pending": "لە چاوەڕوانیدایە",
     "verified": "پشتڕاستکراوە",
-    "suspended": "ڕاگیراوە"
+    "suspended": "ڕاگیراوە",
+    "refresh": "نوێکردنەوەی دۆخ"
   },
   "common": {
     "selected": "دیاریکراو"

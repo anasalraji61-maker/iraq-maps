@@ -59,7 +59,8 @@
     "draft": "Draft",
     "pending": "Under Review",
     "verified": "Verified",
-    "suspended": "Suspended"
+    "suspended": "Suspended",
+    "refresh": "Refresh Status"
   },
   "common": {
     "selected": "Selected"

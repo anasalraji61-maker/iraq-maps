@@ -79,7 +79,10 @@ export function LoginPage() {
 
   return (
     <div style={cardStyle}>
-      <h2 style={{ marginTop: 0, marginBottom: 24 }}>تسجيل الدخول — الإدارة</h2>
+      <h2 style={{ marginTop: 0, marginBottom: 8 }}>تسجيل الدخول — الإدارة</h2>
+      <p style={{ margin: '0 0 20px', fontSize: 13, color: '#1565c0', background: '#e3f2fd', borderRadius: 4, padding: '6px 10px' }}>
+        3 مزود بانتظار المراجعة
+      </p>
 
       {step === 'phone' ? (
         <form onSubmit={handleRequestOtp}>

@@ -38,6 +38,13 @@ export function VerificationPage() {
     setTimeout(() => setMsg(''), 3000);
   }
 
+  async function handleReject(id: string, reason: string) {
+    await api.rejectProvider(id, reason);
+    setMsg('تم رفض المزود');
+    void load(page);
+    setTimeout(() => setMsg(''), 3000);
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
@@ -57,6 +64,7 @@ export function VerificationPage() {
         providers={providers}
         onVerify={(id) => void handleVerify(id)}
         onSuspend={(id) => void handleSuspend(id)}
+        onReject={(id, reason) => void handleReject(id, reason)}
         loading={loading}
       />
 

@@ -9,6 +9,7 @@ export interface Provider {
   phone: string;
   submittedAt: string;
   status: string;
+  mediaAssetId?: string;
 }
 
 export interface AuditEntry {
@@ -183,6 +184,24 @@ export const api = {
       mockAudit.unshift({
         id: String(Date.now()),
         action: 'suspend',
+        providerNameAr: `متجر ${id}`,
+        adminUser: 'admin@iraq-maps.iq',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+
+  async rejectProvider(id: string, reason: string): Promise<void> {
+    try {
+      await request<void>(`/v1/admin/providers/${id}/reject`, {
+        method: 'PATCH',
+        body: JSON.stringify({ reason }),
+      });
+    } catch {
+      mockProviders = mockProviders.filter((p) => p.id !== id);
+      mockAudit.unshift({
+        id: String(Date.now()),
+        action: 'reject',
         providerNameAr: `متجر ${id}`,
         adminUser: 'admin@iraq-maps.iq',
         timestamp: new Date().toISOString(),

@@ -59,7 +59,8 @@
     "draft": "مسودة",
     "pending": "قيد المراجعة",
     "verified": "موثّق",
-    "suspended": "موقوف"
+    "suspended": "موقوف",
+    "refresh": "تحديث الحالة"
   },
   "common": {
     "selected": "محدد"
