@@ -17,6 +17,15 @@ export interface NavigationState {
   distanceToManeuver: number;
   isRerouting: boolean;
   hasArrived: boolean;
+  /** True when user is off-route but reroute hasn't fired yet (pre-confirmation banner). */
+  isOffRoute: boolean;
+  /** ETA as a Date (Date.now() + remaining durationS). Null until a position fix arrives. */
+  eta: Date | null;
+  /** Remaining route duration in seconds (decreases as maneuvers are consumed). */
+  remainingDurationS: number;
+  /** All maneuvers in the current route (for step list display). */
+  allManeuvers: Maneuver[];
+  onRecalculate: () => void;
 }
 
 export interface UseNavigationOptions {
@@ -56,6 +65,9 @@ export function useNavigation({
   const isReroutingRef = useRef(isRerouting);
   isReroutingRef.current = isRerouting;
 
+  const [isOffRoute, setIsOffRoute] = useState(false);
+  const [eta, setEta] = useState<Date | null>(null);
+
   const deviationRef = useRef<DeviationDetector | null>(null);
   const arrivalRef = useRef<ArrivalDetector | null>(null);
 
@@ -65,19 +77,7 @@ export function useNavigation({
 
     const deviation = new DeviationDetector(polyline, () => {
       if (isReroutingRef.current) return;
-      setIsRerouting(true);
-      api.routes
-        .create({ body: request })
-        .then((res) => {
-          if (res.status !== 200) return;
-          const newRoute = res.body;
-          setCurrentRoute(newRoute);
-          setManeuverIndex(0);
-          deviation.reset();
-          onRerouted?.(newRoute);
-        })
-        .catch(() => undefined)
-        .finally(() => setIsRerouting(false));
+      setIsOffRoute(true);
     });
 
     const arrival = new ArrivalDetector(() => {
@@ -99,6 +99,24 @@ export function useNavigation({
     deviationRef.current = deviation;
     arrivalRef.current = arrival;
   }, [currentRoute, api, request, destinationName, onRerouted, onArrived]);
+
+  const recalculate = () => {
+    if (isRerouting) return;
+    setIsRerouting(true);
+    setIsOffRoute(false);
+    api.routes
+      .create({ body: request })
+      .then((res) => {
+        if (res.status !== 200) return;
+        const newRoute = res.body;
+        setCurrentRoute(newRoute);
+        setManeuverIndex(0);
+        deviationRef.current?.reset();
+        onRerouted?.(newRoute);
+      })
+      .catch(() => undefined)
+      .finally(() => setIsRerouting(false));
+  };
 
   useEffect(() => {
     if (hasArrived) return;
@@ -124,6 +142,10 @@ export function useNavigation({
         if (maneuvers[i]!.beginShapeIndex <= nearestIdx) next = i;
       }
       setManeuverIndex(next);
+
+      // Compute remaining duration from current maneuver onward and update ETA
+      const remaining = maneuvers.slice(next).reduce((acc, m) => acc + m.durationS, 0);
+      setEta(new Date(Date.now() + remaining * 1000));
     });
     return unsub;
   }, [subscribe, hasArrived, request.destination]);
@@ -131,6 +153,7 @@ export function useNavigation({
   const maneuvers = currentRoute.maneuvers;
   const currentManeuver = maneuvers[maneuverIndex] ?? null;
   const nextManeuver = maneuvers[maneuverIndex + 1] ?? null;
+  const remainingDurationS = maneuvers.slice(maneuverIndex).reduce((acc, m) => acc + m.durationS, 0);
 
   return {
     currentManeuver,
@@ -144,5 +167,10 @@ export function useNavigation({
     distanceToManeuver: currentManeuver?.distanceM ?? 0,
     isRerouting,
     hasArrived,
+    isOffRoute,
+    eta,
+    remainingDurationS,
+    allManeuvers: maneuvers,
+    onRecalculate: recalculate,
   };
 }
