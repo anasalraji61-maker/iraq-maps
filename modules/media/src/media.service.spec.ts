@@ -101,6 +101,36 @@ describe('processAsset (EXIF stripping)', () => {
   });
 });
 
+describe('cleanupOrphaned', () => {
+  it('deletes pending assets older than the grace period', async () => {
+    // Create a pending asset and backdate its created_at to exceed the grace period
+    const { assetId } = await svc.createUpload(ownerId, { purpose: 'provider_photo', mime: 'image/jpeg', size: 256 });
+    const pastCutoff = new Date(Date.now() - 25 * 60 * 60 * 1000); // 25 hours ago
+    await tdb.db.update(assetTable).set({ createdAt: pastCutoff }).where(eq(assetTable.id, assetId));
+
+    const { deleted } = await svc.cleanupOrphaned();
+    expect(deleted).toBeGreaterThanOrEqual(1);
+
+    const [row] = await tdb.db.select().from(assetTable).where(eq(assetTable.id, assetId));
+    expect(row).toBeUndefined();
+  });
+
+  it('does NOT delete ready assets even if they are old', async () => {
+    const { assetId } = await svc.createUpload(ownerId, { purpose: 'provider_photo', mime: 'image/jpeg', size: 256 });
+    await svc.completeUpload(assetId);
+    // processAsset needs real storage data; instead force status to 'ready' directly
+    await tdb.db.update(assetTable).set({ status: 'ready', storageKey: `${assetId}.webp` }).where(eq(assetTable.id, assetId));
+    const pastCutoff = new Date(Date.now() - 25 * 60 * 60 * 1000);
+    await tdb.db.update(assetTable).set({ createdAt: pastCutoff }).where(eq(assetTable.id, assetId));
+
+    await svc.cleanupOrphaned();
+
+    const [row] = await tdb.db.select().from(assetTable).where(eq(assetTable.id, assetId));
+    expect(row).toBeDefined();
+    expect(row?.status).toBe('ready');
+  });
+});
+
 describe('getReadUrl', () => {
   it('returns null when asset is not ready', async () => {
     const { assetId } = await svc.createUpload(ownerId, { purpose: 'provider_photo', mime: 'image/jpeg', size: 512 });
