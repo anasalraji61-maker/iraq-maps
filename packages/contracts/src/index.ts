@@ -1,4 +1,5 @@
 export * from './assistant'; // M5
+export * from './discover'; // M6
 export * from './common';
 export * from './events';
 export * from './geo-data';

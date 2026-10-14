@@ -1,4 +1,13 @@
 import { satelliteTestIDs } from './imagery';
+
+/** M6: discover testIDs shared by RNTL tests and Maestro flows. */
+export const discoverTestIDs = {
+  feedItem: (id: string) => `discover.feed.${id}`,
+  likeButton: (id: string) => `discover.like.${id}`,
+  commentButton: (id: string) => `discover.comment.${id}`,
+  createPostButton: 'discover.create.post',
+  postInput: 'discover.post.input',
+} as const;
 import { providerTestIDs } from './providers';
 import { navigationTestIDs } from './routing';
 
@@ -50,5 +59,6 @@ export const testIDs = {
   provider: providerTestIDs, // M3
   messaging: messagingTestIDs, // M4
   assistant: assistantTestIDs, // M5
+  discover: discoverTestIDs, // M6
   dev: { serverUrlInput: 'dev.serverUrl.input', serverUrlSave: 'dev.serverUrl.save' },
 } as const;

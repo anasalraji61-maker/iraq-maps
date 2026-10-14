@@ -1,6 +1,8 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 import { IraqiPhone, Locale, Problem, Role, UserId } from './common';
+import { assistantContract } from './assistant.js';
+import { discoverContract } from './discover.js';
 import { imageryContract } from './imagery';
 import { mediaContract } from './media';
 import { messagingContract } from './messaging';
@@ -95,5 +97,9 @@ export const apiContract = c.router({
   // M4
   messaging: messagingContract,
   notifications: notificationsContract,
+  // M5
+  assistant: assistantContract,
+  // M6
+  discover: discoverContract,
 });
 export type ApiContract = typeof apiContract;
