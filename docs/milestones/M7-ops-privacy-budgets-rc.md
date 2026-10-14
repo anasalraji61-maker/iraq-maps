@@ -15,6 +15,7 @@ owners:
     - "docs/legal/**"
     - "site/**"
     - "mobile-features/account/**"
+    - "tools/gen-licenses.mjs"
   builder-release-budgets:
     - "infra/**"
     - "tools/bench/**"
