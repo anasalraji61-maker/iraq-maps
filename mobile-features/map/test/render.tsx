@@ -40,8 +40,9 @@ export function later() {
 /** Endpoints answer 500 until a test stubs them; the city list holds Baghdad. */
 export function fakeApi() {
   const endpoint = () => jest.fn((_req?: Request) => respond(500));
-  const api = { cities: { list: endpoint() }, places: { search: endpoint(), get: endpoint() } };
+  const api = { cities: { list: endpoint() }, places: { search: endpoint(), get: endpoint(), suggestions: endpoint() } };
   api.cities.list.mockImplementation(() => respond(200, { items: [city] }));
+  api.places.suggestions.mockImplementation(() => respond(200, { items: [] }));
   return api;
 }
 

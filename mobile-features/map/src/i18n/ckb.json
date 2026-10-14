@@ -11,7 +11,8 @@
     "clearRecent": "سڕینەوەی هەموو",
     "sectionPlaces": "شوێنەکان",
     "sectionStreets": "شەقامەکان",
-    "sectionAreas": "ناوچەکان"
+    "sectionAreas": "ناوچەکان",
+    "suggestionsHint": "پێشنیازێک هەڵبژێرە یان بەردەوام بە نووسین"
   },
   "focus": {
     "show": "پیشاندانی: {name}",

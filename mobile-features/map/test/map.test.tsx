@@ -120,8 +120,8 @@ describe('search', () => {
   it('says so when nothing matches', async () => {
     const api = fakeApi();
     api.places.search.mockReturnValue(respond(200, { items: [] }));
-    const { view } = await search('zzz', api);
-    expect(view.getByText(t('map:search.empty', { query: '\u2068zzz\u2069' }))).toBeVisible();
+    const { view } = await search('zzzz', api);
+    expect(view.getByText(t('map:search.empty', { query: '\u2068zzzz\u2069' }))).toBeVisible();
     expect(view.queryByTestId(map.searchResult)).toBeNull();
   });
 

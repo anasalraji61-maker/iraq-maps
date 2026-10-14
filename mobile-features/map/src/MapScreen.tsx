@@ -41,6 +41,8 @@ const SEARCH_DELAY_MS = 300;
 const LOCATED_ZOOM = 15;
 const NO_RESULTS: PlaceSummary[] = [];
 const MAX_RECENT = 5;
+/** Queries at or above this length use the full search endpoint; shorter (2–3) use fast suggestions. */
+const FULL_SEARCH_MIN_LEN = 4;
 
 const BAGHDAD_CENTER: LngLat = [44.4009, 33.3152];
 
@@ -79,6 +81,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [query, setQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
+  /** When the user picks a suggestion, we promote to full search for that term. */
+  const [promotedQuery, setPromotedQuery] = useState<string>();
   const [mapMode, setMapMode] = useState<MapMode>('street');
   const baseLayer = useMapStyle(mapMode);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
@@ -102,6 +106,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   }, [focusPlaceId]);
 
   const q = query.trim();
+  /** True when the query is short enough to use the fast suggestions endpoint. */
+  const useSuggestions = q.length >= 2 && q.length < FULL_SEARCH_MIN_LEN && promotedQuery !== q;
 
   const addRecent = (term: string) => {
     const trimmed = term.trim();
@@ -112,7 +118,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
   // 4 decimals (about 11m) are enough to rank by distance and send no more of the user's location than that.
   const search = useLatest(
-    q ? `${mapLang}:${q}` : null,
+    q && !useSuggestions ? `full:${mapLang}:${q}` : null,
     async (signal) => {
       const params = { q, city: city.id, near: near.map((v) => v.toFixed(4)).join(','), lang: mapLang };
       return ok(await api.places.search({ query: params, fetchOptions: { signal } })).items;
@@ -120,6 +126,17 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     SEARCH_DELAY_MS,
   );
   const results = search.state?.status === 'ready' ? search.state.data : NO_RESULTS;
+
+  // Fast suggestions endpoint: only names, shown as chips while query is short.
+  const suggestions = useLatest(
+    useSuggestions ? `sug:${mapLang}:${q}` : null,
+    async (signal) => {
+      const params = { q, city: city.id, lang: mapLang };
+      return ok(await api.places.suggestions({ query: params, fetchOptions: { signal } })).items;
+    },
+    SEARCH_DELAY_MS,
+  );
+  const suggestionItems = suggestions.state?.status === 'ready' ? suggestions.state.data : [];
   const markers = useMemo(() => results.map(({ id, location }) => ({ id, location, selected: id === selectedPlaceId })), [results, selectedPlaceId]);
 
   type ResultSection = { title: string; data: PlaceSummary[] };
@@ -138,6 +155,13 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     setSelectedPlaceId(placeId);
     addRecent(q);
     router.push(href('place', { placeId }));
+  };
+
+  /** User taps a suggestion chip: promote to full search with that name. */
+  const pickSuggestion = (name: string) => {
+    setQuery(name);
+    setPromotedQuery(name);
+    setSearchPanelOpen(true);
   };
 
   const locate = async () => {
@@ -199,7 +223,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
               label={t('search.label')}
               placeholder={t('search.placeholder')}
               value={query}
-              onChangeText={(v) => { setQuery(v); setSearchPanelOpen(true); }}
+              onChangeText={(v) => { setQuery(v); setPromotedQuery(undefined); setSearchPanelOpen(true); }}
               accessibilityRole="search"
               accessibilityLabel={t('search.a11yLabel')}
             />
@@ -241,7 +265,24 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             </View>
           </View>
         ) : null}
-        {searchPanelOpen && q ? (
+        {searchPanelOpen && useSuggestions && suggestionItems.length > 0 ? (
+          <View>
+            <Text variant="caption" tone="muted">{t('search.suggestionsHint')}</Text>
+            <View style={styles.chipsRow}>
+              {suggestionItems.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.chip}
+                  accessibilityRole="button"
+                  onPress={() => pickSuggestion(item.name)}
+                >
+                  <RNText style={styles.chipText} numberOfLines={1}>{item.name}</RNText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        {searchPanelOpen && q && !useSuggestions ? (
           <SectionList
             style={{ maxHeight: maxResultsHeight }}
             contentContainerStyle={styles.results}

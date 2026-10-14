@@ -11,7 +11,8 @@
     "clearRecent": "مسح الكل",
     "sectionPlaces": "أماكن",
     "sectionStreets": "شوارع",
-    "sectionAreas": "مناطق"
+    "sectionAreas": "مناطق",
+    "suggestionsHint": "اختر اقتراحاً أو تابع الكتابة"
   },
   "focus": {
     "show": "عرض: {name}",

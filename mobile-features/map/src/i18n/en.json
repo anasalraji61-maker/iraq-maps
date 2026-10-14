@@ -11,7 +11,8 @@
     "sectionPlaces": "Places",
     "sectionStreets": "Streets",
     "sectionAreas": "Areas",
-    "networkError": "Search failed — check your connection"
+    "networkError": "Search failed — check your connection",
+    "suggestionsHint": "Pick a suggestion or keep typing"
   },
   "focus": {
     "show": "Showing: {name}",
