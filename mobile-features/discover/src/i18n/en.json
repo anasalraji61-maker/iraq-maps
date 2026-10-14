@@ -1,0 +1,35 @@
+{
+  "feed": {
+    "title": "Discover",
+    "empty": "No posts yet",
+    "loadError": "Failed to load posts, try again",
+    "loadMore": "Load more"
+  },
+  "post": {
+    "like": "Like",
+    "comment": "Comment",
+    "create": "Create Post",
+    "type": {
+      "photo": "Photo",
+      "tip": "Tip",
+      "event": "Event",
+      "offer": "Offer"
+    }
+  },
+  "create": {
+    "title": "New Post",
+    "placeholder": "What do you want to share?",
+    "submit": "Post",
+    "typeLabel": "Post Type",
+    "charCount": "{{count}}/1000",
+    "submitError": "Failed to create post, try again"
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet",
+    "placeholder": "Add a comment...",
+    "send": "Send",
+    "loadError": "Failed to load comments",
+    "sendError": "Failed to send comment"
+  }
+}
