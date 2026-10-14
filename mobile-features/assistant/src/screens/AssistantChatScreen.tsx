@@ -13,8 +13,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useAssistantChat } from '../hooks/useAssistantChat.js';
-import { t } from '../strings.js';
+import { useAssistantChat } from '../hooks/useAssistantChat';
+import { t } from '../strings';
 
 // Force RTL for Arabic
 I18nManager.forceRTL(true);

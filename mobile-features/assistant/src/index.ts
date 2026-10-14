@@ -1,1 +1,1 @@
-export { AssistantChatScreen } from './screens/AssistantChatScreen.js';
+export { AssistantChatScreen } from './screens/AssistantChatScreen';

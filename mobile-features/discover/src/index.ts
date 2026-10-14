@@ -1,3 +1,3 @@
-export { DiscoverFeedScreen } from './screens/DiscoverFeedScreen.js';
-export { CreatePostScreen } from './screens/CreatePostScreen.js';
-export { CommentsScreen } from './screens/CommentsScreen.js';
+export { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
+export { CreatePostScreen } from './screens/CreatePostScreen';
+export { CommentsScreen } from './screens/CommentsScreen';

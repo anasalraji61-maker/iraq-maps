@@ -1,7 +1,7 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { discoverTestIDs } from '@iraq-maps/contracts';
-import { DiscoverFeedScreen } from './screens/DiscoverFeedScreen.js';
+import { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
 
 const mockListFeed = jest.fn<() => Promise<unknown>>();
 const mockLikePost = jest.fn<() => Promise<unknown>>();

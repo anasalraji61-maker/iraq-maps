@@ -1,7 +1,7 @@
 import { type AssistantResponseType } from '@iraq-maps/contracts';
 import { useState, useCallback } from 'react';
-import { useAssistantClient } from '../client.js';
-import { t } from '../strings.js';
+import { useAssistantClient } from '../client';
+import { t } from '../strings';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';

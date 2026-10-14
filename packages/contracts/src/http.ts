@@ -1,8 +1,8 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 import { IraqiPhone, Locale, Problem, Role, UserId } from './common';
-import { assistantContract } from './assistant.js';
-import { discoverContract } from './discover.js';
+import { assistantContract } from './assistant';
+import { discoverContract } from './discover';
 import { imageryContract } from './imagery';
 import { mediaContract } from './media';
 import { messagingContract } from './messaging';

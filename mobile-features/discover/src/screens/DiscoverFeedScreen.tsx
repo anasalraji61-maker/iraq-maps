@@ -11,8 +11,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useDiscoverClient } from '../client.js';
-import { t } from '../strings.js';
+import { useDiscoverClient } from '../client';
+import { t } from '../strings';
 
 I18nManager.forceRTL(true);
 

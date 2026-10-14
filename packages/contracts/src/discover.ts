@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { initContract } from '@ts-rest/core';
-import { PlaceId, UserId } from './common.js';
+import { PlaceId, UserId } from './common';
 
 const c = initContract();
 

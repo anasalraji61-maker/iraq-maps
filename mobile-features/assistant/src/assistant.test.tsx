@@ -1,7 +1,7 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { assistantTestIDs } from '@iraq-maps/contracts';
-import { AssistantChatScreen } from './screens/AssistantChatScreen.js';
+import { AssistantChatScreen } from './screens/AssistantChatScreen';
 
 const mockChat = jest.fn<() => Promise<unknown>>();
 jest.mock('./client', () => ({
