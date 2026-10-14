@@ -261,3 +261,5 @@ No new events.
 | 2026-10-14 | feat(account): settings screen, language switch, app version display | `2302d1d` | — |
 | 2026-10-14 | feat(discover): comments screen, post detail, share button | `955842d` | — |
 | 2026-10-14 | feat(places,navigation): improved Arabic search ranking and route alternatives | `1e31f73`, `ae34731` | — |
+| 2026-10-14 | feat(media): thumbnail variants, validation, and discover feed optimization | `b871660` | — |
+| 2026-10-14 | feat(assistant): improved tool results, session trimming, plan-my-day structure | `07877aa` | — |
