@@ -15,12 +15,13 @@ function makeFakePhone(): PhoneVerificationPort & { setNextResult(r: Awaited<Ret
   };
 }
 
+const uid = (n: number) => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}` as UserId;
+const adminId = uid(999);
+
+describe.skipIf(!process.env['DATABASE_URL'])('ProvidersService (integration)', () => {
 let tdb: TestDatabase;
 let svc: ProvidersService;
 const fakePhone = makeFakePhone();
-
-const uid = (n: number) => `00000000-0000-0000-0000-${String(n).padStart(12, '0')}` as UserId;
-const adminId = uid(999);
 
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: [{ schema: 'providers', migrationsDir: providersMigrationsDir }] });
@@ -106,3 +107,4 @@ describe('admin verify / suspend', () => {
     expect(updated.suspensionReason).toBe('مخالفة الشروط');
   });
 });
+}); // describe.skipIf

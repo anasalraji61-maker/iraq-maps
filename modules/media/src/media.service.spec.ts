@@ -7,11 +7,12 @@ import { mediaMigrationsDir, MediaService, FileObjectStorage } from './index.js'
 import { assetTable } from './schema.js';
 import { eq } from 'drizzle-orm';
 
+const ownerId = '11111111-1111-1111-1111-111111111111' as UserId;
+
+describe.skipIf(!process.env['DATABASE_URL'])('MediaService (integration)', () => {
 let tdb: TestDatabase;
 let svc: MediaService;
 let storage: FileObjectStorage;
-
-const ownerId = '11111111-1111-1111-1111-111111111111' as UserId;
 
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: [{ schema: 'media', migrationsDir: mediaMigrationsDir }] });
@@ -152,3 +153,4 @@ describe('getReadUrl', () => {
     expect(url).toMatch(/^\/v1\/media\/fs\//);
   });
 });
+}); // describe.skipIf

@@ -39,6 +39,8 @@ let app: NestFastifyApplication;
 let relay: OutboxRelay;
 let redis: Redis;
 
+describe.skipIf(!process.env['DATABASE_URL'])('IdentityModule (integration)', () => {
+
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: [{ schema: 'identity', migrationsDir: identityMigrationsDir }] });
   const outbox = createOutboxPublisher(tdb.db);
@@ -332,3 +334,5 @@ it('never logs a phone number', () => {
   expect(logs.records.length).toBeGreaterThan(0);
   expect(logs.text()).not.toMatch(/9647\d{9}|07\d{9}|\[phone\]/);
 });
+
+}); // describe.skipIf
