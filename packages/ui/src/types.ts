@@ -5,7 +5,7 @@ type Base = { testID?: string };
 
 export interface ScreenProps extends Base { children: ReactNode; scroll?: boolean }
 export interface TextProps extends Base { children: ReactNode; variant?: 'title' | 'subtitle' | 'body' | 'caption'; tone?: 'default' | 'muted' | 'danger' }
-export interface ButtonProps extends Base { label: string; onPress(): void; variant?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean }
+export interface ButtonProps extends Base { label: string; onPress(): void; variant?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityLabel?: string }
 export interface TextFieldProps extends Base {
   label: string;
   value: string;
@@ -19,6 +19,10 @@ export interface TextFieldProps extends Base {
   direction?: 'ltr';
   autoComplete?: TextInputProps['autoComplete'];
   textContentType?: TextInputProps['textContentType'];
+  /** Accessibility role forwarded to the underlying TextInput (e.g. 'searchbox'). */
+  accessibilityRole?: TextInputProps['accessibilityRole'];
+  /** Accessibility label override (defaults to `label` when omitted). */
+  accessibilityLabel?: string;
 }
 export interface ListItemProps extends Base {
   title: string;
@@ -44,8 +48,10 @@ export interface PlaceSummaryCardProps extends Base {
   /** The source badge, e.g. "OpenStreetMap". */
   source?: string;
   onPress(): void;
+  /** Accessibility label for the card (defaults to name when omitted). */
+  accessibilityLabel?: string;
 }
-export interface CardProps extends Base { children: ReactNode; onPress?(): void }
+export interface CardProps extends Base { children: ReactNode; onPress?(): void; accessibilityLabel?: string }
 export interface SheetProps extends Base { visible: boolean; onClose(): void; children: ReactNode }
 export interface BannerProps extends Base { kind: 'info' | 'success' | 'error'; message: string }
 export interface EmptyStateProps extends Base { title: string; body?: string; action?: { label: string; onPress(): void } }

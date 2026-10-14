@@ -54,10 +54,10 @@ function useAnnounce(message: string | undefined) {
   }, [message]);
 }
 
-type TouchableProps = { onPress?(): void; selected?: boolean; disabled?: boolean; testID?: string; style: StyleProp<ViewStyle>; children: ReactNode };
+type TouchableProps = { onPress?(): void; selected?: boolean; disabled?: boolean; testID?: string; style: StyleProp<ViewStyle>; children: ReactNode; accessibilityLabel?: string };
 
 /** A Pressable with button (or, with `selected`, radio) semantics when `onPress` is set, a plain View otherwise. */
-function Touchable({ onPress, selected, disabled, testID, style, children }: TouchableProps) {
+function Touchable({ onPress, selected, disabled, testID, style, children, accessibilityLabel }: TouchableProps) {
   const radio = selected !== undefined;
   return onPress ? (
     <Pressable
@@ -66,6 +66,7 @@ function Touchable({ onPress, selected, disabled, testID, style, children }: Tou
       disabled={disabled}
       accessibilityRole={radio ? 'radio' : 'button'}
       accessibilityState={radio ? { checked: selected, disabled } : { disabled }}
+      accessibilityLabel={accessibilityLabel}
       style={pressable(style, disabled && styles.disabled)}
     >
       {children}
@@ -99,7 +100,7 @@ export function Text({ children, variant = 'body', tone = 'default', testID }: T
   );
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled = false, loading = false, testID }: ButtonProps): ReactElement {
+export function Button({ label, onPress, variant = 'primary', disabled = false, loading = false, testID, accessibilityLabel }: ButtonProps): ReactElement {
   const { bg, fg } = buttonColors[variant];
   const inactive = disabled || loading;
   return (
@@ -108,7 +109,7 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       onPress={onPress}
       disabled={inactive}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: inactive, busy: loading }}
       style={pressable(styles.button, { backgroundColor: bg, borderColor: variant === 'secondary' ? color.primary : bg }, disabled && styles.disabled)}
     >
@@ -155,9 +156,9 @@ export function ListItem({ title, subtitle, onPress, trailing, selected, disable
   );
 }
 
-export function Card({ children, onPress, testID }: CardProps): ReactElement {
+export function Card({ children, onPress, testID, accessibilityLabel }: CardProps): ReactElement {
   return (
-    <Touchable onPress={onPress} testID={testID} style={styles.card}>
+    <Touchable onPress={onPress} testID={testID} style={styles.card} accessibilityLabel={accessibilityLabel}>
       {children}
     </Touchable>
   );
@@ -172,10 +173,10 @@ export function Badge({ label, testID }: BadgeProps): ReactElement {
 }
 
 /** Name and distance on the first line, category, area and source badge on the second; both lines start at the logical start. */
-export function PlaceSummaryCard({ name, category, area, distance, source, onPress, testID }: PlaceSummaryCardProps): ReactElement {
+export function PlaceSummaryCard({ name, category, area, distance, source, onPress, testID, accessibilityLabel }: PlaceSummaryCardProps): ReactElement {
   const details = [category, area].filter(Boolean).join(' · ');
   return (
-    <Card onPress={onPress} testID={testID}>
+    <Card onPress={onPress} testID={testID} accessibilityLabel={accessibilityLabel ?? name}>
       <View style={styles.line}>
         <RNText style={[text.body, styles.bold, styles.fill]}>{name}</RNText>
         {distance ? <RNText style={[text.caption, { color: color.textMuted }]}>{distance}</RNText> : null}

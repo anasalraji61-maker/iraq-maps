@@ -187,6 +187,7 @@ export function AssistantChatScreen(): ReactElement {
         data={messages}
         keyExtractor={(_, idx) => String(idx)}
         contentContainerStyle={styles.listContent}
+        accessibilityLiveRegion="polite"
         renderItem={({ item, index }) => (
           <View
             style={[
@@ -200,6 +201,8 @@ export function AssistantChatScreen(): ReactElement {
                 styles.bubble,
                 item.role === 'user' ? styles.userBubble : styles.assistantBubble,
               ]}
+              accessibilityRole="text"
+              accessibilityLabel={item.role === 'user' ? t('chat.msgFromUser', { content: item.content }) : t('chat.msgFromAssistant', { content: item.content })}
             >
               <Text
                 style={[
@@ -289,6 +292,8 @@ export function AssistantChatScreen(): ReactElement {
           style={[styles.sendBtn, (!inputText.trim() || isLoading) && styles.sendBtnDisabled]}
           onPress={handleSend}
           disabled={!inputText.trim() || isLoading}
+          accessibilityRole="button"
+          accessibilityLabel={t('chat.sendA11y')}
         >
           <Text style={styles.sendBtnText}>{t('chat.send')}</Text>
         </Pressable>

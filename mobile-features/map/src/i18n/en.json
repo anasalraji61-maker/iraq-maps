@@ -1,6 +1,8 @@
 {
   "search": {
     "label": "Search for a place, street or neighbourhood",
+    "a11yLabel": "Search for places",
+    "resultA11y": "{name}, {category}",
     "placeholder": "e.g. citadel, restaurant, Karrada",
     "empty": "No results for “{query}”. Try another spelling or a shorter name.",
     "assistantHint": "Ask the assistant about this search",

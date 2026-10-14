@@ -179,6 +179,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
               placeholder={t('search.placeholder')}
               value={query}
               onChangeText={(v) => { setQuery(v); setSearchPanelOpen(true); }}
+              accessibilityRole="search"
+              accessibilityLabel={t('search.a11yLabel')}
             />
           </View>
           {q ? (
@@ -235,18 +237,23 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                 </View>
               ) : null
             }
-            renderItem={({ item: place }) => (
-              <PlaceSummaryCard
-                key={place.id}
-                testID={testIDs.map.searchResult}
-                name={`${categoryIcon(place)} ${pickName(place.names, mapLang)}`}
-                category={kindLabel(place)}
-                area={place.area ? pickName(place.area, mapLang) : undefined}
-                distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
-                source={t('source.osm')}
-                onPress={() => open(place.id)}
-              />
-            )}
+            renderItem={({ item: place }) => {
+              const placeName = pickName(place.names, mapLang);
+              const placeCategory = kindLabel(place);
+              return (
+                <PlaceSummaryCard
+                  key={place.id}
+                  testID={testIDs.map.searchResult}
+                  name={`${categoryIcon(place)} ${placeName}`}
+                  category={placeCategory}
+                  area={place.area ? pickName(place.area, mapLang) : undefined}
+                  distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
+                  source={t('source.osm')}
+                  onPress={() => open(place.id)}
+                  accessibilityLabel={placeCategory ? t('search.resultA11y', { name: placeName, category: placeCategory }) : placeName}
+                />
+              );
+            }}
           />
         ) : null}
       </View>

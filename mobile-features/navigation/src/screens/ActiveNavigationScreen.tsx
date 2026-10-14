@@ -50,7 +50,13 @@ export function ActiveNavigationScreen({
       ) : null}
 
       {isOffRoute && !isRerouting ? (
-        <View style={styles.offRouteBanner} testID="nav.off_route">
+        <View
+          style={styles.offRouteBanner}
+          testID="nav.off_route"
+          accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
+          accessibilityLabel="خارج المسار — إعادة الحساب"
+        >
           <View style={styles.offRouteTextWrap}>
             <Text>خارج المسار — إعادة الحساب</Text>
           </View>
@@ -58,6 +64,7 @@ export function ActiveNavigationScreen({
             label="إعادة الحساب"
             onPress={onRecalculate}
             testID="nav.recalculate"
+            accessibilityLabel="إعادة حساب المسار"
           />
         </View>
       ) : null}

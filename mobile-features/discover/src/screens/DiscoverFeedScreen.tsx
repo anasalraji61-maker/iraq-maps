@@ -66,7 +66,11 @@ const PostItem = memo(function PostItem({
     <View testID={discoverTestIDs.feedItem(post.id)} style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.authorText}>{post.authorId.slice(0, 8)}</Text>
-        <View style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}>
+        <View
+          style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
+          accessibilityRole="text"
+          accessibilityLabel={t('post.typeA11y', { type: TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type })}
+        >
           <Text style={[styles.typeText, { color: badgeColors.text }]}>
             {TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type}
           </Text>
@@ -77,7 +81,12 @@ const PostItem = memo(function PostItem({
         <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
       ) : null}
       {post.placeId ? (
-        <Pressable style={styles.placeChip} onPress={() => onPlacePress(post.placeId!)}>
+        <Pressable
+          style={styles.placeChip}
+          onPress={() => onPlacePress(post.placeId!)}
+          accessibilityRole="button"
+          accessibilityLabel={placeName ?? post.placeId.slice(0, 8)}
+        >
           <Text style={styles.placeChipText}>📍 {placeName ?? post.placeId.slice(0, 8)}</Text>
         </Pressable>
       ) : null}
@@ -86,6 +95,8 @@ const PostItem = memo(function PostItem({
           testID={discoverTestIDs.likeButton(post.id)}
           style={[styles.actionBtn, post.isLikedByMe && styles.actionBtnActive]}
           onPress={() => onLike(post)}
+          accessibilityRole="button"
+          accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
         >
           <Text style={[styles.actionBtnText, post.isLikedByMe && styles.actionBtnTextActive]}>
             {t('post.like')} {formatCount(post.likeCount)}
@@ -95,12 +106,13 @@ const PostItem = memo(function PostItem({
           testID={discoverTestIDs.commentButton(post.id)}
           style={styles.actionBtn}
           onPress={() => onComment(post.id)}
+          accessibilityRole="button"
         >
           <Text style={styles.actionBtnText}>
             {t('post.comment')} {formatCount(post.commentCount)}
           </Text>
         </Pressable>
-        <Pressable style={styles.actionBtn} onPress={handleShare}>
+        <Pressable style={styles.actionBtn} onPress={handleShare} accessibilityRole="button">
           <Text style={styles.actionBtnText}>{t('post.share')}</Text>
         </Pressable>
       </View>
@@ -255,6 +267,7 @@ export function DiscoverFeedScreen(): ReactElement {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
+        accessibilityRole="list"
         renderItem={({ item }) => (
           <PostItem
             post={item}
@@ -296,6 +309,8 @@ export function DiscoverFeedScreen(): ReactElement {
         testID={discoverTestIDs.createPostButton}
         style={styles.fab}
         onPress={handleCreate}
+        accessibilityRole="button"
+        accessibilityLabel={t('post.create')}
       >
         <Text style={styles.fabText}>+</Text>
       </Pressable>
