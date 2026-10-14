@@ -139,6 +139,9 @@ importers:
       '@iraq-maps/adapter-storage-s3':
         specifier: workspace:*
         version: link:../../adapters/storage-s3
+      '@iraq-maps/assistant':
+        specifier: workspace:*
+        version: link:../../modules/assistant
       '@iraq-maps/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -218,6 +221,9 @@ importers:
       '@iraq-maps/feature-account':
         specifier: workspace:*
         version: link:../../mobile-features/account
+      '@iraq-maps/feature-assistant':
+        specifier: workspace:*
+        version: link:../../mobile-features/assistant
       '@iraq-maps/feature-map':
         specifier: workspace:*
         version: link:../../mobile-features/map

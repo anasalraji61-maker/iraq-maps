@@ -4,6 +4,7 @@ import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, ty
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
+import { AssistantModule, assistantMigrationsDir } from '@iraq-maps/assistant';
 import { messagingMigrationsDir, messagingModule } from '@iraq-maps/messaging';
 import { notificationsMigrationsDir, notificationsModule } from '@iraq-maps/notifications';
 import { createLogger, type Logger } from '@iraq-maps/observability';
@@ -40,6 +41,7 @@ export const moduleMigrations = [
   { schema: 'providers', migrationsDir: providersMigrationsDir },
   { schema: 'messaging', migrationsDir: messagingMigrationsDir },
   { schema: 'notifications', migrationsDir: notificationsMigrationsDir },
+  { schema: 'assistant', migrationsDir: assistantMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -171,6 +173,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         providersModule({ db, phoneVerification: null }),
         messagingModule({ db }),
         notificationsModule({ db, eventBus: bus, env: opts.env }),
+        AssistantModule,
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],
