@@ -9,7 +9,7 @@ const c = initContract();
 export const AssetId = z.string().uuid().brand<'AssetId'>();
 export type AssetId = z.infer<typeof AssetId>;
 /** @public frozen contract (M3) */
-export const MediaPurpose = z.enum(['provider_photo']);
+export const MediaPurpose = z.enum(['provider_photo', 'provider_logo']);
 export type MediaPurpose = z.infer<typeof MediaPurpose>;
 /** The client compresses to JPEG before upload; PNG and WebP are accepted as they are.
  * @public frozen contract (M3) */

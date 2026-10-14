@@ -3,8 +3,9 @@ import { toAsciiDigits } from '@iraq-maps/i18n';
 import { useApi, useApiBaseUrl, uploadAsset } from '@iraq-maps/mobile-kit';
 import { Banner, Button, ListItem, Screen, Text, TextField } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { useState, type ReactElement } from 'react';
-import { Pressable, StyleSheet, View, Text as RNText, Image } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View, Text as RNText, Image } from 'react-native';
 import { normalizeIraqiPhone } from '../phone';
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
@@ -62,20 +63,46 @@ export function ProviderRegistrationScreen(): ReactElement {
     goNext();
   };
 
-  // pickPhoto is a stub; the real implementation will use expo-image-picker.
-  // uploadAsset handles the upload through the API once a URI is available.
+  const [uploading, setUploading] = useState(false);
+
   const pickPhoto = async () => {
-    // no-op in this milestone; expo-image-picker wiring is a future step.
-    void uploadAsset; // referenced so tree-shaker keeps the import
+    if (state.photoUris.length >= 5) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+      allowsEditing: true,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const uri = result.assets[0]!.uri;
+    updateState({ photoUris: [...state.photoUris, uri] });
   };
 
-  // pickLogo is a stub for the business logo/profile photo.
-  // TODO: wire up expo-image-picker to let the provider pick an image,
-  //       then call uploadAsset(api, apiBaseUrl, { uri, purpose: 'provider_logo' })
-  //       and store the returned assetId in state.logoUri.
+  const [logoAssetId, setLogoAssetId] = useState<string | null>(null);
+
   const pickLogo = async () => {
-    // no-op in this milestone; expo-image-picker wiring is a future step.
-    void uploadAsset; // referenced so tree-shaker keeps the import
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.9,
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const uri = result.assets[0]!.uri;
+    // show preview immediately
+    updateState({ logoUri: uri });
+    setUploading(true);
+    try {
+      const assetId = await uploadAsset(api, apiBaseUrl, { uri, purpose: 'provider_logo' });
+      setLogoAssetId(assetId as string);
+    } catch {
+      updateState({ logoUri: null });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const toggleConsent = (scope: ConsentScope) => {
@@ -92,12 +119,17 @@ export function ProviderRegistrationScreen(): ReactElement {
         await api.providers.create({ body: { name: state.name.trim(), category: state.category! } }),
         201,
       );
-      // Step 2: upload photos and attach them.
-      const assetIds = await Promise.all(
+      // Step 2: upload photos and attach them. Logo was already uploaded during picking.
+      const photoAssetIds = await Promise.all(
         state.photoUris.map((uri) => uploadAsset(api, apiBaseUrl, { uri, purpose: 'provider_photo' })),
       );
-      if (assetIds.length > 0) {
-        await api.providers.update({ body: { photoAssetIds: assetIds } });
+      if (photoAssetIds.length > 0 || logoAssetId) {
+        await api.providers.update({
+          body: {
+            ...(photoAssetIds.length > 0 ? { photoAssetIds } : {}),
+            ...(logoAssetId ? { logoAssetId } : {}),
+          },
+        });
       }
       // Step 3: set consents.
       for (const scope of state.consents) {
@@ -141,10 +173,16 @@ export function ProviderRegistrationScreen(): ReactElement {
                   <RNText style={regStyles.logoPlaceholderIcon}>🏪</RNText>
                 </View>
               )}
-              {/* Camera icon overlay */}
-              <View style={regStyles.cameraOverlay}>
-                <RNText style={regStyles.cameraIcon}>📷</RNText>
-              </View>
+              {/* Upload spinner overlay while logo is uploading */}
+              {uploading ? (
+                <View style={regStyles.uploadOverlay}>
+                  <ActivityIndicator color="#FFF" size="small" />
+                </View>
+              ) : (
+                <View style={regStyles.cameraOverlay}>
+                  <RNText style={regStyles.cameraIcon}>📷</RNText>
+                </View>
+              )}
             </Pressable>
             <RNText style={regStyles.logoHint}>{t('logo.placeholder')}</RNText>
           </View>
@@ -265,4 +303,12 @@ const regStyles = StyleSheet.create({
   },
   cameraIcon: { fontSize: 16 },
   logoHint: { marginTop: 6, fontSize: 12 },
+  uploadOverlay: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

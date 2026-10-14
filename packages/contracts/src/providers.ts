@@ -182,6 +182,8 @@ export const providersContract = c.router(
         links: z.array(SocialLink).max(10).optional(),
         /** Ready provider_photo assets of this user, in display order. */
         photoAssetIds: z.array(AssetId).max(10).optional(),
+        /** Ready provider_logo asset id. */
+        logoAssetId: AssetId.optional(),
       }),
       responses: { 200: ProviderMe, 400: Problem, 401: Problem, 404: Problem, 409: Problem },
     },
