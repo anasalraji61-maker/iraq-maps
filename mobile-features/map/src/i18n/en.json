@@ -10,7 +10,8 @@
     "clearRecent": "Clear all",
     "sectionPlaces": "Places",
     "sectionStreets": "Streets",
-    "sectionAreas": "Areas"
+    "sectionAreas": "Areas",
+    "networkError": "Search failed — check your connection"
   },
   "focus": {
     "show": "Showing: {name}",

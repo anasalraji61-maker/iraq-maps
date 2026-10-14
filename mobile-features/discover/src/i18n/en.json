@@ -4,6 +4,8 @@
     "loading": "Loading...",
     "empty": "No posts yet",
     "loadError": "Failed to load posts, try again",
+    "networkError": "Could not load posts — check your connection",
+    "retry": "Retry",
     "loadMore": "Load more"
   },
   "post": {

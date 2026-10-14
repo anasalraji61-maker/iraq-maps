@@ -27,6 +27,10 @@
     "retry": "Try again",
     "serverError": "Server error, please try again"
   },
+  "network": {
+    "offline": "No internet connection",
+    "restored": "Connection restored"
+  },
   "devSettings": {
     "title": "Developer settings",
     "open": "Open developer settings",

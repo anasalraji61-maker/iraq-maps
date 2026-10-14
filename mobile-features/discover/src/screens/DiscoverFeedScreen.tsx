@@ -136,6 +136,7 @@ export function DiscoverFeedScreen(): ReactElement {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [isNetworkError, setIsNetworkError] = useState(false);
   const [placeNames, setPlaceNames] = useState<Readonly<Record<string, string>>>({});
   const [mediaUrls, setMediaUrls] = useState<Readonly<Record<string, string>>>({});
   const fetchingPlaceIds = useRef(new Set<string>());
@@ -149,6 +150,7 @@ export function DiscoverFeedScreen(): ReactElement {
       setLoadingMore(true);
     }
     setError(undefined);
+    setIsNetworkError(false);
     try {
       const res = await api.listFeed({ query: { cursor: reset ? undefined : cursor, limit: 10 } });
       if (res.status === 200) {
@@ -157,8 +159,12 @@ export function DiscoverFeedScreen(): ReactElement {
         setCursor(nextCursor);
         setHasMore(!!nextCursor);
       }
-    } catch {
-      setError(t('feed.loadError'));
+    } catch (err) {
+      const isNetwork =
+        err instanceof TypeError ||
+        (err instanceof Error && (err.message.includes('Network') || err.message.includes('fetch') || err.message.includes('network')));
+      setIsNetworkError(isNetwork);
+      setError(isNetwork ? t('feed.networkError') : t('feed.loadError'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -266,6 +272,15 @@ export function DiscoverFeedScreen(): ReactElement {
       {error ? (
         <View style={[styles.errorRow, { backgroundColor: theme.surface }]}>
           <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
+          {isNetworkError ? (
+            <Pressable
+              style={styles.retryBtn}
+              onPress={() => { void loadFeed(true); }}
+              accessibilityRole="button"
+            >
+              <Text style={styles.retryBtnText}>{t('feed.retry')}</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
       <FlatList
@@ -342,11 +357,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEE',
     paddingHorizontal: 16,
     paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   errorText: {
     color: '#C62828',
     fontSize: 13,
     textAlign: 'auto',
+    flex: 1,
+  },
+  retryBtn: {
+    backgroundColor: '#C62828',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  retryBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   listContent: {
     padding: 12,

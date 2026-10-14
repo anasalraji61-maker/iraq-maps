@@ -14,6 +14,7 @@ import ar from './i18n/ar.json';
 import ckb from './i18n/ckb.json';
 import en from './i18n/en.json';
 import { persistLocaleChanges, restoreLocale, useLocale } from './locale';
+import { NetworkBanner } from './NetworkBanner';
 import { OnboardingFlow, ONBOARDING_DONE_KEY } from './OnboardingFlow';
 
 registerNamespace('shell', { ar, ckb, en });
@@ -153,6 +154,7 @@ export function RootLayout() {
   }
   return (
     <ErrorBoundary>
+      <NetworkBanner />
       <SessionProvider apiBaseUrl={apiBaseUrl} onServerError={() => setServerError(true)}>
         <AvailableRoutesProvider routes={availableRoutes()}>
           <SessionRestored>

@@ -5,6 +5,7 @@
     "resultA11y": "{name}، {category}",
     "placeholder": "مثلاً: قلعة، مطعم، الكرادة",
     "empty": "لا توجد نتائج لـ «{query}». جرّب إملاءً آخر أو اسماً أقصر.",
+    "networkError": "تعذر البحث — تحقق من اتصالك",
     "assistantHint": "اسأل المساعد عن هذا البحث",
     "recentTitle": "عمليات بحث سابقة",
     "clearRecent": "مسح الكل",

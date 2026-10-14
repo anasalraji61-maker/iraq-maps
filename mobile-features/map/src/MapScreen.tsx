@@ -1,5 +1,5 @@
 import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceSummary } from '@iraq-maps/contracts';
-import { getLocale } from '@iraq-maps/i18n';
+import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
 import { href, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
@@ -156,6 +156,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     <View style={styles.fill}>
       <View style={StyleSheet.absoluteFill}>
         <Pressable style={StyleSheet.absoluteFill} onPress={() => setSearchPanelOpen(false)}>
+          {/* TODO: PMTiles offline caching - tiles are served from TILES_SOURCE */}
           <MapCanvas
             city={city}
             apiBaseUrl={apiBaseUrl}
@@ -226,7 +227,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             keyExtractor={(item) => item.id}
             ListHeaderComponent={
               <>
-                <LoadStatus {...search} />
+                {search.state?.status === 'failed' && search.state.message === globalT('common:errors.network')
+                  ? <Banner kind="error" message={t('search.networkError')} />
+                  : <LoadStatus {...search} />}
                 {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
               </>
             }
