@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { eq, lt } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import sharp from 'sharp';
 import {
   type AssetId,
@@ -195,12 +195,13 @@ export class MediaService implements MediaPort {
    */
   async cleanupOrphaned(): Promise<{ deleted: number }> {
     const cutoff = new Date(Date.now() - ORPHAN_GRACE_MS);
-    // Select all assets (any status) created before the grace cutoff that are still pending.
+    // Select only 'pending' assets (upload was never completed) older than the grace cutoff.
+    // 'ready' assets are referenced by their owner and must not be deleted here.
     // TODO: also exclude assets referenced in discover.post or providers.photo once cross-schema joins are permitted.
     const staleOrphans = await this.db
       .select({ id: assetTable.id, storageKey: assetTable.storageKey })
       .from(assetTable)
-      .where(lt(assetTable.createdAt, cutoff));
+      .where(and(eq(assetTable.status, 'pending'), lt(assetTable.createdAt, cutoff)));
 
     let deleted = 0;
     for (const row of staleOrphans) {

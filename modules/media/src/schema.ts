@@ -3,7 +3,7 @@ import { pgSchema, uuid, varchar, integer, timestamp } from 'drizzle-orm/pg-core
 export const mediaSchema = pgSchema('media');
 
 export const assetStatusEnum = mediaSchema.enum('asset_status', ['pending', 'processing', 'ready', 'failed']);
-export const assetPurposeEnum = mediaSchema.enum('asset_purpose', ['provider_photo']);
+export const assetPurposeEnum = mediaSchema.enum('asset_purpose', ['provider_photo', 'provider_logo']);
 export const assetMimeEnum = mediaSchema.enum('asset_mime', ['image/jpeg', 'image/png', 'image/webp']);
 
 export const assetTable = mediaSchema.table('asset', {
