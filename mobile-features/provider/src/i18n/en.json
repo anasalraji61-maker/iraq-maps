@@ -64,6 +64,22 @@
   "common": {
     "selected": "Selected"
   },
+  "inbox": {
+    "title": "Inbox",
+    "reply": "Reply",
+    "optOut": "Stop Receiving Messages",
+    "optOutConfirm": "Are you sure you want to stop receiving messages?",
+    "noMessages": "No messages",
+    "cancel": "Cancel"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "reply": "Reply",
+    "optOut": "Stop Receiving Messages",
+    "optOutConfirm": "Are you sure you want to stop receiving messages?",
+    "noMessages": "No messages",
+    "cancel": "Cancel"
+  },
   "errors": {
     "provider_already_exists": "You already have a registered business.",
     "phone_not_verified": "You must verify your phone number first.",

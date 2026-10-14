@@ -64,6 +64,22 @@
   "common": {
     "selected": "محدد"
   },
+  "inbox": {
+    "title": "صندوق الوارد",
+    "reply": "رد",
+    "optOut": "إيقاف الاستقبال",
+    "optOutConfirm": "هل أنت متأكد من إيقاف استقبال الرسائل؟",
+    "noMessages": "لا توجد رسائل",
+    "cancel": "إلغاء"
+  },
+  "inbox": {
+    "title": "صندوق الوارد",
+    "reply": "رد",
+    "optOut": "إيقاف الاستقبال",
+    "optOutConfirm": "هل أنت متأكد من إيقاف استقبال الرسائل؟",
+    "noMessages": "لا توجد رسائل",
+    "cancel": "إلغاء"
+  },
   "errors": {
     "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",
     "phone_not_verified": "يجب التحقق من رقم الهاتف أولاً.",

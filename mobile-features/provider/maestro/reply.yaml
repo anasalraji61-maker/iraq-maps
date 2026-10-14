@@ -1,0 +1,13 @@
+appId: com.iraqmaps.app
+---
+- launchApp
+- tapOn: "حسابي"
+- tapOn: "صندوق الوارد"
+- assertVisible: "طلب جديد"
+- tapOn:
+    id: "provider.inbox.*"
+- tapOn:
+    id: "provider.inbox.reply.input"
+- inputText: "نعم متاح"
+- tapOn: "إرسال"
+- assertVisible: "نعم متاح"
