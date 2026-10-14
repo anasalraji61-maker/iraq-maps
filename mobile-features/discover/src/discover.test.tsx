@@ -33,6 +33,19 @@ jest.mock('@iraq-maps/i18n', () => ({
   t: (_key: string) => _key,
 }));
 
+jest.mock('@iraq-maps/ui', () => ({
+  useTheme: () => ({
+    background: '#F5F5F5',
+    surface: '#FFFFFF',
+    primary: '#1976D2',
+    text: '#222222',
+    textSecondary: '#666666',
+    border: '#E0E0E0',
+    error: '#C62828',
+    success: '#388E3C',
+  }),
+}));
+
 const POST_ID = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 
 const makeFeedResponse = (isLikedByMe = false) => ({

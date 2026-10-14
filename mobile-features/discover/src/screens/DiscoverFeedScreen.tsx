@@ -1,6 +1,5 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
-import { useTheme } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
@@ -52,7 +51,6 @@ const PostItem = memo(function PostItem({
   onComment: (post: DiscoverPostType) => void;
   onPlacePress: (placeId: string) => void;
 }): ReactElement {
-  const theme = useTheme();
   const badgeColors = getTypeBadgeColors(post.type);
 
   const handleShare = useCallback(() => {
@@ -61,9 +59,9 @@ const PostItem = memo(function PostItem({
   }, [post.body, post.id]);
 
   return (
-    <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: theme.surface }]}>
+    <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.authorText, { color: theme.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
+        <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
         <View
           style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
           accessibilityRole="text"
@@ -74,7 +72,7 @@ const PostItem = memo(function PostItem({
           </Text>
         </View>
       </View>
-      <Text style={[styles.bodyText, { color: theme.text }]}>{post.body}</Text>
+      <Text style={[styles.bodyText, { color: COLORS.textPrimary }]}>{post.body}</Text>
       {firstImageUrl ? (
         <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
       ) : null}
@@ -91,27 +89,27 @@ const PostItem = memo(function PostItem({
       <View style={styles.actions}>
         <Pressable
           testID={discoverTestIDs.likeButton(post.id)}
-          style={[styles.actionBtn, { backgroundColor: theme.border }, post.isLikedByMe && styles.actionBtnActive]}
+          style={[styles.actionBtn, { backgroundColor: COLORS.border }, post.isLikedByMe && styles.actionBtnActive]}
           onPress={() => onLike(post)}
           accessibilityRole="button"
           accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
         >
-          <Text style={[styles.actionBtnText, { color: theme.textSecondary }, post.isLikedByMe && styles.actionBtnTextActive]}>
+          <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }, post.isLikedByMe && styles.actionBtnTextActive]}>
             {t('post.like')} {formatCount(post.likeCount)}
           </Text>
         </Pressable>
         <Pressable
           testID={discoverTestIDs.commentButton(post.id)}
-          style={[styles.actionBtn, { backgroundColor: theme.border }]}
+          style={[styles.actionBtn, { backgroundColor: COLORS.border }]}
           onPress={() => onComment(post)}
           accessibilityRole="button"
         >
-          <Text style={[styles.actionBtnText, { color: theme.textSecondary }]}>
+          <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>
             {t('post.comment')} {formatCount(post.commentCount)}
           </Text>
         </Pressable>
-        <Pressable style={[styles.actionBtn, { backgroundColor: theme.border }]} onPress={handleShare} accessibilityRole="button">
-          <Text style={[styles.actionBtnText, { color: theme.textSecondary }]}>{t('post.share')}</Text>
+        <Pressable style={[styles.actionBtn, { backgroundColor: COLORS.border }]} onPress={handleShare} accessibilityRole="button">
+          <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>{t('post.share')}</Text>
         </Pressable>
       </View>
     </View>
@@ -165,7 +163,7 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api, cursor, hasMore, loadingMore]);
 
-  useEffect(() => { void loadFeed(true); }, [loadFeed]);
+  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch place names for any post.placeId not yet loaded
   useEffect(() => {
@@ -257,16 +255,14 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push('/discover/create');
   }, [router]);
 
-  const theme = useTheme();
-
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('feed.title')}</Text>
       </View>
       {error ? (
-        <View style={[styles.errorRow, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
+        <View style={[styles.errorRow, { backgroundColor: COLORS.surface }]}>
+          <Text style={[styles.errorText, { color: COLORS.error }]}>{error}</Text>
           {isNetworkError ? (
             <Pressable
               style={styles.retryBtn}
