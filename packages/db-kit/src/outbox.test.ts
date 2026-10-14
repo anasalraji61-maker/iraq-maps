@@ -106,9 +106,13 @@ describe('startOutboxRelay', () => {
       if (down) throw new Error('subscriber down');
     });
     const r = relay({ bus });
-    await expect(r.drainOnce()).rejects.toThrow('subscriber down');
+    // Delivery failure no longer rejects drainOnce; it increments attempt_count and returns 0.
+    expect(await r.drainOnce()).toBe(0);
     expect(await pending()).toBe(1);
     down = false;
+    // The backoff condition (attempt_count = 1 → wait 5s) means the event won't be picked up immediately unless
+    // we reset attempt_count; for the test we bypass by resetting directly.
+    await tdb.db.execute(sql`UPDATE platform.outbox SET attempt_count = 0`);
     expect(await r.drainOnce()).toBe(1);
     expect(await pending()).toBe(0);
   });

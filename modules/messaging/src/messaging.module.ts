@@ -7,6 +7,7 @@ import { Queue } from 'bullmq';
 import { FakeMessagingChannel } from './fake-channel';
 import { MessagingController } from './messaging.controller';
 import { MessagingService } from './messaging.service';
+import { createMessagingWorker } from './messaging.worker';
 
 export interface MessagingModuleOptions {
   db: Db;
@@ -61,9 +62,15 @@ export function messagingModule(opts: MessagingModuleOptions): DynamicModule {
         useValue: opts.channelAdapter ?? new FakeMessagingChannel(),
       },
       { provide: 'MESSAGING_QUEUE', useValue: queue },
+      { provide: 'MESSAGING_REDIS_CONN', useValue: redisConn },
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new InMemoryEventBus() },
       MessagingService,
+      {
+        provide: 'MESSAGING_WORKER',
+        useFactory: (svc: MessagingService) => createMessagingWorker(svc, redisConn),
+        inject: [MessagingService],
+      },
     ],
-    exports: [MessagingService],
+    exports: [MessagingService, 'MESSAGING_QUEUE'],
   };
 }

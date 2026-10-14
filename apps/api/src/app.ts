@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { defineModuleConfig } from '@iraq-maps/config';
 import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, type UserDataEraser } from '@iraq-maps/contracts';
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
+import { Queue } from 'bullmq';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
 import { AssistantModule, assistantMigrationsDir, PLACES_SEARCH_TOKEN } from '@iraq-maps/assistant';
@@ -61,6 +62,8 @@ export const apiConfig = (env?: Record<string, string | undefined>) =>
       // Fastify trustProxy: a hop count or comma-separated proxy IPs/CIDRs. `true` trusts any X-Forwarded-For, which
       // makes the per-IP OTP limit spoofable, so production refuses it.
       TRUST_PROXY: z.string().default('false'),
+      // Internal admin key for /internal/* endpoints. Must be set in production.
+      ADMIN_KEY: z.string().optional(),
     },
     { env, productionForbidden: { TRUST_PROXY: ['true'] } },
   );
@@ -69,7 +72,10 @@ const trustProxy = (v: string) => (v === 'true' ? true : v === 'false' ? false :
 
 @Controller()
 class HealthController {
-  constructor(@Inject('HEALTH_DB') private readonly db: ReturnType<typeof createDb>['db']) {}
+  constructor(
+    @Inject('HEALTH_DB') private readonly db: ReturnType<typeof createDb>['db'],
+    @Inject('HEALTH_QUEUES') private readonly queues: Queue[],
+  ) {}
 
   @TsRestHandler(healthContract.health)
   health() {
@@ -80,7 +86,16 @@ class HealthController {
         // Return 503 by throwing an HttpException that bypasses the 200 contract
         throw Object.assign(new HttpException(problem(503, 'db_unavailable', 'Database unavailable'), 503), {});
       }
-      return { status: 200, body: { status: 'ok', version: '1.0.0' } };
+      const queueStats: Record<string, { waiting: number; active: number; failed: number }> = {};
+      for (const q of this.queues) {
+        try {
+          const counts = await q.getJobCounts('waiting', 'active', 'failed');
+          queueStats[q.name] = { waiting: counts.waiting ?? 0, active: counts.active ?? 0, failed: counts.failed ?? 0 };
+        } catch {
+          queueStats[q.name] = { waiting: -1, active: -1, failed: -1 };
+        }
+      }
+      return { status: 200, body: { status: 'ok', version: '1.0.0', queues: queueStats } };
     });
   }
 }
@@ -151,7 +166,9 @@ export interface CreateAppOptions {
 /** Composition root: wires modules and port bindings. Call app.listen() yourself, or use app.inject() in tests. */
 export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastifyApplication> {
   const config = apiConfig(opts.env);
+  const adminKey = config.ADMIN_KEY;
   const { db, close } = createDb(config.DATABASE_URL);
+  const messagingQueue = new Queue('messaging', { connection: { url: config.REDIS_URL } });
   const bus = createInProcessEventBus();
 
   @Module({})
@@ -211,6 +228,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         { provide: APP_GUARD, useClass: IdentityAuthGuard },
         { provide: PortTokens.EventBus, useValue: bus },
         { provide: 'HEALTH_DB', useValue: db },
+        { provide: 'HEALTH_QUEUES', useValue: [messagingQueue] },
       ],
       exports: [PortTokens.EventBus],
     },
@@ -227,6 +245,26 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
   // A plain Fastify route: outside Nest routing, so the auth guard never sees it.
   const openApi = generateOpenApi(apiContract, { info: { title: 'iraq-maps API', version: '0.0.0' } }, { setOperationId: 'concatenated-path' });
   fastify.get('/openapi.json', async () => openApi);
+
+  // Internal admin route: returns failed job counts per queue.
+  fastify.get('/internal/queues/failed', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(403).send(problem(403, 'forbidden', 'Forbidden'));
+    }
+    const queues = [messagingQueue];
+    const result: Record<string, { failed: number }> = {};
+    for (const q of queues) {
+      try {
+        const counts = await q.getJobCounts('failed');
+        result[q.name] = { failed: counts.failed ?? 0 };
+      } catch {
+        result[q.name] = { failed: -1 };
+      }
+    }
+    return reply.status(200).send({ queues: result });
+  });
+
   await app.init();
   await fastify.ready();
   return app;

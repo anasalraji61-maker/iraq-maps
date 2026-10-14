@@ -30,11 +30,19 @@ export const TokenPair = z.object({
 });
 export type TokenPair = z.infer<typeof TokenPair>;
 
+const QueueCounts = z.object({ waiting: z.number().int(), active: z.number().int(), failed: z.number().int() });
+
 export const healthContract = c.router({
   health: {
     method: 'GET',
     path: '/health',
-    responses: { 200: z.object({ status: z.literal('ok'), version: z.string() }) },
+    responses: {
+      200: z.object({
+        status: z.literal('ok'),
+        version: z.string(),
+        queues: z.record(QueueCounts).optional(),
+      }),
+    },
   },
 });
 
