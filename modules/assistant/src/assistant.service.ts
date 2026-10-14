@@ -56,6 +56,14 @@ export class AssistantService {
     @Inject(PLACES_SEARCH_TOKEN) private readonly placesSearch: PlacesSearchFn,
   ) {}
 
+  /** Detect day-planning intent in the last user message */
+  private isDayPlanIntent(messages: Array<{ role: string; content: string }>): boolean {
+    const lastUser = [...messages].reverse().find(m => m.role === 'user');
+    if (!lastUser) return false;
+    const text = lastUser.content;
+    return /خطط|جولة|برنامج يوم|يومي|خطة يوم/.test(text);
+  }
+
   async chat(userId: string, turn: AssistantTurnType) {
     // Rate limit check
     await this.checkRateLimit(userId);
@@ -86,60 +94,109 @@ export class AssistantService {
       ...turn.messages,
     ];
 
-    // Call LLM with tools
-    const response = await this.llm.chat({
-      systemPrompt: SYSTEM_PROMPT,
-      messages: allMessages,
-      tools: ASSISTANT_TOOLS,
-      maxTokens: 1024,
-    });
-
-    let finalContent = response.content;
+    let finalContent: string;
     let composeParams: { text?: string; placeIds?: string[] } | undefined;
-    let focusPlaceId: string | undefined;
+    let focusPlaceIds: string[] = [];
 
-    // Handle tool calls (max 1 round-trip)
-    if (response.stopReason === 'tool_use' && response.toolCalls && response.toolCalls.length > 0) {
-      const toolCall = response.toolCalls[0]!;
+    // --- Plan my day: heuristic shortcut before LLM tool loop ---
+    if (this.isDayPlanIntent(allMessages)) {
+      const lastUser = [...allMessages].reverse().find(m => m.role === 'user');
+      // Extract city hint from message if present, otherwise undefined
+      const cityMatch = lastUser?.content.match(/في\s+(\S+)/);
+      const city = cityMatch?.[1];
 
-      if (toolCall.name === 'search_places') {
-        const query = toolCall.input['query'] as string;
-        const city = toolCall.input['city'] as string | undefined;
-        const results = await this.placesSearch(query, city);
+      const [restaurants, attractions, cafes] = await Promise.all([
+        this.placesSearch('مطاعم', city),
+        this.placesSearch('معالم سياحية', city),
+        this.placesSearch('مقاهي', city),
+      ]);
 
-        // Surface the top result on the map
-        if (results.length > 0) {
-          focusPlaceId = results[0]!.id;
+      // Pick top result from each category, deduplicate, cap at 5
+      const ordered = [
+        restaurants[0],
+        attractions[0],
+        cafes[0],
+        restaurants[1],
+        attractions[1],
+      ]
+        .filter((r): r is NonNullable<typeof r> => r !== undefined)
+        .filter((r, i, arr) => arr.findIndex(x => x.id === r.id) === i)
+        .slice(0, 5);
+
+      focusPlaceIds = ordered.map(r => r.id);
+
+      // Build itinerary text for LLM follow-up
+      const itineraryText = ordered
+        .map((r, i) => `${i + 1}. ${r.name} — ${r.address}`)
+        .join('\n');
+
+      const planMessages = [
+        ...allMessages,
+        {
+          role: 'user' as const,
+          content: `نتائج البحث للتخطيط:\n${itineraryText}\nرتّب هذه الأماكن كبرنامج يوم مقترح بالعربية.`,
+        },
+      ];
+
+      const planReply = await this.llm.chat({
+        systemPrompt: SYSTEM_PROMPT,
+        messages: planMessages,
+        maxTokens: 1024,
+      });
+
+      finalContent = planReply.content;
+    } else {
+      // --- Normal LLM tool loop ---
+      const response = await this.llm.chat({
+        systemPrompt: SYSTEM_PROMPT,
+        messages: allMessages,
+        tools: ASSISTANT_TOOLS,
+        maxTokens: 1024,
+      });
+
+      finalContent = response.content;
+
+      // Handle tool calls (max 1 round-trip)
+      if (response.stopReason === 'tool_use' && response.toolCalls && response.toolCalls.length > 0) {
+        const toolCall = response.toolCalls[0]!;
+
+        if (toolCall.name === 'search_places') {
+          const query = toolCall.input['query'] as string;
+          const city = toolCall.input['city'] as string | undefined;
+          const results = await this.placesSearch(query, city);
+
+          // Surface up to 5 results on the map
+          focusPlaceIds = results.slice(0, 5).map(r => r.id);
+
+          const toolResultText = results.length > 0
+            ? results.map(r => `- ${r.name}: ${r.address}`).join('\n')
+            : 'لم يتم العثور على نتائج.';
+
+          const messagesWithToolResult = [
+            ...allMessages,
+            {
+              role: 'assistant' as const,
+              content: `[استخدام أداة البحث عن: ${query}]`,
+            },
+            {
+              role: 'user' as const,
+              content: `نتائج البحث:\n${toolResultText}`,
+            },
+          ];
+
+          const followUp = await this.llm.chat({
+            systemPrompt: SYSTEM_PROMPT,
+            messages: messagesWithToolResult,
+            maxTokens: 1024,
+          });
+
+          finalContent = followUp.content;
+        } else if (toolCall.name === 'compose_message') {
+          const text = toolCall.input['text'] as string | undefined;
+          const placeIds = toolCall.input['placeIds'] as string[] | undefined;
+          composeParams = { text, placeIds };
+          finalContent = text ?? '';
         }
-
-        const toolResultText = results.length > 0
-          ? results.map(r => `- ${r.name}: ${r.address}`).join('\n')
-          : 'لم يتم العثور على نتائج.';
-
-        const messagesWithToolResult = [
-          ...allMessages,
-          {
-            role: 'assistant' as const,
-            content: `[استخدام أداة البحث عن: ${query}]`,
-          },
-          {
-            role: 'user' as const,
-            content: `نتائج البحث:\n${toolResultText}`,
-          },
-        ];
-
-        const followUp = await this.llm.chat({
-          systemPrompt: SYSTEM_PROMPT,
-          messages: messagesWithToolResult,
-          maxTokens: 1024,
-        });
-
-        finalContent = followUp.content;
-      } else if (toolCall.name === 'compose_message') {
-        const text = toolCall.input['text'] as string | undefined;
-        const placeIds = toolCall.input['placeIds'] as string[] | undefined;
-        composeParams = { text, placeIds };
-        finalContent = text ?? '';
       }
     }
 
@@ -157,7 +214,16 @@ export class AssistantService {
       composeParams = this.extractComposeParams(finalContent);
     }
 
-    return { sessionId, reply: finalContent, composeParams, focusPlaceId };
+    // Keep focusPlaceId for compat (first of the array)
+    const focusPlaceId = focusPlaceIds[0];
+
+    return {
+      sessionId,
+      reply: finalContent,
+      composeParams,
+      focusPlaceId,
+      focusPlaceIds: focusPlaceIds.length > 0 ? focusPlaceIds : undefined,
+    };
   }
 
   async getSession(userId: string, sessionId: string) {

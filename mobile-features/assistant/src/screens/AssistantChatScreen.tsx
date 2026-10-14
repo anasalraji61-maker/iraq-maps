@@ -40,7 +40,7 @@ function formatTime(ts: number): string {
 export function AssistantChatScreen(): ReactElement {
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
-  const { messages, send, isLoading, composeParams, focusPlaceId, error } =
+  const { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, error } =
     useAssistantChat(sessionId);
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
@@ -145,7 +145,19 @@ export function AssistantChatScreen(): ReactElement {
         </View>
       ) : null}
 
-      {focusPlaceId ? (
+      {focusPlaceIds && focusPlaceIds.length > 1 ? (
+        <Pressable
+          testID="assistant.map.deeplink"
+          style={styles.mapBtn}
+          onPress={() =>
+            router.push(`/?focusPlaceIds=${focusPlaceIds.join(',')}`)
+          }
+        >
+          <Text style={styles.mapBtnText}>
+            {t('chat.showPlacesOnMap', { count: focusPlaceIds.length })}
+          </Text>
+        </Pressable>
+      ) : focusPlaceId ? (
         <Pressable
           testID="assistant.map.deeplink"
           style={styles.mapBtn}

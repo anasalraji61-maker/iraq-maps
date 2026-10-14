@@ -6,6 +6,7 @@
     "compose": "Message Provider",
     "loading": "Thinking...",
     "error": "An error occurred, please try again",
-    "showOnMap": "Show on Map"
+    "showOnMap": "Show on Map",
+    "showPlacesOnMap": "Show {{count}} places on Map"
   }
 }

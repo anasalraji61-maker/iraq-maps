@@ -92,6 +92,12 @@ describe('AssistantService tool calling (unit)', () => {
     const secondCallMessages = llm.calls[1]!.messages;
     expect(secondCallMessages.some(m => m.content.includes('نتائج البحث'))).toBe(true);
     expect(result.reply).toBe('وجدت مطعمين قريبين منك.');
+    // focusPlaceIds should be set (up to 5)
+    expect(result.focusPlaceIds).toBeDefined();
+    expect(result.focusPlaceIds!.length).toBeGreaterThan(0);
+    expect(result.focusPlaceIds!.length).toBeLessThanOrEqual(5);
+    // focusPlaceId (compat) should equal first of focusPlaceIds
+    expect(result.focusPlaceId).toBe(result.focusPlaceIds![0]);
   });
 
   it('compose_message tool call returns composeParams', async () => {
@@ -110,6 +116,44 @@ describe('AssistantService tool calling (unit)', () => {
     expect(result.composeParams).toBeDefined();
     expect(result.composeParams?.text).toBe('أريد الحجز لشخصين');
     expect(result.composeParams?.placeIds).toEqual(['place-001']);
+  });
+});
+
+describe('AssistantService plan-my-day (unit)', () => {
+  let llm: FakeLlmClient;
+  let svc: AssistantService;
+
+  beforeEach(() => {
+    llm = new FakeLlmClient();
+    svc = new AssistantService(makeRateLimitDb(0), llm, fakePlacesSearch);
+  });
+
+  it('detects day-plan intent and skips normal tool loop', async () => {
+    llm.nextReply = '١. مطعم — شارع الرشيد\n٢. معالم — شارع المتنبي\n٣. مقهى — شارع الرشيد';
+
+    const result = await svc.chat('user-3', {
+      sessionId: '00000000-0000-0000-0000-000000000020',
+      messages: [{ role: 'user', content: 'خطط لي برنامج يوم في بغداد' }],
+    });
+
+    // One LLM call (plan prompt), no tool-call round-trip
+    expect(llm.calls.length).toBe(1);
+    // Should include itinerary prompt
+    const msgs = llm.calls[0]!.messages;
+    expect(msgs.some(m => m.content.includes('نتائج البحث للتخطيط'))).toBe(true);
+    // focusPlaceIds populated from parallel searches
+    expect(result.focusPlaceIds).toBeDefined();
+    expect(result.focusPlaceIds!.length).toBeGreaterThan(0);
+    expect(result.focusPlaceIds!.length).toBeLessThanOrEqual(5);
+  });
+
+  it('isDayPlanIntent detects Arabic plan keywords', () => {
+    const words = ['خطط لي جولة', 'أريد جولة', 'برنامج يوم', 'خطة يوم كاملة', 'يومي في بغداد'];
+    for (const w of words) {
+      const msgs = [{ role: 'user', content: w }];
+      // @ts-expect-error private method under test
+      expect(svc.isDayPlanIntent(msgs)).toBe(true);
+    }
   });
 });
 

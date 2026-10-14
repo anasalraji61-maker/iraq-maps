@@ -33,8 +33,10 @@ export const AssistantResponse = z.object({
       placeIds: z.array(PlaceId).max(5).optional(),
     })
     .optional(),
-  // If assistant wants to show a place on map
+  // If assistant wants to show a place on map (single, kept for compat)
   focusPlaceId: PlaceId.optional(),
+  // If assistant wants to show multiple places on map (up to 5)
+  focusPlaceIds: z.array(PlaceId).max(5).optional(),
 });
 
 export const AssistantSessionId = z.string().uuid().brand('AssistantSessionId');
