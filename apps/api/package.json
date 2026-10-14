@@ -22,6 +22,8 @@
     "@iraq-maps/observability": "workspace:*",
     "@iraq-maps/adapter-storage-s3": "workspace:*",
     "@iraq-maps/media": "workspace:*",
+    "@iraq-maps/messaging": "workspace:*",
+    "@iraq-maps/notifications": "workspace:*",
     "@iraq-maps/places": "workspace:*",
     "@iraq-maps/providers": "workspace:*",
     "@iraq-maps/routing": "workspace:*",

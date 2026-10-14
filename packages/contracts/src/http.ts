@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { IraqiPhone, Locale, Problem, Role, UserId } from './common';
 import { imageryContract } from './imagery';
 import { mediaContract } from './media';
+import { messagingContract } from './messaging';
+import { notificationsContract } from './notifications';
 import { citiesContract, placesContract } from './places';
 import { adminProvidersContract, providersContract } from './providers';
 import { routesContract } from './routing';
@@ -90,5 +92,8 @@ export const apiContract = c.router({
   providers: providersContract,
   adminProviders: adminProvidersContract,
   media: mediaContract,
+  // M4
+  messaging: messagingContract,
+  notifications: notificationsContract,
 });
 export type ApiContract = typeof apiContract;

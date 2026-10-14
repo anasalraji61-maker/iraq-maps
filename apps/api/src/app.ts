@@ -4,6 +4,8 @@ import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, ty
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
+import { messagingMigrationsDir, messagingModule } from '@iraq-maps/messaging';
+import { notificationsMigrationsDir, notificationsModule } from '@iraq-maps/notifications';
 import { createLogger, type Logger } from '@iraq-maps/observability';
 import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
 import { providersMigrationsDir, providersModule } from '@iraq-maps/providers';
@@ -29,8 +31,6 @@ import type { FastifyBaseLogger, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 // Nest DI note: tsx/esbuild/vite do not emit decorator metadata, so always inject with explicit @Inject(token).
-// TODO(M4-messaging): import { messagingModule } from '@iraq-maps/messaging'; add to AppModule imports below.
-// TODO(M4-notifications): import { notificationsModule } from '@iraq-maps/notifications'; add to AppModule imports below.
 
 /** Module migrations, in order. The `platform` schema (outbox) always runs before them. */
 export const moduleMigrations = [
@@ -38,6 +38,8 @@ export const moduleMigrations = [
   { schema: 'places', migrationsDir: placesMigrationsDir },
   { schema: 'media', migrationsDir: mediaMigrationsDir },
   { schema: 'providers', migrationsDir: providersMigrationsDir },
+  { schema: 'messaging', migrationsDir: messagingMigrationsDir },
+  { schema: 'notifications', migrationsDir: notificationsMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -167,6 +169,8 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         routingModule({ env: opts.env }),
         mediaModule({ db, storage }),
         providersModule({ db, phoneVerification: null }),
+        messagingModule({ db }),
+        notificationsModule({ db, eventBus: bus, env: opts.env }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],

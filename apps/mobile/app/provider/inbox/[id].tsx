@@ -1,1 +1,1 @@
-export { PendingScreen as default } from '../../../src/shell';
+export { ProviderInboxDetailScreen as default } from '@iraq-maps/feature-provider';

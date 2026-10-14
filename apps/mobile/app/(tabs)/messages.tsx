@@ -1,1 +1,1 @@
-export { PendingScreen as default } from '../../src/shell';
+export { InquiriesListScreen as default } from '@iraq-maps/feature-messages';
