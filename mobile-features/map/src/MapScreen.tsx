@@ -134,6 +134,11 @@ function CityMap({ city }: { city: CityDescriptor }) {
             onPress={() => router.push(href('navigation', { placeId: selectedPlaceId }))}
           />
         ) : null}
+        <Button
+          testID="assistant.open.button"
+          label={t('actions.assistant')}
+          onPress={() => router.push('/assistant')}
+        />
       </View>
       <Sheet visible={choosingLang} onClose={() => setChoosingLang(false)}>
         <Text variant="subtitle">{t('lang.title')}</Text>

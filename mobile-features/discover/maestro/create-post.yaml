@@ -1,0 +1,10 @@
+appId: com.iraqmaps.app
+---
+- launchApp
+- tapOn:
+    id: "discover.create.post"
+- tapOn:
+    id: "discover.post.input"
+- inputText: "منشور تجريبي عن مطعم جديد في بغداد"
+- tapOn:
+    id: "discover.create.post"

@@ -1,0 +1,10 @@
+appId: com.iraqmaps.app
+---
+- launchApp
+- tapOn:
+    id: "assistant.chat.input"
+- inputText: "أين أجد مطعم جيد في بغداد؟"
+- tapOn:
+    id: "assistant.chat.send"
+- assertVisible:
+    id: "assistant.message.0"
