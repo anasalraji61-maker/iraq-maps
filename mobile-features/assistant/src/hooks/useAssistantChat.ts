@@ -19,6 +19,7 @@ export interface UseAssistantChatResult {
   composeParams?: AssistantResponseType['composeParams'];
   focusPlaceId?: AssistantResponseType['focusPlaceId'];
   focusPlaceIds?: AssistantResponseType['focusPlaceIds'];
+  focusPlaceNames?: AssistantResponseType['focusPlaceNames'];
   error?: string;
 }
 
@@ -32,6 +33,7 @@ export function useAssistantChat(
   const [composeParams, setComposeParams] = useState<AssistantResponseType['composeParams']>(undefined);
   const [focusPlaceId, setFocusPlaceId] = useState<AssistantResponseType['focusPlaceId']>(undefined);
   const [focusPlaceIds, setFocusPlaceIds] = useState<AssistantResponseType['focusPlaceIds']>(undefined);
+  const [focusPlaceNames, setFocusPlaceNames] = useState<AssistantResponseType['focusPlaceNames']>(undefined);
   const [error, setError] = useState<string | undefined>();
 
   // Persist sessionId to AsyncStorage
@@ -53,6 +55,7 @@ export function useAssistantChat(
       setComposeParams(undefined);
       setFocusPlaceId(undefined);
       setFocusPlaceIds(undefined);
+      setFocusPlaceNames(undefined);
       setError(undefined);
 
       try {
@@ -64,7 +67,7 @@ export function useAssistantChat(
         });
 
         if (res.status === 200) {
-          const { reply, composeParams: cp, focusPlaceId: fpid, focusPlaceIds: fpids } = res.body;
+          const { reply, composeParams: cp, focusPlaceId: fpid, focusPlaceIds: fpids, focusPlaceNames: fpnames } = res.body;
           setMessages((prev) => [
             ...prev,
             { role: 'assistant', content: reply, timestamp: Date.now() },
@@ -72,6 +75,7 @@ export function useAssistantChat(
           if (cp) setComposeParams(cp);
           if (fpid) setFocusPlaceId(fpid);
           if (fpids && fpids.length > 0) setFocusPlaceIds(fpids);
+          if (fpnames) setFocusPlaceNames(fpnames);
         } else {
           setError(t('chat.error'));
         }
@@ -84,7 +88,7 @@ export function useAssistantChat(
     [client, messages, sessionId, isLoading],
   );
 
-  return { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, error };
+  return { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error };
 }
 
 /** Load the previously saved session id from storage. Returns null if none. */

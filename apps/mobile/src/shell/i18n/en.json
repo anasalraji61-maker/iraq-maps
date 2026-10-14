@@ -1,6 +1,7 @@
 {
   "tabs": {
-    "assistant": "Assistant"
+    "assistant": "Assistant",
+    "activity": "Notifications"
   },
   "onboarding": {
     "welcome": {

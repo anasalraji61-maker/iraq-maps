@@ -63,7 +63,8 @@ export function createClient({ baseUrl, getTokens, onTokens, onServerError, fetc
   const send = async ({ route, path, method, headers, body, fetchOptions }: ApiFetcherArgs, accessToken?: string) => {
     const res = await doFetch(baseUrl() + path, {
       method,
-      body,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      body: body as any,
       // A superseded search aborts its request (fetchOptions: { signal }).
       signal: fetchOptions?.signal,
       headers: accessToken ? { ...headers, authorization: `Bearer ${accessToken}` } : headers,

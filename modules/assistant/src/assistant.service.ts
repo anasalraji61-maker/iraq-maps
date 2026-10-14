@@ -126,6 +126,7 @@ export class AssistantService {
     let finalContent: string;
     let composeParams: { text?: string; placeIds?: string[] } | undefined;
     let focusPlaceIds: string[] = [];
+    const placeNameCache = new Map<string, string>(); // id → display name
 
     // --- Plan my day: heuristic shortcut before LLM tool loop ---
     if (this.isDayPlanIntent(allMessages)) {
@@ -153,6 +154,7 @@ export class AssistantService {
         .slice(0, 5);
 
       focusPlaceIds = ordered.map(r => r.id);
+      ordered.forEach(r => placeNameCache.set(r.id, r.name));
 
       // Assign slots: breakfast, attraction, lunch, cafe, dinner
       const slotDefs = [
@@ -214,6 +216,7 @@ export class AssistantService {
 
           // Surface up to 5 results on the map
           focusPlaceIds = results.slice(0, 5).map(r => r.id);
+          results.slice(0, 5).forEach(r => placeNameCache.set(r.id, r.name));
 
           const toolResultText = results.length > 0
             ? results.map(r => {
@@ -272,12 +275,18 @@ export class AssistantService {
     const tomorrow = new Date();
     tomorrow.setUTCHours(24, 0, 0, 0);
 
+    // Build name map from the cache collected during searches this turn
+    const focusPlaceNames = placeNameCache.size > 0
+      ? Object.fromEntries(placeNameCache)
+      : undefined;
+
     return {
       sessionId,
       reply: finalContent,
       composeParams,
       focusPlaceId,
       focusPlaceIds: focusPlaceIds.length > 0 ? focusPlaceIds : undefined,
+      focusPlaceNames,
       rateLimitRemaining,
       rateLimitReset: tomorrow.toISOString(),
     };

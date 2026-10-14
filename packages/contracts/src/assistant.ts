@@ -37,6 +37,8 @@ export const AssistantResponse = z.object({
   focusPlaceId: PlaceId.optional(),
   // If assistant wants to show multiple places on map (up to 5)
   focusPlaceIds: z.array(PlaceId).max(5).optional(),
+  // Names keyed by place ID for focusPlaceIds
+  focusPlaceNames: z.record(z.string(), z.string()).optional(),
 });
 
 export const AssistantSessionId = z.string().uuid().brand('AssistantSessionId');

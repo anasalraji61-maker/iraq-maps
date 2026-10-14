@@ -1,0 +1,7 @@
+{
+  "extends": "@iraq-maps/tooling/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-native"
+  },
+  "include": ["src"]
+}

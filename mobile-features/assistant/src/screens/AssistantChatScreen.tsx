@@ -87,9 +87,11 @@ function TypingIndicator(): ReactElement {
 
 function PlaceCards({
   placeIds,
+  names,
   onPress,
 }: {
   placeIds: string[];
+  names?: Record<string, string>;
   onPress: (id: string) => void;
 }): ReactElement {
   return (
@@ -100,14 +102,16 @@ function PlaceCards({
           testID={`assistant.placeCard.${id}`}
           style={styles.placeCard}
           onPress={() => onPress(id)}
+          accessibilityRole="button"
+          accessibilityLabel={names?.[id] ?? id}
         >
           <View style={styles.placeCardInner}>
             <View style={styles.placeCardIcon}>
               <Text style={styles.placeCardIconText}>📍</Text>
             </View>
             <View style={styles.placeCardInfo}>
-              <Text style={styles.placeCardId} numberOfLines={1}>
-                {id.slice(0, 8)}...
+              <Text style={styles.placeCardName} numberOfLines={1}>
+                {names?.[id] ?? id}
               </Text>
             </View>
             <Text style={styles.placeCardMapLabel}>{t('chat.viewOnMap')}</Text>
@@ -121,7 +125,7 @@ function PlaceCards({
 export function AssistantChatScreen(): ReactElement {
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
-  const { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, error } =
+  const { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error } =
     useAssistantChat(sessionId);
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
@@ -233,7 +237,7 @@ export function AssistantChatScreen(): ReactElement {
       ) : null}
 
       {focusPlaceIds && focusPlaceIds.length > 1 ? (
-        <PlaceCards placeIds={focusPlaceIds} onPress={handlePlaceCardPress} />
+        <PlaceCards placeIds={focusPlaceIds} names={focusPlaceNames} onPress={handlePlaceCardPress} />
       ) : focusPlaceId ? (
         <Pressable
           testID="assistant.map.deeplink"
@@ -429,7 +433,7 @@ const styles = StyleSheet.create({
   placeCardInfo: {
     flex: 1,
   },
-  placeCardId: {
+  placeCardName: {
     fontSize: 13,
     color: '#424242',
     fontWeight: '500',

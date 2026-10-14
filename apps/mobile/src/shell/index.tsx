@@ -21,21 +21,20 @@ registerNamespace('shell', { ar, ckb, en });
 
 type ContractTab = keyof typeof testIDs.tabs;
 
-/** Full ordered tab list; assistant is not yet in testIDs.tabs so it is typed separately. */
-type Tab = ContractTab | 'assistant';
+/** Full ordered tab list; assistant and activity are not yet in testIDs.tabs so typed separately. */
+type Tab = ContractTab | 'assistant' | 'activity';
 
 const tabIcons: Record<Tab, AndroidSymbol> = {
   map: 'map',
   discover: 'explore',
   messages: 'chat',
   assistant: 'smart_toy',
-  account: 'person',
-  // kept for back-compat; not shown in the primary bar
   activity: 'history',
+  account: 'person',
 };
 
-/** Primary tab bar order — five tabs visible to the user. */
-const tabs: Tab[] = ['map', 'discover', 'messages', 'assistant', 'account'];
+/** Primary tab bar order — six tabs visible to the user. */
+const tabs: Tab[] = ['map', 'discover', 'messages', 'assistant', 'activity', 'account'];
 
 /** Polls unread notification count every 30 s when the user is signed in. Returns 0 when signed out. */
 function useUnreadNotificationCount(): number {
@@ -188,9 +187,9 @@ export function TabsLayout() {
   return (
     <Tabs screenOptions={{ ...tabBarOptions, tabBarStyle }}>
       {tabs.map((tab) => {
-        const label = tab === 'assistant' ? t('shell:tabs.assistant') : t(`common:tabs.${tab}`);
+        const label = (tab === 'assistant' || tab === 'activity') ? t(`shell:tabs.${tab}`) : t(`common:tabs.${tab}`);
         const testID = tab in testIDs.tabs ? testIDs.tabs[tab as ContractTab] : undefined;
-        const badge = tab === 'account' && unreadCount > 0 ? unreadCount : undefined;
+        const badge = tab === 'activity' && unreadCount > 0 ? unreadCount : undefined;
         return (
           <Tabs.Screen
             key={tab}

@@ -1,1 +1,1 @@
-export { PendingScreen as default } from '../../src/shell';
+export { ActivityScreen as default } from '@iraq-maps/feature-activity';
