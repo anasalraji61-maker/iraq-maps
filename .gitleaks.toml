@@ -4,9 +4,11 @@ title = "iraq-maps gitleaks config"
 useDefault = true
 
 [allowlist]
-description = "Lockfiles and generated output"
+description = "Lockfiles, generated output, and known test fixtures"
 paths = [
   '''pnpm-lock\.yaml''',
   '''(^|/)node_modules/''',
   '''(^|/)dist/''',
 ]
+# Zeroed-out RSA key in the FCM adapter test fixture — not a real key
+commits = ["6c374fcf4d55f0dec382e7d9b6c8e7f7cb7f3d94"]
