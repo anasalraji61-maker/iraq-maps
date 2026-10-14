@@ -1,0 +1,10 @@
+{
+  "chat": {
+    "title": "AI Assistant",
+    "placeholder": "Ask about places, prices, directions...",
+    "send": "Send",
+    "compose": "Message Provider",
+    "loading": "Thinking...",
+    "error": "An error occurred, please try again"
+  }
+}
