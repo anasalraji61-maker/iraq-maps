@@ -125,10 +125,7 @@ const PostItem = memo(function PostItem({
 
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const extApi = useApi() as any;
-  const placesApi = extApi;
-  const mediaApi = extApi;
+  const extApi = useApi();
   const router = useRouter();
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
@@ -186,7 +183,7 @@ export function DiscoverFeedScreen(): ReactElement {
       ids.map(async (id) => {
         const idStr = id as string;
         try {
-          const res = await placesApi.places.get({ params: { id } });
+          const res = await extApi.places.get({ params: { id } });
           if (res.status === 200) {
             const name: string = res.body.names.ar ?? res.body.names.name;
             setPlaceNames((prev) => ({ ...prev, [idStr]: name }));
@@ -198,7 +195,7 @@ export function DiscoverFeedScreen(): ReactElement {
         }
       }),
     );
-  }, [posts, placeNames, placesApi]);
+  }, [posts, placeNames, extApi]);
 
   // Fetch signed read URLs for first asset of posts that have media
   useEffect(() => {
@@ -210,8 +207,7 @@ export function DiscoverFeedScreen(): ReactElement {
     void Promise.all(
       assetIds.map(async (assetId) => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const res = await (mediaApi as any).media.readUrl({ params: { assetId }, query: { size: 'thumbnail' } });
+          const res = await extApi.media.readUrl({ params: { assetId }, query: { size: 'thumbnail' } });
           if (res.status === 200) {
             const url: string = res.body.url.startsWith('/') ? `${res.body.url}` : res.body.url;
             setMediaUrls((prev) => ({ ...prev, [assetId]: url }));
@@ -223,7 +219,7 @@ export function DiscoverFeedScreen(): ReactElement {
         }
       }),
     );
-  }, [posts, mediaUrls, mediaApi]);
+  }, [posts, mediaUrls, extApi]);
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);

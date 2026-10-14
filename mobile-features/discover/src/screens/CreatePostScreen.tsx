@@ -41,8 +41,7 @@ interface UploadedPhoto {
 
 export function CreatePostScreen(): ReactElement {
   const api = useDiscoverClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const placesApi = useApi() as any;
+  const placesApi = useApi();
   const baseUrl = useApiBaseUrl();
   const router = useRouter();
   const [body, setBody] = useState('');

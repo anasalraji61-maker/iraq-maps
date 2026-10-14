@@ -2,6 +2,7 @@ import {
   messagingTestIDs,
   type DeliveryTarget,
   type Inquiry,
+  type InquiryId,
   type MessageStatus,
 } from '@iraq-maps/contracts';
 import { Badge, Banner, Button, Card, ListItem, Screen, Text } from '@iraq-maps/ui';
@@ -152,8 +153,7 @@ export function InquiryDetailScreen(): ReactElement {
 
   useEffect(() => {
     if (!requestId) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    api.getInquiry({ params: { id: requestId as any } })
+    api.getInquiry({ params: { id: requestId as InquiryId } })
       .then((res) => { if (res.status === 200) setInquiry(res.body); })
       .catch(() => setError(t('detail.loadError')));
   }, [requestId]);
