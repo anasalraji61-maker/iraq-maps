@@ -54,6 +54,9 @@ const allowRTL = jest.spyOn(I18nManager, 'allowRTL');
 beforeEach(() => {
   mockAppEnv = 'development';
   setLocale('ar');
+  // Tests expect the tab bar, not the onboarding flow. Mark onboarding as seen by default;
+  // tests that exercise onboarding can clear this key themselves.
+  void memorySecureStore.setItemAsync('app.hasSeenOnboarding', '1');
 });
 afterEach(() => {
   memorySecureStore.clear();
@@ -64,19 +67,24 @@ afterEach(() => {
 describe('tabs', () => {
   it('five tabs with labels from the i18n common namespace, following the locale', async () => {
     await launch();
+    // activity uses shell:tabs.activity (renamed to "Notifications"); the others use common:tabs.*
+    const tabLabel = (tab: (typeof tabs)[number]) =>
+      tab === 'activity' ? t(`shell:tabs.${tab}`) : t(`common:tabs.${tab}`);
     for (const locale of ['ar', 'ckb', 'en'] as const) {
       await act(async () => setLocale(locale));
-      for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveTextContent(t(`common:tabs.${tab}`));
+      for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveTextContent(tabLabel(tab));
     }
     expect(t('common:tabs.map')).not.toBe('common:tabs.map');
   });
 
   it('tab labels are 12sp with AA colors, and each tab is announced by its localized name', async () => {
     await launch();
-    const label = (tab: (typeof tabs)[number]) => within(screen.getByTestId(testIDs.tabs[tab])).getByText(t(`common:tabs.${tab}`));
+    const tabLabel = (tab: (typeof tabs)[number]) =>
+      tab === 'activity' ? t(`shell:tabs.${tab}`) : t(`common:tabs.${tab}`);
+    const label = (tab: (typeof tabs)[number]) => within(screen.getByTestId(testIDs.tabs[tab])).getByText(tabLabel(tab));
     expect(label('map')).toHaveStyle({ fontSize: 12, color: tokens.color.primary });
     expect(label('discover')).toHaveStyle({ fontSize: 12, color: tokens.color.textMuted });
-    for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveProp('accessibilityLabel', t(`common:tabs.${tab}`));
+    for (const tab of tabs) expect(screen.getByTestId(testIDs.tabs[tab])).toHaveProp('accessibilityLabel', tabLabel(tab));
   });
 
   it('the tab bar fits the 28dp icon and the whole label line at the font scale, above the bottom safe-area inset', async () => {
