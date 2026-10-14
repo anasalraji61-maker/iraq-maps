@@ -6,11 +6,27 @@ import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, type ReactElement } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, Text as RNText, View } from 'react-native';
 import { NotifPrefsSection } from './NotifPrefsSection';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
 import { useNotifApi } from './useNotifApi';
+
+/** Derives up to 2 initials from a display name. */
+function initials(name: string | null | undefined): string {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0]!.charAt(0).toUpperCase();
+  return (parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0)).toUpperCase();
+}
+
+function AvatarCircle({ name }: { name: string | null | undefined }): ReactElement {
+  return (
+    <View style={styles.avatar} accessibilityRole="image" accessibilityLabel={name ?? ''}>
+      <RNText style={styles.avatarText}>{initials(name)}</RNText>
+    </View>
+  );
+}
 
 export function AccountScreen(): ReactElement {
   const api = useApi();
@@ -90,6 +106,10 @@ export function AccountScreen(): ReactElement {
   return (
     <Screen scroll>
       {confirmingDelete ? null : banner}
+      <View style={styles.profileHeader}>
+        <AvatarCircle name={state.user.name} />
+        <Text variant="subtitle">{state.user.name ?? t('profile.noName')}</Text>
+      </View>
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
       <ListItem testID={testIDs.provider.entry} title={t('profile.registerBusiness')} onPress={() => router.push(href('providerRegister'))} />
       {languageItem}
@@ -120,6 +140,24 @@ export function AccountScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
+  profileHeader: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    gap: 12,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#1976D2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+  },
   versionRow: {
     alignItems: 'center',
     paddingVertical: 24,
