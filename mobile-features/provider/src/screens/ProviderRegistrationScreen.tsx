@@ -4,6 +4,7 @@ import { useApi, useApiBaseUrl, uploadAsset } from '@iraq-maps/mobile-kit';
 import { Banner, Button, ListItem, Screen, Text, TextField } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useState, type ReactElement } from 'react';
+import { Pressable, StyleSheet, View, Text as RNText, Image } from 'react-native';
 import { normalizeIraqiPhone } from '../phone';
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
@@ -22,6 +23,7 @@ interface State {
   name: string;
   phone: string;
   category: PlaceCategory | null;
+  logoUri: string | null;
   photoUris: string[];
   consents: Set<ConsentScope>;
 }
@@ -38,6 +40,7 @@ export function ProviderRegistrationScreen(): ReactElement {
     name: '',
     phone: '',
     category: null,
+    logoUri: null,
     photoUris: [],
     consents: new Set(),
   });
@@ -62,6 +65,15 @@ export function ProviderRegistrationScreen(): ReactElement {
   // pickPhoto is a stub; the real implementation will use expo-image-picker.
   // uploadAsset handles the upload through the API once a URI is available.
   const pickPhoto = async () => {
+    // no-op in this milestone; expo-image-picker wiring is a future step.
+    void uploadAsset; // referenced so tree-shaker keeps the import
+  };
+
+  // pickLogo is a stub for the business logo/profile photo.
+  // TODO: wire up expo-image-picker to let the provider pick an image,
+  //       then call uploadAsset(api, apiBaseUrl, { uri, purpose: 'provider_logo' })
+  //       and store the returned assetId in state.logoUri.
+  const pickLogo = async () => {
     // no-op in this milestone; expo-image-picker wiring is a future step.
     void uploadAsset; // referenced so tree-shaker keeps the import
   };
@@ -114,6 +126,29 @@ export function ProviderRegistrationScreen(): ReactElement {
 
       {step === 1 && (
         <>
+          {/* Business logo / profile photo */}
+          <View style={regStyles.logoContainer}>
+            <Pressable
+              testID={testIDs.provider.photosAdd}
+              onPress={() => { void pickLogo(); }}
+              accessibilityLabel={t('logo.change')}
+              style={regStyles.logoWrapper}
+            >
+              {state.logoUri ? (
+                <Image source={{ uri: state.logoUri }} style={regStyles.logoImage} />
+              ) : (
+                <View style={regStyles.logoPlaceholder}>
+                  <RNText style={regStyles.logoPlaceholderIcon}>🏪</RNText>
+                </View>
+              )}
+              {/* Camera icon overlay */}
+              <View style={regStyles.cameraOverlay}>
+                <RNText style={regStyles.cameraIcon}>📷</RNText>
+              </View>
+            </Pressable>
+            <RNText style={regStyles.logoHint}>{t('logo.placeholder')}</RNText>
+          </View>
+
           <TextField
             testID={testIDs.provider.nameInput}
             label={t('name.label')}
@@ -201,3 +236,33 @@ export function ProviderRegistrationScreen(): ReactElement {
     </Screen>
   );
 }
+
+const LOGO_SIZE = 96;
+
+const regStyles = StyleSheet.create({
+  logoContainer: { alignItems: 'center', marginVertical: 16 },
+  logoWrapper: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2 },
+  logoImage: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2 },
+  logoPlaceholder: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: LOGO_SIZE / 2,
+    backgroundColor: '#E5E7EB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoPlaceholderIcon: { fontSize: 40 },
+  cameraOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    end: 0,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#3B82F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraIcon: { fontSize: 16 },
+  logoHint: { marginTop: 6, fontSize: 12 },
+});

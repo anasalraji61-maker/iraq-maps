@@ -60,7 +60,13 @@
     "pending": "قيد المراجعة",
     "verified": "موثّق",
     "suspended": "موقوف",
-    "refresh": "تحديث الحالة"
+    "refresh": "تحديث الحالة",
+    "analytics": {
+      "viewsToday": "عدد المشاهدات اليوم",
+      "incomingMessages": "عدد الرسائل الواردة",
+      "posts": "عدد المنشورات",
+      "rating": "التقييم"
+    }
   },
   "common": {
     "selected": "محدد"
@@ -70,16 +76,14 @@
     "reply": "رد",
     "optOut": "إيقاف الاستقبال",
     "optOutConfirm": "هل أنت متأكد من إيقاف استقبال الرسائل؟",
-    "noMessages": "لا توجد رسائل",
-    "cancel": "إلغاء"
+    "noMessages": "لا توجد رسائل بعد",
+    "cancel": "إلغاء",
+    "unread": "رسالة غير مقروءة"
   },
-  "inbox": {
-    "title": "صندوق الوارد",
-    "reply": "رد",
-    "optOut": "إيقاف الاستقبال",
-    "optOutConfirm": "هل أنت متأكد من إيقاف استقبال الرسائل؟",
-    "noMessages": "لا توجد رسائل",
-    "cancel": "إلغاء"
+  "logo": {
+    "title": "شعار النشاط التجاري",
+    "change": "تغيير الشعار",
+    "placeholder": "أضف شعاراً"
   },
   "errors": {
     "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",

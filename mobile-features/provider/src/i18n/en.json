@@ -60,7 +60,13 @@
     "pending": "Under Review",
     "verified": "Verified",
     "suspended": "Suspended",
-    "refresh": "Refresh Status"
+    "refresh": "Refresh Status",
+    "analytics": {
+      "viewsToday": "Views Today",
+      "incomingMessages": "Incoming Messages",
+      "posts": "Posts",
+      "rating": "Rating"
+    }
   },
   "common": {
     "selected": "Selected"
@@ -70,16 +76,14 @@
     "reply": "Reply",
     "optOut": "Stop Receiving Messages",
     "optOutConfirm": "Are you sure you want to stop receiving messages?",
-    "noMessages": "No messages",
-    "cancel": "Cancel"
+    "noMessages": "No messages yet",
+    "cancel": "Cancel",
+    "unread": "unread message"
   },
-  "inbox": {
-    "title": "Inbox",
-    "reply": "Reply",
-    "optOut": "Stop Receiving Messages",
-    "optOutConfirm": "Are you sure you want to stop receiving messages?",
-    "noMessages": "No messages",
-    "cancel": "Cancel"
+  "logo": {
+    "title": "Business Logo",
+    "change": "Change Logo",
+    "placeholder": "Add a logo"
   },
   "errors": {
     "provider_already_exists": "You already have a registered business.",
