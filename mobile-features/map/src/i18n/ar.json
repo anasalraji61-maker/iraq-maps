@@ -97,6 +97,8 @@
   "markerSheet": {
     "viewDetails": "عرض التفاصيل",
     "directions": "الطريق إليه",
-    "dismiss": "إغلاق"
+    "dismiss": "إغلاق",
+    "save": "حفظ",
+    "saved": "محفوظ"
   }
 }

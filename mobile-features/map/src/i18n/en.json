@@ -97,6 +97,8 @@
   "markerSheet": {
     "viewDetails": "View Details",
     "directions": "Get Directions",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "save": "Save",
+    "saved": "Saved"
   }
 }

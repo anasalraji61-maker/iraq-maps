@@ -12,9 +12,13 @@ export interface PlaceMarkerSheetProps {
   icon: string;
   /** Category label. */
   category: string | undefined;
+  /** Whether the place is currently saved by the user. */
+  isSaved?: boolean;
   onViewDetails: () => void;
   onDirections: () => void;
   onDismiss: () => void;
+  /** Called when the user taps Save / Saved. */
+  onSave?: () => void;
 }
 
 const SHEET_HEIGHT = 160;
@@ -29,9 +33,11 @@ export function PlaceMarkerSheet({
   name,
   icon,
   category,
+  isSaved = false,
   onViewDetails,
   onDirections,
   onDismiss,
+  onSave,
 }: PlaceMarkerSheetProps): ReactElement | null {
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
 
@@ -76,6 +82,15 @@ export function PlaceMarkerSheet({
           <View style={styles.flex1}>
             <Button label={t('markerSheet.directions')} onPress={onDirections} />
           </View>
+          {onSave ? (
+            <View style={styles.flex1}>
+              <Button
+                label={isSaved ? t('markerSheet.saved') : t('markerSheet.save')}
+                onPress={onSave}
+                variant={isSaved ? 'secondary' : 'primary'}
+              />
+            </View>
+          ) : null}
         </View>
       </Animated.View>
     </>

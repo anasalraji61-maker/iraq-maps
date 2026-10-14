@@ -1,5 +1,5 @@
 import { type DiscoverPostType, type NotificationItem } from '@iraq-maps/contracts';
-import { recentRoutes, type RecentRoute, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -11,7 +11,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { savedPlaces, type SavedPlace } from './saved-places';
 import { t } from './strings';
 
 I18nManager.forceRTL(true);

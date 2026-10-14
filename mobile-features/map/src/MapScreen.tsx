@@ -1,13 +1,13 @@
-import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceSummary } from '@iraq-maps/contracts';
+import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceId, type PlaceSummary } from '@iraq-maps/contracts';
 import { PlaceMarkerSheet } from './components/PlaceMarkerSheet';
 import { formatIraqiAddress } from '@iraq-maps/geo';
 import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
-import { href, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
+import { href, savedPlaces, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
 
 /** Maps place category to a representative emoji icon. */
@@ -89,6 +89,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
   /** The place shown in the compact bottom sheet after tapping a map marker. */
   const [sheetPlace, setSheetPlace] = useState<PlaceSummary | null>(null);
+  const [sheetIsSaved, setSheetIsSaved] = useState(false);
   // Handle deep-link focusPlaceId: fetch place and move camera.
   useEffect(() => {
     if (!focusPlaceId) return;
@@ -162,11 +163,24 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   };
 
   /** Show compact bottom sheet when a map marker is tapped; navigate when tapped from search list. */
-  const openFromMarker = (placeId: string) => {
+  const openFromMarker = useCallback((placeId: string) => {
     const place = results.find((p) => p.id === placeId) ?? null;
     setSelectedPlaceId(placeId);
     setSheetPlace(place);
-  };
+    void savedPlaces.isSaved(placeId as PlaceId).then(setSheetIsSaved);
+  }, [results]);
+
+  const handleSheetSave = useCallback(async () => {
+    if (!sheetPlace) return;
+    if (sheetIsSaved) {
+      await savedPlaces.remove(sheetPlace.id);
+      setSheetIsSaved(false);
+    } else {
+      const name = pickName(sheetPlace.names, mapLang);
+      await savedPlaces.save({ placeId: sheetPlace.id, name, category: sheetPlace.category ?? undefined });
+      setSheetIsSaved(true);
+    }
+  }, [sheetPlace, sheetIsSaved, mapLang]);
 
   /** User taps a suggestion chip: promote to full search with that name. */
   const pickSuggestion = (name: string) => {
@@ -379,6 +393,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           name={pickName(sheetPlace.names, mapLang)}
           icon={categoryIcon(sheetPlace)}
           category={sheetPlace.category ? t(`categories.${sheetPlace.category}`) : undefined}
+          isSaved={sheetIsSaved}
+          onSave={() => { void handleSheetSave(); }}
           onViewDetails={() => {
             setSheetPlace(null);
             openDetails(sheetPlace.id);

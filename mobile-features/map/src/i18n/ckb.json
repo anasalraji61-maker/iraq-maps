@@ -97,6 +97,8 @@
   "markerSheet": {
     "viewDetails": "بینینی وردەکاریەکان",
     "directions": "ئاراستەی بۆ",
-    "dismiss": "داخستن"
+    "dismiss": "داخستن",
+    "save": "پاشەکەوتکردن",
+    "saved": "پاشەکەوتکراوە"
   }
 }

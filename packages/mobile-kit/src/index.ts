@@ -11,3 +11,5 @@ export { uploadAsset } from './upload-asset';
 export { InquiryOutbox, type OutboxEntry } from './outbox';
 /** @public shared request helpers */
 export { expectStatus, ProblemError, useRequest } from './request';
+
+export { savedPlaces, type SavedPlace } from './saved-places';
