@@ -2,6 +2,7 @@ import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
+import * as SecureStore from 'expo-secure-store';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
@@ -13,6 +14,7 @@ import ar from './i18n/ar.json';
 import ckb from './i18n/ckb.json';
 import en from './i18n/en.json';
 import { persistLocaleChanges, restoreLocale, useLocale } from './locale';
+import { OnboardingFlow, ONBOARDING_DONE_KEY } from './OnboardingFlow';
 
 registerNamespace('shell', { ar, ckb, en });
 
@@ -117,13 +119,15 @@ export function RootLayout() {
   // The navigation state lives above it (expo-router), so the user stays where they were.
   const locale = useLocale();
   const [restored, setRestored] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [serverError, setServerError] = useState(false);
   useEffect(() => {
     let mounted = true;
     let stop: (() => void) | undefined;
-    void Promise.all([restoreLocale(), loadServerUrl()]).then(() => {
+    void Promise.all([restoreLocale(), loadServerUrl(), SecureStore.getItemAsync(ONBOARDING_DONE_KEY)]).then(([, , seen]) => {
       if (!mounted) return;
       stop = persistLocaleChanges();
+      if (!seen) setShowOnboarding(true);
       setRestored(true);
     });
     return () => {
@@ -140,6 +144,13 @@ export function RootLayout() {
   }, [serverError]);
 
   if (!fontsReady || !restored) return null;
+  if (showOnboarding) {
+    return (
+      <ErrorBoundary>
+        <OnboardingFlow onDone={() => setShowOnboarding(false)} />
+      </ErrorBoundary>
+    );
+  }
   return (
     <ErrorBoundary>
       <SessionProvider apiBaseUrl={apiBaseUrl} onServerError={() => setServerError(true)}>

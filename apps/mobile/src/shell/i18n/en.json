@@ -2,6 +2,26 @@
   "tabs": {
     "assistant": "Assistant"
   },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Iraq Smart Maps",
+      "subtitle": "Discover places, navigate smartly, and connect with businesses",
+      "start": "Get started"
+    },
+    "location": {
+      "title": "Your location",
+      "body": "We need your permission to access your location to show nearby places",
+      "allow": "Allow",
+      "skip": "Skip"
+    },
+    "language": {
+      "title": "Choose your language",
+      "next": "Next",
+      "ar": "العربية",
+      "ckb": "کوردی",
+      "en": "English"
+    }
+  },
   "error": {
     "unexpected": "An unexpected error occurred",
     "retry": "Try again",
