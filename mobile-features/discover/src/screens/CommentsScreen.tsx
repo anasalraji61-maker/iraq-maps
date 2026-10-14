@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -21,20 +22,85 @@ I18nManager.forceRTL(true);
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
+function formatRelativeTime(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return '< 1m';
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
+
+function CommentItem({ item }: { item: DiscoverCommentType }): ReactElement {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  const handleLike = useCallback(() => {
+    setLiked((prev) => !prev);
+    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+  }, [liked]);
+
+  const handleReply = useCallback(() => {
+    // stub — reply UI not yet implemented
+  }, []);
+
+  return (
+    <View style={styles.commentCard}>
+      <View style={styles.commentHeader}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarText}>{item.authorId.slice(0, 1).toUpperCase()}</Text>
+        </View>
+        <View style={styles.commentMeta}>
+          <Text style={styles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
+          <Text style={styles.commentDate}>{formatRelativeTime(item.createdAt)}</Text>
+        </View>
+      </View>
+      <Text style={styles.commentBody}>{item.body}</Text>
+      <View style={styles.commentActions}>
+        <Pressable
+          style={[styles.commentActionBtn, liked && styles.commentActionBtnActive]}
+          onPress={handleLike}
+          accessibilityRole="button"
+          accessibilityLabel={t('comments.likeA11y')}
+        >
+          <Text style={[styles.commentActionText, liked && styles.commentActionTextActive]}>
+            {t('comments.likeComment')}{likeCount > 0 ? ` ${likeCount}` : ''}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={styles.commentActionBtn}
+          onPress={handleReply}
+          accessibilityRole="button"
+          accessibilityLabel={t('comments.replyA11y')}
+        >
+          <Text style={styles.commentActionText}>{t('comments.replyComment')}</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 export function CommentsScreen(): ReactElement {
   const { postId } = useLocalSearchParams<{ postId: string }>();
   const api = useDiscoverClient();
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [commentText, setCommentText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | undefined>();
   const listRef = useRef<FlatList>(null);
 
-  const loadComments = useCallback(async () => {
+  const loadComments = useCallback(async (isRefresh = false) => {
     if (!postId) return;
-    setLoading(true);
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     setError(undefined);
     try {
       const res = await api.listComments({ params: { postId }, query: { limit: 20 } });
@@ -47,10 +113,13 @@ export function CommentsScreen(): ReactElement {
       setError(t('comments.loadError'));
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [api, postId]);
 
-  useEffect(() => { void loadComments(); }, [loadComments]);
+  useEffect(() => { void loadComments(false); }, [loadComments]);
+
+  const handleRefresh = useCallback(() => { void loadComments(true); }, [loadComments]);
 
   const handleSend = useCallback(async () => {
     const text = commentText.trim();
@@ -98,13 +167,10 @@ export function CommentsScreen(): ReactElement {
         data={comments}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <View style={styles.commentCard}>
-            <Text style={styles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
-            <Text style={styles.commentBody}>{item.body}</Text>
-            <Text style={styles.commentDate}>{item.createdAt.slice(0, 10)}</Text>
-          </View>
-        )}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} tintColor="#1976D2" />
+        }
+        renderItem={({ item }) => <CommentItem item={item} />}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>
@@ -190,11 +256,40 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
   },
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
+  },
+  avatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1976D2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  commentMeta: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   commentAuthor: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#1976D2',
     fontWeight: '600',
-    marginBottom: 4,
+    textAlign: 'auto',
+  },
+  commentDate: {
+    fontSize: 11,
+    color: '#999',
     textAlign: 'auto',
   },
   commentBody: {
@@ -202,12 +297,28 @@ const styles = StyleSheet.create({
     color: '#222',
     lineHeight: 20,
     textAlign: 'auto',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  commentDate: {
-    fontSize: 11,
-    color: '#999',
-    textAlign: 'auto',
+  commentActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  commentActionBtn: {
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: '#F0F0F0',
+  },
+  commentActionBtnActive: {
+    backgroundColor: '#BBDEFB',
+  },
+  commentActionText: {
+    fontSize: 12,
+    color: '#555',
+    fontWeight: '500',
+  },
+  commentActionTextActive: {
+    color: '#1565C0',
   },
   emptyContainer: {
     alignItems: 'center',

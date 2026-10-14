@@ -15,6 +15,7 @@
     "create": "إنشاء منشور",
     "likeA11y": "الإعجاب بمنشور {author}",
     "typeA11y": "نوع المنشور: {type}",
+    "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "type": {
       "photo": "صورة",
       "tip": "نصيحة",
@@ -45,6 +46,15 @@
     "placeholder": "أضف تعليقاً...",
     "send": "إرسال",
     "loadError": "فشل تحميل التعليقات",
-    "sendError": "فشل إرسال التعليق"
+    "sendError": "فشل إرسال التعليق",
+    "likeComment": "إعجاب",
+    "replyComment": "رد",
+    "likeA11y": "الإعجاب بالتعليق",
+    "replyA11y": "الرد على التعليق"
+  },
+  "postDetail": {
+    "title": "المنشور",
+    "loadError": "فشل تحميل المنشور",
+    "commentsSection": "التعليقات"
   }
 }

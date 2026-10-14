@@ -15,6 +15,7 @@
     "create": "Create Post",
     "likeA11y": "Like post by {author}",
     "typeA11y": "Post type: {type}",
+    "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "type": {
       "photo": "Photo",
       "tip": "Tip",
@@ -45,6 +46,15 @@
     "placeholder": "Add a comment...",
     "send": "Send",
     "loadError": "Failed to load comments",
-    "sendError": "Failed to send comment"
+    "sendError": "Failed to send comment",
+    "likeComment": "Like",
+    "replyComment": "Reply",
+    "likeA11y": "Like comment",
+    "replyA11y": "Reply to comment"
+  },
+  "postDetail": {
+    "title": "Post",
+    "loadError": "Failed to load post",
+    "commentsSection": "Comments"
   }
 }

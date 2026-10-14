@@ -15,6 +15,7 @@
     "create": "پۆستی نوێ",
     "likeA11y": "لایک بۆ پۆستی {author}",
     "typeA11y": "جۆری پۆست: {type}",
+    "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "type": {
       "photo": "وێنە",
       "tip": "تێبینی",
@@ -45,6 +46,15 @@
     "placeholder": "کۆمێنتێک زیاد بکە...",
     "send": "نێردن",
     "loadError": "هەڵەی بارکردنی کۆمێنتەکان",
-    "sendError": "هەڵەی نێردنی کۆمێنت"
+    "sendError": "هەڵەی نێردنی کۆمێنت",
+    "likeComment": "لایک",
+    "replyComment": "وەڵام",
+    "likeA11y": "لایک بۆ کۆمێنت",
+    "replyA11y": "وەڵام بۆ کۆمێنت"
+  },
+  "postDetail": {
+    "title": "پۆست",
+    "loadError": "هەڵەی بارکردنی پۆست",
+    "commentsSection": "کۆمێنتەکان"
   }
 }

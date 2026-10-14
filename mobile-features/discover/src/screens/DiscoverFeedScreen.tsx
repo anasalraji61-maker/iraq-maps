@@ -61,8 +61,9 @@ const PostItem = memo(function PostItem({
   const badgeColors = TYPE_BADGE_COLORS[post.type] ?? { bg: '#E3F2FD', text: '#1976D2' };
 
   const handleShare = useCallback(() => {
-    void Share.share({ message: post.body });
-  }, [post.body]);
+    const message = t('post.shareText', { body: post.body, postId: post.id });
+    void Share.share({ message });
+  }, [post.body, post.id]);
 
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: theme.surface }]}>
@@ -251,7 +252,7 @@ export function DiscoverFeedScreen(): ReactElement {
   }, [api]);
 
   const handleComment = useCallback((postId: string) => {
-    router.push({ pathname: '/discover/comments', params: { postId } });
+    router.push({ pathname: '/discover/[postId]/index', params: { postId } });
   }, [router]);
 
   const handlePlacePress = useCallback((placeId: string) => {
