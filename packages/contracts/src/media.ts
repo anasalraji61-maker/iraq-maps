@@ -70,8 +70,7 @@ export const mediaContract = c.router(
       query: z.object({ size: z.enum(['thumbnail', 'medium', 'full']).optional() }),
       responses: { 200: SignedUrl, 401: Problem, 404: Problem, 409: Problem },
     },
-    /** Returns a signed URL to a resized variant. The variant is generated on first request and cached.
-     *  TODO: wire to an actual image-processing worker; currently stubs the URL. */
+    /** Returns a signed URL to a resized variant. The variant is generated on first request and cached in storage. */
     resize: {
       method: 'POST',
       path: '/media/:assetId/resize',
