@@ -12,7 +12,6 @@ import {
   Share,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { type z } from 'zod';

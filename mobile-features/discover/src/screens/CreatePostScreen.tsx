@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { sharedStyles, COLORS } from './shared';
+import { sharedStyles } from './shared';
 
 const MAX_PHOTOS = 3;
 
