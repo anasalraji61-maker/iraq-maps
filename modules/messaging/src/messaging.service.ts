@@ -131,11 +131,11 @@ export class MessagingService implements UserDataEraser {
   }
 
   async providerReply(providerId: string, inquiryId: InquiryId, text: string) {
-    // Find a delivery for this provider's places (by provider_id match on place)
+    // Find a delivery for this inquiry that targets one of this provider's places
     const delivery = await this.db
       .select()
       .from(deliveryTable)
-      .where(eq(deliveryTable.inquiryId, inquiryId))
+      .where(and(eq(deliveryTable.inquiryId, inquiryId), eq(deliveryTable.placeId, providerId)))
       .limit(1);
 
     if (!delivery[0]) throw new NotFoundException({ code: 'not_found' });

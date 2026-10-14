@@ -79,8 +79,8 @@ export class MessagingController {
         return { status: 200, body: 'forbidden' };
       },
 
-      whatsappInbound: async ({ body }) => {
-        await this.svc.handleInbound(body, {});
+      whatsappInbound: async ({ body, headers }) => {
+        await this.svc.handleInbound(body, headers as Record<string, string>);
         return { status: 200, body: { ok: true as const } };
       },
     });
