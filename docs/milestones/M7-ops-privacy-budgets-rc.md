@@ -232,3 +232,4 @@ No new events.
 |---|---|---|---|
 | 2026-10-14 | ops + RTL audit + shell navigation | `43ad319`, `0d5411e`, `21b7871` | — |
 | 2026-10-14 | البوابة النهائية الشاملة | `ee3dd6b` | APPROVED `ee3dd6b` |
+| 2026-10-14 | post-M7 polish: map deep-link, discover real place names, assistant focusPlaceId | `e8bb966`, `0b5fde8`, `df7362f`, `2fc7c6a` | — |

@@ -23,7 +23,11 @@
     "submit": "Post",
     "typeLabel": "Post Type",
     "charCount": "{{count}}/1000",
-    "submitError": "Failed to create post, try again"
+    "submitError": "Failed to create post, try again",
+    "placeLabel": "Location (optional)",
+    "placePlaceholder": "Type a place name...",
+    "placeSelected": "📍 {name}",
+    "clearPlace": "✕"
   },
   "comments": {
     "title": "Comments",

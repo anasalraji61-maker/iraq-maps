@@ -23,7 +23,11 @@
     "submit": "بڵاوکردنەوە",
     "typeLabel": "جۆری پۆست",
     "charCount": "{{count}}/1000",
-    "submitError": "هەڵەی بڵاوکردنەوە"
+    "submitError": "هەڵەی بڵاوکردنەوە",
+    "placeLabel": "شوێن (ئارەزوومەندانە)",
+    "placePlaceholder": "ناوی شوێن بنووسە...",
+    "placeSelected": "📍 {name}",
+    "clearPlace": "✕"
   },
   "comments": {
     "title": "کۆمێنتەکان",

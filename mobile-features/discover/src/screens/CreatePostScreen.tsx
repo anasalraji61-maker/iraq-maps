@@ -1,6 +1,7 @@
 import { discoverTestIDs } from '@iraq-maps/contracts';
+import { useApi } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
-import { useState, type ReactElement } from 'react';
+import { useState, useCallback, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   I18nManager,
@@ -30,18 +31,56 @@ const POST_TYPE_KEYS: Record<PostTypeValue, 'post.type.photo' | 'post.type.tip' 
 
 export function CreatePostScreen(): ReactElement {
   const api = useDiscoverClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const placesApi = useApi() as any;
   const router = useRouter();
   const [body, setBody] = useState('');
   const [postType, setPostType] = useState<PostTypeValue>('tip');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [placeQuery, setPlaceQuery] = useState('');
+  const [placeResults, setPlaceResults] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedPlace, setSelectedPlace] = useState<{ id: string; name: string } | undefined>();
+  const [searchingPlace, setSearchingPlace] = useState(false);
+
+  const handlePlaceSearch = useCallback(async (q: string) => {
+    setPlaceQuery(q);
+    if (q.trim().length < 2) { setPlaceResults([]); return; }
+    setSearchingPlace(true);
+    try {
+      const res = await placesApi.places.search({ query: { q: q.trim(), city: 'baghdad', limit: 5, lang: 'ar' } });
+      if (res.status === 200) {
+        setPlaceResults(res.body.items.map((r: { id: string; names: { ar?: string; name: string } }) => ({
+          id: r.id,
+          name: r.names.ar ?? r.names.name,
+        })));
+      }
+    } catch {
+      setPlaceResults([]);
+    } finally {
+      setSearchingPlace(false);
+    }
+  }, [placesApi]);
+
+  const handleSelectPlace = useCallback((place: { id: string; name: string }) => {
+    setSelectedPlace(place);
+    setPlaceQuery('');
+    setPlaceResults([]);
+  }, []);
 
   const handleSubmit = async () => {
     if (!body.trim() || submitting) return;
     setSubmitting(true);
     setError(undefined);
     try {
-      const res = await api.createPost({ body: { type: postType, body: body.trim(), mediaAssetIds: [] } });
+      const res = await api.createPost({
+        body: {
+          type: postType,
+          body: body.trim(),
+          mediaAssetIds: [],
+          ...(selectedPlace ? { placeId: selectedPlace.id } : {}),
+        },
+      });
       if (res.status === 201) {
         router.back();
       } else {
@@ -98,6 +137,37 @@ export function CreatePostScreen(): ReactElement {
           textAlignVertical="top"
         />
         <Text style={styles.charCount}>{t('create.charCount', { count: body.length })}</Text>
+
+        <Text style={styles.label}>{t('create.placeLabel')}</Text>
+        {selectedPlace ? (
+          <View style={styles.selectedPlaceRow}>
+            <Text style={styles.selectedPlaceText}>{t('create.placeSelected', { name: selectedPlace.name })}</Text>
+            <Pressable onPress={() => setSelectedPlace(undefined)}>
+              <Text style={styles.clearPlaceText}>{t('create.clearPlace')}</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.placeSearchBox}>
+            <TextInput
+              style={styles.placeInput}
+              value={placeQuery}
+              onChangeText={(q) => { void handlePlaceSearch(q); }}
+              placeholder={t('create.placePlaceholder')}
+              placeholderTextColor="#999"
+              textAlign="right"
+            />
+            {searchingPlace ? <ActivityIndicator size="small" color="#1976D2" style={styles.placeSpinner} /> : null}
+            {placeResults.length > 0 ? (
+              <View style={styles.placeDropdown}>
+                {placeResults.map((p) => (
+                  <Pressable key={p.id} style={styles.placeResultItem} onPress={() => handleSelectPlace(p)}>
+                    <Text style={styles.placeResultText}>📍 {p.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        )}
 
         <Pressable
           testID={discoverTestIDs.createPostButton}
@@ -208,5 +278,65 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  placeSearchBox: {
+    marginBottom: 20,
+    position: 'relative',
+  },
+  placeInput: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 14,
+    color: '#222',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    textAlign: 'auto',
+  },
+  placeSpinner: {
+    position: 'absolute',
+    top: 12,
+    start: 12,
+  },
+  placeDropdown: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  placeResultItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  placeResultText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'auto',
+  },
+  selectedPlaceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#E8F5E9',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 20,
+  },
+  selectedPlaceText: {
+    fontSize: 14,
+    color: '#388E3C',
+    fontWeight: '500',
+    flex: 1,
+    textAlign: 'auto',
+  },
+  clearPlaceText: {
+    fontSize: 16,
+    color: '#999',
+    paddingStart: 8,
   },
 });
