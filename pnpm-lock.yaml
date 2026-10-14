@@ -417,6 +417,9 @@ importers:
       '@iraq-maps/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@react-native-async-storage/async-storage':
+        specifier: ^2.1.2
+        version: 2.2.0(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))
     devDependencies:
       '@iraq-maps/tooling':
         specifier: workspace:*
@@ -663,6 +666,12 @@ importers:
       test-renderer:
         specifier: ~1.2.0
         version: 1.2.0(@types/react@19.2.18)(react@19.2.3)
+
+  modules/activity:
+    devDependencies:
+      typescript:
+        specifier: '*'
+        version: 6.0.3
 
   modules/assistant:
     dependencies:

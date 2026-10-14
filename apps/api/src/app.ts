@@ -4,7 +4,7 @@ import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, ty
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
-import { AssistantModule, assistantMigrationsDir } from '@iraq-maps/assistant';
+import { AssistantModule, assistantMigrationsDir, PLACES_SEARCH_TOKEN } from '@iraq-maps/assistant';
 import { discoverModule, discoverMigrationsDir } from '@iraq-maps/discover';
 import { messagingMigrationsDir, messagingModule } from '@iraq-maps/messaging';
 import { notificationsMigrationsDir, notificationsModule } from '@iraq-maps/notifications';
@@ -175,7 +175,20 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         providersModule({ db, phoneVerification: null }),
         messagingModule({ db }),
         notificationsModule({ db, eventBus: bus, env: opts.env }),
-        AssistantModule,
+        {
+          module: AssistantModule,
+          providers: [
+            {
+              provide: PLACES_SEARCH_TOKEN,
+              useFactory: (placesQuery: import('@iraq-maps/contracts').PlacesQueryPort) =>
+                async (query: string, city?: string) => {
+                  const results = await placesQuery.search({ q: query, city: (city ?? 'baghdad') as import('@iraq-maps/contracts').CityId, limit: 5, lang: 'ar' });
+                  return results.map((r) => ({ id: r.id, name: r.names.ar ?? r.names.name, address: r.area?.name ?? '' }));
+                },
+              inject: [PortTokens.PlacesQueryPort],
+            },
+          ],
+        } as unknown as typeof AssistantModule,
         discoverModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
