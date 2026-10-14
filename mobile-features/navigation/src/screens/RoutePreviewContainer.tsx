@@ -2,8 +2,9 @@
  * Self-contained route container for the Expo Router screen `/route/[placeId]`.
  * Fetches the place, requests the route from the current location, and renders RoutePreviewScreen.
  */
-import { type LngLat, type RouteResult, type TravelMode } from '@iraq-maps/contracts';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { type CityDescriptor, type LngLat, type RouteResult, type TravelMode } from '@iraq-maps/contracts';
+import { getLocale } from '@iraq-maps/i18n';
+import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Screen, Text } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -15,10 +16,14 @@ export function RoutePreviewContainer(): ReactElement {
   const api = useApi();
   const router = useRouter();
 
+  const apiBaseUrl = useApiBaseUrl();
+  const lang = getLocale();
+
   const [mode, setMode] = useState<TravelMode>('car');
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [city, setCity] = useState<CityDescriptor | undefined>();
 
   // Stable refs for origin/destination so mode changes can re-request without re-fetching place
   const originRef = useRef<LngLat | null>(null);
@@ -67,12 +72,17 @@ export function RoutePreviewContainer(): ReactElement {
         const org: LngLat = [coords.longitude, coords.latitude];
         originRef.current = org;
 
-        const placeRes = await api.places.get({ params: { id: placeId } });
+        // Fetch city and place in parallel
+        const [placeRes, cityRes] = await Promise.all([
+          api.places.get({ params: { id: placeId } }),
+          api.cities.list(),
+        ]);
         if (placeRes.status !== 200) {
           setError('لم يتم العثور على المكان');
           setIsLoading(false);
           return;
         }
+        if (cityRes.status === 200) setCity(cityRes.body.items[0]);
         const place = placeRes.body;
         const dest: LngLat = place.location;
         destinationRef.current = dest;
@@ -125,6 +135,9 @@ export function RoutePreviewContainer(): ReactElement {
       isLoading={isLoading}
       error={error}
       destinationAddress={destinationName}
+      city={city}
+      apiBaseUrl={apiBaseUrl}
+      lang={lang}
     />
   );
 }

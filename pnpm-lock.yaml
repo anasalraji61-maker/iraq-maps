@@ -645,6 +645,9 @@ importers:
       '@iraq-maps/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@iraq-maps/map-kit':
+        specifier: workspace:*
+        version: link:../../packages/map-kit
       '@iraq-maps/mobile-kit':
         specifier: workspace:*
         version: link:../../packages/mobile-kit

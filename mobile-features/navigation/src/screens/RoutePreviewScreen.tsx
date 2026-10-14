@@ -1,7 +1,9 @@
-import type { Maneuver, ManeuverModifier, RouteResult, TravelMode } from '@iraq-maps/contracts';
+import type { CityDescriptor, Maneuver, ManeuverModifier, RouteResult, TravelMode } from '@iraq-maps/contracts';
 import { navigationTestIDs } from '@iraq-maps/contracts';
+import { MapCanvas } from '@iraq-maps/map-kit';
 import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 function fmtDist(m: number): string {
@@ -75,15 +77,33 @@ interface Props {
   originAddress?: string;
   /** Formatted address of the destination. Shown below the route summary. */
   destinationAddress?: string;
+  /** City descriptor used to render the route map. If absent the map is hidden. */
+  city?: CityDescriptor;
+  /** API base URL for map tile requests. */
+  apiBaseUrl?: string;
+  /** Locale for map labels. */
+  lang?: string;
 }
 
-export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoading, error, originAddress, destinationAddress }: Props): ReactElement {
+export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoading, error, originAddress, destinationAddress, city, apiBaseUrl, lang }: Props): ReactElement {
   const eta = new Date(Date.now() + route.durationS * 1000);
   // Show all maneuvers except the final "arrive" step in the step list
   const steps = route.maneuvers.filter((m) => m.type !== 'arrive');
+  const routeProp = useMemo(() => ({ polyline6: route.polyline6 }), [route.polyline6]);
 
   return (
     <Screen testID={navigationTestIDs.preview.view}>
+      {city && apiBaseUrl ? (
+        <View style={styles.mapContainer}>
+          <MapCanvas
+            city={city}
+            apiBaseUrl={apiBaseUrl}
+            lang={(lang ?? 'ar') as 'ar' | 'en' | 'ckb'}
+            route={routeProp}
+            showUserLocation
+          />
+        </View>
+      ) : null}
       {originAddress ? (
         <View style={styles.addressRow}>
           <Text variant="caption" tone="muted">{'من: '}</Text>
@@ -135,8 +155,9 @@ export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoadi
 
 const { space, color } = tokens;
 const styles = StyleSheet.create({
+  mapContainer: { height: 220, borderRadius: 12, overflow: 'hidden', marginBottom: space.s },
   modeRow: { flexDirection: 'row', gap: space.s },
-  stepList: { maxHeight: 300 },
+  stepList: { maxHeight: 280 },
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.s, paddingVertical: space.xs, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: color.border },
   stepIcon: { width: 28, alignItems: 'center' },
   stepBody: { flex: 1, gap: 2 },
