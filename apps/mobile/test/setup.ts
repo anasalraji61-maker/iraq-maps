@@ -1,6 +1,5 @@
 // Jest setup for the mobile app shell.
 // Regular jest.mock calls here ARE hoisted by babel-jest (unlike jest.mock from @jest/globals).
-/* eslint-disable @typescript-eslint/no-require-imports */
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
