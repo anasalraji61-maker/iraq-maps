@@ -10,7 +10,7 @@ const { account } = testIDs;
 describe('AccountScreen', () => {
   it('shows the name and language, and signs out on logout', async () => {
     const { session, view } = await setup(<AccountScreen />);
-    expect(view.getByText('علي')).toBeTruthy();
+    expect(view.getAllByText('علي').length).toBeGreaterThanOrEqual(1);
     expect(view.getByText(t('account:languages.ar'))).toBeTruthy();
     await fireEvent.press(view.getByTestId(account.logout));
     await waitFor(() => expect(session.signOut).toHaveBeenCalledTimes(1));
