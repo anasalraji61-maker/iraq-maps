@@ -7,7 +7,7 @@ const mockListFeed = jest.fn<() => Promise<unknown>>();
 const mockLikePost = jest.fn<() => Promise<unknown>>();
 const mockUnlikePost = jest.fn<() => Promise<unknown>>();
 
-jest.mock('./client.js', () => ({
+jest.mock('./client', () => ({
   useDiscoverClient: () => ({
     listFeed: mockListFeed,
     likePost: mockLikePost,

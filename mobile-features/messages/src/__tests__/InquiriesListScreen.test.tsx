@@ -19,7 +19,7 @@ describe('InquiriesListScreen', () => {
       listInquiries: jest.fn(async () => ({ status: 200, body: { items: [] } })),
     });
     const view = await renderWithProviders(<InquiriesListScreen />);
-    await waitFor(() => expect(view.getByText(/لا توجد استفسارات/)).toBeTruthy());
+    await waitFor(() => expect(view.getByText(/لا توجد رسائل/)).toBeTruthy());
   });
 
   it('renders inquiry items returned by API', async () => {

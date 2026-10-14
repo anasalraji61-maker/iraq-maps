@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { S3ObjectStorage } from './index.js';
 

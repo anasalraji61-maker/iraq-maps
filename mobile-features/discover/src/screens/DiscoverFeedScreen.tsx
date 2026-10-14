@@ -1,6 +1,6 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { useRouter } from 'expo-router';
-import { useState, useCallback, type ReactElement } from 'react';
+import { useState, useCallback, useEffect, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -98,6 +98,8 @@ export function DiscoverFeedScreen(): ReactElement {
       setLoadingMore(false);
     }
   }, [api, cursor, hasMore, loadingMore]);
+
+  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
