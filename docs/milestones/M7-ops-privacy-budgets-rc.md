@@ -246,3 +246,8 @@ No new events.
 | 2026-10-14 | post-M7 polish: onboarding flow and new-user name prompt | `66d2884` | — |
 | 2026-10-14 | post-M7 polish: FlatList tuning, place detail cache, memo | `3462536` | — |
 | 2026-10-14 | fix: adapter-llm test missing systemPrompt typecheck fix | `7b9a041` | — |
+| 2026-10-14 | post-M7 polish: log latest polish commits (docs update) | `4a347ca` | — |
+| 2026-10-14 | post-M7 polish: photo upload in posts and image display in feed | `20381a4` | — |
+| 2026-10-14 | post-M7 polish: assistant typing indicator, timestamps, place cards, quick replies | `80fea35` | — |
+| 2026-10-14 | post-M7 polish: provider dashboard analytics, inbox badges, profile photo | `d109852` | — |
+| 2026-10-14 | fix(activity): add missing tsconfig.json to fix typecheck | — | — |
