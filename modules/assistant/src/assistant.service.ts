@@ -96,6 +96,7 @@ export class AssistantService {
 
     let finalContent = response.content;
     let composeParams: { text?: string; placeIds?: string[] } | undefined;
+    let focusPlaceId: string | undefined;
 
     // Handle tool calls (max 1 round-trip)
     if (response.stopReason === 'tool_use' && response.toolCalls && response.toolCalls.length > 0) {
@@ -105,6 +106,11 @@ export class AssistantService {
         const query = toolCall.input['query'] as string;
         const city = toolCall.input['city'] as string | undefined;
         const results = await this.placesSearch(query, city);
+
+        // Surface the top result on the map
+        if (results.length > 0) {
+          focusPlaceId = results[0]!.id;
+        }
 
         const toolResultText = results.length > 0
           ? results.map(r => `- ${r.name}: ${r.address}`).join('\n')
@@ -151,7 +157,7 @@ export class AssistantService {
       composeParams = this.extractComposeParams(finalContent);
     }
 
-    return { sessionId, reply: finalContent, composeParams };
+    return { sessionId, reply: finalContent, composeParams, focusPlaceId };
   }
 
   async getSession(userId: string, sessionId: string) {
