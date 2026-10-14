@@ -1,6 +1,8 @@
+import type { CityDescriptor } from '@iraq-maps/contracts';
 import { navigationTestIDs } from '@iraq-maps/contracts';
+import { MapCanvas } from '@iraq-maps/map-kit';
 import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { NavigationState } from '../hooks/useNavigation';
 
@@ -8,6 +10,11 @@ interface Props extends NavigationState {
   onStop: () => void;
   /** Optional: called when user wants to navigate again after arrival. */
   onNavigateAgain?: () => void;
+  /** Route polyline6 for the map. */
+  routePolyline6?: string;
+  city?: CityDescriptor;
+  apiBaseUrl?: string;
+  lang?: string;
 }
 
 function fmtDist(m: number): string {
@@ -31,7 +38,16 @@ export function ActiveNavigationScreen({
   onRecalculate,
   onStop,
   onNavigateAgain,
+  routePolyline6,
+  city,
+  apiBaseUrl,
+  lang,
 }: Props): ReactElement {
+  const routeProp = useMemo(
+    () => (routePolyline6 ? { polyline6: routePolyline6 } : undefined),
+    [routePolyline6],
+  );
+
   if (hasArrived) {
     return (
       <Screen>
@@ -59,6 +75,19 @@ export function ActiveNavigationScreen({
 
   return (
     <Screen>
+      {city && apiBaseUrl ? (
+        <View style={styles.mapContainer}>
+          <MapCanvas
+            city={city}
+            apiBaseUrl={apiBaseUrl}
+            lang={(lang ?? 'ar') as 'ar' | 'en' | 'ckb'}
+            route={routeProp}
+            showUserLocation
+            followUser
+          />
+        </View>
+      ) : null}
+
       {isRerouting ? (
         <Banner kind="info" message="يُعاد حساب المسار…" testID={navigationTestIDs.active.reroute} />
       ) : null}
@@ -115,6 +144,7 @@ export function ActiveNavigationScreen({
 
 const { space, color } = tokens;
 const styles = StyleSheet.create({
+  mapContainer: { height: 240, borderRadius: 12, overflow: 'hidden', marginBottom: space.s },
   flex1: { flex: 1 },
   arrivedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.l, padding: space.m },
   arrivedActions: { flexDirection: 'row', gap: space.s, width: '100%' },

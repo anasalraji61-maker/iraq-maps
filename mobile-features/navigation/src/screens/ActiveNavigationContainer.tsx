@@ -2,26 +2,35 @@
  * Self-contained active navigation container for the Expo Router screen `/navigate/[placeId]`.
  * Fetches place & route, then drives the turn-by-turn ActiveNavigationScreen.
  */
-import { PlaceId, type LngLat, type RouteRequest, type RouteResult } from '@iraq-maps/contracts';
+import { PlaceId } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Screen, Text } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, type ReactElement } from 'react';
 import { useNavigation, type PositionSubscriber } from '../hooks/useNavigation';
+import { useRouteInit } from '../hooks/useRouteInit';
 import { ActiveNavigationScreen } from './ActiveNavigationScreen';
+import type { RouteResult, RouteRequest, CityDescriptor } from '@iraq-maps/contracts';
+import type { LngLat } from '@iraq-maps/contracts';
 
 function NavigationSession({
   route,
   request,
   placeId,
   destinationName,
+  city,
+  apiBaseUrl,
+  lang,
 }: {
   route: RouteResult;
   request: RouteRequest;
   placeId: PlaceId;
   destinationName: string;
+  city?: CityDescriptor;
+  apiBaseUrl?: string;
+  lang?: string;
 }): ReactElement {
   const router = useRouter();
   const locale = getLocale();
@@ -64,57 +73,20 @@ function NavigationSession({
       onNavigateAgain={() =>
         router.replace({ pathname: '/route/[placeId]', params: { placeId: String(placeId) } })
       }
+      routePolyline6={route.polyline6}
+      city={city}
+      apiBaseUrl={apiBaseUrl}
+      lang={lang}
     />
   );
 }
 
 export function ActiveNavigationContainer(): ReactElement {
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
-  const api = useApi();
-  const [ready, setReady] = useState<{
-    route: RouteResult;
-    request: RouteRequest;
-    name: string;
-    pid: PlaceId;
-  } | null>(null);
-  const [error, setError] = useState<string>();
+  const apiBaseUrl = useApiBaseUrl();
+  const lang = getLocale();
 
-  useEffect(() => {
-    if (!placeId) return;
-    void (async () => {
-      try {
-        const { granted } = await Location.requestForegroundPermissionsAsync();
-        if (!granted) {
-          setError('الموقع غير مسموح');
-          return;
-        }
-        const { coords } = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        // LngLat is [lng, lat]
-        const org: LngLat = [coords.longitude, coords.latitude];
-
-        const placeRes = await api.places.get({ params: { id: placeId } });
-        if (placeRes.status !== 200) {
-          setError('لم يوجد المكان');
-          return;
-        }
-        const place = placeRes.body;
-        const dest: LngLat = place.location;
-        const name = (place.names.ar ?? place.names.en ?? place.names.ckb ?? placeId) as string;
-
-        const request: RouteRequest = { origin: org, destination: dest, mode: 'car', waypoints: [] };
-        const routeRes = await api.routes.create({ body: request });
-        if (routeRes.status !== 200) {
-          setError('لا يوجد مسار');
-          return;
-        }
-        setReady({ route: routeRes.body, request, name, pid: placeId as PlaceId });
-      } catch {
-        setError('فشل التحميل');
-      }
-    })();
-  }, [placeId, api]);
+  const { result, isLoading, error } = useRouteInit(placeId, 'car');
 
   if (error) {
     return (
@@ -123,7 +95,7 @@ export function ActiveNavigationContainer(): ReactElement {
       </Screen>
     );
   }
-  if (!ready) {
+  if (!result || isLoading) {
     return (
       <Screen>
         <Text>جاري التحميل...</Text>
@@ -133,10 +105,13 @@ export function ActiveNavigationContainer(): ReactElement {
 
   return (
     <NavigationSession
-      route={ready.route}
-      request={ready.request}
-      placeId={ready.pid}
-      destinationName={ready.name}
+      route={result.route}
+      request={result.request}
+      placeId={placeId as PlaceId}
+      destinationName={result.destinationName}
+      city={result.city}
+      apiBaseUrl={apiBaseUrl}
+      lang={lang}
     />
   );
 }

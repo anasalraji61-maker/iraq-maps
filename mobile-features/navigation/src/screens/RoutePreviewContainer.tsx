@@ -2,39 +2,45 @@
  * Self-contained route container for the Expo Router screen `/route/[placeId]`.
  * Fetches the place, requests the route from the current location, and renders RoutePreviewScreen.
  */
-import { type CityDescriptor, type LngLat, type RouteResult, type TravelMode } from '@iraq-maps/contracts';
+import { type LngLat, type RouteResult, type TravelMode } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Screen, Text } from '@iraq-maps/ui';
-import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { useRouteInit } from '../hooks/useRouteInit';
 import { RoutePreviewScreen } from './RoutePreviewScreen';
 
 export function RoutePreviewContainer(): ReactElement {
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
   const api = useApi();
-  const router = useRouter();
-
   const apiBaseUrl = useApiBaseUrl();
   const lang = getLocale();
+  const router = useRouter();
 
   const [mode, setMode] = useState<TravelMode>('car');
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
-  const [city, setCity] = useState<CityDescriptor | undefined>();
+  const [isModeLoading, setIsModeLoading] = useState(false);
+  const [modeError, setModeError] = useState<string | undefined>();
 
-  // Stable refs for origin/destination so mode changes can re-request without re-fetching place
   const originRef = useRef<LngLat | null>(null);
   const destinationRef = useRef<LngLat | null>(null);
-  const [destinationName, setDestinationName] = useState('');
-  const initializedRef = useRef(false);
+
+  const { result, isLoading, error } = useRouteInit(placeId, 'car');
+
+  // Once init resolves, seed refs and display
+  useEffect(() => {
+    if (result && originRef.current === null) {
+      originRef.current = result.origin;
+      destinationRef.current = result.destination;
+      setRouteResult(result.route);
+    }
+  }, [result]);
 
   const fetchRoute = useCallback(
     async (org: LngLat, dest: LngLat, travelMode: TravelMode) => {
-      setIsLoading(true);
-      setError(undefined);
+      setIsModeLoading(true);
+      setModeError(undefined);
       try {
         const res = await api.routes.create({
           body: { origin: org, destination: dest, mode: travelMode, waypoints: [] },
@@ -42,61 +48,16 @@ export function RoutePreviewContainer(): ReactElement {
         if (res.status === 200) {
           setRouteResult(res.body);
         } else {
-          setError('لا يمكن إيجاد مسار');
+          setModeError('لا يمكن إيجاد مسار');
         }
       } catch {
-        setError('فشل تحميل المسار');
+        setModeError('فشل تحميل المسار');
       } finally {
-        setIsLoading(false);
+        setIsModeLoading(false);
       }
     },
     [api],
   );
-
-  // Initial load: get location + place, then fetch route
-  useEffect(() => {
-    if (!placeId || initializedRef.current) return;
-    initializedRef.current = true;
-    void (async () => {
-      try {
-        const { granted } = await Location.requestForegroundPermissionsAsync();
-        if (!granted) {
-          setError('لا يمكن الوصول إلى الموقع');
-          setIsLoading(false);
-          return;
-        }
-        const { coords } = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        // LngLat is [lng, lat]
-        const org: LngLat = [coords.longitude, coords.latitude];
-        originRef.current = org;
-
-        // Fetch city and place in parallel
-        const [placeRes, cityRes] = await Promise.all([
-          api.places.get({ params: { id: placeId } }),
-          api.cities.list(),
-        ]);
-        if (placeRes.status !== 200) {
-          setError('لم يتم العثور على المكان');
-          setIsLoading(false);
-          return;
-        }
-        if (cityRes.status === 200) setCity(cityRes.body.items[0]);
-        const place = placeRes.body;
-        const dest: LngLat = place.location;
-        destinationRef.current = dest;
-        setDestinationName(
-          (place.names.ar ?? place.names.en ?? place.names.ckb ?? placeId) as string,
-        );
-
-        await fetchRoute(org, dest, 'car');
-      } catch {
-        setError('فشل التحميل');
-        setIsLoading(false);
-      }
-    })();
-  }, [placeId, api, fetchRoute]);
 
   const handleModeChange = (newMode: TravelMode) => {
     setMode(newMode);
@@ -132,10 +93,10 @@ export function RoutePreviewContainer(): ReactElement {
       mode={mode}
       onModeChange={handleModeChange}
       onStart={handleStart}
-      isLoading={isLoading}
-      error={error}
-      destinationAddress={destinationName}
-      city={city}
+      isLoading={isModeLoading}
+      error={modeError}
+      destinationAddress={result?.destinationName}
+      city={result?.city}
       apiBaseUrl={apiBaseUrl}
       lang={lang}
     />
