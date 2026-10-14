@@ -1,6 +1,7 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
+import { useApi } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
-import { useState, useCallback, useEffect, type ReactElement } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -33,11 +34,13 @@ const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 
 function PostItem({
   post,
+  placeName,
   onLike,
   onComment,
   onPlacePress,
 }: {
   post: DiscoverPostType;
+  placeName?: string;
   onLike: (post: DiscoverPostType) => void;
   onComment: (postId: string) => void;
   onPlacePress: (placeId: string) => void;
@@ -61,7 +64,7 @@ function PostItem({
       <Text style={styles.bodyText}>{post.body}</Text>
       {post.placeId ? (
         <Pressable style={styles.placeChip} onPress={() => onPlacePress(post.placeId!)}>
-          <Text style={styles.placeChipText}>📍 {post.placeId.slice(0, 8)}</Text>
+          <Text style={styles.placeChipText}>📍 {placeName ?? post.placeId.slice(0, 8)}</Text>
         </Pressable>
       ) : null}
       <View style={styles.actions}>
@@ -93,6 +96,7 @@ function PostItem({
 
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
+  const placesApi = useApi();
   const router = useRouter();
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
@@ -100,6 +104,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [placeNames, setPlaceNames] = useState<Readonly<Record<string, string>>>({});
+  const fetchingPlaceIds = useRef(new Set<string>());
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -126,6 +132,32 @@ export function DiscoverFeedScreen(): ReactElement {
   }, [api, cursor, hasMore, loadingMore]);
 
   useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line
+
+  // Fetch place names for any post.placeId not yet loaded
+  useEffect(() => {
+    const ids = posts
+      .map((p) => p.placeId)
+      .filter((id): id is NonNullable<typeof id> => !!id && !placeNames[id as string] && !fetchingPlaceIds.current.has(id as string));
+    if (ids.length === 0) return;
+    ids.forEach((id) => fetchingPlaceIds.current.add(id as string));
+    void Promise.all(
+      ids.map(async (id) => {
+        const idStr = id as string;
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const res = await (placesApi as any).places.get({ params: { id } });
+          if (res.status === 200) {
+            const name: string = res.body.names.ar ?? res.body.names.name;
+            setPlaceNames((prev) => ({ ...prev, [idStr]: name }));
+          }
+        } catch {
+          // silent — place chip falls back to id slice
+        } finally {
+          fetchingPlaceIds.current.delete(idStr);
+        }
+      }),
+    );
+  }, [posts, placeNames, placesApi]);
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
@@ -179,7 +211,13 @@ export function DiscoverFeedScreen(): ReactElement {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <PostItem post={item} onLike={handleLike} onComment={handleComment} onPlacePress={handlePlacePress} />
+          <PostItem
+            post={item}
+            placeName={item.placeId ? placeNames[item.placeId] : undefined}
+            onLike={handleLike}
+            onComment={handleComment}
+            onPlacePress={handlePlacePress}
+          />
         )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         onEndReached={handleEndReached}

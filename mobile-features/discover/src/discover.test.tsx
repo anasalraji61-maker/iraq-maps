@@ -21,6 +21,11 @@ jest.mock('./client', () => ({
 
 jest.mock('@iraq-maps/mobile-kit', () => ({
   useApiBaseUrl: () => 'http://localhost:3000',
+  useApi: () => ({
+    places: {
+      get: jest.fn<() => Promise<unknown>>().mockResolvedValue({ status: 404 }),
+    },
+  }),
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({
