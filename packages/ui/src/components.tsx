@@ -175,8 +175,9 @@ export function Badge({ label, testID }: BadgeProps): ReactElement {
 /** Name and distance on the first line, category, area and source badge on the second; both lines start at the logical start. */
 export function PlaceSummaryCard({ name, category, area, distance, source, onPress, testID, accessibilityLabel }: PlaceSummaryCardProps): ReactElement {
   const details = [category, area].filter(Boolean).join(' · ');
+  const autoLabel = [name, distance, details, source].filter(Boolean).join(' ');
   return (
-    <Card onPress={onPress} testID={testID} accessibilityLabel={accessibilityLabel ?? name}>
+    <Card onPress={onPress} testID={testID} accessibilityLabel={accessibilityLabel ?? autoLabel}>
       <View style={styles.line}>
         <RNText style={[text.body, styles.bold, styles.fill]}>{name}</RNText>
         {distance ? <RNText style={[text.caption, { color: color.textMuted }]}>{distance}</RNText> : null}

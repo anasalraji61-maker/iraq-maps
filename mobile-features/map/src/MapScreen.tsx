@@ -250,7 +250,6 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                   distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
                   source={t('source.osm')}
                   onPress={() => open(place.id)}
-                  accessibilityLabel={placeCategory ? t('search.resultA11y', { name: placeName, category: placeCategory }) : placeName}
                 />
               );
             }}
