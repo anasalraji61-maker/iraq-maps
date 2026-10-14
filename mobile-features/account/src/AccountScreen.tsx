@@ -2,10 +2,11 @@ import { testIDs, type NotificationPrefs } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ListItem, Screen, Sheet, Text } from '@iraq-maps/ui';
+import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, type ReactElement } from 'react';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { NotifPrefsSection } from './NotifPrefsSection';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
@@ -46,6 +47,8 @@ export function AccountScreen(): ReactElement {
 
   if (state.status === 'loading') return <Screen>{null}</Screen>;
 
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+
   const languageItem = (
     <ListItem
       testID={testIDs.account.language}
@@ -55,12 +58,23 @@ export function AccountScreen(): ReactElement {
     />
   );
 
+  const settingsItem = (
+    <ListItem
+      title={t('settings.title')}
+      onPress={() => router.push(href('accountSettings'))}
+    />
+  );
+
   if (state.status === 'signedOut') {
     return (
       <Screen>
         <EmptyState title={t('profile.signedOutTitle')} body={t('profile.signedOutBody')} />
         <Button testID={testIDs.account.signIn} label={t('profile.signIn')} onPress={() => router.push(href('authPhone'))} />
         {languageItem}
+        {settingsItem}
+        <View style={styles.versionRow}>
+          <Text variant="caption">{t('profile.version', { version: appVersion })}</Text>
+        </View>
       </Screen>
     );
   }
@@ -79,6 +93,7 @@ export function AccountScreen(): ReactElement {
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
       <ListItem testID={testIDs.provider.entry} title={t('profile.registerBusiness')} onPress={() => router.push(href('providerRegister'))} />
       {languageItem}
+      {settingsItem}
       {notifPrefs ? (
         <NotifPrefsSection
           prefs={notifPrefs}
@@ -97,6 +112,16 @@ export function AccountScreen(): ReactElement {
         <Button testID={testIDs.account.deleteConfirm} variant="danger" label={t('deleteSheet.confirm')} onPress={deleteAccount} loading={busy} />
         <Button variant="secondary" label={t('deleteSheet.cancel')} onPress={() => setConfirmingDelete(false)} disabled={busy} />
       </Sheet>
+      <View style={styles.versionRow}>
+        <Text variant="caption">{t('profile.version', { version: appVersion })}</Text>
+      </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  versionRow: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+});

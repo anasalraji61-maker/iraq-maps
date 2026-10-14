@@ -17,6 +17,7 @@ export const routes = {
   activity: '/activity',
   account: '/account',
   accountLanguage: '/account/language',
+  accountSettings: '/account/settings',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',

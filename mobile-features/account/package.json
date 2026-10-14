@@ -17,6 +17,7 @@
     "@iraq-maps/mobile-kit": "workspace:*",
     "@iraq-maps/ui": "workspace:*",
     "@ts-rest/core": "3.52.1",
+    "expo-constants": "*",
     "expo-notifications": "*",
     "expo-secure-store": "*"
   },

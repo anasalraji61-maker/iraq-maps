@@ -30,7 +30,8 @@
     "language": "Language",
     "logout": "Sign out",
     "delete": "Delete account",
-    "registerBusiness": "Register your business"
+    "registerBusiness": "Register your business",
+    "version": "Version {version}"
   },
   "deleteSheet": {
     "title": "Delete your account permanently?",
@@ -51,6 +52,14 @@
     "newInquiry": "New inquiries",
     "replyReceived": "Provider replies",
     "statusUpdate": "Status updates"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "reportProblem": "Report a problem",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "version": "Version {version} (build {build})"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",

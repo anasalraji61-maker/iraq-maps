@@ -30,7 +30,8 @@
     "language": "اللغة",
     "logout": "تسجيل الخروج",
     "delete": "حذف الحساب",
-    "registerBusiness": "سجّل نشاطك التجاري"
+    "registerBusiness": "سجّل نشاطك التجاري",
+    "version": "الإصدار {version}"
   },
   "deleteSheet": {
     "title": "هل تريد حذف حسابك نهائياً؟",
@@ -51,6 +52,14 @@
     "newInquiry": "طلبات جديدة",
     "replyReceived": "ردود المزوّدين",
     "statusUpdate": "تحديثات الحالة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "reportProblem": "تقرير مشكلة",
+    "privacy": "سياسة الخصوصية",
+    "terms": "شروط الاستخدام",
+    "version": "الإصدار {version} (بناء {build})"
   },
   "errors": {
     "otp_invalid": "الرمز غير صحيح. حاول مرة أخرى.",

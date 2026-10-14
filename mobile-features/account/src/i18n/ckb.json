@@ -30,7 +30,8 @@
     "language": "زمان",
     "logout": "چوونەدەرەوە",
     "delete": "سڕینەوەی هەژمار",
-    "registerBusiness": "کارووبارەکەت تۆمار بکە"
+    "registerBusiness": "کارووبارەکەت تۆمار بکە",
+    "version": "وەشان {version}"
   },
   "deleteSheet": {
     "title": "دەتەوێت هەژمارەکەت بە یەکجاری بسڕیتەوە؟",
@@ -51,6 +52,14 @@
     "newInquiry": "داواکارییە نوێیەکان",
     "replyReceived": "وەڵامی دابینکەرەکان",
     "statusUpdate": "نوێکردنەوەی دۆخ"
+  },
+  "settings": {
+    "title": "ڕێکخستنەکان",
+    "language": "زمان",
+    "reportProblem": "کێشەیەک ڕاپۆرتبکە",
+    "privacy": "سیاسەتی تایبەتمەندی",
+    "terms": "مەرجەکانی بەکارهێنان",
+    "version": "وەشان {version} (بناء {build})"
   },
   "errors": {
     "otp_invalid": "کۆدەکە هەڵەیە. دووبارە هەوڵ بدەرەوە.",
