@@ -233,3 +233,10 @@ No new events.
 | 2026-10-14 | ops + RTL audit + shell navigation | `43ad319`, `0d5411e`, `21b7871` | — |
 | 2026-10-14 | البوابة النهائية الشاملة | `ee3dd6b` | APPROVED `ee3dd6b` |
 | 2026-10-14 | post-M7 polish: map deep-link, discover real place names, assistant focusPlaceId | `e8bb966`, `0b5fde8`, `df7362f`, `2fc7c6a` | — |
+| 2026-10-14 | post-M7 polish: assistant multi-place pins + plan-my-day itinerary | `ec83ac7` | — |
+| 2026-10-14 | post-M7 polish: discover loading/empty states + count formatting | `5af4952` | — |
+| 2026-10-14 | post-M7 polish: provider hours display, empty states, contact CTA | `7c18ff4` | — |
+| 2026-10-14 | post-M7 polish: map recent searches, grouped results, keyboard dismiss | `d167f3b` | — |
+| 2026-10-14 | post-M7 polish: account profile edit, delete confirm, error boundary | `5aeed69` | — |
+| 2026-10-14 | post-M7 polish: navigation turn steps, ETA clock time, off-route banner | `f420839` | — |
+| 2026-10-14 | post-M7 polish: admin verification queue, post moderation, dashboard metrics | `8dd5690` | — |
