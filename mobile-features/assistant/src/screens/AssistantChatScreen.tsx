@@ -259,6 +259,13 @@ export function AssistantChatScreen(): ReactElement {
       ) : null}
 
       {showQuickReplies ? (
+        <View style={styles.welcomeHero} accessibilityRole="header">
+          <Text style={styles.welcomeTitle}>{t('chat.welcomeTitle')}</Text>
+          <Text style={styles.welcomeSubtitle}>{t('chat.welcomeSubtitle')}</Text>
+        </View>
+      ) : null}
+
+      {showQuickReplies ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -480,6 +487,24 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  // Welcome hero (shown when chat is empty)
+  welcomeHero: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    gap: 8,
+  },
+  welcomeTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    lineHeight: 20,
   },
   // Quick replies
   quickRepliesRow: {

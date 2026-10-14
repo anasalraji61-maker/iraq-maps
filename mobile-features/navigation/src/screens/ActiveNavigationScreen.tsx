@@ -6,6 +6,8 @@ import type { NavigationState } from '../hooks/useNavigation';
 
 interface Props extends NavigationState {
   onStop: () => void;
+  /** Optional: called when user wants to navigate again after arrival. */
+  onNavigateAgain?: () => void;
 }
 
 function fmtDist(m: number): string {
@@ -28,14 +30,26 @@ export function ActiveNavigationScreen({
   remainingDurationS,
   onRecalculate,
   onStop,
+  onNavigateAgain,
 }: Props): ReactElement {
   if (hasArrived) {
     return (
       <Screen>
-        <Text variant="title" testID={navigationTestIDs.active.arrived}>
-          وصلت إلى وجهتك
-        </Text>
-        <Button label="إغلاق" onPress={onStop} testID={navigationTestIDs.active.stop} />
+        <View style={styles.arrivedContainer}>
+          <Text variant="title" testID={navigationTestIDs.active.arrived}>
+            وصلت إلى وجهتك 🎉
+          </Text>
+          <View style={styles.arrivedActions}>
+            {onNavigateAgain ? (
+              <View style={styles.flex1}>
+                <Button label="التنقل مرة أخرى" onPress={onNavigateAgain} />
+              </View>
+            ) : null}
+            <View style={styles.flex1}>
+              <Button label="إغلاق" onPress={onStop} variant="secondary" testID={navigationTestIDs.active.stop} />
+            </View>
+          </View>
+        </View>
       </Screen>
     );
   }
@@ -101,6 +115,9 @@ export function ActiveNavigationScreen({
 
 const { space, color } = tokens;
 const styles = StyleSheet.create({
+  flex1: { flex: 1 },
+  arrivedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.l, padding: space.m },
+  arrivedActions: { flexDirection: 'row', gap: space.s, width: '100%' },
   instructionBlock: { gap: space.xs, backgroundColor: color.bg, padding: space.m, borderRadius: 8 },
   nextBlock: { gap: space.xs, padding: space.s },
   offRouteBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF3CD', padding: space.s, borderRadius: 8, gap: space.s },
