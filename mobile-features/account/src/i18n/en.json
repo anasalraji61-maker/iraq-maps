@@ -46,6 +46,12 @@
     "ckb": "کوردی",
     "en": "English"
   },
+  "notifPrefs": {
+    "title": "Notification Preferences",
+    "newInquiry": "New inquiries",
+    "replyReceived": "Provider replies",
+    "statusUpdate": "Status updates"
+  },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",
     "otp_expired": "That code has expired. Request a new one.",

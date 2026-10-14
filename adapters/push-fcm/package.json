@@ -1,0 +1,21 @@
+{
+  "name": "@iraq-maps/adapter-push-fcm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@iraq-maps/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*",
+    "vitest": "^3.2.4"
+  }
+}

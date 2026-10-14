@@ -46,6 +46,12 @@
     "ckb": "کوردی",
     "en": "English"
   },
+  "notifPrefs": {
+    "title": "تفضيلات الإشعارات",
+    "newInquiry": "طلبات جديدة",
+    "replyReceived": "ردود المزوّدين",
+    "statusUpdate": "تحديثات الحالة"
+  },
   "errors": {
     "otp_invalid": "الرمز غير صحيح. حاول مرة أخرى.",
     "otp_expired": "انتهت صلاحية الرمز. اطلب رمزاً جديداً.",
