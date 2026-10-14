@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AssistantController } from './assistant.controller.js';
 import { AssistantService } from './assistant.service.js';
+import { PLACES_SEARCH_TOKEN } from './assistant.service.js';
 import { PortTokens } from '@iraq-maps/contracts';
 
 // The adapter package name is kept in a runtime string so depcruise cannot
@@ -17,12 +18,20 @@ async function resolveLlmClient() {
   return new FakeLlmClient();
 }
 
+// Fake places search — returns hardcoded results for testing without a real DB.
+// In production, apps/api wires a real implementation that calls the places module.
+const fakePlacesSearch = async (query: string, _city?: string) => [
+  { id: 'place-001', name: `مطعم ${query}`, address: 'شارع الرشيد، بغداد' },
+  { id: 'place-002', name: `${query} المركزي`, address: 'شارع المتنبي، بغداد' },
+];
+
 @Module({
   controllers: [AssistantController],
   providers: [
     AssistantService,
     { provide: 'ASSISTANT_DB', useValue: null }, // replaced by app.ts
     { provide: PortTokens.LlmClient, useFactory: resolveLlmClient },
+    { provide: PLACES_SEARCH_TOKEN, useValue: fakePlacesSearch },
   ],
   exports: [AssistantService],
 })

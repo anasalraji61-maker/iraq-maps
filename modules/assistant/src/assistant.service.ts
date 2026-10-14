@@ -17,12 +17,43 @@ const SYSTEM_PROMPT = `أنت مساعد سفر ذكي لتطبيق Iraq Smart M
 أجب دائماً باللغة العربية ما لم يتحدث المستخدم بلغة أخرى.
 لا تخترع معلومات عن أماكن محددة — استخدم فقط ما تعرفه بشكل موثوق.`;
 
+const ASSISTANT_TOOLS = [
+  {
+    name: 'search_places',
+    description: 'ابحث عن أماكن أو محلات أو خدمات في العراق. استخدمها عندما يسأل المستخدم عن مكان محدد.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'نص البحث بالعربية' },
+        city: { type: 'string', description: 'المدينة (اختياري)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'compose_message',
+    description: 'افتح شاشة إرسال رسالة إلى مزود خدمة. استخدمها عندما يريد المستخدم التواصل مع مكان.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'نص الرسالة المقترح' },
+        placeIds: { type: 'array', items: { type: 'string' }, description: 'معرفات الأماكن' },
+      },
+    },
+  },
+];
+
+export type PlacesSearchFn = (query: string, city?: string) => Promise<Array<{ id: string; name: string; address: string }>>;
+
+export const PLACES_SEARCH_TOKEN = 'ASSISTANT_PLACES_SEARCH';
+
 @Injectable()
 export class AssistantService {
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     @Inject('ASSISTANT_DB') private readonly db: PostgresJsDatabase<any>,
     @Inject(PortTokens.LlmClient) private readonly llm: LlmClient,
+    @Inject(PLACES_SEARCH_TOKEN) private readonly placesSearch: PlacesSearchFn,
   ) {}
 
   async chat(userId: string, turn: AssistantTurnType) {
@@ -55,26 +86,72 @@ export class AssistantService {
       ...turn.messages,
     ];
 
-    // Call LLM
+    // Call LLM with tools
     const response = await this.llm.chat({
       systemPrompt: SYSTEM_PROMPT,
       messages: allMessages,
+      tools: ASSISTANT_TOOLS,
       maxTokens: 1024,
     });
+
+    let finalContent = response.content;
+    let composeParams: { text?: string; placeIds?: string[] } | undefined;
+
+    // Handle tool calls (max 1 round-trip)
+    if (response.stopReason === 'tool_use' && response.toolCalls && response.toolCalls.length > 0) {
+      const toolCall = response.toolCalls[0]!;
+
+      if (toolCall.name === 'search_places') {
+        const query = toolCall.input['query'] as string;
+        const city = toolCall.input['city'] as string | undefined;
+        const results = await this.placesSearch(query, city);
+
+        const toolResultText = results.length > 0
+          ? results.map(r => `- ${r.name}: ${r.address}`).join('\n')
+          : 'لم يتم العثور على نتائج.';
+
+        const messagesWithToolResult = [
+          ...allMessages,
+          {
+            role: 'assistant' as const,
+            content: `[استخدام أداة البحث عن: ${query}]`,
+          },
+          {
+            role: 'user' as const,
+            content: `نتائج البحث:\n${toolResultText}`,
+          },
+        ];
+
+        const followUp = await this.llm.chat({
+          systemPrompt: SYSTEM_PROMPT,
+          messages: messagesWithToolResult,
+          maxTokens: 1024,
+        });
+
+        finalContent = followUp.content;
+      } else if (toolCall.name === 'compose_message') {
+        const text = toolCall.input['text'] as string | undefined;
+        const placeIds = toolCall.input['placeIds'] as string[] | undefined;
+        composeParams = { text, placeIds };
+        finalContent = text ?? '';
+      }
+    }
 
     // Store new messages
     for (const msg of turn.messages) {
       await this.db.insert(messageTable).values({ sessionId, role: msg.role, content: msg.content });
     }
-    await this.db.insert(messageTable).values({ sessionId, role: 'assistant', content: response.content });
+    await this.db.insert(messageTable).values({ sessionId, role: 'assistant', content: finalContent });
 
     // Increment rate limit
     await this.incrementRateLimit(userId);
 
-    // Parse composeParams if assistant mentions messaging
-    const composeParams = this.extractComposeParams(response.content);
+    // Fall back to heuristic compose detection if no tool call provided composeParams
+    if (!composeParams) {
+      composeParams = this.extractComposeParams(finalContent);
+    }
 
-    return { sessionId, reply: response.content, composeParams };
+    return { sessionId, reply: finalContent, composeParams };
   }
 
   async getSession(userId: string, sessionId: string) {
