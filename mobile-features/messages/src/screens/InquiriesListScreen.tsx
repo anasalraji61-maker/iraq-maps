@@ -29,7 +29,14 @@ export function InquiriesListScreen(): ReactElement {
   useEffect(() => { void load(); }, []);
 
   if (!loading && inquiries.length === 0 && !error) {
-    return <Screen><EmptyState title={t('list.empty')} /></Screen>;
+    return (
+      <Screen>
+        <EmptyState
+          title={t('list.empty')}
+          action={{ label: t('list.start'), onPress: () => router.push('/messages/new') }}
+        />
+      </Screen>
+    );
   }
 
   return (
