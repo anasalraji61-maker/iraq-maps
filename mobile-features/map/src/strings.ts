@@ -1,5 +1,5 @@
 import type { PlaceSummary } from '@iraq-maps/contracts';
-import { formatNumber, registerNamespace, t as translate } from '@iraq-maps/i18n';
+import { formatNumber, NestedPaths, registerNamespace, t as translate } from '@iraq-maps/i18n';
 import ar from './i18n/ar.json';
 import ckb from './i18n/ckb.json';
 import en from './i18n/en.json';
