@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
+import { sharedStyles, COLORS } from './shared';
 
 const MAX_PHOTOS = 3;
 
@@ -291,39 +292,17 @@ export function CreatePostScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  header: {
-    backgroundColor: '#1976D2',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  container: sharedStyles.container,
+  header: sharedStyles.header,
+  headerTitle: sharedStyles.headerTitle,
   dismissArea: {
     flex: 1,
   },
   content: {
     padding: 16,
   },
-  errorRow: {
-    backgroundColor: '#FFEBEE',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  errorText: {
-    color: '#C62828',
-    fontSize: 13,
-    textAlign: 'auto',
-  },
+  errorRow: { ...sharedStyles.errorRow, borderRadius: 8, marginBottom: 12 },
+  errorText: sharedStyles.errorText,
   label: {
     fontSize: 14,
     fontWeight: '600',

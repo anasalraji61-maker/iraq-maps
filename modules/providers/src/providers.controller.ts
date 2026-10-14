@@ -32,6 +32,12 @@ export class ProvidersController {
       });
     }
 
+    const providerMeResponse = async (row: Awaited<ReturnType<typeof this.svc.getByUserId>>) => {
+      if (!row) return problem(404, 'provider_not_found', 'Provider not found');
+      const consents = await this.svc.getActiveConsents(row.id as ProviderId);
+      return { status: 200 as const, body: this.svc.toProviderMe(row, consents) };
+    };
+
     return tsRestHandler(providersContract, {
       create: async ({ body }) => {
         try {
@@ -79,8 +85,7 @@ export class ProvidersController {
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         try {
           const updated = await this.svc.claimPlace(userId, row.id as ProviderId, body.placeId as PlaceId);
-          const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
-          return { status: 200, body: this.svc.toProviderMe(updated, consents) };
+          return providerMeResponse(updated);
         } catch (e: unknown) {
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
           throw e;
@@ -91,8 +96,7 @@ export class ProvidersController {
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         try {
           const updated = await this.svc.submit(userId, row.id as ProviderId);
-          const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
-          return { status: 200, body: this.svc.toProviderMe(updated, consents) };
+          return providerMeResponse(updated);
         } catch (e: unknown) {
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
           throw e;
@@ -135,6 +139,12 @@ export class AdminProvidersController {
     }
 
     const adminUserId = req.principal!.userId;
+    const getProviderOrProblem = async (id: string) => {
+      const view = await this.svc.adminGetProvider(id as ProviderId);
+      if (!view) return { ok: false as const, prob: problem(404, 'provider_not_found', 'Provider not found') };
+      return { ok: true as const, view };
+    };
+
     return tsRestHandler(adminProvidersContract, {
       queue: async ({ query }) => {
         const result = await this.svc.adminListQueue(query.status, query.cursor);
@@ -143,25 +153,23 @@ export class AdminProvidersController {
       verify: async ({ params }) => {
         try {
           await this.svc.adminVerify(adminUserId, params.id);
-          const view = await this.svc.adminGetProvider(params.id);
-          if (!view) return problem(404, 'provider_not_found', 'Provider not found');
-          return { status: 200, body: view };
         } catch (e: unknown) {
           if (isNestException(e, 404)) return problem(404, getCode(e), getMessage(e));
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
           throw e;
         }
+        const r = await getProviderOrProblem(params.id);
+        return r.ok ? { status: 200, body: r.view } : r.prob;
       },
       suspend: async ({ params, body }) => {
         try {
           await this.svc.adminSuspend(adminUserId, params.id, body.reason);
-          const view = await this.svc.adminGetProvider(params.id);
-          if (!view) return problem(404, 'provider_not_found', 'Provider not found');
-          return { status: 200, body: view };
         } catch (e: unknown) {
           if (isNestException(e, 404)) return problem(404, getCode(e), getMessage(e));
           throw e;
         }
+        const r = await getProviderOrProblem(params.id);
+        return r.ok ? { status: 200, body: r.view } : r.prob;
       },
     });
   }

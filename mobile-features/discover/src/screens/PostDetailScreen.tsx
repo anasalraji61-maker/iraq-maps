@@ -19,30 +19,14 @@ import { type z } from 'zod';
 import { DiscoverComment } from '@iraq-maps/contracts';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
+import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
 
 I18nManager.forceRTL(true);
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  photo: { bg: '#E3F2FD', text: '#1976D2' },
-  tip:   { bg: '#E8F5E9', text: '#388E3C' },
-  event: { bg: '#FFF3E0', text: '#F57C00' },
-  offer: { bg: '#FFEBEE', text: '#D32F2F' },
-};
-
-function formatRelativeTime(isoDate: string): string {
-  const diff = Date.now() - new Date(isoDate).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return '< 1m';
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
-}
-
 function PostBody({ post }: { post: DiscoverPostType }): ReactElement {
-  const badgeColors = TYPE_BADGE_COLORS[post.type] ?? { bg: '#E3F2FD', text: '#1976D2' };
+  const badgeColors = getTypeBadgeColors(post.type);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -69,45 +53,6 @@ function PostBody({ post }: { post: DiscoverPostType }): ReactElement {
   );
 }
 
-function CommentRow({ item }: { item: DiscoverCommentType }): ReactElement {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-
-  const handleLike = useCallback(() => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  }, [liked]);
-
-  return (
-    <View style={styles.commentCard}>
-      <View style={styles.commentHeader}>
-        <View style={[styles.avatarCircle, styles.commentAvatar]}>
-          <Text style={styles.avatarText}>{item.authorId.slice(0, 1).toUpperCase()}</Text>
-        </View>
-        <View style={styles.commentMeta}>
-          <Text style={styles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
-          <Text style={styles.commentDate}>{formatRelativeTime(item.createdAt)}</Text>
-        </View>
-      </View>
-      <Text style={styles.commentBody}>{item.body}</Text>
-      <View style={styles.commentActions}>
-        <Pressable
-          style={[styles.commentActionBtn, liked && styles.commentActionBtnActive]}
-          onPress={handleLike}
-          accessibilityRole="button"
-          accessibilityLabel={t('comments.likeA11y')}
-        >
-          <Text style={[styles.commentActionText, liked && styles.commentActionTextActive]}>
-            {t('comments.likeComment')}{likeCount > 0 ? ` ${likeCount}` : ''}
-          </Text>
-        </Pressable>
-        <Pressable style={styles.commentActionBtn} accessibilityRole="button" accessibilityLabel={t('comments.replyA11y')}>
-          <Text style={styles.commentActionText}>{t('comments.replyComment')}</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
 
 export function PostDetailScreen(): ReactElement {
   const { postId, postJson } = useLocalSearchParams<{ postId: string; postJson?: string }>();
@@ -209,50 +154,30 @@ export function PostDetailScreen(): ReactElement {
             {sectionHeader}
           </>
         }
-        renderItem={({ item }) => <CommentRow item={item} />}
+        renderItem={({ item }) => <CommentCard item={item} smallAvatar t={t} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>{t('comments.empty')}</Text>
           </View>
         }
       />
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          value={commentText}
-          onChangeText={(text) => setCommentText(text.slice(0, 500))}
-          placeholder={t('comments.placeholder')}
-          placeholderTextColor="#999"
-          multiline
-          maxLength={500}
-        />
-        <Pressable
-          style={[styles.sendBtn, (!commentText.trim() || sending) && styles.sendBtnDisabled]}
-          onPress={handleSend}
-          disabled={!commentText.trim() || sending}
-        >
-          {sending ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <Text style={styles.sendBtnText}>{t('comments.send')}</Text>
-          )}
-        </Pressable>
-      </View>
+      <CommentInputRow
+        value={commentText}
+        onChangeText={setCommentText}
+        onSend={handleSend}
+        sending={sending}
+        t={t}
+      />
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
+  container: sharedStyles.container,
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  header: {
-    backgroundColor: '#1976D2',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '600' },
-  listContent: { padding: 12, paddingBottom: 8 },
+  header: sharedStyles.header,
+  headerTitle: sharedStyles.headerTitle,
+  listContent: sharedStyles.listContent,
   postCard: {
     backgroundColor: '#FFF',
     borderRadius: 12,
@@ -270,118 +195,35 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     gap: 8,
   },
-  avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#1976D2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  avatarCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
   commentAvatar: { width: 28, height: 28, borderRadius: 14 },
-  avatarText: { color: '#FFF', fontSize: 14, fontWeight: '700' },
-  authorText: { flex: 1, fontSize: 14, color: '#555', fontWeight: '500', textAlign: 'auto' },
-  typeBadge: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  typeText: { fontSize: 12, color: '#1976D2', fontWeight: '600' },
-  bodyText: {
-    fontSize: 16,
-    color: '#222',
-    lineHeight: 24,
-    textAlign: 'auto',
-    marginBottom: 8,
-  },
-  postDate: { fontSize: 12, color: '#999', textAlign: 'auto', marginBottom: 10 },
-  shareBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  shareBtnText: { fontSize: 13, color: '#555', fontWeight: '500' },
-  sectionHeader: {
-    paddingHorizontal: 4,
-    paddingBottom: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#DDD',
-    marginBottom: 8,
-  },
+  avatarText: sharedStyles.avatarText,
+  authorText: { flex: 1, fontSize: 14, color: COLORS.textSecondary, fontWeight: '500', textAlign: 'auto' },
+  typeBadge: { backgroundColor: COLORS.primaryXLight, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
+  typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
+  bodyText: { fontSize: 16, color: COLORS.textPrimary, lineHeight: 24, textAlign: 'auto', marginBottom: 8 },
+  postDate: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto', marginBottom: 10 },
+  shareBtn: { alignSelf: 'flex-start', backgroundColor: COLORS.inputBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  shareBtnText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500' },
+  sectionHeader: { paddingHorizontal: 4, paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border, marginBottom: 8 },
   sectionTitle: { fontSize: 15, fontWeight: '600', color: '#333', textAlign: 'auto' },
-  commentCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
-  },
-  commentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    gap: 8,
-  },
-  commentMeta: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  commentAuthor: { fontSize: 13, color: '#1976D2', fontWeight: '600', textAlign: 'auto' },
-  commentDate: { fontSize: 11, color: '#999' },
-  commentBody: {
-    fontSize: 14,
-    color: '#222',
-    lineHeight: 20,
-    textAlign: 'auto',
-    marginBottom: 8,
-  },
-  commentActions: { flexDirection: 'row', gap: 8 },
-  commentActionBtn: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: '#F0F0F0',
-  },
-  commentActionBtnActive: { backgroundColor: '#BBDEFB' },
-  commentActionText: { fontSize: 12, color: '#555', fontWeight: '500' },
-  commentActionTextActive: { color: '#1565C0' },
+  commentCard: sharedStyles.commentCard,
+  commentHeader: sharedStyles.commentHeader,
+  commentMeta: sharedStyles.commentMeta,
+  commentAuthor: sharedStyles.commentAuthor,
+  commentDate: sharedStyles.commentDate,
+  commentBody: sharedStyles.commentBody,
+  commentActions: sharedStyles.commentActions,
+  commentActionBtn: sharedStyles.commentActionBtn,
+  commentActionBtnActive: sharedStyles.commentActionBtnActive,
+  commentActionText: sharedStyles.commentActionText,
+  commentActionTextActive: sharedStyles.commentActionTextActive,
   emptyContainer: { alignItems: 'center', paddingTop: 40 },
-  emptyText: { fontSize: 15, color: '#999' },
-  errorText: { fontSize: 15, color: '#C62828', textAlign: 'center', padding: 16 },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    padding: 8,
-    backgroundColor: '#FFF',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#DDD',
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    fontSize: 15,
-    textAlign: 'auto',
-    color: '#222',
-  },
-  sendBtn: {
-    backgroundColor: '#1976D2',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 64,
-  },
-  sendBtnDisabled: { backgroundColor: '#B0BEC5' },
-  sendBtnText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
+  emptyText: sharedStyles.emptyText,
+  errorText: { fontSize: 15, color: COLORS.error, textAlign: 'center', padding: 16 },
+  inputRow: sharedStyles.inputRow,
+  input: sharedStyles.input,
+  sendBtn: sharedStyles.sendBtn,
+  sendBtnDisabled: sharedStyles.sendBtnDisabled,
+  sendBtnText: sharedStyles.sendBtnText,
 });

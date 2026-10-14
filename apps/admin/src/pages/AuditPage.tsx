@@ -1,22 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api, type AuditEntry } from '../api';
-
-const thStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  textAlign: 'right',
-  background: '#f5f5f5',
-  borderBottom: '2px solid #ddd',
-  fontWeight: 600,
-  fontSize: 14,
-  color: '#333',
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  borderBottom: '1px solid #eee',
-  fontSize: 14,
-  color: '#222',
-};
+import { thStyle, tdStyle, LoadingRow } from '../components/shared';
 
 const actionLabel: Record<string, string> = {
   verify: 'توثيق',
@@ -34,7 +18,7 @@ export function AuditPage() {
     }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <p style={{ padding: 24, color: '#888' }}>جارٍ التحميل…</p>;
+  if (loading) return <LoadingRow />;
 
   return (
     <div>

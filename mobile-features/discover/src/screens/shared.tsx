@@ -1,0 +1,329 @@
+/**
+ * Shared UI primitives and style tokens used across discover screens.
+ * Keep this file free of screen-specific state or navigation logic.
+ */
+import { useState, useCallback, type ReactElement } from 'react';
+import React from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { type t as TFunc } from '../strings';
+
+export const COLORS = {
+  primary: '#1976D2',
+  primaryDark: '#1565C0',
+  primaryLight: '#BBDEFB',
+  primaryXLight: '#E3F2FD',
+  error: '#C62828',
+  errorBg: '#FFEBEE',
+  surface: '#FFF',
+  background: '#F5F5F5',
+  textPrimary: '#222',
+  textSecondary: '#555',
+  textMuted: '#999',
+  border: '#DDD',
+  divider: '#E0E0E0',
+  muted: '#B0BEC5',
+  inputBg: '#F0F0F0',
+} as const;
+
+const DEFAULT_BADGE = { bg: '#E3F2FD', text: '#1976D2' } as const;
+
+export const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
+  photo: { bg: '#E3F2FD', text: '#1976D2' },
+  tip:   { bg: '#E8F5E9', text: '#388E3C' },
+  event: { bg: '#FFF3E0', text: '#F57C00' },
+  offer: { bg: '#FFEBEE', text: '#D32F2F' },
+};
+
+export function getTypeBadgeColors(type: string): { bg: string; text: string } {
+  return TYPE_BADGE_COLORS[type] ?? DEFAULT_BADGE;
+}
+
+export function formatRelativeTime(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return '< 1m';
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
+export const sharedStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: COLORS.surface,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  errorRow: {
+    backgroundColor: COLORS.errorBg,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 13,
+    textAlign: 'auto',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: 60,
+  },
+  emptyText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+  },
+  listContent: {
+    padding: 12,
+    paddingBottom: 8,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    padding: 8,
+    backgroundColor: COLORS.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.border,
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    minHeight: 40,
+    maxHeight: 100,
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    fontSize: 15,
+    textAlign: 'auto',
+    color: COLORS.textPrimary,
+  },
+  sendBtn: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 64,
+  },
+  sendBtnDisabled: {
+    backgroundColor: COLORS.muted,
+  },
+  sendBtnText: {
+    color: COLORS.surface,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  avatarCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: COLORS.surface,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  commentCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 8,
+  },
+  commentMeta: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  commentAuthor: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+    textAlign: 'auto',
+  },
+  commentDate: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    textAlign: 'auto',
+  },
+  commentBody: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+    textAlign: 'auto',
+    marginBottom: 8,
+  },
+  commentActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  commentActionBtn: {
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: COLORS.inputBg,
+  },
+  commentActionBtnActive: {
+    backgroundColor: COLORS.primaryLight,
+  },
+  commentActionText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  commentActionTextActive: {
+    color: COLORS.primaryDark,
+  },
+});
+
+/** Simple spinner shown while a screen is loading */
+export function LoadingIndicator(): ReactElement {
+  return <ActivityIndicator style={{ paddingVertical: 20 }} size="large" color={COLORS.primary} />;
+}
+
+/** Centered error/empty message */
+export function CenteredMessage({ text }: { text: string }): ReactElement {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ fontSize: 15, color: COLORS.error, textAlign: 'center', padding: 16 }}>{text}</Text>
+    </View>
+  );
+}
+
+/** Shared TextInput + Send button row for comment screens */
+export function CommentInputRow({
+  value,
+  onChangeText,
+  onSend,
+  sending,
+  inputRef,
+  t,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+  onSend: () => void;
+  sending: boolean;
+  inputRef?: React.RefObject<TextInput | null>;
+  t: typeof TFunc;
+}): ReactElement {
+  return (
+    <View style={sharedStyles.inputRow}>
+      <TextInput
+        ref={inputRef}
+        style={sharedStyles.input}
+        value={value}
+        onChangeText={(text) => onChangeText(text.slice(0, 500))}
+        placeholder={t('comments.placeholder')}
+        placeholderTextColor="#999"
+        multiline
+        maxLength={500}
+      />
+      <Pressable
+        style={[sharedStyles.sendBtn, (!value.trim() || sending) && sharedStyles.sendBtnDisabled]}
+        onPress={onSend}
+        disabled={!value.trim() || sending}
+      >
+        {sending ? (
+          <ActivityIndicator color="#FFF" size="small" />
+        ) : (
+          <Text style={sharedStyles.sendBtnText}>{t('comments.send')}</Text>
+        )}
+      </Pressable>
+    </View>
+  );
+}
+
+interface CommentCardItem {
+  authorId: string;
+  createdAt: string;
+  body: string;
+}
+
+/**
+ * Shared comment card used in both CommentsScreen and PostDetailScreen.
+ * onReply is optional — omit it to hide the reply button.
+ */
+export function CommentCard({
+  item,
+  onReply,
+  smallAvatar,
+  t,
+}: {
+  item: CommentCardItem;
+  onReply?: (authorId: string) => void;
+  smallAvatar?: boolean;
+  t: typeof TFunc;
+}): ReactElement {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  const handleLike = useCallback(() => {
+    setLiked((prev) => !prev);
+    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
+  }, [liked]);
+
+  const handleReply = useCallback(() => {
+    onReply?.(item.authorId.slice(0, 8));
+  }, [item.authorId, onReply]);
+
+  const avatarSize = smallAvatar
+    ? { width: 28, height: 28, borderRadius: 14 }
+    : sharedStyles.avatarCircle;
+
+  return (
+    <View style={sharedStyles.commentCard}>
+      <View style={sharedStyles.commentHeader}>
+        <View style={[sharedStyles.avatarCircle, avatarSize]}>
+          <Text style={sharedStyles.avatarText}>{item.authorId.slice(0, 1).toUpperCase()}</Text>
+        </View>
+        <View style={sharedStyles.commentMeta}>
+          <Text style={sharedStyles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
+          <Text style={sharedStyles.commentDate}>{formatRelativeTime(item.createdAt)}</Text>
+        </View>
+      </View>
+      <Text style={sharedStyles.commentBody}>{item.body}</Text>
+      <View style={sharedStyles.commentActions}>
+        <Pressable
+          style={[sharedStyles.commentActionBtn, liked && sharedStyles.commentActionBtnActive]}
+          onPress={handleLike}
+          accessibilityRole="button"
+          accessibilityLabel={t('comments.likeA11y')}
+        >
+          <Text style={[sharedStyles.commentActionText, liked && sharedStyles.commentActionTextActive]}>
+            {t('comments.likeComment')}{likeCount > 0 ? ` ${likeCount}` : ''}
+          </Text>
+        </Pressable>
+        {onReply ? (
+          <Pressable
+            style={sharedStyles.commentActionBtn}
+            onPress={handleReply}
+            accessibilityRole="button"
+            accessibilityLabel={t('comments.replyA11y')}
+          >
+            <Text style={sharedStyles.commentActionText}>{t('comments.replyComment')}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}

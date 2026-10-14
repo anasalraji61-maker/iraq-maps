@@ -17,70 +17,12 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
+import { sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
 
 I18nManager.forceRTL(true);
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-function formatRelativeTime(isoDate: string): string {
-  const diff = Date.now() - new Date(isoDate).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return '< 1m';
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `${days}d`;
-}
-
-function CommentItem({ item, onReply }: { item: DiscoverCommentType; onReply: (authorId: string) => void }): ReactElement {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-
-  const handleLike = useCallback(() => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  }, [liked]);
-
-  const handleReply = useCallback(() => {
-    onReply(item.authorId.slice(0, 8));
-  }, [item.authorId, onReply]);
-
-  return (
-    <View style={styles.commentCard}>
-      <View style={styles.commentHeader}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>{item.authorId.slice(0, 1).toUpperCase()}</Text>
-        </View>
-        <View style={styles.commentMeta}>
-          <Text style={styles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
-          <Text style={styles.commentDate}>{formatRelativeTime(item.createdAt)}</Text>
-        </View>
-      </View>
-      <Text style={styles.commentBody}>{item.body}</Text>
-      <View style={styles.commentActions}>
-        <Pressable
-          style={[styles.commentActionBtn, liked && styles.commentActionBtnActive]}
-          onPress={handleLike}
-          accessibilityRole="button"
-          accessibilityLabel={t('comments.likeA11y')}
-        >
-          <Text style={[styles.commentActionText, liked && styles.commentActionTextActive]}>
-            {t('comments.likeComment')}{likeCount > 0 ? ` ${likeCount}` : ''}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={styles.commentActionBtn}
-          onPress={handleReply}
-          accessibilityRole="button"
-          accessibilityLabel={t('comments.replyA11y')}
-        >
-          <Text style={styles.commentActionText}>{t('comments.replyComment')}</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
 
 export function CommentsScreen(): ReactElement {
   const { postId } = useLocalSearchParams<{ postId: string }>();
@@ -180,7 +122,7 @@ export function CommentsScreen(): ReactElement {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} tintColor="#1976D2" />
         }
-        renderItem={({ item }) => <CommentItem item={item} onReply={handleReply} />}
+        renderItem={({ item }) => <CommentCard item={item} onReply={handleReply} t={t} />}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>
@@ -208,205 +150,57 @@ export function CommentsScreen(): ReactElement {
           </Pressable>
         </View>
       ) : null}
-      <View style={styles.inputRow}>
-        <TextInput
-          ref={inputRef}
-          style={styles.input}
-          value={commentText}
-          onChangeText={(text) => setCommentText(text.slice(0, 500))}
-          placeholder={t('comments.placeholder')}
-          placeholderTextColor="#999"
-          multiline
-          maxLength={500}
-        />
-        <Pressable
-          style={[styles.sendBtn, (!commentText.trim() || sending) && styles.sendBtnDisabled]}
-          onPress={handleSend}
-          disabled={!commentText.trim() || sending}
-        >
-          {sending ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <Text style={styles.sendBtnText}>{t('comments.send')}</Text>
-          )}
-        </Pressable>
-      </View>
+      <CommentInputRow
+        value={commentText}
+        onChangeText={setCommentText}
+        onSend={handleSend}
+        sending={sending}
+        inputRef={inputRef}
+        t={t}
+      />
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  header: {
-    backgroundColor: '#1976D2',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  loadingIndicator: {
-    paddingVertical: 20,
-  },
-  errorRow: {
-    backgroundColor: '#FFEBEE',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  sendErrorRow: {
-    backgroundColor: '#FFEBEE',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-  },
-  errorText: {
-    color: '#C62828',
-    fontSize: 13,
-    textAlign: 'auto',
-  },
-  listContent: {
-    padding: 12,
-    paddingBottom: 8,
-  },
-  commentCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 8,
-  },
-  commentHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-    gap: 8,
-  },
-  avatarCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#1976D2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  commentMeta: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  commentAuthor: {
-    fontSize: 13,
-    color: '#1976D2',
-    fontWeight: '600',
-    textAlign: 'auto',
-  },
-  commentDate: {
-    fontSize: 11,
-    color: '#999',
-    textAlign: 'auto',
-  },
-  commentBody: {
-    fontSize: 14,
-    color: '#222',
-    lineHeight: 20,
-    textAlign: 'auto',
-    marginBottom: 8,
-  },
-  commentActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  commentActionBtn: {
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: '#F0F0F0',
-  },
-  commentActionBtnActive: {
-    backgroundColor: '#BBDEFB',
-  },
-  commentActionText: {
-    fontSize: 12,
-    color: '#555',
-    fontWeight: '500',
-  },
-  commentActionTextActive: {
-    color: '#1565C0',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyText: {
-    fontSize: 15,
-    color: '#999',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    padding: 8,
-    backgroundColor: '#FFF',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#DDD',
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    fontSize: 15,
-    textAlign: 'auto',
-    color: '#222',
-  },
-  sendBtn: {
-    backgroundColor: '#1976D2',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 64,
-  },
-  sendBtnDisabled: {
-    backgroundColor: '#B0BEC5',
-  },
-  sendBtnText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  container: sharedStyles.container,
+  header: sharedStyles.header,
+  headerTitle: sharedStyles.headerTitle,
+  loadingIndicator: { paddingVertical: 20 },
+  errorRow: sharedStyles.errorRow,
+  sendErrorRow: { backgroundColor: COLORS.errorBg, paddingHorizontal: 16, paddingVertical: 6 },
+  errorText: sharedStyles.errorText,
+  listContent: sharedStyles.listContent,
+  commentCard: sharedStyles.commentCard,
+  commentHeader: sharedStyles.commentHeader,
+  avatarCircle: sharedStyles.avatarCircle,
+  avatarText: sharedStyles.avatarText,
+  commentMeta: sharedStyles.commentMeta,
+  commentAuthor: sharedStyles.commentAuthor,
+  commentDate: sharedStyles.commentDate,
+  commentBody: sharedStyles.commentBody,
+  commentActions: sharedStyles.commentActions,
+  commentActionBtn: sharedStyles.commentActionBtn,
+  commentActionBtnActive: sharedStyles.commentActionBtnActive,
+  commentActionText: sharedStyles.commentActionText,
+  commentActionTextActive: sharedStyles.commentActionTextActive,
+  emptyContainer: sharedStyles.emptyContainer,
+  emptyText: sharedStyles.emptyText,
+  inputRow: sharedStyles.inputRow,
+  input: sharedStyles.input,
+  sendBtn: sharedStyles.sendBtn,
+  sendBtnDisabled: sharedStyles.sendBtnDisabled,
+  sendBtnText: sharedStyles.sendBtnText,
   replyBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     paddingVertical: 6,
-    backgroundColor: '#E3F2FD',
+    backgroundColor: COLORS.primaryXLight,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#BBDEFB',
+    borderTopColor: COLORS.primaryLight,
   },
-  replyBannerText: {
-    fontSize: 12,
-    color: '#1565C0',
-    flex: 1,
-  },
-  replyBannerClose: {
-    fontSize: 14,
-    color: '#666',
-    paddingHorizontal: 6,
-  },
+  replyBannerText: { fontSize: 12, color: COLORS.primaryDark, flex: 1 },
+  replyBannerClose: { fontSize: 14, color: '#666', paddingHorizontal: 6 },
 });

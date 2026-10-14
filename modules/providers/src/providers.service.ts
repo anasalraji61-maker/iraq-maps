@@ -162,43 +162,42 @@ export class ProvidersService {
     return updated!;
   }
 
-  async grantConsent(userId: UserId, providerId: ProviderId, scope: ConsentScope, evidence: ConsentEvidence): Promise<void> {
-    const provider = await this.getById(providerId);
-    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
-    this.assertOwner(userId, provider);
-
-    // Upsert: revoke old record if present, insert new
+  private async revokeActiveConsent(providerId: ProviderId, scope: ConsentScope): Promise<void> {
     await this.db
       .update(consentTable)
       .set({ revokedAt: new Date() })
       .where(and(eq(consentTable.providerId, providerId), eq(consentTable.scope, scope), isNull(consentTable.revokedAt)));
+  }
 
-    await this.db.insert(consentTable).values({ providerId, scope, grantedAt: new Date(), evidence: JSON.stringify(evidence) });
-
+  private async publishConsentChanged(providerId: ProviderId, scope: ConsentScope, granted: boolean): Promise<void> {
     await this.outbox.publish({
       id: randomUUID(),
       name: 'providers.consent.changed.v1',
       occurredAt: new Date().toISOString(),
-      payload: { providerId: providerId as never, scope, granted: true },
+      payload: { providerId: providerId as never, scope, granted },
     });
   }
 
-  async revokeConsent(userId: UserId, providerId: ProviderId, scope: ConsentScope): Promise<void> {
+  private async assertProviderOwner(userId: UserId, providerId: ProviderId): Promise<void> {
     const provider = await this.getById(providerId);
     if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
     this.assertOwner(userId, provider);
+  }
 
-    await this.db
-      .update(consentTable)
-      .set({ revokedAt: new Date() })
-      .where(and(eq(consentTable.providerId, providerId), eq(consentTable.scope, scope), isNull(consentTable.revokedAt)));
+  async grantConsent(userId: UserId, providerId: ProviderId, scope: ConsentScope, evidence: ConsentEvidence): Promise<void> {
+    await this.assertProviderOwner(userId, providerId);
 
-    await this.outbox.publish({
-      id: randomUUID(),
-      name: 'providers.consent.changed.v1',
-      occurredAt: new Date().toISOString(),
-      payload: { providerId: providerId as never, scope, granted: false },
-    });
+    // Upsert: revoke old record if present, insert new
+    await this.revokeActiveConsent(providerId, scope);
+    await this.db.insert(consentTable).values({ providerId, scope, grantedAt: new Date(), evidence: JSON.stringify(evidence) });
+    await this.publishConsentChanged(providerId, scope, true);
+  }
+
+  async revokeConsent(userId: UserId, providerId: ProviderId, scope: ConsentScope): Promise<void> {
+    await this.assertProviderOwner(userId, providerId);
+
+    await this.revokeActiveConsent(providerId, scope);
+    await this.publishConsentChanged(providerId, scope, false);
   }
 
   async getConsentLedger(providerId: ProviderId): Promise<ConsentLedger> {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, type Provider } from '../api';
 import { ProviderTable } from '../components/ProviderTable';
+import { FlashBanner, PageHeader } from '../components/shared';
 
 const PAGE_SIZE = 25;
 
@@ -49,16 +50,8 @@ export function VerificationPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h2 style={{ margin: 0 }}>طابور التوثيق</h2>
-        <span style={{ fontSize: 14, color: '#666' }}>{total} مزود بانتظار التوثيق</span>
-      </div>
-
-      {msg && (
-        <div style={{ background: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: 4, padding: '8px 12px', marginBottom: 12, color: '#2e7d32', fontSize: 13 }}>
-          {msg}
-        </div>
-      )}
+      <PageHeader title="طابور التوثيق" meta={`${total} مزود بانتظار التوثيق`} />
+      <FlashBanner msg={msg} />
 
       <ProviderTable
         providers={providers}

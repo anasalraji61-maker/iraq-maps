@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
+import { getTypeBadgeColors, sharedStyles, COLORS } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -35,12 +36,6 @@ const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'pos
   offer: 'post.type.offer',
 };
 
-const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  photo: { bg: '#E3F2FD', text: '#1976D2' },
-  tip:   { bg: '#E8F5E9', text: '#388E3C' },
-  event: { bg: '#FFF3E0', text: '#F57C00' },
-  offer: { bg: '#FFEBEE', text: '#D32F2F' },
-};
 
 const PostItem = memo(function PostItem({
   post,
@@ -58,7 +53,7 @@ const PostItem = memo(function PostItem({
   onPlacePress: (placeId: string) => void;
 }): ReactElement {
   const theme = useTheme();
-  const badgeColors = TYPE_BADGE_COLORS[post.type] ?? { bg: '#E3F2FD', text: '#1976D2' };
+  const badgeColors = getTypeBadgeColors(post.type);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -338,50 +333,14 @@ export function DiscoverFeedScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  header: {
-    backgroundColor: '#1976D2',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  errorRow: {
-    backgroundColor: '#FFEBEE',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  errorText: {
-    color: '#C62828',
-    fontSize: 13,
-    textAlign: 'auto',
-    flex: 1,
-  },
-  retryBtn: {
-    backgroundColor: '#C62828',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  retryBtnText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  listContent: {
-    padding: 12,
-    paddingBottom: 80,
-  },
+  container: sharedStyles.container,
+  header: sharedStyles.header,
+  headerTitle: sharedStyles.headerTitle,
+  errorRow: { ...sharedStyles.errorRow, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  errorText: { ...sharedStyles.errorText, flex: 1 },
+  retryBtn: { backgroundColor: COLORS.error, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  retryBtnText: { color: COLORS.surface, fontSize: 13, fontWeight: '600' },
+  listContent: { padding: 12, paddingBottom: 80 },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 12,
@@ -404,17 +363,8 @@ const styles = StyleSheet.create({
     color: '#555',
     fontWeight: '500',
   },
-  typeBadge: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  typeText: {
-    fontSize: 12,
-    color: '#1976D2',
-    fontWeight: '600',
-  },
+  typeBadge: { backgroundColor: COLORS.primaryXLight, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
+  typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
   bodyText: {
     fontSize: 15,
     color: '#222',

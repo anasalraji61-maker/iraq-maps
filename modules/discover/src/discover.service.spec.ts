@@ -12,6 +12,18 @@ describe.skipIf(!process.env['DATABASE_URL'])('DiscoverService (integration)', (
   });
 });
 
+function makeSelectDb(rows: unknown[]) {
+  return {
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(rows),
+        }),
+      }),
+    }),
+  };
+}
+
 describe('DiscoverService (unit)', () => {
   const userId = 'user-1' as UserId;
 
@@ -64,13 +76,7 @@ describe('DiscoverService (unit)', () => {
     };
 
     const db = {
-      select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockPost]),
-          }),
-        }),
-      }),
+      ...makeSelectDb([mockPost]),
       insert: vi.fn().mockReturnValue({
         values: vi.fn().mockReturnValue({
           onConflictDoNothing: vi.fn().mockReturnValue({
@@ -110,15 +116,7 @@ describe('DiscoverService (unit)', () => {
       createdAt: now,
     };
 
-    const db = {
-      select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([mockPost]),
-          }),
-        }),
-      }),
-    } as unknown as import('@iraq-maps/db-kit').Db;
+    const db = makeSelectDb([mockPost]) as unknown as import('@iraq-maps/db-kit').Db;
 
     const svc = new DiscoverService(db);
     const result = await svc.deletePost(userId, 'post-1' as PostIdType);

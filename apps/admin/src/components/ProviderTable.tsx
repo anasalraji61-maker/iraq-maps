@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Provider } from '../api';
+import { thStyle, tdStyle, btnStyle } from './shared';
 
 interface Props {
   providers: Provider[];
@@ -27,33 +28,6 @@ const statusLabel: Record<string, string> = {
   suspended: 'موقوف',
 };
 
-const thStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  textAlign: 'right',
-  background: '#f5f5f5',
-  borderBottom: '2px solid #ddd',
-  fontWeight: 600,
-  fontSize: 14,
-  color: '#333',
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '10px 14px',
-  borderBottom: '1px solid #eee',
-  fontSize: 14,
-  color: '#222',
-};
-
-const btnStyle = (color: string): React.CSSProperties => ({
-  padding: '5px 12px',
-  border: 'none',
-  borderRadius: 4,
-  background: color,
-  color: '#fff',
-  cursor: 'pointer',
-  fontSize: 13,
-  marginInlineStart: 6,
-});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BASE_URL: string = ((import.meta as any).env?.VITE_API_URL as string | undefined) ?? 'http://localhost:3000';

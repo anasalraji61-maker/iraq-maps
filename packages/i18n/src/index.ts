@@ -8,6 +8,9 @@ export { normalizeArabic, toAsciiDigits } from './normalize';
 
 export type Messages = { [key: string]: string | Messages };
 
+/** Recursively produces all dot-separated leaf key paths of T (used in each feature's strings.ts). */
+export type NestedPaths<T> = { [K in keyof T & string]: T[K] extends string ? K : `${K}.${NestedPaths<T[K]>}` }[keyof T & string];
+
 const RTL: Record<Locale, boolean> = { ar: true, ckb: true, en: false };
 const LOCALES = Object.keys(RTL) as Locale[];
 // Explicit `nu-arab`: CLDR's bare `ar` now defaults to Latin digits; Iraq uses Arabic-Indic ones.

@@ -6,10 +6,9 @@ import en from './i18n/en.json';
 
 registerNamespace('map', { ar, ckb, en });
 
-type Paths<T> = { [K in keyof T & string]: T[K] extends string ? K : `${K}.${Paths<T[K]>}` }[keyof T & string];
 
 /** i18n `t` bound to the `map` namespace (named `t` for the no-literal-string rule); keys are checked against the Arabic catalog. */
-export const t = (key: Paths<typeof ar>, params?: Record<string, string | number>): string => translate(`map:${key}`, params);
+export const t = (key: NestedPaths<typeof ar>, params?: Record<string, string | number>): string => translate(`map:${key}`, params);
 
 /** First-strong isolate (FSI…PDI): a query, phone number, URL or OSM hours value keeps its own direction inside RTL text. */
 export const isolate = (text: string): string => `\u2068${text}\u2069`;

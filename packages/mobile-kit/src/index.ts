@@ -9,3 +9,5 @@ export { recentRoutes, type RecentRoute } from './recent-routes';
 export { uploadAsset } from './upload-asset';
 /** @public offline inquiry outbox (M4) */
 export { InquiryOutbox, type OutboxEntry } from './outbox';
+/** @public shared request helpers */
+export { expectStatus, ProblemError, useRequest } from './request';

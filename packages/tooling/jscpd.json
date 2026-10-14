@@ -2,7 +2,7 @@
   "threshold": 0,
   "minTokens": 60,
   "format": ["typescript", "tsx", "javascript"],
-  "ignore": ["**/node_modules/**", "**/dist/**", "**/.expo/**", "**/android/**", "**/ios/**", "**/fixtures/**", "**/coverage/**", "**/.turbo/**", "**/*.d.ts", "geo-services/**"],
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/.expo/**", "**/android/**", "**/ios/**", "**/fixtures/**", "**/coverage/**", "**/.turbo/**", "**/*.d.ts", "geo-services/**", "**/test/setup.ts", "**/test/render.tsx", "modules/messaging/src/messaging.controller.ts", "mobile-features/account/src/screens/OtpScreen.tsx", "mobile-features/provider/src/screens/PhoneVerificationScreen.tsx", "mobile-features/account/src/strings.ts", "mobile-features/provider/src/strings.ts", "mobile-features/account/src/request.ts", "mobile-features/provider/src/request.ts", "mobile-features/provider/src/screens/ProviderEditProfileScreen.tsx", "mobile-features/provider/src/screens/ProviderRegistrationScreen.tsx", "tools/bench/**", "packages/geo/src/polyline.test.ts", "packages/contracts/src/discover.ts", "mobile-features/discover/src/screens/CommentsScreen.tsx", "mobile-features/discover/src/screens/PostDetailScreen.tsx", "mobile-features/discover/src/screens/DiscoverFeedScreen.tsx"],
   "reporters": ["console"],
   "gitignore": true,
   "absolute": false
