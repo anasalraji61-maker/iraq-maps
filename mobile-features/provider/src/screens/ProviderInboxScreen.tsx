@@ -2,7 +2,9 @@ import { messagingTestIDs, type Inquiry } from '@iraq-maps/contracts';
 import { EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
+import { FlatList, I18nManager, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
+
+I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
 import { t } from '../strings';
 

@@ -129,7 +129,6 @@ export function CommentsScreen(): ReactElement {
           placeholderTextColor="#999"
           multiline
           maxLength={500}
-          textAlign="right"
         />
         <Pressable
           style={[styles.sendBtn, (!commentText.trim() || sending) && styles.sendBtnDisabled]}
