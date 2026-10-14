@@ -4,7 +4,8 @@
     "addPlace": "أضف مكاناً",
     "continue": "متابعة",
     "maxPlaces": "الحد الأقصى 5 أماكن",
-    "title": "رسالة جديدة"
+    "title": "رسالة جديدة",
+    "charCount": "{{count}}/500"
   },
   "confirm": {
     "title": "تأكيد الإرسال",
@@ -27,6 +28,8 @@
     "copy": "نسخ",
     "open": "فتح",
     "loadError": "خطأ في تحميل الطلب",
+    "whatsapp": "تواصل عبر واتساب",
+    "urlPreview": "افتح الرابط",
     "status": {
       "queued": "في الانتظار",
       "sent": "أُرسل",

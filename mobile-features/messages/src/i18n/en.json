@@ -4,7 +4,8 @@
     "addPlace": "Add a place",
     "continue": "Continue",
     "maxPlaces": "Maximum 5 places",
-    "title": "New message"
+    "title": "New message",
+    "charCount": "{{count}}/500"
   },
   "confirm": {
     "title": "Confirm send",
@@ -27,6 +28,8 @@
     "copy": "Copy",
     "open": "Open",
     "loadError": "Error loading request",
+    "whatsapp": "Contact via WhatsApp",
+    "urlPreview": "Open link",
     "status": {
       "queued": "Queued",
       "sent": "Sent",

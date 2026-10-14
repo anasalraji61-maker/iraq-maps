@@ -5,6 +5,7 @@ import { useState, type ReactElement } from 'react';
 import { View } from 'react-native';
 import { t } from '../strings';
 
+const MAX_CHARS = 500;
 const MAX_PLACES = 5;
 
 export function ComposeScreen(): ReactElement {
@@ -36,13 +37,19 @@ export function ComposeScreen(): ReactElement {
       <Text variant="title">{t('compose.title')}</Text>
       {error ? <Banner kind="error" message={error} /> : null}
       <TextField
+        autoFocus
         label={t('compose.title')}
         value={text}
         onChangeText={(v) => {
-          if (v.length <= 500) setText(v);
+          if (v.length <= MAX_CHARS) setText(v);
         }}
         placeholder={t('compose.placeholder')}
       />
+      <View style={{ alignItems: 'flex-end' }}>
+        <Text tone="muted" variant="caption">
+          {t('compose.charCount', { count: text.length })}
+        </Text>
+      </View>
       {placeIds.length > 0 ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {placeIds.map((id) => (
