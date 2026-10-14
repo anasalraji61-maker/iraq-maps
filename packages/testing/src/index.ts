@@ -6,3 +6,4 @@ export * from './fake-push-sender'; // M4
 export * from './media'; // M3
 export * from './providers'; // M3
 export * from './routing'; // M2
+export * from './fake-llm-client'; // M5
