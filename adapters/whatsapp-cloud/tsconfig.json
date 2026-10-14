@@ -1,0 +1,6 @@
+{
+  "extends": "@iraq-maps/tooling/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"]
+  }
+}
