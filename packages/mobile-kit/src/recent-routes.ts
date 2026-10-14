@@ -62,4 +62,10 @@ export const recentRoutes = {
     const filtered = prev.filter((r) => !(r.placeId === entry.placeId && r.mode === entry.mode));
     await save([entry, ...filtered].slice(0, MAX));
   },
+
+  /** Removes the route matching placeId+mode and persists the result. */
+  async remove(placeId: PlaceId, mode: TravelMode): Promise<void> {
+    const prev = await load();
+    await save(prev.filter((r) => !(r.placeId === placeId && r.mode === mode)));
+  },
 };

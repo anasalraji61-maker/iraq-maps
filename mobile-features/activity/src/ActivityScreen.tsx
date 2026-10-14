@@ -210,8 +210,8 @@ function RoutesTab(): ReactElement {
   useEffect(() => { void load(); }, [load]);
 
   const handleRemove = useCallback(async (item: RecentRoute) => {
-    // No remove API in recentRoutes yet — filter locally and update display
     setRoutes((prev) => prev.filter((r) => !(r.placeId === item.placeId && r.mode === item.mode)));
+    await recentRoutes.remove(item.placeId, item.mode);
   }, []);
 
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
