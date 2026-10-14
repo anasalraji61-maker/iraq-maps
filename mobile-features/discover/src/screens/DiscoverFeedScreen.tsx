@@ -163,7 +163,9 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api, cursor, hasMore, loadingMore]);
 
-  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Load once on mount. loadFeed recreates on every state change so adding it
+  // to deps would cause an infinite reload loop; mount-only is intentional.
+  useEffect(() => { void loadFeed(true); }, []);
 
   // Fetch place names for any post.placeId not yet loaded
   useEffect(() => {
