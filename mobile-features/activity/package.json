@@ -2,20 +2,32 @@
   "name": "@iraq-maps/feature-activity",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --max-warnings 0"
+    "lint": "eslint src --max-warnings 0",
+    "test": "jest"
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
-    "@iraq-maps/mobile-kit": "workspace:*",
-    "react": "18.3.1",
-    "react-native": "0.76.5"
+    "@iraq-maps/mobile-kit": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",
+    "@jest/globals": "^29.7.0",
+    "@react-native/jest-preset": "0.86.3",
+    "@testing-library/react-native": "^14.1.0",
+    "@types/react": "~19.2.2",
+    "jest": "^29.7.0",
+    "jest-expo": "~57.0.5",
     "typescript": "^5.7.3"
   }
 }
