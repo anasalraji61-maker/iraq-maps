@@ -9,6 +9,19 @@ export interface SentryReporterOptions {
   fallbackLogger?: Logger;
 }
 
+// Minimal shape we call on @sentry/node — avoids depending on its types.
+interface SentryLike {
+  init(opts: { dsn: string; environment?: string; release?: string }): void;
+  setUser(user: { id: string } | null): void;
+  captureException(err: unknown): void;
+  captureMessage(msg: string, level: string): void;
+  withScope(cb: (scope: ScopeLike) => void): void;
+}
+interface ScopeLike {
+  setUser(u: { id: string } | null): void;
+  setExtras(e: Record<string, unknown>): void;
+}
+
 /**
  * Creates an ErrorReporter backed by Sentry.
  *
@@ -23,10 +36,12 @@ export async function createSentryReporter(
   dsn: string,
   opts: SentryReporterOptions = {},
 ): Promise<ErrorReporter> {
-  let Sentry: typeof import('@sentry/node') | undefined;
+  let sentry: SentryLike | undefined;
 
   try {
-    Sentry = await import('@sentry/node');
+    // Dynamic import so @sentry/node stays optional.
+    const mod = await import('@sentry/node' as string) as unknown;
+    sentry = mod as SentryLike;
   } catch {
     const logger = opts.fallbackLogger ?? createLogger({ name: 'sentry-adapter', level: 'warn' });
     logger.warn(
@@ -37,7 +52,7 @@ export async function createSentryReporter(
     return logReporter(logger);
   }
 
-  Sentry.init({
+  sentry.init({
     dsn,
     environment: opts.environment ?? process.env['NODE_ENV'],
     release: opts.release,
@@ -49,27 +64,24 @@ export async function createSentryReporter(
     kind: 'sentry',
 
     captureException(err, context) {
-      Sentry!.withScope((scope) => {
+      sentry!.withScope((scope) => {
         if (currentUser) scope.setUser({ id: currentUser.id });
         if (context) scope.setExtras(context);
-        Sentry!.captureException(err);
+        sentry!.captureException(err);
       });
     },
 
     captureMessage(message, level = 'error', context) {
-      Sentry!.withScope((scope) => {
+      sentry!.withScope((scope) => {
         if (currentUser) scope.setUser({ id: currentUser.id });
         if (context) scope.setExtras(context);
-        Sentry!.captureMessage(
-          message,
-          level === 'warning' ? 'warning' : level,
-        );
+        sentry!.captureMessage(message, level === 'warning' ? 'warning' : level);
       });
     },
 
     setUser(user) {
       currentUser = user;
-      Sentry!.setUser(user ? { id: user.id } : null);
+      sentry!.setUser(user ? { id: user.id } : null);
     },
   };
 }
