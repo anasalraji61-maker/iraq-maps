@@ -3,12 +3,18 @@ import { Locale, UserId } from './common';
 import { mediaEventPayloads } from './media';
 import { providerEventPayloads } from './providers';
 
+export const messagingEventPayloads = {
+  'messaging.inquiry.received.v1': z.object({ inquiryId: z.string(), userId: UserId, placeIds: z.array(z.string()) }),
+  'messaging.reply.received.v1': z.object({ inquiryId: z.string(), replyId: z.string(), fromProviderId: z.string() }),
+} as const;
+
 /** Versioned domain events `<module>.<entity>.<verb>.v1`, published only through the outbox. */
 const eventPayloads = {
   'identity.user.registered.v1': z.object({ userId: UserId, locale: Locale }),
   'identity.user.deleted.v1': z.object({ userId: UserId }),
   ...providerEventPayloads, // M3
   ...mediaEventPayloads, // M3
+  ...messagingEventPayloads, // M4
 } as const;
 
 export type EventName = keyof typeof eventPayloads;

@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import type { DomainEvent, EventBus, EventHandler, EventName } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
@@ -13,6 +14,27 @@ export interface MessagingModuleOptions {
   channelAdapter?: unknown;
   /** Redis connection options for BullMQ. */
   redis?: { host: string; port: number };
+  /** Optional: provide an existing EventBus. If absent, an in-memory one is used. */
+  eventBus?: EventBus;
+}
+
+class InMemoryEventBus implements EventBus {
+  private readonly handlers = new Map<string, Set<EventHandler>>();
+
+  async publish(event: DomainEvent): Promise<void> {
+    const set = this.handlers.get(event.name);
+    if (set) {
+      for (const handler of set) {
+        await handler(event);
+      }
+    }
+  }
+
+  subscribe<N extends EventName>(name: N, handler: EventHandler<N>): () => void {
+    if (!this.handlers.has(name)) this.handlers.set(name, new Set());
+    this.handlers.get(name)!.add(handler as EventHandler);
+    return () => this.handlers.get(name)?.delete(handler as EventHandler);
+  }
 }
 
 /** Absolute path to this module's migrations (schema `messaging`). @public */
@@ -39,6 +61,7 @@ export function messagingModule(opts: MessagingModuleOptions): DynamicModule {
         useValue: opts.channelAdapter ?? new FakeMessagingChannel(),
       },
       { provide: 'MESSAGING_QUEUE', useValue: queue },
+      { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new InMemoryEventBus() },
       MessagingService,
     ],
     exports: [MessagingService],

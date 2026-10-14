@@ -1,4 +1,4 @@
-import type { ChannelAdapter, UserDataEraser } from '@iraq-maps/contracts';
+import type { ChannelAdapter, EventBus, UserDataEraser } from '@iraq-maps/contracts';
 import {
   type InquiryId,
   type MessagingChannelKind,
@@ -10,6 +10,7 @@ import type { Db } from '@iraq-maps/db-kit';
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 import { and, count, eq, gt, lt, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 import { deliveryTable, inquiryTable, providerOptOutTable, replyTable } from './schema';
 
 const DAILY_LIMIT = Number(process.env['MESSAGING_DAILY_LIMIT_PER_USER'] ?? 10);
@@ -22,6 +23,7 @@ export class MessagingService implements UserDataEraser {
     @Inject('MESSAGING_DB') private readonly db: Db,
     @Inject(PortTokens.MessagingChannelAdapter) private readonly channelAdapter: ChannelAdapter,
     @Inject('MESSAGING_QUEUE') private readonly queue: Queue,
+    @Inject(PortTokens.EventBus) private readonly eventBus: EventBus,
   ) {}
 
   async createInquiry(
@@ -90,6 +92,14 @@ export class MessagingService implements UserDataEraser {
       }
     }
 
+    // Publish domain event
+    await this.eventBus.publish({
+      id: randomUUID(),
+      name: 'messaging.inquiry.received.v1',
+      occurredAt: new Date().toISOString(),
+      payload: { inquiryId: inquiry.id, userId, placeIds: placeIds as string[] },
+    });
+
     return this.toInquiryShape(inquiry, deliveries);
   }
 
@@ -140,11 +150,21 @@ export class MessagingService implements UserDataEraser {
 
     if (!delivery[0]) throw new NotFoundException({ code: 'not_found' });
 
-    await this.db.insert(replyTable).values({ deliveryId: delivery[0].id, fromProvider: true, text });
+    const [reply] = await this.db.insert(replyTable).values({ deliveryId: delivery[0].id, fromProvider: true, text }).returning();
     await this.db
       .update(deliveryTable)
       .set({ status: 'replied', updatedAt: new Date() })
       .where(eq(deliveryTable.id, delivery[0].id));
+
+    // Publish domain event
+    if (reply) {
+      await this.eventBus.publish({
+        id: randomUUID(),
+        name: 'messaging.reply.received.v1',
+        occurredAt: new Date().toISOString(),
+        payload: { inquiryId, replyId: reply.id, fromProviderId: providerId },
+      });
+    }
   }
 
   async providerOptOut(providerId: string) {
@@ -222,8 +242,18 @@ export class MessagingService implements UserDataEraser {
       .limit(1);
 
     if (delivery) {
-      await this.db.insert(replyTable).values({ deliveryId: delivery.id, fromProvider: true, text: msg.text });
+      const [reply] = await this.db.insert(replyTable).values({ deliveryId: delivery.id, fromProvider: true, text: msg.text }).returning();
       await this.db.update(deliveryTable).set({ status: 'replied', updatedAt: new Date() }).where(eq(deliveryTable.id, delivery.id));
+
+      // Publish domain event
+      if (reply) {
+        await this.eventBus.publish({
+          id: randomUUID(),
+          name: 'messaging.reply.received.v1',
+          occurredAt: new Date().toISOString(),
+          payload: { inquiryId: delivery.inquiryId, replyId: reply.id, fromProviderId: msg.from },
+        });
+      }
     }
   }
 

@@ -32,8 +32,9 @@ describe.skipIf(!TEST_DB_URL)('MessagingService', () => {
 
     fakeQueue = { add: vi.fn().mockResolvedValue(undefined) } as unknown as Queue;
     const channel = new FakeMessagingChannel();
+    const fakeEventBus = { publish: vi.fn().mockResolvedValue(undefined), subscribe: vi.fn() };
 
-    svc = new MessagingService(testDb.db as never, channel, fakeQueue);
+    svc = new MessagingService(testDb.db as never, channel, fakeQueue, fakeEventBus as never);
   });
 
   const uid = (n = 1) => `00000000-0000-0000-0000-00000000000${n}` as UserId;
