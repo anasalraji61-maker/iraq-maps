@@ -48,3 +48,33 @@ Every database needs `postgis` and `pg_trgm` in schema `public`. Module migratio
 as in the CI service containers, whose `postgis/postgis` image has PostGIS but not pg_trgm). Otherwise it stops with
 an error that names the missing extension. **Production databases must have both extensions provisioned by their
 admin before the first migration**, because the application role is not a superuser.
+
+## Per-schema DB roles (production hardening)
+
+`infra/db-roles.sql` creates the following roles (run once as superuser before first migration):
+
+| Role | Privileges | Used by |
+|---|---|---|
+| `iraqmaps_app` | `USAGE` on all schemas + `SELECT/INSERT/UPDATE/DELETE` on all tables | Running API (`DATABASE_URL`) |
+| `<schema>_migrator` | `ALL` on schema + default privileges on tables/sequences | `drizzle-kit migrate` per module |
+
+Schemas covered: `activity`, `assistant`, `discover`, `identity`, `media`, `messaging`, `notifications`, `places`, `providers`.
+
+### Applying in staging / production
+
+```sh
+# 1. Run as superuser once
+psql $ADMIN_DATABASE_URL -f infra/db-roles.sql
+
+# 2. Create login users (one per service; passwords from secrets manager)
+psql $ADMIN_DATABASE_URL -c "CREATE USER iraqmaps_api PASSWORD '...' IN ROLE iraqmaps_app;"
+psql $ADMIN_DATABASE_URL -c "CREATE USER iraqmaps_migrate_identity PASSWORD '...' IN ROLE identity_migrator;"
+# (repeat per schema)
+
+# 3. Set DATABASE_URL to iraqmaps_api credentials
+# 4. Set DB_MIGRATE_URL_<SCHEMA> to the per-schema migrator credentials
+```
+
+### Local development
+
+Local dev uses the `iraqmaps` superuser role for simplicity. The per-schema migrator split is a production concern.
