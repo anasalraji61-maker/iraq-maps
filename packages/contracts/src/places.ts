@@ -78,6 +78,19 @@ export const PlaceDetails = PlaceSummary.omit({ distanceM: true }).extend({
 });
 export type PlaceDetails = z.infer<typeof PlaceDetails>;
 
+/** Autocomplete suggestions (names only, no full details).
+ * @public M1 extension */
+export const SuggestionsQuery = z.object({
+  q: z.string().trim().min(1).max(100).regex(/^[^\p{Cc}]*$/u),
+  city: CityId,
+  lang: Locale.default('ar'),
+});
+export type SuggestionsQuery = z.infer<typeof SuggestionsQuery>;
+
+/** @public M1 extension */
+export const SuggestionsResult = z.object({ items: z.array(z.object({ id: PlaceId, name: z.string() })) });
+export type SuggestionsResult = z.infer<typeof SuggestionsResult>;
+
 /** Root-relative URLs (`/v1/...`) are resolved by the client against its API base URL. */
 const origin = '(https?://[^/\\s]+)?';
 /** @public frozen contract (M1) */
@@ -146,6 +159,8 @@ export const placesContract = c.router(
       pathParams: z.object({ id: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/).pipe(PlaceId) }),
       responses: { 200: PlaceDetails, 400: Problem, 404: Problem },
     },
+    /** Autocomplete suggestions: names only, no full details. Limit 5, fast trgm only. */
+    suggestions: { method: 'GET', path: '/search/suggestions', query: SuggestionsQuery, responses: { 200: SuggestionsResult, 400: Problem, 429: Problem } },
   },
   { pathPrefix: '/v1', strictStatusCodes: true },
 );

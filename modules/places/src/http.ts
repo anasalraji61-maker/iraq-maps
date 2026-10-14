@@ -74,11 +74,20 @@ export class PlacesController {
   places(@Req() req: { ip: string }) {
     const { places, limiter } = this.internals;
     return tsRestHandler(placesContract, {
-      search: async ({ query }) => (limiter.allow(req.ip) ? { status: 200, body: { items: await places.search(query) } } : rateLimited),
+      search: async ({ query }) => {
+        if (!limiter.allow(req.ip)) return rateLimited;
+        if (!(await places.hasCity(query.city))) return problem(400, 'city_not_found', 'Unknown city');
+        return { status: 200, body: { items: await places.search(query) } };
+      },
       nearby: async ({ query }) => (limiter.allow(req.ip) ? { status: 200, body: { items: await places.nearby(query) } } : rateLimited),
       get: async ({ params }) => {
         const place = await places.getById(params.id);
         return place ? { status: 200, body: place } : problem(404, 'place_not_found', 'No such place');
+      },
+      suggestions: async ({ query }) => {
+        if (!limiter.allow(req.ip)) return rateLimited;
+        if (!(await places.hasCity(query.city))) return problem(400, 'city_not_found', 'Unknown city');
+        return { status: 200, body: { items: await places.suggestions(query) } };
       },
     });
   }

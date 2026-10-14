@@ -16,6 +16,7 @@ import {
   type PlacesQueryPort,
   type PlaceSummary,
   type SearchQuery,
+  type SuggestionsQuery,
   type UserDataEraser,
   type UserId,
 } from '@iraq-maps/contracts';
@@ -116,6 +117,14 @@ export class FakePlacesQueryPort implements PlacesQueryPort {
       .sort((a, b) => a.d - b.d)
       .slice(0, q.limit)
       .map((h) => this.summary(h.r, h.d));
+  }
+
+  async suggestions(q: SuggestionsQuery): Promise<Array<{ id: PlaceId; name: string }>> {
+    const needle = normalizeArabic(q.q).toLowerCase();
+    return this.inCity(q.city)
+      .filter((r) => Object.values(r.names).some((n) => normalizeArabic(n).toLowerCase().includes(needle)))
+      .slice(0, 5)
+      .map((r) => ({ id: r.id as PlaceId, name: (r.names as Record<string, string>).name ?? (r.names as Record<string, string>).ar ?? r.id }));
   }
 
   private inCity(city: CityId): Row[] {

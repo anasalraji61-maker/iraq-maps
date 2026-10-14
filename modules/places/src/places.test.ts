@@ -148,6 +148,20 @@ describe('HTTP', () => {
       expect((await get(`/v1/search?q=${q}&city=testville`)).statusCode, q).toBe(400);
     expect((await get('/v1/search?q=a&city=Bad_City')).statusCode).toBe(400);
     expect((await get('/v1/search?q=a&city=testville&near=500,33')).statusCode).toBe(400);
+    // Valid-format city not in the DB → 400 city_not_found.
+    const missing = await get('/v1/search?q=a&city=no-such-city');
+    expect(missing.statusCode).toBe(400);
+    expect(missing.json().code).toBe('city_not_found');
+  });
+
+  it('returns suggestions for autocomplete and 400 for unknown city', async () => {
+    const res = await get(`/v1/search/suggestions?q=${encodeURIComponent('كرخ')}&city=testville`);
+    expect(res.statusCode).toBe(200);
+    expect(res.json().items.length).toBeGreaterThanOrEqual(1);
+    expect(res.json().items[0]).toMatchObject({ id: expect.any(String), name: expect.any(String) });
+    const bad = await get('/v1/search/suggestions?q=a&city=no-such-city');
+    expect(bad.statusCode).toBe(400);
+    expect(bad.json().code).toBe('city_not_found');
   });
 
   it('serves place details, a 404 Problem for a missing id, and nearby', async () => {

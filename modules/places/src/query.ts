@@ -8,6 +8,7 @@ import {
   type PlacesQueryPort,
   type PlaceSummary,
   type SearchQuery,
+  type SuggestionsQuery,
 } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { normalizeArabic } from '@iraq-maps/i18n';
@@ -34,10 +35,12 @@ const contacts = PlaceDetails.shape.osmContacts.shape;
 const valid = (schema: z.ZodTypeAny, value: string | null) => (value !== null && schema.safeParse(value).success ? value : undefined);
 
 /**
- * Ranking: trigram word similarity of the normalized query (0..1), plus up to 0.3 for proximity to `near`
- * (0.3 at 0 m, 0.11 at 3 km, ~0 beyond 10 km), plus a small kind weight (place, then street, then area).
+ * Ranking: max of similarity() and word_similarity() of the normalized query (0..1),
+ * plus up to 0.3 for proximity to `near` (0.3 at 0 m, 0.11 at 3 km, ~0 beyond 10 km),
+ * plus a small kind weight (place, then street, then area),
+ * plus a 0.05 boost for high-utility categories (food, health).
  */
-const RANK = sql`sim + CASE kind WHEN 'place' THEN 0.04 WHEN 'street' THEN 0.02 ELSE 0 END + COALESCE(0.3 * exp(-distance_m / 3000), 0)`;
+const RANK = sql`sim + CASE kind WHEN 'place' THEN 0.04 WHEN 'street' THEN 0.02 ELSE 0 END + COALESCE(0.3 * exp(-distance_m / 3000), 0) + CASE category WHEN 'food' THEN 0.05 WHEN 'health' THEN 0.05 ELSE 0 END`;
 
 /** PlacesQueryPort over the places.osm_features table (pg_trgm + PostGIS); every value reaches SQL as a bind parameter. */
 export class PgPlaces implements PlacesQueryPort {
@@ -46,10 +49,13 @@ export class PgPlaces implements PlacesQueryPort {
   async search({ q, city, near, limit }: SearchQuery): Promise<PlaceSummary[]> {
     const needle = normalizeArabic(q);
     if (!needle) return [];
+    const dist = near ? sql`ST_Distance(location, ${point(near)})` : sql`NULL::float8`;
+    // Use GREATEST(similarity, word_similarity) so partial-word matches score well.
+    // similarity() threshold 0.2 catches loose matches; <% (word_similarity) keeps trigram index use.
     const { rows } = await this.db.execute<Row>(sql`
       SELECT * FROM (
-        ${select(near ? sql`ST_Distance(location, ${point(near)})` : sql`NULL::float8`)}, word_similarity(${needle}, search_text) AS sim
-        FROM places.osm_features WHERE city_id = ${city} AND ${needle} <% search_text
+        ${select(dist)}, GREATEST(similarity(${needle}, search_text), word_similarity(${needle}, search_text)) AS sim
+        FROM places.osm_features WHERE city_id = ${city} AND (${needle} <% search_text OR similarity(${needle}, search_text) > 0.2)
       ) AS hits
       ORDER BY ${RANK} DESC, id LIMIT ${limit}`);
     return rows.map(summary);
@@ -76,6 +82,17 @@ export class PgPlaces implements PlacesQueryPort {
       source: 'osm',
       attribution: OSM_ATTRIBUTION,
     };
+  }
+
+  async suggestions({ q, city }: SuggestionsQuery): Promise<Array<{ id: PlaceId; name: string }>> {
+    const needle = normalizeArabic(q);
+    if (!needle) return [];
+    type SugRow = { id: PlaceId; names: PlaceSummary['names'] };
+    const { rows } = await this.db.execute<SugRow>(sql`
+      SELECT id, names FROM places.osm_features
+      WHERE city_id = ${city} AND ${needle} <% search_text
+      ORDER BY word_similarity(${needle}, search_text) DESC, id LIMIT 5`);
+    return rows.map((r) => ({ id: r.id, name: (r.names as Record<string, string>).name ?? (r.names as Record<string, string>).ar ?? r.id }));
   }
 
   async hasCity(id: string): Promise<boolean> {

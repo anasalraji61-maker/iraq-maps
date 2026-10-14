@@ -2,7 +2,7 @@ import type { IraqiPhone, Locale, PlaceId, Role, UserId } from './common';
 import type { PlaceInsights } from './insights';
 import type { DomainEvent, EventName } from './events';
 import type { MessagingChannelKind } from './messaging';
-import type { NearbyQuery, PlaceDetails, PlaceSummary, SearchQuery } from './places';
+import type { NearbyQuery, PlaceDetails, PlaceSummary, SearchQuery, SuggestionsQuery } from './places';
 
 /** DI tokens: modules provide ports under these, consumers inject them, nobody imports another module. */
 export const PortTokens = {
@@ -49,6 +49,8 @@ export interface PlacesQueryPort {
   getById(id: PlaceId): Promise<PlaceDetails | null>;
   /** Kind `place` only, within query.radiusM of query.near, nearest first. */
   nearby(query: NearbyQuery): Promise<PlaceSummary[]>;
+  /** Fast autocomplete: names only, limit 5, trgm only (no ranking). */
+  suggestions(query: SuggestionsQuery): Promise<Array<{ id: PlaceId; name: string }>>;
 }
 
 export interface OtpSender {
