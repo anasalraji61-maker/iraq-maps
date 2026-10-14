@@ -4,7 +4,7 @@ import { captureLogs } from '@iraq-maps/observability';
 import { FakeOtpSender, identityTestEnv, randomIp, randomPhone } from '@iraq-maps/testing';
 import type { AuthenticatedRequest } from '@iraq-maps/identity';
 import { Controller, Get, Req } from '@nestjs/common';
-import { afterAll, beforeAll, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { apiConfig, createApp, moduleMigrations } from './app';
 
 const MARKER = 'Secret-Name-Marker';
@@ -22,6 +22,7 @@ class ProtectedDummy {
   }
 }
 
+describe.skipIf(!process.env['DATABASE_URL'])('API integration', () => {
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
 const delivered: DomainEvent<'identity.user.registered.v1'>[] = [];
@@ -112,12 +113,6 @@ it('sends nosniff on every answer, and answers a bad URL or an over-long path pa
   }
 });
 
-it('refuses TRUST_PROXY=true in production (a spoofable X-Forwarded-For defeats the per-IP OTP limit)', () => {
-  const env = { APP_ENV: 'production', DATABASE_URL: 'postgres://db/x', REDIS_URL: 'redis://redis' };
-  expect(() => apiConfig({ ...env, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);
-  expect(apiConfig({ ...env, TRUST_PROXY: '1' }).TRUST_PROXY).toBe('1');
-});
-
 it('never logs error messages or request data', async () => {
   const { headers } = await login();
   const patch = await app.inject({ method: 'PATCH', url: '/v1/me', headers, payload: { name: `Zainab\u0000${MARKER}` } });
@@ -126,4 +121,11 @@ it('never logs error messages or request data', async () => {
   expect([remove.statusCode, remove.json()]).toEqual([500, { type: 'about:blank', title: 'Internal server error', status: 500, code: 'internal' }]);
   expect(logs.records).toContainEqual(expect.objectContaining({ errorName: 'Error', pgCode: '22021', route: '/v1/me', msg: 'unhandled error' }));
   expect(logs.text()).not.toContain(MARKER);
+});
+}); // describe.skipIf DATABASE_URL
+
+it('refuses TRUST_PROXY=true in production (a spoofable X-Forwarded-For defeats the per-IP OTP limit)', () => {
+  const env = { APP_ENV: 'production', DATABASE_URL: 'postgres://db/x', REDIS_URL: 'redis://redis' };
+  expect(() => apiConfig({ ...env, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);
+  expect(apiConfig({ ...env, TRUST_PROXY: '1' }).TRUST_PROXY).toBe('1');
 });
