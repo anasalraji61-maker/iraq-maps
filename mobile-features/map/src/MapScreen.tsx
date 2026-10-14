@@ -1,4 +1,5 @@
 import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceSummary } from '@iraq-maps/contracts';
+import { PlaceMarkerSheet } from './components/PlaceMarkerSheet';
 import { formatIraqiAddress } from '@iraq-maps/geo';
 import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
@@ -86,6 +87,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [mapMode, setMapMode] = useState<MapMode>('street');
   const baseLayer = useMapStyle(mapMode);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
+  /** The place shown in the compact bottom sheet after tapping a map marker. */
+  const [sheetPlace, setSheetPlace] = useState<PlaceSummary | null>(null);
   // Handle deep-link focusPlaceId: fetch place and move camera.
   useEffect(() => {
     if (!focusPlaceId) return;
@@ -151,10 +154,18 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     return sections;
   }, [results]);
 
-  const open = (placeId: string) => {
+  /** Navigate to full place details (from sheet or search list). */
+  const openDetails = (placeId: string) => {
     setSelectedPlaceId(placeId);
     addRecent(q);
     router.push(href('place', { placeId }));
+  };
+
+  /** Show compact bottom sheet when a map marker is tapped; navigate when tapped from search list. */
+  const openFromMarker = (placeId: string) => {
+    const place = results.find((p) => p.id === placeId) ?? null;
+    setSelectedPlaceId(placeId);
+    setSheetPlace(place);
   };
 
   /** User taps a suggestion chip: promote to full search with that name. */
@@ -207,7 +218,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             lang={mapLang}
             camera={camera}
             markers={markers}
-            onMarkerPress={open}
+            onMarkerPress={openFromMarker}
             showUserLocation={located}
             onCameraChanged={setNear}
             baseLayer={baseLayer}
@@ -316,7 +327,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                   area={place.area ? pickName(place.area, mapLang) : undefined}
                   distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
                   source={t('source.osm')}
-                  onPress={() => open(place.id)}
+                  onPress={() => openDetails(place.id)}
                 />
               );
             }}
@@ -335,7 +346,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             });
           }}
         />
-        {selectedPlaceId ? (
+        {selectedPlaceId && !sheetPlace ? (
           <Button
             label={t('actions.directions')}
             onPress={() => router.push(href('navigation', { placeId: selectedPlaceId }))}
@@ -362,6 +373,23 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           />
         ))}
       </Sheet>
+      {sheetPlace ? (
+        <PlaceMarkerSheet
+          place={sheetPlace}
+          name={pickName(sheetPlace.names, mapLang)}
+          icon={categoryIcon(sheetPlace)}
+          category={sheetPlace.category ? t(`categories.${sheetPlace.category}`) : undefined}
+          onViewDetails={() => {
+            setSheetPlace(null);
+            openDetails(sheetPlace.id);
+          }}
+          onDirections={() => {
+            setSheetPlace(null);
+            router.push(href('navigation', { placeId: sheetPlace.id }));
+          }}
+          onDismiss={() => setSheetPlace(null)}
+        />
+      ) : null}
     </View>
   );
 }

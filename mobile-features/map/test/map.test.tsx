@@ -104,8 +104,10 @@ describe('search', () => {
     expect(second).toHaveAccessibleName(`📍 شارع القلعة ٣٥٠ م شارع ${t('map:source.osm')}`);
     await fireEvent.press(first!);
     expect(router.push).toHaveBeenLastCalledWith('/place/n1001');
-    // The results are markers too, and a marker opens its place.
+    // Tapping a marker opens the compact bottom sheet; pressing "View Details" then navigates.
     await fireEvent.press(view.getByTestId(markerTestID('w2002')));
+    // Sheet appeared — press "View Details" to navigate.
+    await fireEvent.press(view.getByText(t('map:markerSheet.viewDetails')));
     expect(router.push).toHaveBeenLastCalledWith('/place/w2002');
   });
 

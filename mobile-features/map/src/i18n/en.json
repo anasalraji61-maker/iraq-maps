@@ -93,5 +93,10 @@
   },
   "satellite": {
     "label": "Satellite"
+  },
+  "markerSheet": {
+    "viewDetails": "View Details",
+    "directions": "Get Directions",
+    "dismiss": "Dismiss"
   }
 }

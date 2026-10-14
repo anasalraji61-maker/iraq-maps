@@ -93,5 +93,10 @@
   },
   "satellite": {
     "label": "ماهوارە"
+  },
+  "markerSheet": {
+    "viewDetails": "بینینی وردەکاریەکان",
+    "directions": "ئاراستەی بۆ",
+    "dismiss": "داخستن"
   }
 }

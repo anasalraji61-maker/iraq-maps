@@ -93,5 +93,10 @@
   },
   "satellite": {
     "label": "القمر الصناعي"
+  },
+  "markerSheet": {
+    "viewDetails": "عرض التفاصيل",
+    "directions": "الطريق إليه",
+    "dismiss": "إغلاق"
   }
 }
