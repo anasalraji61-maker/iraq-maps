@@ -1,3 +1,4 @@
+export * from './assistant'; // M5
 export * from './common';
 export * from './events';
 export * from './geo-data';

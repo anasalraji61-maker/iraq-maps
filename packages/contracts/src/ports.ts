@@ -16,6 +16,7 @@ export const PortTokens = {
   ObjectStorage: 'port:ObjectStorage', // M3
   MessagingChannelAdapter: 'port:MessagingChannelAdapter', // M4
   PushSender: 'port:PushSender', // M4
+  LlmClient: 'ports:llm_client', // M5
 } as const;
 
 export interface Clock {
@@ -90,4 +91,20 @@ export interface ChannelAdapter {
 /** PushSenderPort — abstracts FCM and other push providers. */
 export interface PushSender {
   send(token: string, notification: { title: string; body: string; data?: Record<string, string> }): Promise<void>;
+}
+
+// ── M5 port interfaces ──────────────────────────────────────────────────────
+
+/** LlmClient — abstracts the Claude API (and any future LLM) for the assistant module. */
+export interface LlmClient {
+  chat(params: {
+    systemPrompt: string;
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    tools?: Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>;
+    maxTokens?: number;
+  }): Promise<{
+    content: string;
+    toolCalls?: Array<{ name: string; input: Record<string, unknown> }>;
+    stopReason: 'end_turn' | 'tool_use' | 'max_tokens';
+  }>;
 }

@@ -2,6 +2,14 @@ import { satelliteTestIDs } from './imagery';
 import { providerTestIDs } from './providers';
 import { navigationTestIDs } from './routing';
 
+/** M5: assistant testIDs shared by RNTL tests and Maestro flows. */
+export const assistantTestIDs = {
+  chatInput: 'assistant.chat.input',
+  sendButton: 'assistant.chat.send',
+  messageItem: (idx: number) => `assistant.message.${idx}`,
+  composeDeepLink: 'assistant.compose.deeplink',
+} as const;
+
 /** M4: messaging testIDs shared by RNTL tests and Maestro flows. */
 export const messagingTestIDs = {
   composeButton: 'messaging.compose',
@@ -41,5 +49,6 @@ export const testIDs = {
   satellite: satelliteTestIDs, // M2
   provider: providerTestIDs, // M3
   messaging: messagingTestIDs, // M4
+  assistant: assistantTestIDs, // M5
   dev: { serverUrlInput: 'dev.serverUrl.input', serverUrlSave: 'dev.serverUrl.save' },
 } as const;
