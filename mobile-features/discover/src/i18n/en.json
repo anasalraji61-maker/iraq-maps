@@ -1,6 +1,7 @@
 {
   "feed": {
     "title": "Discover",
+    "loading": "Loading...",
     "empty": "No posts yet",
     "loadError": "Failed to load posts, try again",
     "loadMore": "Load more"

@@ -18,6 +18,13 @@ import { t } from '../strings';
 
 I18nManager.forceRTL(true);
 
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    return `${(n / 1000).toFixed(n % 1000 < 100 ? 0 : 1)}k`;
+  }
+  return String(n);
+}
+
 const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'post.type.event' | 'post.type.offer'> = {
   photo: 'post.type.photo',
   tip: 'post.type.tip',
@@ -74,7 +81,7 @@ function PostItem({
           onPress={() => onLike(post)}
         >
           <Text style={[styles.actionBtnText, post.isLikedByMe && styles.actionBtnTextActive]}>
-            {t('post.like')} {post.likeCount}
+            {t('post.like')} {formatCount(post.likeCount)}
           </Text>
         </Pressable>
         <Pressable
@@ -83,7 +90,7 @@ function PostItem({
           onPress={() => onComment(post.id)}
         >
           <Text style={styles.actionBtnText}>
-            {t('post.comment')} {post.commentCount}
+            {t('post.comment')} {formatCount(post.commentCount)}
           </Text>
         </Pressable>
         <Pressable style={styles.actionBtn} onPress={handleShare}>
@@ -101,6 +108,7 @@ export function DiscoverFeedScreen(): ReactElement {
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -126,6 +134,7 @@ export function DiscoverFeedScreen(): ReactElement {
     } catch {
       setError(t('feed.loadError'));
     } finally {
+      setLoading(false);
       setRefreshing(false);
       setLoadingMore(false);
     }
@@ -223,14 +232,19 @@ export function DiscoverFeedScreen(): ReactElement {
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.3}
         ListEmptyComponent={
-          !refreshing ? (
+          loading ? (
+            <View style={styles.emptyContainer}>
+              <ActivityIndicator size="large" color="#1976D2" style={styles.loadingIndicator} />
+              <Text style={styles.emptyText}>{t('feed.loading')}</Text>
+            </View>
+          ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('feed.empty')}</Text>
               <Pressable style={styles.emptyCreateBtn} onPress={handleCreate}>
                 <Text style={styles.emptyCreateBtnText}>{t('post.create')}</Text>
               </Pressable>
             </View>
-          ) : null
+          )
         }
         ListFooterComponent={
           loadingMore ? <ActivityIndicator style={styles.loadingMore} size="small" color="#1976D2" /> : null
@@ -356,6 +370,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  loadingIndicator: {
+    marginBottom: 16,
   },
   emptyText: {
     fontSize: 15,

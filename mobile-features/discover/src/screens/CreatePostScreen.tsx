@@ -5,6 +5,7 @@ import { useState, useCallback, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   I18nManager,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -102,6 +103,7 @@ export function CreatePostScreen(): ReactElement {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('create.title')}</Text>
       </View>
+      <Pressable style={styles.dismissArea} onPress={Keyboard.dismiss} accessible={false}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {error ? (
           <View style={styles.errorRow}>
@@ -182,6 +184,7 @@ export function CreatePostScreen(): ReactElement {
           )}
         </Pressable>
       </ScrollView>
+      </Pressable>
     </KeyboardAvoidingView>
   );
 }
@@ -201,6 +204,9 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
+  },
+  dismissArea: {
+    flex: 1,
   },
   content: {
     padding: 16,
