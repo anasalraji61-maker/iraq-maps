@@ -15,7 +15,8 @@
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/api-client": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
-    "@iraq-maps/mobile-kit": "workspace:*"
+    "@iraq-maps/mobile-kit": "workspace:*",
+    "@iraq-maps/ui": "workspace:*"
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",

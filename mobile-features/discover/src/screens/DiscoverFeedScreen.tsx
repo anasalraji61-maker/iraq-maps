@@ -1,5 +1,6 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
+import { useTheme } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
@@ -56,6 +57,7 @@ const PostItem = memo(function PostItem({
   onComment: (postId: string) => void;
   onPlacePress: (placeId: string) => void;
 }): ReactElement {
+  const theme = useTheme();
   const badgeColors = TYPE_BADGE_COLORS[post.type] ?? { bg: '#E3F2FD', text: '#1976D2' };
 
   const handleShare = useCallback(() => {
@@ -63,9 +65,9 @@ const PostItem = memo(function PostItem({
   }, [post.body]);
 
   return (
-    <View testID={discoverTestIDs.feedItem(post.id)} style={styles.card}>
+    <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: theme.surface }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.authorText}>{post.authorId.slice(0, 8)}</Text>
+        <Text style={[styles.authorText, { color: theme.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
         <View
           style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
           accessibilityRole="text"
@@ -76,7 +78,7 @@ const PostItem = memo(function PostItem({
           </Text>
         </View>
       </View>
-      <Text style={styles.bodyText}>{post.body}</Text>
+      <Text style={[styles.bodyText, { color: theme.text }]}>{post.body}</Text>
       {firstImageUrl ? (
         <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
       ) : null}
@@ -93,27 +95,27 @@ const PostItem = memo(function PostItem({
       <View style={styles.actions}>
         <Pressable
           testID={discoverTestIDs.likeButton(post.id)}
-          style={[styles.actionBtn, post.isLikedByMe && styles.actionBtnActive]}
+          style={[styles.actionBtn, { backgroundColor: theme.border }, post.isLikedByMe && styles.actionBtnActive]}
           onPress={() => onLike(post)}
           accessibilityRole="button"
           accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
         >
-          <Text style={[styles.actionBtnText, post.isLikedByMe && styles.actionBtnTextActive]}>
+          <Text style={[styles.actionBtnText, { color: theme.textSecondary }, post.isLikedByMe && styles.actionBtnTextActive]}>
             {t('post.like')} {formatCount(post.likeCount)}
           </Text>
         </Pressable>
         <Pressable
           testID={discoverTestIDs.commentButton(post.id)}
-          style={styles.actionBtn}
+          style={[styles.actionBtn, { backgroundColor: theme.border }]}
           onPress={() => onComment(post.id)}
           accessibilityRole="button"
         >
-          <Text style={styles.actionBtnText}>
+          <Text style={[styles.actionBtnText, { color: theme.textSecondary }]}>
             {t('post.comment')} {formatCount(post.commentCount)}
           </Text>
         </Pressable>
-        <Pressable style={styles.actionBtn} onPress={handleShare} accessibilityRole="button">
-          <Text style={styles.actionBtnText}>{t('post.share')}</Text>
+        <Pressable style={[styles.actionBtn, { backgroundColor: theme.border }]} onPress={handleShare} accessibilityRole="button">
+          <Text style={[styles.actionBtnText, { color: theme.textSecondary }]}>{t('post.share')}</Text>
         </Pressable>
       </View>
     </View>
@@ -254,14 +256,16 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push('/discover/create');
   }, [router]);
 
+  const theme = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('feed.title')}</Text>
       </View>
       {error ? (
-        <View style={styles.errorRow}>
-          <Text style={styles.errorText}>{error}</Text>
+        <View style={[styles.errorRow, { backgroundColor: theme.surface }]}>
+          <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
         </View>
       ) : null}
       <FlatList
