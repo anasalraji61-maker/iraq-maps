@@ -4,7 +4,7 @@
   "private": true,
   "description": "Vector tiles (Planetiler, Java 21 + Maven) and glyphs (fontnik) for one city. pnpm scripts wrap Maven so turbo can run them.",
   "scripts": {
-    "test": "sh scripts/planetiler.sh && mvn -q -B test",
+    "test": "sh scripts/test.sh",
     "tiles": "sh scripts/tiles.sh"
   },
   "dependencies": {
