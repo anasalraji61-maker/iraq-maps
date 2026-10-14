@@ -253,3 +253,6 @@ No new events.
 | 2026-10-14 | fix(activity): add missing tsconfig.json to fix typecheck | — | — |
 | 2026-10-14 | post-M7 polish: accessibility labels, dark mode tokens, map category icons | `7521174`, `fc77455`, `55b8993` | — |
 | 2026-10-14 | fix(ui,map): composite accessibility label for PlaceSummaryCard (test fixes) | `1c71715` | — |
+| 2026-10-14 | docs(milestone): log accessibility, dark mode, map UX commits | `6b0f23a` | — |
+| 2026-10-14 | feat(shell,discover,map): offline banner and network error states | `66a71b4` | — |
+| 2026-10-14 | feat(api,assistant): health check DB ping, rate limit headers, request ID tracing | `185f947` | — |
