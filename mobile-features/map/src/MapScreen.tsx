@@ -4,8 +4,8 @@ import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-k
 import { href, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
-import { useMemo, useState, type ReactElement } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SatelliteToggle } from './components/SatelliteToggle';
 import { useMapStyle, type MapMode } from './hooks/useMapStyle';
@@ -16,15 +16,18 @@ const SEARCH_DELAY_MS = 300;
 const LOCATED_ZOOM = 15;
 const NO_RESULTS: PlaceSummary[] = [];
 
+const BAGHDAD_CENTER: LngLat = [44.4009, 33.3152];
+
 /** The map tab: the first city from GET /v1/cities, with search, locate-me and the map label language. */
 export function MapScreen(): ReactElement {
   const api = useApi();
+  const { focusPlaceId } = useLocalSearchParams<{ focusPlaceId?: string }>();
   const cities = useLatest('cities', async () => {
     const [city] = ok(await api.cities.list()).items;
     if (!city) throw new Error('no city');
     return city;
   });
-  if (cities.state?.status === 'ready') return <CityMap city={cities.state.data} />;
+  if (cities.state?.status === 'ready') return <CityMap city={cities.state.data} focusPlaceId={focusPlaceId} />;
   return (
     <Screen>
       <LoadStatus {...cities} />
@@ -32,7 +35,7 @@ export function MapScreen(): ReactElement {
   );
 }
 
-function CityMap({ city }: { city: CityDescriptor }) {
+function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: string }) {
   const api = useApi();
   const apiBaseUrl = useApiBaseUrl();
   const router = useRouter();
@@ -42,6 +45,7 @@ function CityMap({ city }: { city: CityDescriptor }) {
   // No camera until locate-me: MapCanvas opens on the city bbox.
   const [camera, setCamera] = useState<MapCamera>();
   const [located, setLocated] = useState(false);
+  const [focusBanner, setFocusBanner] = useState<string>();
   // Search ranks near the last place the map settled on (a pan, or locate-me), the city centre at first.
   const [near, setNear] = useState<LngLat>(city.center);
   const [locateError, setLocateError] = useState<string>();
@@ -49,6 +53,25 @@ function CityMap({ city }: { city: CityDescriptor }) {
   const [mapMode, setMapMode] = useState<MapMode>('street');
   const baseLayer = useMapStyle(mapMode);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
+  // Handle deep-link focusPlaceId: fetch place and move camera.
+  useEffect(() => {
+    if (!focusPlaceId) return;
+    void (async () => {
+      try {
+        const place = ok(await api.places.get({ params: { id: focusPlaceId } }));
+        const [lng, lat] = place.location;
+        setCamera({ center: [lng, lat], zoom: 16 });
+        setFocusBanner(t('focus.show', { name: pickName(place.names, mapLang) }));
+      } catch {
+        // Fallback to Baghdad center when place is not found.
+        setCamera({ center: BAGHDAD_CENTER, zoom: 16 });
+        setFocusBanner(t('focus.fallback'));
+      }
+      setTimeout(() => setFocusBanner(undefined), 3000);
+    })();
+    // focusPlaceId is the only dep; mapLang is intentionally snapshotted at focus time.
+  }, [focusPlaceId]);
+
   const q = query.trim();
 
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
@@ -103,10 +126,19 @@ function CityMap({ city }: { city: CityDescriptor }) {
           <View style={styles.fill}>
             <TextField testID={testIDs.map.searchInput} label={t('search.label')} placeholder={t('search.placeholder')} value={query} onChangeText={setQuery} />
           </View>
+          {q ? (
+            <IconButton
+              testID="map.search.assistant"
+              icon="smart_toy"
+              accessibilityLabel={t('search.assistantHint')}
+              onPress={() => router.push(`/assistant?initialMessage=${encodeURIComponent(q)}`)}
+            />
+          ) : null}
           <SatelliteToggle active={mapMode === 'satellite'} onToggle={() => setMapMode((m) => (m === 'satellite' ? 'street' : 'satellite'))} />
           <IconButton testID={testIDs.map.lang} icon="translate" accessibilityLabel={t('lang.title')} onPress={() => setChoosingLang(true)} />
         </View>
         {locateError ? <Banner kind="error" message={locateError} /> : null}
+        {focusBanner ? <Banner kind="info" message={focusBanner} /> : null}
         {q ? (
           <ScrollView style={{ maxHeight: maxResultsHeight }} contentContainerStyle={styles.results} keyboardShouldPersistTaps="handled">
             <LoadStatus {...search} />

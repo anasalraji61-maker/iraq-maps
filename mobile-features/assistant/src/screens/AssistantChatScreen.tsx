@@ -1,5 +1,5 @@
 import { assistantTestIDs } from '@iraq-maps/contracts';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -44,12 +44,22 @@ export function AssistantChatScreen(): ReactElement {
     useAssistantChat(sessionId);
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
+  const { initialMessage } = useLocalSearchParams<{ initialMessage?: string }>();
+  const initialMessageSent = useRef(false);
 
   // Resume the persisted session on mount
   useEffect(() => {
     loadPersistedSessionId().then((saved) => {
       if (saved) setSessionId(saved);
     });
+  }, []);
+
+  // Auto-send initialMessage from deep-link (e.g. map search → assistant)
+  useEffect(() => {
+    if (initialMessage && messages.length === 0 && !initialMessageSent.current) {
+      initialMessageSent.current = true;
+      void send(decodeURIComponent(initialMessage));
+    }
   }, []);
 
   const handleSend = async () => {
