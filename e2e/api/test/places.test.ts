@@ -11,6 +11,9 @@ import { createTestDatabase, type TestDatabase } from '@iraq-maps/db-kit';
 import { FakeOtpSender, identityTestEnv, randomIp } from '@iraq-maps/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+// Requires a real Postgres: skip in environments without one.
+const skip = !process.env.DATABASE_URL;
+
 // AC#4 on the composed app (createApp). The fixture city is the pipeline's output for the CC0 fixture
 // baghdad-mini.osm.xml (geo-services/pipeline/tests/fixtures/baghdad-mini), imported with the places import CLI
 // (CliContracts.placesImport) twice, since an import must be idempotent. The tiles and glyphs fallbacks read a
@@ -24,8 +27,9 @@ let dir: string;
 let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
 
-describe('places and cities on the composed API', () => {
+describe.skipIf(skip)('places and cities on the composed API', () => {
   beforeAll(async () => {
+    if (skip) return;
     tdb = await createTestDatabase({ modules: moduleMigrations });
     // `run`: a bare `pnpm import` is pnpm's own command.
     const args = ['--filter', '@iraq-maps/places', 'run', 'import', '--city', fixture('city.json'), '--input', fixture('places.ndjson')];

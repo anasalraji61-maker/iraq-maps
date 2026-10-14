@@ -5,6 +5,9 @@ import { captureLogs } from '@iraq-maps/observability';
 import { FakeOtpSender, identityTestEnv, InMemoryUserDataEraser, randomIp, randomPhone } from '@iraq-maps/testing';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
+// Requires a real Postgres: skip in environments without one.
+const skip = !process.env.DATABASE_URL;
+
 // AC#4: phone login end to end on the composed app (createApp), and AC#6: none of it reaches the logs.
 // The tests run in order; the last one checks the logs the whole flow wrote.
 const logs = captureLogs();
@@ -16,6 +19,7 @@ let tdb: TestDatabase;
 let app: Awaited<ReturnType<typeof createApp>>;
 
 beforeAll(async () => {
+  if (skip) return;
   tdb = await createTestDatabase({ modules: moduleMigrations });
   app = await createApp({ env: { ...identityTestEnv(), DATABASE_URL: tdb.url, REDIS_URL: redisUrl }, otpSender: sender, erasers: [eraser], logger: true });
   app.get<EventBus>(PortTokens.EventBus).subscribe('identity.user.deleted.v1', (e) => void deleted.push(e));
@@ -44,7 +48,7 @@ async function login() {
   return verified.json() as Session & { user: { id: string }; isNewUser: boolean };
 }
 
-describe('phone login on the composed API', () => {
+describe.skipIf(skip)('phone login on the composed API', () => {
   it('signs in with an OTP, reads GET /v1/me and updates the name and locale', async () => {
     const session = await login();
     expect(session).toMatchObject({ isNewUser: true, user: { name: null, locale: 'ar', roles: ['user'] } });
