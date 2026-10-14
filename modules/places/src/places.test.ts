@@ -23,6 +23,8 @@ let tdb: TestDatabase;
 let app: NestFastifyApplication;
 let dir: string;
 
+describe.skipIf(!process.env['DATABASE_URL'])('PlacesModule (integration)', () => {
+
 /** A one-tile PMTiles v3 archive: z0/0/0 holds `tile` (gzip), uncompressed root directory, zooms 0..14. */
 function pmtilesArchive(tile: Buffer): Buffer {
   const dir = Buffer.from([1, 0, 1, tile.length, 1]); // 1 entry: tile id 0, run length 1, length, offset 0 (+1)
@@ -286,3 +288,5 @@ describe('search performance sanity', () => {
     expect(p95).toBeLessThan(300);
   }, 60_000);
 });
+
+}); // describe.skipIf
