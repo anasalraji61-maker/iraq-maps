@@ -1,5 +1,5 @@
 import { testIDs, type ProviderStatus } from '@iraq-maps/contracts';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
@@ -10,13 +10,13 @@ import { useMessagingApi } from '../messaging-api';
 const POLL_INTERVAL_MS = 30_000;
 
 interface AnalyticsData {
-  // TODO: fetch from providers analytics endpoint when available
+  /** Always null until a backend analytics endpoint is available. */
   viewsToday: number | null;
-  // derived from inbox count
+  /** Derived from inbox inquiry count. */
   incomingMessages: number | null;
-  // TODO: fetch from discover module endpoint when available
+  /** Count of discover posts authored by this provider's user. */
   posts: number | null;
-  // TODO: fetch from providers rating endpoint when available
+  /** Always null until a backend rating endpoint is available. */
   rating: number | null;
 }
 
@@ -43,6 +43,7 @@ function AnalyticsCard({ label, value, color, icon }: AnalyticsCardProps): React
 export function ProviderDashboardScreen(): ReactElement {
   const api = useApi();
   const router = useRouter();
+  const session = useSession();
   const messagingApi = useMessagingApi();
   const [status, setStatus] = useState<ProviderStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,18 +64,23 @@ export function ProviderDashboardScreen(): ReactElement {
   }, [api]);
 
   const fetchAnalytics = useCallback(async () => {
-    // TODO: replace viewsToday with real analytics API call when endpoint is available
-    // TODO: replace posts with real discover API call when endpoint is available
-    // TODO: replace rating with real rating API call when endpoint is available
+    const userId = session?.state.status === 'signedIn' ? session.state.user.id : null;
     try {
-      const res = await messagingApi.listProviderInquiries({ query: {} });
-      if (res.status === 200) {
-        setAnalytics((prev) => ({ ...prev, incomingMessages: res.body.items.length }));
-      }
+      const [inboxRes, feedRes] = await Promise.all([
+        messagingApi.listProviderInquiries({ query: {} }),
+        userId ? api.discover.listFeed({ query: { limit: 50 } }) : Promise.resolve(null),
+      ]);
+      setAnalytics((prev) => ({
+        ...prev,
+        incomingMessages: inboxRes.status === 200 ? inboxRes.body.items.length : prev.incomingMessages,
+        posts: feedRes?.status === 200
+          ? feedRes.body.items.filter((p) => p.authorId === userId).length
+          : prev.posts,
+      }));
     } catch {
       // analytics are non-critical; silently ignore fetch errors
     }
-  }, [messagingApi]);
+  }, [api, messagingApi, session]);
 
   useEffect(() => {
     void fetchStatus();
