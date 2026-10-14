@@ -2,6 +2,7 @@ import { BadRequestException, Controller, ConflictException, Inject, NotFoundExc
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import {
   mediaContract,
+  type AssetId,
   type MediaMime,
   type MediaPurpose,
   SignedUrlString,
