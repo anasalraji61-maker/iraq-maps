@@ -1,4 +1,7 @@
 {
+  "tabs": {
+    "assistant": "Assistant"
+  },
   "devSettings": {
     "title": "Developer settings",
     "open": "Open developer settings",

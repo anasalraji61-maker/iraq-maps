@@ -16,9 +16,23 @@ import { persistLocaleChanges, restoreLocale, useLocale } from './locale';
 
 registerNamespace('shell', { ar, ckb, en });
 
-type Tab = keyof typeof testIDs.tabs;
-const tabIcons: Record<Tab, AndroidSymbol> = { map: 'map', discover: 'explore', messages: 'chat', activity: 'history', account: 'person' };
-const tabs = Object.keys(tabIcons) as Tab[];
+type ContractTab = keyof typeof testIDs.tabs;
+
+/** Full ordered tab list; assistant is not yet in testIDs.tabs so it is typed separately. */
+type Tab = ContractTab | 'assistant';
+
+const tabIcons: Record<Tab, AndroidSymbol> = {
+  map: 'map',
+  discover: 'explore',
+  messages: 'chat',
+  assistant: 'smart_toy',
+  account: 'person',
+  // kept for back-compat; not shown in the primary bar
+  activity: 'history',
+};
+
+/** Primary tab bar order — five tabs visible to the user. */
+const tabs: Tab[] = ['map', 'discover', 'messages', 'assistant', 'account'];
 const font = { fontFamily: tokens.font.family };
 // AA contrast for inactive labels (textMuted) and 12sp labels instead of the 10sp default. Noto Sans Arabic's line box
 // is tall, so the label gets a fixed line height without Android's extra font padding.
@@ -84,23 +98,27 @@ export function TabsLayout() {
   const tabBarStyle = { height: TAB_ITEM_CHROME + Math.ceil(LABEL_LINE_HEIGHT * fontScale) + bottom };
   return (
     <Tabs screenOptions={{ ...tabBarOptions, tabBarStyle }}>
-      {tabs.map((tab) => (
-        <Tabs.Screen
-          key={tab}
-          name={tab === 'map' ? 'index' : tab}
-          options={{
-            title: t(`common:tabs.${tab}`),
-            // Without it iOS appends an English "tab, N of 5" to the label.
-            tabBarAccessibilityLabel: t(`common:tabs.${tab}`),
-            tabBarButtonTestID: testIDs.tabs[tab],
-            tabBarIcon: ({ color, size }) => <SymbolView name={{ android: tabIcons[tab], web: tabIcons[tab] }} tintColor={color} size={size} />,
-            headerRight:
-              tab === 'account' && devSettings
-                ? () => <IconButton icon="developer_mode" accessibilityLabel={t('shell:devSettings.open')} onPress={() => router.push(href('devSettings'))} />
-                : undefined,
-          }}
-        />
-      ))}
+      {tabs.map((tab) => {
+        const label = tab === 'assistant' ? t('shell:tabs.assistant') : t(`common:tabs.${tab}`);
+        const testID = tab in testIDs.tabs ? testIDs.tabs[tab as ContractTab] : undefined;
+        return (
+          <Tabs.Screen
+            key={tab}
+            name={tab === 'map' ? 'index' : tab}
+            options={{
+              title: label,
+              // Without it iOS appends an English "tab, N of 5" to the label.
+              tabBarAccessibilityLabel: label,
+              tabBarButtonTestID: testID,
+              tabBarIcon: ({ color, size }) => <SymbolView name={{ android: tabIcons[tab], web: tabIcons[tab] }} tintColor={color} size={size} />,
+              headerRight:
+                tab === 'account' && devSettings
+                  ? () => <IconButton icon="developer_mode" accessibilityLabel={t('shell:devSettings.open')} onPress={() => router.push(href('devSettings'))} />
+                  : undefined,
+            }}
+          />
+        );
+      })}
     </Tabs>
   );
 }
