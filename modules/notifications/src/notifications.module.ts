@@ -38,6 +38,28 @@ class NotificationsModule implements OnModuleInit {
         body: 'ردّ المزوّد على استفسارك.',
       });
     });
+
+    // discover.post.liked.v1 → notify post author
+    this.eventBus.subscribe('discover.post.liked.v1' as never, async (event: { payload: { postId: string; postAuthorId: string; likedByUserId: string } }) => {
+      const { postAuthorId, likedByUserId } = event.payload;
+      if (postAuthorId === likedByUserId) return; // don't notify own likes
+      await this.svc.sendToUser(postAuthorId as UserId, {
+        title: 'إعجاب جديد',
+        body: 'أعجب شخص ما بمنشورك.',
+        data: { type: 'post_liked', postId: event.payload.postId },
+      });
+    });
+
+    // discover.post.commented.v1 → notify post author
+    this.eventBus.subscribe('discover.post.commented.v1' as never, async (event: { payload: { postId: string; postAuthorId: string; commentedByUserId: string } }) => {
+      const { postAuthorId, commentedByUserId } = event.payload;
+      if (postAuthorId === commentedByUserId) return; // don't notify own comments
+      await this.svc.sendToUser(postAuthorId as UserId, {
+        title: 'تعليق جديد',
+        body: 'علّق شخص ما على منشورك.',
+        data: { type: 'post_commented', postId: event.payload.postId },
+      });
+    });
   }
 }
 

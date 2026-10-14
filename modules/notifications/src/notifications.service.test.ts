@@ -35,6 +35,17 @@ describe('NotificationsService', () => {
           updated_at timestamptz NOT NULL DEFAULT now()
         )
       `);
+      await testDb.db.execute(sql`
+        CREATE TABLE IF NOT EXISTS notifications.notification (
+          id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id uuid NOT NULL,
+          title text NOT NULL,
+          body text NOT NULL,
+          data jsonb,
+          read_at timestamptz,
+          created_at timestamptz NOT NULL DEFAULT now()
+        )
+      `);
     } catch {
       testDb = null; // no Postgres — skip all tests
     }
@@ -94,5 +105,42 @@ describe('NotificationsService', () => {
     // and push sends nothing (no devices)
     await svc.notifyUser(userId, { title: 'test', body: 'test' });
     expect(push.sent).toHaveLength(0);
+  });
+
+  it('sendToUser — persists notification row and pushes', async () => {
+    if (!testDb) return;
+    const userId = uid('00000000-0000-0000-0000-000000000005');
+    await svc.registerDevice(userId, 'send-token', 'android');
+    const id = await svc.sendToUser(userId, { title: 'إعجاب جديد', body: 'أعجب شخص ما بمنشورك.', data: { type: 'post_liked' } });
+    expect(id).toBeTruthy();
+    expect(push.sent).toHaveLength(1);
+    expect(push.sent[0]!.title).toBe('إعجاب جديد');
+  });
+
+  it('listNotifications — returns only unread by default', async () => {
+    if (!testDb) return;
+    const userId = uid('00000000-0000-0000-0000-000000000006');
+    await svc.sendToUser(userId, { title: 'أولى', body: 'رسالة 1' });
+    await svc.sendToUser(userId, { title: 'ثانية', body: 'رسالة 2' });
+    const { items, unreadCount } = await svc.listNotifications(userId);
+    expect(items).toHaveLength(2);
+    expect(unreadCount).toBe(2);
+  });
+
+  it('markRead — marks a notification read and excludes it from unread list', async () => {
+    if (!testDb) return;
+    const userId = uid('00000000-0000-0000-0000-000000000007');
+    const notifId = await svc.sendToUser(userId, { title: 'تست', body: 'رسالة' });
+    const found = await svc.markRead(userId, notifId);
+    expect(found).toBe(true);
+    const { unreadCount } = await svc.listNotifications(userId);
+    expect(unreadCount).toBe(0);
+  });
+
+  it('markRead — returns false for non-existent id', async () => {
+    if (!testDb) return;
+    const userId = uid('00000000-0000-0000-0000-000000000008');
+    const found = await svc.markRead(userId, '00000000-0000-0000-0000-999999999999');
+    expect(found).toBe(false);
   });
 });

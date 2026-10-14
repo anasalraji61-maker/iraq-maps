@@ -1,4 +1,4 @@
-// M4 contracts: device registration and notification preferences.
+// M4 contracts: device registration, notification preferences and inbox.
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
@@ -17,7 +17,20 @@ export const NotificationPrefs = z.object({
 });
 export type NotificationPrefs = z.infer<typeof NotificationPrefs>;
 
-/** @public frozen contract (M4) */
+export const NotificationId = z.string().uuid().brand<'NotificationId'>();
+export type NotificationId = z.infer<typeof NotificationId>;
+
+export const NotificationItem = z.object({
+  id: NotificationId,
+  title: z.string(),
+  body: z.string(),
+  data: z.record(z.string()).optional(),
+  readAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type NotificationItem = z.infer<typeof NotificationItem>;
+
+/** @public frozen contract (M4/M6) */
 export const notificationsContract = c.router({
   registerDevice: {
     method: 'POST',
@@ -38,5 +51,25 @@ export const notificationsContract = c.router({
     path: '/v1/notification-prefs',
     body: NotificationPrefs.partial(),
     responses: { 200: NotificationPrefs },
+  },
+  listNotifications: {
+    method: 'GET',
+    path: '/v1/notifications',
+    query: z.object({ unreadOnly: z.coerce.boolean().optional() }),
+    responses: {
+      200: z.object({ items: z.array(NotificationItem), unreadCount: z.number().int() }),
+    },
+    summary: 'List notifications (unread by default)',
+  },
+  markRead: {
+    method: 'POST',
+    path: '/v1/notifications/:id/read',
+    pathParams: z.object({ id: NotificationId }),
+    body: z.object({}),
+    responses: {
+      200: z.object({ ok: z.literal(true) }),
+      404: z.object({ code: z.string() }),
+    },
+    summary: 'Mark a notification as read',
   },
 });

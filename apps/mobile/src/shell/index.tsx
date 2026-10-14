@@ -1,10 +1,10 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
-import { AvailableRoutesProvider, href, SessionProvider, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
+import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
-import { Component, useEffect, useState, type ReactNode } from 'react';
+import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { availableRoutes } from './available-routes';
@@ -33,6 +33,36 @@ const tabIcons: Record<Tab, AndroidSymbol> = {
 
 /** Primary tab bar order — five tabs visible to the user. */
 const tabs: Tab[] = ['map', 'discover', 'messages', 'assistant', 'account'];
+
+/** Polls unread notification count every 30 s when the user is signed in. Returns 0 when signed out. */
+function useUnreadNotificationCount(): number {
+  const api = useApi();
+  const session = useSession();
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (session.state.status !== 'signedIn') {
+      setCount(0);
+      return;
+    }
+    const fetch = async () => {
+      try {
+        const res = await api.notifications.listNotifications({ query: { unreadOnly: true } });
+        if (res.status === 200) setCount(res.body.unreadCount);
+      } catch {
+        // network error — keep previous count
+      }
+    };
+    void fetch();
+    intervalRef.current = setInterval(() => void fetch(), 30_000);
+    return () => {
+      if (intervalRef.current !== null) clearInterval(intervalRef.current);
+    };
+  }, [api, session.state.status]);
+
+  return count;
+}
 const font = { fontFamily: tokens.font.family };
 // AA contrast for inactive labels (textMuted) and 12sp labels instead of the 10sp default. Noto Sans Arabic's line box
 // is tall, so the label gets a fixed line height without Android's extra font padding.
@@ -141,11 +171,13 @@ export function TabsLayout() {
   const { bottom } = useSafeAreaInsets();
   const { fontScale } = useWindowDimensions();
   const tabBarStyle = { height: TAB_ITEM_CHROME + Math.ceil(LABEL_LINE_HEIGHT * fontScale) + bottom };
+  const unreadCount = useUnreadNotificationCount();
   return (
     <Tabs screenOptions={{ ...tabBarOptions, tabBarStyle }}>
       {tabs.map((tab) => {
         const label = tab === 'assistant' ? t('shell:tabs.assistant') : t(`common:tabs.${tab}`);
         const testID = tab in testIDs.tabs ? testIDs.tabs[tab as ContractTab] : undefined;
+        const badge = tab === 'account' && unreadCount > 0 ? unreadCount : undefined;
         return (
           <Tabs.Screen
             key={tab}
@@ -155,6 +187,7 @@ export function TabsLayout() {
               // Without it iOS appends an English "tab, N of 5" to the label.
               tabBarAccessibilityLabel: label,
               tabBarButtonTestID: testID,
+              tabBarBadge: badge,
               tabBarIcon: ({ color, size }) => <SymbolView name={{ android: tabIcons[tab], web: tabIcons[tab] }} tintColor={color} size={size} />,
               headerRight:
                 tab === 'account' && devSettings

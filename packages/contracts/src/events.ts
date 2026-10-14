@@ -8,6 +8,11 @@ export const messagingEventPayloads = {
   'messaging.reply.received.v1': z.object({ inquiryId: z.string(), replyId: z.string(), fromProviderId: z.string() }),
 } as const;
 
+export const discoverEventPayloads = {
+  'discover.post.liked.v1': z.object({ postId: z.string().uuid(), postAuthorId: UserId, likedByUserId: UserId }),
+  'discover.post.commented.v1': z.object({ postId: z.string().uuid(), postAuthorId: UserId, commentedByUserId: UserId }),
+} as const;
+
 /** Versioned domain events `<module>.<entity>.<verb>.v1`, published only through the outbox. */
 const eventPayloads = {
   'identity.user.registered.v1': z.object({ userId: UserId, locale: Locale }),
@@ -15,6 +20,7 @@ const eventPayloads = {
   ...providerEventPayloads, // M3
   ...mediaEventPayloads, // M3
   ...messagingEventPayloads, // M4
+  ...discoverEventPayloads, // M6
 } as const;
 
 export type EventName = keyof typeof eventPayloads;

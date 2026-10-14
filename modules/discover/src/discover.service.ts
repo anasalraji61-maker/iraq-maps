@@ -1,16 +1,22 @@
-import { CommentId, type UserId } from '@iraq-maps/contracts';
+import { CommentId, PortTokens, type EventBus, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, lt, sql } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
 import { commentTable, postLikeTable, postTable } from './schema';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
+const noopEventBus: EventBus = { publish: async () => {}, subscribe: () => () => {} };
+
 @Injectable()
 export class DiscoverService {
-  constructor(@Inject('DISCOVER_DB') private readonly db: Db) {}
+  constructor(
+    @Inject('DISCOVER_DB') private readonly db: Db,
+    @Inject(PortTokens.EventBus) private readonly eventBus: EventBus = noopEventBus,
+  ) {}
 
   async listFeed(userId: UserId, cursor?: string, limit = 10) {
     const rows = await this.db
@@ -73,6 +79,16 @@ export class DiscoverService {
       .where(eq(postTable.id, postId))
       .returning();
 
+    // Notify post author (idempotent: onConflictDoNothing avoids duplicate likes)
+    if (post.authorId !== userId) {
+      await this.eventBus.publish({
+        id: randomUUID(),
+        name: 'discover.post.liked.v1',
+        occurredAt: new Date().toISOString(),
+        payload: { postId, postAuthorId: post.authorId as UserId, likedByUserId: userId },
+      });
+    }
+
     return { likeCount: updated?.likeCount ?? post.likeCount };
   }
 
@@ -117,7 +133,7 @@ export class DiscoverService {
   }
 
   async createComment(userId: UserId, postId: PostIdType, body: string) {
-    await this.getPostOrThrow(postId);
+    const post = await this.getPostOrThrow(postId);
 
     const [comment] = await this.db
       .insert(commentTable)
@@ -129,6 +145,13 @@ export class DiscoverService {
       .update(postTable)
       .set({ commentCount: sql`comment_count + 1` })
       .where(eq(postTable.id, postId));
+
+    await this.eventBus.publish({
+      id: randomUUID(),
+      name: 'discover.post.commented.v1',
+      occurredAt: new Date().toISOString(),
+      payload: { postId, postAuthorId: post.authorId as UserId, commentedByUserId: userId },
+    });
 
     return this.toCommentShape(comment);
   }

@@ -1,7 +1,7 @@
 import type { NotificationPrefs, PushSender, UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { eq } from 'drizzle-orm';
-import { deviceTable, prefsTable } from './schema';
+import { and, eq, isNull } from 'drizzle-orm';
+import { deviceTable, notificationTable, prefsTable } from './schema';
 
 export class NotificationsService {
   constructor(
@@ -54,8 +54,52 @@ export class NotificationsService {
     await Promise.allSettled(devices.map((d) => this.push.send(d.token, notification)));
   }
 
+  /** Persist a notification row and push it to the user's devices. */
+  async sendToUser(userId: UserId, notification: { title: string; body: string; data?: Record<string, string> }): Promise<string> {
+    const [row] = await this.db
+      .insert(notificationTable)
+      .values({ userId, title: notification.title, body: notification.body, data: notification.data ?? null })
+      .returning({ id: notificationTable.id });
+    if (!row) throw new Error('insert failed');
+    const devices = await this.db.select().from(deviceTable).where(eq(deviceTable.userId, userId));
+    await Promise.allSettled(devices.map((d) => this.push.send(d.token, notification)));
+    return row.id;
+  }
+
+  async listNotifications(userId: UserId, unreadOnly = true) {
+    const rows = unreadOnly
+      ? await this.db.select().from(notificationTable).where(and(eq(notificationTable.userId, userId), isNull(notificationTable.readAt))).orderBy(notificationTable.createdAt)
+      : await this.db.select().from(notificationTable).where(eq(notificationTable.userId, userId)).orderBy(notificationTable.createdAt);
+
+    const unreadCount = unreadOnly
+      ? rows.length
+      : rows.filter((r) => r.readAt === null).length;
+
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        body: r.body,
+        data: r.data ?? undefined,
+        readAt: r.readAt?.toISOString() ?? null,
+        createdAt: r.createdAt.toISOString(),
+      })),
+      unreadCount,
+    };
+  }
+
+  async markRead(userId: UserId, notificationId: string): Promise<boolean> {
+    const [updated] = await this.db
+      .update(notificationTable)
+      .set({ readAt: new Date() })
+      .where(and(eq(notificationTable.id, notificationId), eq(notificationTable.userId, userId), isNull(notificationTable.readAt)))
+      .returning({ id: notificationTable.id });
+    return updated !== undefined;
+  }
+
   async eraseUserData(userId: UserId): Promise<void> {
     await this.db.delete(deviceTable).where(eq(deviceTable.userId, userId));
     await this.db.delete(prefsTable).where(eq(prefsTable.userId, userId));
+    await this.db.delete(notificationTable).where(eq(notificationTable.userId, userId));
   }
 }
