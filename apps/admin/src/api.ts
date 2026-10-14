@@ -35,6 +35,13 @@ export interface AuditEntry {
   timestamp: string;
 }
 
+export interface AssistantUsageEntry {
+  date: string;
+  inputTokens: number;
+  outputTokens: number;
+  requestCount: number;
+}
+
 export interface PaginatedProviders {
   items: Provider[];
   total: number;
@@ -276,5 +283,9 @@ export const api = {
     } catch {
       return mockAudit;
     }
+  },
+
+  async getAssistantUsage(): Promise<AssistantUsageEntry[]> {
+    return request<AssistantUsageEntry[]>('/admin/assistant/usage');
   },
 };
