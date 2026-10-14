@@ -15,7 +15,6 @@
     "@iraq-maps/contracts": "workspace:*"
   },
   "devDependencies": {
-    "@iraq-maps/testing": "workspace:*",
     "@iraq-maps/tooling": "workspace:*"
   }
 }

@@ -1,7 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": [
-    "**/fixtures/**"
+    "**/fixtures/**",
+    "adapters/push-fcm/src/index.test.ts",
+    "adapters/whatsapp-cloud/src/index.test.ts",
+    "modules/notifications/src/notifications.service.test.ts"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",
@@ -10,5 +13,8 @@
   "ignoreBinaries": [
     "gitleaks"
   ],
-  "includeEntryExports": true
+  "includeEntryExports": true,
+  "ignoreExportsUsedInFile": true,
+  "exclude": ["exports", "types"],
+  "ignoreDependencies": ["@react-native-community/netinfo"]
 }

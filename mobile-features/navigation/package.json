@@ -15,7 +15,6 @@
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/geo": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",
-    "@iraq-maps/map-kit": "workspace:*",
     "@iraq-maps/ui": "workspace:*"
   },
   "peerDependencies": {

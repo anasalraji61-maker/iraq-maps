@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
-    "@iraq-maps/api-client": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",
-    "@iraq-maps/ui": "workspace:*",
+    "@ts-rest/core": "3.52.1",
+    "expo-router": "^4.0.0",
     "@react-native-async-storage/async-storage": "^2.1.2"
   },
   "devDependencies": {

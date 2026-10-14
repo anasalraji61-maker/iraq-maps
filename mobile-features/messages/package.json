@@ -24,8 +24,9 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
-    "@iraq-maps/api-client": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
+    "@ts-rest/core": "3.52.1",
+    "expo-router": "^4.0.0",
     "@iraq-maps/mobile-kit": "workspace:*",
     "@iraq-maps/ui": "workspace:*",
     "expo-clipboard": "~7.0.0",

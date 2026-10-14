@@ -417,6 +417,9 @@ importers:
       '@iraq-maps/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@iraq-maps/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@iraq-maps/mobile-kit':
         specifier: workspace:*
         version: link:../../packages/mobile-kit
@@ -11746,7 +11749,7 @@ snapshots:
       react-refresh: 0.14.2
     optionalDependencies:
       '@babel/runtime': 7.29.10
-      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@57.0.25)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@4.0.22)(react-dom@19.2.3(react@18.3.1))(react-native@0.76.5(@babel/core@7.29.7)(@types/react@18.3.31)(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color

@@ -16,7 +16,8 @@
     "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",
     "@iraq-maps/ui": "workspace:*",
-    "@iraq-maps/api-client": "workspace:*"
+    "@ts-rest/core": "3.52.1",
+    "expo-image-picker": "~16.1.4"
   },
   "peerDependencies": {
     "expo-router": "*",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@jest/globals": "^29.7.0",
     "@react-native/jest-preset": "0.86.3",
     "@testing-library/react-native": "^14.1.0",
