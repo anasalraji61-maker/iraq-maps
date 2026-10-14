@@ -258,3 +258,5 @@ No new events.
 | 2026-10-14 | feat(api,assistant): health check DB ping, rate limit headers, request ID tracing | `185f947` | — |
 | 2026-10-14 | feat(geo,map,navigation): Iraqi address formatter and address display | `1156945` | — |
 | 2026-10-14 | fix(map,ui): show network error text in alert and add retry button to Banner | `517b24b` | — |
+| 2026-10-14 | feat(account): settings screen, language switch, app version display | `2302d1d` | — |
+| 2026-10-14 | feat(discover): comments screen, post detail, share button | `955842d` | — |
