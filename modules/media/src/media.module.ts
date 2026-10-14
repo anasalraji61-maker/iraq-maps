@@ -7,6 +7,9 @@ import { DB_TOKEN, OUTBOX_TOKEN, MediaService } from './media.service.js';
 import { MEDIA_SERVICE, MediaController } from './media.controller.js';
 import { FileObjectStorage } from './file-storage.js';
 
+/** How often the orphan cleanup job runs (every 6 hours). */
+const CLEANUP_INTERVAL_MS = 6 * 60 * 60 * 1000;
+
 export interface MediaModuleOptions {
   db: Db;
   storage?: ObjectStorage;
@@ -23,6 +26,12 @@ class MediaModule {}
 export function mediaModule(opts: MediaModuleOptions): DynamicModule {
   const storage = opts.storage ?? new FileObjectStorage();
   const svc = new MediaService(opts.db, storage);
+
+  // Schedule orphan cleanup every 6 h. The timer is intentionally never cleared: the process
+  // lifetime matches the app lifetime, and clearInterval on shutdown is not necessary here.
+  setInterval(() => {
+    void svc.cleanupOrphaned().catch(() => undefined);
+  }, CLEANUP_INTERVAL_MS);
 
   return {
     module: MediaModule,
