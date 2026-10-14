@@ -14,10 +14,12 @@
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/geo": "workspace:*",
+    "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",
     "@iraq-maps/ui": "workspace:*"
   },
   "peerDependencies": {
+    "expo-location": "*",
     "expo-router": "*",
     "react": "*",
     "react-native": "*"

@@ -5,3 +5,5 @@ export { DeviationDetector } from './engine/deviation';
 export { useNavigation, type NavigationState, type PositionSubscriber } from './hooks/useNavigation';
 export { ActiveNavigationScreen } from './screens/ActiveNavigationScreen';
 export { RoutePreviewScreen } from './screens/RoutePreviewScreen';
+export { RoutePreviewContainer } from './screens/RoutePreviewContainer';
+export { ActiveNavigationContainer } from './screens/ActiveNavigationContainer';

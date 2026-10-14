@@ -41,6 +41,17 @@ function EmptyState({ icon, title, subtitle }: { icon: string; title: string; su
   );
 }
 
+function LoadError({ onRetry }: { onRetry: () => void }): ReactElement {
+  return (
+    <View style={styles.center}>
+      <Text style={styles.errorText}>{t('loadError')}</Text>
+      <Pressable onPress={onRetry} style={styles.retryBtn}>
+        <Text style={styles.retryText}>{t('retry')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 // ──────────────────────────────────────────────
 // Notifications tab
 // ──────────────────────────────────────────────
@@ -126,16 +137,7 @@ function NotificationsTab(): ReactElement {
     return <EmptyState icon="🔔" title={t('loginPrompt')} subtitle="" />;
   }
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
-          <Text style={styles.retryText}>{t('retry')}</Text>
-        </Pressable>
-      </View>
-    );
-  }
+  if (error) return <LoadError onRetry={() => { void load(); }} />;
 
   return (
     <View style={styles.flex}>
@@ -327,16 +329,7 @@ function PostsTab(): ReactElement {
 
   if (!session) return <EmptyState icon="📝" title={t('loginPrompt')} subtitle="" />;
   if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
-          <Text style={styles.retryText}>{t('retry')}</Text>
-        </Pressable>
-      </View>
-    );
-  }
+  if (error) return <LoadError onRetry={() => { void load(); }} />;
   if (posts.length === 0) return <EmptyState icon="📝" title={t('emptyPosts')} subtitle={t('emptyPostsSubtext')} />;
 
   return (
