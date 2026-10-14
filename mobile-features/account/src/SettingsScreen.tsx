@@ -8,8 +8,6 @@ import { StyleSheet, View } from 'react-native';
 import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
-const PRIVACY_URL = 'https://iraqsmartmaps.com/privacy';
-const TERMS_URL = 'https://iraqsmartmaps.com/terms';
 const SUPPORT_EMAIL = 'mailto:support@iraqsmartmaps.com';
 
 const version = Constants.expoConfig?.version ?? '1.0.0';
@@ -24,8 +22,9 @@ export function SettingsScreen(): ReactElement {
       <ScreenTitle title={t('settings.title')} />
       <ListItem title={t('settings.language')} onPress={() => router.push(href('accountLanguage'))} />
       <ListItem title={t('settings.reportProblem')} onPress={() => void Linking.openURL(SUPPORT_EMAIL)} />
-      <ListItem title={t('settings.privacy')} onPress={() => void Linking.openURL(PRIVACY_URL)} />
-      <ListItem title={t('settings.terms')} onPress={() => void Linking.openURL(TERMS_URL)} />
+      <ListItem title={t('settings.privacy')} onPress={() => router.push(href('accountPrivacy'))} />
+      <ListItem title={t('settings.terms')} onPress={() => router.push(href('accountTerms'))} />
+      <ListItem title={t('settings.licenses')} onPress={() => router.push(href('accountLicenses'))} />
       <View style={styles.versionRow}>
         <Text variant="caption">{t('settings.version', { version, build: buildNumber })}</Text>
       </View>

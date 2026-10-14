@@ -2,6 +2,9 @@
 export { AccountScreen } from './AccountScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { LanguageScreen } from './LanguageScreen';
+export { LicensesScreen } from './LicensesScreen';
 export { NameScreen } from './NameScreen';
 export { OtpScreen } from './OtpScreen';
 export { PhoneScreen } from './PhoneScreen';
+export { PrivacyScreen } from './PrivacyScreen';
+export { TermsScreen } from './TermsScreen';

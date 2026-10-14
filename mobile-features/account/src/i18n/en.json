@@ -59,7 +59,8 @@
     "reportProblem": "Report a problem",
     "privacy": "Privacy policy",
     "terms": "Terms of use",
-    "version": "Version {version} (build {build})"
+    "version": "Version {version} (build {build})",
+    "licenses": "Open-source licences"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",
@@ -69,5 +70,56 @@
     "otp_rate_limited": "Too many code requests in a short time. Wait at least 15 minutes, then try again.",
     "otp_resend_too_soon": "Please wait a little before requesting a new code.",
     "invalid_request": "Check what you entered and try again."
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "Iraq Smart Maps respects your privacy. This policy explains what data we collect, why we collect it, and how you control it.",
+    "collect": {
+      "heading": "What we collect",
+      "body": "We collect your phone number to create your account. We store the routes you navigate and places you save so you can access them later. We collect approximate location while using navigation, solely to power turn-by-turn guidance."
+    },
+    "use": {
+      "heading": "How we use it",
+      "body": "We use your phone number to verify your identity. Routes and saved places are shown only to you. Location data is used only inside the app to calculate routes and is not retained on our servers after the session ends."
+    },
+    "share": {
+      "heading": "Who we share it with",
+      "body": "We do not sell your data. We do not share personal data with advertisers. When you message a business, we share only what is necessary to deliver that message to the business you chose."
+    },
+    "rights": {
+      "heading": "Your rights",
+      "body": "You can delete your account at any time from the Account screen. Deletion permanently removes your phone number, name, saved routes and saved places from our servers within 30 days."
+    },
+    "contact": {
+      "heading": "Contact",
+      "body": "For privacy questions, email support@iraqsmartmaps.com."
+    }
+  },
+  "terms": {
+    "title": "Terms of use",
+    "intro": "By using Iraq Smart Maps, you agree to these terms.",
+    "use": {
+      "heading": "Permitted use",
+      "body": "You may use Iraq Smart Maps for personal, non-commercial navigation and discovery in Iraq. Business accounts are subject to the provider agreement shown during registration."
+    },
+    "prohibited": {
+      "heading": "Prohibited use",
+      "body": "Do not use the app to collect data at scale, reverse-engineer the service, or violate applicable Iraqi law."
+    },
+    "content": {
+      "heading": "Map data",
+      "body": "Map data is sourced from OpenStreetMap contributors under the Open Database Licence (ODbL). Attribution must appear whenever map tiles are displayed, as it does in this app."
+    },
+    "liability": {
+      "heading": "Liability",
+      "body": "Routes and place information are provided for convenience only. Always follow local traffic laws. We are not responsible for route inaccuracies or accidents."
+    },
+    "changes": {
+      "heading": "Changes",
+      "body": "We may update these terms. Continued use after notice of a change constitutes acceptance."
+    }
+  },
+  "licenses": {
+    "title": "Open-source licences"
   }
 }
