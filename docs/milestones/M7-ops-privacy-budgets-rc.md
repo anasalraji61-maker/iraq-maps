@@ -240,3 +240,9 @@ No new events.
 | 2026-10-14 | post-M7 polish: account profile edit, delete confirm, error boundary | `5aeed69` | — |
 | 2026-10-14 | post-M7 polish: navigation turn steps, ETA clock time, off-route banner | `f420839` | — |
 | 2026-10-14 | post-M7 polish: admin verification queue, post moderation, dashboard metrics | `8dd5690` | — |
+| 2026-10-14 | docs: log post-M7 polish commits | `b31f1dd` | — |
+| 2026-10-14 | post-M7 polish: crowding and price display in place detail | `98f6255` | — |
+| 2026-10-14 | post-M7 polish: push delivery, post-like alerts, badge count | `157cbac` | — |
+| 2026-10-14 | post-M7 polish: onboarding flow and new-user name prompt | `66d2884` | — |
+| 2026-10-14 | post-M7 polish: FlatList tuning, place detail cache, memo | `3462536` | — |
+| 2026-10-14 | fix: adapter-llm test missing systemPrompt typecheck fix | `7b9a041` | — |
