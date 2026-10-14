@@ -7,13 +7,13 @@ import type { RecentRoute, SavedPlace } from '@iraq-maps/mobile-kit';
 
 // ─── Module-level mock holders (must be named mock* for jest babel hoisting) ─
 
-const mockRemoveRoute = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
-const mockRemoveSaved = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
+const mockRemoveRoute = jest.fn<(a?: unknown, b?: unknown) => Promise<void>>().mockResolvedValue(undefined);
+const mockRemoveSaved = jest.fn<(a?: unknown) => Promise<void>>().mockResolvedValue(undefined);
 const mockListRoutes = jest.fn<() => Promise<RecentRoute[]>>();
 const mockListSaved = jest.fn<() => Promise<SavedPlace[]>>();
-const mockListFeed = jest.fn<() => Promise<unknown>>();
-const mockListNotifications = jest.fn<() => Promise<unknown>>();
-const mockMarkRead = jest.fn<() => Promise<unknown>>();
+const mockListFeed = jest.fn<(a?: unknown) => Promise<unknown>>();
+const mockListNotifications = jest.fn<(a?: unknown) => Promise<unknown>>();
+const mockMarkRead = jest.fn<(a?: unknown) => Promise<unknown>>();
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -21,11 +21,11 @@ jest.mock('@iraq-maps/mobile-kit', () => {
   // Stable object refs prevent useCallback dep-array churn and infinite re-renders
   const _api = {
     notifications: {
-      listNotifications: (...args: unknown[]) => mockListNotifications(...args),
-      markRead: (...args: unknown[]) => mockMarkRead(...args),
+      listNotifications: (a: unknown) => mockListNotifications(a),
+      markRead: (a: unknown) => mockMarkRead(a),
     },
     discover: {
-      listFeed: (...args: unknown[]) => mockListFeed(...args),
+      listFeed: (a: unknown) => mockListFeed(a),
     },
   };
   const _session = {
@@ -38,12 +38,12 @@ jest.mock('@iraq-maps/mobile-kit', () => {
   };
   return {
     recentRoutes: {
-      list: (...args: unknown[]) => mockListRoutes(...args),
-      remove: (...args: unknown[]) => mockRemoveRoute(...args),
+      list: () => mockListRoutes(),
+      remove: (a: unknown, b: unknown) => mockRemoveRoute(a, b),
     },
     savedPlaces: {
-      list: (...args: unknown[]) => mockListSaved(...args),
-      remove: (...args: unknown[]) => mockRemoveSaved(...args),
+      list: () => mockListSaved(),
+      remove: (a: unknown) => mockRemoveSaved(a),
     },
     useApi: () => _api,
     useSession: () => _session,
