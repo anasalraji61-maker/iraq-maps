@@ -8,6 +8,7 @@
   "post": {
     "like": "Like",
     "comment": "Comment",
+    "share": "Share",
     "create": "Create Post",
     "type": {
       "photo": "Photo",

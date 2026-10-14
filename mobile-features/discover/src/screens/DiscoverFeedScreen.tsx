@@ -7,6 +7,7 @@ import {
   I18nManager,
   Pressable,
   RefreshControl,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -23,24 +24,46 @@ const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'pos
   offer: 'post.type.offer',
 };
 
+const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
+  photo: { bg: '#E3F2FD', text: '#1976D2' },
+  tip:   { bg: '#E8F5E9', text: '#388E3C' },
+  event: { bg: '#FFF3E0', text: '#F57C00' },
+  offer: { bg: '#FFEBEE', text: '#D32F2F' },
+};
+
 function PostItem({
   post,
   onLike,
   onComment,
+  onPlacePress,
 }: {
   post: DiscoverPostType;
   onLike: (post: DiscoverPostType) => void;
   onComment: (postId: string) => void;
+  onPlacePress: (placeId: string) => void;
 }): ReactElement {
+  const badgeColors = TYPE_BADGE_COLORS[post.type] ?? { bg: '#E3F2FD', text: '#1976D2' };
+
+  const handleShare = useCallback(() => {
+    void Share.share({ message: post.body });
+  }, [post.body]);
+
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.authorText}>{post.authorId.slice(0, 8)}</Text>
-        <View style={styles.typeBadge}>
-          <Text style={styles.typeText}>{TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type}</Text>
+        <View style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}>
+          <Text style={[styles.typeText, { color: badgeColors.text }]}>
+            {TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type}
+          </Text>
         </View>
       </View>
       <Text style={styles.bodyText}>{post.body}</Text>
+      {post.placeId ? (
+        <Pressable style={styles.placeChip} onPress={() => onPlacePress(post.placeId!)}>
+          <Text style={styles.placeChipText}>📍 {post.placeId.slice(0, 8)}</Text>
+        </Pressable>
+      ) : null}
       <View style={styles.actions}>
         <Pressable
           testID={discoverTestIDs.likeButton(post.id)}
@@ -59,6 +82,9 @@ function PostItem({
           <Text style={styles.actionBtnText}>
             {t('post.comment')} {post.commentCount}
           </Text>
+        </Pressable>
+        <Pressable style={styles.actionBtn} onPress={handleShare}>
+          <Text style={styles.actionBtnText}>{t('post.share')}</Text>
         </Pressable>
       </View>
     </View>
@@ -99,7 +125,7 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api, cursor, hasMore, loadingMore]);
 
-  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
@@ -131,6 +157,10 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push({ pathname: '/discover/comments', params: { postId } });
   }, [router]);
 
+  const handlePlacePress = useCallback((placeId: string) => {
+    router.push({ pathname: '/', params: { focusPlaceId: placeId } });
+  }, [router]);
+
   const handleCreate = useCallback(() => {
     router.push('/discover/create');
   }, [router]);
@@ -149,7 +179,7 @@ export function DiscoverFeedScreen(): ReactElement {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <PostItem post={item} onLike={handleLike} onComment={handleComment} />
+          <PostItem post={item} onLike={handleLike} onComment={handleComment} onPlacePress={handlePlacePress} />
         )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         onEndReached={handleEndReached}
@@ -158,6 +188,9 @@ export function DiscoverFeedScreen(): ReactElement {
           !refreshing ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('feed.empty')}</Text>
+              <Pressable style={styles.emptyCreateBtn} onPress={handleCreate}>
+                <Text style={styles.emptyCreateBtnText}>{t('post.create')}</Text>
+              </Pressable>
             </View>
           ) : null
         }
@@ -268,13 +301,40 @@ const styles = StyleSheet.create({
   actionBtnTextActive: {
     color: '#1565C0',
   },
+  placeChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 10,
+  },
+  placeChipText: {
+    fontSize: 13,
+    color: '#388E3C',
+    fontWeight: '500',
+  },
   emptyContainer: {
     alignItems: 'center',
     paddingTop: 60,
+    paddingHorizontal: 24,
   },
   emptyText: {
     fontSize: 15,
     color: '#999',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  emptyCreateBtn: {
+    backgroundColor: '#1976D2',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  emptyCreateBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   loadingMore: {
     paddingVertical: 12,
