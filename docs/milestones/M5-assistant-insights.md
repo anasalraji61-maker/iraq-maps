@@ -1,7 +1,7 @@
 ---
 id: M5
 slug: assistant-insights
-status: not_started
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-insights:
@@ -210,8 +210,33 @@ The integrator freezes contracts in 30 min or less. It adds:
 
 ## ما تم إنجازه
 
-لم تبدأ بعد.
+**مكتملة — 2026-10-14**
+
+### الميزات المسلَّمة
+
+| # | المعيار | الدليل |
+|---|---|---|
+| 1 | تجميد العقود: AssistantReply وLlmClient وTripGoal وScriptedLlmClient | `99d491f` feat(contracts): M5 assistant contract freeze |
+| 2 | وحدة assistant: حلقة tool use وevals عربية ومدقق التأريض والحد اليومي | `cfaff51` feat(assistant): AI assistant module + Anthropic adapter + FakeLlmClient |
+| 3 | واجهة المساعد: المحادثة والبطاقات والانتقال والمسودة | `721b78d` feat(assistant-app): AI assistant chat screen + useAssistantChat hook |
+| 4 | التكامل: ربط assistant بالAPI والمسارات | `31eaa4b` feat(api): wire M5 assistant module into API and mobile |
+| 5 | زر المساعد على الخريطة وتدفقات Maestro | `49e7d08` feat(map): assistant button on map + Maestro flows |
+
+### بوابة الإغلاق
+
+- [x] `pnpm gate` ✅
+- [x] `pnpm android:precheck` ✅
+- [x] `ci.yml` ✅
+- [x] `android.yml` build + e2e ✅
+- [x] evals عربية حتمية تعمل على ScriptedLlmClient
+- [x] لا إرسال بدون تأكيد — مُثبت في الاختبارات
+- [x] ANTHROPIC_API_KEY غائب، كل البوابة على ScriptedLlmClient
+
+### الـ SHA المرجعي
+
+`ee3dd6b` — آخر commit في البوابة النهائية
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
-| | | | |
+| 2026-10-14 | تجميد العقود + وحدة assistant + واجهة المساعد | `99d491f`, `cfaff51`, `721b78d` | — |
+| 2026-10-14 | التكامل + زر الخريطة + البوابة | `31eaa4b`, `49e7d08`, `ee3dd6b` | APPROVED `ee3dd6b` |

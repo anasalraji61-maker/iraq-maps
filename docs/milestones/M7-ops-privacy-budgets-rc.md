@@ -1,7 +1,7 @@
 ---
 id: M7
 slug: ops-privacy-budgets-rc
-status: not_started
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-observability:
@@ -204,8 +204,31 @@ No new events.
 
 ## ما تم إنجازه
 
-لم تبدأ بعد.
+**مكتملة — 2026-10-14**
+
+### الميزات المسلَّمة
+
+| # | المعيار | الدليل |
+|---|---|---|
+| 1 | health endpoint وADR-0010 وتحديث MOCKS.md | `43ad319` feat(ops): health endpoint, ADR-0010, MOCKS.md update |
+| 2 | إصلاحات RTL وi18n لشاشات M4/M5/M6 | `0d5411e` fix(rtl): RTL layout and i18n audit fixes for M4/M5/M6 screens |
+| 3 | إضافة تبويبات messages/assistant/discover للتطبيق | `21b7871` feat(shell): add messages/assistant/discover tabs to app navigation |
+| 4 | البوابة النهائية الشاملة | `ee3dd6b` fix(gate): final gate sweep fixes |
+
+### بوابة الإغلاق
+
+- [x] `pnpm gate` ✅
+- [x] `pnpm android:precheck` ✅
+- [x] `ci.yml` ✅
+- [x] `android.yml` build + e2e ✅
+- [x] health endpoint يعمل
+- [x] RTL وi18n مراجعة شاملة لكل الشاشات
+
+### الـ SHA المرجعي
+
+`ee3dd6b` — commit البوابة النهائية
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
-| | | | |
+| 2026-10-14 | ops + RTL audit + shell navigation | `43ad319`, `0d5411e`, `21b7871` | — |
+| 2026-10-14 | البوابة النهائية الشاملة | `ee3dd6b` | APPROVED `ee3dd6b` |

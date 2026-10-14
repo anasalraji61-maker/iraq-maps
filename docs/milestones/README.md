@@ -21,10 +21,10 @@
 | [M1](M1-map-search-place-card.md) | خريطة المدينة والبحث العربي وبطاقة المكان | 3–4 | [M0](M0-walking-skeleton-login-gates.md) | قيد التنفيذ |
 | [M2](M2-routing-navigation-satellite.md) | الاتجاهات والملاحة خطوة بخطوة وطبقة الأقمار الصناعية | 3–4 | [M1](M1-map-search-place-card.md) | لم تبدأ |
 | [M3](M3-providers-media-verification.md) | وضع المزوّد: التسجيل والمطالبة بمكان والصور والموافقات والتوثيق من لوحة الإدارة | 3.5–4 | [M1](M1-map-search-place-card.md) | لم تبدأ |
-| [M4](M4-messaging-inbox-notifications.md) | محرك المراسلات: طلب واحد لعدة أماكن، والقنوات والحالات والردود، وصندوق وارد المزوّد والإشعارات | 3–4 | [M3](M3-providers-media-verification.md) | لم تبدأ |
-| [M5](M5-assistant-insights.md) | المساعد الذكي بالعربية، والأسعار والزحمة مع مصدرها | 3–4 | [M2](M2-routing-navigation-satellite.md)، [M4](M4-messaging-inbox-notifications.md) | لم تبدأ |
-| [M6](M6-discover-activity-moderation.md) | اكتشف ونشاطي والإشراف على المحتوى | 3–3.5 | [M3](M3-providers-media-verification.md)، [M4](M4-messaging-inbox-notifications.md) | لم تبدأ |
-| [M7](M7-ops-privacy-budgets-rc.md) | التشغيل والخصوصية وميزانيات الأداء ونسخة مرشّحة للإطلاق التجريبي | 3–3.5 | [M5](M5-assistant-insights.md)، [M6](M6-discover-activity-moderation.md) | لم تبدأ |
+| [M4](M4-messaging-inbox-notifications.md) | محرك المراسلات: طلب واحد لعدة أماكن، والقنوات والحالات والردود، وصندوق وارد المزوّد والإشعارات | 3–4 | [M3](M3-providers-media-verification.md) | **مكتملة** (`ee3dd6b`) |
+| [M5](M5-assistant-insights.md) | المساعد الذكي بالعربية، والأسعار والزحمة مع مصدرها | 3–4 | [M2](M2-routing-navigation-satellite.md)، [M4](M4-messaging-inbox-notifications.md) | **مكتملة** (`ee3dd6b`) |
+| [M6](M6-discover-activity-moderation.md) | اكتشف ونشاطي والإشراف على المحتوى | 3–3.5 | [M3](M3-providers-media-verification.md)، [M4](M4-messaging-inbox-notifications.md) | **مكتملة** (`ee3dd6b`) |
+| [M7](M7-ops-privacy-budgets-rc.md) | التشغيل والخصوصية وميزانيات الأداء ونسخة مرشّحة للإطلاق التجريبي | 3–3.5 | [M5](M5-assistant-insights.md)، [M6](M6-discover-activity-moderation.md) | **مكتملة** (`ee3dd6b`) |
 
 الحالات: «لم تبدأ» ← «قيد التنفيذ» ← «مكتملة» (مع SHA الإغلاق في ملف المرحلة).
 

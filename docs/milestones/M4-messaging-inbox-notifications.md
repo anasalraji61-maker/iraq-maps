@@ -1,7 +1,7 @@
 ---
 id: M4
 slug: messaging-inbox-notifications
-status: in_progress
+status: completed
 phase_a_freeze_sha: pending
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
@@ -204,8 +204,36 @@ The integrator freezes contracts in 30 min or less. It adds:
 
 ## ما تم إنجازه
 
-لم تبدأ بعد.
+**مكتملة — 2026-10-14**
+
+### الميزات المسلَّمة
+
+| # | المعيار | الدليل |
+|---|---|---|
+| 1 | وحدة messaging: الطلبات والقنوات والحالات والردود وOutbox/BullMQ | `b2efdf3` feat(messaging): core inquiry/delivery/reply module with BullMQ |
+| 2 | محوّل WhatsApp Cloud: القالب والتوقيع وparseInbound | `bf1bea9` feat(whatsapp): WhatsApp Cloud adapter with signature verification |
+| 3 | وحدة notifications: FCM adapter وتفضيلات المستخدم | `6c374fc` feat(notifications): push module + FCM adapter + account prefs screen |
+| 4 | تبويب المراسلات: الإنشاء والتأكيد والقائمة والمحادثة والتسليم اليدوي | `86481d0` feat(messages): compose/confirm/list/detail screens + offline outbox |
+| 5 | صندوق وارد المزوّد: القائمة والتفاصيل والرد وإيقاف الاستقبال | `1839173` feat(provider-inbox): inbox list, detail, reply, opt-out screens |
+| 6 | التكامل: ربط الوحدات وMobile routes | `31f4eed` feat(api): wire M4 messaging + notifications modules into API and mobile routes |
+| 7 | إصلاح تدقيق الأمان | `f5e702e` fix(security): M4 security audit fixes |
+| 8 | تدفقات Maestro والاختبارات | `8ba0a8f` test(qa): M4 Maestro flow + messaging test fixes |
+
+### بوابة الإغلاق
+
+- [x] `pnpm gate` ✅
+- [x] `pnpm android:precheck` ✅
+- [x] `ci.yml` ✅
+- [x] `android.yml` build + e2e ✅
+- [x] جميع معايير القبول مُثبتة
+- [x] تقرير تدقيق الأمان: `docs/milestones/M4-security-audit.md`
+
+### الـ SHA المرجعي
+
+`ee3dd6b` — آخر commit في البوابة النهائية
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
-| | | | |
+| 2026-10-14 | وحدة messaging + WhatsApp adapter | `b2efdf3`, `bf1bea9` | — |
+| 2026-10-14 | notifications + messages app + provider inbox | `6c374fc`, `86481d0`, `1839173` | — |
+| 2026-10-14 | التكامل وإصلاح الأمان والبوابة | `31f4eed`, `f5e702e`, `ee3dd6b` | APPROVED `ee3dd6b` |

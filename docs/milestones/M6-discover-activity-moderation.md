@@ -1,7 +1,7 @@
 ---
 id: M6
 slug: discover-activity-moderation
-status: not_started
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-discover:
@@ -191,8 +191,32 @@ The integrator freezes contracts in 30 min or less. It adds:
 
 ## ما تم إنجازه
 
-لم تبدأ بعد.
+**مكتملة — 2026-10-14**
+
+### الميزات المسلَّمة
+
+| # | المعيار | الدليل |
+|---|---|---|
+| 1 | تجميد العقود: Discover feed وPostSchema وCommentSchema | `8532789` feat(contracts): M6 Discover feed contract freeze |
+| 2 | وحدة discover: المنشورات والإعجابات والتعليقات والإشراف | `557c5da` feat(discover): Discover feed module with posts/likes/comments |
+| 3 | شاشات Discover: الفيد وإنشاء منشور والتعليقات | `90e1891` feat(discover-app): Discover feed + create post + comments screens |
+| 4 | التكامل: ربط discover بالAPI والمسارات | `2e109e7` feat(api): wire M6 discover module into API and mobile routes |
+| 5 | إصلاح حدود معمارية المساعد وأحداث messaging | `f6428df` fix(arch): fix assistant adapter boundary + publish messaging domain events |
+
+### بوابة الإغلاق
+
+- [x] `pnpm gate` ✅
+- [x] `pnpm android:precheck` ✅
+- [x] `ci.yml` ✅
+- [x] `android.yml` build + e2e ✅
+- [x] وحدة discover مع UserDataEraser
+- [x] تبويب Discover في التطبيق
+
+### الـ SHA المرجعي
+
+`ee3dd6b` — آخر commit في البوابة النهائية
 
 | التاريخ | ما تم إنجازه | commit | ملاحظات التدقيق |
 |---|---|---|---|
-| | | | |
+| 2026-10-14 | تجميد العقود + وحدة discover + شاشات Discover | `8532789`, `557c5da`, `90e1891` | — |
+| 2026-10-14 | التكامل + إصلاح المعمارية + البوابة | `2e109e7`, `f6428df`, `ee3dd6b` | APPROVED `ee3dd6b` |
