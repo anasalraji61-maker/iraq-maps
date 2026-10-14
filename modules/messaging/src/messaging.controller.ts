@@ -1,5 +1,5 @@
 import { type AuthPrincipal, type InquiryId, messagingContract } from '@iraq-maps/contracts';
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { MessagingService } from './messaging.service';
 
@@ -8,7 +8,9 @@ const problem = <S extends number>(status: S, code: string, title: string) => ({
   body: { type: 'about:blank', title, status, code } as const,
 });
 
-export const AUTH_PRINCIPAL = 'AUTH_PRINCIPAL';
+/** Minimal shape of what IdentityAuthGuard leaves on the request. */
+interface AuthedRequest { principal?: AuthPrincipal }
+
 const WHATSAPP_VERIFY_TOKEN = process.env['WHATSAPP_VERIFY_TOKEN'] ?? '';
 
 @Controller()
@@ -16,9 +18,9 @@ export class MessagingController {
   constructor(private readonly svc: MessagingService) {}
 
   @TsRestHandler(messagingContract)
-  handle(@Inject(AUTH_PRINCIPAL) principal: AuthPrincipal | null) {
-    const userId = principal?.userId;
-    const isProvider = principal?.roles.includes('provider') ?? false;
+  handle(@Req() req: AuthedRequest) {
+    const userId = req.principal?.userId;
+    const isProvider = req.principal?.roles.includes('provider') ?? false;
 
     return tsRestHandler(messagingContract, {
       createInquiry: async ({ body, headers }) => {

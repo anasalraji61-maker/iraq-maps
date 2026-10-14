@@ -1,5 +1,5 @@
 import { adminProvidersContract, type PlaceId, type ProviderId, providersContract, type AuthPrincipal } from '@iraq-maps/contracts';
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { ProvidersService } from './providers.service';
 
@@ -8,16 +8,16 @@ const problem = <S extends number>(status: S, code: string, title: string) => ({
   body: { type: 'about:blank', title, status, code } as const,
 });
 
-/** Minimal guard interface: the real guard is wired by apps/api; the providers module just uses the token. */
-export const AUTH_PRINCIPAL = 'AUTH_PRINCIPAL';
+/** Minimal shape of what IdentityAuthGuard leaves on the request. */
+interface AuthedRequest { principal?: AuthPrincipal }
 
 @Controller()
 export class ProvidersController {
   constructor(private readonly svc: ProvidersService) {}
 
   @TsRestHandler(providersContract)
-  providers(@Inject(AUTH_PRINCIPAL) principal: AuthPrincipal | null) {
-    const userId = principal?.userId;
+  providers(@Req() req: AuthedRequest) {
+    const userId = req.principal?.userId;
     if (!userId) {
       return tsRestHandler(providersContract, {
         create: async () => problem(401, 'unauthorized', 'Authentication required'),
@@ -124,8 +124,8 @@ export class AdminProvidersController {
   constructor(private readonly svc: ProvidersService) {}
 
   @TsRestHandler(adminProvidersContract)
-  adminProviders(@Inject(AUTH_PRINCIPAL) principal: AuthPrincipal | null) {
-    const roles = principal?.roles ?? [];
+  adminProviders(@Req() req: AuthedRequest) {
+    const roles = req.principal?.roles ?? [];
     if (!roles.includes('admin') && !roles.includes('moderator')) {
       return tsRestHandler(adminProvidersContract, {
         queue: async () => problem(403, 'forbidden', 'Admin role required'),
@@ -134,7 +134,7 @@ export class AdminProvidersController {
       });
     }
 
-    const adminUserId = principal!.userId;
+    const adminUserId = req.principal!.userId;
     return tsRestHandler(adminProvidersContract, {
       queue: async ({ query }) => {
         const result = await this.svc.adminListQueue(query.status, query.cursor);

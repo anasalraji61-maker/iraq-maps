@@ -1,5 +1,5 @@
 import { type AuthPrincipal, type PostIdType, discoverContract } from '@iraq-maps/contracts';
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { DiscoverService } from './discover.service';
 
@@ -8,15 +8,16 @@ const problem = <S extends number>(status: S, code: string, title: string) => ({
   body: { type: 'about:blank' as const, title, status, code },
 });
 
-export const AUTH_PRINCIPAL = 'AUTH_PRINCIPAL';
+/** Minimal shape of what IdentityAuthGuard leaves on the request. */
+interface AuthedRequest { principal?: AuthPrincipal }
 
 @Controller()
 export class DiscoverController {
   constructor(private readonly svc: DiscoverService) {}
 
   @TsRestHandler(discoverContract)
-  handle(@Inject(AUTH_PRINCIPAL) principal: AuthPrincipal | null) {
-    const userId = principal?.userId;
+  handle(@Req() req: AuthedRequest) {
+    const userId = req.principal?.userId;
 
     return tsRestHandler(discoverContract, {
       listFeed: async ({ query }) => {
