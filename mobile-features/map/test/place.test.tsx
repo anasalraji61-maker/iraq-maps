@@ -123,13 +123,14 @@ describe('PlaceScreen', () => {
 
   it('shows each action once its screen is delivered, and opens it for this place', async () => {
     const { router, view } = await open();
-    for (const [key, pathname] of [
-      ['directions', '/route/[placeId]'],
-      ['message', '/messages/new'],
-      ['assistant', '/assistant'],
+    for (const [key, pathname, paramsKey] of [
+      ['directions', '/route/[placeId]', 'placeId'],
+      // message compose passes placeIds (plural) so ComposeScreen can pre-fill place chips.
+      ['message', '/messages/new', 'placeIds'],
+      ['assistant', '/assistant', 'placeId'],
     ] as const) {
       await fireEvent.press(view.getByRole('button', { name: t(`map:actions.${key}`) }));
-      expect(router.push).toHaveBeenLastCalledWith({ pathname, params: { placeId: 'n1001' } });
+      expect(router.push).toHaveBeenLastCalledWith({ pathname, params: { [paramsKey]: 'n1001' } });
     }
   });
 });

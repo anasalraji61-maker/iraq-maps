@@ -7,3 +7,5 @@ export { SessionProvider, useApi, useApiBaseUrl, useSession } from './session';
 export { recentRoutes, type RecentRoute } from './recent-routes';
 /** @public frozen stub (M3) */
 export { uploadAsset } from './upload-asset';
+/** @public offline inquiry outbox (M4) */
+export { InquiryOutbox, type OutboxEntry } from './outbox';

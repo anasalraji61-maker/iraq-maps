@@ -1,0 +1,39 @@
+{
+  "compose": {
+    "placeholder": "Write your request here...",
+    "addPlace": "Add a place",
+    "continue": "Continue",
+    "maxPlaces": "Maximum 5 places",
+    "title": "New message"
+  },
+  "confirm": {
+    "title": "Confirm send",
+    "send": "Send",
+    "offline": "Will be sent when internet is restored",
+    "channel": {
+      "in_app": "In-app",
+      "whatsapp": "WhatsApp",
+      "handoff": "Manual handoff"
+    }
+  },
+  "list": {
+    "title": "Messages",
+    "empty": "No messages yet",
+    "loadError": "Error loading messages"
+  },
+  "detail": {
+    "title": "Request details",
+    "copy": "Copy",
+    "open": "Open",
+    "loadError": "Error loading request",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "replied": "Replied",
+      "failed": "Failed",
+      "handed_off": "Manual handoff"
+    }
+  }
+}

@@ -3,6 +3,12 @@ import { jest } from '@jest/globals';
 // MapLibre's native module cannot load in Jest: map-kit's mock renders the real MapCanvas on host views.
 jest.mock('@maplibre/maplibre-react-native', () => jest.requireActual('@iraq-maps/map-kit/jest-mock'));
 
+// AsyncStorage is a native module; it requires a mock in Jest.
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(async () => null),
+  setItem: jest.fn(async () => undefined),
+}));
+
 jest.mock('expo-location', () => ({ requestForegroundPermissionsAsync: jest.fn(), getCurrentPositionAsync: jest.fn(), Accuracy: { Balanced: 3 } }));
 
 // One shared router: tests assert on router.push instead of mounting a navigator.

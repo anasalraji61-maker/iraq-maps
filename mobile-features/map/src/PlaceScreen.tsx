@@ -83,5 +83,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
 function RouteAction({ route, placeId }: { route: keyof typeof actions; placeId: string }) {
   const router = useRouter();
   if (!useRouteAvailable(route)) return null;
-  return <Button variant="secondary" label={t(actions[route])} onPress={() => router.push({ pathname: routes[route], params: { placeId } })} />;
+  // messageCompose passes placeIds (plural, comma-joined) so ComposeScreen can pre-fill the place chips.
+  const params = route === 'messageCompose' ? { placeIds: placeId } : { placeId };
+  return <Button variant="secondary" label={t(actions[route])} onPress={() => router.push({ pathname: routes[route], params })} />;
 }
