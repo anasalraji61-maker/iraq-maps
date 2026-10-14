@@ -5,6 +5,7 @@ import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRe
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
 import { AssistantModule, assistantMigrationsDir } from '@iraq-maps/assistant';
+import { discoverModule, discoverMigrationsDir } from '@iraq-maps/discover';
 import { messagingMigrationsDir, messagingModule } from '@iraq-maps/messaging';
 import { notificationsMigrationsDir, notificationsModule } from '@iraq-maps/notifications';
 import { createLogger, type Logger } from '@iraq-maps/observability';
@@ -42,6 +43,7 @@ export const moduleMigrations = [
   { schema: 'messaging', migrationsDir: messagingMigrationsDir },
   { schema: 'notifications', migrationsDir: notificationsMigrationsDir },
   { schema: 'assistant', migrationsDir: assistantMigrationsDir },
+  { schema: 'discover', migrationsDir: discoverMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -174,6 +176,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         messagingModule({ db }),
         notificationsModule({ db, eventBus: bus, env: opts.env }),
         AssistantModule,
+        discoverModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],

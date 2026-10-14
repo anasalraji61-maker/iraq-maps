@@ -15,6 +15,7 @@
     "@expo/metro-runtime": "~57.0.16",
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/feature-assistant": "workspace:*",
+    "@iraq-maps/feature-discover": "workspace:*",
     "@iraq-maps/feature-account": "workspace:*",
     "@iraq-maps/feature-map": "workspace:*",
     "@iraq-maps/feature-messages": "workspace:*",

@@ -151,6 +151,9 @@ importers:
       '@iraq-maps/db-kit':
         specifier: workspace:*
         version: link:../../packages/db-kit
+      '@iraq-maps/discover':
+        specifier: workspace:*
+        version: link:../../modules/discover
       '@iraq-maps/identity':
         specifier: workspace:*
         version: link:../../modules/identity
@@ -224,6 +227,9 @@ importers:
       '@iraq-maps/feature-assistant':
         specifier: workspace:*
         version: link:../../mobile-features/assistant
+      '@iraq-maps/feature-discover':
+        specifier: workspace:*
+        version: link:../../mobile-features/discover
       '@iraq-maps/feature-map':
         specifier: workspace:*
         version: link:../../mobile-features/map
