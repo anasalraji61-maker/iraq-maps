@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AssistantController } from './assistant.controller.js';
+import { AssistantController, AssistantAdminController } from './assistant.controller.js';
 import { AssistantService } from './assistant.service.js';
 import { PLACES_SEARCH_TOKEN } from './assistant.service.js';
 import { PortTokens } from '@iraq-maps/contracts';
@@ -27,7 +27,7 @@ const fakePlacesSearch = async (query: string, _city?: string) => [
 ];
 
 @Module({
-  controllers: [AssistantController],
+  controllers: [AssistantController, AssistantAdminController],
   providers: [
     AssistantService,
     { provide: 'ASSISTANT_DB', useValue: null }, // replaced by app.ts

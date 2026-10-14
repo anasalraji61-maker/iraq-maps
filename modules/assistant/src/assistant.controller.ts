@@ -1,12 +1,12 @@
 import { assistantContract } from '@iraq-maps/contracts';
-import { Controller, Req, Res } from '@nestjs/common';
+import { Controller, Get, Req, Res, HttpCode, HttpStatus } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AuthPrincipal } from '@iraq-maps/contracts';
 import { AssistantService } from './assistant.service.js';
 
 /** Minimal shape of what IdentityAuthGuard leaves on the request (mirrors identity module's AuthenticatedRequest). */
-interface AuthedRequest { principal?: AuthPrincipal }
+interface AuthedRequest extends FastifyRequest { principal?: AuthPrincipal }
 
 const problem = <S extends number>(status: S, code: string, title: string) => ({
   status,
@@ -78,4 +78,18 @@ export class AssistantController {
 
 function isHttpException(e: unknown, status: number): boolean {
   return typeof e === 'object' && e !== null && 'status' in e && (e as { status: number }).status === status;
+}
+
+@Controller('admin/assistant')
+export class AssistantAdminController {
+  constructor(private readonly svc: AssistantService) {}
+
+  @Get('usage')
+  @HttpCode(HttpStatus.OK)
+  async getUsage(@Req() req: AuthedRequest) {
+    if (!req.principal?.roles.includes('admin')) {
+      return { error: 'forbidden', statusCode: 403 };
+    }
+    return this.svc.getUsageLast30Days();
+  }
 }

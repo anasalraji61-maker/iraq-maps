@@ -24,5 +24,13 @@ export const rateLimitTable = assistantSchema.table('rate_limit', {
   count: integer('count').notNull().default(0),
 });
 
+export const usageDailyTable = assistantSchema.table('usage_daily', {
+  date: date('date').notNull().primaryKey(),
+  inputTokens: integer('input_tokens').notNull().default(0),
+  outputTokens: integer('output_tokens').notNull().default(0),
+  requestCount: integer('request_count').notNull().default(0),
+});
+
 export type SessionRow = typeof sessionTable.$inferSelect;
 export type MessageRow = typeof messageTable.$inferSelect;
+export type UsageDailyRow = typeof usageDailyTable.$inferSelect;

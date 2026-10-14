@@ -2,8 +2,8 @@ import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import type { LlmClient } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { eq, and, sql } from 'drizzle-orm';
-import { sessionTable, messageTable, rateLimitTable } from './schema.js';
+import { eq, and, sql, desc } from 'drizzle-orm';
+import { sessionTable, messageTable, rateLimitTable, usageDailyTable } from './schema.js';
 import type { AssistantTurnType } from '@iraq-maps/contracts';
 
 const DAILY_LIMIT = parseInt(process.env['ASSISTANT_DAILY_LIMIT'] ?? process.env['ASSISTANT_DAILY_LIMIT_PER_USER'] ?? '20', 10);
@@ -193,6 +193,7 @@ export class AssistantService {
       });
 
       finalContent = planReply.content;
+      this.trackUsage(estimateTokens(planMessages.map(m => m.content).join('')), estimateTokens(finalContent));
     } else {
       // --- Normal LLM tool loop ---
       const response = await this.llm.chat({
@@ -203,6 +204,7 @@ export class AssistantService {
       });
 
       finalContent = response.content;
+      this.trackUsage(estimateTokens(allMessages.map(m => m.content).join('')), estimateTokens(finalContent));
 
       // Handle tool calls (max 1 round-trip)
       if (response.stopReason === 'tool_use' && response.toolCalls && response.toolCalls.length > 0) {
@@ -244,6 +246,7 @@ export class AssistantService {
           });
 
           finalContent = followUp.content;
+          this.trackUsage(estimateTokens(messagesWithToolResult.map(m => m.content).join('')), estimateTokens(finalContent));
         } else if (toolCall.name === 'compose_message') {
           const text = toolCall.input['text'] as string | undefined;
           const placeIds = toolCall.input['placeIds'] as string[] | undefined;
@@ -342,6 +345,37 @@ export class AssistantService {
         target: [rateLimitTable.userId, rateLimitTable.date],
         set: { count: sql`${rateLimitTable.count} + 1` },
       });
+  }
+
+  /** Fire-and-forget: upsert today's aggregated usage row. */
+  private trackUsage(inputTokens: number, outputTokens: number): void {
+    void this.db
+      .insert(usageDailyTable)
+      .values({ date: sql`CURRENT_DATE`, inputTokens, outputTokens, requestCount: 1 })
+      .onConflictDoUpdate({
+        target: [usageDailyTable.date],
+        set: {
+          inputTokens: sql`${usageDailyTable.inputTokens} + excluded.input_tokens`,
+          outputTokens: sql`${usageDailyTable.outputTokens} + excluded.output_tokens`,
+          requestCount: sql`${usageDailyTable.requestCount} + 1`,
+        },
+      })
+      .catch(() => { /* non-critical */ });
+  }
+
+  async getUsageLast30Days(): Promise<Array<{ date: string; inputTokens: number; outputTokens: number; requestCount: number }>> {
+    const rows = await this.db
+      .select()
+      .from(usageDailyTable)
+      .where(sql`${usageDailyTable.date} >= CURRENT_DATE - INTERVAL '29 days'`)
+      .orderBy(desc(usageDailyTable.date))
+      .limit(30);
+    return rows.map(r => ({
+      date: typeof r.date === 'string' ? r.date : (r.date as Date).toISOString().slice(0, 10),
+      inputTokens: r.inputTokens,
+      outputTokens: r.outputTokens,
+      requestCount: r.requestCount,
+    }));
   }
 
   extractComposeParams(reply: string): { text?: string; placeIds?: string[] } | undefined {
