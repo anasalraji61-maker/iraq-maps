@@ -67,10 +67,11 @@ export class DiscoverService {
   async likePost(userId: UserId, postId: PostIdType) {
     const post = await this.getPostOrThrow(postId);
 
-    await this.db
+    const inserted = await this.db
       .insert(postLikeTable)
       .values({ postId, userId })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning();
 
     // Re-compute count from table
     const [updated] = await this.db
@@ -79,8 +80,8 @@ export class DiscoverService {
       .where(eq(postTable.id, postId))
       .returning();
 
-    // Notify post author (idempotent: onConflictDoNothing avoids duplicate likes)
-    if (post.authorId !== userId) {
+    // Only notify on the first like (not on duplicate/idempotent calls)
+    if (inserted.length > 0 && post.authorId !== userId) {
       await this.eventBus.publish({
         id: randomUUID(),
         name: 'discover.post.liked.v1',

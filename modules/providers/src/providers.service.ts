@@ -357,7 +357,7 @@ export class ProvidersService {
     };
   }
 
-  private async getActiveConsents(providerId: ProviderId): Promise<ConsentScope[]> {
+  async getActiveConsents(providerId: ProviderId): Promise<ConsentScope[]> {
     const rows = await this.db.select({ scope: consentTable.scope }).from(consentTable).where(and(eq(consentTable.providerId, providerId), isNull(consentTable.revokedAt)));
     return rows.map((r) => r.scope as ConsentScope);
   }

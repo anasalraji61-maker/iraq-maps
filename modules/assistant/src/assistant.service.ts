@@ -1,7 +1,7 @@
 import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import type { LlmClient } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { Db } from '@iraq-maps/db-kit';
 import { eq, and, sql } from 'drizzle-orm';
 import { sessionTable, messageTable, rateLimitTable } from './schema.js';
 import type { AssistantTurnType } from '@iraq-maps/contracts';
@@ -78,8 +78,7 @@ export const PLACES_SEARCH_TOKEN = 'ASSISTANT_PLACES_SEARCH';
 @Injectable()
 export class AssistantService {
   constructor(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    @Inject('ASSISTANT_DB') private readonly db: PostgresJsDatabase<any>,
+    @Inject('ASSISTANT_DB') private readonly db: Db,
     @Inject(PortTokens.LlmClient) private readonly llm: LlmClient,
     @Inject(PLACES_SEARCH_TOKEN) private readonly placesSearch: PlacesSearchFn,
   ) {}

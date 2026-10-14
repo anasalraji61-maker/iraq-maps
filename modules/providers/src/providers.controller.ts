@@ -36,7 +36,7 @@ export class ProvidersController {
       create: async ({ body }) => {
         try {
           const row = await this.svc.register(userId, body);
-          const consents = await this.svc['getActiveConsents'](row.id as ProviderId);
+          const consents = await this.svc.getActiveConsents(row.id as ProviderId);
           return { status: 201, body: this.svc.toProviderMe(row, consents) };
         } catch (e: unknown) {
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
@@ -46,7 +46,7 @@ export class ProvidersController {
       me: async () => {
         const row = await this.svc.getByUserId(userId);
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
-        const consents = await this.svc['getActiveConsents'](row.id as ProviderId);
+        const consents = await this.svc.getActiveConsents(row.id as ProviderId);
         return { status: 200, body: this.svc.toProviderMe(row, consents) };
       },
       update: async ({ body }) => {
@@ -54,7 +54,7 @@ export class ProvidersController {
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         try {
           const updated = await this.svc.update(userId, row.id as ProviderId, body);
-          const consents = await this.svc['getActiveConsents'](updated.id as ProviderId);
+          const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
           return { status: 200, body: this.svc.toProviderMe(updated, consents) };
         } catch (e: unknown) {
           if (isNestException(e, 403)) return problem(404, 'forbidden', 'Access denied');
@@ -71,7 +71,7 @@ export class ProvidersController {
         const row = await this.svc.getByUserId(userId);
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         const updated = await this.svc.confirmPhoneVerification(userId, row.id as ProviderId, body.verificationId, body.code);
-        const consents = await this.svc['getActiveConsents'](updated.id as ProviderId);
+        const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
         return { status: 200, body: this.svc.toProviderMe(updated, consents) };
       },
       claim: async ({ body }) => {
@@ -79,7 +79,7 @@ export class ProvidersController {
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         try {
           const updated = await this.svc.claimPlace(userId, row.id as ProviderId, body.placeId as PlaceId);
-          const consents = await this.svc['getActiveConsents'](updated.id as ProviderId);
+          const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
           return { status: 200, body: this.svc.toProviderMe(updated, consents) };
         } catch (e: unknown) {
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
@@ -91,7 +91,7 @@ export class ProvidersController {
         if (!row) return problem(404, 'provider_not_found', 'Provider not found');
         try {
           const updated = await this.svc.submit(userId, row.id as ProviderId);
-          const consents = await this.svc['getActiveConsents'](updated.id as ProviderId);
+          const consents = await this.svc.getActiveConsents(updated.id as ProviderId);
           return { status: 200, body: this.svc.toProviderMe(updated, consents) };
         } catch (e: unknown) {
           if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
