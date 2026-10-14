@@ -17,7 +17,7 @@ async function read<T>(key: string, schema: { parse(value: unknown): T }): Promi
 }
 
 /** Restores the session from expo-secure-store and provides it plus the API client. */
-export function SessionProvider({ children, apiBaseUrl }: { children: ReactNode; apiBaseUrl: () => string }) {
+export function SessionProvider({ children, apiBaseUrl, onServerError }: { children: ReactNode; apiBaseUrl: () => string; onServerError?: (status: number) => void }) {
   const [state, setState] = useState<SessionState>({ status: 'loading' });
   const tokens = useRef<TokenPair | null>(null);
   const baseUrl = useRef(apiBaseUrl);
@@ -31,7 +31,7 @@ export function SessionProvider({ children, apiBaseUrl }: { children: ReactNode;
     await Promise.all([SecureStore.deleteItemAsync(TOKENS_KEY), SecureStore.deleteItemAsync(USER_KEY)]);
   }, []);
 
-  const api = useMemo(() => createClient({ baseUrl: currentBaseUrl, getTokens: () => tokens.current, onTokens: setTokens }), [currentBaseUrl, setTokens]);
+  const api = useMemo(() => createClient({ baseUrl: currentBaseUrl, getTokens: () => tokens.current, onTokens: setTokens, onServerError }), [currentBaseUrl, setTokens, onServerError]);
 
   const updateUser = useCallback((user: Me) => {
     if (!tokens.current) return;

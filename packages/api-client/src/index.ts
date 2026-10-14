@@ -9,6 +9,8 @@ export interface CreateClientOptions {
   getTokens(): TokenPair | null;
   /** Called after a successful refresh (new pair) or a failed one (null => signed out). */
   onTokens(tokens: TokenPair | null): void | Promise<void>;
+  /** Called when the server returns a 5xx status so the app can show a global error notice. */
+  onServerError?: (status: number) => void;
   fetch?: typeof fetch;
 }
 
@@ -29,7 +31,7 @@ function encodingPathParams<T extends object>(client: T): T {
 }
 
 /** ts-rest client that injects the bearer token and, on 401, refreshes once (single-flight) and retries. */
-export function createClient({ baseUrl, getTokens, onTokens, fetch: doFetch = (...args) => fetch(...args) }: CreateClientOptions): ApiClient {
+export function createClient({ baseUrl, getTokens, onTokens, onServerError, fetch: doFetch = (...args) => fetch(...args) }: CreateClientOptions): ApiClient {
   const send = async ({ route, path, method, headers, body, fetchOptions }: ApiFetcherArgs, accessToken?: string) => {
     const res = await doFetch(baseUrl() + path, {
       method,
@@ -65,6 +67,10 @@ export function createClient({ baseUrl, getTokens, onTokens, fetch: doFetch = (.
   const api: ApiFetcher = async (args) => {
     const tokens = getTokens();
     const res = await send(args, tokens?.accessToken);
+    if (res.status >= 500) {
+      onServerError?.(res.status);
+      return res;
+    }
     if (res.status !== 401 || !tokens || (res.body as Problem).code !== 'unauthorized') return res;
     const fresh = await refreshFrom(tokens);
     return fresh ? send(args, fresh.accessToken) : res;

@@ -2,6 +2,11 @@
   "tabs": {
     "assistant": "Assistant"
   },
+  "error": {
+    "unexpected": "An unexpected error occurred",
+    "retry": "Try again",
+    "serverError": "Server error, please try again"
+  },
   "devSettings": {
     "title": "Developer settings",
     "open": "Open developer settings",

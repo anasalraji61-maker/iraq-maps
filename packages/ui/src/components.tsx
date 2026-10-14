@@ -245,8 +245,39 @@ export function IconButton({ icon, accessibilityLabel, onPress, testID }: IconBu
   );
 }
 
+export interface ErrorToastProps { message: string; testID?: string }
+
+/**
+ * A brief non-blocking error notice rendered as a floating bar at the bottom of the screen.
+ * Announced for accessibility. The caller is responsible for showing/hiding it.
+ */
+export function ErrorToast({ message, testID }: ErrorToastProps): ReactElement {
+  useAnnounce(message);
+  return (
+    <View testID={testID} accessibilityRole="alert" style={styles.toast} pointerEvents="none">
+      <RNText style={[text.body, { color: bannerColors.error.fg }]}>{message}</RNText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.bg },
+  toast: {
+    position: 'absolute',
+    bottom: space.xl,
+    start: space.m,
+    end: space.m,
+    padding: space.m,
+    borderRadius: radius.m,
+    backgroundColor: bannerColors.error.bg,
+    borderStartWidth: 4,
+    borderStartColor: bannerColors.error.fg,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
   content: { padding: space.m, gap: space.m },
   fill: { flex: 1 },
   center: { textAlign: 'center' },

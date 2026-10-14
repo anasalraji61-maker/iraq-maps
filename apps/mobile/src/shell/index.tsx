@@ -1,10 +1,10 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
-import { Banner, Button, EmptyState, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
+import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
-import { useEffect, useState, type ReactNode } from 'react';
+import { Component, useEffect, useState, type ReactNode } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { availableRoutes } from './available-routes';
@@ -47,6 +47,39 @@ const tabBarOptions = {
 // the label. The bar adds the bottom safe-area inset as padding (gesture navigation), so the height includes it too.
 const TAB_ITEM_CHROME = 5 + 28 + 5 + 4;
 
+interface ErrorBoundaryState { hasError: boolean }
+
+/**
+ * Catches unhandled render errors and shows a recoverable "حدث خطأ غير متوقع" screen.
+ * Must be a class component — React only supports class-based error boundaries.
+ */
+export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  reset = () => this.setState({ hasError: false });
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <Screen>
+          <EmptyState
+            title={t('shell:error.unexpected')}
+            action={{ label: t('shell:error.retry'), onPress: this.reset }}
+          />
+        </Screen>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /** Nothing renders until the saved locale, server URL, fonts and session are restored, so nothing flashes. */
 export function RootLayout() {
   const fontsReady = useUiFonts();
@@ -54,6 +87,7 @@ export function RootLayout() {
   // The navigation state lives above it (expo-router), so the user stays where they were.
   const locale = useLocale();
   const [restored, setRestored] = useState(false);
+  const [serverError, setServerError] = useState(false);
   useEffect(() => {
     let mounted = true;
     let stop: (() => void) | undefined;
@@ -67,21 +101,32 @@ export function RootLayout() {
       stop?.();
     };
   }, []);
+
+  // Auto-dismiss the server error toast after 4 seconds.
+  useEffect(() => {
+    if (!serverError) return;
+    const id = setTimeout(() => setServerError(false), 4000);
+    return () => clearTimeout(id);
+  }, [serverError]);
+
   if (!fontsReady || !restored) return null;
   return (
-    <SessionProvider apiBaseUrl={apiBaseUrl}>
-      <AvailableRoutesProvider routes={availableRoutes()}>
-        <SessionRestored>
-          {/* Screens set their own (announced) title; '' only avoids showing a raw route path when one does not. */}
-          <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: font }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Protected guard={!isProduction()}>
-              <Stack.Screen name="dev-settings" options={{ title: t('shell:devSettings.title') }} />
-            </Stack.Protected>
-          </Stack>
-        </SessionRestored>
-      </AvailableRoutesProvider>
-    </SessionProvider>
+    <ErrorBoundary>
+      <SessionProvider apiBaseUrl={apiBaseUrl} onServerError={() => setServerError(true)}>
+        <AvailableRoutesProvider routes={availableRoutes()}>
+          <SessionRestored>
+            {/* Screens set their own (announced) title; '' only avoids showing a raw route path when one does not. */}
+            <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: font }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Protected guard={!isProduction()}>
+                <Stack.Screen name="dev-settings" options={{ title: t('shell:devSettings.title') }} />
+              </Stack.Protected>
+            </Stack>
+          </SessionRestored>
+        </AvailableRoutesProvider>
+      </SessionProvider>
+      {serverError ? <ErrorToast message={t('shell:error.serverError')} /> : null}
+    </ErrorBoundary>
   );
 }
 
