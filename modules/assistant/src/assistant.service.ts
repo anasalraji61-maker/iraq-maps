@@ -43,7 +43,35 @@ const ASSISTANT_TOOLS = [
   },
 ];
 
-export type PlacesSearchFn = (query: string, city?: string) => Promise<Array<{ id: string; name: string; address: string }>>;
+export type PlacesSearchFn = (query: string, city?: string) => Promise<Array<{ id: string; name: string; address: string; category?: string; distanceMeters?: number }>>;
+
+/** Estimate token count assuming ~4 chars per token */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/** Trim history to fit within maxTokens, keeping system prompt budget in mind */
+function trimToTokenBudget(
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+  maxTokens: number,
+): Array<{ role: 'user' | 'assistant'; content: string }> {
+  let total = 0;
+  const kept: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+  // Walk backwards and keep messages that fit
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i]!;
+    const tokens = estimateTokens(msg.content);
+    if (total + tokens > maxTokens) break;
+    kept.unshift(msg);
+    total += tokens;
+  }
+  return kept;
+}
+
+const CONTEXT_TOKEN_BUDGET = 8000;
+// Reserve ~500 tokens for system prompt overhead
+const HISTORY_TOKEN_BUDGET = CONTEXT_TOKEN_BUDGET - 500;
+
 
 export const PLACES_SEARCH_TOKEN = 'ASSISTANT_PLACES_SEARCH';
 
@@ -80,19 +108,20 @@ export class AssistantService {
       await this.db.insert(sessionTable).values({ id: sessionId, userId });
     }
 
-    // Get history
+    // Get history — load up to 40 rows then trim by token budget
     const history = await this.db
       .select({ role: messageTable.role, content: messageTable.content })
       .from(messageTable)
       .where(eq(messageTable.sessionId, sessionId))
       .orderBy(messageTable.createdAt)
-      .limit(20);
+      .limit(40);
 
-    // Merge history with new messages
-    const allMessages = [
+    // Merge history with new messages, then trim to token budget
+    const merged = [
       ...history.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       ...turn.messages,
     ];
+    const allMessages = trimToTokenBudget(merged, HISTORY_TOKEN_BUDGET);
 
     let finalContent: string;
     let composeParams: { text?: string; placeIds?: string[] } | undefined;
@@ -125,21 +154,39 @@ export class AssistantService {
 
       focusPlaceIds = ordered.map(r => r.id);
 
-      // Build itinerary text for LLM follow-up
-      const itineraryText = ordered
-        .map((r, i) => `${i + 1}. ${r.name} — ${r.address}`)
-        .join('\n');
+      // Assign slots: breakfast, attraction, lunch, cafe, dinner
+      const slotDefs = [
+        { label: 'الإفطار', time: '08:00', duration: '1 ساعة', emoji: '🌅' },
+        { label: 'معلم سياحي', time: '09:30', duration: 'ساعتان', emoji: '🗺️' },
+        { label: 'الغداء', time: '13:00', duration: '1 ساعة', emoji: '☀️' },
+        { label: 'مقهى', time: '15:00', duration: '1 ساعة', emoji: '☕' },
+        { label: 'العشاء', time: '19:00', duration: 'ساعتان', emoji: '🌙' },
+      ];
+
+      const itineraryLines = ordered.map((r, i) => {
+        const slot = slotDefs[i] ?? slotDefs[slotDefs.length - 1]!;
+        return `${i + 1}. [${slot.time}] ${slot.label} — ${r.name} (${r.address}) — مدة الزيارة: ${slot.duration}`;
+      });
+
+      const itineraryText = itineraryLines.join('\n');
+
+      const DAY_PLAN_SYSTEM = `${SYSTEM_PROMPT}
+
+عند إنشاء برنامج يوم، استخدم هذا التنسيق بالضبط:
+- قسّم اليوم إلى: صباح (8-12)، ظهر (12-17)، مساء (17-22)
+- لكل مكان: رقم الترتيب، الوقت، اسم المكان، المدة المقترحة
+- اختم بملاحظات مفيدة للزيارة`;
 
       const planMessages = [
         ...allMessages,
         {
           role: 'user' as const,
-          content: `نتائج البحث للتخطيط:\n${itineraryText}\nرتّب هذه الأماكن كبرنامج يوم مقترح بالعربية.`,
+          content: `نتائج البحث للتخطيط:\n${itineraryText}\n\nبناءً على هذه الأماكن، أنشئ برنامجاً يومياً مرتّباً بالأوقات مع تقسيم صباح/ظهر/مساء. اذكر المدة المقترحة لكل مكان.`,
         },
       ];
 
       const planReply = await this.llm.chat({
-        systemPrompt: SYSTEM_PROMPT,
+        systemPrompt: DAY_PLAN_SYSTEM,
         messages: planMessages,
         maxTokens: 1024,
       });
@@ -169,7 +216,11 @@ export class AssistantService {
           focusPlaceIds = results.slice(0, 5).map(r => r.id);
 
           const toolResultText = results.length > 0
-            ? results.map(r => `- ${r.name}: ${r.address}`).join('\n')
+            ? results.map(r => {
+                const cat = r.category ? ` (${r.category})` : '';
+                const dist = r.distanceMeters != null ? ` - ${r.distanceMeters < 1000 ? `${r.distanceMeters}م` : `${(r.distanceMeters / 1000).toFixed(1)}كم`}` : '';
+                return `- ${r.name}${cat} - ${r.address}${dist}`;
+              }).join('\n')
             : 'لم يتم العثور على نتائج.';
 
           const messagesWithToolResult = [
