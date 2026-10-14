@@ -1,6 +1,34 @@
 import { apiContract, Problem, type ApiContract, type TokenPair } from '@iraq-maps/contracts';
 import { initClient, isZodType, type ApiFetcher, type ApiFetcherArgs, type InitClientReturn } from '@ts-rest/core';
 
+// ---------------------------------------------------------------------------
+// Simple in-memory cache for GET /v1/places/:id (place detail)
+// TTL: 5 minutes. Prevents redundant fetches when the discover feed re-renders.
+// ---------------------------------------------------------------------------
+interface CacheEntry { body: unknown; expiresAt: number }
+const PLACE_CACHE_TTL_MS = 5 * 60 * 1000;
+const placeCache = new Map<string, CacheEntry>();
+
+/** Returns the cached place body if still fresh, or undefined. */
+function getCachedPlace(id: string): unknown | undefined {
+  const entry = placeCache.get(id);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) { placeCache.delete(id); return undefined; }
+  return entry.body;
+}
+
+/** Stores a place body in the cache. */
+function setCachedPlace(id: string, body: unknown): void {
+  placeCache.set(id, { body, expiresAt: Date.now() + PLACE_CACHE_TTL_MS });
+}
+
+/** Extracts the place id from a GET /v1/places/:id path, or returns null. */
+function placeIdFromPath(method: string, path: string): string | null {
+  if (method !== 'GET') return null;
+  const m = /\/v1\/places\/([^/?]+)$/.exec(path);
+  return m ? decodeURIComponent(m[1]!) : null;
+}
+
 export type ApiClient = InitClientReturn<ApiContract, { baseUrl: string; baseHeaders: Record<string, string> }>;
 
 export interface CreateClientOptions {
@@ -65,15 +93,28 @@ export function createClient({ baseUrl, getTokens, onTokens, onServerError, fetc
   };
 
   const api: ApiFetcher = async (args) => {
+    // Serve place detail from cache when available.
+    const placeId = placeIdFromPath(args.method, args.path);
+    if (placeId) {
+      const cached = getCachedPlace(placeId);
+      if (cached !== undefined) return { status: 200, headers: new Headers(), body: cached };
+    }
+
     const tokens = getTokens();
     const res = await send(args, tokens?.accessToken);
     if (res.status >= 500) {
       onServerError?.(res.status);
       return res;
     }
-    if (res.status !== 401 || !tokens || (res.body as Problem).code !== 'unauthorized') return res;
+    if (res.status !== 401 || !tokens || (res.body as Problem).code !== 'unauthorized') {
+      // Cache a successful place detail response.
+      if (placeId && res.status === 200) setCachedPlace(placeId, res.body);
+      return res;
+    }
     const fresh = await refreshFrom(tokens);
-    return fresh ? send(args, fresh.accessToken) : res;
+    const retried = fresh ? await send(args, fresh.accessToken) : res;
+    if (placeId && retried.status === 200) setCachedPlace(placeId, retried.body);
+    return retried;
   };
   return encodingPathParams(initClient(apiContract, { baseUrl: '', baseHeaders: {}, api }));
 }

@@ -1,11 +1,12 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
-import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   I18nManager,
+  Platform,
   Pressable,
   RefreshControl,
   Share,
@@ -39,7 +40,7 @@ const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   offer: { bg: '#FFEBEE', text: '#D32F2F' },
 };
 
-function PostItem({
+const PostItem = memo(function PostItem({
   post,
   placeName,
   onLike,
@@ -99,7 +100,7 @@ function PostItem({
       </View>
     </View>
   );
-}
+});
 
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
@@ -228,6 +229,10 @@ export function DiscoverFeedScreen(): ReactElement {
             onPlacePress={handlePlacePress}
           />
         )}
+        initialNumToRender={5}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews={Platform.OS === 'android'}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.3}
