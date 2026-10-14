@@ -1,0 +1,33 @@
+# Staging compose — extends the base infra services and adds the API container.
+# Usage:
+#   cp .env.example .env  # fill real values
+#   docker compose -f infra/docker-compose.yml -f infra/docker-compose.staging.yml up -d
+#
+# The API image must be built first:
+#   docker build -f apps/api/Dockerfile -t iraq-maps-api:staging .
+#
+# All secrets come from the .env file in the repo root; they are never baked
+# into the image (the repo is public).
+
+services:
+  api:
+    image: iraq-maps-api:staging
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    env_file: ../.env
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
