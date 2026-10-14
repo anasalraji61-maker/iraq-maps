@@ -87,8 +87,8 @@ describe('search', () => {
       first.settle({ status: 200, body: { items: [citadel] } });
     });
     expect(view.getAllByTestId(map.searchResult)).toHaveLength(1);
-    expect(view.getByText('شارع القلعة')).toBeOnTheScreen();
-    expect(view.queryByText('قلعة بغداد')).toBeNull();
+    expect(view.getByText('📍 شارع القلعة')).toBeOnTheScreen();
+    expect(view.queryByText('🏛️ قلعة بغداد')).toBeNull();
   });
 
   it('shows the loading state, then results with kind, area, source and Arabic-Indic distances', async () => {
@@ -100,8 +100,8 @@ describe('search', () => {
     await act(async () => pending.settle({ status: 200, body: { items: [citadel, street] } }));
     expect(view.queryByText(t('common:status.loading'))).toBeNull();
     const [first, second] = view.getAllByTestId(map.searchResult);
-    expect(first).toHaveAccessibleName(`قلعة بغداد ١٫٢ كم سياحة · الرصافة ${t('map:source.osm')}`);
-    expect(second).toHaveAccessibleName(`شارع القلعة ٣٥٠ م شارع ${t('map:source.osm')}`);
+    expect(first).toHaveAccessibleName(`🏛️ قلعة بغداد ١٫٢ كم سياحة · الرصافة ${t('map:source.osm')}`);
+    expect(second).toHaveAccessibleName(`📍 شارع القلعة ٣٥٠ م شارع ${t('map:source.osm')}`);
     await fireEvent.press(first!);
     expect(router.push).toHaveBeenLastCalledWith('/place/n1001');
     // The results are markers too, and a marker opens its place.
@@ -114,7 +114,7 @@ describe('search', () => {
     api.places.search.mockReturnValue(respond(200, { items: [citadel] }));
     const { view } = await search('citadel', api, 'en');
     expect(api.places.search.mock.calls[0]?.[0]?.query).toMatchObject({ lang: 'en' });
-    expect(view.getByTestId(map.searchResult)).toHaveAccessibleName('Baghdad Citadel 1.2 km Tourism · Rusafa From OpenStreetMap');
+    expect(view.getByTestId(map.searchResult)).toHaveAccessibleName('🏛️ Baghdad Citadel 1.2 km Tourism · Rusafa From OpenStreetMap');
   });
 
   it('says so when nothing matches', async () => {

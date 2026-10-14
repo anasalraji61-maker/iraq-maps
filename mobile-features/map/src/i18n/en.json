@@ -83,7 +83,8 @@
   "actions": {
     "directions": "Directions",
     "message": "Message this place",
-    "assistant": "Ask the assistant"
+    "assistant": "Ask the assistant",
+    "nearMe": "Near me"
   },
   "satellite": {
     "label": "Satellite"

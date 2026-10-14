@@ -7,6 +7,30 @@ import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
+
+/** Maps place category to a representative emoji icon. */
+const CATEGORY_ICONS: Record<string, string> = {
+  food: '🍽️',
+  cafe: '☕',
+  lodging: '🏨',
+  shopping: '🛒',
+  tourism: '🏛️',
+  health: '🏥',
+  finance: '🏦',
+  fuel: '⛽',
+  office: '🏢',
+  worship: '🕌',
+  education: '🎓',
+  government: '🏛️',
+  transport: '🚌',
+  entertainment: '🎭',
+};
+const DEFAULT_ICON = '📍';
+
+/** Returns the icon for a place summary (category takes precedence). */
+function categoryIcon(place: PlaceSummary): string {
+  return place.category ? (CATEGORY_ICONS[place.category] ?? DEFAULT_ICON) : DEFAULT_ICON;
+}
 import { SatelliteToggle } from './components/SatelliteToggle';
 import { useMapStyle, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
@@ -215,7 +239,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
               <PlaceSummaryCard
                 key={place.id}
                 testID={testIDs.map.searchResult}
-                name={pickName(place.names, mapLang)}
+                name={`${categoryIcon(place)} ${pickName(place.names, mapLang)}`}
                 category={kindLabel(place)}
                 area={place.area ? pickName(place.area, mapLang) : undefined}
                 distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
@@ -228,6 +252,16 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
       </View>
       <View style={styles.locate}>
         <IconButton testID={testIDs.map.locate} icon="my_location" accessibilityLabel={t('locate.label')} onPress={locate} />
+        <Button
+          testID="map.near.me"
+          label={t('actions.nearMe')}
+          onPress={() => {
+            void locate().then(() => {
+              setQuery('');
+              setSearchPanelOpen(true);
+            });
+          }}
+        />
         {selectedPlaceId ? (
           <Button
             label={t('actions.directions')}

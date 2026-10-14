@@ -83,7 +83,8 @@
   "actions": {
     "directions": "ئاراستەکان",
     "message": "نامە بنێرە بۆ شوێنەکە",
-    "assistant": "پرسیار لە یاریدەدەر بکە"
+    "assistant": "پرسیار لە یاریدەدەر بکە",
+    "nearMe": "نزیکم"
   },
   "satellite": {
     "label": "ماهوارە"

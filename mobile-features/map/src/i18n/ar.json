@@ -83,7 +83,8 @@
   "actions": {
     "directions": "الاتجاهات",
     "message": "راسِل المكان",
-    "assistant": "اسأل المساعد"
+    "assistant": "اسأل المساعد",
+    "nearMe": "قريب مني"
   },
   "satellite": {
     "label": "القمر الصناعي"
