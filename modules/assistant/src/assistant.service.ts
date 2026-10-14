@@ -65,8 +65,8 @@ export class AssistantService {
   }
 
   async chat(userId: string, turn: AssistantTurnType) {
-    // Rate limit check
-    await this.checkRateLimit(userId);
+    // Rate limit check — returns remaining messages after this call
+    const rateLimitRemaining = await this.checkRateLimit(userId);
 
     // Upsert session
     const sessionId = turn.sessionId;
@@ -217,12 +217,18 @@ export class AssistantService {
     // Keep focusPlaceId for compat (first of the array)
     const focusPlaceId = focusPlaceIds[0];
 
+    // Compute reset time: midnight UTC tonight
+    const tomorrow = new Date();
+    tomorrow.setUTCHours(24, 0, 0, 0);
+
     return {
       sessionId,
       reply: finalContent,
       composeParams,
       focusPlaceId,
       focusPlaceIds: focusPlaceIds.length > 0 ? focusPlaceIds : undefined,
+      rateLimitRemaining,
+      rateLimitReset: tomorrow.toISOString(),
     };
   }
 
@@ -251,18 +257,22 @@ export class AssistantService {
     return result.length > 0;
   }
 
-  private async checkRateLimit(userId: string) {
+  /** Returns the number of messages remaining after this call (i.e. limit - current - 1). */
+  private async checkRateLimit(userId: string): Promise<number> {
     const row = await this.db
       .select({ count: rateLimitTable.count })
       .from(rateLimitTable)
       .where(and(eq(rateLimitTable.userId, userId), eq(rateLimitTable.date, sql`CURRENT_DATE`)))
       .limit(1);
-    if ((row[0]?.count ?? 0) >= DAILY_LIMIT) {
+    const current = row[0]?.count ?? 0;
+    if (current >= DAILY_LIMIT) {
       throw new HttpException(
         { code: 'daily_limit_exceeded', title: 'Daily limit exceeded' },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
+    // remaining = how many messages left after consuming this one
+    return Math.max(0, DAILY_LIMIT - current - 1);
   }
 
   private async incrementRateLimit(userId: string) {

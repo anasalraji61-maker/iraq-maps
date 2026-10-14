@@ -14,10 +14,12 @@ import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
 import { providersMigrationsDir, providersModule } from '@iraq-maps/providers';
 import { routingModule } from '@iraq-maps/routing';
 import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
+import { sql } from 'drizzle-orm';
 import {
   Catch,
   Controller,
   HttpException,
+  Inject,
   Module,
   type ArgumentsHost,
   type ExceptionFilter,
@@ -67,9 +69,19 @@ const trustProxy = (v: string) => (v === 'true' ? true : v === 'false' ? false :
 
 @Controller()
 class HealthController {
+  constructor(@Inject('HEALTH_DB') private readonly db: ReturnType<typeof createDb>['db']) {}
+
   @TsRestHandler(healthContract.health)
   health() {
-    return tsRestHandler(healthContract.health, async () => ({ status: 200, body: { status: 'ok', version: '0.0.0' } }));
+    return tsRestHandler(healthContract.health, async () => {
+      try {
+        await this.db.execute(sql`SELECT 1`);
+      } catch {
+        // Return 503 by throwing an HttpException that bypasses the 200 contract
+        throw Object.assign(new HttpException(problem(503, 'db_unavailable', 'Database unavailable'), 503), {});
+      }
+      return { status: 200, body: { status: 'ok', version: '1.0.0' } };
+    });
   }
 }
 
@@ -195,7 +207,11 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         discoverModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
-      providers: [{ provide: APP_GUARD, useClass: IdentityAuthGuard }, { provide: PortTokens.EventBus, useValue: bus }],
+      providers: [
+        { provide: APP_GUARD, useClass: IdentityAuthGuard },
+        { provide: PortTokens.EventBus, useValue: bus },
+        { provide: 'HEALTH_DB', useValue: db },
+      ],
       exports: [PortTokens.EventBus],
     },
     new FastifyAdapter({ trustProxy: trustProxy(config.TRUST_PROXY), loggerInstance: log && fastifyLogger(log), frameworkErrors }),
@@ -204,7 +220,10 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
   app.useGlobalFilters(new ProblemFilter(log));
   const fastify = app.getHttpAdapter().getInstance();
   // Clients must not sniff a JSON or tile answer into something executable.
-  fastify.addHook('onRequest', async (_req, reply) => void reply.header('x-content-type-options', 'nosniff'));
+  fastify.addHook('onRequest', async (req, reply) => {
+    void reply.header('x-content-type-options', 'nosniff');
+    void reply.header('x-request-id', req.id);
+  });
   // A plain Fastify route: outside Nest routing, so the auth guard never sees it.
   const openApi = generateOpenApi(apiContract, { info: { title: 'iraq-maps API', version: '0.0.0' } }, { setOperationId: 'concatenated-path' });
   fastify.get('/openapi.json', async () => openApi);

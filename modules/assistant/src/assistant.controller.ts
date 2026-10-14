@@ -1,6 +1,7 @@
 import { assistantContract } from '@iraq-maps/contracts';
-import { Controller } from '@nestjs/common';
+import { Controller, Res } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
+import type { FastifyReply } from 'fastify';
 import { AssistantService } from './assistant.service.js';
 
 // TODO: replace with real auth principal injection (M6+)
@@ -16,14 +17,18 @@ export class AssistantController {
   constructor(private readonly svc: AssistantService) {}
 
   @TsRestHandler(assistantContract)
-  handle() {
+  handle(@Res({ passthrough: true }) reply: FastifyReply) {
     const userId = PLACEHOLDER_USER_ID;
 
     return tsRestHandler(assistantContract, {
       chat: async ({ body }) => {
         try {
           const result = await this.svc.chat(userId, body);
-          return { status: 200 as const, body: result };
+          // Set rate limit headers so mobile clients can show "N رسائل متبقية اليوم"
+          reply.header('x-ratelimit-remaining', String(result.rateLimitRemaining));
+          reply.header('x-ratelimit-reset', result.rateLimitReset);
+          const { rateLimitRemaining: _r, rateLimitReset: _s, ...chatBody } = result;
+          return { status: 200 as const, body: chatBody };
         } catch (e: unknown) {
           if (isHttpException(e, 429)) {
             return {
