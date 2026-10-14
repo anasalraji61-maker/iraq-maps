@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { CityId, LngLat, Locale, PlaceId, Problem } from './common';
 import { CityImportRecord, PlaceCategory, PlaceKind, PlaceNames, TileSchema } from './geo-data';
 import { SatelliteLayer } from './imagery';
+import { CrowdingEstimate, PriceLevelEstimate } from './insights';
 import { PlaceProviderSection } from './providers';
 
 const c = initContract();
@@ -70,6 +71,10 @@ export const PlaceDetails = PlaceSummary.omit({ distanceM: true }).extend({
   attribution: z.string(),
   /** M3: a verified provider's consent-filtered section, read per request (ProviderProfilePort). */
   provider: PlaceProviderSection.optional(),
+  /** M5: crowding estimate; null when no data is available. */
+  crowding: CrowdingEstimate.nullable().optional(),
+  /** M5: price level estimate; null when no data is available. */
+  priceLevel: PriceLevelEstimate.nullable().optional(),
 });
 export type PlaceDetails = z.infer<typeof PlaceDetails>;
 

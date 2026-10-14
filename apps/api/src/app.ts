@@ -5,6 +5,7 @@ import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRe
 import { IdentityAuthGuard, identityMigrationsDir, identityModule } from '@iraq-maps/identity';
 import { mediaMigrationsDir, mediaModule } from '@iraq-maps/media';
 import { AssistantModule, assistantMigrationsDir, PLACES_SEARCH_TOKEN } from '@iraq-maps/assistant';
+import { InsightsModule, insightsMigrationsDir } from '@iraq-maps/insights';
 import { discoverModule, discoverMigrationsDir } from '@iraq-maps/discover';
 import { messagingMigrationsDir, messagingModule } from '@iraq-maps/messaging';
 import { notificationsMigrationsDir, notificationsModule } from '@iraq-maps/notifications';
@@ -43,6 +44,7 @@ export const moduleMigrations = [
   { schema: 'messaging', migrationsDir: messagingMigrationsDir },
   { schema: 'notifications', migrationsDir: notificationsMigrationsDir },
   { schema: 'assistant', migrationsDir: assistantMigrationsDir },
+  { schema: 'insights', migrationsDir: insightsMigrationsDir },
   { schema: 'discover', migrationsDir: discoverMigrationsDir },
 ];
 
@@ -189,6 +191,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
             },
           ],
         } as unknown as typeof AssistantModule,
+        InsightsModule,
         discoverModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],

@@ -53,7 +53,19 @@ export const testIDs = {
     searchResult: 'map.search.result',
     lang: 'map.lang',
   },
-  place: { card: 'place.card', name: 'place.name', category: 'place.category', source: 'place.source', share: 'place.share' },
+  place: {
+    card: 'place.card',
+    name: 'place.name',
+    category: 'place.category',
+    source: 'place.source',
+    share: 'place.share',
+    crowding: 'place.crowding',
+    crowdingBar: 'place.crowding.bar',
+    priceLevel: 'place.priceLevel',
+    insightsAttribution: 'place.insights.attribution',
+    reportCrowded: 'place.report.crowded',
+    reportPrice: 'place.report.price',
+  },
   navigation: navigationTestIDs, // M2
   satellite: satelliteTestIDs, // M2
   provider: providerTestIDs, // M3

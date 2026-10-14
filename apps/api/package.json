@@ -23,6 +23,7 @@
     "@iraq-maps/adapter-storage-s3": "workspace:*",
     "@iraq-maps/media": "workspace:*",
     "@iraq-maps/assistant": "workspace:*",
+    "@iraq-maps/insights": "workspace:*",
     "@iraq-maps/discover": "workspace:*",
     "@iraq-maps/messaging": "workspace:*",
     "@iraq-maps/notifications": "workspace:*",

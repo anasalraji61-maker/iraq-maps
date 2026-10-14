@@ -1,4 +1,5 @@
 import type { IraqiPhone, Locale, PlaceId, Role, UserId } from './common';
+import type { PlaceInsights } from './insights';
 import type { DomainEvent, EventName } from './events';
 import type { MessagingChannelKind } from './messaging';
 import type { NearbyQuery, PlaceDetails, PlaceSummary, SearchQuery } from './places';
@@ -17,6 +18,7 @@ export const PortTokens = {
   MessagingChannelAdapter: 'port:MessagingChannelAdapter', // M4
   PushSender: 'port:PushSender', // M4
   LlmClient: 'ports:llm_client', // M5
+  InsightsPort: 'port:InsightsPort', // M5
 } as const;
 
 export interface Clock {
@@ -94,6 +96,16 @@ export interface PushSender {
 }
 
 // ── M5 port interfaces ──────────────────────────────────────────────────────
+
+/** InsightsPort — abstracts the insights module (crowding + price). */
+export interface InsightsPort {
+  /** Returns insights for a place; crowding and priceLevel are null when no data is available. */
+  getInsights(placeId: PlaceId): Promise<PlaceInsights>;
+  /** Record a crowded-now report. Effect decays after 60 minutes. */
+  reportCrowded(placeId: PlaceId, reportedAt: Date): Promise<void>;
+  /** Record a price report from a user. */
+  reportPrice(placeId: PlaceId, priceLevel: import('./insights').PriceLevel, reportedAt: Date): Promise<void>;
+}
 
 /** LlmClient — abstracts the Claude API (and any future LLM) for the assistant module. */
 export interface LlmClient {

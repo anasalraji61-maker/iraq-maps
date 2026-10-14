@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { IraqiPhone, Locale, Problem, Role, UserId } from './common';
 import { assistantContract } from './assistant';
 import { discoverContract } from './discover';
+import { insightsContract } from './insights';
 import { imageryContract } from './imagery';
 import { mediaContract } from './media';
 import { messagingContract } from './messaging';
@@ -99,6 +100,7 @@ export const apiContract = c.router({
   notifications: notificationsContract,
   // M5
   assistant: assistantContract,
+  insights: insightsContract,
   // M6
   discover: discoverContract,
 });
