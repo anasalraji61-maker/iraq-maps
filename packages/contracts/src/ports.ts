@@ -1,5 +1,6 @@
 import type { IraqiPhone, Locale, PlaceId, Role, UserId } from './common';
 import type { DomainEvent, EventName } from './events';
+import type { MessagingChannelKind } from './messaging';
 import type { NearbyQuery, PlaceDetails, PlaceSummary, SearchQuery } from './places';
 
 /** DI tokens: modules provide ports under these, consumers inject them, nobody imports another module. */
@@ -13,6 +14,8 @@ export const PortTokens = {
   ProviderDirectoryPort: 'port:ProviderDirectoryPort', // M3
   MediaPort: 'port:MediaPort', // M3
   ObjectStorage: 'port:ObjectStorage', // M3
+  MessagingChannelAdapter: 'port:MessagingChannelAdapter', // M4
+  PushSender: 'port:PushSender', // M4
 } as const;
 
 export interface Clock {
@@ -66,4 +69,25 @@ export interface EventBus {
 /** Writes an event to the outbox inside the caller's transaction; the relay delivers it later. */
 export interface OutboxPublisher<Tx = unknown> {
   publish(event: DomainEvent, tx?: Tx): Promise<void>;
+}
+
+// ── M4 port interfaces ──────────────────────────────────────────────────────
+
+export interface InboundMessage {
+  externalId: string;
+  from: string;
+  text: string;
+  receivedAt: Date;
+}
+
+/** MessagingChannelPort — each channel adapter implements this. */
+export interface ChannelAdapter {
+  readonly channelType: MessagingChannelKind;
+  send(params: { to: string; text: string; templateParams?: Record<string, string> }): Promise<{ externalId: string }>;
+  parseInbound(rawBody: unknown, headers: Record<string, string>): Promise<InboundMessage | null>;
+}
+
+/** PushSenderPort — abstracts FCM and other push providers. */
+export interface PushSender {
+  send(token: string, notification: { title: string; body: string; data?: Record<string, string> }): Promise<void>;
 }

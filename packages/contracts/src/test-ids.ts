@@ -2,6 +2,18 @@ import { satelliteTestIDs } from './imagery';
 import { providerTestIDs } from './providers';
 import { navigationTestIDs } from './routing';
 
+/** M4: messaging testIDs shared by RNTL tests and Maestro flows. */
+export const messagingTestIDs = {
+  composeButton: 'messaging.compose',
+  placeChip: (id: string) => `messaging.place.${id}`,
+  confirmSend: 'messaging.confirm.send',
+  channelBadge: (id: string) => `messaging.channel.${id}`,
+  handoffCopy: 'messaging.handoff.copy',
+  inboxItem: (id: string) => `provider.inbox.${id}`,
+  replyInput: 'provider.inbox.reply.input',
+  optOutButton: 'provider.inbox.opt-out',
+} as const;
+
 /** Stable testIDs shared by RNTL tests and Maestro flows. */
 export const testIDs = {
   tabs: { map: 'tab.map', discover: 'tab.discover', messages: 'tab.messages', activity: 'tab.activity', account: 'tab.account' },
@@ -28,5 +40,6 @@ export const testIDs = {
   navigation: navigationTestIDs, // M2
   satellite: satelliteTestIDs, // M2
   provider: providerTestIDs, // M3
+  messaging: messagingTestIDs, // M4
   dev: { serverUrlInput: 'dev.serverUrl.input', serverUrlSave: 'dev.serverUrl.save' },
 } as const;

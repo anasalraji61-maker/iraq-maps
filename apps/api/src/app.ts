@@ -29,6 +29,8 @@ import type { FastifyBaseLogger, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 // Nest DI note: tsx/esbuild/vite do not emit decorator metadata, so always inject with explicit @Inject(token).
+// TODO(M4-messaging): import { messagingModule } from '@iraq-maps/messaging'; add to AppModule imports below.
+// TODO(M4-notifications): import { notificationsModule } from '@iraq-maps/notifications'; add to AppModule imports below.
 
 /** Module migrations, in order. The `platform` schema (outbox) always runs before them. */
 export const moduleMigrations = [

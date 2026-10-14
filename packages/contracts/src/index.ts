@@ -4,6 +4,8 @@ export * from './geo-data';
 export * from './http';
 export * from './imagery';
 export * from './media';
+export * from './messaging'; // M4
+export * from './notifications'; // M4
 export * from './osm-categories';
 export * from './places';
 export * from './ports';

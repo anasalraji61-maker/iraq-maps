@@ -1,7 +1,8 @@
 ---
 id: M4
 slug: messaging-inbox-notifications
-status: not_started
+status: in_progress
+phase_a_freeze_sha: pending
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-messaging:
