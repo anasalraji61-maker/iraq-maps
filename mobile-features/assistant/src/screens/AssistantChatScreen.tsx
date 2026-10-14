@@ -2,12 +2,13 @@ import { assistantTestIDs } from '@iraq-maps/contracts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, type ReactElement } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -37,6 +38,86 @@ function formatTime(ts: number): string {
   return `${h}:${m}`;
 }
 
+const QUICK_REPLIES = [
+  'quickReply1',
+  'quickReply2',
+  'quickReply3',
+  'quickReply4',
+] as const;
+
+function TypingIndicator(): ReactElement {
+  const dot1 = useRef(new Animated.Value(0.3)).current;
+  const dot2 = useRef(new Animated.Value(0.3)).current;
+  const dot3 = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    const pulse = (dot: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0.3, duration: 300, useNativeDriver: true }),
+          Animated.delay(600 - delay),
+        ]),
+      );
+
+    const a1 = pulse(dot1, 0);
+    const a2 = pulse(dot2, 200);
+    const a3 = pulse(dot3, 400);
+    a1.start();
+    a2.start();
+    a3.start();
+    return () => {
+      a1.stop();
+      a2.stop();
+      a3.stop();
+    };
+  }, [dot1, dot2, dot3]);
+
+  return (
+    <View style={styles.typingRow}>
+      <View style={styles.typingBubble}>
+        {[dot1, dot2, dot3].map((dot, i) => (
+          <Animated.View key={i} style={[styles.typingDot, { opacity: dot }]} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function PlaceCards({
+  placeIds,
+  onPress,
+}: {
+  placeIds: string[];
+  onPress: (id: string) => void;
+}): ReactElement {
+  return (
+    <View style={styles.placeCardsContainer}>
+      {placeIds.map((id) => (
+        <Pressable
+          key={id}
+          testID={`assistant.placeCard.${id}`}
+          style={styles.placeCard}
+          onPress={() => onPress(id)}
+        >
+          <View style={styles.placeCardInner}>
+            <View style={styles.placeCardIcon}>
+              <Text style={styles.placeCardIconText}>📍</Text>
+            </View>
+            <View style={styles.placeCardInfo}>
+              <Text style={styles.placeCardId} numberOfLines={1}>
+                {id.slice(0, 8)}...
+              </Text>
+            </View>
+            <Text style={styles.placeCardMapLabel}>{t('chat.viewOnMap')}</Text>
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 export function AssistantChatScreen(): ReactElement {
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
@@ -46,6 +127,8 @@ export function AssistantChatScreen(): ReactElement {
   const listRef = useRef<FlatList>(null);
   const { initialMessage } = useLocalSearchParams<{ initialMessage?: string }>();
   const initialMessageSent = useRef(false);
+
+  const showQuickReplies = messages.length === 0 && !isLoading;
 
   // Resume the persisted session on mount
   useEffect(() => {
@@ -70,6 +153,10 @@ export function AssistantChatScreen(): ReactElement {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
+  const handleQuickReply = (key: (typeof QUICK_REPLIES)[number]) => {
+    setInputText(t(`chat.${key}`));
+  };
+
   const handleCompose = () => {
     if (!composeParams) return;
     router.push({
@@ -79,6 +166,10 @@ export function AssistantChatScreen(): ReactElement {
         placeIds: composeParams.placeIds?.join(','),
       },
     });
+  };
+
+  const handlePlaceCardPress = (id: string) => {
+    router.push(`/?focusPlaceId=${id}`);
   };
 
   return (
@@ -129,14 +220,7 @@ export function AssistantChatScreen(): ReactElement {
             </View>
           </View>
         )}
-        ListFooterComponent={
-          isLoading ? (
-            <View style={styles.loadingRow}>
-              <ActivityIndicator size="small" color="#555" />
-              <Text style={styles.loadingText}>{t('chat.loading')}</Text>
-            </View>
-          ) : null
-        }
+        ListFooterComponent={isLoading ? <TypingIndicator /> : null}
       />
 
       {error ? (
@@ -146,17 +230,7 @@ export function AssistantChatScreen(): ReactElement {
       ) : null}
 
       {focusPlaceIds && focusPlaceIds.length > 1 ? (
-        <Pressable
-          testID="assistant.map.deeplink"
-          style={styles.mapBtn}
-          onPress={() =>
-            router.push(`/?focusPlaceIds=${focusPlaceIds.join(',')}`)
-          }
-        >
-          <Text style={styles.mapBtnText}>
-            {t('chat.showPlacesOnMap', { count: focusPlaceIds.length })}
-          </Text>
-        </Pressable>
+        <PlaceCards placeIds={focusPlaceIds} onPress={handlePlaceCardPress} />
       ) : focusPlaceId ? (
         <Pressable
           testID="assistant.map.deeplink"
@@ -175,6 +249,27 @@ export function AssistantChatScreen(): ReactElement {
         >
           <Text style={styles.composeBtnText}>{t('chat.compose')}</Text>
         </Pressable>
+      ) : null}
+
+      {showQuickReplies ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.quickRepliesContent}
+          style={styles.quickRepliesRow}
+          keyboardShouldPersistTaps="handled"
+        >
+          {QUICK_REPLIES.map((key) => (
+            <Pressable
+              key={key}
+              testID={`assistant.quickReply.${key}`}
+              style={styles.quickChip}
+              onPress={() => handleQuickReply(key)}
+            >
+              <Text style={styles.quickChipText}>{t(`chat.${key}`)}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       ) : null}
 
       <View style={styles.inputRow}>
@@ -271,16 +366,73 @@ const styles = StyleSheet.create({
     color: '#9E9E9E',
     textAlign: 'auto',
   },
-  loadingRow: {
+  // Typing indicator
+  typingRow: {
+    alignItems: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  typingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    borderBottomStartRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 5,
   },
-  loadingText: {
-    color: '#666',
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#757575',
+  },
+  // Place cards
+  placeCardsContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 4,
+    gap: 6,
+  },
+  placeCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E3F2FD',
+    overflow: 'hidden',
+  },
+  placeCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  placeCardIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#E3F2FD',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeCardIconText: {
+    fontSize: 16,
+  },
+  placeCardInfo: {
+    flex: 1,
+  },
+  placeCardId: {
     fontSize: 13,
+    color: '#424242',
+    fontWeight: '500',
+  },
+  placeCardMapLabel: {
+    fontSize: 12,
+    color: '#1976D2',
+    fontWeight: '600',
   },
   errorRow: {
     backgroundColor: '#FFEBEE',
@@ -319,6 +471,30 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  // Quick replies
+  quickRepliesRow: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#DDD',
+    backgroundColor: '#FFF',
+  },
+  quickRepliesContent: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  quickChip: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
+  },
+  quickChipText: {
+    color: '#1565C0',
+    fontSize: 13,
+    fontWeight: '500',
   },
   inputRow: {
     flexDirection: 'row',

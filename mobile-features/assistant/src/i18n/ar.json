@@ -7,6 +7,11 @@
     "loading": "جارٍ التفكير...",
     "error": "حدث خطأ، حاول مجدداً",
     "showOnMap": "عرض على الخريطة",
-    "showPlacesOnMap": "عرض {{count}} أماكن على الخريطة"
+    "showPlacesOnMap": "عرض {{count}} أماكن على الخريطة",
+    "viewOnMap": "عرض على الخريطة",
+    "quickReply1": "ابحث عن مطعم قريب",
+    "quickReply2": "خطط لي جولة اليوم",
+    "quickReply3": "أفضل الأماكن في بغداد",
+    "quickReply4": "كيف أصل إلى..."
   }
 }

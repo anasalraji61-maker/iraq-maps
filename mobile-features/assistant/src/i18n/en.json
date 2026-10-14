@@ -7,6 +7,11 @@
     "loading": "Thinking...",
     "error": "An error occurred, please try again",
     "showOnMap": "Show on Map",
-    "showPlacesOnMap": "Show {{count}} places on Map"
+    "showPlacesOnMap": "Show {{count}} places on Map",
+    "viewOnMap": "View on Map",
+    "quickReply1": "Find a nearby restaurant",
+    "quickReply2": "Plan a tour for today",
+    "quickReply3": "Best places in Baghdad",
+    "quickReply4": "How do I get to..."
   }
 }
