@@ -18,6 +18,7 @@ describe('AnthropicLlmClient', () => {
   it('returns text content from the API response', async () => {
     const client = new AnthropicLlmClient({ model: 'claude-3-haiku-20240307' });
     const result = await client.chat({
+      systemPrompt: 'You are a helpful assistant.',
       messages: [{ role: 'user', content: 'hi' }],
     });
     expect(result.content).toBe('hello');
