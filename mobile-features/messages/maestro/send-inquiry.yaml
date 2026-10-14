@@ -1,0 +1,10 @@
+appId: com.iraqmaps.app
+---
+- launchApp
+- tapOn:
+    id: "messaging.compose"
+- inputText: "أريد الاستفسار عن خدماتكم"
+- tapOn:
+    id: "messaging.confirm.send"
+- assertVisible:
+    id: "messaging.channel..*"
