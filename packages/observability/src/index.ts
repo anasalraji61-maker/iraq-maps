@@ -50,6 +50,44 @@ export interface LogCapture {
   stop(): void;
 }
 
+// ── ErrorReporter ──────────────────────────────────────────────────────────
+
+export interface ErrorReporter {
+  readonly kind: string;
+  captureException(err: unknown, context?: Record<string, unknown>): void;
+  captureMessage(message: string, level?: 'info' | 'warning' | 'error', context?: Record<string, unknown>): void;
+  setUser(user: { id: string; locale?: string } | null): void;
+}
+
+/** No-op reporter — safe default for dev / test. */
+export function noopReporter(): ErrorReporter {
+  return {
+    kind: 'noop',
+    captureException: () => undefined,
+    captureMessage: () => undefined,
+    setUser: () => undefined,
+  };
+}
+
+/** Log-based reporter — forwards to a Logger instance; useful in staging. */
+export function logReporter(logger: Logger): ErrorReporter {
+  return {
+    kind: 'log',
+    captureException(err, context) {
+      logger.error({ err, ...context }, err instanceof Error ? err.message : String(err));
+    },
+    captureMessage(message, level = 'error', context) {
+      const fn = level === 'info' ? logger.info : level === 'warning' ? logger.warn : logger.error;
+      fn({ ...context }, message);
+    },
+    setUser(_user) {
+      // no persistent user binding in log reporter
+    },
+  };
+}
+
+// ── LogCapture ─────────────────────────────────────────────────────────────
+
 /** Captures everything every logger writes until stop(); for tests. Captured lines are not echoed to stdout. */
 export function captureLogs(): LogCapture {
   const lines: string[] = [];

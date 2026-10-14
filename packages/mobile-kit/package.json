@@ -16,6 +16,7 @@
     "@iraq-maps/api-client": "workspace:*",
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
+    "@iraq-maps/observability": "workspace:*",
     "expo-secure-store": "~57.0.4",
     "@react-native-async-storage/async-storage": "^2.1.2"
   },

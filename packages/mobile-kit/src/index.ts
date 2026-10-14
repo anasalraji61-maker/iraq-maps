@@ -13,3 +13,5 @@ export { InquiryOutbox, type OutboxEntry } from './outbox';
 export { expectStatus, ProblemError, useRequest } from './request';
 
 export { savedPlaces, type SavedPlace } from './saved-places';
+/** @public error boundary with optional ErrorReporter integration */
+export { ErrorBoundary } from './error-boundary';
