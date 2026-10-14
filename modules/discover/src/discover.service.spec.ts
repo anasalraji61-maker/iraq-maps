@@ -73,7 +73,9 @@ describe('DiscoverService (unit)', () => {
       }),
       insert: vi.fn().mockReturnValue({
         values: vi.fn().mockReturnValue({
-          onConflictDoNothing: vi.fn().mockResolvedValue(undefined),
+          onConflictDoNothing: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ postId: 'post-1', userId }]),
+          }),
         }),
       }),
       update: vi.fn().mockReturnValue({
