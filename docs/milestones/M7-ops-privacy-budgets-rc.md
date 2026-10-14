@@ -298,3 +298,4 @@ No new events.
 | 2026-10-14 | feat(places,navigation): improved Arabic search ranking and route alternatives | `1e31f73`, `ae34731` | — |
 | 2026-10-14 | feat(media): thumbnail variants, validation, and discover feed optimization | `b871660` | — |
 | 2026-10-14 | feat(assistant): improved tool results, session trimming, plan-my-day structure | `07877aa` | — |
+| 2026-10-14 | fix(gate): gitleaks allowlist, ownership globs, invisible chars in phone.ts | `1361416`, `8c6e446`, `a785735`, `bf31e07`, `712fce8` | — |

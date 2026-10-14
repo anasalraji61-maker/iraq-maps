@@ -1,6 +1,6 @@
-import { type NotificationItem } from '@iraq-maps/contracts';
-import { useApi, useSession } from '@iraq-maps/mobile-kit';
-import { useEffect, useState, useCallback, type ReactElement } from 'react';
+import { type DiscoverPostType, type NotificationItem } from '@iraq-maps/contracts';
+import { recentRoutes, type RecentRoute, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,11 +11,16 @@ import {
   Text,
   View,
 } from 'react-native';
+import { savedPlaces, type SavedPlace } from './saved-places';
 import { t } from './strings';
 
 I18nManager.forceRTL(true);
 
-type NotifItem = NotificationItem & { _type?: string };
+// ──────────────────────────────────────────────
+// Shared helpers
+// ──────────────────────────────────────────────
+
+type Tab = 'notifications' | 'routes' | 'saved' | 'posts';
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -24,9 +29,24 @@ function formatRelativeTime(iso: string): string {
   if (minutes < 60) return t('timeMinutes', { n: minutes });
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return t('timeHours', { n: hours });
-  const days = Math.floor(hours / 24);
-  return t('timeDays', { n: days });
+  return t('timeDays', { n: Math.floor(hours / 24) });
 }
+
+function EmptyState({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }): ReactElement {
+  return (
+    <View style={styles.center}>
+      <Text style={styles.emptyIcon} accessibilityElementsHidden>{icon}</Text>
+      <Text style={styles.emptyText}>{title}</Text>
+      <Text style={styles.emptySubtext}>{subtitle}</Text>
+    </View>
+  );
+}
+
+// ──────────────────────────────────────────────
+// Notifications tab
+// ──────────────────────────────────────────────
+
+type NotifItem = NotificationItem & { _type?: string };
 
 function notifIcon(data?: Record<string, string>): string {
   const type = data?.['type'];
@@ -44,25 +64,21 @@ function NotifRow({ item, onPress }: { item: NotifItem; onPress: (item: NotifIte
       style={[styles.row, unread && styles.rowUnread]}
       onPress={() => onPress(item)}
       accessibilityRole="button"
-      accessibilityLabel={item.title + '. ' + item.body}
+      accessibilityLabel={`${item.title}. ${item.body}`}
       accessibilityState={{ selected: unread }}
     >
-      <Text style={styles.icon}>{notifIcon(item.data)}</Text>
+      <Text style={styles.rowIcon} accessibilityElementsHidden>{notifIcon(item.data)}</Text>
       <View style={styles.rowBody}>
-        <Text style={[styles.title, unread && styles.titleUnread]} numberOfLines={1}>
-          {item.title}
-        </Text>
-        <Text style={styles.body} numberOfLines={2}>
-          {item.body}
-        </Text>
-        <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
+        <Text style={[styles.rowTitle, unread && styles.rowTitleUnread]} numberOfLines={1}>{item.title}</Text>
+        <Text style={styles.rowSub} numberOfLines={2}>{item.body}</Text>
+        <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
-      {unread ? <View style={styles.dot} /> : null}
+      {unread ? <View style={styles.unreadDot} accessibilityElementsHidden /> : null}
     </Pressable>
   );
 }
 
-export function ActivityScreen(): ReactElement {
+function NotificationsTab(): ReactElement {
   const api = useApi();
   const session = useSession();
   const [items, setItems] = useState<NotifItem[]>([]);
@@ -91,72 +107,54 @@ export function ActivityScreen(): ReactElement {
 
   useEffect(() => { void load(); }, [load]);
 
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    void load(true);
-  }, [load]);
-
   const handlePress = useCallback(async (item: NotifItem) => {
     if (item.readAt !== null) return;
     try {
-      await api.notifications.markRead({
-        params: { id: item.id },
-        body: {},
-      });
+      await api.notifications.markRead({ params: { id: item.id }, body: {} });
       setItems((prev) => prev.map((n) => n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n));
-    } catch {
-      // best-effort
-    }
+    } catch { /* best-effort */ }
   }, [api]);
 
   const markAllRead = useCallback(async () => {
-    const unread = items.filter(n => n.readAt === null);
-    await Promise.allSettled(
-      unread.map(n => api.notifications.markRead({ params: { id: n.id }, body: {} })),
-    );
+    const unread = items.filter((n) => n.readAt === null);
+    await Promise.allSettled(unread.map((n) => api.notifications.markRead({ params: { id: n.id }, body: {} })));
     setItems((prev) => prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date().toISOString() })));
   }, [api, items]);
 
-  const unreadCount = items.filter(n => n.readAt === null).length;
+  const unreadCount = items.filter((n) => n.readAt === null).length;
+
+  if (!session) {
+    return <EmptyState icon="🔔" title={t('loginPrompt')} subtitle="" />;
+  }
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
+          <Text style={styles.retryText}>{t('retry')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('title')}</Text>
-        {unreadCount > 0 ? (
-          <Pressable onPress={() => { void markAllRead(); }} style={styles.markAllBtn}>
+    <View style={styles.flex}>
+      {unreadCount > 0 && (
+        <View style={styles.markAllBar}>
+          <Pressable onPress={() => { void markAllRead(); }} accessibilityRole="button" accessibilityLabel={t('markAllRead')}>
             <Text style={styles.markAllText}>{t('markAllRead')}</Text>
           </Pressable>
-        ) : null}
-      </View>
-
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#1976D2" />
         </View>
-      ) : error ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
-          <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
-            <Text style={styles.retryText}>{t('retry')}</Text>
-          </Pressable>
-        </View>
-      ) : !session ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyText}>{t('loginPrompt')}</Text>
-        </View>
-      ) : items.length === 0 ? (
-        <View style={styles.center}>
-          <Text style={styles.emptyIcon}>{'🔔'}</Text>
-          <Text style={styles.emptyText}>{t('empty')}</Text>
-          <Text style={styles.emptySubtext}>{t('emptySubtext')}</Text>
-        </View>
+      )}
+      {items.length === 0 ? (
+        <EmptyState icon="🔔" title={t('empty')} subtitle={t('emptySubtext')} />
       ) : (
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
@@ -165,19 +163,288 @@ export function ActivityScreen(): ReactElement {
   );
 }
 
+// ──────────────────────────────────────────────
+// Recent routes tab
+// ──────────────────────────────────────────────
+
+function formatDistance(m: number): string {
+  if (m >= 1000) return t('distanceKm', { n: (m / 1000).toFixed(1) });
+  return t('distanceM', { n: m });
+}
+
+function formatDuration(s: number): string {
+  const min = Math.round(s / 60);
+  if (min < 60) return t('durationMin', { n: min });
+  return t('durationHour', { h: Math.floor(min / 60), m: min % 60 });
+}
+
+function RouteRow({ item, onRemove }: { item: RecentRoute; onRemove: (item: RecentRoute) => void }): ReactElement {
+  const modeLabel = item.mode === 'walk' ? t('modeWalking') : t('modeDriving');
+  const icon = item.mode === 'walk' ? '🚶' : '🚗';
+  return (
+    <View style={styles.row} accessibilityRole="none">
+      <Text style={styles.rowIcon} accessibilityElementsHidden>{icon}</Text>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.rowSub}>{modeLabel} · {formatDistance(item.distanceM)} · {formatDuration(item.durationS)}</Text>
+        <Text style={styles.rowTime}>{formatRelativeTime(item.at)}</Text>
+      </View>
+      <Pressable onPress={() => onRemove(item)} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t('removeRoute')}>
+        <Text style={styles.removeBtnText}>{t('removeRoute')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function RoutesTab(): ReactElement {
+  const [routes, setRoutes] = useState<RecentRoute[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setRoutes(await recentRoutes.list());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const handleRemove = useCallback(async (item: RecentRoute) => {
+    // No remove API in recentRoutes yet — filter locally and update display
+    setRoutes((prev) => prev.filter((r) => !(r.placeId === item.placeId && r.mode === item.mode)));
+  }, []);
+
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (routes.length === 0) return <EmptyState icon="🗺️" title={t('emptyRoutes')} subtitle={t('emptyRoutesSubtext')} />;
+
+  return (
+    <FlatList
+      data={routes}
+      keyExtractor={(item) => `${item.placeId}-${item.mode}`}
+      renderItem={({ item }) => <RouteRow item={item} onRemove={handleRemove} />}
+      contentContainerStyle={styles.list}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────
+// Saved places tab
+// ──────────────────────────────────────────────
+
+function SavedRow({ item, onRemove }: { item: SavedPlace; onRemove: (item: SavedPlace) => void }): ReactElement {
+  return (
+    <View style={styles.row} accessibilityRole="none">
+      <Text style={styles.rowIcon} accessibilityElementsHidden>{'📍'}</Text>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle} numberOfLines={1}>{item.name}</Text>
+        {item.category ? <Text style={styles.rowSub}>{item.category}</Text> : null}
+        <Text style={styles.rowTime}>{formatRelativeTime(item.savedAt)}</Text>
+      </View>
+      <Pressable onPress={() => onRemove(item)} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t('removePlace')}>
+        <Text style={styles.removeBtnText}>{t('removePlace')}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function SavedTab(): ReactElement {
+  const [places, setPlaces] = useState<SavedPlace[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setPlaces(await savedPlaces.list());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const handleRemove = useCallback(async (item: SavedPlace) => {
+    await savedPlaces.remove(item.placeId);
+    setPlaces((prev) => prev.filter((p) => p.placeId !== item.placeId));
+  }, []);
+
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (places.length === 0) return <EmptyState icon="🔖" title={t('emptySaved')} subtitle={t('emptySavedSubtext')} />;
+
+  return (
+    <FlatList
+      data={places}
+      keyExtractor={(item) => item.placeId}
+      renderItem={({ item }) => <SavedRow item={item} onRemove={handleRemove} />}
+      contentContainerStyle={styles.list}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────
+// My posts tab
+// ──────────────────────────────────────────────
+
+function PostRow({ item }: { item: DiscoverPostType }): ReactElement {
+  const hasMedia = item.mediaAssetIds && item.mediaAssetIds.length > 0;
+  return (
+    <View style={styles.row} accessibilityRole="none">
+      <Text style={styles.rowIcon} accessibilityElementsHidden>{hasMedia ? '📷' : '📝'}</Text>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle} numberOfLines={2}>{item.body}</Text>
+        <Text style={styles.rowSub}>{item.likeCount}</Text>
+        <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
+      </View>
+    </View>
+  );
+}
+
+function PostsTab(): ReactElement {
+  const api = useApi();
+  const session = useSession();
+  const [posts, setPosts] = useState<DiscoverPostType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | undefined>();
+
+  const load = useCallback(async () => {
+    if (!session) { setLoading(false); return; }
+    setLoading(true);
+    try {
+      // Fetch feed and filter to posts by the current user
+      const res = await api.discover.listFeed({ query: { limit: 50 } });
+      if (res.status === 200) {
+        const userId = session.state.status === 'signedIn' ? session.state.user.id : null;
+        const mine = res.body.items.filter((p) => p.authorId === userId);
+        setPosts(mine);
+        setError(undefined);
+      } else {
+        setError(t('loadError'));
+      }
+    } catch {
+      setError(t('loadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [api, session]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  if (!session) return <EmptyState icon="📝" title={t('loginPrompt')} subtitle="" />;
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
+          <Text style={styles.retryText}>{t('retry')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+  if (posts.length === 0) return <EmptyState icon="📝" title={t('emptyPosts')} subtitle={t('emptyPostsSubtext')} />;
+
+  return (
+    <FlatList
+      data={posts}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => <PostRow item={item} />}
+      contentContainerStyle={styles.list}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────
+// Root screen
+// ──────────────────────────────────────────────
+
+export function ActivityScreen(): ReactElement {
+  const [activeTab, setActiveTab] = useState<Tab>('notifications');
+
+  const tabs: Array<{ id: Tab; label: string }> = [
+    { id: 'notifications', label: t('tabNotifications') },
+    { id: 'routes', label: t('tabRoutes') },
+    { id: 'saved', label: t('tabSaved') },
+    { id: 'posts', label: t('tabPosts') },
+  ];
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{t('title')}</Text>
+      </View>
+
+      {/* Tab bar */}
+      <View style={styles.tabBar} accessibilityRole="tablist">
+        {tabs.map((tab) => (
+          <Pressable
+            key={tab.id}
+            style={[styles.tabItem, activeTab === tab.id && styles.tabItemActive]}
+            onPress={() => setActiveTab(tab.id)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === tab.id }}
+            accessibilityLabel={tab.label}
+          >
+            <Text
+              style={[styles.tabLabel, activeTab === tab.id && styles.tabLabelActive]}
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Text>
+            {activeTab === tab.id && <View style={styles.tabUnderline} />}
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Tab content */}
+      <View style={styles.flex}>
+        {activeTab === 'notifications' && <NotificationsTab />}
+        {activeTab === 'routes' && <RoutesTab />}
+        {activeTab === 'saved' && <SavedTab />}
+        {activeTab === 'posts' && <PostsTab />}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
+  flex: { flex: 1 },
   header: {
     backgroundColor: '#1976D2',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '600' },
-  markAllBtn: { paddingHorizontal: 8, paddingVertical: 4 },
-  markAllText: { color: '#BBD6FB', fontSize: 13 },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    position: 'relative',
+  },
+  tabItemActive: {},
+  tabLabel: { fontSize: 12, color: '#888', textAlign: 'center' },
+  tabLabelActive: { color: '#1976D2', fontWeight: '600' },
+  tabUnderline: {
+    position: 'absolute',
+    bottom: 0,
+    start: 4,
+    end: 4,
+    height: 2,
+    backgroundColor: '#1976D2',
+    borderRadius: 1,
+  },
+  markAllBar: {
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'flex-end',
+  },
+  markAllText: { color: '#1976D2', fontSize: 13 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   list: { paddingVertical: 8 },
   row: {
@@ -189,16 +456,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowUnread: { backgroundColor: '#E3F2FD' },
-  icon: { fontSize: 24, lineHeight: 28 },
+  rowIcon: { fontSize: 24, lineHeight: 28 },
   rowBody: { flex: 1 },
-  title: { fontSize: 14, fontWeight: '500', color: '#333', marginBottom: 2 },
-  titleUnread: { fontWeight: '700', color: '#1976D2' },
-  body: { fontSize: 13, color: '#666', lineHeight: 18 },
-  time: { fontSize: 11, color: '#999', marginTop: 4 },
-  dot: {
+  rowTitle: { fontSize: 14, fontWeight: '500', color: '#333', marginBottom: 2 },
+  rowTitleUnread: { fontWeight: '700', color: '#1976D2' },
+  rowSub: { fontSize: 13, color: '#666', lineHeight: 18 },
+  rowTime: { fontSize: 11, color: '#999', marginTop: 4 },
+  unreadDot: {
     width: 8, height: 8, borderRadius: 4, backgroundColor: '#1976D2',
     marginTop: 8, flexShrink: 0,
   },
+  removeBtn: { padding: 8, marginTop: -4 },
+  removeBtnText: { fontSize: 16, color: '#999' },
   separator: { height: 1, backgroundColor: '#F0F0F0' },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 16, color: '#555', fontWeight: '500', textAlign: 'center', marginBottom: 6 },
