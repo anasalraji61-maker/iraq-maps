@@ -260,3 +260,4 @@ No new events.
 | 2026-10-14 | fix(map,ui): show network error text in alert and add retry button to Banner | `517b24b` | — |
 | 2026-10-14 | feat(account): settings screen, language switch, app version display | `2302d1d` | — |
 | 2026-10-14 | feat(discover): comments screen, post detail, share button | `955842d` | — |
+| 2026-10-14 | feat(places,navigation): improved Arabic search ranking and route alternatives | `1e31f73`, `ae34731` | — |
