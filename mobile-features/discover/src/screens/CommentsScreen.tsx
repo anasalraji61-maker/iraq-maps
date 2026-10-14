@@ -33,7 +33,7 @@ function formatRelativeTime(isoDate: string): string {
   return `${days}d`;
 }
 
-function CommentItem({ item }: { item: DiscoverCommentType }): ReactElement {
+function CommentItem({ item, onReply }: { item: DiscoverCommentType; onReply: (authorId: string) => void }): ReactElement {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -43,8 +43,8 @@ function CommentItem({ item }: { item: DiscoverCommentType }): ReactElement {
   }, [liked]);
 
   const handleReply = useCallback(() => {
-    // stub — reply UI not yet implemented
-  }, []);
+    onReply(item.authorId.slice(0, 8));
+  }, [item.authorId, onReply]);
 
   return (
     <View style={styles.commentCard}>
@@ -90,9 +90,11 @@ export function CommentsScreen(): ReactElement {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [commentText, setCommentText] = useState('');
+  const [replyingToAuthor, setReplyingToAuthor] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | undefined>();
   const listRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput | null>(null);
 
   const loadComments = useCallback(async (isRefresh = false) => {
     if (!postId) return;
@@ -121,6 +123,13 @@ export function CommentsScreen(): ReactElement {
 
   const handleRefresh = useCallback(() => { void loadComments(true); }, [loadComments]);
 
+  const handleReply = useCallback((authorId: string) => {
+    setReplyingToAuthor(authorId);
+    const prefix = `@${authorId} `;
+    setCommentText(prefix);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }, []);
+
   const handleSend = useCallback(async () => {
     const text = commentText.trim();
     if (!text || sending || !postId) return;
@@ -139,6 +148,7 @@ export function CommentsScreen(): ReactElement {
       setSendError(t('comments.sendError'));
     } finally {
       setSending(false);
+    setReplyingToAuthor(null);
     }
   }, [api, commentText, postId, sending]);
 
@@ -170,7 +180,7 @@ export function CommentsScreen(): ReactElement {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} tintColor="#1976D2" />
         }
-        renderItem={({ item }) => <CommentItem item={item} />}
+        renderItem={({ item }) => <CommentItem item={item} onReply={handleReply} />}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>
@@ -186,8 +196,21 @@ export function CommentsScreen(): ReactElement {
         </View>
       ) : null}
 
+      {replyingToAuthor ? (
+        <View style={styles.replyBanner}>
+          <Text style={styles.replyBannerText}>{t('comments.replyingTo', { author: replyingToAuthor })}</Text>
+          <Pressable
+            onPress={() => { setReplyingToAuthor(null); setCommentText(''); }}
+            accessibilityRole="button"
+            accessibilityLabel={t('comments.cancelReply')}
+          >
+            <Text style={styles.replyBannerClose}>✕</Text>
+          </Pressable>
+        </View>
+      ) : null}
       <View style={styles.inputRow}>
         <TextInput
+          ref={inputRef}
           style={styles.input}
           value={commentText}
           onChangeText={(text) => setCommentText(text.slice(0, 500))}
@@ -365,5 +388,25 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  replyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    backgroundColor: '#E3F2FD',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#BBDEFB',
+  },
+  replyBannerText: {
+    fontSize: 12,
+    color: '#1565C0',
+    flex: 1,
+  },
+  replyBannerClose: {
+    fontSize: 14,
+    color: '#666',
+    paddingHorizontal: 6,
   },
 });

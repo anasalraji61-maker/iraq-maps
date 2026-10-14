@@ -50,7 +50,9 @@
     "likeComment": "إعجاب",
     "replyComment": "رد",
     "likeA11y": "الإعجاب بالتعليق",
-    "replyA11y": "الرد على التعليق"
+    "replyA11y": "الرد على التعليق",
+    "replyingTo": "الرد على @{author}",
+    "cancelReply": "إلغاء الرد"
   },
   "postDetail": {
     "title": "المنشور",

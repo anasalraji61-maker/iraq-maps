@@ -50,7 +50,9 @@
     "likeComment": "لایک",
     "replyComment": "وەڵام",
     "likeA11y": "لایک بۆ کۆمێنت",
-    "replyA11y": "وەڵام بۆ کۆمێنت"
+    "replyA11y": "وەڵام بۆ کۆمێنت",
+    "replyingTo": "وەڵامدانەوە بۆ @{author}",
+    "cancelReply": "هەڵوەشاندنەوەی وەڵام"
   },
   "postDetail": {
     "title": "پۆست",
