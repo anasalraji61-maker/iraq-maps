@@ -1,10 +1,12 @@
 import { discoverTestIDs } from '@iraq-maps/contracts';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { useState, useCallback, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   I18nManager,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +20,8 @@ import {
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 
+const MAX_PHOTOS = 3;
+
 I18nManager.forceRTL(true);
 
 type PostTypeValue = 'photo' | 'tip' | 'event' | 'offer';
@@ -30,10 +34,16 @@ const POST_TYPE_KEYS: Record<PostTypeValue, 'post.type.photo' | 'post.type.tip' 
   offer: 'post.type.offer',
 };
 
+interface UploadedPhoto {
+  uri: string;
+  assetId: string;
+}
+
 export function CreatePostScreen(): ReactElement {
   const api = useDiscoverClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const placesApi = useApi() as any;
+  const baseUrl = useApiBaseUrl();
   const router = useRouter();
   const [body, setBody] = useState('');
   const [postType, setPostType] = useState<PostTypeValue>('tip');
@@ -43,6 +53,8 @@ export function CreatePostScreen(): ReactElement {
   const [placeResults, setPlaceResults] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedPlace, setSelectedPlace] = useState<{ id: string; name: string } | undefined>();
   const [searchingPlace, setSearchingPlace] = useState(false);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const handlePlaceSearch = useCallback(async (q: string) => {
     setPlaceQuery(q);
@@ -69,6 +81,66 @@ export function CreatePostScreen(): ReactElement {
     setPlaceResults([]);
   }, []);
 
+  const handleAddPhoto = useCallback(async () => {
+    if (photos.length >= MAX_PHOTOS) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0]!;
+    const mime = (asset.mimeType === 'image/png' || asset.mimeType === 'image/webp')
+      ? asset.mimeType as 'image/png' | 'image/webp'
+      : 'image/jpeg';
+    const size = asset.fileSize ?? 0;
+    setUploadProgress(0);
+    setError(undefined);
+    try {
+      // Step 1: request signed upload ticket
+      const ticketRes = await fetch(`${baseUrl}/v1/media/uploads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purpose: 'provider_photo', mime, size }),
+      });
+      if (!ticketRes.ok) { setError(t('create.uploadError')); setUploadProgress(null); return; }
+      const ticket = await ticketRes.json() as { assetId: string; uploadUrl: string; headers: Record<string, string> };
+
+      // Step 2: PUT file bytes to signed URL, track progress via XHR
+      const fileRes = await fetch(asset.uri);
+      const blob = await fileRes.blob();
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', ticket.uploadUrl);
+        Object.entries(ticket.headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`PUT ${xhr.status}`)));
+        xhr.onerror = () => reject(new Error('network'));
+        xhr.send(blob);
+      });
+
+      // Step 3: signal completion
+      const completeRes = await fetch(`${baseUrl}/v1/media/uploads/${encodeURIComponent(ticket.assetId)}/complete`, {
+        method: 'POST',
+      });
+      if (!completeRes.ok && completeRes.status !== 409) { setError(t('create.uploadError')); setUploadProgress(null); return; }
+
+      setPhotos((prev) => [...prev, { uri: asset.uri, assetId: ticket.assetId }]);
+    } catch {
+      setError(t('create.uploadError'));
+    } finally {
+      setUploadProgress(null);
+    }
+  }, [photos.length, baseUrl]);
+
+  const handleRemovePhoto = useCallback((assetId: string) => {
+    setPhotos((prev) => prev.filter((p) => p.assetId !== assetId));
+  }, []);
+
   const handleSubmit = async () => {
     if (!body.trim() || submitting) return;
     setSubmitting(true);
@@ -78,7 +150,7 @@ export function CreatePostScreen(): ReactElement {
         body: {
           type: postType,
           body: body.trim(),
-          mediaAssetIds: [],
+          mediaAssetIds: photos.map((p) => p.assetId),
           ...(selectedPlace ? { placeId: selectedPlace.id } : {}),
         },
       });
@@ -139,6 +211,36 @@ export function CreatePostScreen(): ReactElement {
           textAlignVertical="top"
         />
         <Text style={styles.charCount}>{t('create.charCount', { count: body.length })}</Text>
+
+        <Text style={styles.label}>{t('create.photoLabel')}</Text>
+        <View style={styles.photoRow}>
+          {photos.map((p) => (
+            <View key={p.assetId} style={styles.photoThumbWrap}>
+              <Image source={{ uri: p.uri }} style={styles.photoThumb} />
+              <Pressable style={styles.photoRemoveBtn} onPress={() => handleRemovePhoto(p.assetId)}>
+                <Text style={styles.photoRemoveText}>{t('create.removePhoto')}</Text>
+              </Pressable>
+            </View>
+          ))}
+          {photos.length < MAX_PHOTOS ? (
+            <Pressable
+              style={styles.addPhotoBtn}
+              onPress={() => { void handleAddPhoto(); }}
+              disabled={uploadProgress !== null}
+            >
+              {uploadProgress !== null ? (
+                <ActivityIndicator size="small" color="#1976D2" />
+              ) : (
+                <Text style={styles.addPhotoBtnText}>{t('create.addPhoto')}</Text>
+              )}
+            </Pressable>
+          ) : null}
+        </View>
+        {uploadProgress !== null ? (
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
+          </View>
+        ) : null}
 
         <Text style={styles.label}>{t('create.placeLabel')}</Text>
         {selectedPlace ? (
@@ -322,6 +424,67 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     textAlign: 'auto',
+  },
+  photoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  photoThumbWrap: {
+    position: 'relative',
+    width: 80,
+    height: 80,
+  },
+  photoThumb: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  photoRemoveBtn: {
+    position: 'absolute',
+    top: 2,
+    end: 2,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoRemoveText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  addPhotoBtn: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#1976D2',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
+  },
+  addPhotoBtnText: {
+    color: '#1976D2',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  progressBar: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#E0E0E0',
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 4,
+    backgroundColor: '#1976D2',
+    borderRadius: 2,
   },
   selectedPlaceRow: {
     flexDirection: 'row',

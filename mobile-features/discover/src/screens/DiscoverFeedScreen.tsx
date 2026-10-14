@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   FlatList,
   I18nManager,
+  Image,
   Platform,
   Pressable,
   RefreshControl,
@@ -43,12 +44,14 @@ const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 const PostItem = memo(function PostItem({
   post,
   placeName,
+  firstImageUrl,
   onLike,
   onComment,
   onPlacePress,
 }: {
   post: DiscoverPostType;
   placeName?: string;
+  firstImageUrl?: string;
   onLike: (post: DiscoverPostType) => void;
   onComment: (postId: string) => void;
   onPlacePress: (placeId: string) => void;
@@ -70,6 +73,9 @@ const PostItem = memo(function PostItem({
         </View>
       </View>
       <Text style={styles.bodyText}>{post.body}</Text>
+      {firstImageUrl ? (
+        <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
+      ) : null}
       {post.placeId ? (
         <Pressable style={styles.placeChip} onPress={() => onPlacePress(post.placeId!)}>
           <Text style={styles.placeChipText}>📍 {placeName ?? post.placeId.slice(0, 8)}</Text>
@@ -104,7 +110,10 @@ const PostItem = memo(function PostItem({
 
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
-  const placesApi = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extApi = useApi() as any;
+  const placesApi = extApi;
+  const mediaApi = extApi;
   const router = useRouter();
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
@@ -114,7 +123,9 @@ export function DiscoverFeedScreen(): ReactElement {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [placeNames, setPlaceNames] = useState<Readonly<Record<string, string>>>({});
+  const [mediaUrls, setMediaUrls] = useState<Readonly<Record<string, string>>>({});
   const fetchingPlaceIds = useRef(new Set<string>());
+  const fetchingAssetIds = useRef(new Set<string>());
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -154,8 +165,7 @@ export function DiscoverFeedScreen(): ReactElement {
       ids.map(async (id) => {
         const idStr = id as string;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const res = await (placesApi as any).places.get({ params: { id } });
+          const res = await placesApi.places.get({ params: { id } });
           if (res.status === 200) {
             const name: string = res.body.names.ar ?? res.body.names.name;
             setPlaceNames((prev) => ({ ...prev, [idStr]: name }));
@@ -168,6 +178,31 @@ export function DiscoverFeedScreen(): ReactElement {
       }),
     );
   }, [posts, placeNames, placesApi]);
+
+  // Fetch signed read URLs for first asset of posts that have media
+  useEffect(() => {
+    const assetIds = posts
+      .flatMap((p) => p.mediaAssetIds.slice(0, 1))
+      .filter((id) => !!id && !mediaUrls[id] && !fetchingAssetIds.current.has(id));
+    if (assetIds.length === 0) return;
+    assetIds.forEach((id) => fetchingAssetIds.current.add(id));
+    void Promise.all(
+      assetIds.map(async (assetId) => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const res = await (mediaApi as any).media.readUrl({ params: { assetId } });
+          if (res.status === 200) {
+            const url: string = res.body.url.startsWith('/') ? `${res.body.url}` : res.body.url;
+            setMediaUrls((prev) => ({ ...prev, [assetId]: url }));
+          }
+        } catch {
+          // silent — image simply won't show
+        } finally {
+          fetchingAssetIds.current.delete(assetId);
+        }
+      }),
+    );
+  }, [posts, mediaUrls, mediaApi]);
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
@@ -224,6 +259,7 @@ export function DiscoverFeedScreen(): ReactElement {
           <PostItem
             post={item}
             placeName={item.placeId ? placeNames[item.placeId] : undefined}
+            firstImageUrl={item.mediaAssetIds[0] ? mediaUrls[item.mediaAssetIds[0]] : undefined}
             onLike={handleLike}
             onComment={handleComment}
             onPlacePress={handlePlacePress}
@@ -335,6 +371,12 @@ const styles = StyleSheet.create({
     color: '#222',
     lineHeight: 22,
     textAlign: 'auto',
+    marginBottom: 10,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
     marginBottom: 10,
   },
   actions: {

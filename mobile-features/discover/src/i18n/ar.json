@@ -28,7 +28,12 @@
     "placeLabel": "الموقع (اختياري)",
     "placePlaceholder": "اكتب اسم المكان...",
     "placeSelected": "📍 {name}",
-    "clearPlace": "✕"
+    "clearPlace": "✕",
+    "addPhoto": "إضافة صورة",
+    "photoLabel": "الصور (حتى 3)",
+    "uploadingPhoto": "جارٍ رفع الصورة...",
+    "uploadError": "فشل رفع الصورة، حاول مجدداً",
+    "removePhoto": "✕"
   },
   "comments": {
     "title": "التعليقات",

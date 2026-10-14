@@ -28,7 +28,12 @@
     "placeLabel": "Location (optional)",
     "placePlaceholder": "Type a place name...",
     "placeSelected": "📍 {name}",
-    "clearPlace": "✕"
+    "clearPlace": "✕",
+    "addPhoto": "Add photo",
+    "photoLabel": "Photos (up to 3)",
+    "uploadingPhoto": "Uploading photo...",
+    "uploadError": "Failed to upload photo, try again",
+    "removePhoto": "✕"
   },
   "comments": {
     "title": "Comments",

@@ -28,7 +28,12 @@
     "placeLabel": "شوێن (ئارەزوومەندانە)",
     "placePlaceholder": "ناوی شوێن بنووسە...",
     "placeSelected": "📍 {name}",
-    "clearPlace": "✕"
+    "clearPlace": "✕",
+    "addPhoto": "وێنە زیاد بکە",
+    "photoLabel": "وێنەکان (تا ٣)",
+    "uploadingPhoto": "بارکردنی وێنە...",
+    "uploadError": "هەڵەی بارکردنی وێنە",
+    "removePhoto": "✕"
   },
   "comments": {
     "title": "کۆمێنتەکان",
