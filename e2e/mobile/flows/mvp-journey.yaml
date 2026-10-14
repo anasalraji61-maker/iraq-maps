@@ -1,0 +1,215 @@
+# MVP full journey (M7 acceptance criterion):
+# login → search → route preview → assistant chat → messaging → provider reply
+# → discover post → activity tab → account deletion.
+#
+# Needs:
+#   APP_ENV=e2e, OTP_SENDER=fixed, OTP_FIXED_CODE=<code>
+#   baghdad-mini fixture places loaded, tiles + glyphs served
+#   run-flows.sh sets emulator locale to ar-IQ before every flow.
+#
+# Env vars (all optional):
+#   PHONE     new Iraqi number (07xxxxxxxxx). Default: random 077xxxxxxxx.
+#   OTP_CODE  must match OTP_FIXED_CODE. Default: 123456.
+#   NAME      ASCII display name. Default: Maestro <random>.
+appId: iq.iraqmaps.app
+name: mvp-journey
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
+---
+
+# ── 1. Login ─────────────────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.signIn
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+- takeScreenshot: journey-01-logged-in
+
+# ── 2. Search a place ─────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- tapOn:
+    id: map.search.input
+# Type the normalised variant to exercise the Arabic normalizer
+- inputText: قلعه
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- takeScreenshot: journey-02-search-results
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.source
+- takeScreenshot: journey-03-place-card
+
+# ── 3. Route preview ──────────────────────────────────────────────────────────
+- tapOn:
+    id: navigation.directions
+- extendedWaitUntil:
+    visible:
+      id: navigation.preview
+    timeout: 15000
+- assertVisible:
+    id: navigation.duration
+- assertVisible:
+    id: navigation.distance
+- takeScreenshot: journey-04-route-preview
+# Go back to map without starting navigation
+- tapOn:
+    id: navigation.back
+
+# ── 4. Assistant chat ─────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- tapOn:
+    id: assistant.compose.deeplink
+- extendedWaitUntil:
+    visible:
+      id: assistant.chat.input
+    timeout: 20000
+- tapOn:
+    id: assistant.chat.input
+- inputText: ما أحسن مطاعم بغداد؟
+- hideKeyboard
+- tapOn:
+    id: assistant.chat.send
+- extendedWaitUntil:
+    visible:
+      id: assistant.message.0
+    timeout: 30000
+- takeScreenshot: journey-05-assistant-reply
+
+# ── 5. Send a messaging inquiry ───────────────────────────────────────────────
+- tapOn:
+    id: tab.messages
+- extendedWaitUntil:
+    visible:
+      id: messaging.compose
+    timeout: 15000
+- tapOn:
+    id: messaging.compose
+- extendedWaitUntil:
+    visible:
+      id: map.search.input
+    timeout: 15000
+- tapOn:
+    id: map.search.input
+- inputText: قلعه
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: messaging.confirm.send
+    timeout: 15000
+- tapOn:
+    id: messaging.confirm.send
+- extendedWaitUntil:
+    visible:
+      id: messaging.handoff.copy
+    timeout: 15000
+- takeScreenshot: journey-06-message-sent
+
+# ── 6. Activity tab ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.activity
+- extendedWaitUntil:
+    visible:
+      text: نشاطي
+    timeout: 15000
+- takeScreenshot: journey-07-activity
+
+# ── 7. Discover — create a post ──────────────────────────────────────────────
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.create.post
+    timeout: 15000
+- tapOn:
+    id: discover.create.post
+- extendedWaitUntil:
+    visible:
+      id: discover.post.input
+    timeout: 15000
+- tapOn:
+    id: discover.post.input
+- inputText: مكان رائع للزيارة!
+- hideKeyboard
+- tapOn: نشر
+- extendedWaitUntil:
+    visible:
+      id: tab.discover
+    timeout: 20000
+- takeScreenshot: journey-08-post-created
+
+# ── 8. Account deletion ───────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.delete
+    timeout: 15000
+- tapOn:
+    id: account.delete
+- extendedWaitUntil:
+    visible:
+      id: account.delete.confirm
+    timeout: 10000
+- takeScreenshot: journey-09-delete-confirm
+- tapOn:
+    id: account.delete.confirm
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 30000
+- takeScreenshot: journey-10-deleted

@@ -1,10 +1,68 @@
-appId: com.iraqmaps.app
+# Assistant chat flow: sign in, open assistant, ask a question, verify a reply appears.
+# Needs APP_ENV=e2e, OTP_SENDER=fixed, a running API with the assistant module wired.
+# run-flows.sh starts every flow on cleared app data in the ar-IQ locale.
+appId: iq.iraqmaps.app
+name: assistant-chat
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
 ---
-- launchApp
+- launchApp:
+    clearState: true
+# Sign in first — assistant requires auth
 - tapOn:
-    id: "assistant.chat.input"
-- inputText: "أين أجد مطعم جيد في بغداد؟"
+    id: tab.account
 - tapOn:
-    id: "assistant.chat.send"
-- assertVisible:
-    id: "assistant.message.0"
+    id: account.signIn
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+# Navigate to assistant via the deep-link compose button on the map tab
+- tapOn:
+    id: tab.map
+- tapOn:
+    id: assistant.compose.deeplink
+- extendedWaitUntil:
+    visible:
+      id: assistant.chat.input
+    timeout: 20000
+- tapOn:
+    id: assistant.chat.input
+- inputText: ما أحسن مطاعم بغداد؟
+- hideKeyboard
+- takeScreenshot: assistant-question
+- tapOn:
+    id: assistant.chat.send
+- extendedWaitUntil:
+    visible:
+      id: assistant.message.0
+    timeout: 30000
+- takeScreenshot: assistant-reply

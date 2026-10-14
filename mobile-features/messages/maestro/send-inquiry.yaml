@@ -1,10 +1,82 @@
-appId: com.iraqmaps.app
+# Messaging — send an inquiry: sign in, open messages tab, compose, pick a place, confirm send.
+# Needs APP_ENV=e2e, baghdad-mini fixture places loaded, running API with messaging module.
+appId: iq.iraqmaps.app
+name: send-inquiry
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
 ---
-- launchApp
+- launchApp:
+    clearState: true
+# Sign in
 - tapOn:
-    id: "messaging.compose"
-- inputText: "أريد الاستفسار عن خدماتكم"
+    id: tab.account
 - tapOn:
-    id: "messaging.confirm.send"
-- assertVisible:
-    id: "messaging.channel..*"
+    id: account.signIn
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+# Compose message
+- tapOn:
+    id: tab.messages
+- extendedWaitUntil:
+    visible:
+      id: messaging.compose
+    timeout: 15000
+- tapOn:
+    id: messaging.compose
+# Place picker opens
+- extendedWaitUntil:
+    visible:
+      id: map.search.input
+    timeout: 15000
+- tapOn:
+    id: map.search.input
+- inputText: قلعه
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: messaging.confirm.send
+    timeout: 15000
+- takeScreenshot: messaging-confirm
+- tapOn:
+    id: messaging.confirm.send
+- extendedWaitUntil:
+    visible:
+      id: messaging.handoff.copy
+    timeout: 15000
+- takeScreenshot: messaging-sent

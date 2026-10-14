@@ -1,13 +1,83 @@
-appId: com.iraqmaps.app
+# Provider inbox — reply to an inquiry: sign in as a provider, open inbox, reply to the first message.
+# Needs APP_ENV=e2e and a message already in the provider's inbox (run send-inquiry.yaml first with
+# a phone that belongs to a verified provider, or seed the DB).
+appId: iq.iraqmaps.app
+name: provider-reply
+env:
+  PHONE: ${PROVIDER_PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Provider ' + Math.floor(Math.random() * 1000000)}
 ---
-- launchApp
-- tapOn: "حسابي"
-- tapOn: "صندوق الوارد"
-- assertVisible: "طلب جديد"
+- launchApp:
+    clearState: true
+# Sign in as provider
 - tapOn:
-    id: "provider.inbox.*"
+    id: tab.account
 - tapOn:
-    id: "provider.inbox.reply.input"
-- inputText: "نعم متاح"
-- tapOn: "إرسال"
-- assertVisible: "نعم متاح"
+    id: account.signIn
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- runFlow:
+    when:
+      visible:
+        id: auth.name.input
+    commands:
+      - tapOn:
+          id: auth.name.input
+      - inputText: ${NAME}
+      - hideKeyboard
+      - tapOn:
+          id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.account
+    timeout: 20000
+# Open provider inbox (account tab → صندوق الوارد)
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      text: صندوق الوارد
+    timeout: 15000
+- tapOn: صندوق الوارد
+# Tap first inbox item
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox.item.0
+    timeout: 15000
+- tapOn:
+    id: provider.inbox.item.0
+# Reply
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox.reply.input
+    timeout: 15000
+- tapOn:
+    id: provider.inbox.reply.input
+- inputText: أهلاً بك، سنكون سعداء باستقبالك.
+- hideKeyboard
+- takeScreenshot: provider-reply-draft
+- tapOn: إرسال
+- extendedWaitUntil:
+    notVisible:
+      id: provider.inbox.reply.input
+    timeout: 15000
+- takeScreenshot: provider-reply-sent

@@ -1,10 +1,70 @@
-appId: com.iraqmaps.app
+# Discover — create a post: sign in, open Discover tab, tap create, type text, publish.
+# Needs APP_ENV=e2e and a running API with the discover module.
+appId: iq.iraqmaps.app
+name: discover-create-post
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'Maestro ' + Math.floor(Math.random() * 1000000)}
 ---
-- launchApp
+- launchApp:
+    clearState: true
+# Sign in
 - tapOn:
-    id: "discover.create.post"
+    id: tab.account
 - tapOn:
-    id: "discover.post.input"
-- inputText: "منشور تجريبي عن مطعم جديد في بغداد"
+    id: account.signIn
 - tapOn:
-    id: "discover.create.post"
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+# Create post
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.create.post
+    timeout: 15000
+- tapOn:
+    id: discover.create.post
+- extendedWaitUntil:
+    visible:
+      id: discover.post.input
+    timeout: 15000
+- tapOn:
+    id: discover.post.input
+- inputText: مكان رائع للزيارة!
+- hideKeyboard
+- takeScreenshot: discover-draft
+- tapOn: نشر
+- extendedWaitUntil:
+    visible:
+      id: tab.discover
+    timeout: 20000
+- takeScreenshot: discover-posted

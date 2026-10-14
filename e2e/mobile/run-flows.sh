@@ -70,4 +70,13 @@ if [ -f "$out/api.log" ]; then
   echo "::endgroup::"
 fi
 e2e/mobile/screenshots-summary.sh "$out" || echo "::warning title=Screenshot summary::could not write the screenshots"
+
+# PII scan: check API log and all Maestro logs for leaked phones, tokens and coordinates (M7).
+if node e2e/mobile/scan-logs.mjs --dir "$out"; then
+  echo "scan-logs: clean"
+else
+  echo "::error title=PII leak in logs::scan-logs.mjs found phone/token/coordinate in e2e output"
+  failed=1
+fi
+
 exit $failed
