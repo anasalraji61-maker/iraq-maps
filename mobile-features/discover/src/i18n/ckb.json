@@ -52,7 +52,8 @@
     "likeA11y": "لایک بۆ کۆمێنت",
     "replyA11y": "وەڵام بۆ کۆمێنت",
     "replyingTo": "وەڵامدانەوە بۆ @{author}",
-    "cancelReply": "هەڵوەشاندنەوەی وەڵام"
+    "cancelReply": "هەڵوەشاندنەوەی وەڵام",
+    "cancelReplyIcon": "✕"
   },
   "postDetail": {
     "title": "پۆست",

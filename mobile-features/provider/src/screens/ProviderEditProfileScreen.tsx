@@ -41,8 +41,7 @@ export function ProviderEditProfileScreen(): ReactElement {
     }).catch(() => {
       setError(t('errors.invalid_request'));
     }).finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api]);
 
   const pickLogo = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();

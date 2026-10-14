@@ -52,7 +52,8 @@
     "likeA11y": "Like comment",
     "replyA11y": "Reply to comment",
     "replyingTo": "Replying to @{author}",
-    "cancelReply": "Cancel reply"
+    "cancelReply": "Cancel reply",
+    "cancelReplyIcon": "✕"
   },
   "postDetail": {
     "title": "Post",

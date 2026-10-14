@@ -52,7 +52,8 @@
     "likeA11y": "الإعجاب بالتعليق",
     "replyA11y": "الرد على التعليق",
     "replyingTo": "الرد على @{author}",
-    "cancelReply": "إلغاء الرد"
+    "cancelReply": "إلغاء الرد",
+    "cancelReplyIcon": "✕"
   },
   "postDetail": {
     "title": "المنشور",

@@ -204,7 +204,7 @@ export function CommentsScreen(): ReactElement {
             accessibilityRole="button"
             accessibilityLabel={t('comments.cancelReply')}
           >
-            <Text style={styles.replyBannerClose}>✕</Text>
+            <Text style={styles.replyBannerClose}>{t('comments.cancelReplyIcon')}</Text>
           </Pressable>
         </View>
       ) : null}

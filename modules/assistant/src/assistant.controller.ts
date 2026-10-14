@@ -1,24 +1,34 @@
 import { assistantContract } from '@iraq-maps/contracts';
-import { Controller, Res } from '@nestjs/common';
+import { Controller, Req, Res } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import type { FastifyReply } from 'fastify';
+import type { AuthPrincipal } from '@iraq-maps/contracts';
 import { AssistantService } from './assistant.service.js';
 
-// TODO: replace with real auth principal injection (M6+)
-const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000000';
+/** Minimal shape of what IdentityAuthGuard leaves on the request (mirrors identity module's AuthenticatedRequest). */
+interface AuthedRequest { principal?: AuthPrincipal }
 
 const problem = <S extends number>(status: S, code: string, title: string) => ({
   status,
   body: { type: 'about:blank' as const, title, status, code },
 });
 
+const unauthorized = problem(401, 'unauthorized', 'Authentication required');
+
 @Controller()
 export class AssistantController {
   constructor(private readonly svc: AssistantService) {}
 
   @TsRestHandler(assistantContract)
-  handle(@Res({ passthrough: true }) reply: FastifyReply) {
-    const userId = PLACEHOLDER_USER_ID;
+  handle(@Req() req: AuthedRequest, @Res({ passthrough: true }) reply: FastifyReply) {
+    const userId = req.principal?.userId;
+    if (!userId) {
+      return tsRestHandler(assistantContract, {
+        chat: async () => unauthorized,
+        getSession: async () => unauthorized as never,
+        deleteSession: async () => unauthorized as never,
+      });
+    }
 
     return tsRestHandler(assistantContract, {
       chat: async ({ body }) => {

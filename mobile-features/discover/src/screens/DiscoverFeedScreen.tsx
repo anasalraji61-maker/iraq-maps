@@ -173,7 +173,7 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api, cursor, hasMore, loadingMore]);
 
-  useEffect(() => { void loadFeed(true); }, []); // eslint-disable-line
+  useEffect(() => { void loadFeed(true); }, [loadFeed]);
 
   // Fetch place names for any post.placeId not yet loaded
   useEffect(() => {
