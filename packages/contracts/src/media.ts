@@ -61,12 +61,23 @@ export const mediaContract = c.router(
       body: c.noBody(),
       responses: { 202: z.object({ assetId: AssetId, status: AssetStatus }), 400: Problem, 401: Problem, 404: Problem, 409: Problem },
     },
-    /** The owner's short-lived read URL. 404 for anyone else; 409 until ready. */
+    /** The owner's short-lived read URL. 404 for anyone else; 409 until ready.
+     *  Pass size=thumbnail|medium|full to get a resized variant (thumbnail: 320px, medium: 800px, full: original). */
     readUrl: {
       method: 'GET',
       path: '/media/:assetId/url',
       pathParams: z.object({ assetId: AssetId }),
+      query: z.object({ size: z.enum(['thumbnail', 'medium', 'full']).optional() }),
       responses: { 200: SignedUrl, 401: Problem, 404: Problem, 409: Problem },
+    },
+    /** Returns a signed URL to a resized variant. The variant is generated on first request and cached.
+     *  TODO: wire to an actual image-processing worker; currently stubs the URL. */
+    resize: {
+      method: 'POST',
+      path: '/media/:assetId/resize',
+      pathParams: z.object({ assetId: AssetId }),
+      body: z.object({ size: z.enum(['thumbnail', 'medium', 'full']) }),
+      responses: { 200: SignedUrl, 400: Problem, 401: Problem, 404: Problem, 409: Problem },
     },
     /** The filesystem driver's signed object routes (dev, test, e2e). Public: the HMAC signature (MEDIA_SIGNING_SECRET)
      * over method, key and expiry is the authorization. 403: bad or expired signature. */

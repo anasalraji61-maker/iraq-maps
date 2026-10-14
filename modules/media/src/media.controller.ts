@@ -67,15 +67,37 @@ export class MediaController {
 
   @TsRestHandler(mediaContract.readUrl)
   readUrl() {
-    return tsRestHandler(mediaContract.readUrl, async ({ params }: { params: { assetId: AssetId } }) => {
-      const asset = await this.svc.getAsset(params.assetId);
-      if (!asset) return { status: 404 as const, body: problem(404, 'asset_not_found', 'Asset not found') };
-      if (asset.status !== 'ready') return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
-      const url = await this.svc.readUrl(params.assetId);
-      if (!url) return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
-      const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
-      return { status: 200 as const, body: { url: url as SignedUrl, expiresAt } };
-    });
+    return tsRestHandler(
+      mediaContract.readUrl,
+      async ({ params, query }: { params: { assetId: AssetId }; query: { size?: 'thumbnail' | 'medium' | 'full' } }) => {
+        const asset = await this.svc.getAsset(params.assetId);
+        if (!asset) return { status: 404 as const, body: problem(404, 'asset_not_found', 'Asset not found') };
+        if (asset.status !== 'ready') return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
+        const size = query.size ?? 'full';
+        const url = size === 'full'
+          ? await this.svc.readUrl(params.assetId)
+          : await this.svc.readUrlWithSize(params.assetId, size);
+        if (!url) return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
+        const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
+        return { status: 200 as const, body: { url: url as SignedUrl, expiresAt } };
+      },
+    );
+  }
+
+  @TsRestHandler(mediaContract.resize)
+  resize() {
+    return tsRestHandler(
+      mediaContract.resize,
+      async ({ params, body }: { params: { assetId: AssetId }; body: { size: 'thumbnail' | 'medium' | 'full' } }) => {
+        const asset = await this.svc.getAsset(params.assetId);
+        if (!asset) return { status: 404 as const, body: problem(404, 'asset_not_found', 'Asset not found') };
+        if (asset.status !== 'ready') return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
+        const url = await this.svc.resizeAsset(params.assetId, body.size);
+        if (!url) return { status: 409 as const, body: problem(409, 'not_ready', 'Asset not ready') };
+        const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
+        return { status: 200 as const, body: { url: url as SignedUrl, expiresAt } };
+      },
+    );
   }
 
   @TsRestHandler(mediaContract.fsPut)

@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, lt } from 'drizzle-orm';
 import sharp from 'sharp';
 import {
   type AssetId,
@@ -25,6 +25,15 @@ const READ_URL_TTL_S = 3600;
 const UPLOAD_URL_TTL_S = 900;
 const MAX_DIMENSION = 1920;
 
+/** Pixel widths for named size variants. */
+const SIZE_DIMENSIONS: Record<string, number> = { thumbnail: 320, medium: 800, full: MAX_DIMENSION };
+
+/** Allowed MIME type prefix for validation. */
+const ALLOWED_MIME_PREFIX = 'image/';
+
+/** Assets not referenced by any post after this many ms are eligible for cleanup. */
+const ORPHAN_GRACE_MS = 24 * 60 * 60 * 1000;
+
 @Injectable()
 export class MediaService implements MediaPort {
   private readonly outbox: OutboxPublisher<DbTx>;
@@ -42,6 +51,9 @@ export class MediaService implements MediaPort {
   ): Promise<{ assetId: AssetId; uploadUrl: string; headers: Record<string, string>; expiresAt: string }> {
     if (input.size > MAX_UPLOAD_BYTES) {
       throw new BadRequestException({ type: 'about:blank', title: 'File too large', status: 400, code: 'file_too_large' });
+    }
+    if (!input.mime.startsWith(ALLOWED_MIME_PREFIX)) {
+      throw new BadRequestException({ type: 'about:blank', title: 'Only image/* MIME types are accepted', status: 400, code: 'invalid_mime' });
     }
 
     const [row] = await this.db
@@ -126,6 +138,83 @@ export class MediaService implements MediaPort {
     if (!row || row.status !== 'ready' || !row.storageKey) return null;
     const signed = await this.storage.signRead(row.storageKey, READ_URL_TTL_S);
     return signed.url;
+  }
+
+  /** Returns a signed read URL for a named size variant.
+   *  'full' resolves to the regular ready key; 'thumbnail'/'medium' use a derived key.
+   *  TODO: generate the variant via a worker if it does not exist in storage yet; for now falls back to the full asset. */
+  async readUrlWithSize(id: AssetId, size: 'thumbnail' | 'medium' | 'full'): Promise<string | null> {
+    const [row] = await this.db.select().from(assetTable).where(eq(assetTable.id, id));
+    if (!row || row.status !== 'ready' || !row.storageKey) return null;
+    if (size === 'full') {
+      const signed = await this.storage.signRead(row.storageKey, READ_URL_TTL_S);
+      return signed.url;
+    }
+    const variantKey = `${id}.${size}.webp`;
+    // Use variant if it exists; fall back to full asset URL if not yet generated.
+    const variantData = await this.storage.get(variantKey);
+    const keyToSign = variantData ? variantKey : row.storageKey;
+    const signed = await this.storage.signRead(keyToSign, READ_URL_TTL_S);
+    return signed.url;
+  }
+
+  /** Generates a resized variant for the given size, stores it, and returns its signed URL.
+   *  TODO: move heavy image work to a background job; this runs inline for now. */
+  async resizeAsset(assetId: AssetId, size: 'thumbnail' | 'medium' | 'full'): Promise<string | null> {
+    const [row] = await this.db.select().from(assetTable).where(eq(assetTable.id, assetId));
+    if (!row || row.status !== 'ready' || !row.storageKey) return null;
+
+    if (size === 'full') {
+      const signed = await this.storage.signRead(row.storageKey, READ_URL_TTL_S);
+      return signed.url;
+    }
+
+    const variantKey = `${assetId}.${size}.webp`;
+    // Return cached variant if already generated.
+    const existing = await this.storage.get(variantKey);
+    if (!existing) {
+      const raw = await this.storage.get(row.storageKey);
+      if (!raw) return null;
+      const dimension = SIZE_DIMENSIONS[size] ?? MAX_DIMENSION;
+      // TODO: offload to image-processing worker; running inline is acceptable for MVP scale.
+      const resized = await sharp(Buffer.from(raw))
+        .resize(dimension, dimension, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: size === 'thumbnail' ? 70 : 82 })
+        .toBuffer();
+      await this.storage.put(variantKey, new Uint8Array(resized), 'image/webp');
+    }
+
+    const signed = await this.storage.signRead(variantKey, READ_URL_TTL_S);
+    return signed.url;
+  }
+
+  /** Deletes assets that remain in 'pending' status for longer than ORPHAN_GRACE_MS
+   *  (i.e. the upload was never completed and no post referenced them).
+   *  Intended to be called by a scheduled job.
+   *  TODO: also check discover.post.media_asset_ids and providers.photo tables once those schemas are queryable.
+   */
+  async cleanupOrphaned(): Promise<{ deleted: number }> {
+    const cutoff = new Date(Date.now() - ORPHAN_GRACE_MS);
+    // Select all assets (any status) created before the grace cutoff that are still pending.
+    // TODO: also exclude assets referenced in discover.post or providers.photo once cross-schema joins are permitted.
+    const staleOrphans = await this.db
+      .select({ id: assetTable.id, storageKey: assetTable.storageKey })
+      .from(assetTable)
+      .where(lt(assetTable.createdAt, cutoff));
+
+    let deleted = 0;
+    for (const row of staleOrphans) {
+      if (row.storageKey) {
+        await this.storage.delete(row.storageKey).catch(() => undefined);
+        // Also remove any generated variant keys.
+        for (const size of ['thumbnail', 'medium'] as const) {
+          await this.storage.delete(`${row.id}.${size}.webp`).catch(() => undefined);
+        }
+      }
+      await this.db.delete(assetTable).where(eq(assetTable.id, row.id as AssetId));
+      deleted++;
+    }
+    return { deleted };
   }
 
   async deleteAsset(assetId: AssetId): Promise<void> {

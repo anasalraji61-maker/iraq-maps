@@ -211,7 +211,7 @@ export function DiscoverFeedScreen(): ReactElement {
       assetIds.map(async (assetId) => {
         try {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const res = await (mediaApi as any).media.readUrl({ params: { assetId } });
+          const res = await (mediaApi as any).media.readUrl({ params: { assetId }, query: { size: 'thumbnail' } });
           if (res.status === 200) {
             const url: string = res.body.url.startsWith('/') ? `${res.body.url}` : res.body.url;
             setMediaUrls((prev) => ({ ...prev, [assetId]: url }));
