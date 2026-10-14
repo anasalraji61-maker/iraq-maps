@@ -61,6 +61,7 @@
     "verified": "موثّق",
     "suspended": "موقوف",
     "refresh": "تحديث الحالة",
+    "editProfile": "تعديل الملف التعريفي",
     "analytics": {
       "viewsToday": "عدد المشاهدات اليوم",
       "incomingMessages": "عدد الرسائل الواردة",
@@ -84,6 +85,19 @@
     "title": "شعار النشاط التجاري",
     "change": "تغيير الشعار",
     "placeholder": "أضف شعاراً"
+  },
+  "edit": {
+    "title": "تعديل الملف التعريفي",
+    "save": "حفظ التغييرات",
+    "saved": "تم الحفظ",
+    "name": "اسم النشاط",
+    "category": "الفئة",
+    "hours": "أوقات العمل",
+    "hoursPlaceholder": "مثال: السبت-الخميس 9ص-10م",
+    "photos": "الصور",
+    "addPhoto": "إضافة صورة",
+    "logo": "الشعار",
+    "changeLogo": "تغيير الشعار"
   },
   "errors": {
     "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",

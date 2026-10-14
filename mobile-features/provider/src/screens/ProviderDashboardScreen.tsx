@@ -1,6 +1,7 @@
 import { testIDs, type ProviderStatus } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { StyleSheet, View, Text as RNText } from 'react-native';
 import { t } from '../strings';
@@ -41,6 +42,7 @@ function AnalyticsCard({ label, value, color, icon }: AnalyticsCardProps): React
 /** Provider dashboard: shows account status badge and simple analytics cards. */
 export function ProviderDashboardScreen(): ReactElement {
   const api = useApi();
+  const router = useRouter();
   const messagingApi = useMessagingApi();
   const [status, setStatus] = useState<ProviderStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -139,6 +141,11 @@ export function ProviderDashboardScreen(): ReactElement {
           onPress={() => { void fetchStatus(); }}
         />
       )}
+      <Button
+        variant="secondary"
+        label={t('dashboard.editProfile')}
+        onPress={() => router.push('/provider/edit-profile' as never)}
+      />
     </Screen>
   );
 }

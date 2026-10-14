@@ -61,6 +61,7 @@
     "verified": "Verified",
     "suspended": "Suspended",
     "refresh": "Refresh Status",
+    "editProfile": "Edit Profile",
     "analytics": {
       "viewsToday": "Views Today",
       "incomingMessages": "Incoming Messages",
@@ -84,6 +85,19 @@
     "title": "Business Logo",
     "change": "Change Logo",
     "placeholder": "Add a logo"
+  },
+  "edit": {
+    "title": "Edit Profile",
+    "save": "Save Changes",
+    "saved": "Saved",
+    "name": "Business Name",
+    "category": "Category",
+    "hours": "Working Hours",
+    "hoursPlaceholder": "e.g. Sat-Thu 9am-10pm",
+    "photos": "Photos",
+    "addPhoto": "Add Photo",
+    "logo": "Logo",
+    "changeLogo": "Change Logo"
   },
   "errors": {
     "provider_already_exists": "You already have a registered business.",
