@@ -1,0 +1,13 @@
+{
+  "title": "Notifications",
+  "markAllRead": "Mark all read",
+  "loadError": "Failed to load notifications",
+  "retry": "Retry",
+  "loginPrompt": "Sign in to see your notifications",
+  "empty": "No notifications yet",
+  "emptySubtext": "Likes, comments, and messages will appear here",
+  "timeNow": "now",
+  "timeMinutes": "{n}m ago",
+  "timeHours": "{n}h ago",
+  "timeDays": "{n}d ago"
+}

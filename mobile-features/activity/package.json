@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/mobile-kit": "workspace:*",
     "expo-router": "^4.0.0",
     "react": "18.3.1",

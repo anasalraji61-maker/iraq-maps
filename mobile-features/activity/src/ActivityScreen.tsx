@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { t } from './strings';
 
 I18nManager.forceRTL(true);
 
@@ -19,12 +20,12 @@ type NotifItem = NotificationItem & { _type?: string };
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return 'الآن';
-  if (minutes < 60) return `منذ ${minutes} د`;
+  if (minutes < 1) return t('timeNow');
+  if (minutes < 60) return t('timeMinutes', { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `منذ ${hours} س`;
+  if (hours < 24) return t('timeHours', { n: hours });
   const days = Math.floor(hours / 24);
-  return `منذ ${days} ي`;
+  return t('timeDays', { n: days });
 }
 
 function notifIcon(data?: Record<string, string>): string {
@@ -78,10 +79,10 @@ export function ActivityScreen(): ReactElement {
         setItems(res.body.items as NotifItem[]);
         setError(undefined);
       } else {
-        setError('تعذر تحميل الإشعارات');
+        setError(t('loadError'));
       }
     } catch {
-      setError('تعذر تحميل الإشعارات');
+      setError(t('loadError'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -121,10 +122,10 @@ export function ActivityScreen(): ReactElement {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>الإشعارات</Text>
+        <Text style={styles.headerTitle}>{t('title')}</Text>
         {unreadCount > 0 ? (
           <Pressable onPress={() => { void markAllRead(); }} style={styles.markAllBtn}>
-            <Text style={styles.markAllText}>تعليم الكل مقروء</Text>
+            <Text style={styles.markAllText}>{t('markAllRead')}</Text>
           </Pressable>
         ) : null}
       </View>
@@ -137,18 +138,18 @@ export function ActivityScreen(): ReactElement {
         <View style={styles.center}>
           <Text style={styles.errorText}>{error}</Text>
           <Pressable onPress={() => { void load(); }} style={styles.retryBtn}>
-            <Text style={styles.retryText}>إعادة المحاولة</Text>
+            <Text style={styles.retryText}>{t('retry')}</Text>
           </Pressable>
         </View>
       ) : !session ? (
         <View style={styles.center}>
-          <Text style={styles.emptyText}>سجّل دخولك لرؤية إشعاراتك</Text>
+          <Text style={styles.emptyText}>{t('loginPrompt')}</Text>
         </View>
       ) : items.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyIcon}>🔔</Text>
-          <Text style={styles.emptyText}>لا توجد إشعارات بعد</Text>
-          <Text style={styles.emptySubtext}>ستظهر هنا إشعارات الإعجابات والتعليقات والرسائل</Text>
+          <Text style={styles.emptyIcon}>{'🔔'}</Text>
+          <Text style={styles.emptyText}>{t('empty')}</Text>
+          <Text style={styles.emptySubtext}>{t('emptySubtext')}</Text>
         </View>
       ) : (
         <FlatList
