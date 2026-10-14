@@ -6,7 +6,7 @@ import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, 
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState, type ReactElement } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
 import { SatelliteToggle } from './components/SatelliteToggle';
 import { useMapStyle, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
@@ -15,6 +15,7 @@ import { formatDistance, isolate, kindLabel, t } from './strings';
 const SEARCH_DELAY_MS = 300;
 const LOCATED_ZOOM = 15;
 const NO_RESULTS: PlaceSummary[] = [];
+const MAX_RECENT = 5;
 
 const BAGHDAD_CENTER: LngLat = [44.4009, 33.3152];
 
@@ -50,6 +51,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [near, setNear] = useState<LngLat>(city.center);
   const [locateError, setLocateError] = useState<string>();
   const [query, setQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const [mapMode, setMapMode] = useState<MapMode>('street');
   const baseLayer = useMapStyle(mapMode);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
@@ -74,6 +77,12 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
 
   const q = query.trim();
 
+  const addRecent = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    setRecentSearches((prev) => [trimmed, ...prev.filter((r) => r !== trimmed)].slice(0, MAX_RECENT));
+  };
+
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
   // 4 decimals (about 11m) are enough to rank by distance and send no more of the user's location than that.
   const search = useLatest(
@@ -86,8 +95,22 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   );
   const results = search.state?.status === 'ready' ? search.state.data : NO_RESULTS;
   const markers = useMemo(() => results.map(({ id, location }) => ({ id, location, selected: id === selectedPlaceId })), [results, selectedPlaceId]);
+
+  type ResultSection = { title: string; data: PlaceSummary[] };
+  const resultSections = useMemo((): ResultSection[] => {
+    const places = results.filter((p) => p.kind === 'place');
+    const streets = results.filter((p) => p.kind === 'street');
+    const areas = results.filter((p) => p.kind === 'area');
+    const sections: ResultSection[] = [];
+    if (places.length) sections.push({ title: t('search.sectionPlaces'), data: places });
+    if (streets.length) sections.push({ title: t('search.sectionStreets'), data: streets });
+    if (areas.length) sections.push({ title: t('search.sectionAreas'), data: areas });
+    return sections;
+  }, [results]);
+
   const open = (placeId: string) => {
     setSelectedPlaceId(placeId);
+    addRecent(q);
     router.push(href('place', { placeId }));
   };
 
@@ -108,30 +131,38 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   return (
     <View style={styles.fill}>
       <View style={StyleSheet.absoluteFill}>
-        <MapCanvas
-          city={city}
-          apiBaseUrl={apiBaseUrl}
-          lang={mapLang}
-          camera={camera}
-          markers={markers}
-          onMarkerPress={open}
-          showUserLocation={located}
-          onCameraChanged={setNear}
-          baseLayer={baseLayer}
-        />
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => setSearchPanelOpen(false)}>
+          <MapCanvas
+            city={city}
+            apiBaseUrl={apiBaseUrl}
+            lang={mapLang}
+            camera={camera}
+            markers={markers}
+            onMarkerPress={open}
+            showUserLocation={located}
+            onCameraChanged={setNear}
+            baseLayer={baseLayer}
+          />
+        </Pressable>
         {mapMode === 'satellite' && city.satellite ? <SatelliteDisclaimer layer={city.satellite} /> : null}
       </View>
       <View style={styles.panel}>
         <View style={styles.searchRow}>
           <View style={styles.fill}>
-            <TextField testID={testIDs.map.searchInput} label={t('search.label')} placeholder={t('search.placeholder')} value={query} onChangeText={setQuery} />
+            <TextField
+              testID={testIDs.map.searchInput}
+              label={t('search.label')}
+              placeholder={t('search.placeholder')}
+              value={query}
+              onChangeText={(v) => { setQuery(v); setSearchPanelOpen(true); }}
+            />
           </View>
           {q ? (
             <IconButton
               testID="map.search.assistant"
               icon="smart_toy"
               accessibilityLabel={t('search.assistantHint')}
-              onPress={() => router.push(`/assistant?initialMessage=${encodeURIComponent(q)}`)}
+              onPress={() => { addRecent(q); router.push(`/assistant?initialMessage=${encodeURIComponent(q)}`); }}
             />
           ) : null}
           <SatelliteToggle active={mapMode === 'satellite'} onToggle={() => setMapMode((m) => (m === 'satellite' ? 'street' : 'satellite'))} />
@@ -139,11 +170,48 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         </View>
         {locateError ? <Banner kind="error" message={locateError} /> : null}
         {focusBanner ? <Banner kind="info" message={focusBanner} /> : null}
-        {q ? (
-          <ScrollView style={{ maxHeight: maxResultsHeight }} contentContainerStyle={styles.results} keyboardShouldPersistTaps="handled">
-            <LoadStatus {...search} />
-            {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
-            {results.map((place) => (
+        {searchPanelOpen && !q && recentSearches.length > 0 ? (
+          <View style={{ maxHeight: maxResultsHeight }}>
+            <View style={styles.recentHeader}>
+              <Text variant="caption">{t('search.recentTitle')}</Text>
+              <Pressable onPress={() => setRecentSearches([])}>
+                <RNText style={styles.clearText}>{t('search.clearRecent')}</RNText>
+              </Pressable>
+            </View>
+            <View style={styles.chipsRow}>
+              {recentSearches.map((term) => (
+                <Pressable
+                  key={term}
+                  style={styles.chip}
+                  onPress={() => { setQuery(term); setSearchPanelOpen(true); }}
+                >
+                  <RNText style={styles.chipText} numberOfLines={1}>{term}</RNText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        {searchPanelOpen && q ? (
+          <SectionList
+            style={{ maxHeight: maxResultsHeight }}
+            contentContainerStyle={styles.results}
+            keyboardShouldPersistTaps="handled"
+            sections={resultSections}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={
+              <>
+                <LoadStatus {...search} />
+                {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
+              </>
+            }
+            renderSectionHeader={({ section }) =>
+              resultSections.length > 1 ? (
+                <View style={styles.sectionHeader}>
+                  <Text variant="caption">{section.title}</Text>
+                </View>
+              ) : null
+            }
+            renderItem={({ item: place }) => (
               <PlaceSummaryCard
                 key={place.id}
                 testID={testIDs.map.searchResult}
@@ -154,8 +222,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                 source={t('source.osm')}
                 onPress={() => open(place.id)}
               />
-            ))}
-          </ScrollView>
+            )}
+          />
         ) : null}
       </View>
       <View style={styles.locate}>
@@ -191,12 +259,18 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   );
 }
 
-const { color, space, minTouch } = tokens;
+const { color, space, radius, minTouch } = tokens;
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   panel: { position: 'absolute', top: 0, start: 0, end: 0, padding: space.m, gap: space.s, backgroundColor: color.bg },
   searchRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space.s },
   results: { gap: space.s },
+  recentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: space.xs },
+  clearText: { color: color.primary, fontSize: 13 },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
+  chip: { paddingHorizontal: space.s, paddingVertical: space.xs, backgroundColor: color.surface, borderRadius: radius.l, borderWidth: 1, borderColor: color.border, maxWidth: 200 },
+  chipText: { fontSize: 13, color: color.text },
+  sectionHeader: { paddingVertical: space.xs, paddingHorizontal: space.xs, backgroundColor: color.bg },
   // At the end side, above the attribution that MapCanvas pins to the bottom-end corner.
   locate: { position: 'absolute', end: space.m, bottom: space.xl * 2, borderRadius: minTouch / 2, backgroundColor: color.bg, elevation: 4 },
 });

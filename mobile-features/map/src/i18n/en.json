@@ -3,7 +3,12 @@
     "label": "Search for a place, street or neighbourhood",
     "placeholder": "e.g. citadel, restaurant, Karrada",
     "empty": "No results for “{query}”. Try another spelling or a shorter name.",
-    "assistantHint": "Ask the assistant about this search"
+    "assistantHint": "Ask the assistant about this search",
+    "recentTitle": "Recent searches",
+    "clearRecent": "Clear all",
+    "sectionPlaces": "Places",
+    "sectionStreets": "Streets",
+    "sectionAreas": "Areas"
   },
   "focus": {
     "show": "Showing: {name}",

@@ -3,7 +3,12 @@
     "label": "ابحث عن مكان أو شارع أو حي",
     "placeholder": "مثلاً: قلعة، مطعم، الكرادة",
     "empty": "لا توجد نتائج لـ «{query}». جرّب إملاءً آخر أو اسماً أقصر.",
-    "assistantHint": "اسأل المساعد عن هذا البحث"
+    "assistantHint": "اسأل المساعد عن هذا البحث",
+    "recentTitle": "عمليات بحث سابقة",
+    "clearRecent": "مسح الكل",
+    "sectionPlaces": "أماكن",
+    "sectionStreets": "شوارع",
+    "sectionAreas": "مناطق"
   },
   "focus": {
     "show": "عرض: {name}",
