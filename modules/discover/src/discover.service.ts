@@ -1,0 +1,175 @@
+import { CommentId, type UserId } from '@iraq-maps/contracts';
+import type { Db } from '@iraq-maps/db-kit';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { and, eq, lt, sql } from 'drizzle-orm';
+import type { PostIdType } from '@iraq-maps/contracts';
+import { z } from 'zod';
+import { commentTable, postLikeTable, postTable } from './schema';
+
+type CommentIdType = z.infer<typeof CommentId>;
+
+@Injectable()
+export class DiscoverService {
+  constructor(@Inject('DISCOVER_DB') private readonly db: Db) {}
+
+  async listFeed(userId: UserId, cursor?: string, limit = 10) {
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined)
+      .orderBy(sql`${postTable.createdAt} DESC`)
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    // Check which posts are liked by user
+    const postIds = items.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+
+    return {
+      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id))),
+      nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
+    };
+  }
+
+  async createPost(
+    userId: UserId,
+    data: { type: string; body: string; placeId?: string; mediaAssetIds?: string[] },
+  ) {
+    const [post] = await this.db
+      .insert(postTable)
+      .values({
+        authorId: userId,
+        placeId: data.placeId ?? null,
+        type: data.type,
+        body: data.body,
+        mediaAssetIds: data.mediaAssetIds ?? [],
+      })
+      .returning();
+    if (!post) throw new Error('insert failed');
+    return this.toPostShape(post, false);
+  }
+
+  async likePost(userId: UserId, postId: PostIdType) {
+    const post = await this.getPostOrThrow(postId);
+
+    await this.db
+      .insert(postLikeTable)
+      .values({ postId, userId })
+      .onConflictDoNothing();
+
+    // Re-compute count from table
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ likeCount: sql`(SELECT COUNT(*) FROM discover.post_like WHERE post_id = ${postId})` })
+      .where(eq(postTable.id, postId))
+      .returning();
+
+    return { likeCount: updated?.likeCount ?? post.likeCount };
+  }
+
+  async unlikePost(userId: UserId, postId: PostIdType) {
+    await this.getPostOrThrow(postId);
+
+    await this.db
+      .delete(postLikeTable)
+      .where(and(eq(postLikeTable.postId, postId), eq(postLikeTable.userId, userId)));
+
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ likeCount: sql`GREATEST(0, (SELECT COUNT(*) FROM discover.post_like WHERE post_id = ${postId}))` })
+      .where(eq(postTable.id, postId))
+      .returning();
+
+    return { likeCount: updated?.likeCount ?? 0 };
+  }
+
+  async listComments(userId: UserId, postId: PostIdType, cursor?: string, limit = 10) {
+    void userId; // no per-user filtering on comments for now
+    await this.getPostOrThrow(postId);
+
+    const rows = await this.db
+      .select()
+      .from(commentTable)
+      .where(
+        cursor
+          ? and(eq(commentTable.postId, postId), lt(commentTable.createdAt, new Date(cursor)))
+          : eq(commentTable.postId, postId),
+      )
+      .orderBy(sql`${commentTable.createdAt} ASC`)
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    return {
+      items: items.map((c) => this.toCommentShape(c)),
+      nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
+    };
+  }
+
+  async createComment(userId: UserId, postId: PostIdType, body: string) {
+    await this.getPostOrThrow(postId);
+
+    const [comment] = await this.db
+      .insert(commentTable)
+      .values({ postId, authorId: userId, body })
+      .returning();
+    if (!comment) throw new Error('insert failed');
+
+    await this.db
+      .update(postTable)
+      .set({ commentCount: sql`comment_count + 1` })
+      .where(eq(postTable.id, postId));
+
+    return this.toCommentShape(comment);
+  }
+
+  async deletePost(userId: UserId, postId: PostIdType): Promise<boolean> {
+    const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    if (post.authorId !== userId) return false;
+
+    await this.db.delete(postTable).where(eq(postTable.id, postId));
+    return true;
+  }
+
+  private async getPostOrThrow(postId: PostIdType) {
+    const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    return post;
+  }
+
+  private toPostShape(post: typeof postTable.$inferSelect, isLikedByMe: boolean) {
+    return {
+      id: post.id as PostIdType,
+      authorId: post.authorId as UserId,
+      placeId: post.placeId ?? undefined,
+      type: post.type as 'photo' | 'tip' | 'event' | 'offer',
+      body: post.body,
+      mediaAssetIds: post.mediaAssetIds ?? [],
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      isLikedByMe,
+      createdAt: post.createdAt.toISOString(),
+    };
+  }
+
+  private toCommentShape(comment: typeof commentTable.$inferSelect) {
+    return {
+      id: comment.id as CommentIdType,
+      postId: comment.postId as PostIdType,
+      authorId: comment.authorId as UserId,
+      body: comment.body,
+      createdAt: comment.createdAt.toISOString(),
+    };
+  }
+}
