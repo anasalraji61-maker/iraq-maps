@@ -50,7 +50,7 @@ describe('openNow', () => {
   });
 });
 
-import { closesAt, fmtMinutes } from '../src/hours';
+import { closesAt, fmtMinutes, todayHours } from '../src/hours';
 
 describe('fmtMinutes', () => {
   it('formats minutes as HH:MM', () => {
@@ -58,6 +58,35 @@ describe('fmtMinutes', () => {
     expect(fmtMinutes(1320)).toBe('22:00');
     expect(fmtMinutes(0)).toBe('00:00');
     expect(fmtMinutes(1441)).toBe('00:01'); // wraps past 24h
+  });
+});
+
+describe('todayHours', () => {
+  it('returns single span for today', () => {
+    // Thursday has Sa-Th rule: 09:00-17:00
+    expect(todayHours('Sa-Th 09:00-17:00; Fr off', at(THU, '10:00'))).toBe('09:00–17:00');
+  });
+
+  it('returns null when today is closed', () => {
+    expect(todayHours('Sa-Th 09:00-17:00; Fr off', at(FRI, '10:00'))).toBeNull();
+  });
+
+  it('returns multiple spans joined by comma', () => {
+    // Thursday at 10:00: two spans 09:00-13:00 and 16:00-22:00
+    expect(todayHours('Mo-Fr 09:00-13:00,16:00-22:00', at(THU, '10:00'))).toBe('09:00–13:00, 16:00–22:00');
+  });
+
+  it('returns 24/7 as full day span', () => {
+    expect(todayHours('24/7', at(THU, '10:00'))).toBe('00:00–00:00');
+  });
+
+  it('returns null for unparseable string', () => {
+    expect(todayHours('PH off', at(THU, '10:00'))).toBeNull();
+  });
+
+  it('normalises overnight span end to same-day clock', () => {
+    // 18:00-02:00 stored as [1080, 1560]; end % 1440 = 120 → "02:00"
+    expect(todayHours('18:00-02:00', at(THU, '10:00'))).toBe('18:00–02:00');
   });
 });
 
