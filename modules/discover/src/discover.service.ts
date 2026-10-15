@@ -5,7 +5,7 @@ import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
-import { commentLikeTable, commentTable, postLikeTable, postReportTable, postTable, postViewTable } from './schema';
+import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, userFollowTable } from './schema';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -66,7 +66,7 @@ export class DiscoverService {
 
   async createPost(
     userId: UserId,
-    data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[] },
+    data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[]; mentionedUserIds?: UserId[] },
   ) {
     const [post] = await this.db
       .insert(postTable)
@@ -80,7 +80,27 @@ export class DiscoverService {
       })
       .returning();
     if (!post) throw new Error('insert failed');
-    return this.toPostShape(post, false);
+
+    // Store @mentions and fire notification events
+    const mentionedIds = data.mentionedUserIds ?? [];
+    if (mentionedIds.length > 0) {
+      await this.db
+        .insert(postMentionTable)
+        .values(mentionedIds.map((mentionedUserId) => ({ postId: post.id, mentionedUserId })))
+        .onConflictDoNothing();
+      for (const mentionedUserId of mentionedIds) {
+        if (mentionedUserId !== userId) {
+          await this.eventBus.publish({
+            id: randomUUID(),
+            name: 'discover.post.mentioned.v1',
+            occurredAt: new Date().toISOString(),
+            payload: { postId: post.id as string, postAuthorId: userId, mentionedUserId },
+          } as import('@iraq-maps/contracts').DomainEvent).catch(() => undefined);
+        }
+      }
+    }
+
+    return this.toPostShape(post, false, false, mentionedIds);
   }
 
   async getPost(userId: UserId, postId: PostIdType) {
@@ -252,6 +272,9 @@ export class DiscoverService {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
     if (post.authorId !== userId) return null;
+
+    // Save previous body to edit history before overwriting
+    await this.db.insert(postEditHistoryTable).values({ postId, previousBody: post.body });
 
     const [updated] = await this.db
       .update(postTable)
@@ -567,13 +590,112 @@ export class DiscoverService {
     };
   }
 
+  /** Follow a user and send notification to them. */
+  async followUser(followerId: UserId, followeeId: UserId): Promise<{ followersCount: number }> {
+    await this.db
+      .insert(userFollowTable)
+      .values({ followerId, followeeId })
+      .onConflictDoNothing();
+
+    await this.eventBus.publish({
+      id: randomUUID(),
+      name: 'discover.user.followed.v1',
+      occurredAt: new Date().toISOString(),
+      payload: { followerId, followeeId },
+    }).catch(() => undefined);
+
+    const [row] = await this.db.execute<{ cnt: string }>(
+      sql`SELECT COUNT(*)::int AS cnt FROM discover.user_follow WHERE followee_id = ${followeeId}`,
+    ).then((r) => r.rows);
+    return { followersCount: Number(row?.cnt ?? 0) };
+  }
+
+  /** Unfollow a user. */
+  async unfollowUser(followerId: UserId, followeeId: UserId): Promise<{ followersCount: number }> {
+    await this.db
+      .delete(userFollowTable)
+      .where(and(eq(userFollowTable.followerId, followerId), eq(userFollowTable.followeeId, followeeId)));
+
+    const [row] = await this.db.execute<{ cnt: string }>(
+      sql`SELECT COUNT(*)::int AS cnt FROM discover.user_follow WHERE followee_id = ${followeeId}`,
+    ).then((r) => r.rows);
+    return { followersCount: Number(row?.cnt ?? 0) };
+  }
+
+  /** Bookmark a post; increment bookmarkCount. */
+  async bookmarkPost(userId: UserId, postId: PostIdType): Promise<{ bookmarkCount: number }> {
+    await this.getPostOrThrow(postId);
+    await this.db.insert(postBookmarkTable).values({ postId, userId }).onConflictDoNothing();
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ bookmarkCount: sql`(SELECT COUNT(*) FROM discover.post_bookmark WHERE post_id = ${postId})` })
+      .where(eq(postTable.id, postId))
+      .returning();
+    return { bookmarkCount: updated?.bookmarkCount ?? 0 };
+  }
+
+  /** Unbookmark a post; decrement bookmarkCount. */
+  async unbookmarkPost(userId: UserId, postId: PostIdType): Promise<{ bookmarkCount: number }> {
+    await this.getPostOrThrow(postId);
+    await this.db.delete(postBookmarkTable).where(and(eq(postBookmarkTable.postId, postId), eq(postBookmarkTable.userId, userId)));
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ bookmarkCount: sql`GREATEST(0, (SELECT COUNT(*) FROM discover.post_bookmark WHERE post_id = ${postId}))` })
+      .where(eq(postTable.id, postId))
+      .returning();
+    return { bookmarkCount: updated?.bookmarkCount ?? 0 };
+  }
+
+  /** Get edit history for a post. */
+  async getPostEdits(postId: PostIdType) {
+    await this.getPostOrThrow(postId);
+    const rows = await this.db
+      .select()
+      .from(postEditHistoryTable)
+      .where(eq(postEditHistoryTable.postId, postId))
+      .orderBy(desc(postEditHistoryTable.editedAt));
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        postId: r.postId as PostIdType,
+        previousBody: r.previousBody,
+        editedAt: r.editedAt.toISOString(),
+      })),
+    };
+  }
+
+  /** Search users by username/displayName prefix for @mention autocomplete.
+   * NOTE: Since we don't have a user table in this module, we search post authors by handle patterns in body.
+   * A real implementation would join an identity module's user table via a port. */
+  async searchUsers(query: string, limit = 10): Promise<{ items: Array<{ userId: UserId; username: string; displayName: string }> }> {
+    const term = query.replace(/[^A-Za-z0-9_؀-ۿ]/g, '').toLowerCase();
+    if (!term) return { items: [] };
+
+    // Best-effort: find distinct author_ids from posts whose body contains @<term>
+    const rows = await this.db.execute<{ author_id: string }>(sql`
+      SELECT DISTINCT author_id
+      FROM discover.post
+      WHERE removed_at IS NULL
+        AND body ILIKE ${'%@' + term + '%'}
+      LIMIT ${limit}
+    `);
+
+    return {
+      items: rows.rows.map((r) => ({
+        userId: r.author_id as UserId,
+        username: r.author_id, // without identity module, return id as placeholder
+        displayName: r.author_id,
+      })),
+    };
+  }
+
   private async getPostOrThrow(postId: PostIdType) {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
     return post;
   }
 
-  private toPostShape(post: typeof postTable.$inferSelect, isLikedByMe: boolean, authorVerified = false) {
+  private toPostShape(post: typeof postTable.$inferSelect, isLikedByMe: boolean, authorVerified = false, mentionedUserIds: UserId[] = []) {
     return {
       id: post.id as PostIdType,
       authorId: post.authorId as UserId,
@@ -585,6 +707,8 @@ export class DiscoverService {
       likeCount: post.likeCount,
       commentCount: post.commentCount,
       viewCount: post.viewCount ?? 0,
+      bookmarkCount: post.bookmarkCount ?? 0,
+      mentionedUserIds,
       isLikedByMe,
       authorVerified,
       createdAt: post.createdAt.toISOString(),

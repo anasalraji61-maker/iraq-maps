@@ -25,6 +25,9 @@ export const DiscoverPost = z.object({
   likeCount: z.number().int().default(0),
   commentCount: z.number().int().default(0),
   viewCount: z.number().int().default(0),
+  bookmarkCount: z.number().int().default(0),
+  /** IDs of users @mentioned in the post body. */
+  mentionedUserIds: z.array(UserId).default([]),
   isLikedByMe: z.boolean().default(false),
   /** True when the post author is a verified provider. @M93 */
   authorVerified: z.boolean().default(false),
@@ -43,6 +46,19 @@ export const DiscoverComment = z.object({
   createdAt: z.string().datetime(),
 });
 
+export const PostEditEntry = z.object({
+  id: z.string().uuid(),
+  postId: PostId,
+  previousBody: z.string(),
+  editedAt: z.string().datetime(),
+});
+
+export const UserSearchResult = z.object({
+  userId: UserId,
+  username: z.string(),
+  displayName: z.string(),
+});
+
 export const discoverContract = c.router({
   listFeed: {
     method: 'GET',
@@ -56,7 +72,7 @@ export const discoverContract = c.router({
   createPost: {
     method: 'POST',
     path: '/discover/posts',
-    body: z.object({ type: PostType, category: PostCategory.optional(), body: z.string().max(1000), placeId: PlaceId.optional(), mediaAssetIds: z.array(z.string().uuid()).max(4).optional() }),
+    body: z.object({ type: PostType, category: PostCategory.optional(), body: z.string().max(1000), placeId: PlaceId.optional(), mediaAssetIds: z.array(z.string().uuid()).max(4).optional(), mentionedUserIds: z.array(UserId).optional() }),
     responses: {
       201: DiscoverPost,
       400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
@@ -284,6 +300,74 @@ export const discoverContract = c.router({
     },
     summary: 'Autocomplete suggestions for hashtags and users',
   },
+
+  followUser: {
+    method: 'POST',
+    path: '/discover/users/:userId/follow',
+    pathParams: z.object({ userId: UserId }),
+    body: z.object({}),
+    responses: {
+      200: z.object({ followersCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Follow a user',
+  },
+
+  unfollowUser: {
+    method: 'DELETE',
+    path: '/discover/users/:userId/follow',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      200: z.object({ followersCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Unfollow a user',
+  },
+
+  bookmarkPost: {
+    method: 'POST',
+    path: '/discover/posts/:postId/bookmark',
+    pathParams: z.object({ postId: PostId }),
+    body: z.object({}),
+    responses: {
+      200: z.object({ bookmarkCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Bookmark a post',
+  },
+
+  unbookmarkPost: {
+    method: 'DELETE',
+    path: '/discover/posts/:postId/bookmark',
+    pathParams: z.object({ postId: PostId }),
+    responses: {
+      200: z.object({ bookmarkCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Remove bookmark from a post',
+  },
+
+  getPostEdits: {
+    method: 'GET',
+    path: '/discover/posts/:postId/edits',
+    pathParams: z.object({ postId: PostId }),
+    responses: {
+      200: z.object({ items: z.array(PostEditEntry) }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Edit history for a post',
+  },
+
+  searchUsers: {
+    method: 'GET',
+    path: '/discover/users/search',
+    query: z.object({ q: z.string().min(1).max(100), limit: z.coerce.number().int().max(20).default(10) }),
+    responses: {
+      200: z.object({ items: z.array(UserSearchResult) }),
+      400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+    },
+    summary: '@mention autocomplete: search users by username/displayName prefix',
+  },
 });
 
 export const ReportedPostView = z.object({
@@ -338,3 +422,5 @@ export const adminDiscoverContract = c.router({
 
 export type PostIdType = z.infer<typeof PostId>;
 export type DiscoverPostType = z.infer<typeof DiscoverPost>;
+export type PostEditEntryType = z.infer<typeof PostEditEntry>;
+export type UserSearchResultType = z.infer<typeof UserSearchResult>;

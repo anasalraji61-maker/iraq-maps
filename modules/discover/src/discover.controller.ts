@@ -221,6 +221,57 @@ export class DiscoverController {
         const result = await this.svc.searchSuggestions(query.q);
         return { status: 200, body: result };
       },
+
+      followUser: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        const result = await this.svc.followUser(userId, params.userId as UserId);
+        return { status: 200, body: result };
+      },
+
+      unfollowUser: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        const result = await this.svc.unfollowUser(userId, params.userId as UserId);
+        return { status: 200, body: result };
+      },
+
+      bookmarkPost: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const result = await this.svc.bookmarkPost(userId, params.postId as PostIdType);
+          return { status: 200, body: result };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      unbookmarkPost: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const result = await this.svc.unbookmarkPost(userId, params.postId as PostIdType);
+          return { status: 200, body: result };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      getPostEdits: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const result = await this.svc.getPostEdits(params.postId as PostIdType);
+          return { status: 200, body: result };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      searchUsers: async ({ query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.searchUsers(query.q, query.limit);
+        return { status: 200, body: result };
+      },
     });
   }
 }

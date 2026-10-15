@@ -15,6 +15,7 @@ export const postTable = discoverSchema.table(
     likeCount: integer('like_count').notNull().default(0),
     commentCount: integer('comment_count').notNull().default(0),
     viewCount: integer('view_count').notNull().default(0),
+    bookmarkCount: integer('bookmark_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     removedAt: timestamp('removed_at', { withTimezone: true }),
   },
@@ -100,4 +101,49 @@ export const userFollowTable = discoverSchema.table(
     index('user_follow_follower_idx').on(t.followerId),
     index('user_follow_followee_idx').on(t.followeeId),
   ],
+);
+
+/** @mention references extracted from post bodies. */
+export const postMentionTable = discoverSchema.table(
+  'post_mention',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    mentionedUserId: uuid('mentioned_user_id').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.mentionedUserId] }),
+    index('post_mention_mentioned_user_idx').on(t.mentionedUserId),
+  ],
+);
+
+/** User bookmarks on posts. */
+export const postBookmarkTable = discoverSchema.table(
+  'post_bookmark',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.userId] }),
+    index('post_bookmark_user_idx').on(t.userId),
+  ],
+);
+
+/** Edit history for posts. */
+export const postEditHistoryTable = discoverSchema.table(
+  'post_edit_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    previousBody: text('previous_body').notNull(),
+    editedAt: timestamp('edited_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('post_edit_history_post_id_idx').on(t.postId)],
 );

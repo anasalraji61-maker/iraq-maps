@@ -11,6 +11,8 @@ export const messagingEventPayloads = {
 export const discoverEventPayloads = {
   'discover.post.liked.v1': z.object({ postId: z.string().uuid(), postAuthorId: UserId, likedByUserId: UserId }),
   'discover.post.commented.v1': z.object({ postId: z.string().uuid(), postAuthorId: UserId, commentedByUserId: UserId }),
+  'discover.post.mentioned.v1': z.object({ postId: z.string().uuid(), postAuthorId: UserId, mentionedUserId: UserId }),
+  'discover.user.followed.v1': z.object({ followerId: UserId, followeeId: UserId }),
 } as const;
 
 /** Versioned domain events `<module>.<entity>.<verb>.v1`, published only through the outbox. */
