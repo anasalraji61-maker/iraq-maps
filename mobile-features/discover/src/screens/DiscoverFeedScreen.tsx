@@ -18,6 +18,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Vibration,
   View,
 } from 'react-native';
 import { useDiscoverClient } from '../client';
@@ -247,7 +248,7 @@ const PostItem = memo(function PostItem({
         <Pressable
           testID={discoverTestIDs.likeButton(post.id)}
           style={[styles.actionBtn, { backgroundColor: COLORS.border }, post.isLikedByMe && styles.actionBtnActive]}
-          onPress={() => onLike(post)}
+          onPress={() => { Vibration.vibrate(30); onLike(post); }}
           accessibilityRole="button"
           accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
         >
