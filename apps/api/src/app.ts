@@ -169,6 +169,8 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
   const adminKey = config.ADMIN_KEY;
   const { db, close } = createDb(config.DATABASE_URL);
   const messagingQueue = new Queue('messaging', { connection: { url: config.REDIS_URL } });
+  const { Redis } = await import('ioredis');
+  const redis = new Redis(config.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: null });
   const bus = createInProcessEventBus();
 
   @Module({})
@@ -180,6 +182,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     async onApplicationShutdown() {
       await this.relay?.stop();
       await close();
+      await redis.quit().catch(() => undefined);
     }
   }
 
@@ -221,7 +224,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
           ],
         } as unknown as typeof AssistantModule,
         InsightsModule,
-        discoverModule({ db, eventBus: bus }),
+        discoverModule({ db, eventBus: bus, redis }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [

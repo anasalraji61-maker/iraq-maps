@@ -47,6 +47,7 @@ export const discoverContract = c.router({
     responses: {
       201: DiscoverPost,
       400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+      429: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(429), code: z.string(), retryAfterMs: z.number().int() }),
     },
     summary: 'Create a discover post',
   },
@@ -145,6 +146,7 @@ export const discoverContract = c.router({
     responses: {
       204: z.undefined(),
       404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+      429: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(429), code: z.string(), retryAfterMs: z.number().int() }),
     },
     summary: 'Report a post for review',
   },

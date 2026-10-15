@@ -1,13 +1,14 @@
 import { type AuthPrincipal, type PostIdType, CommentId, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
 import { type z } from 'zod';
 type CommentIdType = z.infer<typeof CommentId>;
-import { Controller, Req } from '@nestjs/common';
+import { Controller, Inject, Optional, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { DiscoverService } from './discover.service';
+import type { SlidingWindowRateLimiter } from './rate-limiter';
 
-const problem = <S extends number>(status: S, code: string, title: string) => ({
+const problem = <S extends number>(status: S, code: string, title: string, extra?: Record<string, unknown>) => ({
   status,
-  body: { type: 'about:blank' as const, title, status, code },
+  body: { type: 'about:blank' as const, title, status, code, ...extra },
 });
 
 /** Minimal shape of what IdentityAuthGuard leaves on the request. */
@@ -15,7 +16,11 @@ interface AuthedRequest { principal?: AuthPrincipal }
 
 @Controller()
 export class DiscoverController {
-  constructor(private readonly svc: DiscoverService) {}
+  constructor(
+    private readonly svc: DiscoverService,
+    @Optional() @Inject('DISCOVER_POST_RATE_LIMITER') private readonly postLimiter: SlidingWindowRateLimiter | null,
+    @Optional() @Inject('DISCOVER_REPORT_RATE_LIMITER') private readonly reportLimiter: SlidingWindowRateLimiter | null,
+  ) {}
 
   @TsRestHandler(discoverContract)
   handle(@Req() req: AuthedRequest) {
@@ -40,6 +45,10 @@ export class DiscoverController {
 
       createPost: async ({ body }) => {
         if (!userId) return problem(400, 'unauthorized', 'Authentication required') as never;
+        if (this.postLimiter) {
+          const rl = await this.postLimiter.check(`post:${userId}`);
+          if (!rl.allowed) return problem(429, 'rate_limited', 'Too many posts', { retryAfterMs: rl.retryAfterMs }) as never;
+        }
         const post = await this.svc.createPost(userId, body);
         return { status: 201, body: post };
       },
@@ -122,6 +131,10 @@ export class DiscoverController {
 
       reportPost: async ({ params, body }) => {
         if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        if (this.reportLimiter) {
+          const rl = await this.reportLimiter.check(`report:${userId}`);
+          if (!rl.allowed) return problem(429, 'rate_limited', 'Too many reports', { retryAfterMs: rl.retryAfterMs }) as never;
+        }
         try {
           await this.svc.reportPost(userId, params.postId as PostIdType, body.reason);
           return { status: 204, body: undefined };
