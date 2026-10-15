@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "جولات ثلاثية الأبعاد",
+    "loading": "جاري التحميل...",
+    "empty": "لا توجد جولات متاحة",
+    "loadError": "فشل تحميل الجولات، حاول مجدداً",
+    "retry": "إعادة المحاولة",
+    "searchPlaceholder": "ابحث عن جولة...",
+    "searchEmpty": "لا توجد نتائج لـ \"{q}\"",
+    "loadMore": "تحميل المزيد",
+    "views": "{count} مشاهدة",
+    "assets": "{count} مشهد",
+    "filterAll": "الكل",
+    "filterHeritage": "تراث",
+    "filterMosque": "مسجد",
+    "filterMarket": "سوق",
+    "filterPark": "حديقة",
+    "filterMuseum": "متحف",
+    "filterShrine": "مزار",
+    "filterBridge": "جسر",
+    "filterNeighborhood": "حي",
+    "filterOther": "أخرى",
+    "nearbyTitle": "قريب منك",
+    "popularTitle": "الأكثر مشاهدة"
+  },
+  "viewer": {
+    "title": "جولة ثلاثية الأبعاد",
+    "loading": "جاري تحميل الجولة...",
+    "loadError": "فشل تحميل الجولة",
+    "notFound": "الجولة غير موجودة",
+    "retry": "إعادة المحاولة",
+    "startTour": "ابدأ الجولة",
+    "panoramaTitle": "عرض بانورامي 360°",
+    "panoramaInstructions": "حرّك هاتفك أو اسحب الشاشة لاستكشاف المكان",
+    "webviewUnavailable": "عرض الجولة غير متاح على هذا الجهاز",
+    "assetCount": "{count} مشهد",
+    "annotationCount": "{count} معلم",
+    "sceneLabel": "المشهد {current} من {total}",
+    "controls": {
+      "previous": "السابق",
+      "next": "التالي",
+      "toggleAnnotations": "إظهار/إخفاء المعالم",
+      "fullscreen": "ملء الشاشة",
+      "exitFullscreen": "خروج"
+    },
+    "progress": {
+      "label": "تقدم الجولة",
+      "complete": "اكتملت الجولة"
+    },
+    "annotation": {
+      "tapToLearnMore": "اضغط لمعرفة المزيد",
+      "linkedPlace": "عرض المكان"
+    }
+  },
+  "map": {
+    "title": "خريطة الجولات",
+    "loading": "جاري تحميل الخريطة...",
+    "loadError": "فشل تحميل مواقع الجولات",
+    "retry": "إعادة المحاولة",
+    "markerLabel": "جولة ثلاثية الأبعاد",
+    "tapToOpen": "اضغط لفتح الجولة"
+  },
+  "category": {
+    "heritage": "تراث",
+    "mosque": "مسجد",
+    "market": "سوق",
+    "park": "حديقة",
+    "museum": "متحف",
+    "shrine": "مزار",
+    "bridge": "جسر",
+    "neighborhood": "حي",
+    "other": "أخرى"
+  }
+}

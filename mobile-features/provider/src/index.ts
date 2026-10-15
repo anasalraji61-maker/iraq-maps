@@ -16,3 +16,11 @@ export { ProviderAppointmentsScreen } from './screens/ProviderAppointmentsScreen
 export { RequestAppointmentScreen } from './screens/RequestAppointmentScreen';
 export { MyAppointmentsScreen } from './screens/MyAppointmentsScreen';
 export { InsightsDashboardScreen } from './screens/InsightsDashboardScreen';
+export { AnalyticsDashboardScreen } from './screens/AnalyticsDashboardScreen';
+export { CompetitorInsightsScreen } from './screens/CompetitorInsightsScreen';
+export { CustomerInsightsScreen } from './screens/CustomerInsightsScreen';
+export { ContentCalendarScreen } from './screens/ContentCalendarScreen';
+export { LineChart } from './components/charts/LineChart';
+export { BarChart } from './components/charts/BarChart';
+export { PieChart } from './components/charts/PieChart';
+export { HeatmapGrid } from './components/charts/HeatmapGrid';

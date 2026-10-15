@@ -27,6 +27,7 @@
     "@iraq-maps/discover": "workspace:*",
     "@iraq-maps/incidents": "workspace:*",
     "@iraq-maps/location-share": "workspace:*",
+    "@iraq-maps/tour3d": "workspace:*",
     "@iraq-maps/messaging": "workspace:*",
     "@iraq-maps/notifications": "workspace:*",
     "@iraq-maps/places": "workspace:*",

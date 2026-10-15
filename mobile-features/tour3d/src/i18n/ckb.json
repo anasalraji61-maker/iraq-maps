@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "گەشتی سێ ئەندازەیی",
+    "loading": "چاوەڕێ بکە...",
+    "empty": "هیچ گەشتێک بەردەست نییە",
+    "loadError": "بارکردنی گەشتەکان سەرنەکەوت",
+    "retry": "دووبارە هەوڵبدەرەوە",
+    "searchPlaceholder": "گەڕان بۆ گەشت...",
+    "searchEmpty": "هیچ ئەنجامێک بۆ \"{q}\" نەدۆزرایەوە",
+    "loadMore": "زیاتر بار بکە",
+    "views": "{count} بینین",
+    "assets": "{count} دیمەن",
+    "filterAll": "هەموو",
+    "filterHeritage": "میراتی مێژووی",
+    "filterMosque": "مزگەوت",
+    "filterMarket": "بازاڕ",
+    "filterPark": "پارک",
+    "filterMuseum": "مۆزەخانە",
+    "filterShrine": "زیارەت",
+    "filterBridge": "پرد",
+    "filterNeighborhood": "نیشتەجێبوون",
+    "filterOther": "ئەوتریش",
+    "nearbyTitle": "نزیکەی تۆ",
+    "popularTitle": "زۆرترین بینین"
+  },
+  "viewer": {
+    "title": "گەشتی سێ ئەندازەیی",
+    "loading": "گەشتەکە بار دەکرێت...",
+    "loadError": "بارکردنی گەشتەکە سەرنەکەوت",
+    "notFound": "گەشتەکە نەدۆزرایەوە",
+    "retry": "دووبارە هەوڵبدەرەوە",
+    "startTour": "دەستپێکردنی گەشت",
+    "panoramaTitle": "دیمەنی ٣٦٠° پانۆراما",
+    "panoramaInstructions": "مۆبایلەکەت بجوڵێنە یان پەردەکە بکێشە بۆ گەڕان",
+    "webviewUnavailable": "پیشاندانی گەشت بەردەست نییە",
+    "assetCount": "{count} دیمەن",
+    "annotationCount": "{count} نیشانە",
+    "sceneLabel": "دیمەنی {current} لە {total}",
+    "controls": {
+      "previous": "پێشتر",
+      "next": "دواتر",
+      "toggleAnnotations": "پیشاندان/شاردنەوەی نیشانەکان",
+      "fullscreen": "پڕ پەردە",
+      "exitFullscreen": "دەرچوون"
+    },
+    "progress": {
+      "label": "پێشکەوتنی گەشت",
+      "complete": "گەشتەکە تەواو بوو"
+    },
+    "annotation": {
+      "tapToLearnMore": "بکە بۆ زانیاری زیاتر",
+      "linkedPlace": "شوێنەکە ببینە"
+    }
+  },
+  "map": {
+    "title": "خەریتەی گەشتەکان",
+    "loading": "خەریتەکە بار دەکرێت...",
+    "loadError": "بارکردنی شوێنەکانی گەشت سەرنەکەوت",
+    "retry": "دووبارە هەوڵبدەرەوە",
+    "markerLabel": "گەشتی سێ ئەندازەیی",
+    "tapToOpen": "بکە بۆ کردنەوەی گەشت"
+  },
+  "category": {
+    "heritage": "میراتی مێژووی",
+    "mosque": "مزگەوت",
+    "market": "بازاڕ",
+    "park": "پارک",
+    "museum": "مۆزەخانە",
+    "shrine": "زیارەت",
+    "bridge": "پرد",
+    "neighborhood": "نیشتەجێبوون",
+    "other": "ئەوتریش"
+  }
+}

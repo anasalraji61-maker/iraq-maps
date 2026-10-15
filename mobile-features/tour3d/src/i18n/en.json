@@ -1,0 +1,74 @@
+{
+  "list": {
+    "title": "3D Tours",
+    "loading": "Loading...",
+    "empty": "No tours available",
+    "loadError": "Failed to load tours, try again",
+    "retry": "Retry",
+    "searchPlaceholder": "Search tours...",
+    "searchEmpty": "No results for \"{q}\"",
+    "loadMore": "Load more",
+    "views": "{count} views",
+    "assets": "{count} scenes",
+    "filterAll": "All",
+    "filterHeritage": "Heritage",
+    "filterMosque": "Mosque",
+    "filterMarket": "Market",
+    "filterPark": "Park",
+    "filterMuseum": "Museum",
+    "filterShrine": "Shrine",
+    "filterBridge": "Bridge",
+    "filterNeighborhood": "Neighborhood",
+    "filterOther": "Other",
+    "nearbyTitle": "Near You",
+    "popularTitle": "Most Viewed"
+  },
+  "viewer": {
+    "title": "3D Tour",
+    "loading": "Loading tour...",
+    "loadError": "Failed to load tour",
+    "notFound": "Tour not found",
+    "retry": "Retry",
+    "startTour": "Start Tour",
+    "panoramaTitle": "360° Panorama View",
+    "panoramaInstructions": "Move your phone or drag the screen to explore",
+    "webviewUnavailable": "Tour viewer is not available on this device",
+    "assetCount": "{count} scenes",
+    "annotationCount": "{count} landmarks",
+    "sceneLabel": "Scene {current} of {total}",
+    "controls": {
+      "previous": "Previous",
+      "next": "Next",
+      "toggleAnnotations": "Show/Hide Landmarks",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit"
+    },
+    "progress": {
+      "label": "Tour progress",
+      "complete": "Tour complete"
+    },
+    "annotation": {
+      "tapToLearnMore": "Tap to learn more",
+      "linkedPlace": "View Place"
+    }
+  },
+  "map": {
+    "title": "Tours Map",
+    "loading": "Loading map...",
+    "loadError": "Failed to load tour locations",
+    "retry": "Retry",
+    "markerLabel": "3D Tour",
+    "tapToOpen": "Tap to open tour"
+  },
+  "category": {
+    "heritage": "Heritage",
+    "mosque": "Mosque",
+    "market": "Market",
+    "park": "Park",
+    "museum": "Museum",
+    "shrine": "Shrine",
+    "bridge": "Bridge",
+    "neighborhood": "Neighborhood",
+    "other": "Other"
+  }
+}

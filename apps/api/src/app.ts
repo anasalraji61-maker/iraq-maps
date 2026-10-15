@@ -17,6 +17,7 @@ import { providersMigrationsDir, providersModule } from '@iraq-maps/providers';
 import { routingModule } from '@iraq-maps/routing';
 import { incidentsModule, incidentsMigrationsDir } from '@iraq-maps/incidents';
 import { locationShareModule, locationShareMigrationsDir } from '@iraq-maps/location-share';
+import { tour3dModule, tour3dMigrationsDir } from '@iraq-maps/tour3d';
 import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
 import { sql } from 'drizzle-orm';
 import {
@@ -54,6 +55,7 @@ export const moduleMigrations = [
   { schema: 'discover', migrationsDir: discoverMigrationsDir },
   { schema: 'incidents', migrationsDir: incidentsMigrationsDir },
   { schema: 'location_share', migrationsDir: locationShareMigrationsDir },
+  { schema: 'tour3d', migrationsDir: tour3dMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -280,6 +282,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         discoverModule({ db, eventBus: bus, redis }),
         incidentsModule({ db }),
         locationShareModule({ db }),
+        tour3dModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [

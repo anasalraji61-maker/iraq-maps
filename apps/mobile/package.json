@@ -18,6 +18,7 @@
     "@iraq-maps/feature-activity": "workspace:*",
     "@iraq-maps/feature-assistant": "workspace:*",
     "@iraq-maps/feature-discover": "workspace:*",
+    "@iraq-maps/feature-tour3d": "workspace:*",
     "@iraq-maps/feature-map": "workspace:*",
     "@iraq-maps/feature-messages": "workspace:*",
     "@iraq-maps/feature-navigation": "workspace:*",
