@@ -1,6 +1,7 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { assistantTestIDs } from '@iraq-maps/contracts';
+import { Clipboard } from 'react-native';
 import { AssistantChatScreen } from './screens/AssistantChatScreen';
 
 const mockChat = jest.fn<() => Promise<unknown>>();
@@ -85,6 +86,29 @@ describe('AssistantChatScreen', () => {
     });
     // After clearing, the input should still be present (screen stays mounted)
     expect(getByTestId(assistantTestIDs.chatInput)).toBeTruthy();
+  });
+
+  it('copies message content on long press', async () => {
+    const setString = jest.spyOn(Clipboard, 'setString').mockImplementation(() => undefined);
+    const { getByTestId } = await render(<AssistantChatScreen />);
+    const input = getByTestId(assistantTestIDs.chatInput);
+    const sendBtn = getByTestId(assistantTestIDs.sendButton);
+
+    await act(async () => {
+      fireEvent.changeText(input, 'رسالة للنسخ');
+    });
+    await act(async () => {
+      fireEvent.press(sendBtn);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId(assistantTestIDs.messageItem(0))).toBeTruthy();
+    }, { timeout: 5000 });
+
+    fireEvent(getByTestId(assistantTestIDs.messageItem(0)), 'longPress');
+    expect(setString).toHaveBeenCalledWith('رسالة للنسخ');
+    setString.mockRestore();
   });
 
   it('shows compose deeplink when composeParams returned', async () => {

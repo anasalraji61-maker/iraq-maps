@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef, useEffect, type ReactElement } from 'react';
 import {
   Animated,
+  Clipboard,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
@@ -213,7 +214,7 @@ export function AssistantChatScreen(): ReactElement {
               item.role === 'user' ? styles.messageRowEnd : styles.messageRowStart,
             ]}
           >
-            <View
+            <Pressable
               testID={assistantTestIDs.messageItem(index)}
               style={[
                 styles.bubble,
@@ -221,6 +222,8 @@ export function AssistantChatScreen(): ReactElement {
               ]}
               accessibilityRole="text"
               accessibilityLabel={item.role === 'user' ? t('chat.msgFromUser', { content: item.content }) : t('chat.msgFromAssistant', { content: item.content })}
+              onLongPress={() => { Clipboard.setString(item.content); }}
+              delayLongPress={500}
             >
               <Text
                 style={[
@@ -238,7 +241,7 @@ export function AssistantChatScreen(): ReactElement {
               >
                 {formatTime(item.timestamp)}
               </Text>
-            </View>
+            </Pressable>
           </View>
         )}
         ListFooterComponent={isLoading ? <TypingIndicator /> : null}
