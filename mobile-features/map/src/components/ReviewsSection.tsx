@@ -151,7 +151,7 @@ function PhotoPickerRow({
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.pickerInner}>
           {uris.map((uri) => (
-            <TouchableOpacity key={uri} onPress={() => onRemove(uri)} style={styles.pickerThumb} accessibilityLabel={t('reviews.removePhoto')}>
+            <TouchableOpacity key={uri} onPress={() => onRemove(uri)} style={styles.pickerThumb} accessibilityRole="button" accessibilityLabel={t('reviews.removePhoto')}>
               <Image source={{ uri }} style={styles.thumbnail} resizeMode="cover" />
               <View style={styles.removeOverlay}>
                 <RNText style={styles.removeIcon}>{ICON_REMOVE}</RNText>
@@ -159,7 +159,7 @@ function PhotoPickerRow({
             </TouchableOpacity>
           ))}
           {uris.length < MAX_PHOTOS && !uploading ? (
-            <TouchableOpacity onPress={onAdd} style={styles.addPhotoBtn} accessibilityLabel={t('reviews.addPhoto')}>
+            <TouchableOpacity onPress={onAdd} style={styles.addPhotoBtn} accessibilityRole="button" accessibilityLabel={t('reviews.addPhoto')}>
               <RNText style={styles.addPhotoIcon}>{ICON_ADD}</RNText>
             </TouchableOpacity>
           ) : null}
