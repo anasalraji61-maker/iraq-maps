@@ -18,6 +18,8 @@
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "more": "المزيد",
     "moreIcon": "⋯",
+    "delete": "حذف المنشور",
+    "deleteError": "فشل حذف المنشور",
     "report": "إبلاغ",
     "reportTitle": "سبب الإبلاغ",
     "reportCancel": "إلغاء",

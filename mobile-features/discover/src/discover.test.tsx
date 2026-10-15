@@ -26,6 +26,7 @@ jest.mock('@iraq-maps/mobile-kit', () => ({
       get: jest.fn<() => Promise<unknown>>().mockResolvedValue({ status: 404 }),
     },
   }),
+  useSession: () => ({ state: { status: 'signedIn', user: { id: 'user-001' } } }),
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({

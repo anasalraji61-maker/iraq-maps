@@ -18,6 +18,8 @@
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "more": "زیاتر",
     "moreIcon": "⋯",
+    "delete": "سڕینەوەی پۆست",
+    "deleteError": "هەڵەی سڕینەوەی پۆست",
     "report": "ڕاپۆرت",
     "reportTitle": "هۆکاری ڕاپۆرت",
     "reportCancel": "هەڵوەشاندنەوە",

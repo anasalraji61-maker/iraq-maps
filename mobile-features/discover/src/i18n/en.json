@@ -18,6 +18,8 @@
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
     "more": "More",
     "moreIcon": "⋯",
+    "delete": "Delete post",
+    "deleteError": "Failed to delete post",
     "report": "Report",
     "reportTitle": "Report reason",
     "reportCancel": "Cancel",

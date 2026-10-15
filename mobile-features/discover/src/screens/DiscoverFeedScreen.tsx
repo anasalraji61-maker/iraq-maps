@@ -1,5 +1,5 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
@@ -49,6 +49,8 @@ const PostItem = memo(function PostItem({
   onComment,
   onPlacePress,
   onReport,
+  onDelete,
+  currentUserId,
 }: {
   post: DiscoverPostType;
   placeName?: string;
@@ -57,7 +59,10 @@ const PostItem = memo(function PostItem({
   onComment: (post: DiscoverPostType) => void;
   onPlacePress: (placeId: string) => void;
   onReport: (postId: string, reason: ReportReason) => void;
+  onDelete: (postId: string) => void;
+  currentUserId?: string;
 }): ReactElement {
+  const isOwn = currentUserId === post.authorId;
   const badgeColors = getTypeBadgeColors(post.type);
 
   const handleShare = useCallback(() => {
@@ -66,6 +71,23 @@ const PostItem = memo(function PostItem({
   }, [post.body, post.id]);
 
   const handleMorePress = useCallback(() => {
+    if (isOwn) {
+      // Own post: show delete option
+      Alert.alert(
+        t('post.more'),
+        undefined,
+        [
+          {
+            text: t('post.delete'),
+            style: 'destructive' as const,
+            onPress: () => onDelete(post.id),
+          },
+          { text: t('post.reportCancel'), style: 'cancel' as const },
+        ],
+      );
+      return;
+    }
+    // Others' posts: show report reasons
     const reasonLabels = REPORT_REASONS.map((r) => t(`post.reportReason.${r}`));
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
@@ -81,7 +103,6 @@ const PostItem = memo(function PostItem({
         },
       );
     } else {
-      // Android: use Alert with buttons for reason selection
       Alert.alert(
         t('post.report'),
         t('post.reportTitle'),
@@ -94,7 +115,7 @@ const PostItem = memo(function PostItem({
         ],
       );
     }
-  }, [post.id, onReport]);
+  }, [post.id, onReport, onDelete, isOwn]);
 
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
@@ -169,6 +190,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
   const extApi = useApi();
   const router = useRouter();
+  const session = useSession();
+  const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -277,6 +300,15 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api]);
 
+  const handleDelete = useCallback(async (postId: string) => {
+    try {
+      await api.deletePost({ params: { postId } });
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } catch {
+      Alert.alert(t('post.deleteError'));
+    }
+  }, [api]);
+
   const handleLike = useCallback(async (post: DiscoverPostType) => {
     try {
       const postId = post.id;
@@ -347,6 +379,8 @@ export function DiscoverFeedScreen(): ReactElement {
             onComment={handleComment}
             onPlacePress={handlePlacePress}
             onReport={handleReport}
+            onDelete={handleDelete}
+            currentUserId={currentUserId}
           />
         )}
         initialNumToRender={5}
