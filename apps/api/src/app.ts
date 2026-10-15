@@ -269,6 +269,25 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     });
   });
 
+  // Admin user search: search by id prefix or name substring.
+  fastify.get('/v1/admin/users', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const q = ((req.query as Record<string, string | undefined>)['q'] ?? '').trim();
+    const limit = Math.min(50, parseInt(((req.query as Record<string, string | undefined>)['limit']) ?? '25', 10) || 25);
+    const rows = await db.execute(
+      q.length > 0
+        ? sql`SELECT id, name, locale, roles, created_at FROM identity.users WHERE id::text ILIKE ${'%' + q + '%'} OR name ILIKE ${'%' + q + '%'} ORDER BY created_at DESC LIMIT ${limit}`
+        : sql`SELECT id, name, locale, roles, created_at FROM identity.users ORDER BY created_at DESC LIMIT ${limit}`,
+    );
+    return reply.status(200).send({ items: rows.rows.map((r) => {
+      const row = r as { id: string; name: string | null; locale: string; roles: string[]; created_at: Date };
+      return { id: row.id, name: row.name ?? null, locale: row.locale, roles: row.roles, createdAt: row.created_at };
+    }) });
+  });
+
   // Internal admin route: returns failed job counts per queue.
   fastify.get('/internal/queues/failed', async (req, reply) => {
     const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];

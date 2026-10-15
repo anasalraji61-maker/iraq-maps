@@ -39,6 +39,14 @@ export interface AuditEntry {
   timestamp: string;
 }
 
+export interface AdminUser {
+  id: string;
+  name: string | null;
+  locale: string;
+  roles: string[];
+  createdAt: string;
+}
+
 export interface AssistantUsageEntry {
   date: string;
   inputTokens: number;
@@ -196,5 +204,10 @@ export const api = {
 
   async getAssistantUsage(): Promise<AssistantUsageEntry[]> {
     return request<AssistantUsageEntry[]>('/admin/assistant/usage');
+  },
+
+  async searchUsers(q: string): Promise<AdminUser[]> {
+    const qs = q.trim().length > 0 ? `?q=${encodeURIComponent(q)}` : '';
+    return request<{ items: AdminUser[] }>(`/v1/admin/users${qs}`).then((r) => r.items);
   },
 };

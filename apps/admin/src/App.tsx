@@ -6,6 +6,7 @@ import { AuditPage } from './pages/AuditPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ReportedPostsPage } from './pages/ReportedPostsPage';
 import { AssistantUsagePage } from './pages/AssistantUsagePage';
+import { UserSearchPage } from './pages/UserSearchPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -53,6 +54,9 @@ function NavBar() {
       </NavLink>
       <NavLink to="/assistant-usage" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         استخدام المساعد
+      </NavLink>
+      <NavLink to="/users" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        المستخدمون
       </NavLink>
       <button
         onClick={logout}
@@ -123,6 +127,14 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AssistantUsagePage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <AuthGate>
+                <Layout><UserSearchPage /></Layout>
               </AuthGate>
             }
           />
