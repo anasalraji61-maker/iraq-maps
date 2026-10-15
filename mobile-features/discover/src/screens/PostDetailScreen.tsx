@@ -7,7 +7,6 @@ import {
   Animated,
   FlatList,
   I18nManager,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -20,6 +19,7 @@ import {
 } from 'react-native';
 import { type z } from 'zod';
 import { DiscoverComment } from '@iraq-maps/contracts';
+import { ZoomableImage } from '@iraq-maps/ui';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
@@ -107,7 +107,7 @@ function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Read
       {images.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageStrip} contentContainerStyle={styles.imageStripContent}>
           {images.map((img) => (
-            <Image key={img.id} source={{ uri: img.url }} style={styles.detailImage} resizeMode="cover" accessibilityRole="image" />
+            <ZoomableImage key={img.id} source={{ uri: img.url }} style={styles.detailImage} resizeMode="cover" />
           ))}
         </ScrollView>
       )}
