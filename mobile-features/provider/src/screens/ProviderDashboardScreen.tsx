@@ -59,6 +59,8 @@ interface AnalyticsData {
   posts: number | null;
   /** Always null until a backend rating endpoint is available. */
   rating: number | null;
+  /** Percentage of inquiries that have received a reply (0–100), derived from inbox. */
+  replyRate: number | null;
 }
 
 interface AnalyticsCardProps {
@@ -94,6 +96,7 @@ export function ProviderDashboardScreen(): ReactElement {
     incomingMessages: null,
     posts: null,
     rating: null,
+    replyRate: null,
   });
 
   const fetchStatus = useCallback(async () => {
@@ -115,6 +118,12 @@ export function ProviderDashboardScreen(): ReactElement {
       setAnalytics((prev) => ({
         ...prev,
         incomingMessages: inboxRes.status === 200 ? inboxRes.body.items.length : prev.incomingMessages,
+        replyRate: inboxRes.status === 200 && inboxRes.body.items.length > 0
+          ? Math.round(
+              (inboxRes.body.items.filter((inq) => inq.targets.some((tgt) => tgt.status === 'replied')).length /
+                inboxRes.body.items.length) * 100,
+            )
+          : prev.replyRate,
         posts: feedRes?.status === 200
           ? feedRes.body.items.filter((p) => p.authorId === userId).length
           : prev.posts,
@@ -191,6 +200,12 @@ export function ProviderDashboardScreen(): ReactElement {
           value={analytics.rating === null ? '—' : `${analytics.rating} ★`}
           color="#EF4444"
           icon="⭐"
+        />
+        <AnalyticsCard
+          label={t('dashboard.analytics.replyRate')}
+          value={analytics.replyRate === null ? '—' : `${analytics.replyRate}%`}
+          color="#8B5CF6"
+          icon="↩️"
         />
       </View>
 
