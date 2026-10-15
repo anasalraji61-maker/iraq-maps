@@ -83,7 +83,11 @@
     "sourceUserReport": "بلاغات المستخدمين",
     "sourceProvider": "المزوّد",
     "sourceHeuristic": "تقدير عام",
-    "sourceOsm": "OpenStreetMap"
+    "sourceOsm": "OpenStreetMap",
+    "save": "حفظ المكان",
+    "saved": "تم الحفظ",
+    "saveA11y": "حفظ {name} في المفضلة",
+    "savedA11y": "إزالة {name} من المفضلة"
   },
   "actions": {
     "directions": "الاتجاهات",

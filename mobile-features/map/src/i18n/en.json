@@ -83,7 +83,11 @@
     "sourceUserReport": "User reports",
     "sourceProvider": "Provider",
     "sourceHeuristic": "General estimate",
-    "sourceOsm": "OpenStreetMap"
+    "sourceOsm": "OpenStreetMap",
+    "save": "Save place",
+    "saved": "Saved",
+    "saveA11y": "Save {name} to favourites",
+    "savedA11y": "Remove {name} from favourites"
   },
   "actions": {
     "directions": "Directions",

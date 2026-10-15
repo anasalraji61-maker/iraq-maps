@@ -83,7 +83,11 @@
     "sourceUserReport": "ڕاپۆرتەکانی بەکارهێنەر",
     "sourceProvider": "دابینکەر",
     "sourceHeuristic": "تەخمینی گشتی",
-    "sourceOsm": "OpenStreetMap"
+    "sourceOsm": "OpenStreetMap",
+    "save": "شوێنەکە پاشەکەوت بکە",
+    "saved": "پاشەکەوتکرا",
+    "saveA11y": "{name} زیاد بکە بۆ دڵخوازەکان",
+    "savedA11y": "{name} لەوردەکانی دڵخوازەکان دەربکە"
   },
   "actions": {
     "directions": "ئاراستەکان",

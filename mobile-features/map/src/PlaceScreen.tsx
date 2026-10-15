@@ -1,9 +1,9 @@
 import { pickName, placesContract, testIDs, type CrowdLevel, type PlaceDetails, type PriceLevel } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
-import { href, routes, useApi, useRouteAvailable } from '@iraq-maps/mobile-kit';
+import { href, routes, savedPlaces, useApi, useRouteAvailable } from '@iraq-maps/mobile-kit';
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import type { ReactElement } from 'react';
+import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
 import { openNow } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
@@ -53,6 +53,22 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
       .report({ body: { placeId: place.id, kind: 'crowded_now' } })
       .catch(() => undefined);
 
+  // ── Save / favourite ──────────────────────────────────────────────────────
+  const [isSaved, setIsSaved] = useState(false);
+  useEffect(() => {
+    void savedPlaces.isSaved(place.id).then(setIsSaved);
+  }, [place.id]);
+  const handleSave = useCallback(async () => {
+    if (isSaved) {
+      await savedPlaces.remove(place.id);
+      setIsSaved(false);
+    } else {
+      const category = kindLabel(place);
+      await savedPlaces.save({ placeId: place.id, name, category });
+      setIsSaved(true);
+    }
+  }, [isSaved, place, name]);
+
   return (
     <Screen scroll testID={testIDs.place.card}>
       <Stack.Screen options={{ title: name }} />
@@ -87,6 +103,13 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         />
       ) : null}
       <InsightsSection place={place} onReportCrowded={reportCrowded} />
+      <Button
+        testID="place.save"
+        label={isSaved ? t('place.saved') : t('place.save')}
+        variant={isSaved ? 'secondary' : 'primary'}
+        accessibilityLabel={isSaved ? t('place.savedA11y', { name }) : t('place.saveA11y', { name })}
+        onPress={() => { void handleSave(); }}
+      />
       <Button testID={testIDs.place.share} label={t('place.share')} onPress={share} />
       {(Object.keys(actions) as (keyof typeof actions)[]).map((route) => (
         <RouteAction key={route} route={route} placeId={place.id} />
