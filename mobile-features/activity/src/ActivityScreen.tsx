@@ -60,8 +60,8 @@ type NotifItem = NotificationItem & { _type?: string };
 
 function notifIcon(data?: Record<string, string>): string {
   const type = data?.['type'];
-  if (type === 'liked') return '❤️';
-  if (type === 'commented') return '💬';
+  if (type === 'liked' || type === 'post_liked') return '❤️';
+  if (type === 'commented' || type === 'post_commented') return '💬';
   if (type === 'message') return '✉️';
   if (type === 'verification') return '✅';
   return '🔔';
