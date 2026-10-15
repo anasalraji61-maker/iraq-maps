@@ -17,6 +17,7 @@
     "@iraq-maps/contracts": "workspace:*",
     "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/observability": "workspace:*",
+    "@react-native-community/netinfo": "^11.4.1",
     "expo-secure-store": "~57.0.4",
     "expo-store-review": "~57.0.3",
     "@react-native-async-storage/async-storage": "^2.1.2"

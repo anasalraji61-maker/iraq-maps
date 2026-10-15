@@ -15,5 +15,12 @@ export { expectStatus, ProblemError, useRequest } from './request';
 export { savedPlaces, type SavedPlace } from './saved-places';
 /** @public app-rating prompt: call after user creates a post or sends a message */
 export { useAppRating } from './app-rating';
+/** @public offline action queue: persist and retry failed actions on reconnect */
+export {
+  enqueueOfflineAction,
+  dequeueOfflineAction,
+  useOfflineQueueDrain,
+  type QueuedAction,
+} from './offline-queue';
 /** @public error boundary with optional ErrorReporter integration */
 export { ErrorBoundary } from './error-boundary';
