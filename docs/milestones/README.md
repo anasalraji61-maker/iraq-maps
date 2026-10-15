@@ -27,6 +27,51 @@
 | [M7](M7-ops-privacy-budgets-rc.md) | التشغيل والخصوصية وميزانيات الأداء ونسخة مرشّحة للإطلاق التجريبي | 3–3.5 | [M5](M5-assistant-insights.md)، [M6](M6-discover-activity-moderation.md) | **مكتملة** (`bf1e9c1`) |
 | [M8](M8-play-store-submission.md) | تجهيز نشر Google Play: التوقيع والإدراج وبيان البيانات والنشر التجريبي | 2–3 | [M7](M7-ops-privacy-budgets-rc.md) | **مكتملة** (`da41048`) |
 | [M9](M9-post-launch-polish.md) | تحسينات ما بعد الإطلاق: صفحة الويب، admin metrics، image worker | 2–3 | [M8](M8-play-store-submission.md) | **مكتملة** (`350c70d`) |
+| [M10](M10-admin-panel-real-api.md) | لوحة الإدارة الكاملة: إدارة المستخدمين، الإشراف على التعليقات، تعديل المكان، تصدير CSV، تتبع الأرباح، ردود التقييمات | 2–3 | [M9](M9-post-launch-polish.md) | **مكتملة** |
+| [M11](M11-post-moderation.md) | قائمة الإشراف على المنشورات والتعليقات في لوحة الإدارة | 1–2 | [M10](M10-admin-panel-real-api.md) | **مكتملة** |
+| [M12](M12-discover-notifications.md) | ملخص الإشعارات، تثبيت المنشور، الحذف الناعم للتعليقات، ملخص الرؤى | 2–3 | [M11](M11-post-moderation.md) | **مكتملة** |
+| [M13](M13-my-posts-delete.md) | «منشوراتي» في ملف المستخدم، حذف المنشور مع تأكيد | 1 | [M12](M12-discover-notifications.md) | **مكتملة** |
+| [M14](M14-edit-post.md) | تعديل المنشور مع سجل التاريخ | 1 | [M13](M13-my-posts-delete.md) | **مكتملة** |
+| [M15](M15-delete-comment.md) | حذف التعليق (ناعم) من قِبل صاحبه أو المشرف | 1 | [M14](M14-edit-post.md) | **مكتملة** |
+| [M16](M16-posts-tab-refresh.md) | إصلاح تحديث تغذية Discover بعد السحب للأسفل | 0.5 | [M15](M15-delete-comment.md) | **مكتملة** |
+| [M17](M17-activity-refresh-assistant-clear.md) | تحديث تبويب النشاط، زر مسح محادثة المساعد | 0.5 | [M16](M16-posts-tab-refresh.md) | **مكتملة** |
+| [M18](M18-inquiries-list-status.md) | شارات حالة الاستفسارات في قائمة النشاط | 0.5 | [M17](M17-activity-refresh-assistant-clear.md) | **مكتملة** |
+| [M19](M19-place-card-tappable-links.md) | روابط قابلة للنقر (هاتف وموقع) في بطاقة المكان | 0.5 | [M18](M18-inquiries-list-status.md) | **مكتملة** |
+| [M20](M20-provider-dashboard-refresh.md) | إصلاح تحديث لوحة تحكم المزوّد | 0.5 | [M19](M19-place-card-tappable-links.md) | **مكتملة** |
+| [M21](M21-assistant-copy-message.md) | نسخ رسالة المساعد بالضغط المطوّل | 0.5 | [M20](M20-provider-dashboard-refresh.md) | **مكتملة** |
+| [M22](M22-inquiry-detail-refresh.md) | إصلاح تحديث تفاصيل الاستفسار (جانب المستخدم) | 0.5 | [M21](M21-assistant-copy-message.md) | **مكتملة** |
+| [M23](M23-provider-inbox-detail-refresh.md) | إصلاح تحديث تفاصيل صندوق وارد المزوّد | 0.5 | [M22](M22-inquiry-detail-refresh.md) | **مكتملة** |
+| [M24](M24-provider-registration-test.md) | اختبارات تسجيل المزوّد (متعدد الخطوات) | 0.5 | [M23](M23-provider-inbox-detail-refresh.md) | **مكتملة** |
+| [M25](M25-compose-char-count-test.md) | اختبارات عداد حروف نافذة إنشاء المنشور | 0.5 | [M24](M24-provider-registration-test.md) | **مكتملة** |
+| [M26](M26-provider-dashboard-test.md) | اختبارات وحدة لوحة تحكم المزوّد | 0.5 | [M25](M25-compose-char-count-test.md) | **مكتملة** |
+| [M27](M27-inquiries-list-refresh-test.md) | اختبارات السحب للتحديث في قائمة الاستفسارات | 0.5 | [M26](M26-provider-dashboard-test.md) | **مكتملة** |
+| [M28](M28-activity-inquiries-tab.md) | تبويب «الاستفسارات» المخصص في شاشة النشاط | 1 | [M27](M27-inquiries-list-refresh-test.md) | **مكتملة** |
+| [M29](M29-assistant-daily-limit-ux.md) | تجربة الحد اليومي للمساعد: عداد وحالة استنفاد مع توقيت إعادة الضبط | 1 | [M28](M28-activity-inquiries-tab.md) | **مكتملة** |
+| [M30](M30-discover-report-test.md) | اختبارات تدفق الإبلاغ عن منشور/تعليق | 0.5 | [M29](M29-assistant-daily-limit-ux.md) | **مكتملة** |
+| [M31](M31-inquiry-status-badge.md) | شارات حالة ملوّنة على عناصر قائمة الاستفسارات | 0.5 | [M30](M30-discover-report-test.md) | **مكتملة** |
+| [M32](M32-discover-report-submit-test.md) | اختبارات إرسال نموذج الإبلاغ | 0.5 | [M31](M31-inquiry-status-badge.md) | **مكتملة** |
+| [M33](M33-assistant-place-cards-test.md) | اختبارات عرض بطاقات الأماكن في ردود المساعد | 0.5 | [M32](M32-discover-report-submit-test.md) | **مكتملة** |
+| [M34](M34-discover-skeleton.md) | محملات skeleton لشاشتَي تغذية Discover وتفاصيل المنشور | 0.5 | [M33](M33-assistant-place-cards-test.md) | **مكتملة** |
+| [M35](M35-messages-skeleton.md) | محمّل skeleton لقائمة صندوق الوارد (الرسائل) | 0.5 | [M34](M34-discover-skeleton.md) | **مكتملة** |
+| [M36](M36-provider-inbox-skeleton.md) | محمّل skeleton لقائمة صندوق وارد المزوّد | 0.5 | [M35](M35-messages-skeleton.md) | **مكتملة** |
+| [M37](M37-activity-skeleton.md) | محملات skeleton لتبويب النشاط (الاستفسارات والإشعارات) | 0.5 | [M36](M36-provider-inbox-skeleton.md) | **مكتملة** |
+| [M38](M38-provider-dashboard-skeleton.md) | محمّل skeleton للوحة تحكم المزوّد | 0.5 | [M37](M37-activity-skeleton.md) | **مكتملة** |
+| [M39](M39-account-skeleton.md) | محمّل skeleton لتبويب الحساب | 0.5 | [M38](M38-provider-dashboard-skeleton.md) | **مكتملة** |
+| [M40](M40-post-detail-skeleton.md) | محمّل skeleton لشاشة تفاصيل المنشور | 0.5 | [M39](M39-account-skeleton.md) | **مكتملة** |
+| [M41](M41-comments-skeleton.md) | محمّل skeleton لقائمة التعليقات | 0.5 | [M40](M40-post-detail-skeleton.md) | **مكتملة** |
+| [M4-security-audit](M4-security-audit.md) | تدقيق أمني: معدل التقييد، الحد اليومي للمساعد، تدقيق auth | 1–2 | [M4](M4-messaging-inbox-notifications.md) | **مكتملة** |
+| [M72](M72-message-read-receipts.md) | قراءة الرسائل: علامات التسليم والقراءة في المحادثات | 1 | [M4](M4-messaging-inbox-notifications.md) | **مكتملة** |
+| [M89](M89-rate-limiting.md) | تحديد معدل الطلبات على نقاط نهاية OTP والبحث | 1 | [M7](M7-ops-privacy-budgets-rc.md) | **مكتملة** |
+| [M90](M90-post-categories.md) | فئات المنشورات في تغذية Discover | 1 | [M6](M6-discover-activity-moderation.md) | **مكتملة** |
+| [M91](M91-notification-batching.md) | تجميع الإشعارات لإرسال ملخصات | 1 | [M6](M6-discover-activity-moderation.md) | **مكتملة** |
+| [M94](M94-hashtags-post-pinning.md) | الوسوم (hashtags) وتثبيت المنشور | 1 | [M6](M6-discover-activity-moderation.md) | **مكتملة** |
+| [M98](M98-place-photo-reviews.md) | مراجعة صور الأماكن: تقديم المستخدم ومراجعة المشرف | 1 | [M3](M3-providers-media-verification.md) | **مكتملة** |
+| [M179](M179-provider-verified-badge.md) | شارة التحقق الزرقاء لملفات المزوّدين | 0.5 | [M3](M3-providers-media-verification.md) | **مكتملة** |
+| [M180](M180-post-delete-confirm.md) | ورقة تأكيد قبل حذف المنشور | 0.5 | [M13](M13-my-posts-delete.md) | **مكتملة** |
+| [M181](M181-report-price-button.md) | زر «الإبلاغ عن سعر غير صحيح» في بطاقات المكان | 0.5 | [M5](M5-assistant-insights.md) | **مكتملة** |
+| [M182](M182-registration-step-dots.md) | مؤشر خطوات التسجيل (نقاط التقدم) | 0.5 | [M3](M3-providers-media-verification.md) | **مكتملة** |
+| [M183](M183-lightbox-multi-photo.md) | عارض lightbox للصور المتعددة في المنشورات | 0.5 | [M6](M6-discover-activity-moderation.md) | **مكتملة** |
+| [M184](M184-nav-turn-arrow.md) | سهم الانعطاف الكبير في HUD الملاحة | 0.5 | [M2](M2-routing-navigation-satellite.md) | **مكتملة** |
 
 الحالات: «لم تبدأ» ← «قيد التنفيذ» ← «مكتملة» (مع SHA الإغلاق في ملف المرحلة).
 
