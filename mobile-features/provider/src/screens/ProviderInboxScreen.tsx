@@ -89,6 +89,7 @@ export function ProviderInboxScreen(): ReactElement {
         )}
       </View>
       <FlatList
+        testID="provider-inbox-list"
         data={items}
         keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
