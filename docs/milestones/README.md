@@ -26,6 +26,7 @@
 | [M6](M6-discover-activity-moderation.md) | اكتشف ونشاطي والإشراف على المحتوى | 3–3.5 | [M3](M3-providers-media-verification.md)، [M4](M4-messaging-inbox-notifications.md) | **مكتملة** (`ee3dd6b`) |
 | [M7](M7-ops-privacy-budgets-rc.md) | التشغيل والخصوصية وميزانيات الأداء ونسخة مرشّحة للإطلاق التجريبي | 3–3.5 | [M5](M5-assistant-insights.md)، [M6](M6-discover-activity-moderation.md) | **مكتملة** (`bf1e9c1`) |
 | [M8](M8-play-store-submission.md) | تجهيز نشر Google Play: التوقيع والإدراج وبيان البيانات والنشر التجريبي | 2–3 | [M7](M7-ops-privacy-budgets-rc.md) | **مكتملة** (`da41048`) |
+| [M9](M9-post-launch-polish.md) | تحسينات ما بعد الإطلاق: صفحة الويب، admin metrics، image worker | 2–3 | [M8](M8-play-store-submission.md) | **مكتملة** (`350c70d`) |
 
 الحالات: «لم تبدأ» ← «قيد التنفيذ» ← «مكتملة» (مع SHA الإغلاق في ملف المرحلة).
 

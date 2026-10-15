@@ -1,7 +1,7 @@
 ---
 id: M9
 slug: post-launch-polish
-status: in_progress
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-site:
@@ -42,17 +42,17 @@ owners:
 
 ## الميزات المطلوبة
 
-- [ ] **صفحة الويب الرئيسية (`site/index.html`)**
+- [x] **صفحة الويب الرئيسية (`site/index.html`)**
   - تصميم عربي RTL، ألوان brand الخضراء (`#1a6b3a`)
   - أقسام: Hero (اسم + وصف + رابط تحميل APK)، مميزات (خريطة/بحث/مساعد/مراسلة)، سياسة الخصوصية، تواصل
   - رابط `site/delete-account/` موجود بالفعل
 
-- [ ] **Admin Metrics endpoint**
+- [x] **Admin Metrics endpoint**
   - route `GET /v1/admin/metrics` يعيد `totalUsers`, `totalProviders`, `postsToday`, `pendingVerification`
   - محمي بـ `x-admin-key` header (نفس نمط `/internal/queues`)
   - استعلامات Drizzle عبر `identity`, `providers`, `discover` schemas
 
-- [ ] **Image Processing Worker**
+- [x] **Image Processing Worker**
   - نقل resize + compress من inline في `MediaService.uploadAsset` إلى BullMQ job `image-processing`
   - Queue: `image-processing` في Redis
   - MediaService يضع job ويعيد `assetId` فوراً (async variant)
@@ -76,4 +76,12 @@ owners:
 
 ## ما تم إنجازه
 
-*(يُملأ عند الإغلاق)*
+- **SHA الإغلاق:** `350c70d`
+- **التاريخ:** 2026-10-15
+- `site/index.html`: صفحة رئيسية عربية RTL لـ iraqmaps.iq — hero, 4 بطاقات مميزات, قسم خصوصية, footer. self-contained HTML/CSS, dark mode.
+- `GET /v1/admin/metrics`: endpoint محمي بـ x-admin-key، 4 queries متوازية (totalUsers/totalProviders/postsToday/pendingVerification)، 3 test cases.
+- `apps/admin/src/api.ts`: إضافة `VITE_ADMIN_KEY` env var وإرساله كـ x-admin-key في كل request. إزالة TODO.
+- `modules/media/src/image-processing-worker.ts`: BullMQ queue + Worker لمعالجة الصور بـ sharp في background. `MediaService.resizeAsset` تضع job وترجع URL الأصل فوراً.
+- `fix(media)`: `cleanupOrphaned()` تستعلم الآن عن الـ assets المرتبطة بـ discover.post وproviders.provider عبر cross-schema raw SQL، وتستثنيها من الحذف. آخر TODO comments محذوفة.
+- `pnpm gitleaks`: نظيف
+- `pnpm ownership:check --milestone M9`: ok (4 owners)
