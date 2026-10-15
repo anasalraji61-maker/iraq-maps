@@ -29,5 +29,10 @@
   "navigateAgain": "دووبارە ناڤیگەیشن",
   "removeRoute": "سڕینەوە",
   "removePlace": "سڕینەوە لە پاشەکەوتکراوەکان",
-  "openPlace": "کردنەوەی شوێن"
+  "openPlace": "کردنەوەی شوێن",
+  "deletePost": "سڕینەوەی پۆست",
+  "deletePostConfirmTitle": "پۆستەکە بسڕیتەوە؟",
+  "deletePostConfirmMsg": "ناتوانرێت بیگەڕێندرێتەوە.",
+  "deletePostError": "هەڵەی سڕینەوەی پۆست",
+  "deletePostCancel": "هەڵوەشاندنەوە"
 }

@@ -12,6 +12,7 @@ const mockRemoveSaved = jest.fn<(a?: unknown) => Promise<void>>().mockResolvedVa
 const mockListRoutes = jest.fn<() => Promise<RecentRoute[]>>();
 const mockListSaved = jest.fn<() => Promise<SavedPlace[]>>();
 const mockListFeed = jest.fn<(a?: unknown) => Promise<unknown>>();
+const mockDeletePost = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockListNotifications = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockMarkRead = jest.fn<(a?: unknown) => Promise<unknown>>();
 
@@ -26,6 +27,7 @@ jest.mock('@iraq-maps/mobile-kit', () => {
     },
     discover: {
       listFeed: (a: unknown) => mockListFeed(a),
+      deletePost: (a: unknown) => mockDeletePost(a),
     },
   };
   const _session = {
@@ -100,6 +102,7 @@ describe('ActivityScreen', () => {
     mockListRoutes.mockResolvedValue([]);
     mockListSaved.mockResolvedValue([]);
     mockListFeed.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
+    mockDeletePost.mockResolvedValue({ status: 204, body: undefined });
     mockListNotifications.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
     mockMarkRead.mockResolvedValue({ status: 204, body: undefined });
   });
@@ -139,6 +142,29 @@ describe('ActivityScreen', () => {
     await waitFor(() => {
       expect(getByText('Notification n1')).toBeTruthy();
     });
+  });
+
+  it('posts tab shows my posts with a delete button', async () => {
+    const myPost = {
+      id: 'post-uuid-1',
+      authorId: 'user-uuid',
+      type: 'tip',
+      body: 'Test post body',
+      mediaAssetIds: [],
+      likeCount: 3,
+      commentCount: 1,
+      isLikedByMe: false,
+      createdAt: new Date().toISOString(),
+    };
+    mockListFeed.mockResolvedValue({ status: 200, body: { items: [myPost] } });
+    const { getByText, getByLabelText } = await render(<ActivityScreen />);
+    const postsTab = getByText('tabPosts');
+    await act(async () => { fireEvent.press(postsTab); });
+    await waitFor(() => {
+      expect(getByText('Test post body')).toBeTruthy();
+    });
+    // Delete button is rendered for each post
+    expect(getByLabelText('deletePost')).toBeTruthy();
   });
 
   it('saved tab shows empty state when no saved places', async () => {

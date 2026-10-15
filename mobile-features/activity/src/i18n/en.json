@@ -29,5 +29,10 @@
   "navigateAgain": "Navigate again",
   "removeRoute": "Remove",
   "removePlace": "Remove from saved",
-  "openPlace": "Open place"
+  "openPlace": "Open place",
+  "deletePost": "Delete post",
+  "deletePostConfirmTitle": "Delete post?",
+  "deletePostConfirmMsg": "This cannot be undone.",
+  "deletePostError": "Failed to delete post",
+  "deletePostCancel": "Cancel"
 }

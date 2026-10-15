@@ -29,5 +29,10 @@
   "navigateAgain": "التنقل مرة أخرى",
   "removeRoute": "حذف",
   "removePlace": "حذف من المحفوظات",
-  "openPlace": "فتح المكان"
+  "openPlace": "فتح المكان",
+  "deletePost": "حذف المنشور",
+  "deletePostConfirmTitle": "حذف المنشور؟",
+  "deletePostConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
+  "deletePostError": "فشل حذف المنشور",
+  "deletePostCancel": "إلغاء"
 }

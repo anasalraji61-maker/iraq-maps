@@ -3,6 +3,7 @@ import { recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, u
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   I18nManager,
   Pressable,
@@ -283,16 +284,36 @@ function SavedTab(): ReactElement {
 // My posts tab
 // ──────────────────────────────────────────────
 
-function PostRow({ item }: { item: DiscoverPostType }): ReactElement {
+function PostRow({ item, onDelete }: { item: DiscoverPostType; onDelete: (postId: string) => void }): ReactElement {
   const hasMedia = item.mediaAssetIds && item.mediaAssetIds.length > 0;
+
+  const handleDeletePress = useCallback(() => {
+    Alert.alert(
+      t('deletePostConfirmTitle'),
+      t('deletePostConfirmMsg'),
+      [
+        { text: t('deletePostCancel'), style: 'cancel' as const },
+        { text: t('deletePost'), style: 'destructive' as const, onPress: () => onDelete(item.id) },
+      ],
+    );
+  }, [item.id, onDelete]);
+
   return (
     <View style={styles.row} accessibilityRole="none">
       <Text style={styles.rowIcon} accessibilityElementsHidden>{hasMedia ? '📷' : '📝'}</Text>
       <View style={styles.rowBody}>
         <Text style={styles.rowTitle} numberOfLines={2}>{item.body}</Text>
-        <Text style={styles.rowSub}>{item.likeCount}</Text>
+        <Text style={styles.rowSub}>{item.likeCount} · {item.commentCount}</Text>
         <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
+      <Pressable
+        style={styles.deletePostBtn}
+        onPress={handleDeletePress}
+        accessibilityRole="button"
+        accessibilityLabel={t('deletePost')}
+      >
+        <Text style={styles.deletePostBtnText}>{t('deletePost')}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -325,6 +346,15 @@ function PostsTab(): ReactElement {
     }
   }, [api, session]);
 
+  const handleDelete = useCallback(async (postId: string) => {
+    try {
+      await api.discover.deletePost({ params: { postId } });
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } catch {
+      Alert.alert(t('deletePostError'));
+    }
+  }, [api]);
+
   useEffect(() => { void load(); }, [load]);
 
   if (!session) return <EmptyState icon="📝" title={t('loginPrompt')} subtitle="" />;
@@ -336,7 +366,7 @@ function PostsTab(): ReactElement {
     <FlatList
       data={posts}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <PostRow item={item} />}
+      renderItem={({ item }) => <PostRow item={item} onDelete={(id) => { void handleDelete(id); }} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
@@ -460,6 +490,8 @@ const styles = StyleSheet.create({
   },
   removeBtn: { padding: 8, marginTop: -4 },
   removeBtnText: { fontSize: 16, color: '#999' },
+  deletePostBtn: { padding: 8, marginTop: -4 },
+  deletePostBtnText: { fontSize: 13, color: '#C62828', fontWeight: '500' },
   separator: { height: 1, backgroundColor: '#F0F0F0' },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 16, color: '#555', fontWeight: '500', textAlign: 'center', marginBottom: 6 },
