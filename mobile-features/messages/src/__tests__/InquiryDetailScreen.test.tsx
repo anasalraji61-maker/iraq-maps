@@ -109,3 +109,62 @@ describe('InquiryDetailScreen — handoff', () => {
     });
   });
 });
+
+describe('InquiryDetailScreen — auto-close banner', () => {
+  const OLD_DATE = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockMarkInquiryRead.mockResolvedValue({ status: 200, body: { ok: true } });
+  });
+
+  it('shows closed banner when inquiry is older than 7 days with no reply', async () => {
+    const staleInquiry = {
+      id: 'inq-stale',
+      userId: 'user1',
+      text: 'سؤال قديم',
+      createdAt: OLD_DATE,
+      targets: [
+        {
+          placeId: 'place-stale',
+          channel: 'in_app' as const,
+          status: 'sent' as const,
+          handoffLink: undefined,
+        },
+      ],
+    };
+    // Override for this test only; no default remains from previous describe
+    mockGetInquiry.mockResolvedValue({ status: 200, body: staleInquiry });
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => view.getByText('سؤال قديم'));
+    expect(view.getByTestId('inquiry-closed-banner')).toBeTruthy();
+  });
+
+  it('does not show closed banner when inquiry has a reply', async () => {
+    const repliedInquiry = {
+      id: 'inq-replied',
+      userId: 'user1',
+      text: 'سؤال مجاب',
+      createdAt: OLD_DATE,
+      targets: [{ placeId: 'place2', channel: 'in_app' as const, status: 'replied' as const, handoffLink: undefined }],
+    };
+    mockGetInquiry.mockResolvedValue({ status: 200, body: repliedInquiry });
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => view.getByText('سؤال مجاب'));
+    expect(view.queryByTestId('inquiry-closed-banner')).toBeNull();
+  });
+
+  it('does not show closed banner when inquiry is recent', async () => {
+    const recentInquiry = {
+      id: 'inq-recent',
+      userId: 'user1',
+      text: 'سؤال حديث',
+      createdAt: new Date().toISOString(),
+      targets: [{ placeId: 'place3', channel: 'in_app' as const, status: 'sent' as const, handoffLink: undefined }],
+    };
+    mockGetInquiry.mockResolvedValue({ status: 200, body: recentInquiry });
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => view.getByText('سؤال حديث'));
+    expect(view.queryByTestId('inquiry-closed-banner')).toBeNull();
+  });
+});

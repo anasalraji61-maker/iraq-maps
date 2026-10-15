@@ -17,6 +17,15 @@ import { t } from '../strings';
 
 // URL detection regex (simple, covers http/https)
 const PRIMARY = '#1976D2';
+const INQUIRY_CLOSE_DAYS = 7;
+
+/** Returns true when an inquiry has no replied target and is older than INQUIRY_CLOSE_DAYS */
+function isInquiryClosed(inquiry: Inquiry): boolean {
+  const hasReply = inquiry.targets.some((tgt) => tgt.status === 'replied');
+  if (hasReply) return false;
+  const ageDays = (Date.now() - new Date(inquiry.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+  return ageDays >= INQUIRY_CLOSE_DAYS;
+}
 const URL_REGEX = /https?:\/\/[^\s]+/g;
 
 /** Returns checkmark indicator for message status */
@@ -195,6 +204,9 @@ export function InquiryDetailScreen(): ReactElement {
       >
         <Text variant="title">{t('detail.title')}</Text>
         {error ? <Banner kind="error" message={error} /> : null}
+        {inquiry && isInquiryClosed(inquiry) ? (
+          <Banner testID="inquiry-closed-banner" kind="info" message={t('detail.closed')} />
+        ) : null}
         {inquiry ? (
           <>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>

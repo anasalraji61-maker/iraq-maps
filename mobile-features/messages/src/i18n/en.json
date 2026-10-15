@@ -59,6 +59,7 @@
     "urlPreview": "Open link",
     "seenAt": "Seen at {time}",
     "unread": "Unread",
+    "closed": "This inquiry is closed — no response received within 7 days",
     "status": {
       "queued": "Queued",
       "sent": "Sent",
