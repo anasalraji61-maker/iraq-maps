@@ -20,7 +20,8 @@ jest.mock('expo-image-picker', () => ({
 // Mock mobile-kit
 jest.mock('@iraq-maps/mobile-kit', () => ({
   useApiBaseUrl: () => 'http://localhost:3000',
-  useSession: () => ({ userId: 'user-1' }),
+  useApi: () => ({}),
+  useSession: () => ({ state: { status: 'signedIn', user: { id: 'user-1' } } }),
   uploadAsset: jest.fn().mockResolvedValue('asset-id-1' as never),
 }));
 

@@ -39,6 +39,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
           accessibilityRole="button"
           accessibilityLabel={t('reviews.starLabel', { n })}
           testID={`star-input-${n}`}
+          // eslint-disable-next-line no-restricted-syntax
           hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
         >
           <Text style={[srStyles.star, { color: n <= value ? '#F5A623' : '#CCC' }]}>

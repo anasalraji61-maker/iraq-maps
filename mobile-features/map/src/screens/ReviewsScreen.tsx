@@ -180,6 +180,7 @@ const chartStyles = StyleSheet.create({
   starLabel: { width: 36, fontSize: 13, color: '#757575' },
   barTrack: { flex: 1, height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' },
   barFill: { height: 8, backgroundColor: '#F5A623', borderRadius: 4 },
+  // eslint-disable-next-line no-restricted-syntax
   count: { width: 28, fontSize: 12, color: '#757575', textAlign: 'right' },
 });
 
