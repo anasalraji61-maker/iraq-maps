@@ -39,6 +39,7 @@ import { MapStyleMenu } from './components/MapStyleMenu';
 import { useMapStyle, isDarkMode, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
 import { formatDistance, isolate, kindLabel, t } from './strings';
+import { isOfflineAvailable } from './offline/OfflineMapManager';
 
 const SEARCH_DELAY_MS = 300;
 
@@ -127,6 +128,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [sheetIsSaved, setSheetIsSaved] = useState(false);
   /** Feature 6: geofence alert message, null when dismissed. */
   const [geofenceAlert, setGeofenceAlert] = useState<string | null>(null);
+  /** True when a complete offline region covers the current map centre. */
+  const [offlineCached, setOfflineCached] = useState(false);
   /** Track user's last known position for geofencing. */
   const [userPosition, setUserPosition] = useState<LngLat | null>(null);
   // Feature 6: geofencing alerts — notify on entering mock zones
@@ -135,6 +138,11 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     setGeofenceAlert(t('geofence.entered', { name: zone.name }));
   }, []);
   useGeofence({ zones: geofenceZones, userPosition, onEnter: handleGeofenceEnter });
+
+  // Check offline coverage when the map centre changes.
+  useEffect(() => {
+    void isOfflineAvailable(near).then(setOfflineCached);
+  }, [near]);
 
   // Handle deep-link focusPlaceId: fetch place and move camera.
   useEffect(() => {
@@ -294,6 +302,11 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
       {!isOnline && (
         <View style={styles.offlineBanner} testID="offline-banner" accessibilityRole="alert">
           <RNText style={styles.offlineBannerText}>{t('offline.banner')}</RNText>
+        </View>
+      )}
+      {isOnline && offlineCached && (
+        <View style={styles.offlineCachedBadge} testID="map.offline-cached-badge" accessibilityRole="text">
+          <RNText style={styles.offlineCachedText}>{t('offline.offlineBadge')}</RNText>
         </View>
       )}
       {/* Feature 6: geofence alert */}
@@ -508,6 +521,12 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           label={t('actions.assistant')}
           onPress={() => router.push('/assistant')}
         />
+        <IconButton
+          testID="map.offline-maps-btn"
+          icon="⬇"
+          accessibilityLabel={t('offline.title')}
+          onPress={() => router.push(href('offlineMaps'))}
+        />
       </View>
       <Sheet visible={choosingLang} onClose={() => setChoosingLang(false)}>
         <Text variant="subtitle">{t('lang.title')}</Text>
@@ -601,6 +620,8 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   offlineBanner: { position: 'absolute', top: 0, start: 0, end: 0, backgroundColor: '#F59E0B', paddingVertical: 8, paddingHorizontal: 16, zIndex: 100 },
   offlineBannerText: { color: '#FFF', fontSize: 13, fontWeight: '600', textAlign: 'center' },
+  offlineCachedBadge: { position: 'absolute', top: 12, start: 12, backgroundColor: '#0A6B4B', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, zIndex: 90 },
+  offlineCachedText: { color: '#FFF', fontSize: 11, fontWeight: '600' },
   panel: { position: 'absolute', top: 0, start: 0, end: 0, padding: space.m, gap: space.s, backgroundColor: color.bg },
   searchRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space.s },
   results: { gap: space.s },

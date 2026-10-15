@@ -183,7 +183,18 @@
     "cancelForm": "پاشگەزبوونەوە",
     "filterAll": "هەمووی",
     "filterStar": "{star} ئەستێرە",
-    "filterEmpty": "هیچ بیرکردنەوەیەک بە ئەم هەڵسەنگاندنەدا نییە"
+    "filterEmpty": "هیچ بیرکردنەوەیەک بە ئەم هەڵسەنگاندنەدا نییە",
+    "photoCount": "{n} وێنە",
+    "ratingBreakdown": "دابەشکردنی هەڵسەنگاندن",
+    "starLabel": "{n} ئەستێرە",
+    "deleteConfirmTitle": "پێداچوونەوەکەت بسڕەوە؟",
+    "deleteConfirmMsg": "ئەمە ناتوانرێت پووچەڵ بکرێتەوە.",
+    "deleteOk": "سڕینەوە",
+    "deleteCancel": "هەڵوەشاندنەوە",
+    "deleteError": "سڕینەوەی پێداچوونەوە سەرنەکەوت",
+    "loadError": "بارکردنی پێداچوونەوەکان سەرنەکەوت",
+    "uploadingPhoto": "بارکردنی وێنە...",
+    "uploadError": "بارکردنی وێنە سەرنەکەوت"
   },
   "lightbox": {
     "close": "داخستن",
@@ -192,7 +203,25 @@
     "counter": "{total} وێنە"
   },
   "offline": {
-    "banner": "ئینتەرنێتت نییە — خەریتە سنووردارە"
+    "banner": "ئینتەرنێتت نییە — خەریتە سنووردارە",
+    "title": "نەخشەی بێ ئینتەرنێت",
+    "sectionDownloaded": "ناوچە پاشەکەوتکراوەکان",
+    "sectionAvailable": "ناوچەکان بۆ داگرتن",
+    "emptyDownloaded": "هیچ ناوچەیەک پاشەکەوت نەکراوە.",
+    "presetBaghdad": "بەغدا",
+    "presetSulaymaniyah": "سلێمانی",
+    "presetMosul": "موسڵ",
+    "download": "داگرتن",
+    "cancelDownload": "هەڵوەشاندنەوەی داگرتن",
+    "delete": "سڕینەوە",
+    "deleteTitle": "سڕینەوەی ناوچە",
+    "deleteConfirm": "دەتەوێت ناوچەی {name} بسڕیتەوە؟",
+    "cancel": "هەڵوەشاندنەوە",
+    "back": "گەڕانەوە",
+    "progressLabel": "{pct}٪ — {size}",
+    "completeLabel": "تەواو بوو — {size}",
+    "failedLabel": "داگرتن سەرنەکەوت",
+    "offlineBadge": "بێ ئینتەرنێت"
   },
   "mapStyle": {
     "label": "شێوازی خەریتە",

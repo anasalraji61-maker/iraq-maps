@@ -183,7 +183,18 @@
     "cancelForm": "إلغاء",
     "filterAll": "الكل",
     "filterStar": "{star} نجوم",
-    "filterEmpty": "لا توجد مراجعات بهذا التقييم"
+    "filterEmpty": "لا توجد مراجعات بهذا التقييم",
+    "photoCount": "{n} صورة",
+    "ratingBreakdown": "توزيع التقييمات",
+    "starLabel": "{n} نجمة",
+    "deleteConfirmTitle": "حذف مراجعتك؟",
+    "deleteConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
+    "deleteOk": "حذف",
+    "deleteCancel": "إلغاء",
+    "deleteError": "فشل حذف المراجعة",
+    "loadError": "فشل تحميل المراجعات",
+    "uploadingPhoto": "جارٍ رفع الصورة...",
+    "uploadError": "فشل رفع الصورة"
   },
   "lightbox": {
     "close": "إغلاق",
@@ -192,7 +203,25 @@
     "counter": "{total} صورة"
   },
   "offline": {
-    "banner": "أنت غير متصل بالإنترنت — الخريطة محدودة"
+    "banner": "أنت غير متصل بالإنترنت — الخريطة محدودة",
+    "title": "الخرائط دون اتصال",
+    "sectionDownloaded": "المناطق المحفوظة",
+    "sectionAvailable": "مناطق متاحة للتحميل",
+    "emptyDownloaded": "لا توجد مناطق محفوظة بعد.",
+    "presetBaghdad": "بغداد",
+    "presetSulaymaniyah": "السليمانية",
+    "presetMosul": "الموصل",
+    "download": "تحميل",
+    "cancelDownload": "إلغاء التحميل",
+    "delete": "حذف",
+    "deleteTitle": "حذف المنطقة",
+    "deleteConfirm": "هل تريد حذف منطقة «{name}» من الجهاز؟",
+    "cancel": "إلغاء",
+    "back": "رجوع",
+    "progressLabel": "{pct}٪ — {size}",
+    "completeLabel": "مكتمل — {size}",
+    "failedLabel": "فشل التحميل",
+    "offlineBadge": "غير متصل"
   },
   "mapStyle": {
     "label": "نمط الخريطة",

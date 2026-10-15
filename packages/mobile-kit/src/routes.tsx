@@ -38,6 +38,7 @@ export const routes = {
   providerInbox: '/provider/inbox',
   providerRequest: '/provider/inbox/[requestId]',
   devSettings: '/dev-settings',
+  offlineMaps: '/map/offline-regions',
 } as const;
 
 export type RouteName = keyof typeof routes;

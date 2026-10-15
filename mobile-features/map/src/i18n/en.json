@@ -183,7 +183,18 @@
     "cancelForm": "Cancel",
     "filterAll": "All",
     "filterStar": "{star} stars",
-    "filterEmpty": "No reviews with this rating"
+    "filterEmpty": "No reviews with this rating",
+    "photoCount": "{n} photos",
+    "ratingBreakdown": "Rating breakdown",
+    "starLabel": "{n} star",
+    "deleteConfirmTitle": "Delete your review?",
+    "deleteConfirmMsg": "This cannot be undone.",
+    "deleteOk": "Delete",
+    "deleteCancel": "Cancel",
+    "deleteError": "Failed to delete review",
+    "loadError": "Failed to load reviews",
+    "uploadingPhoto": "Uploading photo...",
+    "uploadError": "Photo upload failed"
   },
   "lightbox": {
     "close": "Close",
@@ -192,7 +203,25 @@
     "counter": "{total} photos"
   },
   "offline": {
-    "banner": "You're offline — map is limited"
+    "banner": "You're offline — map is limited",
+    "title": "Offline Maps",
+    "sectionDownloaded": "Downloaded Regions",
+    "sectionAvailable": "Available to Download",
+    "emptyDownloaded": "No regions downloaded yet.",
+    "presetBaghdad": "Baghdad",
+    "presetSulaymaniyah": "Sulaymaniyah",
+    "presetMosul": "Mosul",
+    "download": "Download",
+    "cancelDownload": "Cancel",
+    "delete": "Delete",
+    "deleteTitle": "Delete Region",
+    "deleteConfirm": "Delete \"{name}\" from this device?",
+    "cancel": "Cancel",
+    "back": "Back",
+    "progressLabel": "{pct}% — {size}",
+    "completeLabel": "Complete — {size}",
+    "failedLabel": "Download failed",
+    "offlineBadge": "Offline"
   },
   "mapStyle": {
     "label": "Map style",
