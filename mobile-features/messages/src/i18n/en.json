@@ -21,7 +21,10 @@
     "title": "Messages",
     "empty": "No messages yet",
     "start": "Start a conversation",
-    "loadError": "Error loading messages"
+    "loadError": "Error loading messages",
+    "placesCount": "{{count}} places",
+    "placeCount": "1 place",
+    "repliedBadge": "Replied"
   },
   "detail": {
     "title": "Request details",

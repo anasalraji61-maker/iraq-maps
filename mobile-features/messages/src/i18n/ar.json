@@ -21,7 +21,10 @@
     "title": "الرسائل",
     "empty": "لا توجد رسائل بعد",
     "start": "ابدأ محادثة",
-    "loadError": "خطأ في تحميل الرسائل"
+    "loadError": "خطأ في تحميل الرسائل",
+    "placesCount": "{{count}} أماكن",
+    "placeCount": "مكان واحد",
+    "repliedBadge": "رد"
   },
   "detail": {
     "title": "تفاصيل الطلب",
