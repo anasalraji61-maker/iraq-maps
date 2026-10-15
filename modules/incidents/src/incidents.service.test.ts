@@ -74,9 +74,9 @@ describe('IncidentsService.listNear', () => {
 
     const result = await svc.listNear({ lat: 33.2, lng: 44.3, radiusKm: 5 });
     expect(result).toHaveLength(1);
-    expect(result[0].type).toBe('roadblock');
-    expect(result[0].active).toBe(true);
-    expect(result[0].location).toEqual([44.3, 33.2]);
+    expect(result[0]!.type).toBe('roadblock');
+    expect(result[0]!.active).toBe(true);
+    expect(result[0]!.location).toEqual([44.3, 33.2]);
   });
 
   it('returns empty array when no incidents nearby', async () => {

@@ -70,7 +70,8 @@ export class IncidentsService {
           ST_X(location::geometry) AS lng,
           ST_Y(location::geometry) AS lat
       `;
-    const result = await this.db.execute(insertSql);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.db.execute(insertSql as any);
     const rows = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
 
     const row = (rows as IncidentDbRow[])[0];
@@ -103,7 +104,8 @@ export class IncidentsService {
         ORDER BY created_at DESC
         LIMIT 200
       `;
-    const result2 = await this.db.execute(selectSql);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result2 = await this.db.execute(selectSql as any);
     const rows2 = Array.isArray(result2) ? result2 : (result2 as { rows?: unknown[] }).rows ?? [];
 
     return (rows2 as IncidentDbRow[]).map(rowToIncident);
