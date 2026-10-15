@@ -99,7 +99,8 @@
     "closesAt": "دادەخرێت {time}",
     "whatsappLabel": "پەیام لە واتساپ",
     "nearbyTitle": "شوێنی نزیک و هاوشێوە",
-    "openInMaps": "کردنەوە لە نەخشەی گووگڵ"
+    "openInMaps": "کردنەوە لە نەخشەی گووگڵ",
+    "todayHours": "ئەمڕۆ: {hours}"
   },
   "actions": {
     "directions": "ئاراستەکان",

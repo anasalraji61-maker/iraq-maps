@@ -99,7 +99,8 @@
     "closesAt": "يغلق الساعة {time}",
     "whatsappLabel": "تواصل عبر واتساب",
     "nearbyTitle": "أماكن قريبة مشابهة",
-    "openInMaps": "فتح في خرائط جوجل"
+    "openInMaps": "فتح في خرائط جوجل",
+    "todayHours": "اليوم: {hours}"
   },
   "actions": {
     "directions": "الاتجاهات",

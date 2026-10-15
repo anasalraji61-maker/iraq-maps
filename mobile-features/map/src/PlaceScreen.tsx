@@ -8,7 +8,7 @@ import { Linking, Pressable, Share, StyleSheet, View } from 'react-native';
 import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
-import { openNow, closesAt } from './hours';
+import { openNow, closesAt, todayHours } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
 import { isolate, kindLabel, t } from './strings';
 
@@ -49,6 +49,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
   const name = pickName(place.names, lang);
   const open = place.hoursRaw ? openNow(place.hoursRaw) : null;
   const closingTime = (open === true && place.hoursRaw) ? closesAt(place.hoursRaw) : null;
+  const todaySpans = place.hoursRaw ? todayHours(place.hoursRaw) : null;
   // The app scheme (app.config `scheme`) plus the place route: iraqmaps://place/<id>.
   const link = `iraqmaps:/${href('place', { placeId: place.id })}`;
   const share = () => Share.share({ message: `${name}\n${link}` }).catch(() => undefined);
@@ -100,6 +101,11 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
             </Text>
           )}
         />
+      ) : null}
+      {todaySpans ? (
+        <Text tone="muted">
+          {t('place.todayHours', { hours: todaySpans })}
+        </Text>
       ) : null}
       {phone ? (
         <ListItem

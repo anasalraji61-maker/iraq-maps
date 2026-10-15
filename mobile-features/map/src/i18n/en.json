@@ -99,7 +99,8 @@
     "closesAt": "Closes at {time}",
     "whatsappLabel": "Message on WhatsApp",
     "nearbyTitle": "Similar nearby places",
-    "openInMaps": "Open in Google Maps"
+    "openInMaps": "Open in Google Maps",
+    "todayHours": "Today: {hours}"
   },
   "actions": {
     "directions": "Directions",

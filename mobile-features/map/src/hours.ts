@@ -67,6 +67,20 @@ export function fmtMinutes(min: number): string {
 }
 
 /**
+ * Returns today's opening time spans as a formatted string, e.g. "09:00–22:00" or "09:00–13:00, 16:00–22:00".
+ * Returns null for formats the parser can't handle or when the place is closed today.
+ */
+export function todayHours(raw: string, at = new Date()): string | null {
+  const week = parse(raw);
+  if (!week) return null;
+  const local = new Date(at.getTime() + IRAQ_UTC_OFFSET_MS);
+  const day = (local.getUTCDay() + 6) % 7;
+  const spans = week[day] ?? [];
+  if (spans.length === 0) return null;
+  return spans.map(([start, end]) => `${fmtMinutes(start)}–${fmtMinutes(end % 1440)}`).join(', ');
+}
+
+/**
  * When the place currently closes (as "HH:MM" in Iraq local time), or null if closed / unknown.
  * Returns null for formats the parser can't handle.
  */
