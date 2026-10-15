@@ -138,6 +138,20 @@ describe('ProviderInboxDetailScreen', () => {
     });
   });
 
+  it('shows skeleton while inquiry is loading', async () => {
+    mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
+    let resolve!: (v: unknown) => void;
+    mockApi({
+      getInquiry: jest.fn(() => new Promise((res) => { resolve = res; })),
+    });
+    const view = await renderWithProviders(<ProviderInboxDetailScreen />);
+    expect(view.getByTestId('skeleton-inbox-detail')).toBeTruthy();
+    await act(async () => {
+      resolve({ status: 200, body: makeInquiry() });
+      await Promise.resolve();
+    });
+  });
+
   it('quick reply chip fills the reply input', async () => {
     mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
     mockApi();
