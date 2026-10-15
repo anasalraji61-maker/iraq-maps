@@ -1,14 +1,17 @@
 import { type DiscoverPostType } from '@iraq-maps/contracts';
+import { useApi } from '@iraq-maps/mobile-kit';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
   Animated,
   FlatList,
   I18nManager,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   RefreshControl,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -68,13 +71,17 @@ function PostDetailSkeleton(): ReactElement {
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-function PostBody({ post }: { post: DiscoverPostType }): ReactElement {
+function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>> }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
     void Share.share({ message });
   }, [post.body, post.id]);
+
+  const images = post.mediaAssetIds
+    .map((id) => ({ id, url: mediaUrls[id] }))
+    .filter((img): img is { id: string; url: string } => !!img.url);
 
   return (
     <View style={styles.postCard}>
@@ -87,6 +94,13 @@ function PostBody({ post }: { post: DiscoverPostType }): ReactElement {
           <Text style={[styles.typeText, { color: badgeColors.text }]}>{post.type}</Text>
         </View>
       </View>
+      {images.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageStrip} contentContainerStyle={styles.imageStripContent}>
+          {images.map((img) => (
+            <Image key={img.id} source={{ uri: img.url }} style={styles.detailImage} resizeMode="cover" accessibilityRole="image" />
+          ))}
+        </ScrollView>
+      )}
       <Text style={styles.bodyText}>{post.body}</Text>
       <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
       <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button">
@@ -100,6 +114,7 @@ function PostBody({ post }: { post: DiscoverPostType }): ReactElement {
 export function PostDetailScreen(): ReactElement {
   const { postId, postJson } = useLocalSearchParams<{ postId: string; postJson?: string }>();
   const api = useDiscoverClient();
+  const extApi = useApi();
 
   // Parse post from navigation params (passed by DiscoverFeedScreen to avoid a redundant feed fetch)
   const initialPost = postJson ? (() => { try { return JSON.parse(postJson) as DiscoverPostType; } catch { return undefined; } })() : undefined;
@@ -111,6 +126,8 @@ export function PostDetailScreen(): ReactElement {
   const [error, setError] = useState<string | undefined>();
   const [commentText, setCommentText] = useState('');
   const [sending, setSending] = useState(false);
+  const [mediaUrls, setMediaUrls] = useState<Readonly<Record<string, string>>>({});
+  const fetchingAssetIds = useRef(new Set<string>());
   const listRef = useRef<FlatList>(null);
 
   const loadData = useCallback(async (isRefresh = false) => {
@@ -131,6 +148,29 @@ export function PostDetailScreen(): ReactElement {
   }, [api, post, postId]);
 
   useEffect(() => { void loadData(false); }, [loadData]);
+
+  // Fetch signed read URLs for all media assets of this post
+  useEffect(() => {
+    if (!post || post.mediaAssetIds.length === 0) return;
+    const assetIds = post.mediaAssetIds.filter((id) => !mediaUrls[id] && !fetchingAssetIds.current.has(id));
+    if (assetIds.length === 0) return;
+    assetIds.forEach((id) => fetchingAssetIds.current.add(id));
+    void Promise.all(
+      assetIds.map(async (assetId) => {
+        try {
+          const res = await extApi.media.readUrl({ params: { assetId }, query: { size: 'medium' } });
+          if (res.status === 200) {
+            setMediaUrls((prev) => ({ ...prev, [assetId]: res.body.url }));
+          }
+        } catch {
+          // silent — image won't show
+        } finally {
+          fetchingAssetIds.current.delete(assetId);
+        }
+      }),
+    );
+  // post?.id as dep: re-fetch only when the post changes, not on every mediaUrls update
+  }, [post?.id]); // extApi ref is stable; deliberate partial deps
 
   const handleRefresh = useCallback(() => { void loadData(true); }, [loadData]);
 
@@ -189,7 +229,7 @@ export function PostDetailScreen(): ReactElement {
         }
         ListHeaderComponent={
           <>
-            <PostBody post={post} />
+            <PostBody post={post} mediaUrls={mediaUrls} />
             {sectionHeader}
           </>
         }
@@ -242,6 +282,9 @@ const styles = StyleSheet.create({
   typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
   bodyText: { fontSize: 16, color: COLORS.textPrimary, lineHeight: 24, textAlign: 'auto', marginBottom: 8 },
   postDate: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto', marginBottom: 10 },
+  imageStrip: { marginBottom: 10, marginHorizontal: -14 },
+  imageStripContent: { paddingHorizontal: 14, gap: 8 },
+  detailImage: { width: 240, height: 180, borderRadius: 10 },
   shareBtn: { alignSelf: 'flex-start', backgroundColor: COLORS.inputBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   shareBtnText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500' },
   sectionHeader: { paddingHorizontal: 4, paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border, marginBottom: 8 },
