@@ -44,8 +44,46 @@ jest.mock('expo-router', () => ({
 
 jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
 
+const mockInquiryInApp = {
+  id: 'inq2',
+  userId: 'user1',
+  text: 'ما هي أوقات العمل؟',
+  createdAt: new Date().toISOString(),
+  targets: [
+    {
+      placeId: 'place2',
+      channel: 'in_app' as const,
+      status: 'replied' as const,
+      handoffLink: undefined,
+    },
+  ],
+};
+
+describe('InquiryDetailScreen — in_app channel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetInquiry.mockResolvedValue({ status: 200, body: mockInquiryInApp });
+    mockMarkInquiryRead.mockResolvedValue({ status: 200, body: { ok: true } });
+  });
+
+  it('renders inquiry text for in_app channel', async () => {
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => expect(view.getByText('ما هي أوقات العمل؟')).toBeTruthy());
+  });
+
+  it('does not show handoff copy button for in_app channel', async () => {
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => expect(view.getByText('ما هي أوقات العمل؟')).toBeTruthy());
+    expect(view.queryByTestId(messagingTestIDs.handoffCopy)).toBeNull();
+  });
+});
+
 describe('InquiryDetailScreen — handoff', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetInquiry.mockResolvedValue({ status: 200, body: mockInquiry });
+    mockMarkInquiryRead.mockResolvedValue({ status: 200, body: { ok: true } });
+  });
 
   it('copy button calls Clipboard.setStringAsync with the handoff copyText', async () => {
     const clipSpy = jest.spyOn(Clipboard, 'setStringAsync').mockResolvedValue(true);
