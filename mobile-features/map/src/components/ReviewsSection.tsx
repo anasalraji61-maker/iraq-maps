@@ -4,12 +4,14 @@
  */
 import { type PlaceId, type Review, type RatingSummary } from '@iraq-maps/contracts';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
-import { Banner, Button, Text, TextField } from '@iraq-maps/ui';
+import { Banner, Button, Text } from '@iraq-maps/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { StyleSheet, Text as RNText, TextInput, TouchableOpacity, View } from 'react-native';
 import { t } from '../strings';
 
 // ── Star row ─────────────────────────────────────────────────────────────────
+
+const STAR = '★'; // Unicode star character, not user-visible text
 
 function StarRow({
   value,
@@ -31,7 +33,7 @@ function StarRow({
           accessibilityLabel={`${n}`}
           testID={`star-${n}`}
         >
-          <RNText style={{ fontSize: 24, color: n <= value ? '#F5A623' : '#CCC' }}>★</RNText>
+          <RNText style={{ fontSize: 24, color: n <= value ? '#F5A623' : '#CCC' }}>{STAR}</RNText>
         </TouchableOpacity>
       ))}
     </View>

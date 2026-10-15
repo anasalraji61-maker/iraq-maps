@@ -7,7 +7,7 @@
  * the backend can track read state for analytics / provider notifications.
  */
 import { type InquiryId } from '@iraq-maps/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMessagingClient } from '../client';
 import { loadReceipts, saveReceipts } from './readReceiptsStore';
 
@@ -26,6 +26,9 @@ export function useReadAt(inquiryId: string | undefined): string | null {
 /** Marks the inquiry as read locally and on the server. Returns the stored timestamp. */
 export function useMarkRead(inquiryId: string | undefined): () => Promise<string> {
   const api = useMessagingClient();
+  // Keep a ref so the callback is stable across re-renders; avoids infinite effect loops.
+  const apiRef = useRef(api);
+  apiRef.current = api;
   return useCallback(async () => {
     if (!inquiryId) return '';
     const now = new Date().toISOString();
@@ -35,9 +38,9 @@ export function useMarkRead(inquiryId: string | undefined): () => Promise<string
       await saveReceipts(receipts);
     }
     // Best-effort server sync — never block the UI on this
-    void api.markInquiryRead({ params: { id: inquiryId as InquiryId }, body: {} }).catch(() => undefined);
+    void apiRef.current.markInquiryRead({ params: { id: inquiryId as InquiryId }, body: {} }).catch(() => undefined);
     return receipts[inquiryId]!;
-  }, [inquiryId, api]);
+  }, [inquiryId]);
 }
 
 /** Returns a map of inquiryId → readAt for the given ids (for the list screen). */

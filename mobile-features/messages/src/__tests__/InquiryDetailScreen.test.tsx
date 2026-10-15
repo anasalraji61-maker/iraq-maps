@@ -33,7 +33,8 @@ const mockInquiry = {
 };
 
 const mockGetInquiry = jest.fn(async () => ({ status: 200, body: mockInquiry }));
-jest.mock('../client', () => ({ useMessagingClient: () => ({ getInquiry: mockGetInquiry }) }));
+const mockMarkInquiryRead = jest.fn(async () => ({ status: 200, body: { ok: true } }));
+jest.mock('../client', () => ({ useMessagingClient: () => ({ getInquiry: mockGetInquiry, markInquiryRead: mockMarkInquiryRead }) }));
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
