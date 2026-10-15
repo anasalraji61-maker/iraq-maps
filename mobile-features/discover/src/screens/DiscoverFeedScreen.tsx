@@ -415,11 +415,22 @@ export function DiscoverFeedScreen(): ReactElement {
   }, [api, editingPost, editBody]);
 
   const handleLike = useCallback(async (post: DiscoverPostType) => {
+    const postId = post.id;
+    const optimisticLiked = !post.isLikedByMe;
+    const optimisticCount = post.likeCount + (optimisticLiked ? 1 : -1);
+
+    // Optimistic update — apply immediately so UI feels instant
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, isLikedByMe: optimisticLiked, likeCount: optimisticCount } : p,
+      ),
+    );
+
     try {
-      const postId = post.id;
       if (post.isLikedByMe) {
         const res = await api.unlikePost({ params: { postId } });
         if (res.status === 200) {
+          // Sync server count (may differ from optimistic if concurrent likes)
           setPosts((prev) =>
             prev.map((p) => p.id === postId ? { ...p, isLikedByMe: false, likeCount: res.body.likeCount } : p),
           );
@@ -433,7 +444,12 @@ export function DiscoverFeedScreen(): ReactElement {
         }
       }
     } catch {
-      // silent — like is best-effort
+      // Revert on error
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId ? { ...p, isLikedByMe: post.isLikedByMe, likeCount: post.likeCount } : p,
+        ),
+      );
     }
   }, [api]);
 
