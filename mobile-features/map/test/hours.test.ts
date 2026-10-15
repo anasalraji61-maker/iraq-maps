@@ -49,3 +49,30 @@ describe('openNow', () => {
     expect(openNow(raw, at(THU, '10:00'))).toBeNull();
   });
 });
+
+import { closesAt, fmtMinutes } from '../src/hours';
+
+describe('fmtMinutes', () => {
+  it('formats minutes as HH:MM', () => {
+    expect(fmtMinutes(540)).toBe('09:00');
+    expect(fmtMinutes(1320)).toBe('22:00');
+    expect(fmtMinutes(0)).toBe('00:00');
+    expect(fmtMinutes(1441)).toBe('00:01'); // wraps past 24h
+  });
+});
+
+describe('closesAt', () => {
+  it('returns closing time when open', () => {
+    // Thursday 10:00 Iraq → open until 17:00
+    expect(closesAt('Sa-Th 09:00-17:00; Fr off', at(THU, '10:00'))).toBe('17:00');
+  });
+
+  it('returns null when closed', () => {
+    // Friday is off day
+    expect(closesAt('Sa-Th 09:00-17:00; Fr off', at(FRI, '10:00'))).toBeNull();
+  });
+
+  it('returns null for unparseable string', () => {
+    expect(closesAt('PH off', at(THU, '10:00'))).toBeNull();
+  });
+});

@@ -94,7 +94,8 @@
     "providerSocialLinks": "بەستەرەکانی تۆڕی کۆمەڵایەتی",
     "providerPhone": "تەلەفۆنی دابینکەر",
     "providerHours": "کاتەکانی کار",
-    "providerVerified": "دابینکەری پشتڕاستکراو"
+    "providerVerified": "دابینکەری پشتڕاستکراو",
+    "closesAt": "دادەخرێت {time}"
   },
   "actions": {
     "directions": "ئاراستەکان",

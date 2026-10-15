@@ -94,7 +94,8 @@
     "providerSocialLinks": "روابط التواصل الاجتماعي",
     "providerPhone": "هاتف المزوّد",
     "providerHours": "ساعات العمل (من المزوّد)",
-    "providerVerified": "مزوّد موثّق"
+    "providerVerified": "مزوّد موثّق",
+    "closesAt": "يغلق الساعة {time}"
   },
   "actions": {
     "directions": "الاتجاهات",

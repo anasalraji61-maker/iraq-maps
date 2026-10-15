@@ -8,7 +8,7 @@ import { Linking, Share, View } from 'react-native';
 import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
-import { openNow } from './hours';
+import { openNow, closesAt } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
 import { isolate, kindLabel, t } from './strings';
 
@@ -48,6 +48,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
   const haptics = useHaptics();
   const name = pickName(place.names, lang);
   const open = place.hoursRaw ? openNow(place.hoursRaw) : null;
+  const closingTime = (open === true && place.hoursRaw) ? closesAt(place.hoursRaw) : null;
   // The app scheme (app.config `scheme`) plus the place route: iraqmaps://place/<id>.
   const link = `iraqmaps:/${href('place', { placeId: place.id })}`;
   const share = () => Share.share({ message: `${name}\n${link}` }).catch(() => undefined);
@@ -89,7 +90,15 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         <ListItem
           title={t('place.hours')}
           subtitle={isolate(place.hoursRaw)}
-          trailing={open === null ? null : <Text tone={open ? 'default' : 'danger'}>{t(open ? 'place.openNow' : 'place.closedNow')}</Text>}
+          trailing={open === null ? null : (
+            <Text tone={open ? 'default' : 'danger'}>
+              {open
+                ? closingTime
+                  ? t('place.closesAt', { time: closingTime })
+                  : t('place.openNow')
+                : t('place.closedNow')}
+            </Text>
+          )}
         />
       ) : null}
       {phone ? (

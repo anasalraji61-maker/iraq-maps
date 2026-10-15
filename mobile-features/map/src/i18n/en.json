@@ -94,7 +94,8 @@
     "providerSocialLinks": "Social Links",
     "providerPhone": "Provider Phone",
     "providerHours": "Business Hours",
-    "providerVerified": "Verified Provider"
+    "providerVerified": "Verified Provider",
+    "closesAt": "Closes at {time}"
   },
   "actions": {
     "directions": "Directions",

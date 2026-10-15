@@ -54,7 +54,7 @@ describe('PlaceScreen', () => {
     expect(view.getByText('الرصافة')).toBeVisible();
     expect(view.getByTestId(place.source)).toHaveTextContent(t('map:source.osm'));
     expect(view.getByText(isolated('Sa-Th 09:00-17:00; Fr off'))).toBeVisible();
-    expect(view.getByText(t('map:place.openNow'))).toBeVisible();
+    expect(view.getByText(t('map:place.closesAt', { time: '17:00' }))).toBeVisible();
     expect(view.getByText(isolated('+964 770 123 4567'))).toBeVisible();
     expect(view.getByText(isolated('https://example.com/citadel'))).toBeVisible();
     expect(view.getByText(OSM_ATTRIBUTION)).toBeVisible();

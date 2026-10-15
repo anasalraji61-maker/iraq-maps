@@ -57,3 +57,35 @@ export function openNow(raw: string, at = new Date()): boolean | null {
   const yesterday = week[(day + 6) % 7] ?? [];
   return today.some(([start, end]) => start <= now && now < end) || yesterday.some(([, end]) => now + 1440 < end);
 }
+
+/** Format minutes-from-midnight as "HH:MM". */
+export function fmtMinutes(min: number): string {
+  const m = min % 1440;
+  const h = Math.floor(m / 60) % 24;
+  const mm = m % 60;
+  return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+/**
+ * When the place currently closes (as "HH:MM" in Iraq local time), or null if closed / unknown.
+ * Returns null for formats the parser can't handle.
+ */
+export function closesAt(raw: string, at = new Date()): string | null {
+  const week = parse(raw);
+  if (!week) return null;
+  const local = new Date(at.getTime() + IRAQ_UTC_OFFSET_MS);
+  const day = (local.getUTCDay() + 6) % 7;
+  const now = local.getUTCHours() * 60 + local.getUTCMinutes();
+  const today = week[day] ?? [];
+  const yesterday = week[(day + 6) % 7] ?? [];
+
+  // Check if currently in a span from today
+  for (const [start, end] of today) {
+    if (start <= now && now < end) return fmtMinutes(end);
+  }
+  // Check overnight span from yesterday
+  for (const [, end] of yesterday) {
+    if (now + 1440 < end) return fmtMinutes(end % 1440);
+  }
+  return null;
+}
