@@ -86,7 +86,8 @@
     "timeJustNow": "الآن",
     "timeMinsAgo": "منذ {{n}} دقيقة",
     "timeHoursAgo": "منذ {{n}} ساعة",
-    "timeDaysAgo": "منذ {{n}} يوم"
+    "timeDaysAgo": "منذ {{n}} يوم",
+    "itemA11y": "رسالة من {userId}"
   },
   "logo": {
     "title": "شعار النشاط التجاري",

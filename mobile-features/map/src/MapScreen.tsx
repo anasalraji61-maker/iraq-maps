@@ -221,7 +221,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   return (
     <View style={styles.fill}>
       <View style={StyleSheet.absoluteFill}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={() => setSearchPanelOpen(false)}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => setSearchPanelOpen(false)} accessibilityLabel="" importantForAccessibility="no">
           {/* TODO: PMTiles offline caching - tiles are served from TILES_SOURCE */}
           <MapCanvas
             city={city}
@@ -270,7 +270,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           <View style={{ maxHeight: maxResultsHeight }}>
             <View style={styles.recentHeader}>
               <Text variant="caption">{t('search.recentTitle')}</Text>
-              <Pressable onPress={() => recentSearches.clear()}>
+              <Pressable onPress={() => recentSearches.clear()} accessibilityRole="button" accessibilityLabel={t('search.clearRecent')}>
                 <RNText style={styles.clearText}>{t('search.clearRecent')}</RNText>
               </Pressable>
             </View>
@@ -280,6 +280,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                   key={term}
                   style={styles.chip}
                   onPress={() => { setQuery(term); setSearchPanelOpen(true); }}
+                  accessibilityRole="button"
+                  accessibilityLabel={term}
                 >
                   <RNText style={styles.chipText} numberOfLines={1}>{term}</RNText>
                 </Pressable>

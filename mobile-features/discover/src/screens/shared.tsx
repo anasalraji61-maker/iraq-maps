@@ -281,6 +281,8 @@ export function CommentInputRow({
           style={[sharedStyles.sendBtn, (!value.trim() || sending) && sharedStyles.sendBtnDisabled]}
           onPress={onSend}
           disabled={!value.trim() || sending}
+          accessibilityRole="button"
+          accessibilityLabel={t('comments.send')}
         >
           {sending ? (
             <ActivityIndicator color="#FFF" size="small" />

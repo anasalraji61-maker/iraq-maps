@@ -162,6 +162,9 @@ export function ProviderInboxScreen(): ReactElement {
             <Pressable
               testID={messagingTestIDs.inboxItem(item.id)}
               style={[styles.row, isUnread && styles.rowUnread]}
+              accessibilityRole="button"
+              accessibilityLabel={t('inbox.itemA11y', { userId: item.userId })}
+              accessibilityState={{ selected: isUnread }}
               onPress={() => {
                 markRead(item.id);
                 router.push({ pathname: '/provider/inbox/[id]', params: { id: item.id } } as never);

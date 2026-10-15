@@ -86,7 +86,8 @@
     "timeJustNow": "Just now",
     "timeMinsAgo": "{{n}}m ago",
     "timeHoursAgo": "{{n}}h ago",
-    "timeDaysAgo": "{{n}}d ago"
+    "timeDaysAgo": "{{n}}d ago",
+    "itemA11y": "Message from {userId}"
   },
   "logo": {
     "title": "Business Logo",

@@ -86,7 +86,8 @@
     "timeJustNow": "ئێستا",
     "timeMinsAgo": "{{n}} خولەک لەمەوبەر",
     "timeHoursAgo": "{{n}} کاتژمێر لەمەوبەر",
-    "timeDaysAgo": "{{n}} ڕۆژ لەمەوبەر"
+    "timeDaysAgo": "{{n}} ڕۆژ لەمەوبەر",
+    "itemA11y": "نامەیەک لە {userId}"
   },
   "logo": {
     "title": "لۆگۆی کارووبار",
