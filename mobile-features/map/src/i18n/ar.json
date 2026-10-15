@@ -83,6 +83,8 @@
     "insightsUpdated": "آخر تحديث: {date}",
     "reportCrowded": "أبلّغ: مزدحم الآن",
     "reportPrice": "أبلّغ عن سعر",
+    "reportPriceTitle": "ما مستوى السعر؟",
+    "reportPriceSuccess": "تم إرسال تقرير السعر",
     "sourceUserReport": "بلاغات المستخدمين",
     "sourceProvider": "المزوّد",
     "sourceHeuristic": "تقدير عام",

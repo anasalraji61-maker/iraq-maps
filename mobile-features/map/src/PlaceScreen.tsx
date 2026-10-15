@@ -4,7 +4,7 @@ import { href, routes, savedPlaces, useApi, useHaptics, useRouteAvailable } from
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, Share, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, Share, StyleSheet, View } from 'react-native';
 import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
@@ -59,6 +59,31 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
     api.insights
       .report({ body: { placeId: place.id, kind: 'crowded_now' } })
       .catch(() => undefined);
+
+  const reportPrice = () => {
+    const levels: PriceLevel[] = ['budget', 'mid_range', 'expensive', 'luxury'];
+    const labels: Record<PriceLevel, string> = {
+      budget: t('place.priceBudget'),
+      mid_range: t('place.priceMidRange'),
+      expensive: t('place.priceExpensive'),
+      luxury: t('place.priceLuxury'),
+    };
+    Alert.alert(
+      t('place.reportPriceTitle'),
+      undefined,
+      [
+        ...levels.map((level) => ({
+          text: labels[level],
+          onPress: () => {
+            api.insights
+              .report({ body: { placeId: place.id, kind: 'price', priceLevel: level } })
+              .catch(() => undefined);
+          },
+        })),
+        { text: t('reviews.cancelForm'), style: 'cancel' as const },
+      ],
+    );
+  };
 
   // ── Distance from user ────────────────────────────────────────────────────
   const distM = useDistanceFromUser(place.location as [number, number] | undefined);
@@ -130,7 +155,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         />
       ) : null}
       {place.provider ? <ProviderSection provider={place.provider} /> : null}
-      <InsightsSection place={place} onReportCrowded={reportCrowded} />
+      <InsightsSection place={place} onReportCrowded={reportCrowded} onReportPrice={reportPrice} />
       <ReviewsSection placeId={place.id} />
       {place.category ? (
         <NearbySection placeId={place.id} location={place.location} category={place.category} />
@@ -186,7 +211,7 @@ function sourceName(source: string): string {
 }
 
 /** Shows crowding bar (low/medium/high) and price level, each with source, date, confidence. */
-function InsightsSection({ place, onReportCrowded }: { place: PlaceDetails; onReportCrowded: () => void }) {
+function InsightsSection({ place, onReportCrowded, onReportPrice }: { place: PlaceDetails; onReportCrowded: () => void; onReportPrice: () => void }) {
   const hasCrowding = place.crowding !== null && place.crowding !== undefined;
   const hasPrice = place.priceLevel !== null && place.priceLevel !== undefined;
 
@@ -200,6 +225,7 @@ function InsightsSection({ place, onReportCrowded }: { place: PlaceDetails; onRe
           {t('place.priceLevel')}: {t('place.noInsightsData')}
         </Text>
         <Button variant="secondary" label={t('place.reportCrowded')} onPress={onReportCrowded} testID={testIDs.place.reportCrowded} />
+        <Button variant="secondary" label={t('place.reportPrice')} onPress={onReportPrice} testID={testIDs.place.priceLevel} />
       </View>
     );
   }
@@ -241,6 +267,7 @@ function InsightsSection({ place, onReportCrowded }: { place: PlaceDetails; onRe
         </Text>
       )}
       <Button variant="secondary" label={t('place.reportCrowded')} onPress={onReportCrowded} testID={testIDs.place.reportCrowded} />
+      <Button variant="secondary" label={t('place.reportPrice')} onPress={onReportPrice} testID="place.reportPrice" />
     </View>
   );
 }

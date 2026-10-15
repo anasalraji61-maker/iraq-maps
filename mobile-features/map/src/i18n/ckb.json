@@ -83,6 +83,8 @@
     "insightsUpdated": "دوایین نوێکردنەوە: {date}",
     "reportCrowded": "ڕاپۆرت: ئێستا قەرەباڵغە",
     "reportPrice": "ڕاپۆرتی نرخ",
+    "reportPriceTitle": "ئاستی نرخ چەندە؟",
+    "reportPriceSuccess": "ڕاپۆرتی نرخ نێردرا",
     "sourceUserReport": "ڕاپۆرتەکانی بەکارهێنەر",
     "sourceProvider": "دابینکەر",
     "sourceHeuristic": "تەخمینی گشتی",
