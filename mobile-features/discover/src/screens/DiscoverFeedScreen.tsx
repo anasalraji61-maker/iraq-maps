@@ -6,6 +6,7 @@ import {
   ActionSheetIOS,
   ActivityIndicator,
   Alert,
+  Animated,
   FlatList,
   I18nManager,
   Image,
@@ -24,6 +25,71 @@ import { t } from '../strings';
 import { getTypeBadgeColors, sharedStyles, COLORS } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Skeleton loader ─────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height, style }: { width: number | string; height: number; style?: object }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return (
+    <Animated.View
+      style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6, opacity }, style]}
+      accessibilityElementsHidden
+    />
+  );
+}
+
+function SkeletonCard(): ReactElement {
+  return (
+    <View testID="skeleton-card" style={[skeletonStyles.card, { backgroundColor: COLORS.surface }]}>
+      <View style={skeletonStyles.header}>
+        <SkeletonBlock width={80} height={12} />
+        <SkeletonBlock width={50} height={18} />
+      </View>
+      <SkeletonBlock width="100%" height={14} style={{ marginBottom: 6 }} />
+      <SkeletonBlock width="75%" height={14} style={{ marginBottom: 12 }} />
+      <View style={skeletonStyles.actions}>
+        <SkeletonBlock width={70} height={28} />
+        <SkeletonBlock width={70} height={28} />
+        <SkeletonBlock width={70} height={28} />
+      </View>
+    </View>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  card: {
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  actions: { flexDirection: 'row', gap: 10 },
+});
+
+function SkeletonFeed(): ReactElement {
+  return (
+    <View style={{ padding: 12 }} accessibilityLabel={t('feed.loading')}>
+      {[1, 2, 3].map((k) => <SkeletonCard key={k} />)}
+    </View>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function formatCount(n: number): string {
   if (n >= 1000) {
@@ -427,10 +493,7 @@ export function DiscoverFeedScreen(): ReactElement {
         onEndReachedThreshold={0.3}
         ListEmptyComponent={
           loading ? (
-            <View style={styles.emptyContainer}>
-              <ActivityIndicator size="large" color="#1976D2" style={styles.loadingIndicator} />
-              <Text style={styles.emptyText}>{t('feed.loading')}</Text>
-            </View>
+            <SkeletonFeed />
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('feed.empty')}</Text>
@@ -598,9 +661,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 60,
     paddingHorizontal: 24,
-  },
-  loadingIndicator: {
-    marginBottom: 16,
   },
   emptyText: {
     fontSize: 15,

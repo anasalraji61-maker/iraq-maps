@@ -121,6 +121,24 @@ describe('DiscoverFeedScreen', () => {
     expect(getByLabelText(/post.more/)).toBeTruthy();
   });
 
+  it('shows skeleton cards while loading', async () => {
+    // Don't resolve the feed yet — keep it pending
+    let resolveFeed!: (v: unknown) => void;
+    mockListFeed.mockReturnValue(new Promise((res) => { resolveFeed = res; }));
+
+    const { getAllByTestId } = await render(<DiscoverFeedScreen />);
+
+    // Skeleton cards should be visible immediately
+    const skeletons = getAllByTestId('skeleton-card');
+    expect(skeletons.length).toBeGreaterThanOrEqual(1);
+
+    // Resolve so the component can unmount cleanly
+    await act(async () => {
+      resolveFeed({ status: 200, body: { items: [], nextCursor: undefined }, headers: new Headers() });
+      await Promise.resolve();
+    });
+  });
+
   it('pressing a report reason calls reportPost API', async () => {
     // In the RNTL environment Platform.OS is 'ios', so the code uses
     // ActionSheetIOS.showActionSheetWithOptions. We intercept that and
