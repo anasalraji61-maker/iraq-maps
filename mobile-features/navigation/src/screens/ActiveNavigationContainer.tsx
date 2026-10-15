@@ -8,7 +8,7 @@ import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Screen, Text } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { useNavigation, type PositionSubscriber } from '../hooks/useNavigation';
 import { useRouteInit } from '../hooks/useRouteInit';
 import { ActiveNavigationScreen } from './ActiveNavigationScreen';
@@ -37,12 +37,17 @@ function NavigationSession({
 
   // Subscribe to live location updates via expo-location watch
   const subscribeRef = useRef<PositionSubscriber | null>(null);
+  const [currentSpeedMps, setCurrentSpeedMps] = useState<number | null>(null);
   useEffect(() => {
     subscribeRef.current = (cb) => {
       let locationSub: Location.LocationSubscription | null = null;
       void Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 5 },
-        (loc) => cb([loc.coords.longitude, loc.coords.latitude] as LngLat),
+        (loc) => {
+          cb([loc.coords.longitude, loc.coords.latitude] as LngLat);
+          // loc.coords.speed is m/s (>= 0) or null when unavailable
+          setCurrentSpeedMps(typeof loc.coords.speed === 'number' && loc.coords.speed >= 0 ? loc.coords.speed : null);
+        },
       ).then((s) => {
         locationSub = s;
       });
@@ -77,6 +82,7 @@ function NavigationSession({
       city={city}
       apiBaseUrl={apiBaseUrl}
       lang={lang}
+      currentSpeedMps={currentSpeedMps}
     />
   );
 }

@@ -16,6 +16,8 @@ interface Props extends NavigationState {
   city?: CityDescriptor;
   apiBaseUrl?: string;
   lang?: string;
+  /** Current GPS speed in m/s (null when unavailable). M195. */
+  currentSpeedMps?: number | null;
 }
 
 /** Format remaining duration as a human-readable string. */
@@ -69,6 +71,7 @@ export function ActiveNavigationScreen({
   city,
   apiBaseUrl,
   lang,
+  currentSpeedMps,
 }: Props): ReactElement {
   const routeProp = useMemo(
     () => (routePolyline6 ? { polyline6: routePolyline6 } : undefined),
@@ -163,6 +166,9 @@ export function ActiveNavigationScreen({
       <View style={styles.etaWrap} testID="nav.eta-row">
         <Text tone="muted">{t('active.eta', { time: fmtEta(etaDate) })}</Text>
         <Text tone="muted" testID="nav.remaining">{t('active.remaining', { dist: fmtDist(remainingDistanceM), duration: fmtDuration(remainingDurationS) })}</Text>
+        {typeof currentSpeedMps === 'number' && currentSpeedMps != null ? (
+          <Text tone="muted" testID="nav.speed">{t('active.speed', { kmh: Math.round(currentSpeedMps * 3.6) })}</Text>
+        ) : null}
       </View>
 
       <Button

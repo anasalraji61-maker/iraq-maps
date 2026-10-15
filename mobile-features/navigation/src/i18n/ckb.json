@@ -15,7 +15,8 @@
     "remaining": "{dist} · {duration}",
     "durationMin": "{n} خ",
     "durationHour": "{h} س",
-    "durationHourMin": "{h} س {m} خ"
+    "durationHourMin": "{h} س {m} خ",
+    "speed": "{kmh} کم/کاتژمێر"
   },
   "preview": {
     "from": "لە: ",
