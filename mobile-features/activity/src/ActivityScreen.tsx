@@ -271,6 +271,7 @@ function formatDuration(s: number): string {
 }
 
 function RouteRow({ item, onRemove }: { item: RecentRoute; onRemove: (item: RecentRoute) => void }): ReactElement {
+  const router = useRouter();
   const modeLabel = item.mode === 'walk' ? t('modeWalking') : t('modeDriving');
   const icon = item.mode === 'walk' ? '🚶' : '🚗';
   return (
@@ -280,6 +281,14 @@ function RouteRow({ item, onRemove }: { item: RecentRoute; onRemove: (item: Rece
         <Text style={styles.rowTitle} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.rowSub}>{modeLabel} · {formatDistance(item.distanceM)} · {formatDuration(item.durationS)}</Text>
         <Text style={styles.rowTime}>{formatRelativeTime(item.at)}</Text>
+        <Pressable
+          onPress={() => router.push({ pathname: '/route/[placeId]' as never, params: { placeId: item.placeId, mode: item.mode } })}
+          style={styles.navigateAgainBtn}
+          accessibilityRole="button"
+          accessibilityLabel={t('navigateAgain')}
+        >
+          <Text style={styles.navigateAgainText}>{t('navigateAgain')}</Text>
+        </Pressable>
       </View>
       <Pressable onPress={() => onRemove(item)} style={styles.removeBtn} accessibilityRole="button" accessibilityLabel={t('removeRoute')}>
         <Text style={styles.removeBtnText}>{t('removeRoute')}</Text>
@@ -761,6 +770,8 @@ const styles = StyleSheet.create({
     marginTop: 8, flexShrink: 0,
   },
   removeBtn: { padding: 8, marginTop: -4 },
+  navigateAgainBtn: { alignSelf: 'flex-start', marginTop: 2 },
+  navigateAgainText: { fontSize: 13, color: '#1976D2', fontWeight: '600' },
   removeBtnText: { fontSize: 16, color: '#999' },
   postActions: { flexDirection: 'column', alignItems: 'flex-end', gap: 4 },
   editPostBtn: { padding: 6 },

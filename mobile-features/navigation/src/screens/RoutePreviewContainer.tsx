@@ -12,13 +12,13 @@ import { useRouteInit } from '../hooks/useRouteInit';
 import { RoutePreviewScreen } from './RoutePreviewScreen';
 
 export function RoutePreviewContainer(): ReactElement {
-  const { placeId } = useLocalSearchParams<{ placeId: string }>();
+  const { placeId, mode: modeParam } = useLocalSearchParams<{ placeId: string; mode?: string }>();
   const api = useApi();
   const apiBaseUrl = useApiBaseUrl();
   const lang = getLocale();
   const router = useRouter();
 
-  const [mode, setMode] = useState<TravelMode>('car');
+  const [mode, setMode] = useState<TravelMode>(modeParam === 'walk' ? 'walk' : 'car');
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [isModeLoading, setIsModeLoading] = useState(false);
   const [modeError, setModeError] = useState<string | undefined>();
