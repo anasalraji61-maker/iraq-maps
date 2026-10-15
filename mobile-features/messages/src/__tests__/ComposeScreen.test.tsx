@@ -5,10 +5,11 @@ import { ComposeScreen } from '../screens/ComposeScreen';
 
 jest.mock('../client', () => ({ useMessagingClient: () => ({}) }));
 
-// 5 place IDs pre-filled so adding another hits the cap
+const mockUseLocalSearchParams = jest.fn(() => ({ placeIds: 'p1,p2,p3,p4,p5' }));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), back: jest.fn() }),
-  useLocalSearchParams: jest.fn(() => ({ placeIds: 'p1,p2,p3,p4,p5' })),
+  useLocalSearchParams: () => mockUseLocalSearchParams(),
   Stack: { Screen: () => null },
 }));
 
@@ -18,5 +19,23 @@ describe('ComposeScreen — place limit', () => {
     const addBtn = view.getByText('أضف مكاناً');
     await act(async () => { fireEvent.press(addBtn); });
     expect(view.getByText('الحد الأقصى 5 أماكن')).toBeTruthy();
+  });
+});
+
+describe('ComposeScreen — char count', () => {
+  it('renders compose input and starts empty', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ placeIds: '' });
+    const view = await renderWithProviders(<ComposeScreen />);
+    const input = view.getByTestId('messaging.compose.input');
+    expect(input).toBeTruthy();
+    expect(input.props.value).toBe('');
+  });
+
+  it('updates input value after typing', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ placeIds: '' });
+    const view = await renderWithProviders(<ComposeScreen />);
+    const input = view.getByTestId('messaging.compose.input');
+    await act(async () => { fireEvent.changeText(input, 'مرحبا'); });
+    expect(input.props.value).toBe('مرحبا');
   });
 });

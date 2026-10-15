@@ -38,6 +38,7 @@ export function ComposeScreen(): ReactElement {
       {error ? <Banner kind="error" message={error} /> : null}
       <TextField
         autoFocus
+        testID="messaging.compose.input"
         label={t('compose.title')}
         value={text}
         onChangeText={(v) => {
