@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
+import { useFollows } from '../useFollows';
 import { COLORS, sharedStyles, formatRelativeTime, getTypeBadgeColors } from './shared';
 
 function formatCount(n: number): string {
@@ -56,6 +57,8 @@ export function UserPostsScreen(): ReactElement {
   const { authorId } = useLocalSearchParams<{ authorId: string }>();
   const api = useDiscoverClient();
   const router = useRouter();
+  const { isFollowing, toggleFollow } = useFollows();
+  const following = authorId ? isFollowing(authorId) : false;
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -104,6 +107,18 @@ export function UserPostsScreen(): ReactElement {
           <Text style={[styles.backBtnText, { color: COLORS.primary }]}>{'‹'}</Text>
         </Pressable>
         <Text style={sharedStyles.headerTitle}>{t('userPosts.title')}</Text>
+        {authorId ? (
+          <Pressable
+            style={[styles.followBtn, following && styles.followBtnActive]}
+            onPress={() => { void toggleFollow(authorId); }}
+            accessibilityRole="button"
+            accessibilityLabel={following ? t('follow.unfollow') : t('follow.follow')}
+          >
+            <Text style={[styles.followBtnText, following && styles.followBtnTextActive]}>
+              {following ? t('follow.following') : t('follow.follow')}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
       {error ? (
         <View style={[sharedStyles.errorRow, { backgroundColor: COLORS.surface }]}>
@@ -162,4 +177,23 @@ const styles = StyleSheet.create({
   backBtnText: { fontSize: 26, fontWeight: '400', lineHeight: 28 },
   emptyContainer: { alignItems: 'center', paddingTop: 60 },
   emptyText: { fontSize: 15, textAlign: 'center' },
+  followBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    marginStart: 8,
+  },
+  followBtnActive: {
+    backgroundColor: COLORS.primary,
+  },
+  followBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  followBtnTextActive: {
+    color: '#FFF',
+  },
 });

@@ -3,6 +3,7 @@ import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import { useSavedPosts } from '../useSavedPosts';
+import { useFollows } from '../useFollows';
 import {
   ActionSheetIOS,
   ActivityIndicator,
@@ -330,6 +331,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const { isSaved, toggleSave } = useSavedPosts();
   const handleSave = useCallback((post: DiscoverPostType) => { void toggleSave(post); }, [toggleSave]);
+  const { followedIds } = useFollows();
+  const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -584,15 +587,40 @@ export function DiscoverFeedScreen(): ReactElement {
   }, []);
 
   const isSearchActive = searchQuery.trim().length > 0;
-  const displayedPosts = useMemo(
-    () => (isSearchActive ? searchResults : posts),
-    [isSearchActive, searchResults, posts],
-  );
+  const displayedPosts = useMemo(() => {
+    const base = isSearchActive ? searchResults : posts;
+    if (!isSearchActive && activeTab === 'following' && followedIds.size > 0) {
+      return base.filter((p) => followedIds.has(p.authorId));
+    }
+    return base;
+  }, [isSearchActive, searchResults, posts, activeTab, followedIds]);
 
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('feed.title')}</Text>
+      </View>
+      <View style={styles.tabRow}>
+        <Pressable
+          style={[styles.tabBtn, activeTab === 'all' && styles.tabBtnActive]}
+          onPress={() => setActiveTab('all')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === 'all' }}
+        >
+          <Text style={[styles.tabBtnText, activeTab === 'all' && styles.tabBtnTextActive]}>
+            {t('feed.title')}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tabBtn, activeTab === 'following' && styles.tabBtnActive]}
+          onPress={() => setActiveTab('following')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === 'following' }}
+        >
+          <Text style={[styles.tabBtnText, activeTab === 'following' && styles.tabBtnTextActive]}>
+            {t('follow.feedTab')}
+          </Text>
+        </Pressable>
       </View>
       <View style={styles.searchRow}>
         <TextInput
@@ -681,6 +709,10 @@ export function DiscoverFeedScreen(): ReactElement {
             )
           ) : loading ? (
             <SkeletonFeed />
+          ) : activeTab === 'following' ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>{t('follow.feedEmpty')}</Text>
+            </View>
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('feed.empty')}</Text>
@@ -759,6 +791,26 @@ const styles = StyleSheet.create({
   errorText: { ...sharedStyles.errorText, flex: 1 },
   retryBtn: { backgroundColor: COLORS.error, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   retryBtnText: { color: COLORS.surface, fontSize: 13, fontWeight: '600' },
+  tabRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    paddingBottom: 4,
+    gap: 8,
+  },
+  tabBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+  },
+  tabBtnActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  tabBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
+  tabBtnTextActive: { color: '#FFF' },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',

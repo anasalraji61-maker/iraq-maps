@@ -5,3 +5,4 @@ export { PostDetailScreen } from './screens/PostDetailScreen';
 export { UserPostsScreen } from './screens/UserPostsScreen';
 export { SavedPostsScreen } from './screens/SavedPostsScreen';
 export { useSavedPosts } from './useSavedPosts';
+export { useFollows } from './useFollows';

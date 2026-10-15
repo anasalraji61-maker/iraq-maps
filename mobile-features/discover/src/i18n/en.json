@@ -111,5 +111,12 @@
     "remove": "Remove",
     "saveSuccess": "Post saved",
     "removeSuccess": "Post removed"
+  },
+  "follow": {
+    "follow": "Follow",
+    "following": "Following",
+    "unfollow": "Unfollow",
+    "feedTab": "Following",
+    "feedEmpty": "No posts from people you follow yet"
   }
 }
