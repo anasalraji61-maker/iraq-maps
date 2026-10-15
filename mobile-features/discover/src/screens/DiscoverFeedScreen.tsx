@@ -1,7 +1,7 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
-import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import {
   ActionSheetIOS,
   ActivityIndicator,
@@ -286,6 +286,11 @@ export function DiscoverFeedScreen(): ReactElement {
   const [editingPost, setEditingPost] = useState<{ id: string; body: string } | null>(null);
   const [editBody, setEditBody] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<DiscoverPostType[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | undefined>();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -468,10 +473,70 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push('/discover/create');
   }, [router]);
 
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchQuery(text);
+    setSearchError(undefined);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    if (!text.trim()) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return;
+    }
+    setSearchLoading(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await api.searchPosts({ query: { q: text.trim(), limit: 20 } });
+        if (res.status === 200) {
+          setSearchResults(res.body.items);
+        }
+      } catch {
+        setSearchError(t('feed.searchError'));
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+  }, [api]);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchError(undefined);
+    setSearchLoading(false);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+  }, []);
+
+  const isSearchActive = searchQuery.trim().length > 0;
+  const displayedPosts = useMemo(
+    () => (isSearchActive ? searchResults : posts),
+    [isSearchActive, searchResults, posts],
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('feed.title')}</Text>
+      </View>
+      <View style={styles.searchRow}>
+        <TextInput
+          style={[styles.searchInput, { backgroundColor: COLORS.surface, color: COLORS.textPrimary }]}
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+          placeholder={t('feed.searchPlaceholder')}
+          placeholderTextColor={COLORS.textSecondary}
+          returnKeyType="search"
+          clearButtonMode="never"
+          accessibilityLabel={t('feed.searchPlaceholder')}
+        />
+        {isSearchActive ? (
+          <Pressable
+            style={styles.clearSearchBtn}
+            onPress={handleClearSearch}
+            accessibilityRole="button"
+            accessibilityLabel={t('feed.clearSearch')}
+          >
+            <Text style={[styles.clearSearchText, { color: COLORS.textSecondary }]}>{t('feed.clearSearch')}</Text>
+          </Pressable>
+        ) : null}
       </View>
       {error ? (
         <View style={[styles.errorRow, { backgroundColor: COLORS.surface }]}>
@@ -488,7 +553,7 @@ export function DiscoverFeedScreen(): ReactElement {
         </View>
       ) : null}
       <FlatList
-        data={posts}
+        data={displayedPosts}
         keyExtractor={(item) => item.id}
         accessibilityRole="list"
         renderItem={({ item }) => (
@@ -513,7 +578,19 @@ export function DiscoverFeedScreen(): ReactElement {
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.3}
         ListEmptyComponent={
-          loading ? (
+          isSearchActive ? (
+            searchLoading ? (
+              <ActivityIndicator style={styles.loadingMore} size="small" color="#1976D2" />
+            ) : searchError ? (
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: COLORS.error }]}>{searchError}</Text>
+              </View>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{t('feed.searchEmpty', { q: searchQuery })}</Text>
+              </View>
+            )
+          ) : loading ? (
             <SkeletonFeed />
           ) : (
             <View style={styles.emptyContainer}>
@@ -593,6 +670,30 @@ const styles = StyleSheet.create({
   errorText: { ...sharedStyles.errorText, flex: 1 },
   retryBtn: { backgroundColor: COLORS.error, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   retryBtnText: { color: COLORS.surface, fontSize: 13, fontWeight: '600' },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  clearSearchBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  clearSearchText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
   listContent: { padding: 12, paddingBottom: 80 },
   card: {
     backgroundColor: '#FFF',

@@ -6,7 +6,11 @@
     "loadError": "Failed to load posts, try again",
     "networkError": "Could not load posts — check your connection",
     "retry": "Retry",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "searchPlaceholder": "Search posts...",
+    "searchEmpty": "No results for \"{q}\"",
+    "searchError": "Search failed, try again",
+    "clearSearch": "Clear"
   },
   "post": {
     "like": "Like",
