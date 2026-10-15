@@ -106,7 +106,15 @@
     "todayHours": "Today: {hours}",
     "away": "{dist} away",
     "responseTime": "Usually responds in {hours} h",
-    "responseTimeLong": "Usually responds in {hours} h"
+    "responseTimeLong": "Usually responds in {hours} h",
+    "reportInaccuracy": "Report Inaccuracy",
+    "reportInaccuracyTitle": "What is wrong?",
+    "reportInaccuracyWrongName": "Wrong name",
+    "reportInaccuracyWrongLocation": "Wrong location",
+    "reportInaccuracyWrongHours": "Wrong hours",
+    "reportInaccuracyOther": "Other",
+    "reportInaccuracySuccess": "Thanks! We will review your report.",
+    "reportInaccuracyCancel": "Cancel"
   },
   "actions": {
     "directions": "Directions",

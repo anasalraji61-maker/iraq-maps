@@ -65,6 +65,7 @@ export const testIDs = {
     insightsAttribution: 'place.insights.attribution',
     reportCrowded: 'place.report.crowded',
     reportPrice: 'place.report.price',
+    reportInaccuracy: 'place.report.inaccuracy',
   },
   navigation: navigationTestIDs, // M2
   satellite: satelliteTestIDs, // M2

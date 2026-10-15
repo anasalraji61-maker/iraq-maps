@@ -35,7 +35,7 @@ export const PlaceInsights = z.object({
 export type PlaceInsights = z.infer<typeof PlaceInsights>;
 
 /** Report kinds users can submit. */
-export const InsightReportKind = z.enum(['crowded_now', 'price']);
+export const InsightReportKind = z.enum(['crowded_now', 'price', 'inaccuracy']);
 export type InsightReportKind = z.infer<typeof InsightReportKind>;
 
 export const InsightReport = z.object({

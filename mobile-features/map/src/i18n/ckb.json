@@ -106,7 +106,15 @@
     "todayHours": "ئەمڕۆ: {hours}",
     "away": "{dist} لێ دوورت",
     "responseTime": "بەزامان {hours} کاتژمێر وەڵامت دەداتەوە",
-    "responseTimeLong": "بەزامان {hours} کاتژمێر وەڵامت دەداتەوە"
+    "responseTimeLong": "بەزامان {hours} کاتژمێر وەڵامت دەداتەوە",
+    "reportInaccuracy": "ڕاپۆرتی هەڵەی زانیاری",
+    "reportInaccuracyTitle": "جۆری هەڵە چییە؟",
+    "reportInaccuracyWrongName": "ناوی هەڵە",
+    "reportInaccuracyWrongLocation": "شوێنی هەڵە",
+    "reportInaccuracyWrongHours": "کاتژمێری کارکردنی هەڵە",
+    "reportInaccuracyOther": "تر",
+    "reportInaccuracySuccess": "سوپاس! پێداچوونەوە دەکەین",
+    "reportInaccuracyCancel": "پاشگەزبوونەوە"
   },
   "actions": {
     "directions": "ئاراستەکان",

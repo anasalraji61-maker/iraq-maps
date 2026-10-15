@@ -85,6 +85,30 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
     );
   };
 
+  const reportInaccuracy = () => {
+    const reasons = [
+      { key: 'reportInaccuracyWrongName' as const, label: t('place.reportInaccuracyWrongName') },
+      { key: 'reportInaccuracyWrongLocation' as const, label: t('place.reportInaccuracyWrongLocation') },
+      { key: 'reportInaccuracyWrongHours' as const, label: t('place.reportInaccuracyWrongHours') },
+      { key: 'reportInaccuracyOther' as const, label: t('place.reportInaccuracyOther') },
+    ];
+    Alert.alert(
+      t('place.reportInaccuracyTitle'),
+      undefined,
+      [
+        ...reasons.map(({ label }) => ({
+          text: label,
+          onPress: () => {
+            api.insights
+              .report({ body: { placeId: place.id, kind: 'inaccuracy' } })
+              .catch(() => undefined);
+          },
+        })),
+        { text: t('place.reportInaccuracyCancel'), style: 'cancel' as const },
+      ],
+    );
+  };
+
   // ── Distance from user ────────────────────────────────────────────────────
   const distM = useDistanceFromUser(place.location as [number, number] | undefined);
 
@@ -155,7 +179,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         />
       ) : null}
       {place.provider ? <ProviderSection provider={place.provider} /> : null}
-      <InsightsSection place={place} onReportCrowded={reportCrowded} onReportPrice={reportPrice} />
+      <InsightsSection place={place} onReportCrowded={reportCrowded} onReportPrice={reportPrice} onReportInaccuracy={reportInaccuracy} />
       <ReviewsSection placeId={place.id} />
       {place.category ? (
         <NearbySection placeId={place.id} location={place.location} category={place.category} />
@@ -211,7 +235,7 @@ function sourceName(source: string): string {
 }
 
 /** Shows crowding bar (low/medium/high) and price level, each with source, date, confidence. */
-function InsightsSection({ place, onReportCrowded, onReportPrice }: { place: PlaceDetails; onReportCrowded: () => void; onReportPrice: () => void }) {
+function InsightsSection({ place, onReportCrowded, onReportPrice, onReportInaccuracy }: { place: PlaceDetails; onReportCrowded: () => void; onReportPrice: () => void; onReportInaccuracy: () => void }) {
   const hasCrowding = place.crowding !== null && place.crowding !== undefined;
   const hasPrice = place.priceLevel !== null && place.priceLevel !== undefined;
 
@@ -226,6 +250,7 @@ function InsightsSection({ place, onReportCrowded, onReportPrice }: { place: Pla
         </Text>
         <Button variant="secondary" label={t('place.reportCrowded')} onPress={onReportCrowded} testID={testIDs.place.reportCrowded} />
         <Button variant="secondary" label={t('place.reportPrice')} onPress={onReportPrice} testID={testIDs.place.priceLevel} />
+        <Button variant="secondary" label={t('place.reportInaccuracy')} onPress={onReportInaccuracy} testID={testIDs.place.reportInaccuracy} />
       </View>
     );
   }
@@ -268,6 +293,7 @@ function InsightsSection({ place, onReportCrowded, onReportPrice }: { place: Pla
       )}
       <Button variant="secondary" label={t('place.reportCrowded')} onPress={onReportCrowded} testID={testIDs.place.reportCrowded} />
       <Button variant="secondary" label={t('place.reportPrice')} onPress={onReportPrice} testID="place.reportPrice" />
+      <Button variant="secondary" label={t('place.reportInaccuracy')} onPress={onReportInaccuracy} testID={testIDs.place.reportInaccuracy} />
     </View>
   );
 }

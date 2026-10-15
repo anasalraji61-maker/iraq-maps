@@ -106,7 +106,15 @@
     "todayHours": "اليوم: {hours}",
     "away": "{dist} منك",
     "responseTime": "يردّ عادةً خلال {hours} ساعة",
-    "responseTimeLong": "يردّ عادةً خلال {hours} ساعة"
+    "responseTimeLong": "يردّ عادةً خلال {hours} ساعة",
+    "reportInaccuracy": "أبلّغ عن خطأ في المعلومات",
+    "reportInaccuracyTitle": "ما نوع الخطأ؟",
+    "reportInaccuracyWrongName": "اسم خاطئ",
+    "reportInaccuracyWrongLocation": "موقع خاطئ",
+    "reportInaccuracyWrongHours": "ساعات عمل خاطئة",
+    "reportInaccuracyOther": "أخرى",
+    "reportInaccuracySuccess": "شكراً! سنراجع البلاغ",
+    "reportInaccuracyCancel": "إلغاء"
   },
   "actions": {
     "directions": "الاتجاهات",
