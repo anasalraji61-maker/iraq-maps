@@ -186,6 +186,23 @@ export function PostDetailScreen(): ReactElement {
 
   const handleRefresh = useCallback(() => { void loadData(true); }, [loadData]);
 
+  const handleLikeComment = useCallback((commentId: string, currentlyLiked: boolean) => {
+    const fn = currentlyLiked
+      ? api.unlikeComment({ params: { commentId: commentId as Parameters<typeof api.unlikeComment>[0]['params']['commentId'] } })
+      : api.likeComment({ params: { commentId: commentId as Parameters<typeof api.likeComment>[0]['params']['commentId'] }, body: {} });
+    void fn.then((res) => {
+      if (res.status === 200) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === commentId
+              ? { ...c, likeCount: res.body.likeCount, isLikedByMe: !currentlyLiked }
+              : c,
+          ),
+        );
+      }
+    }).catch(() => { /* silent */ });
+  }, [api]);
+
   const handleSend = useCallback(async () => {
     const text = commentText.trim();
     if (!text || sending || !postId) return;
@@ -246,7 +263,7 @@ export function PostDetailScreen(): ReactElement {
             {sectionHeader}
           </>
         }
-        renderItem={({ item }) => <CommentCard item={item} smallAvatar t={t} />}
+        renderItem={({ item }) => <CommentCard item={item} onLike={handleLikeComment} smallAvatar t={t} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>{t('comments.empty')}</Text>

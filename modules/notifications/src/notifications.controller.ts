@@ -42,6 +42,12 @@ export class NotificationsController {
         if (!found) return { status: 404, body: { code: 'not_found' } };
         return { status: 200, body: { ok: true as const } };
       },
+
+      dismissNotification: async ({ params }) => {
+        const found = await this.svc.dismissNotification(userId, params.id);
+        if (!found) return { status: 404, body: { code: 'not_found' } };
+        return { status: 200, body: { ok: true as const } };
+      },
     });
   }
 }

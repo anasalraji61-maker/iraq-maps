@@ -131,6 +131,14 @@ export class NotificationsService {
     return updated !== undefined;
   }
 
+  async dismissNotification(userId: UserId, notificationId: string): Promise<boolean> {
+    const result = await this.db
+      .delete(notificationTable)
+      .where(and(eq(notificationTable.id, notificationId), eq(notificationTable.userId, userId)))
+      .returning({ id: notificationTable.id });
+    return result.length > 0;
+  }
+
   async eraseUserData(userId: UserId): Promise<void> {
     await this.db.delete(deviceTable).where(eq(deviceTable.userId, userId));
     await this.db.delete(prefsTable).where(eq(prefsTable.userId, userId));

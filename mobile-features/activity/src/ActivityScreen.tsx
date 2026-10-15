@@ -10,6 +10,7 @@ import {
   FlatList,
   I18nManager,
   Modal,
+  PanResponder,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -130,24 +131,55 @@ function notifIcon(data?: Record<string, string>): string {
   return '🔔';
 }
 
-function NotifRow({ item, onPress }: { item: NotifItem; onPress: (item: NotifItem) => void }): ReactElement {
+const SWIPE_DISMISS_THRESHOLD = 80; // px
+
+function NotifRow({ item, onPress, onDismiss }: { item: NotifItem; onPress: (item: NotifItem) => void; onDismiss?: (item: NotifItem) => void }): ReactElement {
   const unread = item.readAt === null;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const dismissed = useRef(false);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_evt, gestureState) =>
+        Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dy) < 20,
+      onPanResponderMove: (_evt, gestureState) => {
+        // Only allow swipe in the "end" direction (LTR: right, RTL: left)
+        const isRTL = I18nManager.isRTL;
+        const allowedDx = isRTL ? Math.min(0, gestureState.dx) : Math.max(0, gestureState.dx);
+        translateX.setValue(allowedDx);
+      },
+      onPanResponderRelease: (_evt, gestureState) => {
+        const dx = I18nManager.isRTL ? -gestureState.dx : gestureState.dx;
+        if (dx > SWIPE_DISMISS_THRESHOLD && !dismissed.current) {
+          dismissed.current = true;
+          Animated.timing(translateX, { toValue: 400, duration: 200, useNativeDriver: true }).start(() => {
+            onDismiss?.(item);
+          });
+        } else {
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    }),
+  ).current;
+
   return (
-    <Pressable
-      style={[styles.row, unread && styles.rowUnread]}
-      onPress={() => onPress(item)}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.title}. ${item.body}`}
-      accessibilityState={{ selected: unread }}
-    >
-      <Text style={styles.rowIcon} accessibilityElementsHidden>{notifIcon(item.data)}</Text>
-      <View style={styles.rowBody}>
-        <Text style={[styles.rowTitle, unread && styles.rowTitleUnread]} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.rowSub} numberOfLines={2}>{item.body}</Text>
-        <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
-      </View>
-      {unread ? <View style={styles.unreadDot} accessibilityElementsHidden /> : null}
-    </Pressable>
+    <Animated.View style={{ transform: [{ translateX }] }} {...panResponder.panHandlers}>
+      <Pressable
+        style={[styles.row, unread && styles.rowUnread]}
+        onPress={() => onPress(item)}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.title}. ${item.body}`}
+        accessibilityState={{ selected: unread }}
+      >
+        <Text style={styles.rowIcon} accessibilityElementsHidden>{notifIcon(item.data)}</Text>
+        <View style={styles.rowBody}>
+          <Text style={[styles.rowTitle, unread && styles.rowTitleUnread]} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.rowSub} numberOfLines={2}>{item.body}</Text>
+          <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
+        </View>
+        {unread ? <View style={styles.unreadDot} accessibilityElementsHidden /> : null}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -225,6 +257,15 @@ function NotificationsTab(): ReactElement {
     setItems((prev) => prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date().toISOString() })));
   }, [api, items]);
 
+  const handleDismiss = useCallback(async (item: NotifItem) => {
+    setItems((prev) => prev.filter((n) => n.id !== item.id));
+    try {
+      await api.notifications.dismissNotification({ params: { id: item.id } });
+    } catch {
+      // Best-effort; item is already removed from UI
+    }
+  }, [api]);
+
   // Auto-mark all notifications as read 1.5 s after the list loads (gives user time to see unread state).
   // We intentionally omit markAllRead from deps so we fire once per load, not on every items change.
   const markAllReadRef = useRef(markAllRead);
@@ -264,7 +305,7 @@ function NotificationsTab(): ReactElement {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} />}
+          renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} onDismiss={handleDismiss} />}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setNextCursor(null); void load(true); }} colors={[PRIMARY]} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

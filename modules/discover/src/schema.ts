@@ -1,4 +1,4 @@
-import { index, integer, pgSchema, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgSchema, text, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core';
 
 export const discoverSchema = pgSchema('discover');
 
@@ -51,7 +51,20 @@ export const commentTable = discoverSchema.table(
       .references(() => postTable.id, { onDelete: 'cascade' }),
     authorId: uuid('author_id').notNull(),
     body: text('body').notNull(),
+    likeCount: integer('like_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('comment_post_id_created_at_idx').on(t.postId, t.createdAt)],
+);
+
+export const commentLikeTable = discoverSchema.table(
+  'comment_like',
+  {
+    commentId: uuid('comment_id')
+      .notNull()
+      .references(() => commentTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.commentId, t.userId] })],
 );

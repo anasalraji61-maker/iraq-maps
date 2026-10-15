@@ -105,6 +105,28 @@ export class DiscoverController {
         }
       },
 
+      likeComment: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const result = await this.svc.likeComment(userId, params.commentId as CommentIdType);
+          return { status: 200, body: result };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Comment not found') as never;
+          throw e;
+        }
+      },
+
+      unlikeComment: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const result = await this.svc.unlikeComment(userId, params.commentId as CommentIdType);
+          return { status: 200, body: result };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Comment not found') as never;
+          throw e;
+        }
+      },
+
       updatePost: async ({ params, body }) => {
         if (!userId) return problem(403, 'forbidden', 'Not authenticated') as never;
         try {

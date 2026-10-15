@@ -380,6 +380,10 @@ interface CommentCardItem {
   authorId: string;
   createdAt: string;
   body: string;
+  /** @M175 */
+  likeCount?: number;
+  /** @M175 */
+  isLikedByMe?: boolean;
 }
 
 /**
@@ -390,6 +394,7 @@ export function CommentCard({
   item,
   onReply,
   onDelete,
+  onLike,
   currentUserId,
   smallAvatar,
   t,
@@ -397,17 +402,21 @@ export function CommentCard({
   item: CommentCardItem;
   onReply?: (authorId: string) => void;
   onDelete?: (commentId: string) => void;
+  /** Called when the like button is tapped; returns updated likeCount. @M175 */
+  onLike?: (commentId: string, currentlyLiked: boolean) => void;
   currentUserId?: string;
   smallAvatar?: boolean;
   t: typeof TFunc;
 }): ReactElement {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const [liked, setLiked] = useState(item.isLikedByMe ?? false);
+  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
 
   const handleLike = useCallback(() => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  }, [liked]);
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((prev) => (next ? prev + 1 : Math.max(0, prev - 1)));
+    onLike?.(item.id, liked);
+  }, [liked, item.id, onLike]);
 
   const handleReply = useCallback(() => {
     onReply?.(item.authorId.slice(0, 8));

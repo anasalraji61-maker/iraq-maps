@@ -35,6 +35,10 @@ export const DiscoverComment = z.object({
   postId: PostId,
   authorId: UserId,
   body: z.string().max(500),
+  /** Number of likes on this comment. @M175 */
+  likeCount: z.number().int().default(0),
+  /** Whether the current user has liked this comment. @M175 */
+  isLikedByMe: z.boolean().default(false),
   createdAt: z.string().datetime(),
 });
 
@@ -112,6 +116,27 @@ export const discoverContract = c.router({
       404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
     },
     summary: 'Delete own comment',
+  },
+  likeComment: {
+    method: 'POST',
+    path: '/discover/comments/:commentId/like',
+    pathParams: z.object({ commentId: CommentId }),
+    body: z.object({}),
+    responses: {
+      200: z.object({ likeCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Like a comment (M175)',
+  },
+  unlikeComment: {
+    method: 'DELETE',
+    path: '/discover/comments/:commentId/like',
+    pathParams: z.object({ commentId: CommentId }),
+    responses: {
+      200: z.object({ likeCount: z.number().int() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Unlike a comment (M175)',
   },
   getPost: {
     method: 'GET',

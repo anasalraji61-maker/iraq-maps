@@ -5,7 +5,7 @@ import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
-import { commentTable, postLikeTable, postReportTable, postTable } from './schema';
+import { commentLikeTable, commentTable, postLikeTable, postReportTable, postTable } from './schema';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -136,7 +136,6 @@ export class DiscoverService {
   }
 
   async listComments(userId: UserId, postId: PostIdType, cursor?: string, limit = 10) {
-    void userId; // no per-user filtering on comments for now
     await this.getPostOrThrow(postId);
 
     const rows = await this.db
@@ -153,10 +152,56 @@ export class DiscoverService {
     const hasMore = rows.length > limit;
     const items = rows.slice(0, limit);
 
+    // Fetch which comments the viewer has liked
+    const commentIds = items.map((c) => c.id);
+    const myLikes =
+      commentIds.length > 0
+        ? await this.db
+            .select()
+            .from(commentLikeTable)
+            .where(and(eq(commentLikeTable.userId, userId), sql`${commentLikeTable.commentId} = ANY(${commentIds})`))
+        : [];
+    const likedSet = new Set(myLikes.map((l) => l.commentId));
+
     return {
-      items: items.map((c) => this.toCommentShape(c)),
+      items: items.map((c) => this.toCommentShape(c, likedSet.has(c.id))),
       nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
     };
+  }
+
+  async likeComment(userId: UserId, commentId: CommentIdType) {
+    const [comment] = await this.db.select().from(commentTable).where(eq(commentTable.id, commentId)).limit(1);
+    if (!comment) throw new NotFoundException({ code: 'not_found' });
+
+    await this.db
+      .insert(commentLikeTable)
+      .values({ commentId, userId })
+      .onConflictDoNothing();
+
+    const [updated] = await this.db
+      .update(commentTable)
+      .set({ likeCount: sql`(SELECT COUNT(*) FROM discover.comment_like WHERE comment_id = ${commentId})` })
+      .where(eq(commentTable.id, commentId))
+      .returning({ likeCount: commentTable.likeCount });
+
+    return { likeCount: updated?.likeCount ?? comment.likeCount };
+  }
+
+  async unlikeComment(userId: UserId, commentId: CommentIdType) {
+    const [comment] = await this.db.select().from(commentTable).where(eq(commentTable.id, commentId)).limit(1);
+    if (!comment) throw new NotFoundException({ code: 'not_found' });
+
+    await this.db
+      .delete(commentLikeTable)
+      .where(and(eq(commentLikeTable.commentId, commentId), eq(commentLikeTable.userId, userId)));
+
+    const [updated] = await this.db
+      .update(commentTable)
+      .set({ likeCount: sql`GREATEST(0, (SELECT COUNT(*) FROM discover.comment_like WHERE comment_id = ${commentId}))` })
+      .where(eq(commentTable.id, commentId))
+      .returning({ likeCount: commentTable.likeCount });
+
+    return { likeCount: updated?.likeCount ?? 0 };
   }
 
   async createComment(userId: UserId, postId: PostIdType, body: string) {
@@ -164,7 +209,7 @@ export class DiscoverService {
 
     const [comment] = await this.db
       .insert(commentTable)
-      .values({ postId, authorId: userId, body })
+      .values({ postId, authorId: userId, body, likeCount: 0 })
       .returning();
     if (!comment) throw new Error('insert failed');
 
@@ -180,7 +225,7 @@ export class DiscoverService {
       payload: { postId, postAuthorId: post.authorId as UserId, commentedByUserId: userId },
     });
 
-    return this.toCommentShape(comment);
+    return this.toCommentShape(comment, false);
   }
 
   async deleteComment(userId: UserId, commentId: CommentIdType): Promise<boolean> {
@@ -381,12 +426,14 @@ export class DiscoverService {
     };
   }
 
-  private toCommentShape(comment: typeof commentTable.$inferSelect) {
+  private toCommentShape(comment: typeof commentTable.$inferSelect, isLikedByMe = false) {
     return {
       id: comment.id as CommentIdType,
       postId: comment.postId as PostIdType,
       authorId: comment.authorId as UserId,
       body: comment.body,
+      likeCount: comment.likeCount,
+      isLikedByMe,
       createdAt: comment.createdAt.toISOString(),
     };
   }

@@ -79,4 +79,14 @@ export const notificationsContract = c.router({
     },
     summary: 'Mark a notification as read',
   },
+  dismissNotification: {
+    method: 'DELETE',
+    path: '/v1/notifications/:id',
+    pathParams: z.object({ id: NotificationId }),
+    responses: {
+      200: z.object({ ok: z.literal(true) }),
+      404: z.object({ code: z.string() }),
+    },
+    summary: 'Dismiss (delete) a notification (M176)',
+  },
 });
