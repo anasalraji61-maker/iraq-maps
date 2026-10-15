@@ -33,9 +33,10 @@ class NotificationsModule implements OnModuleInit {
 
     // messaging.reply.received.v1 → notify user (reply_received pref)
     this.eventBus.subscribe('messaging.reply.received.v1' as never, async (event: { payload: { userId: string; inquiryId: string } }) => {
-      await this.svc.notifyUser(event.payload.userId as UserId, {
+      await this.svc.sendToUser(event.payload.userId as UserId, {
         title: 'ردّ جديد',
         body: 'ردّ المزوّد على استفسارك.',
+        data: { type: 'inquiry_replied', requestId: event.payload.inquiryId },
       });
     });
 
