@@ -31,6 +31,7 @@
     "test-renderer": "~1.2.0"
   },
   "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*",
     "expo-image-picker": "*",
     "react": "*",
     "react-native": "*"

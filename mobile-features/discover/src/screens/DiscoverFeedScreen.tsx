@@ -2,6 +2,7 @@ import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
+import { useSavedPosts } from '../useSavedPosts';
 import {
   ActionSheetIOS,
   ActivityIndicator,
@@ -123,6 +124,8 @@ const PostItem = memo(function PostItem({
   onDelete,
   onEdit,
   onAuthorPress,
+  onSave,
+  isSaved,
   currentUserId,
 }: {
   post: DiscoverPostType;
@@ -135,6 +138,8 @@ const PostItem = memo(function PostItem({
   onDelete: (postId: string) => void;
   onEdit: (postId: string, body: string) => void;
   onAuthorPress: (authorId: string) => void;
+  onSave: (post: DiscoverPostType) => void;
+  isSaved: boolean;
   currentUserId?: string;
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
@@ -267,6 +272,16 @@ const PostItem = memo(function PostItem({
         <Pressable style={[styles.actionBtn, { backgroundColor: COLORS.border }]} onPress={handleShare} accessibilityRole="button">
           <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>{t('post.share')}</Text>
         </Pressable>
+        <Pressable
+          style={[styles.actionBtn, { backgroundColor: isSaved ? COLORS.primaryXLight : COLORS.border }]}
+          onPress={() => onSave(post)}
+          accessibilityRole="button"
+          accessibilityLabel={isSaved ? t('saved.saved') : t('saved.save')}
+        >
+          <Text style={[styles.actionBtnText, { color: isSaved ? COLORS.primary : COLORS.textSecondary }]}>
+            {isSaved ? t('saved.saved') : t('saved.save')}
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -313,6 +328,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const router = useRouter();
   const session = useSession();
   const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
+  const { isSaved, toggleSave } = useSavedPosts();
+  const handleSave = useCallback((post: DiscoverPostType) => { void toggleSave(post); }, [toggleSave]);
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -637,6 +654,8 @@ export function DiscoverFeedScreen(): ReactElement {
             onDelete={handleDelete}
             onEdit={handleOpenEdit}
             onAuthorPress={handleAuthorPress}
+            onSave={handleSave}
+            isSaved={isSaved(item.id)}
             currentUserId={currentUserId}
           />
         )}

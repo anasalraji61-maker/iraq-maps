@@ -102,5 +102,14 @@
     "title": "User Posts",
     "empty": "This user has no posts yet",
     "loadError": "Failed to load posts"
+  },
+  "saved": {
+    "title": "Saved Posts",
+    "empty": "You haven't saved any posts yet",
+    "save": "Save",
+    "saved": "Saved",
+    "remove": "Remove",
+    "saveSuccess": "Post saved",
+    "removeSuccess": "Post removed"
   }
 }
