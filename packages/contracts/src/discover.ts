@@ -9,11 +9,17 @@ export const CommentId = z.string().uuid().brand('CommentId');
 
 export const PostType = z.enum(['photo', 'tip', 'event', 'offer']);
 
+/** Content category for discovery filtering. @public M90 */
+export const PostCategory = z.enum(['food', 'transport', 'tourism', 'shopping', 'services', 'other']);
+export type PostCategory = z.infer<typeof PostCategory>;
+
 export const DiscoverPost = z.object({
   id: PostId,
   authorId: UserId,
   placeId: PlaceId.optional(),
   type: PostType,
+  /** Content category for discover filtering. @M90 */
+  category: PostCategory.optional(),
   body: z.string().max(1000),
   mediaAssetIds: z.array(z.string().uuid()).max(4),
   likeCount: z.number().int().default(0),
@@ -34,7 +40,7 @@ export const discoverContract = c.router({
   listFeed: {
     method: 'GET',
     path: '/discover/feed',
-    query: z.object({ cursor: z.string().optional(), limit: z.coerce.number().int().max(20).default(10) }),
+    query: z.object({ cursor: z.string().optional(), limit: z.coerce.number().int().max(20).default(10), category: PostCategory.optional() }),
     responses: {
       200: z.object({ items: z.array(DiscoverPost), nextCursor: z.string().optional() }),
     },
@@ -43,7 +49,7 @@ export const discoverContract = c.router({
   createPost: {
     method: 'POST',
     path: '/discover/posts',
-    body: z.object({ type: PostType, body: z.string().max(1000), placeId: PlaceId.optional(), mediaAssetIds: z.array(z.string().uuid()).max(4).optional() }),
+    body: z.object({ type: PostType, category: PostCategory.optional(), body: z.string().max(1000), placeId: PlaceId.optional(), mediaAssetIds: z.array(z.string().uuid()).max(4).optional() }),
     responses: {
       201: DiscoverPost,
       400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),

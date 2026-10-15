@@ -113,7 +113,9 @@ const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'pos
 
 const REPORT_REASONS = ['spam', 'inappropriate', 'misinformation', 'other'] as const;
 const TYPE_FILTER_KEYS = ['all', 'photo', 'tip', 'event', 'offer'] as const;
+const CATEGORY_FILTER_KEYS = ['all', 'food', 'transport', 'tourism', 'shopping', 'services', 'other'] as const;
 type TypeFilter = typeof TYPE_FILTER_KEYS[number];
+type CategoryFilter = typeof CATEGORY_FILTER_KEYS[number];
 type ReportReason = typeof REPORT_REASONS[number];
 
 const PostItem = memo(function PostItem({
@@ -350,6 +352,7 @@ export function DiscoverFeedScreen(): ReactElement {
   const { followedIds } = useFollows();
   const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -613,8 +616,11 @@ export function DiscoverFeedScreen(): ReactElement {
     if (typeFilter !== 'all') {
       filtered = filtered.filter((p) => p.type === typeFilter);
     }
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter((p) => p.category === categoryFilter);
+    }
     return filtered;
-  }, [isSearchActive, searchResults, posts, activeTab, followedIds, typeFilter]);
+  }, [isSearchActive, searchResults, posts, activeTab, followedIds, typeFilter, categoryFilter]);
 
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
@@ -656,6 +662,24 @@ export function DiscoverFeedScreen(): ReactElement {
             >
               <Text style={[styles.typeChipText, typeFilter === type && styles.typeChipTextActive]}>
                 {t(`feed.typeFilter.${type}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
+      {/* Post category filter chips */}
+      {!isSearchActive ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeFilterRow} contentContainerStyle={styles.typeFilterContent}>
+          {CATEGORY_FILTER_KEYS.map((cat) => (
+            <Pressable
+              key={cat}
+              style={[styles.typeChip, categoryFilter === cat && styles.typeChipActive]}
+              onPress={() => setCategoryFilter(cat)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: categoryFilter === cat }}
+            >
+              <Text style={[styles.typeChipText, categoryFilter === cat && styles.typeChipTextActive]}>
+                {t(`feed.categoryFilter.${cat}`)}
               </Text>
             </Pressable>
           ))}

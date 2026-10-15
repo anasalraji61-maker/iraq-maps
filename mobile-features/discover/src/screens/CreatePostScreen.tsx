@@ -27,6 +27,7 @@ const MAX_PHOTOS = 3;
 I18nManager.forceRTL(true);
 
 type PostTypeValue = 'photo' | 'tip' | 'event' | 'offer';
+type PostCategoryValue = 'food' | 'transport' | 'tourism' | 'shopping' | 'services' | 'other';
 
 const POST_TYPE_VALUES: PostTypeValue[] = ['photo', 'tip', 'event', 'offer'];
 const POST_TYPE_KEYS: Record<PostTypeValue, 'post.type.photo' | 'post.type.tip' | 'post.type.event' | 'post.type.offer'> = {
@@ -34,6 +35,15 @@ const POST_TYPE_KEYS: Record<PostTypeValue, 'post.type.photo' | 'post.type.tip' 
   tip: 'post.type.tip',
   event: 'post.type.event',
   offer: 'post.type.offer',
+};
+const POST_CATEGORY_VALUES: PostCategoryValue[] = ['food', 'transport', 'tourism', 'shopping', 'services', 'other'];
+const POST_CATEGORY_KEYS: Record<PostCategoryValue, `feed.categoryFilter.${PostCategoryValue}`> = {
+  food: 'feed.categoryFilter.food',
+  transport: 'feed.categoryFilter.transport',
+  tourism: 'feed.categoryFilter.tourism',
+  shopping: 'feed.categoryFilter.shopping',
+  services: 'feed.categoryFilter.services',
+  other: 'feed.categoryFilter.other',
 };
 
 interface UploadedPhoto {
@@ -51,6 +61,7 @@ export function CreatePostScreen(): ReactElement {
   const { onPostCreated } = useAppRating();
   const [body, setBody] = useState('');
   const [postType, setPostType] = useState<PostTypeValue>('tip');
+  const [postCategory, setPostCategory] = useState<PostCategoryValue | undefined>(undefined);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -180,6 +191,7 @@ export function CreatePostScreen(): ReactElement {
           body: body.trim(),
           mediaAssetIds: photos.map((p) => p.assetId),
           ...(selectedPlace ? { placeId: selectedPlace.id } : {}),
+          ...(postCategory ? { category: postCategory } : {}),
         },
       });
       if (res.status === 201) {
@@ -223,6 +235,21 @@ export function CreatePostScreen(): ReactElement {
             >
               <Text style={[styles.typeChipText, postType === val && styles.typeChipTextActive]}>
                 {t(POST_TYPE_KEYS[val])}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={styles.label}>{t('create.categoryLabel')}</Text>
+        <View style={styles.typeRow}>
+          {POST_CATEGORY_VALUES.map((val) => (
+            <Pressable
+              key={val}
+              style={[styles.typeChip, postCategory === val && styles.typeChipActive]}
+              onPress={() => setPostCategory(postCategory === val ? undefined : val)}
+            >
+              <Text style={[styles.typeChipText, postCategory === val && styles.typeChipTextActive]}>
+                {t(POST_CATEGORY_KEYS[val])}
               </Text>
             </Pressable>
           ))}

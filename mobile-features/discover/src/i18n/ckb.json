@@ -20,6 +20,15 @@
       "tip": "شیکاری",
       "event": "بۆنەکان",
       "offer": "پێشکەش"
+    },
+    "categoryFilter": {
+      "all": "هەموو",
+      "food": "خواردن",
+      "transport": "گواستنەوە",
+      "tourism": "گەشتیاری",
+      "shopping": "کڕین",
+      "services": "خزمەتگوزاری",
+      "other": "تر"
     }
   },
   "post": {
@@ -73,7 +82,8 @@
     "photoLabel": "وێنەکان (تا ٣)",
     "uploadingPhoto": "بارکردنی وێنە...",
     "uploadError": "هەڵەی بارکردنی وێنە",
-    "removePhoto": "✕"
+    "removePhoto": "✕",
+    "categoryLabel": "پۆل (ئارەزووی)"
   },
   "comments": {
     "title": "کۆمێنتەکان",

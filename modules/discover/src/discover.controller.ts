@@ -29,7 +29,7 @@ export class DiscoverController {
     return tsRestHandler(discoverContract, {
       listFeed: async ({ query }) => {
         if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
-        const result = await this.svc.listFeed(userId, query.cursor, query.limit);
+        const result = await this.svc.listFeed(userId, query.cursor, query.limit, query.category);
         return { status: 200, body: result };
       },
 

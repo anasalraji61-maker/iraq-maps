@@ -20,6 +20,15 @@
       "tip": "Tips",
       "event": "Events",
       "offer": "Offers"
+    },
+    "categoryFilter": {
+      "all": "All",
+      "food": "Food",
+      "transport": "Transport",
+      "tourism": "Tourism",
+      "shopping": "Shopping",
+      "services": "Services",
+      "other": "Other"
     }
   },
   "post": {
@@ -73,7 +82,8 @@
     "photoLabel": "Photos (up to 3)",
     "uploadingPhoto": "Uploading photo...",
     "uploadError": "Failed to upload photo, try again",
-    "removePhoto": "✕"
+    "removePhoto": "✕",
+    "categoryLabel": "Category (optional)"
   },
   "comments": {
     "title": "Comments",

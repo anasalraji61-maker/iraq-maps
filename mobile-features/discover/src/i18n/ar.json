@@ -20,6 +20,15 @@
       "tip": "نصائح",
       "event": "فعاليات",
       "offer": "عروض"
+    },
+    "categoryFilter": {
+      "all": "الكل",
+      "food": "طعام",
+      "transport": "مواصلات",
+      "tourism": "سياحة",
+      "shopping": "تسوق",
+      "services": "خدمات",
+      "other": "أخرى"
     }
   },
   "post": {
@@ -73,7 +82,8 @@
     "photoLabel": "الصور (حتى 3)",
     "uploadingPhoto": "جارٍ رفع الصورة...",
     "uploadError": "فشل رفع الصورة، حاول مجدداً",
-    "removePhoto": "✕"
+    "removePhoto": "✕",
+    "categoryLabel": "الفئة (اختياري)"
   },
   "comments": {
     "title": "التعليقات",

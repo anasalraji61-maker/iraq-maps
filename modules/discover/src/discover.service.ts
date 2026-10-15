@@ -18,11 +18,15 @@ export class DiscoverService {
     @Inject(PortTokens.EventBus) private readonly eventBus: EventBus = noopEventBus,
   ) {}
 
-  async listFeed(userId: UserId, cursor?: string, limit = 10) {
+  async listFeed(userId: UserId, cursor?: string, limit = 10, category?: string) {
     const rows = await this.db
       .select()
       .from(postTable)
-      .where(and(isNull(postTable.removedAt), cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined))
+      .where(and(
+        isNull(postTable.removedAt),
+        cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined,
+        category ? eq(postTable.category, category) : undefined,
+      ))
       .orderBy(sql`${postTable.createdAt} DESC`)
       .limit(limit + 1);
 
@@ -48,7 +52,7 @@ export class DiscoverService {
 
   async createPost(
     userId: UserId,
-    data: { type: string; body: string; placeId?: string; mediaAssetIds?: string[] },
+    data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[] },
   ) {
     const [post] = await this.db
       .insert(postTable)
@@ -56,6 +60,7 @@ export class DiscoverService {
         authorId: userId,
         placeId: data.placeId ?? null,
         type: data.type,
+        category: data.category ?? null,
         body: data.body,
         mediaAssetIds: data.mediaAssetIds ?? [],
       })
@@ -351,6 +356,7 @@ export class DiscoverService {
       authorId: post.authorId as UserId,
       placeId: post.placeId ?? undefined,
       type: post.type as 'photo' | 'tip' | 'event' | 'offer',
+      category: (post.category ?? undefined) as import('@iraq-maps/contracts').PostCategory | undefined,
       body: post.body,
       mediaAssetIds: post.mediaAssetIds ?? [],
       likeCount: post.likeCount,

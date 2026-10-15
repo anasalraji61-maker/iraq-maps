@@ -9,6 +9,7 @@ export const postTable = discoverSchema.table(
     authorId: uuid('author_id').notNull(),
     placeId: uuid('place_id'),
     type: text('type').notNull(), // 'photo' | 'tip' | 'event' | 'offer'
+    category: text('category'), // 'food' | 'transport' | 'tourism' | 'shopping' | 'services' | 'other' | null
     body: text('body').notNull(),
     mediaAssetIds: uuid('media_asset_ids').array().notNull().default([]),
     likeCount: integer('like_count').notNull().default(0),
