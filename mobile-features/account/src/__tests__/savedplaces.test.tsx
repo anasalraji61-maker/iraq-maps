@@ -2,6 +2,9 @@ import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { render } from '@testing-library/react-native';
 import React from 'react';
+import { Alert } from 'react-native';
+
+jest.spyOn(Alert, 'alert');
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +73,35 @@ describe('SavedPlacesScreen', () => {
       expect(screen.getByText('مطعم البيت')).toBeTruthy();
       expect(screen.getByText('متحف الموصل')).toBeTruthy();
     });
+  });
+
+  it('shows clearAll button when places exist and triggers alert', async () => {
+    mockSavedList.mockResolvedValue([...PLACES]);
+    renderScreen();
+    await waitFor(() => expect(screen.getByTestId('savedPlaces.clearAll')).toBeTruthy());
+
+    fireEvent.press(screen.getByTestId('savedPlaces.clearAll'));
+    expect(Alert.alert).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.arrayContaining([expect.objectContaining({ style: 'destructive' })]),
+    );
+  });
+
+  it('clears all places when destructive action is confirmed', async () => {
+    mockSavedList.mockResolvedValue([...PLACES]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Alert.alert as any).mockImplementation((_title: unknown, _msg: unknown, buttons: { style?: string; onPress?: () => void }[]) => {
+      const destructive = buttons.find((b) => b.style === 'destructive');
+      void destructive?.onPress?.();
+    });
+    renderScreen();
+    await waitFor(() => expect(screen.getByTestId('savedPlaces.clearAll')).toBeTruthy());
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('savedPlaces.clearAll'));
+      await Promise.resolve();
+    });
+    expect(mockSavedRemove).toHaveBeenCalledTimes(PLACES.length);
   });
 
   it('removes a place when unsave is pressed', async () => {

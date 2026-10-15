@@ -141,6 +141,9 @@
     "emptyBody": "اضغط على زر الحفظ في صفحة المكان لإضافته هنا",
     "unsave": "إزالة",
     "unsaveA11y": "إزالة {name} من المحفوظات",
-    "savedAt": "حُفظ {date}"
+    "savedAt": "حُفظ {date}",
+    "clearAll": "مسح الكل",
+    "clearAllConfirm": "هل أنت متأكد من مسح جميع الأماكن المحفوظة؟",
+    "clearAllCancel": "إلغاء"
   }
 }

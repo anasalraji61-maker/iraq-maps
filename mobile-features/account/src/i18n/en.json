@@ -141,6 +141,9 @@
     "emptyBody": "Tap the save button on a place page to add it here",
     "unsave": "Remove",
     "unsaveA11y": "Remove {name} from saved places",
-    "savedAt": "Saved {date}"
+    "savedAt": "Saved {date}",
+    "clearAll": "Clear All",
+    "clearAllConfirm": "Are you sure you want to remove all saved places?",
+    "clearAllCancel": "Cancel"
   }
 }

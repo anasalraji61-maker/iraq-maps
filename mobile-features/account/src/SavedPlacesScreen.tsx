@@ -6,7 +6,7 @@ import { href, savedPlaces, type SavedPlace } from '@iraq-maps/mobile-kit';
 import { EmptyState, Screen } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
@@ -65,13 +65,44 @@ export function SavedPlacesScreen(): ReactElement {
     router.push(href('place', { placeId }));
   }, [router]);
 
+  const handleClearAll = useCallback(() => {
+    Alert.alert(
+      t('savedPlaces.clearAll'),
+      t('savedPlaces.clearAllConfirm'),
+      [
+        { text: t('savedPlaces.clearAllCancel'), style: 'cancel' },
+        {
+          text: t('savedPlaces.clearAll'),
+          style: 'destructive',
+          onPress: async () => {
+            await Promise.all(places.map((p) => savedPlaces.remove(p.placeId as Parameters<typeof savedPlaces.remove>[0])));
+            setPlaces([]);
+          },
+        },
+      ],
+    );
+  }, [places]);
+
   if (loading) {
     return <Screen><ScreenTitle title={t('savedPlaces.title')} /></Screen>;
   }
 
   return (
     <Screen testID="saved-places-screen">
-      <ScreenTitle title={t('savedPlaces.title')} />
+      <View style={styles.header}>
+        <ScreenTitle title={t('savedPlaces.title')} />
+        {places.length > 0 && (
+          <Pressable
+            testID="savedPlaces.clearAll"
+            onPress={handleClearAll}
+            accessibilityRole="button"
+            accessibilityLabel={t('savedPlaces.clearAll')}
+            style={styles.clearAllBtn}
+          >
+            <Text style={styles.clearAllText}>{t('savedPlaces.clearAll')}</Text>
+          </Pressable>
+        )}
+      </View>
       {places.length === 0 ? (
         <EmptyState title={t('savedPlaces.empty')} body={t('savedPlaces.emptyBody')} />
       ) : (
@@ -90,6 +121,9 @@ export function SavedPlacesScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingEnd: 16 },
+  clearAllBtn: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, backgroundColor: '#FDECEA' },
+  clearAllText: { fontSize: 13, color: '#C62828', fontWeight: '500' },
   list: { paddingVertical: 8 },
   row: {
     flexDirection: 'row',
