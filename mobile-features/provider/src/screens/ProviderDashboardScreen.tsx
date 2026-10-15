@@ -1,5 +1,5 @@
 import { testIDs, type ProviderMe, type ProviderStatus } from '@iraq-maps/contracts';
-import { useApi, useSession } from '@iraq-maps/mobile-kit';
+import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
@@ -325,6 +325,14 @@ export function ProviderDashboardScreen(): ReactElement {
         label={t('dashboard.editProfile')}
         onPress={() => router.push('/provider/edit-profile' as never)}
       />
+      {providerMe?.claimedPlaceId ? (
+        <Button
+          testID="provider.viewPublicPage"
+          variant="secondary"
+          label={t('dashboard.viewPublicPage')}
+          onPress={() => router.push(href('place', { placeId: providerMe.claimedPlaceId! }))}
+        />
+      ) : null}
       </ScrollView>
     </SafeAreaView>
   );
