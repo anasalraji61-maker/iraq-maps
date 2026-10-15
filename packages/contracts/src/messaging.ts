@@ -43,6 +43,7 @@ export const Inquiry = z.object({
   text: z.string().max(500),
   targets: z.array(DeliveryTarget),
   createdAt: z.string().datetime(),
+  readAt: z.string().datetime().nullable().optional(),
 });
 export type Inquiry = z.infer<typeof Inquiry>;
 
@@ -86,6 +87,17 @@ export const messagingContract = c.router({
       200: Inquiry,
       404: z.object({ code: z.literal('not_found') }),
     },
+  },
+  markInquiryRead: {
+    method: 'POST',
+    path: '/v1/inquiries/:id/read',
+    pathParams: z.object({ id: InquiryId }),
+    body: z.object({}),
+    responses: {
+      200: z.object({ ok: z.literal(true) }),
+      404: z.object({ code: z.literal('not_found') }),
+    },
+    summary: 'Mark an inquiry as read by the user',
   },
   // Provider inbox
   listProviderInquiries: {

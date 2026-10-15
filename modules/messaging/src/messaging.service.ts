@@ -275,6 +275,20 @@ export class MessagingService implements UserDataEraser {
     return 'in_app';
   }
 
+  async markInquiryRead(id: InquiryId, userId: UserId): Promise<void> {
+    const [existing] = await this.db
+      .select({ id: inquiryTable.id, readAt: inquiryTable.readAt })
+      .from(inquiryTable)
+      .where(and(eq(inquiryTable.id, id), eq(inquiryTable.userId, userId)))
+      .limit(1);
+    if (!existing) throw new NotFoundException({ code: 'not_found' });
+    if (existing.readAt) return; // already read — idempotent
+    await this.db
+      .update(inquiryTable)
+      .set({ readAt: new Date() })
+      .where(eq(inquiryTable.id, id));
+  }
+
   private toInquiryShape(
     inquiry: typeof inquiryTable.$inferSelect,
     deliveries: (typeof deliveryTable.$inferSelect)[],
@@ -284,6 +298,7 @@ export class MessagingService implements UserDataEraser {
       userId: inquiry.userId as UserId,
       text: inquiry.text,
       createdAt: inquiry.createdAt.toISOString(),
+      readAt: inquiry.readAt?.toISOString() ?? null,
       targets: deliveries.map((d) => ({
         placeId: d.placeId as PlaceId,
         channel: d.channel as MessagingChannelKind,

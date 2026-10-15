@@ -1,12 +1,14 @@
 /**
  * M57: Local read-receipt tracking.
+ * M72: Also syncs read status to the server via markInquiryRead endpoint.
  *
  * When a user opens an inquiry detail, we record the timestamp locally in
- * AsyncStorage so the list screen can show an unread dot and the detail screen
- * can display "seen at <time>".  There is no server-side markRead endpoint in
- * the current contract; this is client-side UX only.
+ * AsyncStorage (for instant UI feedback) and also notify the server so that
+ * the backend can track read state for analytics / provider notifications.
  */
+import { type InquiryId } from '@iraq-maps/contracts';
 import { useCallback, useEffect, useState } from 'react';
+import { useMessagingClient } from '../client';
 import { loadReceipts, saveReceipts } from './readReceiptsStore';
 
 /** Returns the ISO timestamp the user last viewed this inquiry, or null. */
@@ -21,8 +23,9 @@ export function useReadAt(inquiryId: string | undefined): string | null {
   return readAt;
 }
 
-/** Marks the inquiry as read (stores current ISO timestamp). Returns the stored timestamp. */
+/** Marks the inquiry as read locally and on the server. Returns the stored timestamp. */
 export function useMarkRead(inquiryId: string | undefined): () => Promise<string> {
+  const api = useMessagingClient();
   return useCallback(async () => {
     if (!inquiryId) return '';
     const now = new Date().toISOString();
@@ -31,8 +34,10 @@ export function useMarkRead(inquiryId: string | undefined): () => Promise<string
       receipts[inquiryId] = now;
       await saveReceipts(receipts);
     }
-    return receipts[inquiryId];
-  }, [inquiryId]);
+    // Best-effort server sync — never block the UI on this
+    void api.markInquiryRead({ params: { id: inquiryId as InquiryId }, body: {} }).catch(() => undefined);
+    return receipts[inquiryId]!;
+  }, [inquiryId, api]);
 }
 
 /** Returns a map of inquiryId → readAt for the given ids (for the list screen). */

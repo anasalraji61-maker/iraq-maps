@@ -83,6 +83,25 @@ describe.skipIf(!TEST_DB_URL)('MessagingService', () => {
     expect(fakeQueue.add).not.toHaveBeenCalled();
   });
 
+  it('markInquiryRead sets readAt and is idempotent', async () => {
+    const userId = uid(6);
+    const inquiry = await svc.createInquiry(userId, 'read me', [pid(1) as never], `00000000-0000-0000-0000-000000000060`);
+    expect(inquiry.readAt).toBeNull();
+
+    await svc.markInquiryRead(inquiry.id, userId);
+    const updated = await svc.getInquiry(inquiry.id, userId);
+    expect(updated.readAt).toBeTruthy();
+
+    // Second call should not throw (idempotent)
+    await expect(svc.markInquiryRead(inquiry.id, userId)).resolves.toBeUndefined();
+  });
+
+  it('markInquiryRead throws not_found for wrong user', async () => {
+    const userId = uid(7);
+    const inquiry = await svc.createInquiry(userId, 'not yours', [pid(1) as never], `00000000-0000-0000-0000-000000000070`);
+    await expect(svc.markInquiryRead(inquiry.id, uid(99))).rejects.toMatchObject({ status: 404 });
+  });
+
   it('eraseUserData clears all user data', async () => {
     const userId = uid(5);
     await svc.createInquiry(userId, 'eraseme', [pid(1) as never], `00000000-0000-0000-0000-000000000050`);

@@ -52,6 +52,16 @@ export class MessagingController {
         }
       },
 
+      markInquiryRead: async ({ params }) => {
+        if (!userId) return { status: 404, body: { code: 'not_found' as const } };
+        try {
+          await this.svc.markInquiryRead(params.id as InquiryId, userId);
+          return { status: 200, body: { ok: true as const } };
+        } catch {
+          return { status: 404, body: { code: 'not_found' as const } };
+        }
+      },
+
       listProviderInquiries: async ({ query }) => {
         if (!userId || !isProvider) return problem(403, 'forbidden', 'Provider role required') as never;
         const result = await this.svc.listProviderInbox(userId, query.cursor);

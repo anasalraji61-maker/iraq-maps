@@ -10,6 +10,7 @@ export const inquiryTable = messagingSchema.table(
     text: text('text').notNull(),
     idempotencyKey: uuid('idempotency_key').notNull().unique(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    readAt: timestamp('read_at', { withTimezone: true }),
   },
   (t) => [index('inquiry_user_id_created_at_idx').on(t.userId, t.createdAt)],
 );
