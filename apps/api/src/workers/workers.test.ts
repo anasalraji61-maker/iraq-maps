@@ -19,7 +19,8 @@ function makeDb(rowCount = 0): AnyDb {
   } as unknown as AnyDb;
 }
 
-type AnyJob = Job<Record<string, unknown>, Record<string, unknown>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyJob = Job<any, any, any>;
 function makeJob(name: string, data: Record<string, unknown>): AnyJob {
   return { name, data, id: 'test-id' } as unknown as AnyJob;
 }
