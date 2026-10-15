@@ -80,5 +80,36 @@
     "hoursAgo": "منذ {n} س",
     "today": "اليوم",
     "yesterday": "أمس"
+  },
+  "search": {
+    "placeholder": "ابحث في المحادثات...",
+    "noResults": "لا توجد نتائج للبحث"
+  },
+  "archive": {
+    "tabAll": "الكل",
+    "tabArchived": "المؤرشفة",
+    "archiveAction": "أرشفة",
+    "unarchiveAction": "إلغاء الأرشفة",
+    "empty": "لا توجد محادثات مؤرشفة",
+    "emptyBody": "يمكنك أرشفة محادثة قديمة بالضغط المطول عليها"
+  },
+  "attachment": {
+    "addPhoto": "أضف صورة",
+    "uploading": "جاري الرفع...",
+    "uploadError": "فشل رفع الصورة",
+    "removePhoto": "إزالة الصورة"
+  },
+  "reaction": {
+    "title": "تفاعل",
+    "remove": "إزالة التفاعل"
+  },
+  "providerInfo": {
+    "title": "معلومات المزود",
+    "totalInquiries": "إجمالي الاستفسارات",
+    "firstContact": "أول تواصل",
+    "noData": "لا توجد معلومات متاحة"
+  },
+  "typing": {
+    "indicator": "يكتب..."
   }
 }

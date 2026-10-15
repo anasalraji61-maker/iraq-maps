@@ -29,7 +29,7 @@ jest.mock('@iraq-maps/mobile-kit', () => ({
   useApiBaseUrl: () => 'http://localhost:3000',
   useApi: () => ({ places: { get: jest.fn() } }),
   useSession: () => ({ state: { status: 'signedIn', user: { id: 'user-session-id' } } }),
-  useHaptics: () => ({ tap: jest.fn(), light: jest.fn() }),
+  useHaptics: () => ({ tap: jest.fn(), light: jest.fn(), sent: jest.fn(), fail: jest.fn(), medium: jest.fn(), success: jest.fn(), error: jest.fn(), like: jest.fn() }),
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({

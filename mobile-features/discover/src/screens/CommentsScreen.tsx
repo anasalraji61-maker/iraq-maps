@@ -1,5 +1,5 @@
 import { DiscoverComment } from '@iraq-maps/contracts';
-import { useSession } from '@iraq-maps/mobile-kit';
+import { useHaptics, useSession } from '@iraq-maps/mobile-kit';
 import { type z } from 'zod';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
@@ -44,6 +44,7 @@ export function CommentsScreen(): ReactElement {
   const { postId } = useLocalSearchParams<{ postId: string }>();
   const api = useDiscoverClient();
   const session = useSession();
+  const haptics = useHaptics();
   const currentUserId = session?.state.status === 'signedIn' ? session.state.user.id : undefined;
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -112,6 +113,7 @@ export function CommentsScreen(): ReactElement {
   const handleSend = useCallback(async () => {
     const text = commentText.trim();
     if (!text || sending || !postId) return;
+    haptics.sent();
     setSending(true);
     setSendError(undefined);
     try {
@@ -121,15 +123,17 @@ export function CommentsScreen(): ReactElement {
         setComments((prev) => [...prev, res.body]);
         setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
       } else {
+        haptics.fail();
         setSendError(t('comments.sendError'));
       }
     } catch {
+      haptics.fail();
       setSendError(t('comments.sendError'));
     } finally {
       setSending(false);
     setReplyingToAuthor(null);
     }
-  }, [api, commentText, postId, sending]);
+  }, [api, commentText, haptics, postId, sending]);
 
   const handleDeleteComment = useCallback(async (commentId: string) => {
     try {
