@@ -5,6 +5,7 @@ import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
+import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
 import { openNow } from './hours';
@@ -35,8 +36,8 @@ function PlaceLoader({ id }: { id: string }) {
   const place = useLatest(id, async () => ok(await api.places.get({ params: { id } })));
   if (place.state?.status === 'ready') return <PlaceCard place={place.state.data} />;
   return (
-    <Screen>
-      <LoadStatus {...place} />
+    <Screen scroll>
+      {place.state?.status === 'loading' ? <PlaceSkeleton /> : <LoadStatus {...place} />}
     </Screen>
   );
 }
