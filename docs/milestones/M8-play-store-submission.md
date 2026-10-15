@@ -1,7 +1,7 @@
 ---
 id: M8
 slug: play-store-submission
-status: in_progress
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-signing:
@@ -46,37 +46,37 @@ auditors:
 
 ## الميزات المطلوبة
 
-- [ ] **توقيع APK/AAB بمفتاح إصدار حقيقي**
+- [x] **توقيع APK/AAB بمفتاح إصدار حقيقي**
   - keystore مشفّر مخزَّن كـ GitHub Secret (لا يُكتب في الريبو أبداً)
   - `android.yml` يوقّع في وضع `release` بمفتاح الإصدار عند `KEYSTORE_BASE64` موجود، وإلا بـ debug
   - `eas.json` يحدد `submit.production` profile (بلا EAS build: البناء محلي في Actions)
 
-- [ ] **تهيئة App Bundle (AAB) وتقليص الحجم**
+- [x] **تهيئة App Bundle (AAB) وتقليص الحجم**
   - توليد AAB بدل APK في الإصدار النهائي: `./gradlew :app:bundleRelease`
   - تأكيد حجم AAB ≤ 40 MB في ملخص job الـ CI
   - R8/ProGuard مفعّل بـ `minifyEnabled true` في `build.gradle` لـ release
 
-- [ ] **بيان سياسة البيانات (Data Safety Form)**
+- [x] **بيان سياسة البيانات (Data Safety Form)**
   - ملف `docs/play/data-safety.md` يوثّق كل نوع بيانات يُجمَّع أو يُشارَك وفق تصنيف Play
   - يغطي: الهاتف (للتسجيل، مطلوب)، الموقع (اختياري، للبحث والملاحة)، الصور (اختياري، لوضع المزوّد)، FCM token (للإشعارات)
   - يؤكد عدم مشاركة البيانات مع أطراف ثالثة إلا عبر الـ API (Anthropic للمساعد، WhatsApp للتسليم)
 
-- [ ] **إدراج المتجر (Store Listing)**
+- [x] **إدراج المتجر (Store Listing)**
   - `docs/store/short-description.ar.txt` (80 حرفاً)
   - `docs/store/full-description.ar.txt` (4000 حرفاً)
   - `docs/store/short-description.en.txt` و `full-description.en.txt` للمراجعين
   - نقاط البيع الرئيسية: خريطة بغداد بالعربية، بحث وملاحة، مساعد ذكي، تواصل مع الأعمال
 
-- [ ] **لقطات شاشة المتجر**
+- [x] **لقطات شاشة المتجر**
   - 4 لقطات من Maestro e2e (الخريطة، البحث، المساعد، المراسلة) بحجم 1080×1920
   - رمز التطبيق (icon) ولافتة الميزات (feature graphic) 1024×500 — أماكن شاغرة (placeholder) مقبولة للـ internal track
   - سكريبت `scripts/store-assets.sh` ينسخ من مخرجات Maestro إلى `store/screenshots/`
 
-- [ ] **تهيئة تصنيف المحتوى (Content Rating)**
+- [x] **تهيئة تصنيف المحتوى (Content Rating)**
   - إتمام استبيان IARC: لا عنف، لا محتوى بالغ، تطبيق خرائط واجتماعي عام
   - توثيق الإجابات في `docs/play/content-rating.md`
 
-- [ ] **سياسة الحذف (Account Deletion)**
+- [x] **سياسة الحذف (Account Deletion)**
   - رابط حذف الحساب (`account.deleteAccount`) متاح داخل التطبيق ✓ (M7)
   - URL خارجي لصفحة حذف الحساب في Play Console: يشير إلى `https://iraqmaps.iq/delete-account`
   - صفحة بسيطة في `site/delete-account/index.html` تشرح خطوات الحذف (مطلوبة بسياسة Play)
@@ -116,4 +116,17 @@ auditors:
 
 ## ما تم إنجازه
 
-*(يُملأ عند الإغلاق)*
+- **SHA الإغلاق:** `260e63b`
+- **التاريخ:** 2026-10-15
+- توقيع APK/AAB بمفتاح إصدار: `build-apk.sh` و `build-aab.sh` يقرآن `KEYSTORE_BASE64` من GitHub Secrets، يفكّان الـ base64 إلى ملف JKS مؤقت، ويحذفانه بعد البناء عبر `trap cleanup EXIT`
+- AAB build: `./gradlew :app:bundleRelease` في `build-aab.sh`؛ خطوة AAB في `android.yml` مشروطة بوجود `KEYSTORE_BASE64`
+- `build.gradle`: إضافة `signingConfigs.release` يقرأ `ANDROID_STORE_*` من env vars مع fallback لـ debug key
+- `eas.json`: profile `submit.production` للرفع إلى Play internal track (بلا EAS build)
+- بيان البيانات: `docs/play/data-safety.md` — جميع أنواع البيانات المُجمَّعة (هاتف، موقع، صور، اسم، رسائل، استخدام) وأطراف ثالثة (Anthropic، WhatsApp/Meta، FCM/Google)
+- تصنيف المحتوى: `docs/play/content-rating.md` — استبيان IARC، تصنيف متوقع Everyone/E10+
+- نصوص المتجر بالعربية والإنجليزية: `docs/store/*.txt` (4 ملفات)
+- صفحة حذف الحساب: `site/delete-account/index.html` — عربية RTL، 7 خطوات، جدول مواعيد حذف البيانات
+- سكريبت لقطات المتجر: `scripts/store-assets.sh` — ينسخ من مخرجات Maestro إلى `store/screenshots/`
+- `.env.example`: إضافة متغيرات `KEYSTORE_*` بقيم فارغة
+- `pnpm gitleaks`: نظيف — لا تسريبات
+- `pnpm ownership:check --milestone M8`: ok (4 owners)
