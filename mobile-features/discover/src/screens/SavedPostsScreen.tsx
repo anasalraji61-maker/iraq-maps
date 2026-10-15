@@ -43,7 +43,7 @@ function SavedPostRow({ post, onUnsave }: { post: DiscoverPostType; onUnsave: (p
 
       <View style={styles.cardFooter}>
         <Text style={styles.stats}>
-          ♥ {post.likeCount}  💬 {post.commentCount}
+          {t('feed.trendingStats', { likes: post.likeCount, comments: post.commentCount })}
         </Text>
         <Pressable
           style={styles.unsaveBtn}

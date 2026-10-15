@@ -151,7 +151,7 @@ export function HashtagFeedScreen(): ReactElement {
           renderItem={({ item }) => (
             <HashtagPostCard
               post={item}
-              onPress={() => router.push({ pathname: '/discover/post/[postId]', params: { postId: item.id } } as never)}
+              onPress={() => router.push({ pathname: '/discover/[postId]', params: { postId: item.id } } as never)}
               onHashtagPress={handleHashtagPress}
             />
           )}
