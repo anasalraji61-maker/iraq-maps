@@ -9,6 +9,8 @@ import { useMessagingApi } from '../messaging-api';
 import { useRequest } from '../request';
 import { t } from '../strings';
 
+const MAX_REPLY_LENGTH = 1000;
+
 /** Keys and labels for the built-in quick reply templates. */
 const QUICK_REPLY_KEYS = ['welcome', 'hours', 'closed', 'available', 'notAvailable', 'callUs'] as const;
 type QuickReplyKey = typeof QUICK_REPLY_KEYS[number];
@@ -105,15 +107,21 @@ export function ProviderInboxDetailScreen(): ReactElement {
 
         <TextInput
           testID={messagingTestIDs.replyInput}
-          style={styles.input}
+          style={[styles.input, replyText.length > MAX_REPLY_LENGTH && styles.inputOver]}
           placeholder={t('inbox.reply')}
           value={replyText}
           onChangeText={setReplyText}
           multiline
+          maxLength={MAX_REPLY_LENGTH + 50}
           accessibilityLabel={t('inbox.reply')}
         />
+        {replyText.length > 0 ? (
+          <RNText style={[styles.charCount, replyText.length > MAX_REPLY_LENGTH && styles.charCountOver]}>
+            {t('inbox.replyCharsRemaining', { n: MAX_REPLY_LENGTH - replyText.length })}
+          </RNText>
+        ) : null}
 
-        <Button testID="provider.inbox.reply.send" label={t('inbox.reply')} onPress={sendReply} loading={busy} disabled={!replyText.trim()} />
+        <Button testID="provider.inbox.reply.send" label={t('inbox.reply')} onPress={sendReply} loading={busy} disabled={!replyText.trim() || replyText.length > MAX_REPLY_LENGTH} />
 
         <Button
           testID={messagingTestIDs.optOutButton}
@@ -132,6 +140,9 @@ const styles = StyleSheet.create({
   bubble: { backgroundColor: '#F3F4F6', borderRadius: 12, padding: 12 },
   replyBubble: { backgroundColor: '#DBEAFE', borderRadius: 12, padding: 12, alignSelf: 'flex-end', maxWidth: '80%' },
   input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: 'top' },
+  inputOver: { borderColor: '#DC2626' },
+  charCount: { fontSize: 11, color: '#6B7280' },
+  charCountOver: { color: '#DC2626', fontWeight: '600' },
   quickReplyLabel: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
   chipRow: { gap: 8, paddingVertical: 4 },
   chip: { backgroundColor: '#EFF6FF', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#BFDBFE', maxWidth: 200 },

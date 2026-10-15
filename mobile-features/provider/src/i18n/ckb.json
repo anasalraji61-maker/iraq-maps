@@ -93,7 +93,8 @@
     "timeHoursAgo": "{{n}} کاتژمێر لەمەوبەر",
     "timeDaysAgo": "{{n}} ڕۆژ لەمەوبەر",
     "itemA11y": "نامەیەک لە {userId}",
-    "loadMore": "زیاتر بارکە"
+    "loadMore": "زیاتر بارکە",
+    "replyCharsRemaining": "{n} پیت ماوە"
   },
   "logo": {
     "title": "لۆگۆی کارووبار",
