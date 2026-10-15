@@ -186,6 +186,7 @@ export function PostDetailScreen(): ReactElement {
       if (res.status === 201) {
         setCommentText('');
         setComments((prev) => [...prev, res.body]);
+        setPost((prev) => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
         setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
       }
     } catch {
