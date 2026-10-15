@@ -148,7 +148,10 @@
     "sortNewest": "Newest",
     "sortHighest": "Highest rated",
     "submitError": "Failed to submit review. Please try again.",
-    "cancelForm": "Cancel"
+    "cancelForm": "Cancel",
+    "filterAll": "All",
+    "filterStar": "{star} stars",
+    "filterEmpty": "No reviews with this rating"
   },
   "lightbox": {
     "close": "Close",

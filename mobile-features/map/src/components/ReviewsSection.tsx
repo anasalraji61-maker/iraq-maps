@@ -185,8 +185,10 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
   const isSignedIn = session.state.status === 'signedIn';
 
   type ReviewSort = 'newest' | 'highest';
+  type StarFilter = 0 | 1 | 2 | 3 | 4 | 5;
   const [reviews, setReviews] = useState<ReviewWithPhotos[]>([]);
   const [sort, setSort] = useState<ReviewSort>('newest');
+  const [starFilter, setStarFilter] = useState<StarFilter>(0);
   const [summary, setSummary] = useState<RatingSummary | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(0);
@@ -345,15 +347,48 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
           </TouchableOpacity>
         </View>
       ) : null}
+      {reviews.length > 1 ? (
+        <View style={styles.starFilterRow}>
+          <TouchableOpacity
+            onPress={() => setStarFilter(0)}
+            style={[styles.sortChip, starFilter === 0 && styles.sortChipActive]}
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.filterAll')}
+            testID="star-filter-all"
+          >
+            <RNText style={[styles.sortChipText, starFilter === 0 && styles.sortChipTextActive]}>
+              {t('reviews.filterAll')}
+            </RNText>
+          </TouchableOpacity>
+          {([5, 4, 3, 2, 1] as const).map((star) => (
+            <TouchableOpacity
+              key={star}
+              onPress={() => setStarFilter(starFilter === star ? 0 : star)}
+              style={[styles.sortChip, starFilter === star && styles.sortChipActive]}
+              accessibilityRole="button"
+              accessibilityLabel={t('reviews.filterStar', { star: String(star) })}
+              testID={`star-filter-${star}`}
+            >
+              <RNText style={[styles.sortChipText, starFilter === star && styles.sortChipTextActive]}>
+                {`${STAR} ${star}`}
+              </RNText>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : null}
       {reviews.length === 0 ? (
         <Text tone="muted" variant="caption">{t('reviews.empty')}</Text>
-      ) : (
-        [...reviews]
-          .sort(sort === 'highest'
+      ) : (() => {
+          const sorted = [...reviews].sort(sort === 'highest'
             ? (a, b) => b.rating - a.rating
-            : (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .map((r) => <ReviewCard key={r.id} review={r} />)
-      )}
+            : (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          const filtered = starFilter === 0 ? sorted : sorted.filter((r) => r.rating === starFilter);
+          if (filtered.length === 0) {
+            return <Text tone="muted" variant="caption">{t('reviews.filterEmpty')}</Text>;
+          }
+          return filtered.map((r) => <ReviewCard key={r.id} review={r} />);
+        })()
+      }
     </View>
   );
 }
@@ -361,6 +396,7 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
 const styles = StyleSheet.create({
   container: { marginTop: 16, gap: 8 },
   sortRow: { flexDirection: 'row', gap: 6 },
+  starFilterRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   sortChip: { borderRadius: 16, borderWidth: 1, borderColor: '#BDBDBD', paddingHorizontal: 10, paddingVertical: 4 },
   sortChipActive: { borderColor: PRIMARY, backgroundColor: '#E3F2FD' },
   sortChipText: { fontSize: 12, color: '#555' },

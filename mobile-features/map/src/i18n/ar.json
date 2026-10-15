@@ -148,7 +148,10 @@
     "sortNewest": "الأحدث",
     "sortHighest": "الأعلى تقييماً",
     "submitError": "حدث خطأ أثناء إرسال المراجعة. حاول مجدداً.",
-    "cancelForm": "إلغاء"
+    "cancelForm": "إلغاء",
+    "filterAll": "الكل",
+    "filterStar": "{star} نجوم",
+    "filterEmpty": "لا توجد مراجعات بهذا التقييم"
   },
   "lightbox": {
     "close": "إغلاق",
