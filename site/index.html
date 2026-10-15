@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>خرائط العراق</title>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       Layout: full-width sections, centered content max 1100px
+       ============================================================ */
+    :root {
+      --brand:       #1a6b3a;
+      --brand-dark:  #145530;
+      --brand-light: #e8f5ee;
+      --bg:          #f8f9fa;
+      --bg-card:     #ffffff;
+      --fg:          #1a1f26;
+      --fg-muted:    #5a6472;
+      --border:      #dde3ea;
+      --shadow:      0 2px 12px rgba(26,107,58,.10);
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:          #0d1117;
+        --bg-card:     #161b22;
+        --fg:          #e6edf3;
+        --fg-muted:    #8b949e;
+        --border:      #30363d;
+        --brand-light: #0d2818;
+        --shadow:      0 2px 12px rgba(0,0,0,.40);
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:          #0d1117;
+      --bg-card:     #161b22;
+      --fg:          #e6edf3;
+      --fg-muted:    #8b949e;
+      --border:      #30363d;
+      --brand-light: #0d2818;
+      --shadow:      0 2px 12px rgba(0,0,0,.40);
+      color-scheme: dark;
+    }
+
+    /* ---- Reset & Base ---- */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .inner {
+      max-width: 1100px;
+      margin-inline: auto;
+      padding-inline: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    /* ============================================================
+       HEADER / NAV
+       ============================================================ */
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: env(safe-area-inset-top, 0px);
+      z-index: 100;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin-inline: auto;
+      padding-inline: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+      padding-block: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--fg);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .nav-brand svg {
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: var(--fg-muted);
+      text-decoration: none;
+      font-size: .92rem;
+      transition: color .15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--brand);
+    }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding-block: 80px 72px;
+    }
+
+    .hero .inner {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      max-width: 680px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brand-light);
+      color: var(--brand);
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid color-mix(in srgb, var(--brand) 20%, transparent);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.2;
+      text-wrap: balance;
+      color: var(--fg);
+    }
+
+    .hero h1 span {
+      color: var(--brand);
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--fg-muted);
+      max-width: 52ch;
+      text-wrap: balance;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .95rem;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      transition: background .15s, transform .1s;
+      margin-top: 4px;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       FEATURES
+       ============================================================ */
+    .features {
+      padding-block: 72px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .section-header h2 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      text-wrap: balance;
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--fg-muted);
+      font-size: .97rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--brand-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-icon svg {
+      color: var(--brand);
+    }
+
+    .feature-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .feature-card p {
+      margin: 0;
+      font-size: .88rem;
+      color: var(--fg-muted);
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       PRIVACY
+       ============================================================ */
+    .privacy {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding-block: 40px;
+    }
+
+    .privacy .inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .privacy-icon {
+      flex-shrink: 0;
+      color: var(--brand);
+    }
+
+    .privacy-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .privacy-text p {
+      margin: 0;
+      color: var(--fg-muted);
+      font-size: .93rem;
+    }
+
+    .privacy-text a {
+      color: var(--brand);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-weight: 500;
+    }
+
+    .privacy-text a:hover {
+      color: var(--brand-dark);
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer {
+      padding-block: 28px;
+    }
+
+    footer .inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-copy {
+      font-size: .85rem;
+      color: var(--fg-muted);
+    }
+
+    .footer-email {
+      font-size: .85rem;
+      color: var(--fg-muted);
+      direction: ltr;
+    }
+
+    .footer-email a {
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    .footer-email a:hover {
+      text-decoration: underline;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 600px) {
+      .hero { padding-block: 52px 44px; }
+      .hero h1 { font-size: 1.75rem; }
+      .features { padding-block: 48px; }
+      .nav-links { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================== HEADER ======================== -->
+  <header>
+    <div class="nav-inner">
+      <a class="nav-brand" href="#">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <circle cx="14" cy="14" r="13" fill="#1a6b3a"/>
+          <circle cx="14" cy="14" r="6" fill="none" stroke="#fff" stroke-width="1.8"/>
+          <circle cx="14" cy="14" r="2" fill="#fff"/>
+          <line x1="14" y1="1" x2="14" y2="7" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="14" y1="21" x2="14" y2="27" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="1" y1="14" x2="7" y2="14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="21" y1="14" x2="27" y2="14" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        خرائط العراق
+      </a>
+      <nav aria-label="القائمة الرئيسية">
+        <ul class="nav-links">
+          <li><a href="#">الرئيسية</a></li>
+          <li><a href="delete-account/">حذف الحساب</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ======================== HERO ======================== -->
+  <section class="hero">
+    <div class="inner">
+      <div class="hero-eyebrow">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+          <path d="M7 1a6 6 0 1 0 0 12A6 6 0 0 0 7 1Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a.75.75 0 0 0-.75.75v2.5c0 .414.336.75.75.75h1.75a.75.75 0 0 0 0-1.5H7.75V5.25A.75.75 0 0 0 7 4.5Z"/>
+        </svg>
+        متوفر قريباً
+      </div>
+      <h1>خرائط العراق <span>الذكية</span></h1>
+      <p>استكشف العراق بسهولة — بحث، ملاحة، مساعد ذكي يتحدث العربية، ويساعدك في العثور على الأماكن والتواصل مع الأعمال.</p>
+      <a class="btn-primary" href="#">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 2v10M5 8l4 4 4-4M3 15h12"/>
+        </svg>
+        حمّل التطبيق
+      </a>
+    </div>
+  </section>
+
+  <!-- ======================== FEATURES ======================== -->
+  <section class="features">
+    <div class="inner">
+      <div class="section-header">
+        <h2>كل ما تحتاجه في مكان واحد</h2>
+        <p>مصمم خصيصاً للعراق، بخرائط محدّثة ومميزات ذكية.</p>
+      </div>
+      <div class="features-grid">
+
+        <!-- خريطة بغداد التفاعلية -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 2C7.134 2 4 5.134 4 9c0 5.25 7 11 7 11s7-5.75 7-11c0-3.866-3.134-7-7-7Z"/>
+              <circle cx="11" cy="9" r="2.5"/>
+            </svg>
+          </div>
+          <h3>خريطة بغداد التفاعلية</h3>
+          <p>خريطة تفاعلية مفصّلة لبغداد تشمل الأحياء والشوارع والمناطق، مع تحديثات مستمرة من مجتمع المساهمين.</p>
+        </div>
+
+        <!-- البحث والملاحة -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="10" cy="10" r="7"/>
+              <line x1="15.5" y1="15.5" x2="20" y2="20"/>
+            </svg>
+          </div>
+          <h3>البحث والملاحة</h3>
+          <p>ابحث عن أي مكان بالعربية وخطّط مسارك بسهولة، مع اقتراحات ذكية وتوجيهات واضحة خطوة بخطوة.</p>
+        </div>
+
+        <!-- المساعد الذكي -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7l-4 4V5Z"/>
+            </svg>
+          </div>
+          <h3>المساعد الذكي بالعربية</h3>
+          <p>اسأل مساعدك بالعربية العراقية عن أقرب مطعم، أفضل مسار، أو توصيات سياحية وتجارية في المنطقة.</p>
+        </div>
+
+        <!-- التواصل مع الأعمال -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="7" width="18" height="13" rx="2"/>
+              <path d="M6 7V5a5 5 0 0 1 10 0v2"/>
+              <line x1="11" y1="12" x2="11" y2="15"/>
+              <circle cx="11" cy="15" r=".5" fill="currentColor"/>
+            </svg>
+          </div>
+          <h3>التواصل مع الأعمال</h3>
+          <p>تواصل مع المحلات والشركات مباشرةً من التطبيق، واطّلع على مواعيد العمل والخدمات المتاحة بموافقة أصحابها.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== PRIVACY ======================== -->
+  <section class="privacy">
+    <div class="inner">
+      <div class="privacy-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 3 5 8v10c0 8 5.75 14.5 13 16 7.25-1.5 13-8 13-16V8L18 3Z"/>
+          <path d="m13 18 3.5 3.5 7-7"/>
+        </svg>
+      </div>
+      <div class="privacy-text">
+        <p>نحرص على حماية خصوصيتك وأمان بياناتك. إذا أردت حذف حسابك وجميع بياناتك المرتبطة به، يمكنك ذلك في أي وقت من خلال <a href="delete-account/">صفحة حذف الحساب</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FOOTER ======================== -->
+  <footer>
+    <div class="inner">
+      <p class="footer-copy">© 2026 خرائط العراق. جميع الحقوق محفوظة.</p>
+      <p class="footer-email">
+        <a href="mailto:support@iraqmaps.iq">support@iraqmaps.iq</a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

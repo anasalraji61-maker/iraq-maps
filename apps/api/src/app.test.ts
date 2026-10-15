@@ -29,7 +29,7 @@ const delivered: DomainEvent<'identity.user.registered.v1'>[] = [];
 
 beforeAll(async () => {
   tdb = await createTestDatabase({ modules: moduleMigrations });
-  const env = { ...identityTestEnv(), DATABASE_URL: tdb.url, REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379' };
+  const env = { ...identityTestEnv(), DATABASE_URL: tdb.url, REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379', ADMIN_KEY: 'test-admin-key' };
   app = await createApp({ env, otpSender: sender, erasers: [failingEraser], logger: true, controllers: [ProtectedDummy] });
   app.get<EventBus>(PortTokens.EventBus).subscribe('identity.user.registered.v1', (e) => void delivered.push(e));
 });
@@ -121,6 +121,24 @@ it('never logs error messages or request data', async () => {
   expect([remove.statusCode, remove.json()]).toEqual([500, { type: 'about:blank', title: 'Internal server error', status: 500, code: 'internal' }]);
   expect(logs.records).toContainEqual(expect.objectContaining({ errorName: 'Error', pgCode: '22021', route: '/v1/me', msg: 'unhandled error' }));
   expect(logs.text()).not.toContain(MARKER);
+});
+describe('GET /v1/admin/metrics', () => {
+  it('returns 401 without admin key', async () => {
+    const res = await app.inject({ method: 'GET', url: '/v1/admin/metrics' });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('returns 401 with wrong admin key', async () => {
+    const res = await app.inject({ method: 'GET', url: '/v1/admin/metrics', headers: { 'x-admin-key': 'wrong-key' } });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('returns 200 with correct admin key and metric fields', async () => {
+    const res = await app.inject({ method: 'GET', url: '/v1/admin/metrics', headers: { 'x-admin-key': 'test-admin-key' } });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<object>();
+    expect(body).toMatchObject({ totalUsers: expect.any(Number), totalProviders: expect.any(Number), postsToday: expect.any(Number), pendingVerification: expect.any(Number) });
+  });
 });
 }); // describe.skipIf DATABASE_URL
 

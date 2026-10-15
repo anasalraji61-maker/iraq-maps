@@ -25,7 +25,7 @@
 | [M5](M5-assistant-insights.md) | المساعد الذكي بالعربية، والأسعار والزحمة مع مصدرها | 3–4 | [M2](M2-routing-navigation-satellite.md)، [M4](M4-messaging-inbox-notifications.md) | **مكتملة** (`ee3dd6b`) |
 | [M6](M6-discover-activity-moderation.md) | اكتشف ونشاطي والإشراف على المحتوى | 3–3.5 | [M3](M3-providers-media-verification.md)، [M4](M4-messaging-inbox-notifications.md) | **مكتملة** (`ee3dd6b`) |
 | [M7](M7-ops-privacy-budgets-rc.md) | التشغيل والخصوصية وميزانيات الأداء ونسخة مرشّحة للإطلاق التجريبي | 3–3.5 | [M5](M5-assistant-insights.md)، [M6](M6-discover-activity-moderation.md) | **مكتملة** (`bf1e9c1`) |
-| [M8](M8-play-store-submission.md) | تجهيز نشر Google Play: التوقيع والإدراج وبيان البيانات والنشر التجريبي | 2–3 | [M7](M7-ops-privacy-budgets-rc.md) | قيد التنفيذ |
+| [M8](M8-play-store-submission.md) | تجهيز نشر Google Play: التوقيع والإدراج وبيان البيانات والنشر التجريبي | 2–3 | [M7](M7-ops-privacy-budgets-rc.md) | **مكتملة** (`da41048`) |
 
 الحالات: «لم تبدأ» ← «قيد التنفيذ» ← «مكتملة» (مع SHA الإغلاق في ملف المرحلة).
 

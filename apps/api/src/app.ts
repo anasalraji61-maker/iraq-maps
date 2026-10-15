@@ -246,6 +246,26 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
   const openApi = generateOpenApi(apiContract, { info: { title: 'iraq-maps API', version: '0.0.0' } }, { setOperationId: 'concatenated-path' });
   fastify.get('/openapi.json', async () => openApi);
 
+  // Admin metrics route: aggregate counts for dashboard.
+  fastify.get('/v1/admin/metrics', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const [usersRes, providersRes, postsTodayRes, pendingRes] = await Promise.all([
+      db.execute(sql`SELECT COUNT(*)::int AS count FROM identity.users`),
+      db.execute(sql`SELECT COUNT(*)::int AS count FROM providers.provider`),
+      db.execute(sql`SELECT COUNT(*)::int AS count FROM discover.post WHERE created_at >= current_date`),
+      db.execute(sql`SELECT COUNT(*)::int AS count FROM providers.provider WHERE status = 'pending'`),
+    ]);
+    return reply.status(200).send({
+      totalUsers: (usersRes.rows[0] as { count: number }).count,
+      totalProviders: (providersRes.rows[0] as { count: number }).count,
+      postsToday: (postsTodayRes.rows[0] as { count: number }).count,
+      pendingVerification: (pendingRes.rows[0] as { count: number }).count,
+    });
+  });
+
   // Internal admin route: returns failed job counts per queue.
   fastify.get('/internal/queues/failed', async (req, reply) => {
     const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];

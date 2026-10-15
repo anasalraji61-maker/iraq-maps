@@ -16,6 +16,7 @@
     "@iraq-maps/db-kit": "workspace:*",
     "@nestjs/common": "^11.2.7",
     "@ts-rest/nest": "3.52.1",
+    "bullmq": "^5.56.0",
     "drizzle-orm": "^0.45.4",
     "sharp": "^0.33.5",
     "zod": "3.25.76"

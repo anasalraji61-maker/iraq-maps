@@ -1,6 +1,7 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { and, eq, lt } from 'drizzle-orm';
 import sharp from 'sharp';
+import type { Queue } from 'bullmq';
 import {
   type AssetId,
   type MediaMime,
@@ -17,6 +18,9 @@ import type { Db, DbTx } from '@iraq-maps/db-kit';
 import { createOutboxPublisher } from '@iraq-maps/db-kit';
 // OutboxPublisher used for ready event below
 import { assetTable } from './schema.js';
+import { IMAGE_PROCESSING_QUEUE, type ImageProcessingJob } from './image-processing-worker.js';
+
+export const IMAGE_PROCESSING_QUEUE_TOKEN = 'media:image-processing-queue';
 
 export const DB_TOKEN = 'media:db';
 export const OUTBOX_TOKEN = 'media:outbox';
@@ -41,6 +45,8 @@ export class MediaService implements MediaPort {
   constructor(
     @Inject(DB_TOKEN) private readonly db: Db,
     @Inject(PortTokens.ObjectStorage) private readonly storage: ObjectStorage,
+    @Optional() @Inject(IMAGE_PROCESSING_QUEUE_TOKEN)
+    private readonly imageQueue: Queue<ImageProcessingJob> | null = null,
   ) {
     this.outbox = createOutboxPublisher(db);
   }
@@ -142,7 +148,7 @@ export class MediaService implements MediaPort {
 
   /** Returns a signed read URL for a named size variant.
    *  'full' resolves to the regular ready key; 'thumbnail'/'medium' use a derived key.
-   *  TODO: generate the variant via a worker if it does not exist in storage yet; for now falls back to the full asset. */
+   *  Falls back to the full asset URL when the variant has not been generated yet. */
   async readUrlWithSize(id: AssetId, size: 'thumbnail' | 'medium' | 'full'): Promise<string | null> {
     const [row] = await this.db.select().from(assetTable).where(eq(assetTable.id, id));
     if (!row || row.status !== 'ready' || !row.storageKey) return null;
@@ -159,7 +165,8 @@ export class MediaService implements MediaPort {
   }
 
   /** Generates a resized variant for the given size, stores it, and returns its signed URL.
-   *  TODO: move heavy image work to a background job; this runs inline for now. */
+   *  When the image-processing queue is available, resize is enqueued as a background job.
+   *  Otherwise falls back to inline processing (acceptable for tests and single-process setups). */
   async resizeAsset(assetId: AssetId, size: 'thumbnail' | 'medium' | 'full'): Promise<string | null> {
     const [row] = await this.db.select().from(assetTable).where(eq(assetTable.id, assetId));
     if (!row || row.status !== 'ready' || !row.storageKey) return null;
@@ -170,13 +177,26 @@ export class MediaService implements MediaPort {
     }
 
     const variantKey = `${assetId}.${size}.webp`;
+    const dimension = SIZE_DIMENSIONS[size] ?? MAX_DIMENSION;
+
     // Return cached variant if already generated.
     const existing = await this.storage.get(variantKey);
     if (!existing) {
+      if (this.imageQueue) {
+        // Offload to background worker; caller will get the full-asset URL until the variant is ready.
+        await this.imageQueue.add(
+          IMAGE_PROCESSING_QUEUE,
+          { assetId, inputPath: row.storageKey, outputPath: variantKey, width: dimension, height: dimension },
+          { attempts: 3, backoff: { type: 'exponential', delay: 2000 } },
+        );
+        // Return full asset URL while the variant is being generated.
+        const signed = await this.storage.signRead(row.storageKey, READ_URL_TTL_S);
+        return signed.url;
+      }
+
+      // Inline fallback (no queue available).
       const raw = await this.storage.get(row.storageKey);
       if (!raw) return null;
-      const dimension = SIZE_DIMENSIONS[size] ?? MAX_DIMENSION;
-      // TODO: offload to image-processing worker; running inline is acceptable for MVP scale.
       const resized = await sharp(Buffer.from(raw))
         .resize(dimension, dimension, { fit: 'inside', withoutEnlargement: true })
         .webp({ quality: size === 'thumbnail' ? 70 : 82 })
