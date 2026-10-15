@@ -1,12 +1,14 @@
 import { type DiscoverPostType } from '@iraq-maps/contracts';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import {
+  Alert,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
@@ -14,6 +16,7 @@ import {
   Share,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { type z } from 'zod';
@@ -56,7 +59,7 @@ function PostDetailSkeleton(): ReactElement {
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-function PostBody({ post, mediaUrls, onHashtagPress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void }): ReactElement {
+function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void; isOwn: boolean; onMorePress: () => void }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -110,6 +113,17 @@ function PostBody({ post, mediaUrls, onHashtagPress }: { post: DiscoverPostType;
         >
           <Text style={styles.shareBtnText}>{linkCopied ? t('postDetail.linkCopied') : t('postDetail.copyLink')}</Text>
         </Pressable>
+        {isOwn ? (
+          <Pressable
+            style={styles.shareBtn}
+            onPress={onMorePress}
+            accessibilityRole="button"
+            accessibilityLabel={t('post.more')}
+            testID={`post.more.${post.id}`}
+          >
+            <Text style={styles.shareBtnText}>{t('post.moreIcon')}</Text>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
@@ -121,6 +135,8 @@ export function PostDetailScreen(): ReactElement {
   const api = useDiscoverClient();
   const extApi = useApi();
   const router = useRouter();
+  const session = useSession();
+  const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const handleHashtagPress = useCallback((tag: string) => {
     router.push({ pathname: '/discover/hashtag/[tag]', params: { tag: tag.slice(1) } });
   }, [router]);
@@ -129,6 +145,9 @@ export function PostDetailScreen(): ReactElement {
   const initialPost = postJson ? (() => { try { return JSON.parse(postJson) as DiscoverPostType; } catch { return undefined; } })() : undefined;
 
   const [post, setPost] = useState<DiscoverPostType | undefined>(initialPost);
+  const [editVisible, setEditVisible] = useState(false);
+  const [editBody, setEditBody] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(!initialPost);
   const [refreshing, setRefreshing] = useState(false);
@@ -222,6 +241,57 @@ export function PostDetailScreen(): ReactElement {
     }
   }, [api, commentText, postId, sending]);
 
+  const handleMorePress = useCallback(() => {
+    if (!post) return;
+    Alert.alert(
+      t('post.more'),
+      undefined,
+      [
+        {
+          text: t('post.edit'),
+          onPress: () => { setEditBody(post.body); setEditVisible(true); },
+        },
+        {
+          text: t('post.delete'),
+          style: 'destructive' as const,
+          onPress: () => Alert.alert(
+            t('post.deleteConfirmTitle'),
+            t('post.deleteConfirmMsg'),
+            [
+              { text: t('post.reportCancel'), style: 'cancel' as const },
+              {
+                text: t('post.deleteConfirmOk'),
+                style: 'destructive' as const,
+                onPress: () => {
+                  void api.deletePost({ params: { postId: post.id } }).then(() => router.back()).catch(() => Alert.alert(t('post.deleteError')));
+                },
+              },
+            ],
+          ),
+        },
+        { text: t('post.reportCancel'), style: 'cancel' as const },
+      ],
+    );
+  }, [post, api, router]);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!post || editBody.trim().length === 0) return;
+    setEditSaving(true);
+    try {
+      const res = await api.updatePost({ params: { postId: post.id }, body: { body: editBody.trim() } });
+      if (res.status === 200) {
+        setPost((prev) => prev ? { ...prev, body: res.body.body } : prev);
+        setEditVisible(false);
+      } else {
+        Alert.alert(t('post.editError'));
+      }
+    } catch {
+      Alert.alert(t('post.editError'));
+    } finally {
+      setEditSaving(false);
+    }
+  }, [api, post, editBody]);
+
   if (loading) {
     return <PostDetailSkeleton />;
   }
@@ -241,6 +311,7 @@ export function PostDetailScreen(): ReactElement {
   );
 
   return (
+    <>
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -259,7 +330,7 @@ export function PostDetailScreen(): ReactElement {
         }
         ListHeaderComponent={
           <>
-            <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} />
+            <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} isOwn={currentUserId === post.authorId} onMorePress={handleMorePress} />
             {sectionHeader}
           </>
         }
@@ -278,6 +349,40 @@ export function PostDetailScreen(): ReactElement {
         t={t}
       />
     </KeyboardAvoidingView>
+    <Modal
+      visible={editVisible} animationType="slide" transparent onRequestClose={() => setEditVisible(false)}>
+      <View style={styles.editOverlay}>
+        <View style={styles.editSheet}>
+          <Text style={styles.editTitle}>{t('post.editTitle')}</Text>
+          <TextInput
+            style={styles.editInput}
+            value={editBody}
+            onChangeText={setEditBody}
+            multiline
+            maxLength={1000}
+            placeholder={t('post.editPlaceholder')}
+            accessibilityLabel={t('post.editTitle')}
+            testID="post.editInput"
+          />
+          <Text style={styles.editCharCount}>{t('post.editCharCount', { n: 1000 - editBody.length })}</Text>
+          <View style={styles.editActions}>
+            <Pressable style={[styles.shareBtn, styles.editCancelBtn]} onPress={() => setEditVisible(false)} accessibilityRole="button">
+              <Text style={styles.shareBtnText}>{t('post.editCancel')}</Text>
+            </Pressable>
+            <Pressable
+              style={editSaving || editBody.trim().length === 0 ? [styles.shareBtn, styles.editSaveBtn, styles.editSaveBtnDisabled] : [styles.shareBtn, styles.editSaveBtn]}
+              onPress={() => void handleSaveEdit()}
+              accessibilityRole="button"
+              disabled={editSaving || editBody.trim().length === 0}
+              testID="post.editSave"
+            >
+              <Text style={[styles.shareBtnText, { color: '#FFF' }]}>{t('post.editSave')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -339,4 +444,13 @@ const styles = StyleSheet.create({
   sendBtn: sharedStyles.sendBtn,
   sendBtnDisabled: sharedStyles.sendBtnDisabled,
   sendBtnText: sharedStyles.sendBtnText,
+  editOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  editSheet: { backgroundColor: '#FFF', borderTopStartRadius: 16, borderTopEndRadius: 16, padding: 20, gap: 12 },
+  editTitle: { fontSize: 18, fontWeight: '600', color: COLORS.textPrimary, textAlign: 'auto' },
+  editInput: { borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, padding: 12, fontSize: 16, minHeight: 100, textAlignVertical: 'top', textAlign: 'auto' },
+  editCharCount: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto' },
+  editActions: { flexDirection: 'row', gap: 8, justifyContent: 'flex-end' },
+  editCancelBtn: {},
+  editSaveBtn: { backgroundColor: COLORS.primary },
+  editSaveBtnDisabled: { backgroundColor: COLORS.border },
 });
