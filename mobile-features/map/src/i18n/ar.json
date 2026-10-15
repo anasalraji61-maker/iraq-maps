@@ -97,7 +97,8 @@
     "providerHours": "ساعات العمل (من المزوّد)",
     "providerVerified": "مزوّد موثّق",
     "closesAt": "يغلق الساعة {time}",
-    "whatsappLabel": "تواصل عبر واتساب"
+    "whatsappLabel": "تواصل عبر واتساب",
+    "nearbyTitle": "أماكن قريبة مشابهة"
   },
   "actions": {
     "directions": "الاتجاهات",

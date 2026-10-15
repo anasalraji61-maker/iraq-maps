@@ -97,7 +97,8 @@
     "providerHours": "کاتەکانی کار",
     "providerVerified": "دابینکەری پشتڕاستکراو",
     "closesAt": "دادەخرێت {time}",
-    "whatsappLabel": "پەیام لە واتساپ"
+    "whatsappLabel": "پەیام لە واتساپ",
+    "nearbyTitle": "شوێنی نزیک و هاوشێوە"
   },
   "actions": {
     "directions": "ئاراستەکان",

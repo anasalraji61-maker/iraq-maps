@@ -97,7 +97,8 @@
     "providerHours": "Business Hours",
     "providerVerified": "Verified Provider",
     "closesAt": "Closes at {time}",
-    "whatsappLabel": "Message on WhatsApp"
+    "whatsappLabel": "Message on WhatsApp",
+    "nearbyTitle": "Similar nearby places"
   },
   "actions": {
     "directions": "Directions",

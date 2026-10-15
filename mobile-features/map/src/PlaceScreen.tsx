@@ -1,10 +1,10 @@
-import { pickName, placesContract, testIDs, type CrowdLevel, type PlaceDetails, type PriceLevel } from '@iraq-maps/contracts';
+import { pickName, placesContract, testIDs, type CrowdLevel, type LngLat, type PlaceCategory, type PlaceDetails, type PriceLevel } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { href, routes, savedPlaces, useApi, useHaptics, useRouteAvailable } from '@iraq-maps/mobile-kit';
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
-import { Linking, Share, View } from 'react-native';
+import { Linking, Pressable, Share, StyleSheet, View } from 'react-native';
 import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
@@ -118,6 +118,9 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
       {place.provider ? <ProviderSection provider={place.provider} /> : null}
       <InsightsSection place={place} onReportCrowded={reportCrowded} />
       <ReviewsSection placeId={place.id} />
+      {place.category ? (
+        <NearbySection placeId={place.id} location={place.location} category={place.category} />
+      ) : null}
       <Button
         testID="place.save"
         label={isSaved ? t('place.saved') : t('place.save')}
@@ -226,3 +229,76 @@ function RouteAction({ route, placeId }: { route: keyof typeof actions; placeId:
   const params = route === 'messageCompose' ? { placeIds: placeId } : { placeId };
   return <Button variant="secondary" label={t(actions[route])} onPress={() => router.push({ pathname: routes[route], params })} />;
 }
+
+// ── Nearby section ────────────────────────────────────────────────────────────
+
+interface NearbySectionProps {
+  placeId: string;
+  location: LngLat;
+  category: PlaceCategory;
+}
+
+function NearbySection({ placeId, location, category }: NearbySectionProps): ReactElement | null {
+  const api = useApi();
+  const lang = getLocale();
+  const router = useRouter();
+  const [items, setItems] = useState<Array<{ id: string; name: string; distanceM: number | null }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        // Fetch the first city to get a CityId for the nearby query.
+        const citiesRes = await api.cities.list();
+        if (citiesRes.status !== 200) return;
+        const cityId = citiesRes.body.items[0]?.id;
+        if (!cityId) return;
+        const near = `${location[0].toFixed(5)},${location[1].toFixed(5)}`;
+        const res = await api.places.nearby({ query: { city: cityId, near, radiusM: 600, category, limit: 6 } });
+        if (res.status !== 200 || cancelled) return;
+        const nearby = res.body.items
+          .filter((p) => p.id !== placeId)
+          .slice(0, 5)
+          .map((p) => ({ id: p.id, name: pickName(p.names, lang), distanceM: p.distanceM }));
+        setItems(nearby);
+      } catch {
+        // Nearby is best-effort; silently ignore errors.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [api, placeId, location, category, lang]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <View style={nearbyStyles.section}>
+      <Text variant="caption" tone="muted">{t('place.nearbyTitle')}</Text>
+      {items.map((item) => (
+        <Pressable
+          key={item.id}
+          style={nearbyStyles.row}
+          onPress={() => router.push(href('place', { placeId: item.id }) as never)}
+          accessibilityRole="button"
+          accessibilityLabel={item.name}
+        >
+          <View style={nearbyStyles.rowBody}>
+            <Text>{item.name}</Text>
+            {item.distanceM !== null ? (
+              <Text variant="caption" tone="muted">
+                {item.distanceM < 1000
+                  ? t('distance.m', { n: Math.round(item.distanceM) })
+                  : t('distance.km', { n: (item.distanceM / 1000).toFixed(1) })}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+const nearbyStyles = StyleSheet.create({
+  section: { marginTop: 16, gap: 4 },
+  row: { paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e0e0e0' },
+  rowBody: { gap: 2 },
+});
