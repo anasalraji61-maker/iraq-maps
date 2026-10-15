@@ -39,6 +39,8 @@ export const routes = {
   providerRequest: '/provider/inbox/[requestId]',
   devSettings: '/dev-settings',
   offlineMaps: '/map/offline-regions',
+  locationShare: '/map/location-share',
+  locationShareView: '/map/location-share-view',
 } as const;
 
 export type RouteName = keyof typeof routes;

@@ -23,3 +23,5 @@ export {
 } from './offline/OfflineMapManager';
 export { ReviewsScreen } from './screens/ReviewsScreen';
 export { AddReviewScreen } from './screens/AddReviewScreen';
+export { LocationShareScreen } from './location-share/LocationShareScreen';
+export { LocationShareViewerScreen } from './location-share/LocationShareViewerScreen';

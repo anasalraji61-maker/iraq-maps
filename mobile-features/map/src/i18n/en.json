@@ -271,5 +271,29 @@
     "expiresAt": "Expires {time}",
     "expiresHours": "in {h} hour(s)",
     "expiresLessThanHour": "in less than an hour"
+  },
+  "locationShare": {
+    "title": "Live Location Sharing",
+    "description": "Create a temporary link so others can see your current location.",
+    "start": "Start Sharing",
+    "creating": "Creating…",
+    "active": "Sharing is active",
+    "expiresAt": "Expires at {time}",
+    "updateLocation": "Update Location",
+    "shareLink": "Share Link",
+    "stop": "Stop Sharing",
+    "shareMessage": "Follow my live location via the link",
+    "loading": "Loading…",
+    "waitingForLocation": "Waiting for location…",
+    "lastUpdated": "Last updated: {time}",
+    "expiredTitle": "Link Expired",
+    "expiredBody": "This location share link has expired.",
+    "notFoundTitle": "Link Not Found",
+    "notFoundBody": "Please check the link and try again.",
+    "noLocationTitle": "Location Unavailable",
+    "noLocationBody": "Enable location services and try again.",
+    "errorTitle": "Something Went Wrong",
+    "errorBody": "Could not connect to the server. Please try again.",
+    "shareBtn": "Share Your Location"
   }
 }

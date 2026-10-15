@@ -271,5 +271,29 @@
     "expiresAt": "کۆتایی {time}",
     "expiresHours": "لە ماوەی {h} کاتژمێر",
     "expiresLessThanHour": "لە ماوەی کەمتر لە کاتژمێرێک"
+  },
+  "locationShare": {
+    "title": "هاوبەشکردنی شوێنی ژیو",
+    "description": "بەستەرێکی کاتی دروست بکە بۆ ئەوەی تر شوێنەکەت ببینن.",
+    "start": "دەستپێکردنی هاوبەشکردن",
+    "creating": "دروستکردن…",
+    "active": "هاوبەشکردن چالاکە",
+    "expiresAt": "کۆتایی {time}",
+    "updateLocation": "نوێکردنەوەی شوێن",
+    "shareLink": "هاوبەشکردنی بەستەر",
+    "stop": "وەستاندنی هاوبەشکردن",
+    "shareMessage": "شوێنی ژیوی من بپشکنە لە بەستەرەکە",
+    "loading": "بارکردن…",
+    "waitingForLocation": "چاوەڕوانی شوێن…",
+    "lastUpdated": "دوایین نوێکردنەوە: {time}",
+    "expiredTitle": "بەستەر بەسەرچووە",
+    "expiredBody": "ئەم بەستەرەی شوێن تەواوبووە.",
+    "notFoundTitle": "بەستەر نەدۆزرایەوە",
+    "notFoundBody": "بەستەرەکە پشکنی.",
+    "noLocationTitle": "شوێن بەردەست نیە",
+    "noLocationBody": "خزمەتگوزاری شوێن چالاک بکە.",
+    "errorTitle": "هەڵەیەک ڕووی دا",
+    "errorBody": "ناتوانرێت پەیوەندی بکرێت. دووبارە هەوڵ بدەرەوە.",
+    "shareBtn": "شوێنەکەت هاوبەش بکە"
   }
 }

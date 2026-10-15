@@ -271,5 +271,29 @@
     "expiresAt": "ينتهي {time}",
     "expiresHours": "خلال {h} ساعة",
     "expiresLessThanHour": "خلال أقل من ساعة"
+  },
+  "locationShare": {
+    "title": "مشاركة الموقع الحي",
+    "description": "أنشئ رابطاً مؤقتاً يتيح للآخرين رؤية موقعك الحالي.",
+    "start": "بدء المشاركة",
+    "creating": "جارٍ الإنشاء…",
+    "active": "المشاركة نشطة",
+    "expiresAt": "تنتهي الصلاحية في {time}",
+    "updateLocation": "تحديث الموقع",
+    "shareLink": "مشاركة الرابط",
+    "stop": "إيقاف المشاركة",
+    "shareMessage": "تابع موقعي الحي عبر الرابط",
+    "loading": "جارٍ التحميل…",
+    "waitingForLocation": "في انتظار الموقع…",
+    "lastUpdated": "آخر تحديث: {time}",
+    "expiredTitle": "انتهت صلاحية الرابط",
+    "expiredBody": "لم يعد رابط الموقع هذا صالحاً.",
+    "notFoundTitle": "الرابط غير موجود",
+    "notFoundBody": "تحقق من الرابط وحاول مجدداً.",
+    "noLocationTitle": "الموقع غير متاح",
+    "noLocationBody": "فعّل خدمة الموقع وحاول مجدداً.",
+    "errorTitle": "حدث خطأ",
+    "errorBody": "تعذّر الاتصال بالخادم. حاول مجدداً.",
+    "shareBtn": "شارك موقعك"
   }
 }

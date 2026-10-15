@@ -12,6 +12,7 @@ import { citiesContract, placesContract, reviewsContract } from './places';
 import { adminProvidersContract, providersContract } from './providers';
 import { routesContract } from './routing';
 import { incidentsContract } from './incidents';
+import { locationShareContract } from './location-share';
 
 const c = initContract();
 
@@ -115,5 +116,6 @@ export const apiContract = c.router({
   discover: discoverContract,
   // M7
   incidents: incidentsContract,
+  locationShare: locationShareContract,
 });
 export type ApiContract = typeof apiContract;

@@ -541,6 +541,12 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           userLocation={userPosition}
           onReported={refreshIncidents}
         />
+        <IconButton
+          testID="map.location-share-btn"
+          icon="📡"
+          accessibilityLabel={t('locationShare.shareBtn')}
+          onPress={() => router.push(href('locationShare'))}
+        />
       </View>
       <Sheet visible={choosingLang} onClose={() => setChoosingLang(false)}>
         <Text variant="subtitle">{t('lang.title')}</Text>
