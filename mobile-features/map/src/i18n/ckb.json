@@ -142,5 +142,8 @@
     "closeSymbol": "✕",
     "photo": "وێنە",
     "counter": "{total} وێنە"
+  },
+  "offline": {
+    "banner": "ئینتەرنێتت نییە — خەریتە سنووردارە"
   }
 }

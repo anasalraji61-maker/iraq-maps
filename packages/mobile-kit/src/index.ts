@@ -26,3 +26,5 @@ export {
 export { ErrorBoundary } from './error-boundary';
 /** @public haptic feedback helpers */
 export { useHaptics } from './haptics';
+
+export { useNetworkStatus } from './use-network-status';

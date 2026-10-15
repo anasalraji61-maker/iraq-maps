@@ -3,7 +3,7 @@ import { PlaceMarkerSheet } from './components/PlaceMarkerSheet';
 import { formatIraqiAddress } from '@iraq-maps/geo';
 import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
-import { href, savedPlaces, useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
+import { href, savedPlaces, useApi, useApiBaseUrl, useNetworkStatus } from '@iraq-maps/mobile-kit';
 import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -83,6 +83,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [near, setNear] = useState<LngLat>(city.center);
   const [locateError, setLocateError] = useState<string>();
   const [locationAddress, setLocationAddress] = useState<string>();
+  const isOnline = useNetworkStatus();
   const [query, setQuery] = useState('');
   const recentSearches = useRecentSearches();
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
@@ -240,6 +241,11 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         </Pressable>
         {mapMode === 'satellite' && city.satellite ? <SatelliteDisclaimer layer={city.satellite} /> : null}
       </View>
+      {!isOnline && (
+        <View style={styles.offlineBanner} testID="offline-banner" accessibilityRole="alert">
+          <RNText style={styles.offlineBannerText}>{t('offline.banner')}</RNText>
+        </View>
+      )}
       <View style={styles.panel}>
         <View style={styles.searchRow}>
           <View style={styles.fill}>
@@ -438,6 +444,8 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
 const { color, space, radius, minTouch } = tokens;
 const styles = StyleSheet.create({
   fill: { flex: 1 },
+  offlineBanner: { position: 'absolute', top: 0, start: 0, end: 0, backgroundColor: '#F59E0B', paddingVertical: 8, paddingHorizontal: 16, zIndex: 100 },
+  offlineBannerText: { color: '#FFF', fontSize: 13, fontWeight: '600', textAlign: 'center' },
   panel: { position: 'absolute', top: 0, start: 0, end: 0, padding: space.m, gap: space.s, backgroundColor: color.bg },
   searchRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space.s },
   results: { gap: space.s },

@@ -142,5 +142,8 @@
     "closeSymbol": "✕",
     "photo": "صورة",
     "counter": "{total} صورة"
+  },
+  "offline": {
+    "banner": "أنت غير متصل بالإنترنت — الخريطة محدودة"
   }
 }

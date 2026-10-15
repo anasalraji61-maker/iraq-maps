@@ -142,5 +142,8 @@
     "closeSymbol": "✕",
     "photo": "Photo",
     "counter": "{total} photos"
+  },
+  "offline": {
+    "banner": "You're offline — map is limited"
   }
 }

@@ -11,6 +11,14 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 
 jest.mock('expo-location', () => ({ requestForegroundPermissionsAsync: jest.fn(), getCurrentPositionAsync: jest.fn(), Accuracy: { Balanced: 3 } }));
 
+jest.mock('@react-native-community/netinfo', () => ({
+  __esModule: true,
+  default: {
+    fetch: jest.fn(async () => ({ isConnected: true, isInternetReachable: true })),
+    addEventListener: jest.fn(() => () => undefined),
+  },
+}));
+
 // One shared router: tests assert on router.push instead of mounting a navigator.
 jest.mock('expo-router', () => {
   const router = { push: jest.fn() };
