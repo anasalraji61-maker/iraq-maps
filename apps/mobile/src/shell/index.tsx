@@ -4,6 +4,7 @@ import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, ThemeProvider, tokens, useUiFonts } from '@iraq-maps/ui';
 import * as SecureStore from 'expo-secure-store';
+import * as Notifications from 'expo-notifications';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
@@ -212,8 +213,48 @@ export function RootLayout() {
   );
 }
 
+/**
+ * Listens for push notification taps and deep-links into the app.
+ * Convention: notification.request.content.data fields:
+ *   screen: 'messages' | 'discover' | 'activity' | 'place'
+ *   inquiryId, postId, placeId — entity identifiers depending on screen
+ */
+function useNotificationDeepLink() {
+  const router = useRouter();
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as Record<string, string> | undefined;
+      if (!data) return;
+      try {
+        switch (data.screen) {
+          case 'messages':
+            router.push(href('messages'));
+            break;
+          case 'discover':
+            if (data.postId) router.push(href('discoverPost', { postId: data.postId }));
+            else router.push(href('discover'));
+            break;
+          case 'activity':
+            router.push(href('activity'));
+            break;
+          case 'place':
+            if (data.placeId) router.push(href('place', { placeId: data.placeId }));
+            break;
+          default:
+            // unknown screen — open activity tab as a fallback
+            router.push(href('activity'));
+        }
+      } catch {
+        // navigation errors are non-fatal
+      }
+    });
+    return () => sub.remove();
+  }, [router]);
+}
+
 /** Signed-out users browse every tab; the account tab (feature-account) shows the sign-in entry. */
 function SessionRestored({ children }: { children: ReactNode }) {
+  useNotificationDeepLink();
   return useSession().state.status === 'loading' ? null : children;
 }
 
