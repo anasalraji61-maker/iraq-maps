@@ -261,7 +261,7 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
         await load();
       }
     } catch {
-      setError('error');
+      setError(t('reviews.submitError'));
     } finally {
       setSubmitting(false);
     }

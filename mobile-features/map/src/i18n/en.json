@@ -132,7 +132,8 @@
     "addPhoto": "Add photo",
     "removePhoto": "Remove photo",
     "sortNewest": "Newest",
-    "sortHighest": "Highest rated"
+    "sortHighest": "Highest rated",
+    "submitError": "Failed to submit review. Please try again."
   },
   "lightbox": {
     "close": "Close",

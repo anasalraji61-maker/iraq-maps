@@ -132,7 +132,8 @@
     "addPhoto": "إضافة صورة",
     "removePhoto": "إزالة الصورة",
     "sortNewest": "الأحدث",
-    "sortHighest": "الأعلى تقييماً"
+    "sortHighest": "الأعلى تقييماً",
+    "submitError": "حدث خطأ أثناء إرسال المراجعة. حاول مجدداً."
   },
   "lightbox": {
     "close": "إغلاق",
