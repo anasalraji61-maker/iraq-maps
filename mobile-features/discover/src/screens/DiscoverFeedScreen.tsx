@@ -129,6 +129,8 @@ const PostItem = memo(function PostItem({
   isSaved,
   currentUserId,
   onHashtagPress,
+  onFollow,
+  isFollowing,
 }: {
   post: DiscoverPostType;
   placeName?: string;
@@ -145,6 +147,8 @@ const PostItem = memo(function PostItem({
   isSaved: boolean;
   currentUserId?: string;
   onHashtagPress: (tag: string) => void;
+  onFollow: (authorId: string) => void;
+  isFollowing: boolean;
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
   const badgeColors = getTypeBadgeColors(post.type);
@@ -240,6 +244,19 @@ const PostItem = memo(function PostItem({
           </View>
           <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt, t)}</Text>
         </Pressable>
+        {!isOwn ? (
+          <Pressable
+            onPress={() => onFollow(post.authorId)}
+            style={[styles.followBtn, isFollowing && styles.followBtnActive]}
+            accessibilityRole="button"
+            accessibilityLabel={isFollowing ? t('follow.unfollow') : t('follow.follow')}
+            testID={`follow-btn-${post.id}`}
+          >
+            <Text style={[styles.followBtnText, isFollowing && styles.followBtnTextActive]}>
+              {isFollowing ? t('follow.following') : t('follow.follow')}
+            </Text>
+          </Pressable>
+        ) : null}
         <View style={styles.cardHeaderRight}>
           <View
             style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
@@ -448,7 +465,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const { isSaved, toggleSave } = useSavedPosts();
   const handleSave = useCallback((post: DiscoverPostType) => { void toggleSave(post); }, [toggleSave]);
-  const { followedIds } = useFollows();
+  const { followedIds, toggleFollow } = useFollows();
+  const handleFollow = useCallback((authorId: string) => { void toggleFollow(authorId); }, [toggleFollow]);
   const { blockedIds, blockUser } = useBlockedUsers();
   const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
@@ -924,6 +942,8 @@ export function DiscoverFeedScreen(): ReactElement {
             onSave={handleSave}
             isSaved={isSaved(item.id)}
             currentUserId={currentUserId}
+            onFollow={handleFollow}
+            isFollowing={followedIds.has(item.authorId)}
           />
         )}
         initialNumToRender={5}
@@ -1144,6 +1164,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     fontWeight: '500',
+  },
+  followBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginStart: 6,
+  },
+  followBtnActive: {
+    backgroundColor: COLORS.primaryXLight,
+    borderColor: COLORS.primary,
+  },
+  followBtnText: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  followBtnTextActive: {
+    color: COLORS.primary,
   },
   timestampText: {
     fontSize: 11,
