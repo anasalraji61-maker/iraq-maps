@@ -23,7 +23,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { getTypeBadgeColors, sharedStyles, COLORS } from './shared';
+import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -99,15 +99,6 @@ function formatCount(n: number): string {
   return String(n);
 }
 
-function formatRelativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return t('timeNow');
-  if (minutes < 60) return t('timeMinutes', { n: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t('timeHours', { n: hours });
-  return t('timeDays', { n: Math.floor(hours / 24) });
-}
 
 const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'post.type.event' | 'post.type.offer'> = {
   photo: 'post.type.photo',
@@ -207,7 +198,7 @@ const PostItem = memo(function PostItem({
       <View style={styles.cardHeader}>
         <View>
           <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
-          <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt)}</Text>
+          <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt, t)}</Text>
         </View>
         <View style={styles.cardHeaderRight}>
           <View

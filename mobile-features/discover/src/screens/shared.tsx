@@ -38,14 +38,21 @@ export function getTypeBadgeColors(type: string): { bg: string; text: string } {
   return TYPE_BADGE_COLORS[type] ?? DEFAULT_BADGE;
 }
 
-export function formatRelativeTime(isoDate: string): string {
+export function formatRelativeTime(isoDate: string, tFn?: typeof TFunc): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return '< 1m';
-  if (minutes < 60) return `${minutes}m`;
+  if (!tFn) {
+    if (minutes < 1) return '< 1m';
+    if (minutes < 60) return `${minutes}m`;
+    const h = Math.floor(minutes / 60);
+    if (h < 24) return `${h}h`;
+    return `${Math.floor(h / 24)}d`;
+  }
+  if (minutes < 1) return tFn('timeNow');
+  if (minutes < 60) return tFn('timeMinutes', { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
+  if (hours < 24) return tFn('timeHours', { n: hours });
+  return tFn('timeDays', { n: Math.floor(hours / 24) });
 }
 
 export const sharedStyles = StyleSheet.create({
@@ -336,7 +343,7 @@ export function CommentCard({
         </View>
         <View style={sharedStyles.commentMeta}>
           <Text style={sharedStyles.commentAuthor}>{item.authorId.slice(0, 8)}</Text>
-          <Text style={sharedStyles.commentDate}>{formatRelativeTime(item.createdAt)}</Text>
+          <Text style={sharedStyles.commentDate}>{formatRelativeTime(item.createdAt, t)}</Text>
         </View>
       </View>
       <Text style={sharedStyles.commentBody}>{item.body}</Text>
