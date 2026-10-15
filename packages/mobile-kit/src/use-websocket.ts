@@ -48,7 +48,8 @@ export function useWebSocket({
   maxBackoffMs = 30_000,
 }: UseWebSocketOptions): UseWebSocketReturn {
   const [status, setStatus] = useState<WsStatus>('disconnected');
-  const wsRef = useRef<WebSocket | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const wsRef = useRef<any>(null);
   const attemptsRef = useRef(0);
   const backoffTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onEventRef = useRef(onEvent);
@@ -59,7 +60,8 @@ export function useWebSocket({
     const wsUrl = `${url}?token=${encodeURIComponent(token)}`;
     setStatus('connecting');
 
-    let ws: WebSocket;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ws: any;
     try {
       ws = new WebSocket(wsUrl);
     } catch {
@@ -73,7 +75,8 @@ export function useWebSocket({
       setStatus('connected');
     };
 
-    ws.onmessage = (e: MessageEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ws.onmessage = (e: any) => {
       if (typeof e.data !== 'string') return;
       try {
         const event = JSON.parse(e.data) as WsIncomingEvent;

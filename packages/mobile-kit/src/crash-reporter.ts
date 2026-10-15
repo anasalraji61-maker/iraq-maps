@@ -33,7 +33,7 @@ function makeConsoleCrashReporter(): CrashReporterInstance {
     init() {
       // Attach to the global unhandledrejection event in dev/web mode.
       if (typeof globalThis !== 'undefined' && 'addEventListener' in globalThis) {
-        (globalThis as typeof globalThis & { addEventListener: (t: string, h: (e: PromiseRejectionEvent) => void) => void })
+        (globalThis as typeof globalThis & { addEventListener: (t: string, h: (e: { reason: unknown }) => void) => void })
           .addEventListener('unhandledrejection', (e) => {
             console.error('[CrashReporter] Unhandled promise rejection:', e.reason);
           });

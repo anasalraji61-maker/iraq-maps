@@ -17,6 +17,16 @@
 import { useEffect } from 'react';
 import { Keyboard } from 'react-native';
 
+// DOM types used for Expo Web support; declared locally to avoid adding 'dom'
+// lib to the tsconfig (which would conflict with RN globals).
+declare interface KeyboardEvent {
+  metaKey: boolean;
+  ctrlKey: boolean;
+  key: string;
+  preventDefault(): void;
+}
+declare const document: { addEventListener(e: string, h: (ev: KeyboardEvent) => void): void; removeEventListener(e: string, h: (ev: KeyboardEvent) => void): void } | undefined;
+
 interface ShortcutHandlers {
   /** Triggered by Cmd+N. */
   onNewPost?: () => void;
