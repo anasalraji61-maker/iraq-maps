@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { COLORS, getTypeBadgeColors, HashtagText, sharedStyles } from './shared';
+import { COLORS, formatRelativeTime, getTypeBadgeColors, HashtagText, sharedStyles } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -47,7 +47,7 @@ function HashtagPostCard({ post, onPress, onHashtagPress }: HashtagPostCardProps
       style={styles.postCard}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.postMeta}>{post.authorId.slice(0, 8)} · {post.createdAt.slice(0, 10)}</Text>
+        <Text style={styles.postMeta}>{post.authorId.slice(0, 8)} · {formatRelativeTime(post.createdAt, t)}</Text>
         <View style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}>
           <Text style={[styles.typeBadgeText, { color: badgeColors.text }]}>
             {TYPE_LABEL_KEYS[post.type] ?? post.type}
