@@ -1,0 +1,47 @@
+Iraq Smart Maps — Your Intelligent Guide to Baghdad
+
+Explore Baghdad with a full Arabic map powered by OpenStreetMap, plus an AI assistant that understands Iraqi dialect and helps you plan your day.
+
+🗺️ MAP & SEARCH
+• Interactive map in Arabic and Kurdish Sorani
+• Search restaurants, hospitals, hotels, landmarks — with Iraqi spelling normalization
+• One tap to center on your current location
+• Optional satellite imagery layer
+
+🧭 DIRECTIONS & NAVIGATION
+• Car and walking routes with distance and ETA
+• Turn-by-turn navigation with Arabic voice instructions
+• Automatic rerouting when you go off-track
+• Recent routes saved in My Activity
+
+🤖 AI ASSISTANT (Arabic)
+• Ask in colloquial Iraqi: "Where's a good restaurant near me?" or "Plan a day in Rusafa"
+• Suggests 3–7 real, documented places with prices and crowd levels
+• Plans a full day with a logical geographic route
+• Contacts businesses on your behalf — only after your confirmation
+
+💬 MESSAGING
+• Send an inquiry to up to 5 places at once
+• Receive business replies directly in the app
+• WhatsApp handoff option for businesses that prefer it
+
+🏪 PROVIDER (BUSINESS) MODE
+• Register your business or claim its OSM listing
+• Add photos, hours, prices, and social links
+• Manage customer inquiries from your inbox
+• Full control over which data is shown publicly
+
+📸 DISCOVER BAGHDAD
+• Browse photos from verified businesses and users
+• Like, comment, and share posts
+• Tap any post to open its location on the map
+
+🔒 PRIVACY & SECURITY
+• We do not sell or share your data with advertisers
+• Delete your account and all data anytime from Settings
+• Location is only sent to the server when you search or navigate
+
+Built on OpenStreetMap © OpenStreetMap contributors.
+
+---
+Support: support@iraqmaps.iq

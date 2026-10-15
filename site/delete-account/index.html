@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حذف الحساب — خرائط العراق</title>
+  <style>
+    :root {
+      --brand: #1a6b3a;
+      --bg: #f8faf8;
+      --text: #1a1a1a;
+      --muted: #555;
+      --border: #dde8dd;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    header {
+      background: var(--brand);
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 600; }
+    main {
+      max-width: 680px;
+      margin: 2rem auto;
+      padding: 0 1rem 4rem;
+    }
+    h2 { font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--brand); }
+    p { color: var(--muted); margin-bottom: 1rem; }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .steps { counter-reset: step; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      padding: 0.6rem 0 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .steps li:last-child { border-bottom: none; }
+    .steps li::before {
+      content: counter(step);
+      background: var(--brand);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .warning {
+      background: var(--danger-bg);
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      color: var(--danger);
+      font-size: 0.92rem;
+      margin-bottom: 1.5rem;
+    }
+    .warning strong { display: block; margin-bottom: 0.25rem; }
+    .alt { font-size: 0.9rem; color: var(--muted); }
+    a { color: var(--brand); }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 1.5rem 1rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <circle cx="14" cy="14" r="14" fill="#ffffff22"/>
+      <path d="M14 5a7 7 0 0 0-7 7c0 5.25 7 11 7 11s7-5.75 7-11a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#fff"/>
+    </svg>
+    <h1>خرائط العراق</h1>
+  </header>
+
+  <main>
+    <h2>حذف الحساب وبياناتك</h2>
+    <p>يمكنك حذف حسابك في خرائط العراق وجميع بياناتك المرتبطة به بشكل كامل ونهائي.</p>
+
+    <div class="warning">
+      <strong>⚠️ تنبيه: هذا الإجراء لا يمكن التراجع عنه</strong>
+      بعد حذف حسابك لن تتمكن من استعادة محادثاتك أو الأماكن المحفوظة أو صور مشاريعك التجارية.
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;font-size:1rem;">حذف الحساب من داخل التطبيق</h3>
+      <ol class="steps">
+        <li>افتح تطبيق <strong>خرائط العراق</strong> على هاتفك</li>
+        <li>اضغط على تبويب <strong>حسابي</strong> في أسفل الشاشة</li>
+        <li>اضغط على <strong>الخصوصية والبيانات</strong></li>
+        <li>اضغط على <strong>حذف الحساب</strong></li>
+        <li>اقرأ التحذير واضغط <strong>تأكيد الحذف</strong></li>
+        <li>أدخل رمز التحقق المرسل إلى هاتفك لتأكيد هويتك</li>
+        <li>سيُحذف حسابك وجميع بياناتك فوراً</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:1rem;font-size:1rem;">ماذا يحدث بعد الحذف؟</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem;">
+        <li>✅ يُحذف رقم هاتفك واسمك فوراً</li>
+        <li>✅ تُحذف محادثاتك ورسائلك فوراً</li>
+        <li>✅ تُحذف الأماكن المحفوظة ونشاطك فوراً</li>
+        <li>✅ تُحذف صور نشاطك التجاري والبيانات المرتبطة به فوراً</li>
+        <li>⏳ تُحذف النسخ الاحتياطية خلال 30 يوماً</li>
+      </ul>
+    </div>
+
+    <p class="alt">
+      إذا لم تتمكن من الوصول إلى التطبيق أو تحتاج إلى مساعدة، تواصل معنا عبر البريد الإلكتروني:
+      <a href="mailto:support@iraqmaps.iq">support@iraqmaps.iq</a>
+      — سنُكمل الحذف يدوياً خلال 7 أيام عمل.
+    </p>
+  </main>
+
+  <footer>
+    خرائط العراق &nbsp;·&nbsp; <a href="https://iraqmaps.iq/privacy">سياسة الخصوصية</a> &nbsp;·&nbsp; <a href="https://iraqmaps.iq/terms">شروط الاستخدام</a>
+  </footer>
+</body>
+</html>

@@ -1,6 +1,7 @@
-# Android gate (ADR-0009): no EAS and no secrets. The release APKs are signed with the template debug key.
+# Android gate (ADR-0009): no EAS. The release APKs are signed with the production keystore when
+# KEYSTORE_BASE64/KEYSTORE_ALIAS/KEYSTORE_PASSWORD/KEY_PASSWORD secrets are set; otherwise the template debug key.
 # build: the arm64 APK people install, 40 MB budget, uploaded as a run artifact.
-# e2e:   an x86_64 e2e build against the API running inside the job, then every Maestro flow on an emulator.
+# e2e:   an x86_64 e2e build (always debug key — no production signing needed for tests).
 name: android
 on:
   push:
@@ -45,6 +46,11 @@ jobs:
         run: e2e/mobile/build-apk.sh arm64-v8a "$RUNNER_TEMP/iraq-maps-arm64-v8a.apk"
         env:
           EXPO_PUBLIC_APP_ENV: development # the APK people try on a phone: developer settings for the server URL
+          # Production keystore secrets (GitHub Secrets). When absent the debug key is used (CI on forks, dev).
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       - name: Check the APK size budget
         run: |
           bytes=$(stat -c %s "$RUNNER_TEMP/iraq-maps-arm64-v8a.apk")

@@ -1,0 +1,29 @@
+{
+  "_comment": "EAS is NOT used for building (ADR-0009: builds run in GitHub Actions). This file exists only to configure `eas submit` for uploading the AAB/APK to Google Play. The build artifact comes from the android.yml workflow artifact.",
+  "cli": {
+    "version": ">= 15.0.0",
+    "promptToInstall": false
+  },
+  "build": {
+    "_comment": "No EAS build profiles — see android.yml"
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "../../../secrets/google-play-service-account.json",
+        "_comment_serviceAccountKeyPath": "Place the Google Play service account JSON here (gitignored). See docs/play/data-safety.md for setup instructions.",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "rollout": 1,
+        "changesNotSentForReview": false
+      }
+    },
+    "internal": {
+      "android": {
+        "serviceAccountKeyPath": "../../../secrets/google-play-service-account.json",
+        "track": "internal",
+        "releaseStatus": "draft"
+      }
+    }
+  }
+}
