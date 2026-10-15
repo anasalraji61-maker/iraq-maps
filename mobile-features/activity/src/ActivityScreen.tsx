@@ -188,6 +188,16 @@ function NotificationsTab(): ReactElement {
     setItems((prev) => prev.map((n) => ({ ...n, readAt: n.readAt ?? new Date().toISOString() })));
   }, [api, items]);
 
+  // Auto-mark all notifications as read 1.5 s after the list loads (gives user time to see unread state).
+  // We intentionally omit markAllRead from deps so we fire once per load, not on every items change.
+  const markAllReadRef = useRef(markAllRead);
+  markAllReadRef.current = markAllRead;
+  useEffect(() => {
+    if (loading) return;
+    const timer = setTimeout(() => { void markAllReadRef.current(); }, 1500);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   const unreadCount = items.filter((n) => n.readAt === null).length;
 
   if (!session) {
