@@ -72,6 +72,15 @@
       "posts": "Posts",
       "rating": "Rating",
       "replyRate": "Reply rate"
+    },
+    "completeness": {
+      "title": "Profile Completeness",
+      "percent": "{pct}%",
+      "photo": "Add a photo",
+      "hours": "Add opening hours",
+      "phone": "Add phone number",
+      "description": "Add a description",
+      "location": "Set location"
     }
   },
   "common": {

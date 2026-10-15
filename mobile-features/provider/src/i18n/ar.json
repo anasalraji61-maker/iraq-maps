@@ -72,6 +72,15 @@
       "posts": "عدد المنشورات",
       "rating": "التقييم",
       "replyRate": "معدل الرد"
+    },
+    "completeness": {
+      "title": "اكتمال الملف التعريفي",
+      "percent": "{pct}٪",
+      "photo": "إضافة صورة",
+      "hours": "إضافة ساعات العمل",
+      "phone": "إضافة رقم الهاتف",
+      "description": "إضافة وصف",
+      "location": "تحديد الموقع"
     }
   },
   "common": {

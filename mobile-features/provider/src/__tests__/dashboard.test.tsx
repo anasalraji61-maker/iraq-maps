@@ -62,6 +62,45 @@ describe('ProviderDashboardScreen', () => {
   });
 });
 
+describe('ProviderDashboardScreen — completeness bar', () => {
+  afterEach(() => { jest.clearAllMocks(); });
+
+  it('renders completeness bar when provider data loads', async () => {
+    const api = {
+      providers: {
+        me: jest.fn(async () => ({
+          status: 200,
+          body: {
+            id: 'p1',
+            status: 'verified',
+            name: 'Test Biz',
+            category: 'food',
+            location: null,
+            phone: null,
+            claimedPlaceId: null,
+            hoursRaw: null,
+            prices: [],
+            links: [],
+            photos: [],
+            consents: [],
+            suspensionReason: null,
+          },
+        })),
+      },
+      discover: { listFeed: jest.fn(async () => ({ status: 200, body: { items: [], nextCursor: undefined } })) },
+    };
+    mockApi();
+    const session = {
+      state: { status: 'signedIn' as const, user: { id: UserId.parse('22222222-2222-2222-2222-222222222222'), name: 'Test', locale: 'ar' as const, roles: ['user'] as never[], createdAt: '2026-01-01T00:00:00.000Z' } },
+      signIn: jest.fn(async () => {}),
+      updateUser: jest.fn(),
+      signOut: jest.fn(async () => {}),
+    };
+    const view = await renderWithProviders(<ProviderDashboardScreen />, { api: api as never, session, locale: 'ar' });
+    await waitFor(() => expect(view.queryByTestId('provider-completeness')).toBeTruthy());
+  });
+});
+
 describe('ProviderInboxScreen — pull-to-refresh', () => {
   afterEach(() => { jest.clearAllMocks(); });
 

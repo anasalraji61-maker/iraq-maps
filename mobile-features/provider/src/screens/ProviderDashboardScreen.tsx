@@ -2,8 +2,8 @@ import { testIDs, type ProviderMe, type ProviderStatus } from '@iraq-maps/contra
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
@@ -50,6 +50,73 @@ interface AnalyticsData {
   /** 7-day inquiry counts [6 days ago … today], derived from inbox createdAt. Null until loaded. */
   inquiryDays: number[] | null;
 }
+
+// ─── Profile Completeness ─────────────────────────────────────────────────────
+
+interface CompletenessItem { key: 'photo' | 'hours' | 'phone' | 'description' | 'location'; done: boolean }
+
+function computeCompleteness(provider: ProviderMe): CompletenessItem[] {
+  return [
+    { key: 'photo', done: (provider.photos ?? []).length > 0 },
+    { key: 'hours', done: !!provider.hoursRaw },
+    { key: 'phone', done: !!provider.phone },
+    { key: 'description', done: (provider.prices ?? []).length > 0 || (provider.links ?? []).length > 0 },
+    { key: 'location', done: !!provider.location },
+  ];
+}
+
+function CompletenessBar({ provider, onEditPress }: { provider: ProviderMe; onEditPress: () => void }): ReactElement {
+  const items = computeCompleteness(provider);
+  const doneCount = items.filter((i) => i.done).length;
+  const pct = Math.round((doneCount / items.length) * 100);
+  const barAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(barAnim, { toValue: pct / 100, duration: 600, useNativeDriver: false }).start();
+  }, [barAnim, pct]);
+
+  const barColor = pct < 40 ? '#EF4444' : pct < 80 ? '#F59E0B' : '#10B981';
+  const missing = items.filter((i) => !i.done);
+
+  return (
+    <View style={completenessStyles.container} testID="provider-completeness">
+      <View style={completenessStyles.header}>
+        <RNText style={completenessStyles.title}>{t('dashboard.completeness.title')}</RNText>
+        <RNText style={[completenessStyles.pct, { color: barColor }]}>
+          {t('dashboard.completeness.percent', { pct })}
+        </RNText>
+      </View>
+      <View style={completenessStyles.track}>
+        <Animated.View
+          style={[completenessStyles.fill, { backgroundColor: barColor, width: barAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }]}
+          testID="completeness-fill"
+        />
+      </View>
+      {missing.length > 0 && (
+        <View style={completenessStyles.tips}>
+          {missing.slice(0, 3).map((item) => (
+            <RNText key={item.key} style={completenessStyles.tip} onPress={onEditPress}>
+              {'• '}{t(`dashboard.completeness.${item.key}`)}
+            </RNText>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const completenessStyles = StyleSheet.create({
+  container: { backgroundColor: '#F0F4FF', borderRadius: 12, padding: 14, gap: 8, marginVertical: 8 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { fontSize: 13, fontWeight: '600', color: '#333' },
+  pct: { fontSize: 14, fontWeight: '700' },
+  track: { height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: 4 },
+  tips: { gap: 4, marginTop: 2 },
+  tip: { fontSize: 12, color: '#1976D2' },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface AnalyticsCardProps {
   label: string;
@@ -192,6 +259,13 @@ export function ProviderDashboardScreen(): ReactElement {
       <Text variant="title">{t('dashboard.title')}</Text>
       <Text>{t('dashboard.status')}</Text>
       <Badge testID={testIDs.provider.status} label={t(`dashboard.${status}`)} />
+
+      {providerMe && (
+        <CompletenessBar
+          provider={providerMe}
+          onEditPress={() => router.push('/provider/edit-profile' as never)}
+        />
+      )}
 
       <View style={styles.grid}>
         <AnalyticsCard
