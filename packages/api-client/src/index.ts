@@ -66,7 +66,8 @@ export function createClient({ baseUrl, getTokens, onTokens, onServerError, fetc
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       body: body as any,
       // A superseded search aborts its request (fetchOptions: { signal }).
-      signal: fetchOptions?.signal,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      signal: fetchOptions?.signal as any,
       headers: accessToken ? { ...headers, authorization: `Bearer ${accessToken}` } : headers,
     });
     const json: unknown = res.headers.get('content-type')?.includes('json') ? await res.json() : undefined;

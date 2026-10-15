@@ -4,7 +4,8 @@
     "**/fixtures/**",
     "adapters/push-fcm/src/index.test.ts",
     "adapters/whatsapp-cloud/src/index.test.ts",
-    "modules/notifications/src/notifications.service.test.ts"
+    "modules/notifications/src/notifications.service.test.ts",
+    "e2e/mobile/scan-logs.mjs"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",

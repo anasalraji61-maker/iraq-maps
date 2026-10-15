@@ -239,10 +239,16 @@ export class ProvidersService {
     return this.toAdminView(provider, activeConsents, consentLedger, auditRows);
   }
 
-  async adminVerify(adminUserId: UserId, providerId: ProviderId): Promise<ProviderRow> {
+  /** Asserts provider exists and is pending; throws 404/409 otherwise. */
+  private async requirePending(providerId: ProviderId) {
     const provider = await this.getById(providerId);
     if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
     if (provider.status !== 'pending') throw new ConflictException({ code: 'not_pending', title: 'Provider is not pending' });
+    return provider;
+  }
+
+  async adminVerify(adminUserId: UserId, providerId: ProviderId): Promise<ProviderRow> {
+    await this.requirePending(providerId);
 
     const [updated] = await this.db.update(providerTable).set({ status: 'verified', updatedAt: new Date() }).where(eq(providerTable.id, providerId)).returning();
 
@@ -259,17 +265,28 @@ export class ProvidersService {
     return updated!;
   }
 
-  async adminSuspend(adminUserId: UserId, providerId: ProviderId, reason: string): Promise<ProviderRow> {
-    const provider = await this.getById(providerId);
-    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
-
+  /** Shared helper: suspend the provider record and write an audit entry. */
+  private async suspendAndAudit(
+    adminUserId: UserId,
+    providerId: ProviderId,
+    action: 'suspended' | 'rejected',
+    reason: string,
+  ): Promise<ProviderRow> {
     const [updated] = await this.db
       .update(providerTable)
       .set({ status: 'suspended', suspensionReason: reason, updatedAt: new Date() })
       .where(eq(providerTable.id, providerId))
       .returning();
+    await this.db.insert(auditLogTable).values({ providerId, action, actorUserId: adminUserId, reason });
+    return updated!;
+  }
 
-    await this.db.insert(auditLogTable).values({ providerId, action: 'suspended', actorUserId: adminUserId, reason });
+  async adminSuspend(adminUserId: UserId, providerId: ProviderId, reason: string): Promise<ProviderRow> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    // Note: suspend does not require pending status (admin can suspend verified providers too)
+
+    const updated = await this.suspendAndAudit(adminUserId, providerId, 'suspended', reason);
 
     await this.outbox.publish({
       id: randomUUID(),
@@ -278,7 +295,29 @@ export class ProvidersService {
       payload: { providerId: providerId as never },
     });
 
-    return updated!;
+    return updated;
+  }
+
+  async adminReject(adminUserId: UserId, providerId: ProviderId, reason: string): Promise<ProviderRow> {
+    await this.requirePending(providerId);
+    return this.suspendAndAudit(adminUserId, providerId, 'rejected', reason);
+  }
+
+  async adminAuditLog(limit = 100): Promise<Array<{ id: string; action: string; providerName: string; actorUserId: string; at: string }>> {
+    const rows = await this.db.execute<{ id: string; action: string; name: string | null; actor_user_id: string; at: Date }>(
+      sql`SELECT al.id, al.action, p.name, al.actor_user_id, al.at
+          FROM providers.audit_log al
+          LEFT JOIN providers.provider p ON p.id = al.provider_id
+          ORDER BY al.at DESC
+          LIMIT ${limit}`,
+    );
+    return rows.rows.map((r) => ({
+      id: r.id,
+      action: r.action,
+      providerName: r.name ?? '',
+      actorUserId: r.actor_user_id,
+      at: (r.at instanceof Date ? r.at : new Date(r.at)).toISOString(),
+    }));
   }
 
   async adminListQueue(status: string, cursor?: string): Promise<{ items: AdminProviderView[]; nextCursor: string | null }> {

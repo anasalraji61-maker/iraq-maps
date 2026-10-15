@@ -252,6 +252,30 @@ export const adminProvidersContract = c.router(
       body: z.object({ reason: text(500) }),
       responses: { 200: AdminProviderView, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
     },
+    reject: {
+      method: 'POST',
+      path: '/admin/providers/:id/reject',
+      pathParams: z.object({ id: ProviderId }),
+      body: z.object({ reason: text(500) }),
+      responses: { 200: AdminProviderView, 400: Problem, 401: Problem, 403: Problem, 404: Problem, 409: Problem },
+    },
+    auditLog: {
+      method: 'GET',
+      path: '/admin/providers/audit-log',
+      responses: {
+        200: z.array(
+          z.object({
+            id: z.string(),
+            action: z.string(),
+            providerNameAr: z.string(),
+            adminUser: z.string(),
+            timestamp: z.string(),
+          }),
+        ),
+        401: Problem,
+        403: Problem,
+      },
+    },
   },
   { pathPrefix: '/v1', strictStatusCodes: true },
 );

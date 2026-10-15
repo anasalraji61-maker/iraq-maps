@@ -135,6 +135,8 @@ export class AdminProvidersController {
         queue: async () => problem(403, 'forbidden', 'Admin role required'),
         verify: async () => problem(403, 'forbidden', 'Admin role required'),
         suspend: async () => problem(403, 'forbidden', 'Admin role required'),
+        reject: async () => problem(403, 'forbidden', 'Admin role required'),
+        auditLog: async () => problem(403, 'forbidden', 'Admin role required'),
       });
     }
 
@@ -145,22 +147,26 @@ export class AdminProvidersController {
       return { ok: true as const, view };
     };
 
+    /** Run an admin action, map 404/409 to problem responses, then return the updated view. */
+    const withView = async (fn: () => Promise<unknown>, id: string, opts = { conflict: false }) => {
+      try {
+        await fn();
+      } catch (e: unknown) {
+        if (isNestException(e, 404)) return problem(404, getCode(e), getMessage(e));
+        if (opts.conflict && isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
+        throw e;
+      }
+      const r = await getProviderOrProblem(id);
+      return r.ok ? { status: 200 as const, body: r.view } : r.prob;
+    };
+
     return tsRestHandler(adminProvidersContract, {
       queue: async ({ query }) => {
         const result = await this.svc.adminListQueue(query.status, query.cursor);
         return { status: 200, body: result };
       },
-      verify: async ({ params }) => {
-        try {
-          await this.svc.adminVerify(adminUserId, params.id);
-        } catch (e: unknown) {
-          if (isNestException(e, 404)) return problem(404, getCode(e), getMessage(e));
-          if (isNestException(e, 409)) return problem(409, getCode(e), getMessage(e));
-          throw e;
-        }
-        const r = await getProviderOrProblem(params.id);
-        return r.ok ? { status: 200, body: r.view } : r.prob;
-      },
+      verify: async ({ params }) =>
+        withView(() => this.svc.adminVerify(adminUserId, params.id), params.id, { conflict: true }),
       suspend: async ({ params, body }) => {
         try {
           await this.svc.adminSuspend(adminUserId, params.id, body.reason);
@@ -169,7 +175,20 @@ export class AdminProvidersController {
           throw e;
         }
         const r = await getProviderOrProblem(params.id);
-        return r.ok ? { status: 200, body: r.view } : r.prob;
+        return r.ok ? { status: 200 as const, body: r.view } : r.prob;
+      },
+      reject: async ({ params, body }) =>
+        withView(() => this.svc.adminReject(adminUserId, params.id, body.reason), params.id, { conflict: true }),
+      auditLog: async () => {
+        const rows = await this.svc.adminAuditLog(100);
+        const body = rows.map((r) => ({
+          id: r.id,
+          action: r.action,
+          providerNameAr: r.providerName,
+          adminUser: r.actorUserId,
+          timestamp: r.at,
+        }));
+        return { status: 200, body };
       },
     });
   }

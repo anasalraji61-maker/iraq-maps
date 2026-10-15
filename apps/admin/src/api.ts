@@ -47,6 +47,7 @@ export interface AssistantUsageEntry {
 export interface PaginatedProviders {
   items: Provider[];
   total: number;
+  nextCursor?: string | null;
 }
 
 function getToken(): string | null {
@@ -96,25 +97,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// --- Mock fallback (used when real API is unavailable) ---
+// --- Reported posts mock (no backend support yet) ---
 
-let mockProviders: Provider[] = Array.from({ length: 30 }, (_, i) => ({
-  id: String(i + 1),
-  nameAr: `متجر النموذج ${i + 1}`,
-  phone: `+9647${String(700000000 + i)}`,
-  submittedAt: new Date(Date.now() - i * 86_400_000).toISOString(),
-  status: 'pending_verification',
-}));
-
-const mockAudit: AuditEntry[] = Array.from({ length: 20 }, (_, i) => ({
-  id: String(i + 1),
-  action: i % 2 === 0 ? 'verify' : 'suspend',
-  providerNameAr: `متجر ${i + 1}`,
-  adminUser: 'admin@iraq-maps.iq',
-  timestamp: new Date(Date.now() - i * 3_600_000).toISOString(),
-}));
-
-let mockReportedPosts: ReportedPost[] = Array.from({ length: 8 }, (_, i) => ({
+const mockReportedPosts: ReportedPost[] = Array.from({ length: 8 }, (_, i) => ({
   id: String(i + 1),
   body: `هذا نص منشور تجريبي رقم ${i + 1} تم الإبلاغ عنه من قِبل المستخدمين.`,
   authorName: `مستخدم ${i + 1}`,
@@ -122,26 +107,11 @@ let mockReportedPosts: ReportedPost[] = Array.from({ length: 8 }, (_, i) => ({
   firstReportAt: new Date(Date.now() - i * 7_200_000).toISOString(),
 }));
 
-let useMock = false;
+let mockReportedPostsMutable = [...mockReportedPosts];
 
-async function tryRealOtpRequest(phone: string): Promise<void> {
-  try {
-    await request<void>('/v1/admin/auth/otp/request', {
-      method: 'POST',
-      body: JSON.stringify({ phone }),
-    });
-  } catch {
-    useMock = true;
-  }
-}
-
-async function tryRealOtpVerify(phone: string, code: string): Promise<string> {
-  const data = await request<{ token: string }>('/v1/admin/auth/otp/verify', {
-    method: 'POST',
-    body: JSON.stringify({ phone, code }),
-  });
-  return data.token;
-}
+// Cursor state for provider pagination
+let providerCursor: string | null = null;
+let providerCursorPage = 1;
 
 // --- Public API ---
 
@@ -151,29 +121,18 @@ export const api = {
   },
 
   async requestOtp(phone: string): Promise<void> {
-    await tryRealOtpRequest(phone);
+    await request<void>('/v1/admin/auth/otp/request', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    });
   },
 
   async verifyOtp(phone: string, code: string): Promise<void> {
-    if (useMock) {
-      if (code !== '123456') throw new Error('رمز غير صحيح');
-      setToken('mock-jwt-token');
-      return;
-    }
-    let realToken: string | undefined;
-    try {
-      realToken = await tryRealOtpVerify(phone, code);
-    } catch {
-      // API not yet wired — fall through to mock
-      useMock = true;
-    }
-    if (realToken !== undefined) {
-      setToken(realToken);
-      return;
-    }
-    // mock path
-    if (code !== '123456') throw new Error('رمز غير صحيح');
-    setToken('mock-jwt-token');
+    const data = await request<{ token: string }>('/v1/admin/auth/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ phone, code }),
+    });
+    setToken(data.token);
   },
 
   logout(): void {
@@ -181,110 +140,69 @@ export const api = {
   },
 
   async getPendingProviders(page: number): Promise<PaginatedProviders> {
-    try {
-      return await request<PaginatedProviders>(
-        `/v1/admin/providers?status=pending_verification&page=${page}&limit=25`,
-      );
-    } catch {
-      const start = (page - 1) * 25;
-      return {
-        items: mockProviders.slice(start, start + 25),
-        total: mockProviders.length,
-      };
+    // Backend uses cursor-based pagination; we track cursor by page progression.
+    // Reset cursor when navigating back to page 1.
+    if (page === 1) {
+      providerCursor = null;
+      providerCursorPage = 1;
     }
+    const cursorParam = providerCursor ? `&cursor=${encodeURIComponent(providerCursor)}` : '';
+    const result = await request<{ items: unknown[]; nextCursor: string | null }>(
+      `/v1/admin/providers?status=pending${cursorParam}`,
+    );
+    if (page > providerCursorPage && result.nextCursor) {
+      providerCursor = result.nextCursor;
+      providerCursorPage = page;
+    }
+    // Map AdminProviderView to Provider shape for the UI
+    const items: Provider[] = (result.items as Array<Record<string, unknown>>).map((p) => ({
+      id: String(p['id'] ?? ''),
+      nameAr: String(p['name'] ?? ''),
+      phone: String((p['phone'] as { number?: string } | null)?.number ?? ''),
+      submittedAt: String(p['submittedAt'] ?? ''),
+      status: String(p['status'] ?? ''),
+      mediaAssetId: (p['photos'] as string[] | undefined)?.[0] ?? undefined,
+    }));
+    return { items, total: items.length + (result.nextCursor ? 1 : 0), nextCursor: result.nextCursor };
   },
 
   async verifyProvider(id: string): Promise<void> {
-    try {
-      await request<void>(`/v1/admin/providers/${id}/verify`, { method: 'PATCH' });
-    } catch {
-      mockProviders = mockProviders.filter((p) => p.id !== id);
-      mockAudit.unshift({
-        id: String(Date.now()),
-        action: 'verify',
-        providerNameAr: `متجر ${id}`,
-        adminUser: 'admin@iraq-maps.iq',
-        timestamp: new Date().toISOString(),
-      });
-    }
+    await request<unknown>(`/v1/admin/providers/${id}/verify`, { method: 'POST' });
   },
 
   async suspendProvider(id: string): Promise<void> {
-    try {
-      await request<void>(`/v1/admin/providers/${id}/suspend`, { method: 'PATCH' });
-    } catch {
-      mockProviders = mockProviders.filter((p) => p.id !== id);
-      mockAudit.unshift({
-        id: String(Date.now()),
-        action: 'suspend',
-        providerNameAr: `متجر ${id}`,
-        adminUser: 'admin@iraq-maps.iq',
-        timestamp: new Date().toISOString(),
-      });
-    }
+    await request<unknown>(`/v1/admin/providers/${id}/suspend`, {
+      method: 'POST',
+      body: JSON.stringify({ reason: 'Suspended by admin' }),
+    });
   },
 
   async rejectProvider(id: string, reason: string): Promise<void> {
-    try {
-      await request<void>(`/v1/admin/providers/${id}/reject`, {
-        method: 'PATCH',
-        body: JSON.stringify({ reason }),
-      });
-    } catch {
-      mockProviders = mockProviders.filter((p) => p.id !== id);
-      mockAudit.unshift({
-        id: String(Date.now()),
-        action: 'reject',
-        providerNameAr: `متجر ${id}`,
-        adminUser: 'admin@iraq-maps.iq',
-        timestamp: new Date().toISOString(),
-      });
-    }
+    await request<unknown>(`/v1/admin/providers/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
   },
 
   async getMetrics(): Promise<Metrics> {
-    try {
-      return await request<Metrics>('/v1/admin/metrics');
-    } catch {
-      return {
-        totalUsers: 1240,
-        totalProviders: mockProviders.length + 47,
-        postsToday: 34,
-        pendingVerification: mockProviders.length,
-      };
-    }
+    return request<Metrics>('/v1/admin/metrics');
   },
 
   async getReportedPosts(): Promise<ReportedPost[]> {
-    try {
-      return await request<ReportedPost[]>('/v1/admin/posts/reported');
-    } catch {
-      return mockReportedPosts;
-    }
+    // No backend support yet — return mock data
+    return Promise.resolve(mockReportedPostsMutable);
   },
 
   async approvePost(id: string): Promise<void> {
-    try {
-      await request<void>(`/v1/admin/posts/${id}/approve`, { method: 'PATCH' });
-    } catch {
-      mockReportedPosts = mockReportedPosts.filter((p) => p.id !== id);
-    }
+    mockReportedPostsMutable = mockReportedPostsMutable.filter((p) => p.id !== id);
   },
 
   async removePost(id: string): Promise<void> {
-    try {
-      await request<void>(`/v1/admin/posts/${id}`, { method: 'DELETE' });
-    } catch {
-      mockReportedPosts = mockReportedPosts.filter((p) => p.id !== id);
-    }
+    mockReportedPostsMutable = mockReportedPostsMutable.filter((p) => p.id !== id);
   },
 
   async getAuditLog(): Promise<AuditEntry[]> {
-    try {
-      return await request<AuditEntry[]>('/v1/admin/providers/audit-log');
-    } catch {
-      return mockAudit;
-    }
+    return request<AuditEntry[]>('/v1/admin/providers/audit-log');
   },
 
   async getAssistantUsage(): Promise<AssistantUsageEntry[]> {
