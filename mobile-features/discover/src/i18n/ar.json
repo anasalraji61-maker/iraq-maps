@@ -67,7 +67,8 @@
       "offer": "عرض"
     },
     "verifiedBadge": "مزوّد موثّق",
-    "verifiedIcon": "✓"
+    "verifiedIcon": "✓",
+    "editCharCount": "{n} متبقٍ"
   },
   "create": {
     "title": "منشور جديد",

@@ -67,7 +67,8 @@
       "offer": "پێشکەش"
     },
     "verifiedBadge": "دابینکەری پشتڕاستکراو",
-    "verifiedIcon": "✓"
+    "verifiedIcon": "✓",
+    "editCharCount": "{n} ماوە"
   },
   "create": {
     "title": "پۆستی نوێ",

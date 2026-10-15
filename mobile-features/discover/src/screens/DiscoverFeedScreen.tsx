@@ -839,6 +839,9 @@ export function DiscoverFeedScreen(): ReactElement {
               autoFocus
               accessibilityLabel={t('post.editPlaceholder')}
             />
+            <Text style={[styles.editCharCount, editBody.length > 900 && styles.editCharCountWarn]}>
+              {t('post.editCharCount', { n: 1000 - editBody.length })}
+            </Text>
             <View style={styles.editModalActions}>
               <Pressable
                 style={styles.editModalCancel}
@@ -1107,7 +1110,9 @@ const styles = StyleSheet.create({
   editModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   editModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 20, width: '100%', maxWidth: 420 },
   editModalTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12, textAlign: 'center' },
-  editModalInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 15, minHeight: 80, textAlignVertical: 'top', marginBottom: 16 },
+  editModalInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 15, minHeight: 80, textAlignVertical: 'top', marginBottom: 4 },
+  editCharCount: { fontSize: 11, color: '#9E9E9E', textAlign: 'auto', marginBottom: 8 },
+  editCharCountWarn: { color: '#E65100', fontWeight: '600' },
   editModalActions: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   editModalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
   editModalCancelText: { fontSize: 14, color: '#555' },

@@ -67,7 +67,8 @@
       "offer": "Offer"
     },
     "verifiedBadge": "Verified provider",
-    "verifiedIcon": "✓"
+    "verifiedIcon": "✓",
+    "editCharCount": "{n} remaining"
   },
   "create": {
     "title": "New Post",
