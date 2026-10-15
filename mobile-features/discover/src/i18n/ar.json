@@ -134,7 +134,9 @@
     "reason_inappropriate": "محتوى غير لائق",
     "reason_misinformation": "معلومات مضللة",
     "reason_other": "أخرى",
-    "reportError": "تعذّر إرسال البلاغ. حاول مرة أخرى."
+    "reportError": "تعذّر إرسال البلاغ. حاول مرة أخرى.",
+    "deleteCommentTitle": "حذف التعليق",
+    "deleteCommentMsg": "هل تريد حذف هذا التعليق؟ لا يمكن التراجع عن هذا."
   },
   "userPosts": {
     "title": "منشورات المستخدم",

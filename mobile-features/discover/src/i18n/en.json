@@ -134,7 +134,9 @@
     "reason_inappropriate": "Inappropriate",
     "reason_misinformation": "Misinformation",
     "reason_other": "Other",
-    "reportError": "Could not send report. Please try again."
+    "reportError": "Could not send report. Please try again.",
+    "deleteCommentTitle": "Delete comment",
+    "deleteCommentMsg": "Delete this comment? This cannot be undone."
   },
   "userPosts": {
     "title": "User Posts",

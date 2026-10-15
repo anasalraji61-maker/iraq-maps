@@ -134,7 +134,9 @@
     "reason_inappropriate": "ناگونجاو",
     "reason_misinformation": "زانیاری هەڵە",
     "reason_other": "هیتر",
-    "reportError": "ناتوانرێ ڕاپۆرت بنێردرێت. دووبارە هەوڵبدەرەوە."
+    "reportError": "ناتوانرێ ڕاپۆرت بنێردرێت. دووبارە هەوڵبدەرەوە.",
+    "deleteCommentTitle": "سڕینەوەی کۆمێنت",
+    "deleteCommentMsg": "دەتەوێت ئەم کۆمێنتە بسڕیتەوە؟ ئەمە پووچەڵناکرێتەوە."
   },
   "userPosts": {
     "title": "پۆستەکانی بەکارهێنەر",

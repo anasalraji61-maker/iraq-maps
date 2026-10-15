@@ -296,6 +296,29 @@ export function PostDetailScreen(): ReactElement {
     );
   }, [post, api, router]);
 
+  const handleDeleteComment = useCallback((commentId: string) => {
+    if (!post) return;
+    Alert.alert(
+      t('postDetail.deleteCommentTitle'),
+      t('postDetail.deleteCommentMsg'),
+      [
+        { text: t('post.reportCancel'), style: 'cancel' as const },
+        {
+          text: t('post.deleteConfirmOk'),
+          style: 'destructive' as const,
+          onPress: () => {
+            void api.deleteComment({ params: { postId: post.id, commentId: commentId as Parameters<typeof api.deleteComment>[0]['params']['commentId'] } }).then((res) => {
+              if (res.status === 204) {
+                setComments((prev) => prev.filter((c) => c.id !== commentId));
+                setPost((prev) => prev ? { ...prev, commentCount: Math.max(0, prev.commentCount - 1) } : prev);
+              }
+            }).catch(() => { /* silent */ });
+          },
+        },
+      ],
+    );
+  }, [post, api]);
+
   const handleReportPress = useCallback(() => {
     if (!post) return;
     const reasons = ['spam', 'inappropriate', 'misinformation', 'other'] as const;
@@ -376,7 +399,7 @@ export function PostDetailScreen(): ReactElement {
             {sectionHeader}
           </>
         }
-        renderItem={({ item }) => <CommentCard item={item} onLike={handleLikeComment} smallAvatar t={t} />}
+        renderItem={({ item }) => <CommentCard item={item} onLike={handleLikeComment} onDelete={handleDeleteComment} currentUserId={currentUserId ?? undefined} smallAvatar t={t} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>{t('comments.empty')}</Text>
