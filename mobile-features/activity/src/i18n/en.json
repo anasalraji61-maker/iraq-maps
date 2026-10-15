@@ -8,6 +8,7 @@
   "loadError": "Failed to load",
   "retry": "Retry",
   "loginPrompt": "Sign in to see your activity",
+  "loadMore": "Load more",
   "empty": "No notifications yet",
   "emptySubtext": "Likes, comments, and messages will appear here",
   "emptyRoutes": "No recent routes",

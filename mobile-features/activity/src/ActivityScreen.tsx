@@ -132,11 +132,14 @@ function NotifRow({ item, onPress }: { item: NotifItem; onPress: (item: NotifIte
   );
 }
 
+const NOTIF_PAGE_SIZE = 15;
+
 function NotificationsTab(): ReactElement {
   const api = useApi();
   const session = useSession();
   const router = useRouter();
   const [items, setItems] = useState<NotifItem[]>([]);
+  const [visibleCount, setVisibleCount] = useState(NOTIF_PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -225,12 +228,27 @@ function NotificationsTab(): ReactElement {
         <EmptyState icon="🔔" title={t('empty')} subtitle={t('emptySubtext')} />
       ) : (
         <FlatList
-          data={items}
+          data={items.slice(0, visibleCount)}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setVisibleCount(NOTIF_PAGE_SIZE); void load(true); }} colors={['#1976D2']} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          onEndReached={() => {
+            if (visibleCount < items.length) setVisibleCount((c) => c + NOTIF_PAGE_SIZE);
+          }}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            visibleCount < items.length ? (
+              <Pressable
+                style={styles.loadMoreBtn}
+                onPress={() => setVisibleCount((c) => c + NOTIF_PAGE_SIZE)}
+                accessibilityRole="button"
+              >
+                <Text style={styles.loadMoreText}>{t('loadMore')}</Text>
+              </Pressable>
+            ) : null
+          }
         />
       )}
     </View>
@@ -759,6 +777,8 @@ const styles = StyleSheet.create({
   editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#1976D2', minWidth: 70, alignItems: 'center' },
   editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
   separator: { height: 1, backgroundColor: '#F0F0F0' },
+  loadMoreBtn: { alignItems: 'center', padding: 14 },
+  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 16, color: '#555', fontWeight: '500', textAlign: 'center', marginBottom: 6 },
   emptySubtext: { fontSize: 13, color: '#888', textAlign: 'center', lineHeight: 18 },
