@@ -20,6 +20,7 @@
     "quickReply3": "Best places in Baghdad",
     "quickReply4": "How do I get to...",
     "clearChat": "New Chat",
-    "clearChatA11y": "Start a new conversation"
+    "clearChatA11y": "Start a new conversation",
+    "charCount": "{{count}}/{{max}}"
   }
 }

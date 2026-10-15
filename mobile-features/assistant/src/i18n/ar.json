@@ -20,6 +20,7 @@
     "quickReply3": "أفضل الأماكن في بغداد",
     "quickReply4": "كيف أصل إلى...",
     "clearChat": "محادثة جديدة",
-    "clearChatA11y": "بدء محادثة جديدة"
+    "clearChatA11y": "بدء محادثة جديدة",
+    "charCount": "{{count}}/{{max}}"
   }
 }

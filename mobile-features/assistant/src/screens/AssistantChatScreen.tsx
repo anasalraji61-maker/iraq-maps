@@ -21,6 +21,9 @@ import { t } from '../strings';
 // Force RTL for Arabic
 I18nManager.forceRTL(true);
 
+const MAX_INPUT_LENGTH = 500;
+const CHAR_WARN_THRESHOLD = 400;
+
 function generateSessionId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -315,7 +318,13 @@ export function AssistantChatScreen(): ReactElement {
           multiline
           returnKeyType="send"
           onSubmitEditing={handleSend}
+          maxLength={MAX_INPUT_LENGTH}
         />
+        {inputText.length >= CHAR_WARN_THRESHOLD ? (
+          <Text style={[styles.charCount, inputText.length >= MAX_INPUT_LENGTH && styles.charCountMax]}>
+            {t('chat.charCount', { count: String(inputText.length), max: String(MAX_INPUT_LENGTH) })}
+          </Text>
+        ) : null}
         <Pressable
           testID={assistantTestIDs.sendButton}
           style={[styles.sendBtn, (!inputText.trim() || isLoading) && styles.sendBtnDisabled]}
@@ -582,6 +591,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'auto',
     color: '#222',
+  },
+  charCount: {
+    position: 'absolute',
+    bottom: 44,
+    insetInlineEnd: 72,
+    fontSize: 11,
+    color: '#E65100',
+  },
+  charCountMax: {
+    color: '#B00020',
+    fontWeight: '600',
   },
   sendBtn: {
     backgroundColor: '#1976D2',
