@@ -59,5 +59,12 @@
       "failed": "فشل",
       "handed_off": "تسليم يدوي"
     }
+  },
+  "time": {
+    "justNow": "الآن",
+    "minutesAgo": "منذ {n} د",
+    "hoursAgo": "منذ {n} س",
+    "today": "اليوم",
+    "yesterday": "أمس"
   }
 }

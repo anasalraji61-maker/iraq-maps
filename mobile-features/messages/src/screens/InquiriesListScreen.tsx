@@ -7,6 +7,21 @@ import { useMessagingClient } from '../client';
 import { useReadReceiptsMap } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
+/** Converts an ISO datetime string into a human-readable relative time label. */
+function fmtRelative(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 2) return t('time.justNow');
+  if (diffMin < 60) return t('time.minutesAgo', { n: diffMin });
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return t('time.hoursAgo', { n: diffH });
+  const diffDays = Math.floor(diffH / 24);
+  if (diffDays === 1) return t('time.yesterday');
+  if (diffDays < 2) return t('time.today');
+  // Fall back to locale date string for older items.
+  return new Date(iso).toLocaleDateString('ar', { day: 'numeric', month: 'short' });
+}
+
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
 
 function SkeletonLine({ width, height }: { width: number; height: number }): ReactElement {
@@ -189,7 +204,7 @@ export function InquiriesListScreen(): ReactElement {
                 <RNText style={isUnread ? { fontWeight: '700', fontSize: 14 } : { fontSize: 14 }}>{inq.text.slice(0, 80)}</RNText>
               </View>
               <View style={styles.meta}>
-                <RNText style={styles.muted}>{inq.createdAt.slice(0, 10)}</RNText>
+                <RNText style={styles.muted}>{fmtRelative(inq.createdAt)}</RNText>
                 {inq.targets.length > 0 ? <RNText style={styles.muted}>{placesLabel}</RNText> : null}
                 {badge ? (
                   <View style={[styles.badge, { backgroundColor: badge.color }]} accessibilityRole="text" accessibilityLabel={badge.label}>

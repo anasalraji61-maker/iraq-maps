@@ -59,5 +59,12 @@
       "failed": "سەرکەوتوو نەبوو",
       "handed_off": "دەستبەدەستکرا"
     }
+  },
+  "time": {
+    "justNow": "ئێستا",
+    "minutesAgo": "{n} خ پێش",
+    "hoursAgo": "{n} س پێش",
+    "today": "ئەمڕۆ",
+    "yesterday": "دوێنێ"
   }
 }

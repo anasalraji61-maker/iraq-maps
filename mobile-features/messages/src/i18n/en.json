@@ -59,5 +59,12 @@
       "failed": "Failed",
       "handed_off": "Manual handoff"
     }
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n}m ago",
+    "hoursAgo": "{n}h ago",
+    "today": "Today",
+    "yesterday": "Yesterday"
   }
 }
