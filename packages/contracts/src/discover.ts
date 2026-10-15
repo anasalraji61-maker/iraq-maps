@@ -138,6 +138,29 @@ export const discoverContract = c.router({
     },
     summary: 'Report a post for review',
   },
+  trending: {
+    method: 'GET',
+    path: '/discover/trending',
+    query: z.object({ limit: z.coerce.number().int().max(20).default(10) }),
+    responses: {
+      200: z.object({ items: z.array(DiscoverPost) }),
+    },
+    summary: 'Trending posts by engagement score (last 48h)',
+  },
+  searchPosts: {
+    method: 'GET',
+    path: '/discover/search',
+    query: z.object({
+      q: z.string().min(1).max(200),
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().max(20).default(10),
+    }),
+    responses: {
+      200: z.object({ items: z.array(DiscoverPost), nextCursor: z.string().optional() }),
+      400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+    },
+    summary: 'Full-text search across post bodies',
+  },
 });
 
 export const ReportedPostView = z.object({

@@ -120,6 +120,18 @@ export class DiscoverController {
           throw e;
         }
       },
+
+      trending: async ({ query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.trending(userId, query.limit);
+        return { status: 200, body: result };
+      },
+
+      searchPosts: async ({ query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.searchPosts(userId, query.q, query.cursor, query.limit);
+        return { status: 200, body: result };
+      },
     });
   }
 }

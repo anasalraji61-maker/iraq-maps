@@ -1,7 +1,7 @@
 import { CommentId, PortTokens, type EventBus, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
@@ -237,6 +237,66 @@ export class DiscoverService {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
     await this.db.update(postTable).set({ removedAt: new Date() }).where(eq(postTable.id, postId));
+  }
+
+  async trending(userId: UserId, limit = 10) {
+    // Score = likeCount * 2 + commentCount, only from posts in last 48 hours
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(
+        and(
+          isNull(postTable.removedAt),
+          sql`${postTable.createdAt} > NOW() - INTERVAL '48 hours'`,
+        ),
+      )
+      .orderBy(sql`(${postTable.likeCount} * 2 + ${postTable.commentCount}) DESC, ${postTable.createdAt} DESC`)
+      .limit(limit);
+
+    const postIds = rows.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+
+    return { items: rows.map((p) => this.toPostShape(p, likedSet.has(p.id))) };
+  }
+
+  async searchPosts(userId: UserId, query: string, cursor?: string, limit = 10) {
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(
+        and(
+          isNull(postTable.removedAt),
+          ilike(postTable.body, `%${query}%`),
+          cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined,
+        ),
+      )
+      .orderBy(desc(postTable.createdAt))
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    const postIds = items.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+
+    return {
+      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id))),
+      nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
+    };
   }
 
   private async getPostOrThrow(postId: PostIdType) {
