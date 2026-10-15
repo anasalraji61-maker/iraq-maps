@@ -69,11 +69,11 @@ describe('kindLabel', () => {
   });
 
   it('returns undefined for kind=place with no category', () => {
-    expect(kindLabel({ kind: 'place', category: undefined })).toBeUndefined();
+    expect(kindLabel({ kind: 'place', category: null })).toBeUndefined();
   });
 
   it('returns a non-empty string for kind=street', () => {
-    const result = kindLabel({ kind: 'street', category: undefined });
+    const result = kindLabel({ kind: 'street', category: null });
     expect(result).toBeTruthy();
   });
 });

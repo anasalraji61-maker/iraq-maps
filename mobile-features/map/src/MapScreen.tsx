@@ -387,7 +387,12 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                 {search.state?.status === 'failed' && search.state.message === globalT('common:errors.network')
                   ? <Banner kind="error" message={globalT('common:errors.network')} onRetry={search.retry} retryLabel={globalT('common:actions.retry')} />
                   : <LoadStatus {...search} />}
-                {search.state?.status === 'ready' && !filteredResults.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
+                {search.state?.status === 'ready' && !filteredResults.length ? (
+                  <>
+                    <Banner kind="info" message={t('search.empty', { query: isolate(q) })} />
+                    <NoResultsSuggestions city={city.id} near={near} lang={mapLang} api={api} onPress={openDetails} />
+                  </>
+                ) : null}
                 {search.state?.status === 'ready' && filteredResults.length > 0 ? (
                   <Text variant="caption" tone="muted">{t('search.resultCount', { count: String(filteredResults.length) })}</Text>
                 ) : null}
@@ -480,6 +485,55 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     </View>
   );
 }
+
+// ── No-results suggestions (feature: place suggestions) ──────────────────────
+
+interface NoResultsSuggestionsProps {
+  city: string;
+  near: number[];
+  lang: string;
+  api: ReturnType<typeof useApi>;
+  onPress: (id: string) => void;
+}
+
+function NoResultsSuggestions({ city, near, lang, api, onPress }: NoResultsSuggestionsProps): ReactElement | null {
+  const [items, setItems] = useState<PlaceSummary[]>([]);
+  const mapLang = lang as Locale;
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const nearStr = near.map((v) => v.toFixed(4)).join(',');
+        const res = await api.places.nearby({ query: { city, near: nearStr, radiusM: 1000, limit: 5 } });
+        if (res.status === 200 && !cancelled) setItems(res.body.items.slice(0, 5));
+      } catch { /* best-effort */ }
+    })();
+    return () => { cancelled = true; };
+  }, [city, near[0], near[1], lang]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <View style={noResSugStyles.container}>
+      <Text variant="caption" tone="muted">{t('search.noResultsSuggest')}</Text>
+      {items.map((place) => (
+        <PlaceSummaryCard
+          key={place.id}
+          name={`${categoryIcon(place)} ${pickName(place.names, mapLang)}`}
+          category={kindLabel(place)}
+          distance={place.distanceM === null ? undefined : formatDistance(place.distanceM)}
+          source={t('source.osm')}
+          onPress={() => onPress(place.id)}
+        />
+      ))}
+    </View>
+  );
+}
+
+const noResSugStyles = StyleSheet.create({
+  container: { gap: 4, marginTop: 8 },
+});
 
 const { color, space, radius, minTouch } = tokens;
 const styles = StyleSheet.create({
