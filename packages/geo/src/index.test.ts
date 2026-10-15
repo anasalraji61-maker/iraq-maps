@@ -1,6 +1,6 @@
 import type { BBox, LngLat } from '@iraq-maps/contracts';
 import { describe, expect, it } from 'vitest';
-import { bboxContains, bboxOf, cameraBounds, formatIraqiAddress, haversineM } from './index';
+import { bboxContains, bboxOf, bearing, cameraBounds, distanceToPolylineM, formatIraqiAddress, haversineM, nearestPointOnLine } from './index';
 
 const baghdad: LngLat = [44.3661, 33.3152];
 const erbil: LngLat = [44.0092, 36.1911];
@@ -82,5 +82,65 @@ describe('cameraBounds', () => {
     const bounds = cameraBounds(city);
     expect(bboxContains(bounds, [city[0], city[1]]) && bboxContains(bounds, [city[2], city[3]])).toBe(true);
     expect(cameraBounds([-180, -90, 180, 90])).toEqual([-180, -90, 180, 90]);
+  });
+});
+
+describe('bearing', () => {
+  it('north is 0°', () => {
+    // Due north: same longitude, higher latitude
+    const b = bearing([44.0, 33.0], [44.0, 34.0]);
+    expect(b).toBeCloseTo(0, 1);
+  });
+
+  it('east is approximately 90°', () => {
+    const b = bearing([44.0, 33.0], [45.0, 33.0]);
+    expect(b).toBeGreaterThan(89);
+    expect(b).toBeLessThan(91);
+  });
+
+  it('south is 180°', () => {
+    const b = bearing([44.0, 34.0], [44.0, 33.0]);
+    expect(b).toBeCloseTo(180, 1);
+  });
+
+  it('west is approximately 270°', () => {
+    const b = bearing([45.0, 33.0], [44.0, 33.0]);
+    expect(b).toBeGreaterThan(269);
+    expect(b).toBeLessThan(271);
+  });
+});
+
+describe('nearestPointOnLine', () => {
+  it('returns the single point when line has one point', () => {
+    const result = nearestPointOnLine([44.0, 33.0], [[44.1, 33.1]]);
+    expect(result.index).toBe(0);
+    expect(result.point[0]).toBeCloseTo(44.1, 5);
+  });
+
+  it('throws when line is empty', () => {
+    expect(() => nearestPointOnLine([44.0, 33.0], [])).toThrow(RangeError);
+  });
+
+  it('finds nearest point on a two-segment line', () => {
+    // Line: A(0,0) → B(1,0) → C(2,0), point at (0.5, 0.01) — nearest is midpoint of AB
+    const line: [number, number][] = [[0, 0], [1, 0], [2, 0]];
+    const result = nearestPointOnLine([0.5, 0.01], line);
+    expect(result.index).toBe(0);
+    expect(result.point[0]).toBeCloseTo(0.5, 3);
+    expect(result.point[1]).toBeCloseTo(0, 3);
+  });
+});
+
+describe('distanceToPolylineM', () => {
+  it('throws when line is empty', () => {
+    expect(() => distanceToPolylineM([44.0, 33.0], [])).toThrow(RangeError);
+  });
+
+  it('returns distance from point to nearest segment', () => {
+    // Point at Mosul city center, line slightly north-south
+    const line: [number, number][] = [[43.1, 36.3], [43.1, 36.4]];
+    const d = distanceToPolylineM([43.2, 36.35], line);
+    expect(d).toBeGreaterThan(0);
+    expect(d).toBeLessThan(20_000); // < 20 km
   });
 });
