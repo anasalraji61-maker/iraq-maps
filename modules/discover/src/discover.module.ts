@@ -3,8 +3,10 @@ import type { EventBus, ProviderDirectoryPort } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import { Module, type DynamicModule } from '@nestjs/common';
 import type { Redis } from 'ioredis';
-import { AdminDiscoverController, DiscoverController } from './discover.controller';
+import { AdminDiscoverController, DiscoverController, StoriesController } from './discover.controller';
 import { DiscoverService } from './discover.service';
+import { SocialController } from './social.controller';
+import { SocialService } from './social.service';
 import { SlidingWindowRateLimiter } from './rate-limiter';
 
 export interface DiscoverModuleOptions {
@@ -35,7 +37,7 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
   return {
     module: DiscoverModule,
     global: true,
-    controllers: [DiscoverController, AdminDiscoverController],
+    controllers: [DiscoverController, AdminDiscoverController, StoriesController, SocialController],
     providers: [
       { provide: 'DISCOVER_DB', useValue: opts.db },
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new NoopEventBus() },
@@ -46,7 +48,8 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
       { provide: PortTokens.ProviderDirectoryPort, useValue: opts.providerDirectory ?? null },
       { provide: 'DISCOVER_REDIS', useValue: opts.redis ?? null },
       DiscoverService,
+      SocialService,
     ],
-    exports: [DiscoverService],
+    exports: [DiscoverService, SocialService],
   };
 }

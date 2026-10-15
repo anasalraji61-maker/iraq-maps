@@ -1,4 +1,14 @@
 export { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
+// Social features
+export { EventsScreen } from './screens/EventsScreen';
+export { EventDetailScreen } from './screens/EventDetailScreen';
+export { CreateEventScreen } from './screens/CreateEventScreen';
+export { ChallengesScreen } from './screens/ChallengesScreen';
+export { ChallengeDetailScreen } from './screens/ChallengeDetailScreen';
+export { MarketplaceScreen } from './screens/MarketplaceScreen';
+export { ListingDetailScreen } from './screens/ListingDetailScreen';
+export { CreateListingScreen } from './screens/CreateListingScreen';
+export { MyListingsScreen } from './screens/MyListingsScreen';
 export { CreatePostScreen } from './screens/CreatePostScreen';
 export { CommentsScreen } from './screens/CommentsScreen';
 export { PostDetailScreen } from './screens/PostDetailScreen';
@@ -13,3 +23,7 @@ export { BlockedUsersScreen } from './screens/BlockedUsersScreen';
 export { FollowedUsersScreen } from './screens/FollowedUsersScreen';
 export { useCollections } from './useCollections';
 export { GifPicker } from './screens/GifPicker';
+export { StoriesBar } from './screens/StoriesBar';
+export { StoryViewerScreen, StoryViewer } from './screens/StoryViewerScreen';
+export { CreateStoryScreen } from './screens/CreateStoryScreen';
+export { useStoriesClient } from './storiesClient';

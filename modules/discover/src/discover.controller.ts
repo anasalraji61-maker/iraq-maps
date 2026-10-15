@@ -1,4 +1,4 @@
-import { type AuthPrincipal, type PostIdType, type UserId, CommentId, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
+import { type AuthPrincipal, type PostIdType, type UserId, CommentId, adminDiscoverContract, discoverContract, storiesContract, type StoryIdType } from '@iraq-maps/contracts';
 import { type z } from 'zod';
 type CommentIdType = z.infer<typeof CommentId>;
 import { Controller, Inject, Optional, Req } from '@nestjs/common';
@@ -330,6 +330,48 @@ export class AdminDiscoverController {
         } catch (e: unknown) {
           if (isNotFound(e)) return problem(404, 'not_found', 'Post not found');
           throw e;
+        }
+      },
+    });
+  }
+}
+
+@Controller()
+export class StoriesController {
+  constructor(private readonly svc: DiscoverService) {}
+
+  @TsRestHandler(storiesContract)
+  handleStories(@Req() req: AuthedRequest) {
+    const userId = req.principal?.userId;
+
+    return tsRestHandler(storiesContract, {
+      createStory: async ({ body }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const story = await this.svc.createStory(userId, body.mediaUrl, body.mediaType, body.duration);
+        return { status: 201, body: story };
+      },
+      getFeed: async () => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.getStoriesFeed(userId);
+        return { status: 200, body: result };
+      },
+      deleteStory: async ({ params }) => {
+        if (!userId) return problem(403, 'forbidden', 'Authentication required') as never;
+        try {
+          await this.svc.deleteStory(userId, params.storyId as StoryIdType);
+          return { status: 204, body: undefined };
+        } catch (e) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Story not found') as never;
+          return problem(403, 'forbidden', 'Not your story') as never;
+        }
+      },
+      markViewed: async ({ params }) => {
+        if (!userId) return { status: 204, body: undefined };
+        try {
+          await this.svc.markStoryViewed(userId, params.storyId as StoryIdType);
+          return { status: 204, body: undefined };
+        } catch {
+          return problem(404, 'not_found', 'Story not found') as never;
         }
       },
     });

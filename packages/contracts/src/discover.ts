@@ -440,3 +440,80 @@ export type PostIdType = z.infer<typeof PostId>;
 export type DiscoverPostType = z.infer<typeof DiscoverPost>;
 export type PostEditEntryType = z.infer<typeof PostEditEntry>;
 export type UserSearchResultType = z.infer<typeof UserSearchResult>;
+
+// ─── Stories ──────────────────────────────────────────────────────────────────
+
+export const StoryId = z.string().uuid().brand('StoryId');
+export type StoryId = z.infer<typeof StoryId>;
+
+export const Story = z.object({
+  id: StoryId,
+  authorId: UserId,
+  mediaUrl: z.string().url(),
+  mediaType: z.enum(['image', 'video']),
+  duration: z.number().int().min(1).max(60).default(5),
+  expiresAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  /** Whether the current user has viewed this story */
+  viewedByMe: z.boolean().default(false),
+});
+export type StoryType = z.infer<typeof Story>;
+
+export const StoryAuthor = z.object({
+  userId: UserId,
+  displayName: z.string(),
+  stories: z.array(Story),
+  hasUnviewed: z.boolean(),
+});
+export type StoryAuthorType = z.infer<typeof StoryAuthor>;
+
+export const storiesContract = c.router({
+  createStory: {
+    method: 'POST',
+    path: '/discover/stories',
+    body: z.object({
+      mediaUrl: z.string().url(),
+      mediaType: z.enum(['image', 'video']),
+      duration: z.number().int().min(1).max(60).optional(),
+    }),
+    responses: {
+      201: Story,
+      400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+      401: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(401), code: z.string() }),
+    },
+    summary: 'Create a new story (expires after 24h)',
+  },
+  getFeed: {
+    method: 'GET',
+    path: '/discover/stories/feed',
+    responses: {
+      200: z.object({ authors: z.array(StoryAuthor) }),
+      401: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(401), code: z.string() }),
+    },
+    summary: 'Active stories from followed users + own stories',
+  },
+  deleteStory: {
+    method: 'DELETE',
+    path: '/discover/stories/:storyId',
+    pathParams: z.object({ storyId: StoryId }),
+    responses: {
+      204: z.undefined(),
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Delete own story',
+  },
+  markViewed: {
+    method: 'POST',
+    path: '/discover/stories/:storyId/view',
+    pathParams: z.object({ storyId: StoryId }),
+    body: z.object({}),
+    responses: {
+      204: z.undefined(),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Mark a story as viewed by current user',
+  },
+});
+
+export type StoryIdType = z.infer<typeof StoryId>;

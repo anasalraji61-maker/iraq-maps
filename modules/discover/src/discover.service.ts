@@ -1,12 +1,12 @@
-import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId } from '@iraq-maps/contracts';
+import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId, type StoryIdType } from '@iraq-maps/contracts';
 import { writeAdminAuditLog, type Db } from '@iraq-maps/db-kit';
 import { Inject, Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
-import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, ilike, inArray, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
 import type { Redis } from 'ioredis';
-import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, userFollowTable } from './schema';
+import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, storyTable, storyViewTable, userFollowTable } from './schema';
 import { WordFilter } from './word-filter';
 
 type CommentIdType = z.infer<typeof CommentId>;
@@ -831,6 +831,107 @@ export class DiscoverService {
       authorVerified,
       isPinned: post.isPinned ?? false,
       createdAt: post.createdAt.toISOString(),
+    };
+  }
+
+  // ─── Stories ──────────────────────────────────────────────────────────────
+
+  async createStory(userId: UserId, mediaUrl: string, mediaType: 'image' | 'video', duration = 5) {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const [story] = await this.db
+      .insert(storyTable)
+      .values({ authorId: userId, mediaUrl, mediaType, duration, expiresAt })
+      .returning();
+    return this.toStoryShape(story!, false);
+  }
+
+  async getStoriesFeed(userId: UserId) {
+    const now = new Date();
+    // Get followed user IDs
+    const follows = await this.db
+      .select({ followedId: userFollowTable.followeeId })
+      .from(userFollowTable)
+      .where(eq(userFollowTable.followerId, userId));
+    const followedIds = follows.map((f) => f.followedId);
+    // Include own stories
+    const authorIds = [...new Set([userId, ...followedIds])];
+
+    if (authorIds.length === 0) return { authors: [] };
+
+    const stories = await this.db
+      .select()
+      .from(storyTable)
+      .where(and(inArray(storyTable.authorId, authorIds), gt(storyTable.expiresAt, now)))
+      .orderBy(storyTable.authorId, storyTable.createdAt);
+
+    if (stories.length === 0) return { authors: [] };
+
+    const storyIds = stories.map((s) => s.id);
+    const views = await this.db
+      .select({ storyId: storyViewTable.storyId })
+      .from(storyViewTable)
+      .where(and(eq(storyViewTable.userId, userId), inArray(storyViewTable.storyId, storyIds)));
+    const viewedSet = new Set(views.map((v) => v.storyId));
+
+    // Group by author
+    const byAuthor = new Map<string, typeof stories>();
+    for (const s of stories) {
+      const list = byAuthor.get(s.authorId) ?? [];
+      list.push(s);
+      byAuthor.set(s.authorId, list);
+    }
+
+    const authors = Array.from(byAuthor.entries()).map(([authorId, authorStories]) => {
+      const shaped = authorStories.map((s) => this.toStoryShape(s, viewedSet.has(s.id)));
+      return {
+        userId: authorId as UserId,
+        displayName: authorId, // caller can join identity
+        stories: shaped,
+        hasUnviewed: shaped.some((s) => !s.viewedByMe),
+      };
+    });
+
+    // Sort: own first, then by hasUnviewed
+    authors.sort((a, b) => {
+      if (a.userId === userId) return -1;
+      if (b.userId === userId) return 1;
+      return (b.hasUnviewed ? 1 : 0) - (a.hasUnviewed ? 1 : 0);
+    });
+
+    return { authors };
+  }
+
+  async deleteStory(userId: UserId, storyId: StoryIdType) {
+    const [story] = await this.db.select().from(storyTable).where(eq(storyTable.id, storyId)).limit(1);
+    if (!story) throw new NotFoundException('Story not found');
+    if (story.authorId !== userId) throw new UnprocessableEntityException('Not your story');
+    await this.db.delete(storyTable).where(eq(storyTable.id, storyId));
+  }
+
+  async markStoryViewed(userId: UserId, storyId: StoryIdType) {
+    const now = new Date();
+    const [story] = await this.db
+      .select()
+      .from(storyTable)
+      .where(and(eq(storyTable.id, storyId), gt(storyTable.expiresAt, now)))
+      .limit(1);
+    if (!story) throw new NotFoundException('Story not found or expired');
+    await this.db
+      .insert(storyViewTable)
+      .values({ storyId, userId })
+      .onConflictDoNothing();
+  }
+
+  private toStoryShape(story: typeof storyTable.$inferSelect, viewedByMe: boolean) {
+    return {
+      id: story.id as StoryIdType,
+      authorId: story.authorId as UserId,
+      mediaUrl: story.mediaUrl,
+      mediaType: story.mediaType as 'image' | 'video',
+      duration: story.duration,
+      expiresAt: story.expiresAt.toISOString(),
+      createdAt: story.createdAt.toISOString(),
+      viewedByMe,
     };
   }
 

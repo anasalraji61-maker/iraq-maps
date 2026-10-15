@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgSchema, text, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core';
+import { boolean, doublePrecision, index, integer, numeric, pgSchema, text, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core';
 
 export const discoverSchema = pgSchema('discover');
 
@@ -160,4 +160,136 @@ export const postEditHistoryTable = discoverSchema.table(
     editedAt: timestamp('edited_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('post_edit_history_post_id_idx').on(t.postId)],
+);
+
+// ─── Stories ──────────────────────────────────────────────────────────────────
+
+export const storyTable = discoverSchema.table(
+  'story',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    authorId: uuid('author_id').notNull(),
+    mediaUrl: text('media_url').notNull(),
+    mediaType: text('media_type').notNull().$type<'image' | 'video'>(),
+    duration: integer('duration').notNull().default(5),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('story_author_id_idx').on(t.authorId),
+    index('story_expires_at_idx').on(t.expiresAt),
+  ],
+);
+
+export const storyViewTable = discoverSchema.table(
+  'story_view',
+  {
+    storyId: uuid('story_id').notNull().references(() => storyTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    viewedAt: timestamp('viewed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.storyId, t.userId] }),
+    index('story_view_user_id_idx').on(t.userId),
+  ],
+);
+
+// ─── Events ──────────────────────────────────────────────────────────────────
+
+export const eventTable = discoverSchema.table(
+  'event',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organizerId: uuid('organizer_id').notNull(),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    lat: doublePrecision('lat').notNull(),
+    lng: doublePrecision('lng').notNull(),
+    address: text('address').notNull().default(''),
+    startTime: timestamp('start_time', { withTimezone: true }).notNull(),
+    endTime: timestamp('end_time', { withTimezone: true }).notNull(),
+    maxAttendees: integer('max_attendees'),
+    imageUrl: text('image_url'),
+    category: text('category').notNull().default('other'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('event_organizer_idx').on(t.organizerId),
+    index('event_start_time_idx').on(t.startTime),
+    index('event_category_idx').on(t.category),
+  ],
+);
+
+export const eventRsvpTable = discoverSchema.table(
+  'event_rsvp',
+  {
+    eventId: uuid('event_id').notNull().references(() => eventTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.userId] }),
+    index('event_rsvp_user_idx').on(t.userId),
+  ],
+);
+
+// ─── Challenges ───────────────────────────────────────────────────────────────
+
+export const challengeTable = discoverSchema.table(
+  'challenge',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    type: text('type').notNull().default('checkin'),
+    targetCount: integer('target_count').notNull().default(1),
+    reward: text('reward'),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('challenge_starts_at_idx').on(t.startsAt),
+    index('challenge_ends_at_idx').on(t.endsAt),
+  ],
+);
+
+export const challengeProgressTable = discoverSchema.table(
+  'challenge_progress',
+  {
+    challengeId: uuid('challenge_id').notNull().references(() => challengeTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    progress: integer('progress').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.challengeId, t.userId] }),
+    index('challenge_progress_challenge_idx').on(t.challengeId),
+  ],
+);
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+
+export const listingTable = discoverSchema.table(
+  'listing',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sellerId: uuid('seller_id').notNull(),
+    sellerName: text('seller_name').notNull().default(''),
+    title: text('title').notNull(),
+    description: text('description').notNull().default(''),
+    price: numeric('price', { precision: 18, scale: 2 }).notNull().default('0'),
+    currency: text('currency').notNull().default('IQD'),
+    category: text('category').notNull().default('other'),
+    images: text('images').array().notNull().default([]),
+    lat: doublePrecision('lat'),
+    lng: doublePrecision('lng'),
+    status: text('status').notNull().default('active'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('listing_seller_id_idx').on(t.sellerId),
+    index('listing_category_idx').on(t.category),
+    index('listing_status_created_idx').on(t.status, t.createdAt),
+  ],
 );
