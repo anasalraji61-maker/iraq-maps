@@ -108,11 +108,13 @@
     "name": "اسم النشاط",
     "category": "الفئة",
     "hours": "أوقات العمل",
-    "hoursPlaceholder": "مثال: السبت-الخميس 9ص-10م",
+    "hoursPlaceholder": "مثال: السبت-الخميس 09:00-22:00",
     "photos": "الصور",
     "addPhoto": "إضافة صورة",
     "logo": "الشعار",
-    "changeLogo": "تغيير الشعار"
+    "changeLogo": "تغيير الشعار",
+    "hoursFormatHint": "الصيغة: السبت-الخميس 09:00-22:00",
+    "hoursInvalid": "صيغة الوقت غير مدعومة — استخدم HH:MM"
   },
   "errors": {
     "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",

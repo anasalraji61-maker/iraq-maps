@@ -7,6 +7,17 @@ import { ActivityIndicator, Image, Pressable, StyleSheet, View, Text as RNText }
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
 
+/**
+ * Returns true when the hours string looks like it uses HH:MM time format
+ * (i.e. every time token has a leading zero). Returns null for empty string.
+ */
+function hoursFormatOk(raw: string): boolean | null {
+  if (!raw.trim()) return null;
+  // Detect bare `8:00` or `9am` style (no leading zero or am/pm).
+  const badToken = /\b\d(?::\d\d)\b/.test(raw) || /\d(?:am|pm)/i.test(raw);
+  return !badToken;
+}
+
 const CATEGORIES: PlaceCategory[] = [
   'food', 'cafe', 'lodging', 'shopping', 'tourism', 'health',
   'finance', 'fuel', 'office', 'worship', 'education', 'government', 'transport', 'entertainment',
@@ -164,6 +175,11 @@ export function ProviderEditProfileScreen(): ReactElement {
         value={hoursRaw}
         onChangeText={setHoursRaw}
       />
+      {hoursFormatOk(hoursRaw) === false ? (
+        <RNText style={styles.hoursWarn}>{t('edit.hoursInvalid')}</RNText>
+      ) : (
+        <RNText style={styles.hoursHint}>{t('edit.hoursFormatHint')}</RNText>
+      )}
 
       {/* Photos */}
       <Text variant="subtitle">{t('edit.photos')}</Text>
@@ -227,4 +243,6 @@ const styles = StyleSheet.create({
   },
   photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   photoThumb: { width: 64, height: 64, borderRadius: 8 },
+  hoursHint: { fontSize: 12, color: '#6B7280', marginTop: -4, marginBottom: 4 },
+  hoursWarn: { fontSize: 12, color: '#DC2626', fontWeight: '600', marginTop: -4, marginBottom: 4 },
 });

@@ -108,11 +108,13 @@
     "name": "Business Name",
     "category": "Category",
     "hours": "Working Hours",
-    "hoursPlaceholder": "e.g. Sat-Thu 9am-10pm",
+    "hoursPlaceholder": "e.g. Sat-Thu 09:00-22:00",
     "photos": "Photos",
     "addPhoto": "Add Photo",
     "logo": "Logo",
-    "changeLogo": "Change Logo"
+    "changeLogo": "Change Logo",
+    "hoursFormatHint": "Format: Sat-Thu 09:00-22:00",
+    "hoursInvalid": "Time format not supported — use HH:MM"
   },
   "errors": {
     "provider_already_exists": "You already have a registered business.",
