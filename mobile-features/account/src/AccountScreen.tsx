@@ -149,6 +149,7 @@ export function AccountScreen(): ReactElement {
         <Text variant="subtitle">{state.user.name ?? t('profile.noName')}</Text>
       </View>
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
+      <ListItem title={t('savedPlaces.entry')} onPress={() => router.push(href('accountSavedPlaces'))} />
       <ListItem testID={testIDs.provider.entry} title={t('profile.registerBusiness')} onPress={() => router.push(href('providerRegister'))} />
       {languageItem}
       {settingsItem}

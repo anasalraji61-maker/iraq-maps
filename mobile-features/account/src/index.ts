@@ -10,3 +10,4 @@ export { PrivacyScreen } from './PrivacyScreen';
 export { TermsScreen } from './TermsScreen';
 export { NotifPrefsScreen } from './NotifPrefsScreen';
 export { ThemeScreen } from './ThemeScreen';
+export { SavedPlacesScreen } from './SavedPlacesScreen';

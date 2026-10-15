@@ -23,6 +23,7 @@ export const routes = {
   accountLicenses: '/account/licenses',
   accountNotifPrefs: '/account/notif-prefs',
   accountTheme: '/account/theme',
+  accountSavedPlaces: '/account/saved-places',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',

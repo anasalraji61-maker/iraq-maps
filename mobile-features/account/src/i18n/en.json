@@ -132,5 +132,14 @@
     "system": "System default",
     "light": "Light",
     "dark": "Dark"
+  },
+  "savedPlaces": {
+    "title": "Saved Places",
+    "entry": "Saved Places",
+    "empty": "No saved places yet",
+    "emptyBody": "Tap the save button on a place page to add it here",
+    "unsave": "Remove",
+    "unsaveA11y": "Remove {name} from saved places",
+    "savedAt": "Saved {date}"
   }
 }
