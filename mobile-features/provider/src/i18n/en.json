@@ -117,5 +117,14 @@
     "viewsTotal": "Total: {n}",
     "inquiriesTotal": "Total: {n}",
     "last7days": "Last 7 days"
+  },
+  "quickReply": {
+    "sectionLabel": "Quick Replies",
+    "welcome": "Hello! We are happy to serve you.",
+    "hours": "Our hours: Sat–Thu, 9 AM to 10 PM.",
+    "closed": "Sorry, we are currently closed. We will reply soon.",
+    "available": "Yes, it is available. Please visit us!",
+    "notAvailable": "Sorry, this item is currently unavailable.",
+    "callUs": "Feel free to call us for more details."
   }
 }

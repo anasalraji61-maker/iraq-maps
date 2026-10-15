@@ -137,4 +137,26 @@ describe('ProviderInboxDetailScreen', () => {
       expect(api.getInquiry.mock.calls.length).toBeGreaterThan(callsBefore);
     });
   });
+
+  it('quick reply chip fills the reply input', async () => {
+    mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
+    mockApi();
+    const view = await renderWithProviders(<ProviderInboxDetailScreen />);
+    await waitFor(() => expect(view.getByText('هل المطعم مفتوح الآن؟')).toBeTruthy());
+
+    // The "welcome" quick reply chip must be visible
+    const chip = view.getByTestId('provider.quickReply.welcome');
+    expect(chip).toBeTruthy();
+
+    // Tap the chip and verify the reply TextInput is updated (value becomes non-empty)
+    const inputBefore = view.getByTestId(messagingTestIDs.replyInput);
+    expect(inputBefore.props.value).toBe('');
+
+    fireEvent.press(chip);
+
+    await waitFor(() => {
+      const input = view.getByTestId(messagingTestIDs.replyInput);
+      expect(input.props.value).not.toBe('');
+    });
+  });
 });

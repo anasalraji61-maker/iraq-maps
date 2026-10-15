@@ -2,12 +2,16 @@ import { messagingTestIDs, type InquiryId } from '@iraq-maps/contracts';
 import { Banner, Button, Screen, Text } from '@iraq-maps/ui';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { Alert, I18nManager, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, I18nManager, Pressable, RefreshControl, ScrollView, StyleSheet, Text as RNText, TextInput, View } from 'react-native';
 
 I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
 import { useRequest } from '../request';
 import { t } from '../strings';
+
+/** Keys and labels for the built-in quick reply templates. */
+const QUICK_REPLY_KEYS = ['welcome', 'hours', 'closed', 'available', 'notAvailable', 'callUs'] as const;
+type QuickReplyKey = typeof QUICK_REPLY_KEYS[number];
 
 /** Provider inbox detail: full inquiry, reply thread, reply input and opt-out. */
 export function ProviderInboxDetailScreen(): ReactElement {
@@ -80,6 +84,25 @@ export function ProviderInboxDetailScreen(): ReactElement {
           </View>
         ) : null}
 
+        {/* Quick reply template chips */}
+        <View>
+          <RNText style={styles.quickReplyLabel}>{t('quickReply.sectionLabel')}</RNText>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+            {QUICK_REPLY_KEYS.map((key: QuickReplyKey) => (
+              <Pressable
+                key={key}
+                testID={`provider.quickReply.${key}`}
+                style={styles.chip}
+                onPress={() => setReplyText(t(`quickReply.${key}`))}
+                accessibilityRole="button"
+                accessibilityLabel={t(`quickReply.${key}`)}
+              >
+                <RNText style={styles.chipText} numberOfLines={1}>{t(`quickReply.${key}`)}</RNText>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+
         <TextInput
           testID={messagingTestIDs.replyInput}
           style={styles.input}
@@ -109,4 +132,8 @@ const styles = StyleSheet.create({
   bubble: { backgroundColor: '#F3F4F6', borderRadius: 12, padding: 12 },
   replyBubble: { backgroundColor: '#DBEAFE', borderRadius: 12, padding: 12, alignSelf: 'flex-end', maxWidth: '80%' },
   input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: 'top' },
+  quickReplyLabel: { fontSize: 12, color: '#6B7280', marginBottom: 6 },
+  chipRow: { gap: 8, paddingVertical: 4 },
+  chip: { backgroundColor: '#EFF6FF', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#BFDBFE', maxWidth: 200 },
+  chipText: { fontSize: 12, color: '#1D4ED8' },
 });
