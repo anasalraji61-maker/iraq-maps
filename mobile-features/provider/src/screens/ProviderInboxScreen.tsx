@@ -76,6 +76,8 @@ export function ProviderInboxScreen(): ReactElement {
   const [items, setItems] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
 
   // Client-side read tracking: new items arriving before the screen was opened
   // are considered unread. We treat items already present on first load as read;
@@ -89,6 +91,7 @@ export function ProviderInboxScreen(): ReactElement {
       if (res.status === 200) {
         const incoming = res.body.items;
         setItems(incoming);
+        setNextCursor(res.body.nextCursor);
 
         if (!initialLoaded.current) {
           // Mark all items on first load as read
@@ -101,6 +104,20 @@ export function ProviderInboxScreen(): ReactElement {
       setRefreshing(false);
     }
   }, [api]);
+
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await api.listProviderInquiries({ query: { cursor: nextCursor } });
+      if (res.status === 200) {
+        setItems((prev) => [...prev, ...res.body.items]);
+        setNextCursor(res.body.nextCursor);
+      }
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [api, nextCursor, loadingMore]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -153,6 +170,20 @@ export function ProviderInboxScreen(): ReactElement {
         testID="provider-inbox-list"
         data={items}
         keyExtractor={(item) => item.id}
+        onEndReached={() => { void loadMore(); }}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={nextCursor ? (
+          <Pressable
+            style={styles.loadMoreBtn}
+            onPress={() => { void loadMore(); }}
+            disabled={loadingMore}
+            accessibilityRole="button"
+          >
+            <RNText style={styles.loadMoreText}>
+              {loadingMore ? '…' : t('inbox.loadMore')}
+            </RNText>
+          </Pressable>
+        ) : null}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => {
           const isUnread = !readIds.has(item.id);
@@ -222,4 +253,6 @@ const styles = StyleSheet.create({
   muted: { color: '#6B7280' },
   urgencyChip: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
   urgencyText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
+  loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
+  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
 });

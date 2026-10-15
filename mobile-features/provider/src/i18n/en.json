@@ -92,7 +92,8 @@
     "timeMinsAgo": "{{n}}m ago",
     "timeHoursAgo": "{{n}}h ago",
     "timeDaysAgo": "{{n}}d ago",
-    "itemA11y": "Message from {userId}"
+    "itemA11y": "Message from {userId}",
+    "loadMore": "Load more"
   },
   "logo": {
     "title": "Business Logo",

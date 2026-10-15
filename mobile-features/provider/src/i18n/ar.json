@@ -92,7 +92,8 @@
     "timeMinsAgo": "منذ {{n}} دقيقة",
     "timeHoursAgo": "منذ {{n}} ساعة",
     "timeDaysAgo": "منذ {{n}} يوم",
-    "itemA11y": "رسالة من {userId}"
+    "itemA11y": "رسالة من {userId}",
+    "loadMore": "تحميل المزيد"
   },
   "logo": {
     "title": "شعار النشاط التجاري",
