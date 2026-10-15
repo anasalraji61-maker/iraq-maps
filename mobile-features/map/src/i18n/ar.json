@@ -122,7 +122,10 @@
     "deleteOwn": "حذف مراجعتي",
     "avgRating": "المتوسط: {avg} من 5 ({count} تقييم)",
     "textPlaceholder": "أضف ملاحظاتك (اختياري)",
-    "loginRequired": "سجّل الدخول لإضافة مراجعة"
+    "loginRequired": "سجّل الدخول لإضافة مراجعة",
+    "addPhotosLabel": "أضف صور (اختياري)",
+    "addPhoto": "إضافة صورة",
+    "removePhoto": "إزالة الصورة"
   },
   "lightbox": {
     "close": "إغلاق",

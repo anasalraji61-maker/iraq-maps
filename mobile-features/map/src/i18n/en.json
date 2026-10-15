@@ -122,7 +122,10 @@
     "deleteOwn": "Delete my review",
     "avgRating": "Average: {avg}/5 ({count} ratings)",
     "textPlaceholder": "Add your notes (optional)",
-    "loginRequired": "Sign in to leave a review"
+    "loginRequired": "Sign in to leave a review",
+    "addPhotosLabel": "Add photos (optional)",
+    "addPhoto": "Add photo",
+    "removePhoto": "Remove photo"
   },
   "lightbox": {
     "close": "Close",
