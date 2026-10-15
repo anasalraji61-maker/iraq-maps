@@ -3,7 +3,8 @@ import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { StyleSheet, View, Text as RNText } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
 
@@ -47,6 +48,7 @@ export function ProviderDashboardScreen(): ReactElement {
   const messagingApi = useMessagingApi();
   const [status, setStatus] = useState<ProviderStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     viewsToday: null,
     incomingMessages: null,
@@ -82,6 +84,12 @@ export function ProviderDashboardScreen(): ReactElement {
     }
   }, [api, messagingApi, session]);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([fetchStatus(), fetchAnalytics()]);
+    setRefreshing(false);
+  }, [fetchStatus, fetchAnalytics]);
+
   useEffect(() => {
     void fetchStatus();
     void fetchAnalytics();
@@ -109,7 +117,12 @@ export function ProviderDashboardScreen(): ReactElement {
   const fmt = (v: number | null): string => (v === null ? '—' : String(v));
 
   return (
-    <Screen scroll>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void handleRefresh(); }} colors={['#1976D2']} />}
+      >
       <Text variant="title">{t('dashboard.title')}</Text>
       <Text>{t('dashboard.status')}</Text>
       <Badge testID={testIDs.provider.status} label={t(`dashboard.${status}`)} />
@@ -152,11 +165,14 @@ export function ProviderDashboardScreen(): ReactElement {
         label={t('dashboard.editProfile')}
         onPress={() => router.push('/provider/edit-profile' as never)}
       />
-    </Screen>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#FFF' },
+  content: { padding: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
   card: {
     flexDirection: 'row',
