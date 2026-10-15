@@ -221,7 +221,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
           ],
         } as unknown as typeof AssistantModule,
         InsightsModule,
-        discoverModule({ db }),
+        discoverModule({ db, eventBus: bus }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [
