@@ -294,7 +294,7 @@ export function CreatePostScreen(): ReactElement {
               accessibilityLabel={t('create.addPhoto')}
             >
               {uploadProgress !== null ? (
-                <ActivityIndicator size="small" color="#1976D2" />
+                <ActivityIndicator size="small" color={COLORS.primary} />
               ) : (
                 <Text style={styles.addPhotoBtnText}>{t('create.addPhoto')}</Text>
               )}
@@ -325,7 +325,7 @@ export function CreatePostScreen(): ReactElement {
               placeholderTextColor="#999"
               textAlign="right"
             />
-            {searchingPlace ? <ActivityIndicator size="small" color="#1976D2" style={styles.placeSpinner} /> : null}
+            {searchingPlace ? <ActivityIndicator size="small" color={COLORS.primary} style={styles.placeSpinner} /> : null}
             {placeResults.length > 0 ? (
               <View style={styles.placeDropdown}>
                 {placeResults.map((p) => (

@@ -7,6 +7,8 @@ import { useMessagingClient } from '../client';
 import { useReadReceiptsMap } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
+const PRIMARY = '#1976D2';
+
 /** Converts an ISO datetime string into a human-readable relative time label. */
 function fmtRelative(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -83,11 +85,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     marginTop: 5,
   },
   loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
-  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
+  loadMoreText: { fontSize: 14, color: PRIMARY, fontWeight: '600' },
 });
 
 type BadgeInfo = { label: string; color: string } | null;
@@ -102,7 +104,7 @@ function getInquiryBadge(targets: Inquiry['targets']): BadgeInfo {
     return { label: t('list.badgeFailed'), color: '#C62828' };
   }
   if (statuses.some((s) => s === 'sent' || s === 'delivered' || s === 'read')) {
-    return { label: t('list.badgeSent'), color: '#1976D2' };
+    return { label: t('list.badgeSent'), color: PRIMARY };
   }
   return { label: t('list.badgePending'), color: '#F57C00' };
 }

@@ -81,10 +81,10 @@ export const COLORS = {
   inputBg: '#F0F0F0',
 } as const;
 
-const DEFAULT_BADGE = { bg: '#E3F2FD', text: '#1976D2' } as const;
+const DEFAULT_BADGE = { bg: COLORS.primaryXLight, text: COLORS.primary } as const;
 
 export const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  photo: { bg: '#E3F2FD', text: '#1976D2' },
+  photo: { bg: COLORS.primaryXLight, text: COLORS.primary },
   tip:   { bg: '#E8F5E9', text: '#388E3C' },
   event: { bg: '#FFF3E0', text: '#F57C00' },
   offer: { bg: '#FFEBEE', text: '#D32F2F' },

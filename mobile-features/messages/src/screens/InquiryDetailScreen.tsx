@@ -16,6 +16,7 @@ import { useMarkRead } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
 // URL detection regex (simple, covers http/https)
+const PRIMARY = '#1976D2';
 const URL_REGEX = /https?:\/\/[^\s]+/g;
 
 /** Returns checkmark indicator for message status */
@@ -33,7 +34,7 @@ function statusIcon(status: MessageStatus): string {
 }
 
 const STATUS_COLORS: Partial<Record<MessageStatus, string>> = {
-  read: '#1976D2',
+  read: PRIMARY,
   delivered: '#757575',
   sent: '#757575',
   replied: '#2E7D32',
@@ -190,7 +191,7 @@ export function InquiryDetailScreen(): ReactElement {
       <ScrollView
         testID="inquiry-detail-scroll"
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl testID="inquiry-detail-refresh" refreshing={refreshing} onRefresh={() => { void loadInquiry(true); }} colors={['#1976D2']} />}
+        refreshControl={<RefreshControl testID="inquiry-detail-refresh" refreshing={refreshing} onRefresh={() => { void loadInquiry(true); }} colors={[PRIMARY]} />}
       >
         <Text variant="title">{t('detail.title')}</Text>
         {error ? <Banner kind="error" message={error} /> : null}
@@ -207,7 +208,7 @@ export function InquiryDetailScreen(): ReactElement {
                 {seenAt ? (
                   <RNText
                     testID="seen-at-label"
-                    style={{ color: '#1976D2', marginTop: 2, fontSize: 11 }}
+                    style={{ color: PRIMARY, marginTop: 2, fontSize: 11 }}
                   >
                     {t('detail.seenAt', { time: formatTime(seenAt) })}
                   </RNText>

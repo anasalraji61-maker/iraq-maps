@@ -779,7 +779,7 @@ export function DiscoverFeedScreen(): ReactElement {
         ListEmptyComponent={
           isSearchActive ? (
             searchLoading ? (
-              <ActivityIndicator style={styles.loadingMore} size="small" color="#1976D2" />
+              <ActivityIndicator style={styles.loadingMore} size="small" color={COLORS.primary} />
             ) : searchError ? (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: COLORS.error }]}>{searchError}</Text>
@@ -805,7 +805,7 @@ export function DiscoverFeedScreen(): ReactElement {
           )
         }
         ListFooterComponent={
-          loadingMore ? <ActivityIndicator style={styles.loadingMore} size="small" color="#1976D2" /> : null
+          loadingMore ? <ActivityIndicator style={styles.loadingMore} size="small" color={COLORS.primary} /> : null
         }
         contentContainerStyle={styles.listContent}
       />

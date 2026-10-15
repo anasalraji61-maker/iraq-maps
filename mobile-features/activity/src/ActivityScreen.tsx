@@ -582,7 +582,7 @@ function PostsTab(): ReactElement {
           refreshing={refreshing}
           onRefresh={() => { setRefreshing(true); void load().finally(() => setRefreshing(false)); }}
           colors={[PRIMARY]}
-          tintColor="#1976D2"
+          tintColor={PRIMARY}
         />
       }
     />

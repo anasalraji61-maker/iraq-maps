@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text as RNText, TextInput, TouchableOpacity, View } from 'react-native';
 import { t } from '../strings';
 
+const PRIMARY = '#1976D2';
 const MAX_PHOTOS = 4;
 // Unicode symbol constants — not translatable user-facing strings
 const ICON_REMOVE = '✕'; // ✕
@@ -361,9 +362,9 @@ const styles = StyleSheet.create({
   container: { marginTop: 16, gap: 8 },
   sortRow: { flexDirection: 'row', gap: 6 },
   sortChip: { borderRadius: 16, borderWidth: 1, borderColor: '#BDBDBD', paddingHorizontal: 10, paddingVertical: 4 },
-  sortChipActive: { borderColor: '#1976D2', backgroundColor: '#E3F2FD' },
+  sortChipActive: { borderColor: PRIMARY, backgroundColor: '#E3F2FD' },
   sortChipText: { fontSize: 12, color: '#555' },
-  sortChipTextActive: { color: '#1976D2', fontWeight: '600' },
+  sortChipTextActive: { color: PRIMARY, fontWeight: '600' },
   stars: { flexDirection: 'row', gap: 4 },
   card: { gap: 4, paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E0E0E0' },
   form: { gap: 8 },
