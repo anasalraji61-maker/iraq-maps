@@ -2,6 +2,7 @@ import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
+import * as Clipboard from 'expo-clipboard';
 import {
   Animated,
   FlatList,
@@ -73,11 +74,20 @@ type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
 function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>> }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
     void Share.share({ message });
   }, [post.body, post.id]);
+
+  const handleCopyLink = useCallback(() => {
+    const link = `iraqsmartmaps://discover/${post.id}`;
+    void Clipboard.setStringAsync(link).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    });
+  }, [post.id]);
 
   const images = post.mediaAssetIds
     .map((id) => ({ id, url: mediaUrls[id] }))
@@ -103,9 +113,20 @@ function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Read
       )}
       <Text style={styles.bodyText}>{post.body}</Text>
       <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
-      <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button">
-        <Text style={styles.shareBtnText}>{t('post.share')}</Text>
-      </Pressable>
+      <View style={styles.actionRow}>
+        <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button" accessibilityLabel={t('post.share')}>
+          <Text style={styles.shareBtnText}>{t('post.share')}</Text>
+        </Pressable>
+        <Pressable
+          style={styles.shareBtn}
+          onPress={handleCopyLink}
+          accessibilityRole="button"
+          accessibilityLabel={t('postDetail.copyLink')}
+          testID={`post.copyLink.${post.id}`}
+        >
+          <Text style={styles.shareBtnText}>{linkCopied ? t('postDetail.linkCopied') : t('postDetail.copyLink')}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -289,7 +310,8 @@ const styles = StyleSheet.create({
   imageStrip: { marginBottom: 10, marginHorizontal: -14 },
   imageStripContent: { paddingHorizontal: 14, gap: 8 },
   detailImage: { width: 240, height: 180, borderRadius: 10 },
-  shareBtn: { alignSelf: 'flex-start', backgroundColor: COLORS.inputBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  actionRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  shareBtn: { backgroundColor: COLORS.inputBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   shareBtnText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500' },
   sectionHeader: { paddingHorizontal: 4, paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: COLORS.border, marginBottom: 8 },
   sectionTitle: { fontSize: 15, fontWeight: '600', color: '#333', textAlign: 'auto' },

@@ -96,7 +96,9 @@
   "postDetail": {
     "title": "پۆست",
     "loadError": "هەڵەی بارکردنی پۆست",
-    "commentsSection": "کۆمێنتەکان"
+    "commentsSection": "کۆمێنتەکان",
+    "copyLink": "لینک کۆپی بکە",
+    "linkCopied": "لینک کۆپی کرا"
   },
   "userPosts": {
     "title": "پۆستەکانی بەکارهێنەر",

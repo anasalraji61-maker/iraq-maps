@@ -96,7 +96,9 @@
   "postDetail": {
     "title": "Post",
     "loadError": "Failed to load post",
-    "commentsSection": "Comments"
+    "commentsSection": "Comments",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied"
   },
   "userPosts": {
     "title": "User Posts",

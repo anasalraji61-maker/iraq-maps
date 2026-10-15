@@ -96,7 +96,9 @@
   "postDetail": {
     "title": "المنشور",
     "loadError": "فشل تحميل المنشور",
-    "commentsSection": "التعليقات"
+    "commentsSection": "التعليقات",
+    "copyLink": "نسخ الرابط",
+    "linkCopied": "تم نسخ الرابط"
   },
   "userPosts": {
     "title": "منشورات المستخدم",

@@ -64,6 +64,8 @@ export function CommentsScreen(): ReactElement {
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [commentText, setCommentText] = useState('');
   const [replyingToAuthor, setReplyingToAuthor] = useState<string | null>(null);
@@ -84,6 +86,7 @@ export function CommentsScreen(): ReactElement {
       const res = await api.listComments({ params: { postId }, query: { limit: 20 } });
       if (res.status === 200) {
         setComments(res.body.items);
+        setNextCursor(res.body.nextCursor);
       } else {
         setError(t('comments.loadError'));
       }
@@ -94,6 +97,22 @@ export function CommentsScreen(): ReactElement {
       setRefreshing(false);
     }
   }, [api, postId]);
+
+  const loadMore = useCallback(async () => {
+    if (!postId || !nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await api.listComments({ params: { postId }, query: { limit: 20, cursor: nextCursor } });
+      if (res.status === 200) {
+        setComments((prev) => [...prev, ...res.body.items]);
+        setNextCursor(res.body.nextCursor);
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [api, nextCursor, postId, loadingMore]);
 
   useEffect(() => { void loadComments(false); }, [loadComments]);
 
@@ -177,6 +196,20 @@ export function CommentsScreen(): ReactElement {
             </View>
           ) : null
         }
+        ListFooterComponent={
+          nextCursor ? (
+            <Pressable
+              testID="comments.loadMore"
+              style={styles.loadMoreBtn}
+              onPress={() => { void loadMore(); }}
+              disabled={loadingMore}
+              accessibilityRole="button"
+              accessibilityLabel={t('feed.loadMore')}
+            >
+              <Text style={styles.loadMoreText}>{loadingMore ? '...' : t('feed.loadMore')}</Text>
+            </Pressable>
+          ) : null
+        }
       />
 
       {sendError ? (
@@ -250,4 +283,6 @@ const styles = StyleSheet.create({
   },
   replyBannerText: { fontSize: 12, color: COLORS.primaryDark, flex: 1 },
   replyBannerClose: { fontSize: 14, color: '#666', paddingHorizontal: 6 },
+  loadMoreBtn: { alignItems: 'center', paddingVertical: 12 },
+  loadMoreText: { fontSize: 14, color: COLORS.primary, fontWeight: '500' },
 });
