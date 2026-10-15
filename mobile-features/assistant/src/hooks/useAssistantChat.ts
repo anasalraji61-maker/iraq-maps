@@ -76,6 +76,8 @@ export function useAssistantChat(
           if (fpid) setFocusPlaceId(fpid);
           if (fpids && fpids.length > 0) setFocusPlaceIds(fpids);
           if (fpnames) setFocusPlaceNames(fpnames);
+        } else if (res.status === 429) {
+          setError(t('chat.dailyLimit'));
         } else {
           setError(t('chat.error'));
         }

@@ -111,6 +111,25 @@ describe('AssistantChatScreen', () => {
     setString.mockRestore();
   });
 
+  it('shows daily limit message on 429 response', async () => {
+    mockChat.mockResolvedValue({
+      status: 429 as const,
+      body: { type: 'about:blank', title: 'Too Many Requests', status: 429, code: 'daily_limit_exceeded' },
+      headers: new Headers(),
+    });
+
+    const { getByTestId, getByText } = await render(<AssistantChatScreen />);
+    const input = getByTestId(assistantTestIDs.chatInput);
+    const sendBtn = getByTestId(assistantTestIDs.sendButton);
+
+    await act(async () => { fireEvent.changeText(input, 'سؤال'); });
+    await act(async () => { fireEvent.press(sendBtn); await Promise.resolve(); });
+
+    await waitFor(() => {
+      expect(getByText(/dailyLimit/)).toBeTruthy();
+    }, { timeout: 5000 });
+  });
+
   it('shows compose deeplink when composeParams returned', async () => {
     mockChat.mockResolvedValue({
       status: 200 as const,

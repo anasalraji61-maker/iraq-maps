@@ -9,6 +9,7 @@
     "compose": "Message Provider",
     "loading": "Thinking...",
     "error": "An error occurred, please try again",
+    "dailyLimit": "Daily limit reached — try again tomorrow",
     "showOnMap": "Show on Map",
     "showPlacesOnMap": "Show {{count}} places on Map",
     "viewOnMap": "View on Map",

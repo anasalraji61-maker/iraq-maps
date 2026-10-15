@@ -1,7 +1,8 @@
 ---
 id: M28
 slug: activity-inquiries-tab
-status: in_progress
+status: completed
+build_sha: 6f7a023
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-activity:
