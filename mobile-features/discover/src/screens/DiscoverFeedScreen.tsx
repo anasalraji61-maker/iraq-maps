@@ -399,7 +399,8 @@ export function DiscoverFeedScreen(): ReactElement {
     setError(undefined);
     setIsNetworkError(false);
     try {
-      const res = await api.listFeed({ query: { cursor: reset ? undefined : cursor, limit: 10 } });
+      const cat = categoryFilter === 'all' ? undefined : categoryFilter;
+      const res = await api.listFeed({ query: { cursor: reset ? undefined : cursor, limit: 10, ...(cat ? { category: cat } : {}) } });
       if (res.status === 200) {
         const { items, nextCursor } = res.body;
         setPosts((prev) => (reset ? items : [...prev, ...items]));
@@ -417,11 +418,12 @@ export function DiscoverFeedScreen(): ReactElement {
       setRefreshing(false);
       setLoadingMore(false);
     }
-  }, [api, cursor, hasMore, loadingMore]);
+  }, [api, cursor, hasMore, loadingMore, categoryFilter]);
 
-  // Load once on mount. loadFeed recreates on every state change so adding it
-  // to deps would cause an infinite reload loop; mount-only is intentional.
+  // Load once on mount.
   useEffect(() => { void loadFeed(true); }, []);
+  // Reset feed when the category filter changes.
+  useEffect(() => { void loadFeed(true); }, [categoryFilter]);
 
   // Fetch place names for any post.placeId not yet loaded
   useEffect(() => {
