@@ -121,6 +121,7 @@ const PostItem = memo(function PostItem({
   onReport,
   onDelete,
   onEdit,
+  onAuthorPress,
   currentUserId,
 }: {
   post: DiscoverPostType;
@@ -132,6 +133,7 @@ const PostItem = memo(function PostItem({
   onReport: (postId: string, reason: ReportReason) => void;
   onDelete: (postId: string) => void;
   onEdit: (postId: string, body: string) => void;
+  onAuthorPress: (authorId: string) => void;
   currentUserId?: string;
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
@@ -196,10 +198,14 @@ const PostItem = memo(function PostItem({
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
       <View style={styles.cardHeader}>
-        <View>
-          <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
+        <Pressable
+          onPress={() => onAuthorPress(post.authorId)}
+          accessibilityRole="button"
+          accessibilityLabel={post.authorId.slice(0, 8)}
+        >
+          <Text style={[styles.authorText, { color: COLORS.primary }]}>{post.authorId.slice(0, 8)}</Text>
           <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt, t)}</Text>
-        </View>
+        </Pressable>
         <View style={styles.cardHeaderRight}>
           <View
             style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
@@ -469,6 +475,10 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push({ pathname: '/', params: { focusPlaceId: placeId } });
   }, [router]);
 
+  const handleAuthorPress = useCallback((authorId: string) => {
+    router.push({ pathname: '/discover/user/[authorId]', params: { authorId } });
+  }, [router]);
+
   const handleCreate = useCallback(() => {
     router.push('/discover/create');
   }, [router]);
@@ -567,6 +577,7 @@ export function DiscoverFeedScreen(): ReactElement {
             onReport={handleReport}
             onDelete={handleDelete}
             onEdit={handleOpenEdit}
+            onAuthorPress={handleAuthorPress}
             currentUserId={currentUserId}
           />
         )}

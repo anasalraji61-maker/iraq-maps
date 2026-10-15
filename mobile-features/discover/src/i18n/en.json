@@ -94,5 +94,10 @@
     "title": "Post",
     "loadError": "Failed to load post",
     "commentsSection": "Comments"
+  },
+  "userPosts": {
+    "title": "User Posts",
+    "empty": "This user has no posts yet",
+    "loadError": "Failed to load posts"
   }
 }

@@ -239,6 +239,39 @@ export class DiscoverService {
     await this.db.update(postTable).set({ removedAt: new Date() }).where(eq(postTable.id, postId));
   }
 
+  async userPosts(viewerUserId: UserId, authorId: UserId, cursor?: string, limit = 10) {
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(
+        and(
+          isNull(postTable.removedAt),
+          eq(postTable.authorId, authorId),
+          cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined,
+        ),
+      )
+      .orderBy(desc(postTable.createdAt))
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    const postIds = items.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, viewerUserId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+
+    return {
+      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id))),
+      nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
+    };
+  }
+
   async trending(userId: UserId, limit = 10) {
     // Score = likeCount * 2 + commentCount, only from posts in last 48 hours
     const rows = await this.db

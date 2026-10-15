@@ -121,6 +121,12 @@ export class DiscoverController {
         }
       },
 
+      userPosts: async ({ params, query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.userPosts(userId, params.authorId, query.cursor, query.limit);
+        return { status: 200, body: result };
+      },
+
       trending: async ({ query }) => {
         if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
         const result = await this.svc.trending(userId, query.limit);

@@ -161,6 +161,16 @@ export const discoverContract = c.router({
     },
     summary: 'Full-text search across post bodies',
   },
+  userPosts: {
+    method: 'GET',
+    path: '/discover/users/:authorId/posts',
+    pathParams: z.object({ authorId: UserId }),
+    query: z.object({ cursor: z.string().optional(), limit: z.coerce.number().int().max(20).default(10) }),
+    responses: {
+      200: z.object({ items: z.array(DiscoverPost), nextCursor: z.string().optional() }),
+    },
+    summary: "Paginated list of a user's posts",
+  },
 });
 
 export const ReportedPostView = z.object({
