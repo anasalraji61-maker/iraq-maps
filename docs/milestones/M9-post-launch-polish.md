@@ -10,6 +10,7 @@ owners:
     - "modules/identity/src/**"
     - "packages/contracts/src/admin/**"
     - "apps/api/src/**"
+    - "apps/admin/src/**"
   builder-media-worker:
     - "modules/media/src/**"
     - "modules/media/package.json"

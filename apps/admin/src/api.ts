@@ -2,6 +2,8 @@
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BASE_URL: string = ((import.meta as any).env?.VITE_API_URL as string | undefined) ?? 'http://localhost:3000';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ADMIN_KEY: string = ((import.meta as any).env?.VITE_ADMIN_KEY as string | undefined) ?? '';
 
 export interface Provider {
   id: string;
@@ -78,6 +80,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...(options.headers as Record<string, string>),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (ADMIN_KEY) headers['x-admin-key'] = ADMIN_KEY;
 
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   if (res.status === 401) {
@@ -239,7 +242,6 @@ export const api = {
     }
   },
 
-  // TODO: connect to API
   async getMetrics(): Promise<Metrics> {
     try {
       return await request<Metrics>('/v1/admin/metrics');
