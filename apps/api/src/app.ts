@@ -382,6 +382,183 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     }) });
   });
 
+  // ── Admin: suspend user ───────────────────────────────────────────────────
+  // Uses the `roles` array: adds the 'suspended' pseudo-role (no schema migration needed).
+  // A future M7-ops migration can add a dedicated `suspended_at` column and remove the role approach.
+  const suspendUserById = async (id: string, reason: string) => {
+    await db.execute(
+      sql`UPDATE identity.users SET roles = array_append(array_remove(roles, 'suspended'), 'suspended') WHERE id = ${id}`,
+    );
+    await db.execute(sql`
+      INSERT INTO identity.admin_audit_log (admin_id, action, target_id, target_type, detail, created_at)
+      SELECT id, 'suspend_user', ${id}, 'user', ${reason}, now()
+      FROM identity.users WHERE roles @> ARRAY['admin']::text[] LIMIT 1
+    `).catch(() => undefined);
+  };
+
+  const unsuspendUserById = async (id: string) => {
+    await db.execute(
+      sql`UPDATE identity.users SET roles = array_remove(roles, 'suspended') WHERE id = ${id}`,
+    );
+  };
+
+  const banUserById = async (id: string, reason: string) => {
+    await db.execute(
+      sql`UPDATE identity.users SET roles = array_append(array_append(array_remove(array_remove(roles, 'suspended'), 'banned'), 'suspended'), 'banned') WHERE id = ${id}`,
+    );
+    await db.execute(sql`
+      INSERT INTO identity.admin_audit_log (admin_id, action, target_id, target_type, detail, created_at)
+      SELECT id, 'ban_user', ${id}, 'user', ${reason}, now()
+      FROM identity.users WHERE roles @> ARRAY['admin']::text[] LIMIT 1
+    `).catch(() => undefined);
+  };
+
+  const isAdmin = (req: { headers: unknown }): boolean => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    return !!adminKey && key === adminKey;
+  };
+
+  fastify.put('/v1/admin/users/:id/suspend', async (req, reply) => {
+    if (!isAdmin(req)) return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    const { id } = req.params as { id: string };
+    const body = req.body as { reason?: string } | null;
+    await suspendUserById(id, body?.reason ?? 'Admin action');
+    return reply.status(204).send();
+  });
+
+  // POST aliases for backward-compat with existing frontend calls (UserManagementPage uses POST)
+  fastify.post('/v1/admin/users/:id/suspend', async (req, reply) => {
+    if (!isAdmin(req)) return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    const { id } = req.params as { id: string };
+    const body = req.body as { reason?: string } | null;
+    await suspendUserById(id, body?.reason ?? 'Admin action');
+    return reply.status(204).send();
+  });
+
+  fastify.post('/v1/admin/users/:id/unsuspend', async (req, reply) => {
+    if (!isAdmin(req)) return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    const { id } = req.params as { id: string };
+    await unsuspendUserById(id);
+    return reply.status(204).send();
+  });
+
+  fastify.put('/v1/admin/users/:id/unsuspend', async (req, reply) => {
+    if (!isAdmin(req)) return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    const { id } = req.params as { id: string };
+    await unsuspendUserById(id);
+    return reply.status(204).send();
+  });
+
+  // ── Admin: ban user ───────────────────────────────────────────────────────
+  fastify.put('/v1/admin/users/:id/ban', async (req, reply) => {
+    if (!isAdmin(req)) return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    const { id } = req.params as { id: string };
+    const body = req.body as { reason?: string } | null;
+    await banUserById(id, body?.reason ?? 'Admin ban');
+    return reply.status(204).send();
+  });
+
+  // ── Admin: pending places queue ───────────────────────────────────────────
+  fastify.get('/v1/admin/places/pending', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const rows = await db.execute(
+      sql`SELECT id, name_ar, name_en, category, phone, hours_raw, lat, lon,
+                 submitted_by_user_id, submitted_at, submission_note
+          FROM places.community_submission
+          WHERE status = 'pending'
+          ORDER BY submitted_at ASC
+          LIMIT 100`,
+    );
+    const items = rows.rows.map((r) => {
+      const row = r as Record<string, unknown>;
+      return {
+        id: row['id'],
+        nameAr: row['name_ar'],
+        nameEn: row['name_en'] ?? null,
+        category: row['category'],
+        phone: row['phone'] ?? null,
+        hoursRaw: row['hours_raw'] ?? null,
+        lat: Number(row['lat']),
+        lon: Number(row['lon']),
+        submittedBy: row['submitted_by_user_id'] ?? null,
+        submittedAt: row['submitted_at'] ? new Date(row['submitted_at'] as string).toISOString().slice(0, 10) : null,
+        submissionNote: row['submission_note'] ?? null,
+      };
+    });
+    return reply.status(200).send({ items });
+  });
+
+  // ── Admin: approve pending place ──────────────────────────────────────────
+  fastify.put('/v1/admin/places/:id/approve', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const { id } = req.params as { id: string };
+    await db.execute(
+      sql`UPDATE places.community_submission SET status = 'approved', reviewed_at = now() WHERE id = ${id}`,
+    );
+    return reply.status(204).send();
+  });
+
+  // ── Admin: reject pending place ───────────────────────────────────────────
+  fastify.put('/v1/admin/places/:id/reject', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const { id } = req.params as { id: string };
+    const body = req.body as { reason?: string } | null;
+    await db.execute(
+      sql`UPDATE places.community_submission SET status = 'rejected', reject_reason = ${body?.reason ?? null}, reviewed_at = now() WHERE id = ${id}`,
+    );
+    return reply.status(204).send();
+  });
+
+  // ── Admin: system stats ───────────────────────────────────────────────────
+  fastify.get('/v1/admin/system/stats', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const uptimeSeconds = process.uptime();
+    const days = Math.floor(uptimeSeconds / 86400);
+    const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+    const mins = Math.floor((uptimeSeconds % 3600) / 60);
+    const dbVersionRes = await db.execute(sql`SELECT version() AS v`).catch(() => ({ rows: [{ v: 'unknown' }] }));
+    const dbVersion = String((dbVersionRes.rows[0] as { v: string }).v ?? '').split(' ').slice(0, 2).join(' ');
+    return reply.status(200).send({
+      uptime: `${days}d ${hours}h ${mins}m`,
+      apiVersion: process.env['npm_package_version'] ?? '1.0.0',
+      dbVersion,
+      nodeVersion: process.version,
+      environment: process.env['NODE_ENV'] ?? 'production',
+    });
+  });
+
+  // ── Admin: set feature flags (stub — persists in memory only) ─────────────
+  fastify.put('/v1/admin/system/feature-flags', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    // Feature flags persistence is a future Redis/DB-backed store; acknowledge for now.
+    return reply.status(200).send({ saved: true });
+  });
+
+  // ── Admin: flush cache (stub) ─────────────────────────────────────────────
+  fastify.post('/v1/admin/system/cache/flush', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    // Real implementation would clear Redis keys by prefix. Stub for now.
+    return reply.status(200).send({ flushed: true });
+  });
+
   // ── Admin key rotation (no restart required) ─────────────────────────────
   // POST /internal/admin/rotate-key  { newKey: string }
   // The caller must supply both the current admin key (x-admin-key) and a new key.

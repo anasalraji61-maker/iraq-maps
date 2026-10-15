@@ -12,6 +12,11 @@ import { ReportedCommentsPage } from './pages/ReportedCommentsPage';
 import { PlaceManagementPage } from './pages/PlaceManagementPage';
 import { ExportDataPage } from './pages/ExportDataPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminUsersPage } from './pages/AdminUsersPage';
+import { AdminPlacesPage } from './pages/AdminPlacesPage';
+import { AdminSystemPage } from './pages/AdminSystemPage';
+import { AdminChallengesPage } from './pages/AdminChallengesPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -77,6 +82,21 @@ function NavBar() {
       </NavLink>
       <NavLink to="/export" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         تصدير البيانات
+      </NavLink>
+      <NavLink to="/admin-dashboard" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Dashboard+
+      </NavLink>
+      <NavLink to="/admin-users" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Users+
+      </NavLink>
+      <NavLink to="/admin-places" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Places+
+      </NavLink>
+      <NavLink to="/admin-system" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        System
+      </NavLink>
+      <NavLink to="/admin-challenges" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Challenges
       </NavLink>
       <button
         onClick={logout}
@@ -195,6 +215,46 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AnalyticsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <AuthGate>
+                <Layout><AdminDashboardPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-users"
+            element={
+              <AuthGate>
+                <Layout><AdminUsersPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-places"
+            element={
+              <AuthGate>
+                <Layout><AdminPlacesPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-system"
+            element={
+              <AuthGate>
+                <Layout><AdminSystemPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-challenges"
+            element={
+              <AuthGate>
+                <Layout><AdminChallengesPage /></Layout>
               </AuthGate>
             }
           />

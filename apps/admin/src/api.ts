@@ -308,6 +308,58 @@ export const api = {
     if (!res.ok) throw new Error(`Export failed: ${res.status}`);
     return res.text();
   },
+
+  // ── User extended actions ────────────────────────────────────────────────
+
+  async banUser(id: string): Promise<void> {
+    await request<void>(`/v1/admin/users/${id}/ban`, { method: 'PUT', body: JSON.stringify({ reason: 'Banned by admin' }) });
+  },
+
+  // ── Places admin ─────────────────────────────────────────────────────────
+
+  async getPendingPlaces(): Promise<PendingAdminPlace[]> {
+    return request<{ items: PendingAdminPlace[] }>('/v1/admin/places/pending').then((r) => r.items);
+  },
+
+  async approvePendingPlace(id: string): Promise<void> {
+    await request<void>(`/v1/admin/places/${id}/approve`, { method: 'PUT', body: JSON.stringify({}) });
+  },
+
+  async rejectPendingPlace(id: string, reason: string): Promise<void> {
+    await request<void>(`/v1/admin/places/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) });
+  },
+
+  // ── System configuration ──────────────────────────────────────────────────
+
+  async getSystemStats(): Promise<SystemStats> {
+    return request<SystemStats>('/v1/admin/system/stats');
+  },
+
+  async getQueueStatus(): Promise<{ queues: Record<string, { failed: number }> }> {
+    return request<{ queues: Record<string, { failed: number }> }>('/internal/queues/failed');
+  },
+
+  async setFeatureFlags(flags: Record<string, boolean>): Promise<void> {
+    await request<void>('/v1/admin/system/feature-flags', { method: 'PUT', body: JSON.stringify({ flags }) });
+  },
+
+  async setAppVersion(version: { current: string; minSupported: string; forceUpdate: boolean; storeUrl: string }): Promise<void> {
+    await request<void>('/v1/admin/system/app-version', { method: 'PUT', body: JSON.stringify(version) });
+  },
+
+  async flushCache(target: string): Promise<void> {
+    await request<void>(`/v1/admin/system/cache/flush`, { method: 'POST', body: JSON.stringify({ target }) });
+  },
+
+  // ── Challenges ────────────────────────────────────────────────────────────
+
+  async approveSubmission(id: string): Promise<void> {
+    await request<void>(`/v1/admin/challenges/submissions/${id}/approve`, { method: 'PUT', body: JSON.stringify({}) });
+  },
+
+  async rejectSubmission(id: string): Promise<void> {
+    await request<void>(`/v1/admin/challenges/submissions/${id}/reject`, { method: 'PUT', body: JSON.stringify({}) });
+  },
 };
 
 // ─── Additional types ─────────────────────────────────────────────────────────
@@ -353,4 +405,18 @@ export interface AdminPlace {
   hoursRaw: string | null;
   lat: number;
   lon: number;
+}
+
+export interface PendingAdminPlace extends AdminPlace {
+  submittedBy?: string;
+  submittedAt?: string;
+  submissionNote?: string;
+}
+
+export interface SystemStats {
+  uptime: string;
+  apiVersion: string;
+  dbVersion: string;
+  nodeVersion: string;
+  environment: string;
 }
