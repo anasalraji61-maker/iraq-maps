@@ -58,6 +58,20 @@ describe('ProviderInboxScreen', () => {
     const view = await renderWithProviders(<ProviderInboxScreen />);
     await waitFor(() => expect(view.getByText(/لا توجد رسائل/)).toBeTruthy());
   });
+
+  it('shows skeleton rows while loading', async () => {
+    let resolve!: (v: unknown) => void;
+    mockApi({
+      listProviderInquiries: jest.fn(() => new Promise((res) => { resolve = res; })),
+    });
+    const view = await renderWithProviders(<ProviderInboxScreen />);
+    const skeletons = view.getAllByTestId('skeleton-inbox-row');
+    expect(skeletons.length).toBeGreaterThanOrEqual(1);
+    await act(async () => {
+      resolve({ status: 200, body: { items: [], nextCursor: undefined } });
+      await Promise.resolve();
+    });
+  });
 });
 
 describe('ProviderInboxDetailScreen', () => {

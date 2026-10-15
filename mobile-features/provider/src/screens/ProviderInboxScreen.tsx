@@ -2,11 +2,48 @@ import { messagingTestIDs, type Inquiry } from '@iraq-maps/contracts';
 import { EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { FlatList, I18nManager, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
+import { Animated, FlatList, I18nManager, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
 
 I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
 import { t } from '../strings';
+
+// ─── Skeleton loader ─────────────────────────────────────────────────────────
+
+function SkeletonBox({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 4 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function SkeletonInboxRow(): ReactElement {
+  return (
+    <View testID="skeleton-inbox-row" style={skeletonStyles.row}>
+      <View style={skeletonStyles.avatar} />
+      <View style={skeletonStyles.content}>
+        <SkeletonBox width={200} height={13} />
+        <SkeletonBox width={120} height={11} />
+      </View>
+    </View>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16, gap: 12 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E0E0E0' },
+  content: { flex: 1, gap: 6 },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function formatInitials(userId: string): string {
   return userId.slice(0, 2).toUpperCase();
@@ -65,7 +102,16 @@ export function ProviderInboxScreen(): ReactElement {
 
   const unreadCount = items.filter((i) => !readIds.has(i.id)).length;
 
-  if (loading) return <Screen>{null}</Screen>;
+  if (loading) {
+    return (
+      <Screen>
+        <View style={styles.header}>
+          <Text variant="title">{t('inbox.title')}</Text>
+        </View>
+        {[1, 2, 3].map((k) => <SkeletonInboxRow key={k} />)}
+      </Screen>
+    );
+  }
 
   if (items.length === 0) {
     return (
