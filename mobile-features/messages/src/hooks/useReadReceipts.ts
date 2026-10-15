@@ -6,31 +6,8 @@
  * can display "seen at <time>".  There is no server-side markRead endpoint in
  * the current contract; this is client-side UX only.
  */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
-
-const STORAGE_KEY = '@iraq-maps/messages/read-receipts';
-
-interface ReadReceipts {
-  [inquiryId: string]: string; // ISO timestamp
-}
-
-async function loadReceipts(): Promise<ReadReceipts> {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ReadReceipts) : {};
-  } catch {
-    return {};
-  }
-}
-
-async function saveReceipts(receipts: ReadReceipts): Promise<void> {
-  try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(receipts));
-  } catch {
-    // best-effort
-  }
-}
+import { loadReceipts, saveReceipts } from './readReceiptsStore';
 
 /** Returns the ISO timestamp the user last viewed this inquiry, or null. */
 export function useReadAt(inquiryId: string | undefined): string | null {

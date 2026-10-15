@@ -8,6 +8,7 @@ import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useUnreadMessagesCount } from '@iraq-maps/feature-messages';
 import { availableRoutes } from './available-routes';
 import { apiBaseUrl, defaultApiUrl, isProduction, loadServerUrl, saveServerUrl } from './config';
 import ar from './i18n/ar.json';
@@ -184,12 +185,15 @@ export function TabsLayout() {
   const { fontScale } = useWindowDimensions();
   const tabBarStyle = { height: TAB_ITEM_CHROME + Math.ceil(LABEL_LINE_HEIGHT * fontScale) + bottom };
   const unreadCount = useUnreadNotificationCount();
+  const unreadMessages = useUnreadMessagesCount();
   return (
     <Tabs screenOptions={{ ...tabBarOptions, tabBarStyle }}>
       {tabs.map((tab) => {
         const label = (tab === 'assistant' || tab === 'activity') ? t(`shell:tabs.${tab}`) : t(`common:tabs.${tab}`);
         const testID = tab in testIDs.tabs ? testIDs.tabs[tab as ContractTab] : undefined;
-        const badge = tab === 'activity' && unreadCount > 0 ? unreadCount : undefined;
+        const badge =
+          (tab === 'activity' && unreadCount > 0 ? unreadCount : undefined) ??
+          (tab === 'messages' && unreadMessages > 0 ? unreadMessages : undefined);
         return (
           <Tabs.Screen
             key={tab}
