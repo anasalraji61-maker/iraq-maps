@@ -5,6 +5,7 @@ import { FakePushSender } from '@iraq-maps/testing';
 import { Inject, Module, type DynamicModule, type OnModuleInit } from '@nestjs/common';
 import { NOTIFICATIONS_SERVICE, NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
+import { LikeBatcher } from './like-batcher';
 
 export const notificationsMigrationsDir = fileURLToPath(new URL('../migrations', import.meta.url));
 
@@ -22,7 +23,10 @@ class NotificationsModule implements OnModuleInit {
     @Inject('NOTIFICATIONS_EVENT_BUS') private readonly eventBus: EventBus,
   ) {}
 
+  private likeBatcher!: LikeBatcher;
+
   onModuleInit() {
+    this.likeBatcher = new LikeBatcher(this.svc);
     // messaging.inquiry.received.v1 → notify provider (new_inquiry pref)
     this.eventBus.subscribe('messaging.inquiry.received.v1' as never, async (event: { payload: { providerId: string; inquiryId: string } }) => {
       await this.svc.notifyProvider(event.payload.providerId as UserId, {
@@ -40,15 +44,11 @@ class NotificationsModule implements OnModuleInit {
       });
     });
 
-    // discover.post.liked.v1 → notify post author
-    this.eventBus.subscribe('discover.post.liked.v1' as never, async (event: { payload: { postId: string; postAuthorId: string; likedByUserId: string } }) => {
+    // discover.post.liked.v1 → batched notification (30 s window)
+    this.eventBus.subscribe('discover.post.liked.v1' as never, (event: { payload: { postId: string; postAuthorId: string; likedByUserId: string } }) => {
       const { postAuthorId, likedByUserId } = event.payload;
       if (postAuthorId === likedByUserId) return; // don't notify own likes
-      await this.svc.sendToUser(postAuthorId as UserId, {
-        title: 'إعجاب جديد',
-        body: 'أعجب شخص ما بمنشورك.',
-        data: { type: 'post_liked', postId: event.payload.postId },
-      });
+      this.likeBatcher.add(event.payload.postId, postAuthorId as UserId);
     });
 
     // discover.post.commented.v1 → notify post author
