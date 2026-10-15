@@ -7,17 +7,8 @@ import { ActivityIndicator, Image, Pressable, StyleSheet, View, Text as RNText }
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
 import { SkeletonBlock } from '../skeleton';
+import { HoursEditor, type WeekSlots, slotsToOsm, osmToSlots, defaultSlots } from '../components/HoursEditor';
 
-/**
- * Returns true when the hours string looks like it uses HH:MM time format
- * (i.e. every time token has a leading zero). Returns null for empty string.
- */
-function hoursFormatOk(raw: string): boolean | null {
-  if (!raw.trim()) return null;
-  // Detect bare `8:00` or `9am` style (no leading zero or am/pm).
-  const badToken = /\b\d(?::\d\d)\b/.test(raw) || /\d(?:am|pm)/i.test(raw);
-  return !badToken;
-}
 
 const CATEGORIES: PlaceCategory[] = [
   'food', 'cafe', 'lodging', 'shopping', 'tourism', 'health',
@@ -57,7 +48,7 @@ export function ProviderEditProfileScreen(): ReactElement {
   // loaded from /providers/me
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PlaceCategory | null>(null);
-  const [hoursRaw, setHoursRaw] = useState('');
+  const [hoursSlots, setHoursSlots] = useState<WeekSlots>(defaultSlots());
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [logoAssetId, setLogoAssetId] = useState<string | null>(null);
   const [photoUris, setPhotoUris] = useState<string[]>([]);
@@ -70,7 +61,7 @@ export function ProviderEditProfileScreen(): ReactElement {
       if (res.status === 200) {
         setName(res.body.name);
         setCategory(res.body.category);
-        setHoursRaw(res.body.hoursRaw ?? '');
+        setHoursSlots(osmToSlots(res.body.hoursRaw ?? ''));
       }
     }).catch(() => {
       setError(t('errors.invalid_request'));
@@ -126,7 +117,7 @@ export function ProviderEditProfileScreen(): ReactElement {
           body: {
             name: name.trim(),
             ...(category ? { category } : {}),
-            hoursRaw: hoursRaw.trim() || null,
+            hoursRaw: slotsToOsm(hoursSlots) || null,
             ...(photoAssetIds.length > 0 ? { photoAssetIds } : {}),
             ...(logoAssetId ? { logoAssetId } : {}),
           },
@@ -192,18 +183,8 @@ export function ProviderEditProfileScreen(): ReactElement {
         />
       ))}
 
-      {/* Hours */}
-      <TextField
-        label={t('edit.hours')}
-        placeholder={t('edit.hoursPlaceholder')}
-        value={hoursRaw}
-        onChangeText={setHoursRaw}
-      />
-      {hoursFormatOk(hoursRaw) === false ? (
-        <RNText style={styles.hoursWarn}>{t('edit.hoursInvalid')}</RNText>
-      ) : (
-        <RNText style={styles.hoursHint}>{t('edit.hoursFormatHint')}</RNText>
-      )}
+      {/* Hours — structured day-by-day editor */}
+      <HoursEditor slots={hoursSlots} onChange={setHoursSlots} />
 
       {/* Photos */}
       <Text variant="subtitle">{t('edit.photos')}</Text>
@@ -267,6 +248,4 @@ const styles = StyleSheet.create({
   },
   photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   photoThumb: { width: 64, height: 64, borderRadius: 8 },
-  hoursHint: { fontSize: 12, color: '#6B7280', marginTop: -4, marginBottom: 4 },
-  hoursWarn: { fontSize: 12, color: '#DC2626', fontWeight: '600', marginTop: -4, marginBottom: 4 },
 });

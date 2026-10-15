@@ -123,7 +123,22 @@
     "logo": "Logo",
     "changeLogo": "Change Logo",
     "hoursFormatHint": "Format: Sat-Thu 09:00-22:00",
-    "hoursInvalid": "Time format not supported — use HH:MM"
+    "hoursInvalid": "Time format not supported — use HH:MM",
+    "hours": {
+      "label": "Working Hours",
+      "from": "From",
+      "to": "–",
+      "toLabel": "To",
+      "closed": "Closed",
+      "none": "No hours set",
+      "day0": "Sat",
+      "day1": "Sun",
+      "day2": "Mon",
+      "day3": "Tue",
+      "day4": "Wed",
+      "day5": "Thu",
+      "day6": "Fri"
+    }
   },
   "errors": {
     "provider_already_exists": "You already have a registered business.",
