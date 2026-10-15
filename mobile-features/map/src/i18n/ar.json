@@ -95,7 +95,8 @@
     "providerPhone": "هاتف المزوّد",
     "providerHours": "ساعات العمل (من المزوّد)",
     "providerVerified": "مزوّد موثّق",
-    "closesAt": "يغلق الساعة {time}"
+    "closesAt": "يغلق الساعة {time}",
+    "whatsappLabel": "تواصل عبر واتساب"
   },
   "actions": {
     "directions": "الاتجاهات",

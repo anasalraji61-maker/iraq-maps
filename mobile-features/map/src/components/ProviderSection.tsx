@@ -1,7 +1,7 @@
 import { type PlaceProviderSection } from '@iraq-maps/contracts';
 import { Badge, ListItem, Text } from '@iraq-maps/ui';
 import { type ReactElement, useState } from 'react';
-import { Image, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text as RNText, View } from 'react-native';
 import { t } from '../strings';
 import { PhotoLightbox } from './PhotoLightbox';
 
@@ -28,11 +28,26 @@ export function ProviderSection({ provider }: Props): ReactElement | null {
       ) : null}
 
       {phone ? (
-        <ListItem
-          title={t('place.providerPhone')}
-          subtitle={phone}
-          onPress={() => Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => undefined)}
-        />
+        <View style={styles.phoneRow}>
+          <ListItem
+            title={t('place.providerPhone')}
+            subtitle={phone}
+            onPress={() => Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => undefined)}
+          />
+          <Pressable
+            style={styles.waBtn}
+            onPress={() => {
+              const digits = phone.replace(/\D/g, '');
+              // Iraqi numbers start with 07xx — prepend country code 964 when needed
+              const intl = digits.startsWith('0') ? `964${digits.slice(1)}` : digits;
+              Linking.openURL(`https://wa.me/${intl}`).catch(() => undefined);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('place.whatsappLabel')}
+          >
+            <RNText style={styles.waBtnText}>{t('place.whatsappLabel')}</RNText>
+          </Pressable>
+        </View>
       ) : null}
 
       {social.length > 0 ? (
@@ -105,5 +120,20 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 8,
+  },
+  phoneRow: {
+    gap: 4,
+  },
+  waBtn: {
+    backgroundColor: '#25D366',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignSelf: 'flex-start',
+  },
+  waBtnText: {
+    color: '#FFF',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

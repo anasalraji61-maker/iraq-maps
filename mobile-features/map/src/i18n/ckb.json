@@ -95,7 +95,8 @@
     "providerPhone": "تەلەفۆنی دابینکەر",
     "providerHours": "کاتەکانی کار",
     "providerVerified": "دابینکەری پشتڕاستکراو",
-    "closesAt": "دادەخرێت {time}"
+    "closesAt": "دادەخرێت {time}",
+    "whatsappLabel": "پەیام لە واتساپ"
   },
   "actions": {
     "directions": "ئاراستەکان",

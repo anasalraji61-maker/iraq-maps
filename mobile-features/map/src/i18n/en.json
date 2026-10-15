@@ -95,7 +95,8 @@
     "providerPhone": "Provider Phone",
     "providerHours": "Business Hours",
     "providerVerified": "Verified Provider",
-    "closesAt": "Closes at {time}"
+    "closesAt": "Closes at {time}",
+    "whatsappLabel": "Message on WhatsApp"
   },
   "actions": {
     "directions": "Directions",
