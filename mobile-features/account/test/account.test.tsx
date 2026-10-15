@@ -17,11 +17,15 @@ describe('AccountScreen', () => {
     await waitFor(() => expect(session.signOut).toHaveBeenCalledTimes(1));
   });
 
-  it('deletes the account only after the explicit confirmation, then signs out', async () => {
+  it('deletes the account only after typing DELETE and confirming, then signs out', async () => {
     const { api, session, view } = await setup(<AccountScreen />);
     api.me.remove.mockReturnValueOnce(reply(204));
     await fireEvent.press(view.getByTestId(account.delete));
     expect(api.me.remove).not.toHaveBeenCalled();
+    // confirm button disabled until DELETE typed
+    expect(view.getByTestId(account.deleteConfirm)).toBeDisabled();
+    const input = view.getByLabelText(t('account:deleteConfirm.label'));
+    await fireEvent.changeText(input, 'DELETE');
     await fireEvent.press(view.getByTestId(account.deleteConfirm));
     await waitFor(() => expect(session.signOut).toHaveBeenCalledTimes(1));
     expect(api.me.remove).toHaveBeenCalledTimes(1);
@@ -30,6 +34,8 @@ describe('AccountScreen', () => {
   it('keeps the session and shows the error when the delete fails', async () => {
     const { session, view } = await setup(<AccountScreen />);
     await fireEvent.press(view.getByTestId(account.delete));
+    const input = view.getByLabelText(t('account:deleteConfirm.label'));
+    await fireEvent.changeText(input, 'DELETE');
     await fireEvent.press(view.getByTestId(account.deleteConfirm));
     expect(await view.findByText(t('common:errors.generic'))).toBeTruthy();
     expect(session.signOut).not.toHaveBeenCalled();

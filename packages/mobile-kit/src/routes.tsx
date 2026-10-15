@@ -26,6 +26,8 @@ export const routes = {
   accountSavedPlaces: '/account/saved-places',
   accountBlockedUsers: '/account/blocked-users',
   accountFollowing: '/account/following',
+  accountPrivacySettings: '/account/privacy-settings',
+  accountDisplayName: '/account/display-name',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',

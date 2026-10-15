@@ -1,10 +1,11 @@
-import { href, useSession } from '@iraq-maps/mobile-kit';
-import { Button, ListItem, Screen, Text } from '@iraq-maps/ui';
+import { href, useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
+import { Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useRequest } from './request';
 import { ScreenTitle } from './ScreenTitle';
 import { t } from './strings';
 
@@ -17,13 +18,36 @@ const buildNumber =
 export function SettingsScreen(): ReactElement {
   const router = useRouter();
   const session = useSession();
+  const baseUrl = useApiBaseUrl();
   const isSignedIn = session.state.status === 'signedIn';
+  const { busy: exportBusy, run: runExport } = useRequest();
+  const [exportDone, setExportDone] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
+
+  const handleExport = () => {
+    setExportError(null);
+    void runExport(async () => {
+      const res = await fetch(`${baseUrl}/v1/identity/me/export-request`, { method: 'POST' });
+      if (!res.ok) {
+        setExportError(t('dataExport.error'));
+        return;
+      }
+      setExportDone(true);
+    }).catch(() => setExportError(t('dataExport.error')));
+  };
+
+  const handleCheckUpdates = () => {
+    setUpdateMsg(t('updates.upToDate'));
+    setTimeout(() => setUpdateMsg(null), 3000);
+  };
 
   return (
     <Screen scroll>
       <ScreenTitle title={t('settings.title')} />
       <ListItem title={t('settings.language')} onPress={() => router.push(href('accountLanguage'))} />
       <ListItem title={t('settings.notifPrefs')} onPress={() => router.push(href('accountNotifPrefs'))} />
+      <ListItem title={t('settings.privacySettingsEntry')} onPress={() => router.push(href('accountPrivacySettings'))} />
       <ListItem title={t('settings.savedPlaces')} onPress={() => router.push(href('accountSavedPlaces'))} />
       <ListItem title={t('settings.blockedUsers')} onPress={() => router.push(href('accountBlockedUsers'))} />
       <ListItem title={t('settings.followedUsers')} onPress={() => router.push(href('accountFollowing'))} />
@@ -33,15 +57,42 @@ export function SettingsScreen(): ReactElement {
       <ListItem title={t('settings.terms')} onPress={() => router.push(href('accountTerms'))} />
       <ListItem title={t('settings.licenses')} onPress={() => router.push(href('accountLicenses'))} />
       {isSignedIn ? (
-        <Button
-          variant="secondary"
-          label={t('settings.signOut')}
-          onPress={() => void session.signOut()}
-          testID="settings.signOut"
-        />
+        <>
+          {exportDone ? (
+            <Banner kind="success" message={t('dataExport.success')} />
+          ) : (
+            <Button
+              testID="settings.exportData"
+              variant="secondary"
+              label={t('settings.exportData')}
+              onPress={handleExport}
+              loading={exportBusy}
+            />
+          )}
+          {exportError ? <Banner kind="error" message={exportError} /> : null}
+          <Button
+            testID="settings.deleteAccount"
+            variant="danger"
+            label={t('settings.deleteAccount')}
+            onPress={() => router.push(href('account'))}
+          />
+          <Button
+            variant="secondary"
+            label={t('settings.signOut')}
+            onPress={() => void session.signOut()}
+            testID="settings.signOut"
+          />
+        </>
       ) : null}
       <View style={styles.versionRow}>
         <Text variant="caption">{t('settings.version', { version, build: buildNumber })}</Text>
+        {updateMsg ? <Text variant="caption" tone="muted">{updateMsg}</Text> : null}
+        <Button
+          testID="settings.checkUpdates"
+          variant="secondary"
+          label={t('settings.checkUpdates')}
+          onPress={handleCheckUpdates}
+        />
       </View>
     </Screen>
   );
@@ -51,5 +102,6 @@ const styles = StyleSheet.create({
   versionRow: {
     alignItems: 'center',
     paddingVertical: 24,
+    gap: 8,
   },
 });

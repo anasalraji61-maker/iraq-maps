@@ -73,7 +73,11 @@
     "savedPlaces": "Saved Places",
     "blockedUsers": "Blocked Users",
     "signOut": "Sign Out",
-    "followedUsers": "Following"
+    "followedUsers": "Following",
+    "deleteAccount": "Delete account",
+    "exportData": "Export my data",
+    "privacySettingsEntry": "Privacy settings",
+    "checkUpdates": "Check for updates"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",
@@ -147,6 +151,40 @@
     "empty": "No blocked users",
     "unblock": "Unblock",
     "unblockA11y": "Unblock {userId}"
+  },
+  "deleteConfirm": {
+    "title": "Confirm account deletion",
+    "body": "To confirm, type DELETE in the field below:",
+    "placeholder": "DELETE",
+    "label": "Type DELETE to confirm",
+    "mismatch": "That does not match. Type DELETE in uppercase."
+  },
+  "privacySettings": {
+    "title": "Privacy settings",
+    "publicProfile": "Public profile",
+    "publicProfileSub": "Anyone can view your profile",
+    "showFollowerCount": "Show follower count",
+    "showFollowerCountSub": "Display how many people follow you",
+    "allowMentions": "Allow mentions",
+    "allowMentionsSub": "Users can mention you in posts",
+    "allowDirectMessages": "Allow direct messages",
+    "allowDirectMessagesSub": "Users can send you direct messages",
+    "saved": "Settings saved"
+  },
+  "displayName": {
+    "title": "Edit display name",
+    "label": "Display name",
+    "save": "Save"
+  },
+  "dataExport": {
+    "button": "Export my data",
+    "success": "Export request sent. You will receive an email within 48 hours.",
+    "error": "Could not send request. Please try again."
+  },
+  "updates": {
+    "check": "Check for updates",
+    "upToDate": "App is up to date",
+    "available": "Update available"
   },
   "savedPlaces": {
     "title": "Saved Places",

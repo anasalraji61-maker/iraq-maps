@@ -1,7 +1,7 @@
 import { testIDs, type NotificationPrefs } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
 import { href, useApi, useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
-import { Banner, Button, EmptyState, ListItem, Screen, Sheet, Text } from '@iraq-maps/ui';
+import { Banner, Button, EmptyState, ListItem, Screen, Sheet, Text, TextField } from '@iraq-maps/ui';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import * as ImagePicker from 'expo-image-picker';
@@ -80,6 +80,7 @@ export function AccountScreen(): ReactElement {
   const notifApi = useNotifApi();
   const baseUrl = useApiBaseUrl();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteInput, setDeleteInput] = useState('');
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -189,8 +190,10 @@ export function AccountScreen(): ReactElement {
 
   const deleteAccount = () =>
     run(async () => {
+      if (deleteInput !== 'DELETE') return;
       expectStatus(await api.me.remove(), 204);
       setConfirmingDelete(false);
+      setDeleteInput('');
       await session.signOut();
     });
   const banner = error ? <Banner kind="error" message={error} /> : null;
@@ -212,7 +215,7 @@ export function AccountScreen(): ReactElement {
         </Pressable>
         <Text variant="subtitle">{state.user.name ?? t('profile.noName')}</Text>
       </View>
-      <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
+      <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('accountDisplayName'))} />
       <ListItem title={t('savedPlaces.entry')} onPress={() => router.push(href('accountSavedPlaces'))} />
       <ListItem
         testID="account.myPosts"
@@ -233,12 +236,20 @@ export function AccountScreen(): ReactElement {
       ) : null}
       <Button testID={testIDs.account.logout} variant="secondary" label={t('profile.logout')} onPress={() => run(() => session.signOut())} loading={busy} />
       <Button testID={testIDs.account.delete} variant="danger" label={t('profile.delete')} onPress={() => setConfirmingDelete(true)} disabled={busy} />
-      <Sheet visible={confirmingDelete} onClose={() => setConfirmingDelete(false)}>
+      <Sheet visible={confirmingDelete} onClose={() => { setConfirmingDelete(false); setDeleteInput(''); }}>
         <Text variant="subtitle">{t('deleteSheet.title')}</Text>
         <Text>{t('deleteSheet.body')}</Text>
+        <Text tone="muted">{t('deleteConfirm.body')}</Text>
+        <TextField
+          label={t('deleteConfirm.label')}
+          placeholder={t('deleteConfirm.placeholder')}
+          value={deleteInput}
+          onChangeText={setDeleteInput}
+          error={deleteInput.length > 0 && deleteInput !== 'DELETE' ? t('deleteConfirm.mismatch') : undefined}
+        />
         {banner}
-        <Button testID={testIDs.account.deleteConfirm} variant="danger" label={t('deleteSheet.confirm')} onPress={deleteAccount} loading={busy} />
-        <Button variant="secondary" label={t('deleteSheet.cancel')} onPress={() => setConfirmingDelete(false)} disabled={busy} />
+        <Button testID={testIDs.account.deleteConfirm} variant="danger" label={t('deleteSheet.confirm')} onPress={deleteAccount} loading={busy} disabled={deleteInput !== 'DELETE'} />
+        <Button variant="secondary" label={t('deleteSheet.cancel')} onPress={() => { setConfirmingDelete(false); setDeleteInput(''); }} disabled={busy} />
       </Sheet>
       <View style={styles.versionRow}>
         <Text variant="caption">{t('profile.version', { version: appVersion })}</Text>

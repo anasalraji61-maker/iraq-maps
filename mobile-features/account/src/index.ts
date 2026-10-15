@@ -7,6 +7,8 @@ export { NameScreen } from './NameScreen';
 export { OtpScreen } from './OtpScreen';
 export { PhoneScreen } from './PhoneScreen';
 export { PrivacyScreen } from './PrivacyScreen';
+export { PrivacySettingsScreen } from './PrivacySettingsScreen';
+export { DisplayNameScreen } from './DisplayNameScreen';
 export { TermsScreen } from './TermsScreen';
 export { NotifPrefsScreen } from './NotifPrefsScreen';
 export { ThemeScreen } from './ThemeScreen';

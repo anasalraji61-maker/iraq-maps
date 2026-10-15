@@ -73,7 +73,11 @@
     "savedPlaces": "الأماكن المحفوظة",
     "blockedUsers": "المستخدمون المحظورون",
     "signOut": "تسجيل الخروج",
-    "followedUsers": "المستخدمون المتابَعون"
+    "followedUsers": "المستخدمون المتابَعون",
+    "deleteAccount": "حذف الحساب",
+    "exportData": "تصدير بياناتي",
+    "privacySettingsEntry": "إعدادات الخصوصية",
+    "checkUpdates": "التحقق من التحديثات"
   },
   "errors": {
     "otp_invalid": "الرمز غير صحيح. حاول مرة أخرى.",
@@ -147,6 +151,40 @@
     "empty": "لم تحظر أي مستخدم بعد",
     "unblock": "إلغاء الحظر",
     "unblockA11y": "إلغاء حظر {userId}"
+  },
+  "deleteConfirm": {
+    "title": "تأكيد حذف الحساب",
+    "body": "لتأكيد الحذف، اكتب كلمة DELETE في الحقل أدناه:",
+    "placeholder": "DELETE",
+    "label": "اكتب DELETE للتأكيد",
+    "mismatch": "الكلمة غير صحيحة. اكتب DELETE بالأحرف الكبيرة."
+  },
+  "privacySettings": {
+    "title": "إعدادات الخصوصية",
+    "publicProfile": "ملف شخصي عام",
+    "publicProfileSub": "يمكن لأي شخص رؤية ملفك الشخصي",
+    "showFollowerCount": "إظهار عدد المتابعين",
+    "showFollowerCountSub": "إظهار عدد متابعيك في ملفك الشخصي",
+    "allowMentions": "السماح بالإشارة إليك",
+    "allowMentionsSub": "يمكن للمستخدمين الإشارة إليك في المنشورات",
+    "allowDirectMessages": "السماح بالرسائل المباشرة",
+    "allowDirectMessagesSub": "يمكن للمستخدمين إرسال رسائل مباشرة إليك",
+    "saved": "تم حفظ الإعدادات"
+  },
+  "displayName": {
+    "title": "تعديل الاسم",
+    "label": "الاسم المعروض",
+    "save": "حفظ"
+  },
+  "dataExport": {
+    "button": "تصدير بياناتي",
+    "success": "تم إرسال طلب التصدير. ستتلقى بريداً إلكترونياً خلال 48 ساعة.",
+    "error": "تعذّر إرسال الطلب. حاول مجدداً."
+  },
+  "updates": {
+    "check": "التحقق من التحديثات",
+    "upToDate": "التطبيق محدّث",
+    "available": "يتوفر تحديث جديد"
   },
   "savedPlaces": {
     "title": "الأماكن المحفوظة",
