@@ -63,6 +63,7 @@ export function CreateStoryScreen(): ReactElement {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.backBtnText}>✕</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('stories.create')}</Text>
@@ -83,6 +84,7 @@ export function CreateStoryScreen(): ReactElement {
       ) : (
         <View style={styles.pickArea}>
           <Pressable style={styles.pickButton} onPress={() => pickMedia('image')}>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.pickIcon}>🖼️</Text>
             <Text style={styles.pickLabel}>{t('stories.pickPhoto')}</Text>
           </Pressable>

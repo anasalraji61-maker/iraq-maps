@@ -14,7 +14,6 @@ import {
   Animated,
   Dimensions,
   GestureResponderEvent,
-  I18nManager,
   Image,
   PanResponder,
   Pressable,
@@ -28,7 +27,7 @@ import { useStoriesClient } from '../storiesClient';
 import { t } from '../strings';
 import type { StoryType } from '@iraq-maps/contracts';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W } = Dimensions.get('window');
 
 interface StoryViewerProps {
   stories: StoryType[];
@@ -149,6 +148,7 @@ export function StoryViewer({ stories, authorName, onDismiss }: StoryViewerProps
             accessibilityLabel={t('lightbox.close')}
             style={styles.closeBtn}
           >
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.closeBtnText}>✕</Text>
           </TouchableOpacity>
         </View>

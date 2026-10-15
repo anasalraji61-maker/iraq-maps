@@ -4,7 +4,7 @@
  */
 import { type PlaceId, type Review, type ReviewId, type RatingSummary, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { avg, count, desc, eq, and, lt, sql } from 'drizzle-orm';
+import { avg, count, desc, eq, and, lt } from 'drizzle-orm';
 import { pgSchema, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 const placesSchema = pgSchema('places');

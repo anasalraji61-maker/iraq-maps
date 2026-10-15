@@ -53,6 +53,52 @@ export const consentTable = providersSchema.table(
   (t) => [unique('consent_provider_scope_unique').on(t.providerId, t.scope), index('consent_provider_id_idx').on(t.providerId)],
 );
 
+export const promotionStatusEnum = providersSchema.enum('promotion_status', ['active', 'expired', 'deleted']);
+
+export const promotionTable = providersSchema.table(
+  'promotion',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => providerTable.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    discountPct: integer('discount_pct'),
+    validFrom: timestamp('valid_from', { withTimezone: true }).notNull(),
+    validTo: timestamp('valid_to', { withTimezone: true }).notNull(),
+    conditions: text('conditions'),
+    status: promotionStatusEnum('status').notNull().default('active'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('promotion_provider_id_idx').on(t.providerId), index('promotion_valid_to_idx').on(t.validTo)],
+);
+
+export const appointmentStatusEnum = providersSchema.enum('appointment_status', ['pending', 'confirmed', 'cancelled', 'completed']);
+
+export const appointmentTable = providersSchema.table(
+  'appointment',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => providerTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    date: text('date').notNull(), // ISO YYYY-MM-DD
+    time: text('time').notNull(), // HH:MM
+    service: text('service').notNull(),
+    status: appointmentStatusEnum('status').notNull().default('pending'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('appointment_provider_id_idx').on(t.providerId),
+    index('appointment_user_id_idx').on(t.userId),
+    index('appointment_date_idx').on(t.date),
+  ],
+);
+
 export const auditLogTable = providersSchema.table(
   'audit_log',
   {

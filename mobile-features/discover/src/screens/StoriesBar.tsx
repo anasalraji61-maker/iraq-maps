@@ -19,7 +19,6 @@ import type { StoryAuthorType } from '@iraq-maps/contracts';
 
 // Gradient ring colours (two-stop linear approximation using borders)
 const RING_VIEWED = '#C0C0C0';
-const RING_UNVIEWED_START = '#F9A825';
 const RING_UNVIEWED_END = '#E91E8C';
 
 interface Props {
