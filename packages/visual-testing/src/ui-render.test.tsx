@@ -9,6 +9,16 @@ import { render } from '@testing-library/react-native';
 import React from 'react';
 import * as Ui from '@iraq-maps/ui';
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: { getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn(), clear: jest.fn() },
+}));
+jest.mock('expo-modules-core', () => ({
+  requireNativeModule: jest.fn(() => ({})),
+  requireOptionalNativeModule: jest.fn(() => null),
+  EventEmitter: class { addListener() {} removeListener() {} },
+  NativeModulesProxy: new Proxy({}, { get: () => jest.fn() }),
+}));
 jest.mock('@expo-google-fonts/noto-sans-arabic', () => ({ useFonts: jest.fn(() => [true]) }));
 jest.mock('expo-font', () => ({ useFonts: jest.fn(() => [true, null]) }));
 jest.mock('expo-symbols', () => ({ SymbolView: 'SymbolView' }));

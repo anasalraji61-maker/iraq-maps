@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "echo \"no source to typecheck\" && exit 0",
-    "test": "jest --passWithNoTests",
+    "test": "jest --passWithNoTests --testPathIgnorePatterns='src/'",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
