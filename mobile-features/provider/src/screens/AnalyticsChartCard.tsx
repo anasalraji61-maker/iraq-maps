@@ -77,10 +77,12 @@ const barStyles = StyleSheet.create({
 export interface AnalyticsChartCardProps {
   providerId: string;
   metric: 'views' | 'inquiries';
+  /** Real 7-day data, index 0 = 6 days ago, index 6 = today. Falls back to seeded mock when absent. */
+  data?: number[];
 }
 
-export function AnalyticsChartCard({ providerId, metric }: AnalyticsChartCardProps): ReactElement {
-  const data = generateWeekData(providerId, metric);
+export function AnalyticsChartCard({ providerId, metric, data: realData }: AnalyticsChartCardProps): ReactElement {
+  const data = realData ?? generateWeekData(providerId, metric);
   const max = Math.max(...data, 1);
   const color = metric === 'views' ? '#1976D2' : '#388E3C';
   const total = data.reduce((s, v) => s + v, 0);

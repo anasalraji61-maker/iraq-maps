@@ -61,6 +61,8 @@ interface AnalyticsData {
   rating: number | null;
   /** Percentage of inquiries that have received a reply (0–100), derived from inbox. */
   replyRate: number | null;
+  /** 7-day inquiry counts [6 days ago … today], derived from inbox createdAt. Null until loaded. */
+  inquiryDays: number[] | null;
 }
 
 interface AnalyticsCardProps {
@@ -98,6 +100,7 @@ export function ProviderDashboardScreen(): ReactElement {
     posts: null,
     rating: null,
     replyRate: null,
+    inquiryDays: null,
   });
 
   const fetchStatus = useCallback(async () => {
@@ -119,19 +122,43 @@ export function ProviderDashboardScreen(): ReactElement {
         messagingApi.listProviderInquiries({ query: {} }),
         userId ? api.discover.listFeed({ query: { limit: 50 } }) : Promise.resolve(null),
       ]);
-      setAnalytics((prev) => ({
-        ...prev,
-        incomingMessages: inboxRes.status === 200 ? inboxRes.body.items.length : prev.incomingMessages,
-        replyRate: inboxRes.status === 200 && inboxRes.body.items.length > 0
-          ? Math.round(
-              (inboxRes.body.items.filter((inq) => inq.targets.some((tgt) => tgt.status === 'replied')).length /
-                inboxRes.body.items.length) * 100,
-            )
-          : prev.replyRate,
-        posts: feedRes?.status === 200
-          ? feedRes.body.items.filter((p) => p.authorId === userId).length
-          : prev.posts,
-      }));
+      if (inboxRes.status === 200) {
+        const items = inboxRes.body.items;
+        // Bucket inquiries into last 7 days (index 0 = 6 days ago, index 6 = today).
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        const buckets = Array<number>(7).fill(0);
+        for (const inq of items) {
+          const d = new Date(inq.createdAt);
+          d.setUTCHours(0, 0, 0, 0);
+          const diffDays = Math.round((today.getTime() - d.getTime()) / 86_400_000);
+          if (diffDays >= 0 && diffDays < 7) {
+            const idx = 6 - diffDays;
+            buckets[idx] = (buckets[idx] ?? 0) + 1;
+          }
+        }
+        setAnalytics((prev) => ({
+          ...prev,
+          incomingMessages: items.length,
+          replyRate: items.length > 0
+            ? Math.round(
+                (items.filter((inq) => inq.targets.some((tgt) => tgt.status === 'replied')).length /
+                  items.length) * 100,
+              )
+            : prev.replyRate,
+          inquiryDays: buckets,
+          posts: feedRes?.status === 200
+            ? feedRes.body.items.filter((p) => p.authorId === userId).length
+            : prev.posts,
+        }));
+      } else {
+        setAnalytics((prev) => ({
+          ...prev,
+          posts: feedRes?.status === 200
+            ? feedRes.body.items.filter((p) => p.authorId === userId).length
+            : prev.posts,
+        }));
+      }
     } catch {
       // analytics are non-critical; silently ignore fetch errors
     }
@@ -220,6 +247,7 @@ export function ProviderDashboardScreen(): ReactElement {
       <AnalyticsChartCard
         providerId={session?.state.status === 'signedIn' ? session.state.user.id : 'anon'}
         metric="inquiries"
+        data={analytics.inquiryDays ?? undefined}
       />
 
       {providerMe && (providerMe.phone || (providerMe.links?.length ?? 0) > 0) ? (
