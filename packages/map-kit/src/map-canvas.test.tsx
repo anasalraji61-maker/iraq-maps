@@ -65,8 +65,8 @@ describe('MapCanvas', () => {
     expect(screen.getByTestId(mapPartIDs.markers)).toHaveProp('data', {
       type: 'FeatureCollection',
       features: [
-        { type: 'Feature', id: 'n1', geometry: { type: 'Point', coordinates: [44.36, 33.31] }, properties: { selected: false } },
-        { type: 'Feature', id: 'w2', geometry: { type: 'Point', coordinates: [44.4, 33.3] }, properties: { selected: true } },
+        { type: 'Feature', id: 'n1', geometry: { type: 'Point', coordinates: [44.36, 33.31] }, properties: { selected: false, category: '' } },
+        { type: 'Feature', id: 'w2', geometry: { type: 'Point', coordinates: [44.4, 33.3] }, properties: { selected: true, category: '' } },
       ],
     });
     expect(screen.getByTestId(markerTestID('n1'))).not.toBeSelected();

@@ -11,7 +11,27 @@ export interface MapMarker {
   id: string;
   location: LngLat;
   selected?: boolean;
+  /** Place category — drives marker color. One of the keys in CATEGORY_COLORS, or omit for default. */
+  category?: string;
 }
+
+/** MapLibre circle-color per category. Must be kept in sync with CATEGORY_ICONS in MapScreen.
+ * @public */
+export const CATEGORY_COLORS: Record<string, string> = {
+  restaurant: '#E64A19',  // deep orange
+  cafe:       '#795548',  // brown
+  hotel:      '#1976D2',  // blue
+  shopping:   '#7B1FA2',  // purple
+  attraction: '#FBC02D',  // yellow
+  hospital:   '#D32F2F',  // red
+  pharmacy:   '#388E3C',  // green
+  mosque:     '#00897B',  // teal
+  school:     '#5E35B1',  // deep purple
+  park:       '#2E7D32',  // dark green
+};
+
+const DEFAULT_MARKER_COLOR = '#0b6e4f';
+const SELECTED_COLOR = '#b3261e';
 
 /** Controlled camera; a new value animates the map to it.
  * @public frozen stub (M1) */
@@ -70,11 +90,17 @@ export function MapCanvas({ city, apiBaseUrl, lang, camera, markers = EMPTY, onM
         type: 'Feature' as const,
         id: m.id,
         geometry: { type: 'Point' as const, coordinates: m.location },
-        properties: { selected: m.selected === true },
+        properties: { selected: m.selected === true, category: m.category ?? '' },
       })),
     }),
     [markers],
   );
+
+  // Build a MapLibre match expression for category colors.
+  const categoryColorExpr = useMemo(() => {
+    const pairs = Object.entries(CATEGORY_COLORS).flatMap(([cat, color]) => [cat, color]);
+    return ['match', ['get', 'category'], ...pairs, DEFAULT_MARKER_COLOR] as unknown as string;
+  }, []);
 
   return (
     <View style={styles.fill}>
@@ -116,7 +142,7 @@ export function MapCanvas({ city, apiBaseUrl, lang, camera, markers = EMPTY, onM
             layout={{ 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] }}
             paint={{
               'circle-radius': ['case', ['get', 'selected'], 11, 8],
-              'circle-color': ['case', ['get', 'selected'], '#b3261e', '#0b6e4f'],
+              'circle-color': ['case', ['get', 'selected'], SELECTED_COLOR, categoryColorExpr],
               'circle-stroke-width': 2,
               'circle-stroke-color': '#ffffff',
             }}

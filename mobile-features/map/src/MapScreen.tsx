@@ -138,7 +138,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     SEARCH_DELAY_MS,
   );
   const suggestionItems = suggestions.state?.status === 'ready' ? suggestions.state.data : [];
-  const markers = useMemo(() => results.map(({ id, location }) => ({ id, location, selected: id === selectedPlaceId })), [results, selectedPlaceId]);
+  const markers = useMemo(() => results.map(({ id, location, category }) => ({ id, location, selected: id === selectedPlaceId, category: category ?? undefined })), [results, selectedPlaceId]);
 
   type ResultSection = { title: string; data: PlaceSummary[] };
   const resultSections = useMemo((): ResultSection[] => {
