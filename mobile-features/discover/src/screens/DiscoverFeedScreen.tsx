@@ -156,6 +156,14 @@ const PostItem = memo(function PostItem({
   const [photoOpen, setPhotoOpen] = useState(false);
   const [photoIdx, setPhotoIdx] = useState(0);
   const firstImageUrl = imageUrls?.[0];
+  const likeScale = useRef(new Animated.Value(1)).current;
+
+  const animateLike = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(likeScale, { toValue: 1.4, duration: 120, useNativeDriver: true }),
+      Animated.timing(likeScale, { toValue: 1, duration: 120, useNativeDriver: true }),
+    ]).start();
+  }, [likeScale]);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -331,17 +339,19 @@ const PostItem = memo(function PostItem({
         </Pressable>
       ) : null}
       <View style={styles.actions}>
-        <Pressable
-          testID={discoverTestIDs.likeButton(post.id)}
-          style={[styles.actionBtn, { backgroundColor: COLORS.border }, post.isLikedByMe && styles.actionBtnActive]}
-          onPress={() => { haptics.like(); onLike(post); }}
-          accessibilityRole="button"
-          accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
-        >
-          <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }, post.isLikedByMe && styles.actionBtnTextActive]}>
-            {t('post.like')} {formatCount(post.likeCount)}
-          </Text>
-        </Pressable>
+        <Animated.View style={{ transform: [{ scale: likeScale }] }}>
+          <Pressable
+            testID={discoverTestIDs.likeButton(post.id)}
+            style={[styles.actionBtn, { backgroundColor: COLORS.border }, post.isLikedByMe && styles.actionBtnActive]}
+            onPress={() => { haptics.like(); animateLike(); onLike(post); }}
+            accessibilityRole="button"
+            accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
+          >
+            <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }, post.isLikedByMe && styles.actionBtnTextActive]}>
+              {t('post.like')} {formatCount(post.likeCount)}
+            </Text>
+          </Pressable>
+        </Animated.View>
         <Pressable
           testID={discoverTestIDs.commentButton(post.id)}
           style={[styles.actionBtn, { backgroundColor: COLORS.border }]}
