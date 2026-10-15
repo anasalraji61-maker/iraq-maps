@@ -216,7 +216,7 @@ const PostItem = memo(function PostItem({
             <Text style={[styles.authorText, { color: COLORS.primary }]}>{post.authorId.slice(0, 8)}</Text>
             {post.authorVerified ? (
               <View
-                style={{ backgroundColor: '#1976D2', borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1 }}
+                style={{ backgroundColor: COLORS.primary, borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1 }}
                 accessibilityLabel={t('post.verifiedBadge')}
                 accessibilityRole="text"
               >
@@ -1071,7 +1071,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   emptyCreateBtn: {
-    backgroundColor: '#1976D2',
+    backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 24,
@@ -1091,7 +1091,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#1976D2',
+    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
@@ -1115,6 +1115,6 @@ const styles = StyleSheet.create({
   editModalActions: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   editModalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
   editModalCancelText: { fontSize: 14, color: '#555' },
-  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#1976D2', minWidth: 70, alignItems: 'center' },
+  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: COLORS.primary, minWidth: 70, alignItems: 'center' },
   editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
 });

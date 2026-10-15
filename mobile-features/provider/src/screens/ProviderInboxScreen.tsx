@@ -9,6 +9,8 @@ import { useMessagingApi } from '../messaging-api';
 import { t } from '../strings';
 import { SkeletonBlock } from '../skeleton';
 
+const PRIMARY = '#1976D2';
+
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
 
 function SkeletonInboxRow(): ReactElement {
@@ -240,5 +242,5 @@ const styles = StyleSheet.create({
   urgencyChip: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
   urgencyText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
   loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
-  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
+  loadMoreText: { fontSize: 14, color: PRIMARY, fontWeight: '600' },
 });

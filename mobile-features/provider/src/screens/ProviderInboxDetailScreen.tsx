@@ -10,6 +10,8 @@ import { useRequest } from '../request';
 import { t } from '../strings';
 import { SkeletonBlock } from '../skeleton';
 
+const PRIMARY = '#1976D2';
+
 const MAX_REPLY_LENGTH = 1000;
 
 /** Keys and labels for the built-in quick reply templates. */
@@ -88,7 +90,7 @@ export function ProviderInboxDetailScreen(): ReactElement {
       <ScrollView
         testID="provider-inbox-detail-scroll"
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void load(true); }} colors={['#1976D2']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void load(true); }} colors={[PRIMARY]} />}
       >
         <Text variant="title">{t('inbox.title')}</Text>
         {error ? <Banner kind="error" message={error} /> : null}

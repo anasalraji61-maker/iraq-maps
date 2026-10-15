@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
 import { SkeletonBlock } from '../skeleton';
+
+const PRIMARY = '#1976D2';
 import { AnalyticsChartCard } from './AnalyticsChartCard';
 
 function DashboardSkeleton(): ReactElement {
@@ -185,7 +187,7 @@ export function ProviderDashboardScreen(): ReactElement {
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void handleRefresh(); }} colors={['#1976D2']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void handleRefresh(); }} colors={[PRIMARY]} />}
       >
       <Text variant="title">{t('dashboard.title')}</Text>
       <Text>{t('dashboard.status')}</Text>
@@ -318,7 +320,7 @@ const styles = StyleSheet.create({
   contactRow: { gap: 2 },
   contactLabel: { fontSize: 12, color: '#555', textAlign: 'auto' },
   contactValue: { fontSize: 14, textAlign: 'auto' },
-  contactVisible: { color: '#1976D2', textDecorationLine: 'underline' },
+  contactVisible: { color: PRIMARY, textDecorationLine: 'underline' },
   contactHidden: { color: '#999' },
   consentNote: { fontSize: 11, color: '#EF4444', textAlign: 'auto' },
 });

@@ -170,7 +170,7 @@ export function CommentsScreen(): ReactElement {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} tintColor="#1976D2" />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[COLORS.primary]} tintColor="#1976D2" />
         }
         renderItem={({ item }) => <CommentCard item={item} onReply={handleReply} onDelete={(id) => { void handleDeleteComment(id); }} currentUserId={currentUserId} t={t} />}
         ListEmptyComponent={

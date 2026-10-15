@@ -10,6 +10,8 @@ import { Animated, Platform, StyleSheet, Text as RNText, View } from 'react-nati
 import { NotifPrefsSection } from './NotifPrefsSection';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
+
+const PRIMARY = '#1976D2';
 import { useNotifApi } from './useNotifApi';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     alignItems: 'center',
     justifyContent: 'center',
   },

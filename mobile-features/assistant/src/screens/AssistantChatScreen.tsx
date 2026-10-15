@@ -21,6 +21,7 @@ import { t } from '../strings';
 // Force RTL for Arabic
 I18nManager.forceRTL(true);
 
+const PRIMARY = '#1976D2';
 const MAX_INPUT_LENGTH = 500;
 const CHAR_WARN_THRESHOLD = 400;
 
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   header: {
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     paddingVertical: 14,
     paddingHorizontal: 16,
     flexDirection: 'row',
@@ -514,7 +515,7 @@ const styles = StyleSheet.create({
   },
   placeCardMapLabel: {
     fontSize: 12,
-    color: '#1976D2',
+    color: PRIMARY,
     fontWeight: '600',
   },
   errorRow: {
@@ -545,7 +546,7 @@ const styles = StyleSheet.create({
   mapBtn: {
     marginHorizontal: 12,
     marginBottom: 4,
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -645,7 +646,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   sendBtn: {
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,

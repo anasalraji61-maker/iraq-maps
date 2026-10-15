@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { sharedStyles } from './shared';
+import { sharedStyles, COLORS } from './shared';
 
 const MAX_PHOTOS = 3;
 
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   typeChipActive: {
-    backgroundColor: '#1976D2',
+    backgroundColor: COLORS.primary,
   },
   typeChipText: {
     fontSize: 14,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   submitBtn: {
-    backgroundColor: '#1976D2',
+    backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -507,14 +507,14 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: '#1976D2',
+    borderColor: COLORS.primary,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#E3F2FD',
   },
   addPhotoBtnText: {
-    color: '#1976D2',
+    color: COLORS.primary,
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: 4,
-    backgroundColor: '#1976D2',
+    backgroundColor: COLORS.primary,
     borderRadius: 2,
   },
   selectedPlaceRow: {
