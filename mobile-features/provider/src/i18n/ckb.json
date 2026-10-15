@@ -110,5 +110,12 @@
     "provider_already_exists": "کارووبارێکی تۆمارکراوت هەیە.",
     "phone_not_verified": "دەبێت ژمارەی تەلەفۆن سەرەتا پشتڕاست بکرێتەوە.",
     "invalid_request": "زانیارییەکان بپشکنە و دووبارە هەوڵبدەرەوە."
+  },
+  "analytics": {
+    "viewsTitle": "بینینی پەڕە",
+    "inquiriesTitle": "داواکارییەکان",
+    "viewsTotal": "کۆی گشتی: {n}",
+    "inquiriesTotal": "کۆی گشتی: {n}",
+    "last7days": "٧ ڕۆژی دواوە"
   }
 }

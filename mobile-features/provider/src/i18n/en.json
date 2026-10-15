@@ -110,5 +110,12 @@
     "provider_already_exists": "You already have a registered business.",
     "phone_not_verified": "You must verify your phone number first.",
     "invalid_request": "Check your input and try again."
+  },
+  "analytics": {
+    "viewsTitle": "Page Views",
+    "inquiriesTitle": "Inquiries",
+    "viewsTotal": "Total: {n}",
+    "inquiriesTotal": "Total: {n}",
+    "last7days": "Last 7 days"
   }
 }

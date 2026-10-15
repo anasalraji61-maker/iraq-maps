@@ -7,6 +7,7 @@ import { Animated, RefreshControl, ScrollView, StyleSheet, View, Text as RNText 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
+import { AnalyticsChartCard } from './AnalyticsChartCard';
 
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
 
@@ -192,6 +193,15 @@ export function ProviderDashboardScreen(): ReactElement {
           icon="⭐"
         />
       </View>
+
+      <AnalyticsChartCard
+        providerId={session?.state.status === 'signedIn' ? session.state.user.id : 'anon'}
+        metric="views"
+      />
+      <AnalyticsChartCard
+        providerId={session?.state.status === 'signedIn' ? session.state.user.id : 'anon'}
+        metric="inquiries"
+      />
 
       {status !== 'verified' && (
         <Button
