@@ -20,6 +20,20 @@
     "tripDistance": "المسافة المقطوعة",
     "tripDuration": "وقت الرحلة"
   },
+  "nearbyNav": {
+    "title": "قريب منك",
+    "detour": "انحراف {dist}"
+  },
+  "waypoints": {
+    "add": "أضف محطة توقف",
+    "addTitle": "أدخل اسم المكان للتوقف فيه",
+    "remove": "إزالة",
+    "label": "التوقف {n}:",
+    "placeholder": "ابحث عن مكان…",
+    "search": "بحث",
+    "searching": "جارٍ البحث…",
+    "noResults": "لا توجد نتائج"
+  },
   "preview": {
     "from": "من: ",
     "eta": "تصل الساعة {time}",

@@ -7,3 +7,5 @@ export { ActiveNavigationScreen } from './screens/ActiveNavigationScreen';
 export { RoutePreviewScreen } from './screens/RoutePreviewScreen';
 export { RoutePreviewContainer } from './screens/RoutePreviewContainer';
 export { ActiveNavigationContainer } from './screens/ActiveNavigationContainer';
+export { WaypointsEditor, type WaypointEntry } from './screens/WaypointsEditor';
+export { NearbyNavChips } from './screens/NearbyNavChips';

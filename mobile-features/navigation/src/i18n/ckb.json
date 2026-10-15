@@ -20,6 +20,20 @@
     "tripDistance": "بەربەستی گواستراو",
     "tripDuration": "کاتی گەشت"
   },
+  "nearbyNav": {
+    "title": "نزیکت",
+    "detour": "+{dist} ئەوتار"
+  },
+  "waypoints": {
+    "add": "زیادکردنی وەستگە",
+    "addTitle": "ناوی شوێن بنووسە",
+    "remove": "لابردن",
+    "label": "وەستگە {n}:",
+    "placeholder": "گەڕان بۆ شوێنێک…",
+    "search": "گەڕان",
+    "searching": "گەڕان…",
+    "noResults": "ئەنجامی نییە"
+  },
   "preview": {
     "from": "لە: ",
     "eta": "دەگەیت کاتژمێر {time}",

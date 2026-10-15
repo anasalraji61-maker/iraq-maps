@@ -9,9 +9,11 @@ import { Banner, Screen, Text } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { View } from 'react-native';
 import { useNavigation, type PositionSubscriber } from '../hooks/useNavigation';
 import { useRouteInit } from '../hooks/useRouteInit';
 import { ActiveNavigationScreen } from './ActiveNavigationScreen';
+import { NearbyNavChips } from './NearbyNavChips';
 import type { RouteResult, RouteRequest, CityDescriptor } from '@iraq-maps/contracts';
 import type { LngLat } from '@iraq-maps/contracts';
 
@@ -38,13 +40,16 @@ function NavigationSession({
   // Subscribe to live location updates via expo-location watch
   const subscribeRef = useRef<PositionSubscriber | null>(null);
   const [currentSpeedMps, setCurrentSpeedMps] = useState<number | null>(null);
+  const [currentPosition, setCurrentPosition] = useState<LngLat | null>(null);
   useEffect(() => {
     subscribeRef.current = (cb) => {
       let locationSub: Location.LocationSubscription | null = null;
       void Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, timeInterval: 1000, distanceInterval: 5 },
         (loc) => {
-          cb([loc.coords.longitude, loc.coords.latitude] as LngLat);
+          const pos: LngLat = [loc.coords.longitude, loc.coords.latitude];
+          cb(pos);
+          setCurrentPosition(pos);
           // loc.coords.speed is m/s (>= 0) or null when unavailable
           setCurrentSpeedMps(typeof loc.coords.speed === 'number' && loc.coords.speed >= 0 ? loc.coords.speed : null);
         },
@@ -72,21 +77,26 @@ function NavigationSession({
   });
 
   return (
-    <ActiveNavigationScreen
-      {...navState}
-      onStop={() => router.back()}
-      onNavigateAgain={() =>
-        router.replace({ pathname: '/route/[placeId]', params: { placeId: String(placeId) } })
-      }
-      routePolyline6={route.polyline6}
-      city={city}
-      apiBaseUrl={apiBaseUrl}
-      lang={lang}
-      tripDistanceM={route.distanceM}
-      tripDurationS={route.durationS}
-      destinationName={destinationName}
-      currentSpeedMps={currentSpeedMps}
-    />
+    <View style={{ flex: 1 }}>
+      <ActiveNavigationScreen
+        {...navState}
+        onStop={() => router.back()}
+        onNavigateAgain={() =>
+          router.replace({ pathname: '/route/[placeId]', params: { placeId: String(placeId) } })
+        }
+        routePolyline6={route.polyline6}
+        city={city}
+        apiBaseUrl={apiBaseUrl}
+        lang={lang}
+        tripDistanceM={route.distanceM}
+        tripDurationS={route.durationS}
+        destinationName={destinationName}
+        currentSpeedMps={currentSpeedMps}
+      />
+      {city && !navState.hasArrived ? (
+        <NearbyNavChips city={city} position={currentPosition} />
+      ) : null}
+    </View>
   );
 }
 

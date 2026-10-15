@@ -161,5 +161,25 @@
   },
   "offline": {
     "banner": "أنت غير متصل بالإنترنت — الخريطة محدودة"
+  },
+  "mapStyle": {
+    "label": "نمط الخريطة",
+    "street": "شوارع",
+    "satellite": "قمر صناعي",
+    "dark": "داكن"
+  },
+  "categoryFilter": {
+    "label": "تصفية حسب الفئة",
+    "all": "الكل",
+    "clear": "إزالة التصفية"
+  },
+  "sharing": {
+    "placeMessage": "{name}\n{address}\n{link}"
+  },
+  "nearby": {
+    "title": "قريب منك",
+    "gas": "محطة وقود",
+    "food": "مطعم",
+    "cafe": "مقهى"
   }
 }

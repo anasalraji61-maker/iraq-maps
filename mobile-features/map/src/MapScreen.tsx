@@ -34,8 +34,8 @@ const DEFAULT_ICON = '📍';
 function categoryIcon(place: PlaceSummary): string {
   return place.category ? (CATEGORY_ICONS[place.category] ?? DEFAULT_ICON) : DEFAULT_ICON;
 }
-import { SatelliteToggle } from './components/SatelliteToggle';
-import { useMapStyle, type MapMode } from './hooks/useMapStyle';
+import { MapStyleMenu } from './components/MapStyleMenu';
+import { useMapStyle, isDarkMode, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
 import { formatDistance, isolate, kindLabel, t } from './strings';
 
@@ -91,6 +91,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [promotedQuery, setPromotedQuery] = useState<string>();
   const [mapMode, setMapMode] = useState<MapMode>('street');
   const baseLayer = useMapStyle(mapMode);
+  const darkOverlay = isDarkMode(mapMode);
+  /** Active category filter; null means show all. */
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>();
   /** The place shown in the compact bottom sheet after tapping a map marker. */
   const [sheetPlace, setSheetPlace] = useState<PlaceSummary | null>(null);
@@ -142,13 +145,20 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     SEARCH_DELAY_MS,
   );
   const suggestionItems = suggestions.state?.status === 'ready' ? suggestions.state.data : [];
-  const markers = useMemo(() => results.map(({ id, location, category }) => ({ id, location, selected: id === selectedPlaceId, category: category ?? undefined })), [results, selectedPlaceId]);
+  const filteredResults = useMemo(
+    () => (activeCategory ? results.filter((p) => p.category === activeCategory) : results),
+    [results, activeCategory],
+  );
+  const markers = useMemo(
+    () => filteredResults.map(({ id, location, category }) => ({ id, location, selected: id === selectedPlaceId, category: category ?? undefined })),
+    [filteredResults, selectedPlaceId],
+  );
 
   type ResultSection = { title: string; data: PlaceSummary[] };
   const resultSections = useMemo((): ResultSection[] => {
-    const places = results.filter((p) => p.kind === 'place');
-    const streets = results.filter((p) => p.kind === 'street');
-    const areas = results.filter((p) => p.kind === 'area');
+    const places = filteredResults.filter((p) => p.kind === 'place');
+    const streets = filteredResults.filter((p) => p.kind === 'street');
+    const areas = filteredResults.filter((p) => p.kind === 'area');
     const sections: ResultSection[] = [];
     if (places.length) sections.push({ title: t('search.sectionPlaces'), data: places });
     if (streets.length) sections.push({ title: t('search.sectionStreets'), data: streets });
@@ -240,6 +250,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           />
         </Pressable>
         {mapMode === 'satellite' && city.satellite ? <SatelliteDisclaimer layer={city.satellite} /> : null}
+        {darkOverlay ? <View style={styles.darkOverlay} pointerEvents="none" /> : null}
       </View>
       {!isOnline && (
         <View style={styles.offlineBanner} testID="offline-banner" accessibilityRole="alert">
@@ -267,7 +278,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
               onPress={() => { addRecent(q); router.push(`/assistant?initialMessage=${encodeURIComponent(q)}`); }}
             />
           ) : null}
-          <SatelliteToggle active={mapMode === 'satellite'} onToggle={() => setMapMode((m) => (m === 'satellite' ? 'street' : 'satellite'))} />
+          <MapStyleMenu mode={mapMode} onModeChange={setMapMode} />
           <IconButton testID={testIDs.map.lang} icon="translate" accessibilityLabel={t('lang.title')} onPress={() => setChoosingLang(true)} />
         </View>
         {locationAddress ? (
@@ -335,6 +346,35 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             </View>
           </View>
         ) : null}
+        {searchPanelOpen && q && !useSuggestions && results.length > 0 ? (
+          <View>
+            <Text variant="caption" tone="muted">{t('categoryFilter.label')}</Text>
+            <View style={styles.chipsRow}>
+              <Pressable
+                key="__all"
+                style={[styles.chip, !activeCategory && styles.chipActive]}
+                onPress={() => setActiveCategory(null)}
+                accessibilityRole="button"
+                accessibilityLabel={t('categoryFilter.all')}
+              >
+                <RNText style={[styles.chipText, !activeCategory && styles.chipTextActive]}>{t('categoryFilter.all')}</RNText>
+              </Pressable>
+              {Array.from(new Set(results.filter((r) => r.category).map((r) => r.category as string))).map((cat) => (
+                <Pressable
+                  key={cat}
+                  style={[styles.chip, activeCategory === cat && styles.chipActive]}
+                  onPress={() => setActiveCategory((prev) => (prev === cat ? null : cat))}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`categories.${cat}` as Parameters<typeof t>[0])}
+                >
+                  <RNText style={[styles.chipText, activeCategory === cat && styles.chipTextActive]} numberOfLines={1}>
+                    {`${CATEGORY_ICONS[cat] ?? ''} ${t(`categories.${cat}` as Parameters<typeof t>[0])}`}
+                  </RNText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
         {searchPanelOpen && q && !useSuggestions ? (
           <SectionList
             style={{ maxHeight: maxResultsHeight }}
@@ -347,9 +387,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                 {search.state?.status === 'failed' && search.state.message === globalT('common:errors.network')
                   ? <Banner kind="error" message={globalT('common:errors.network')} onRetry={search.retry} retryLabel={globalT('common:actions.retry')} />
                   : <LoadStatus {...search} />}
-                {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
-                {search.state?.status === 'ready' && results.length > 0 ? (
-                  <Text variant="caption" tone="muted">{t('search.resultCount', { count: String(results.length) })}</Text>
+                {search.state?.status === 'ready' && !filteredResults.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
+                {search.state?.status === 'ready' && filteredResults.length > 0 ? (
+                  <Text variant="caption" tone="muted">{t('search.resultCount', { count: String(filteredResults.length) })}</Text>
                 ) : null}
               </>
             }
@@ -453,7 +493,10 @@ const styles = StyleSheet.create({
   clearText: { color: color.primary, fontSize: 13 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.xs },
   chip: { paddingHorizontal: space.s, paddingVertical: space.xs, backgroundColor: color.surface, borderRadius: radius.l, borderWidth: 1, borderColor: color.border, maxWidth: 200 },
+  chipActive: { backgroundColor: color.primary, borderColor: color.primary },
   chipText: { fontSize: 13, color: color.text },
+  chipTextActive: { color: '#fff', fontWeight: '600' },
+  darkOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 1 },
   sectionHeader: { paddingVertical: space.xs, paddingHorizontal: space.xs, backgroundColor: color.bg },
   // At the end side, above the attribution that MapCanvas pins to the bottom-end corner.
   locate: { position: 'absolute', end: space.m, bottom: space.xl * 2, borderRadius: minTouch / 2, backgroundColor: color.bg, elevation: 4 },

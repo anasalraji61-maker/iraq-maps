@@ -161,5 +161,25 @@
   },
   "offline": {
     "banner": "You're offline — map is limited"
+  },
+  "mapStyle": {
+    "label": "Map style",
+    "street": "Streets",
+    "satellite": "Satellite",
+    "dark": "Dark"
+  },
+  "categoryFilter": {
+    "label": "Filter by category",
+    "all": "All",
+    "clear": "Clear filter"
+  },
+  "sharing": {
+    "placeMessage": "{name}\n{address}\n{link}"
+  },
+  "nearby": {
+    "title": "Nearby",
+    "gas": "Gas station",
+    "food": "Restaurant",
+    "cafe": "Café"
   }
 }

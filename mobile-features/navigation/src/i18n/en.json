@@ -20,6 +20,20 @@
     "tripDistance": "Distance",
     "tripDuration": "Trip time"
   },
+  "nearbyNav": {
+    "title": "Nearby",
+    "detour": "+{dist} detour"
+  },
+  "waypoints": {
+    "add": "Add stop",
+    "addTitle": "Enter a place name for the stop",
+    "remove": "Remove",
+    "label": "Stop {n}:",
+    "placeholder": "Search for a place…",
+    "search": "Search",
+    "searching": "Searching…",
+    "noResults": "No results"
+  },
   "preview": {
     "from": "From: ",
     "eta": "Arrive at {time}",

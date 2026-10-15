@@ -161,5 +161,25 @@
   },
   "offline": {
     "banner": "ئینتەرنێتت نییە — خەریتە سنووردارە"
+  },
+  "mapStyle": {
+    "label": "شێوازی خەریتە",
+    "street": "کۆلانەکان",
+    "satellite": "ستەلایت",
+    "dark": "تاریک"
+  },
+  "categoryFilter": {
+    "label": "پاڵاوتن بە جۆر",
+    "all": "هەموو",
+    "clear": "لابردنی پاڵاوتن"
+  },
+  "sharing": {
+    "placeMessage": "{name}\n{address}\n{link}"
+  },
+  "nearby": {
+    "title": "نزیکت",
+    "gas": "چووگاه",
+    "food": "چێشتخانە",
+    "cafe": "کافێ"
   }
 }

@@ -8,8 +8,10 @@ import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Banner, Screen, Text } from '@iraq-maps/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { ScrollView } from 'react-native';
 import { useRouteInit } from '../hooks/useRouteInit';
 import { RoutePreviewScreen } from './RoutePreviewScreen';
+import { WaypointsEditor, type WaypointEntry } from './WaypointsEditor';
 
 export function RoutePreviewContainer(): ReactElement {
   const { placeId, mode: modeParam } = useLocalSearchParams<{ placeId: string; mode?: string }>();
@@ -22,6 +24,7 @@ export function RoutePreviewContainer(): ReactElement {
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null);
   const [isModeLoading, setIsModeLoading] = useState(false);
   const [modeError, setModeError] = useState<string | undefined>();
+  const [waypoints, setWaypoints] = useState<WaypointEntry[]>([]);
 
   const originRef = useRef<LngLat | null>(null);
   const destinationRef = useRef<LngLat | null>(null);
@@ -38,12 +41,12 @@ export function RoutePreviewContainer(): ReactElement {
   }, [result]);
 
   const fetchRoute = useCallback(
-    async (org: LngLat, dest: LngLat, travelMode: TravelMode) => {
+    async (org: LngLat, dest: LngLat, travelMode: TravelMode, wps: LngLat[] = []) => {
       setIsModeLoading(true);
       setModeError(undefined);
       try {
         const res = await api.routes.create({
-          body: { origin: org, destination: dest, mode: travelMode, waypoints: [] },
+          body: { origin: org, destination: dest, mode: travelMode, waypoints: wps },
         });
         if (res.status === 200) {
           setRouteResult(res.body);
@@ -62,7 +65,14 @@ export function RoutePreviewContainer(): ReactElement {
   const handleModeChange = (newMode: TravelMode) => {
     setMode(newMode);
     if (originRef.current && destinationRef.current) {
-      void fetchRoute(originRef.current, destinationRef.current, newMode);
+      void fetchRoute(originRef.current, destinationRef.current, newMode, waypoints.map((w) => w.lngLat));
+    }
+  };
+
+  const handleWaypointsChange = (newWaypoints: WaypointEntry[]) => {
+    setWaypoints(newWaypoints);
+    if (originRef.current && destinationRef.current) {
+      void fetchRoute(originRef.current, destinationRef.current, mode, newWaypoints.map((w) => w.lngLat));
     }
   };
 
@@ -88,17 +98,26 @@ export function RoutePreviewContainer(): ReactElement {
   }
 
   return (
-    <RoutePreviewScreen
-      route={routeResult}
-      mode={mode}
-      onModeChange={handleModeChange}
-      onStart={handleStart}
-      isLoading={isModeLoading}
-      error={modeError}
-      destinationAddress={result?.destinationName}
-      city={result?.city}
-      apiBaseUrl={apiBaseUrl}
-      lang={lang}
-    />
+    <ScrollView>
+      {result?.city ? (
+        <WaypointsEditor
+          cityId={result.city.id}
+          waypoints={waypoints}
+          onChange={handleWaypointsChange}
+        />
+      ) : null}
+      <RoutePreviewScreen
+        route={routeResult}
+        mode={mode}
+        onModeChange={handleModeChange}
+        onStart={handleStart}
+        isLoading={isModeLoading}
+        error={modeError}
+        destinationAddress={result?.destinationName}
+        city={result?.city}
+        apiBaseUrl={apiBaseUrl}
+        lang={lang}
+      />
+    </ScrollView>
   );
 }
