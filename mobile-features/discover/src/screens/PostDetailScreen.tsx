@@ -2,7 +2,7 @@ import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
@@ -21,6 +21,50 @@ import { t } from '../strings';
 import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function PostDetailSkeleton(): ReactElement {
+  return (
+    <View testID="skeleton-post-detail" style={{ padding: 16, gap: 16 }}>
+      <View style={{ backgroundColor: '#FFF', borderRadius: 12, padding: 14, gap: 10 }}>
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+          <SkeletonBlock width={36} height={36} />
+          <SkeletonBlock width={80} height={13} />
+        </View>
+        <SkeletonBlock width={280} height={14} />
+        <SkeletonBlock width={200} height={14} />
+        <SkeletonBlock width={100} height={11} />
+      </View>
+      {[1, 2, 3].map((k) => (
+        <View key={k} style={{ backgroundColor: '#FFF', borderRadius: 10, padding: 12, gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <SkeletonBlock width={28} height={28} />
+            <SkeletonBlock width={70} height={12} />
+          </View>
+          <SkeletonBlock width={220} height={12} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
@@ -109,11 +153,7 @@ export function PostDetailScreen(): ReactElement {
   }, [api, commentText, postId, sending]);
 
   if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1976D2" />
-      </View>
-    );
+    return <PostDetailSkeleton />;
   }
 
   if (error || !post) {
