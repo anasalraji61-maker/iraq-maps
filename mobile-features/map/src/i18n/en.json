@@ -13,7 +13,8 @@
     "sectionAreas": "Areas",
     "networkError": "Search failed — check your connection",
     "suggestionsHint": "Pick a suggestion or keep typing",
-    "resultCount": "{{count}} results"
+    "resultCount": "{{count}} results",
+    "categoryChipsTitle": "Browse by category"
   },
   "focus": {
     "show": "Showing: {name}",

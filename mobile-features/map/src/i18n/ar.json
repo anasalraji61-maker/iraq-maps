@@ -13,7 +13,8 @@
     "sectionStreets": "شوارع",
     "sectionAreas": "مناطق",
     "suggestionsHint": "اختر اقتراحاً أو تابع الكتابة",
-    "resultCount": "{{count}} نتيجة"
+    "resultCount": "{{count}} نتيجة",
+    "categoryChipsTitle": "تصفّح حسب الفئة"
   },
   "focus": {
     "show": "عرض: {name}",

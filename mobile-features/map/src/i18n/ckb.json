@@ -13,7 +13,8 @@
     "sectionStreets": "شەقامەکان",
     "sectionAreas": "ناوچەکان",
     "suggestionsHint": "پێشنیازێک هەڵبژێرە یان بەردەوام بە نووسین",
-    "resultCount": "{{count}} ئەنجام"
+    "resultCount": "{{count}} ئەنجام",
+    "categoryChipsTitle": "بڕووسکەی بە جۆر"
   },
   "focus": {
     "show": "پیشاندانی: {name}",

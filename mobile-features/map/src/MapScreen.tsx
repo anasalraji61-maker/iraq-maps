@@ -40,6 +40,9 @@ import { LoadStatus, ok, useLatest } from './load';
 import { formatDistance, isolate, kindLabel, t } from './strings';
 
 const SEARCH_DELAY_MS = 300;
+
+/** Category keys shown as quick-filter chips in the empty search panel. */
+const QUICK_CATEGORY_KEYS = ['food', 'cafe', 'lodging', 'shopping', 'fuel', 'health'] as const;
 const LOCATED_ZOOM = 15;
 const NO_RESULTS: PlaceSummary[] = [];
 
@@ -284,6 +287,26 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                   accessibilityLabel={term}
                 >
                   <RNText style={styles.chipText} numberOfLines={1}>{term}</RNText>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        {searchPanelOpen && !q ? (
+          <View>
+            <Text variant="caption" tone="muted">{t('search.categoryChipsTitle')}</Text>
+            <View style={styles.chipsRow}>
+              {QUICK_CATEGORY_KEYS.map((cat) => (
+                <Pressable
+                  key={cat}
+                  style={styles.chip}
+                  onPress={() => { setQuery(t(`categories.${cat}`)); setSearchPanelOpen(true); }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`categories.${cat}`)}
+                >
+                  <RNText style={styles.chipText} numberOfLines={1}>
+                    {`${CATEGORY_ICONS[cat] ?? ''} ${t(`categories.${cat}`)}`}
+                  </RNText>
                 </Pressable>
               ))}
             </View>
