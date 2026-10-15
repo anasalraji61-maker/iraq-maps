@@ -754,6 +754,15 @@ export function DiscoverFeedScreen(): ReactElement {
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('feed.title')}</Text>
+        <Pressable
+          onPress={() => router.push('/discover/saved' as never)}
+          accessibilityRole="button"
+          accessibilityLabel={t('saved.title')}
+          testID="discover.savedPostsBtn"
+          style={styles.savedBtn}
+        >
+          <Text style={styles.savedBtnText}>🔖</Text>
+        </Pressable>
       </View>
       <View style={styles.tabRow}>
         <Pressable
@@ -1000,8 +1009,10 @@ export function DiscoverFeedScreen(): ReactElement {
 
 const styles = StyleSheet.create({
   container: sharedStyles.container,
-  header: sharedStyles.header,
+  header: { ...sharedStyles.header, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: sharedStyles.headerTitle,
+  savedBtn: { padding: 6, borderRadius: 8 },
+  savedBtnText: { fontSize: 22 },
   errorRow: { ...sharedStyles.errorRow, flexDirection: 'row', alignItems: 'center', gap: 12 },
   errorText: { ...sharedStyles.errorText, flex: 1 },
   retryBtn: { backgroundColor: COLORS.error, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
