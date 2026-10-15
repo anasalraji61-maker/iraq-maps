@@ -25,6 +25,7 @@ export const routes = {
   accountTheme: '/account/theme',
   accountSavedPlaces: '/account/saved-places',
   accountBlockedUsers: '/account/blocked-users',
+  accountFollowing: '/account/following',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',

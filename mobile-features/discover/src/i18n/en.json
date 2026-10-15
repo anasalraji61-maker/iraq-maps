@@ -188,5 +188,11 @@
     "empty": "No blocked users",
     "unblock": "Unblock",
     "unblockA11y": "Unblock {userId}"
+  },
+  "followedUsers": {
+    "title": "Following",
+    "empty": "No followed users yet",
+    "unfollow": "Unfollow",
+    "unfollowA11y": "Unfollow {userId}"
   }
 }

@@ -25,6 +25,7 @@ export function SettingsScreen(): ReactElement {
       <ListItem title={t('settings.language')} onPress={() => router.push(href('accountLanguage'))} />
       <ListItem title={t('settings.notifPrefs')} onPress={() => router.push(href('accountNotifPrefs'))} />
       <ListItem title={t('settings.blockedUsers')} onPress={() => router.push(href('accountBlockedUsers'))} />
+      <ListItem title={t('settings.followedUsers')} onPress={() => router.push(href('accountFollowing'))} />
       <ListItem title={t('settings.theme')} onPress={() => router.push(href('accountTheme'))} />
       <ListItem title={t('settings.reportProblem')} onPress={() => void Linking.openURL(SUPPORT_EMAIL)} />
       <ListItem title={t('settings.privacy')} onPress={() => router.push(href('accountPrivacy'))} />

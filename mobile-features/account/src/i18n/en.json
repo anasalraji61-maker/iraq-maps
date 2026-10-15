@@ -68,7 +68,8 @@
     "notifPrefs": "Notification Preferences",
     "theme": "Appearance",
     "blockedUsers": "Blocked Users",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "followedUsers": "Following"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",
