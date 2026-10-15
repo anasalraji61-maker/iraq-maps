@@ -14,6 +14,7 @@ function makePost(body: string): DiscoverPostType {
     mediaAssetIds: [],
     likeCount: 0,
     commentCount: 0,
+    viewCount: 0,
     isLikedByMe: false,
     authorVerified: false,
     createdAt: new Date().toISOString(),

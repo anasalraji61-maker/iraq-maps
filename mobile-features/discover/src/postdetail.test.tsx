@@ -66,6 +66,7 @@ const mockPost: DiscoverPostType = {
   mediaAssetIds: [],
   likeCount: 10,
   commentCount: 2,
+  viewCount: 5,
   isLikedByMe: false,
   authorVerified: false,
   createdAt: '2024-06-01T00:00:00Z',

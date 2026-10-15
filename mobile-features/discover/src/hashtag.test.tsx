@@ -41,6 +41,7 @@ const makeSearchResponse = () => ({
         mediaAssetIds: [] as string[],
         likeCount: 3,
         commentCount: 1,
+        viewCount: 0,
         isLikedByMe: false,
         createdAt: '2024-02-01T00:00:00Z',
       },

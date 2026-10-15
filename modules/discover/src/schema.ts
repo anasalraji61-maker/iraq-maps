@@ -14,6 +14,7 @@ export const postTable = discoverSchema.table(
     mediaAssetIds: uuid('media_asset_ids').array().notNull().default([]),
     likeCount: integer('like_count').notNull().default(0),
     commentCount: integer('comment_count').notNull().default(0),
+    viewCount: integer('view_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     removedAt: timestamp('removed_at', { withTimezone: true }),
   },

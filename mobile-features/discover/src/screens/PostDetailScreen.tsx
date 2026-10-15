@@ -111,7 +111,12 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
         <HashtagText text={post.body} style={styles.bodyText} onHashtagPress={onHashtagPress} />
       </Pressable>
       {copyFeedback ? <Text style={styles.copyFeedback}>{copyFeedback}</Text> : null}
-      <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
+      <View style={styles.metaRow}>
+        <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
+        {post.viewCount > 0 && (
+          <Text style={styles.viewCount}>{t('postDetail.views', { n: post.viewCount })}</Text>
+        )}
+      </View>
       <View style={styles.actionRow}>
         <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button" accessibilityLabel={t('post.share')}>
           <Text style={styles.shareBtnText}>{t('post.share')}</Text>
@@ -482,7 +487,9 @@ const styles = StyleSheet.create({
   typeBadge: { backgroundColor: COLORS.primaryXLight, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
   typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
   bodyText: { fontSize: 16, color: COLORS.textPrimary, lineHeight: 24, textAlign: 'auto', marginBottom: 8 },
-  postDate: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto', marginBottom: 10 },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  postDate: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto' },
+  viewCount: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto' },
   copyFeedback: { fontSize: 12, color: COLORS.primary ?? '#1976D2', textAlign: 'auto', marginBottom: 4 },
   imageStrip: { marginBottom: 10, marginHorizontal: -14 },
   imageStripContent: { paddingHorizontal: 14, gap: 8 },

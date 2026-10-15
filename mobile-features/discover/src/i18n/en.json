@@ -142,7 +142,8 @@
     "reason_other": "Other",
     "reportError": "Could not send report. Please try again.",
     "deleteCommentTitle": "Delete comment",
-    "deleteCommentMsg": "Delete this comment? This cannot be undone."
+    "deleteCommentMsg": "Delete this comment? This cannot be undone.",
+    "views": "{n} view"
   },
   "userPosts": {
     "title": "User Posts",

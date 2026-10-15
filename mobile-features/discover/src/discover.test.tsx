@@ -65,6 +65,7 @@ const makeFeedResponse = (isLikedByMe = false) => ({
         mediaAssetIds: [] as string[],
         likeCount: 5,
         commentCount: 2,
+        viewCount: 0,
         isLikedByMe,
         createdAt: '2024-01-01T00:00:00Z',
       },

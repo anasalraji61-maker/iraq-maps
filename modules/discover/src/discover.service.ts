@@ -84,10 +84,17 @@ export class DiscoverService {
   }
 
   async getPost(userId: UserId, postId: PostIdType) {
-    const post = await this.getPostOrThrow(postId);
+    const [post] = await Promise.all([
+      this.getPostOrThrow(postId),
+      // Increment view count fire-and-forget — does not block response
+      this.db.update(postTable)
+        .set({ viewCount: sql`${postTable.viewCount} + 1` })
+        .where(eq(postTable.id, postId))
+        .catch(() => undefined),
+    ]);
     const [like] = await this.db.select().from(postLikeTable)
       .where(and(eq(postLikeTable.postId, postId), eq(postLikeTable.userId, userId))).limit(1);
-    return this.toPostShape(post, !!like);
+    return this.toPostShape({ ...post, viewCount: (post.viewCount ?? 0) + 1 }, !!like);
   }
 
   async likePost(userId: UserId, postId: PostIdType) {
@@ -420,6 +427,7 @@ export class DiscoverService {
       mediaAssetIds: post.mediaAssetIds ?? [],
       likeCount: post.likeCount,
       commentCount: post.commentCount,
+      viewCount: post.viewCount ?? 0,
       isLikedByMe,
       authorVerified,
       createdAt: post.createdAt.toISOString(),

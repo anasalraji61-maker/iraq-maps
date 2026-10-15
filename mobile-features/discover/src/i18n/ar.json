@@ -142,7 +142,8 @@
     "reason_other": "أخرى",
     "reportError": "تعذّر إرسال البلاغ. حاول مرة أخرى.",
     "deleteCommentTitle": "حذف التعليق",
-    "deleteCommentMsg": "هل تريد حذف هذا التعليق؟ لا يمكن التراجع عن هذا."
+    "deleteCommentMsg": "هل تريد حذف هذا التعليق؟ لا يمكن التراجع عن هذا.",
+    "views": "{n} مشاهدة"
   },
   "userPosts": {
     "title": "منشورات المستخدم",

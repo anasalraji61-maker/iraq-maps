@@ -66,6 +66,7 @@ const makePost = (overrides: Partial<DiscoverPostType> = {}): DiscoverPostType =
   mediaAssetIds: [],
   likeCount: 5,
   commentCount: 2,
+  viewCount: 0,
   isLikedByMe: false,
   authorVerified: false,
   createdAt: '2024-04-01T00:00:00Z',

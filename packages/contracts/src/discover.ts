@@ -24,6 +24,7 @@ export const DiscoverPost = z.object({
   mediaAssetIds: z.array(z.string().uuid()).max(4),
   likeCount: z.number().int().default(0),
   commentCount: z.number().int().default(0),
+  viewCount: z.number().int().default(0),
   isLikedByMe: z.boolean().default(false),
   /** True when the post author is a verified provider. @M93 */
   authorVerified: z.boolean().default(false),
