@@ -57,7 +57,7 @@ describe('DiscoverController', () => {
 
   beforeEach(() => {
     svc = makeService();
-    ctrl = new DiscoverController(svc, null, null);
+    ctrl = new DiscoverController(svc, null, null, null);
   });
 
   it('listFeed returns 401 when no principal', async () => {

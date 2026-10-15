@@ -1,4 +1,4 @@
-import { index, integer, pgSchema, text, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgSchema, text, timestamp, uuid, primaryKey } from 'drizzle-orm/pg-core';
 
 export const discoverSchema = pgSchema('discover');
 
@@ -68,4 +68,36 @@ export const commentLikeTable = discoverSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.commentId, t.userId] })],
+);
+
+/** Tracks unique post viewers for analytics. @M-analytics */
+export const postViewTable = discoverSchema.table(
+  'post_view',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    viewerId: text('viewer_id').notNull(), // userId or IP-hash for anon
+    isAnon: boolean('is_anon').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.viewerId] }),
+    index('post_view_post_id_idx').on(t.postId),
+  ],
+);
+
+/** User follow relationships for recommendations. @M-recommendations */
+export const userFollowTable = discoverSchema.table(
+  'user_follow',
+  {
+    followerId: uuid('follower_id').notNull(),
+    followeeId: uuid('followee_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.followerId, t.followeeId] }),
+    index('user_follow_follower_idx').on(t.followerId),
+    index('user_follow_followee_idx').on(t.followeeId),
+  ],
 );

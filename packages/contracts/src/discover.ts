@@ -217,6 +217,73 @@ export const discoverContract = c.router({
     },
     summary: "Paginated list of a user's posts",
   },
+
+  getPostStats: {
+    method: 'GET',
+    path: '/discover/posts/:postId/stats',
+    pathParams: z.object({ postId: PostId }),
+    responses: {
+      200: z.object({
+        viewCount: z.number().int(),
+        likeCount: z.number().int(),
+        commentCount: z.number().int(),
+        uniqueViewerCount: z.number().int(),
+      }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Get analytics stats for a post',
+  },
+
+  trendingHashtags: {
+    method: 'GET',
+    path: '/discover/trending/hashtags',
+    query: z.object({ limit: z.coerce.number().int().max(50).default(10) }),
+    responses: {
+      200: z.object({
+        items: z.array(z.object({ hashtag: z.string(), count: z.number().int() })),
+      }),
+    },
+    summary: 'Top hashtags by usage in last 24h',
+  },
+
+  getUserStats: {
+    method: 'GET',
+    path: '/discover/users/:userId/stats',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      200: z.object({
+        postCount: z.number().int(),
+        followersCount: z.number().int(),
+        followingCount: z.number().int(),
+        totalLikes: z.number().int(),
+      }),
+    },
+    summary: 'Aggregated stats for a user',
+  },
+
+  recommended: {
+    method: 'GET',
+    path: '/discover/recommended',
+    query: z.object({ limit: z.coerce.number().int().max(20).default(10) }),
+    responses: {
+      200: z.object({ items: z.array(DiscoverPost) }),
+    },
+    summary: 'Personalised post recommendations',
+  },
+
+  searchSuggestions: {
+    method: 'GET',
+    path: '/discover/search/suggestions',
+    query: z.object({ q: z.string().min(1).max(100) }),
+    responses: {
+      200: z.object({
+        hashtags: z.array(z.string()),
+        userIds: z.array(UserId),
+      }),
+      400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+    },
+    summary: 'Autocomplete suggestions for hashtags and users',
+  },
 });
 
 export const ReportedPostView = z.object({

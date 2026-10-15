@@ -26,9 +26,11 @@ class DiscoverModule {}
 /** Nest dynamic module serving discoverContract routes.
  * @public */
 export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
-  // 10 posts per minute, 20 reports per hour
+  // 10 posts per minute, 20 reports per hour, 20 comments per hour, 50 messages per day
   const postLimiter = opts.redis ? new SlidingWindowRateLimiter(opts.redis, 10, 60) : null;
   const reportLimiter = opts.redis ? new SlidingWindowRateLimiter(opts.redis, 20, 3600) : null;
+  const commentLimiter = opts.redis ? new SlidingWindowRateLimiter(opts.redis, 20, 3600) : null;
+  const messageLimiter = opts.redis ? new SlidingWindowRateLimiter(opts.redis, 50, 86400) : null;
 
   return {
     module: DiscoverModule,
@@ -39,6 +41,8 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new NoopEventBus() },
       { provide: 'DISCOVER_POST_RATE_LIMITER', useValue: postLimiter },
       { provide: 'DISCOVER_REPORT_RATE_LIMITER', useValue: reportLimiter },
+      { provide: 'DISCOVER_COMMENT_RATE_LIMITER', useValue: commentLimiter },
+      { provide: 'DISCOVER_MESSAGE_RATE_LIMITER', useValue: messageLimiter },
       { provide: PortTokens.ProviderDirectoryPort, useValue: opts.providerDirectory ?? null },
       DiscoverService,
     ],

@@ -5,7 +5,7 @@ import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
-import { commentLikeTable, commentTable, postLikeTable, postReportTable, postTable } from './schema';
+import { commentLikeTable, commentTable, postLikeTable, postReportTable, postTable, postViewTable } from './schema';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -407,6 +407,163 @@ export class DiscoverService {
     return {
       items: items.map((p) => this.toPostShape(p, likedSet.has(p.id))),
       nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
+    };
+  }
+
+  /** Track a unique view and return post analytics stats. @M-analytics */
+  async getPostStats(viewerId: string, postId: PostIdType, isAnon = false) {
+    const post = await this.getPostOrThrow(postId);
+
+    // Upsert view record (primary key ensures uniqueness per viewer)
+    await this.db
+      .insert(postViewTable)
+      .values({ postId, viewerId, isAnon })
+      .onConflictDoNothing()
+      .catch(() => undefined);
+
+    const [uniqueCount] = await this.db.execute<{ cnt: string }>(sql`
+      SELECT COUNT(*)::int AS cnt FROM discover.post_view WHERE post_id = ${postId}
+    `).then((r) => r.rows);
+
+    return {
+      viewCount: post.viewCount ?? 0,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      uniqueViewerCount: Number(uniqueCount?.cnt ?? 0),
+    };
+  }
+
+  /** Top hashtags extracted from post bodies in the last 24h. @M-trending */
+  async trendingHashtags(limit = 10): Promise<Array<{ hashtag: string; count: number }>> {
+    const rows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
+      WITH words AS (
+        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        FROM discover.post
+        WHERE removed_at IS NULL
+          AND created_at > NOW() - INTERVAL '24 hours'
+      )
+      SELECT lower(m[1]) AS hashtag, COUNT(*)::int AS cnt
+      FROM words
+      GROUP BY lower(m[1])
+      ORDER BY cnt DESC, hashtag ASC
+      LIMIT ${limit}
+    `);
+    return rows.rows.map((r) => ({ hashtag: r.hashtag, count: Number(r.cnt) }));
+  }
+
+  /** Aggregated stats for a user profile. @M-user-stats */
+  async getUserStats(targetUserId: UserId) {
+    const [stats] = await this.db.execute<{
+      post_count: string;
+      total_likes: string;
+    }>(sql`
+      SELECT COUNT(*)::int AS post_count,
+             COALESCE(SUM(like_count), 0)::int AS total_likes
+      FROM discover.post
+      WHERE author_id = ${targetUserId} AND removed_at IS NULL
+    `).then((r) => r.rows);
+
+    const [followCounts] = await this.db.execute<{
+      followers_count: string;
+      following_count: string;
+    }>(sql`
+      SELECT
+        (SELECT COUNT(*)::int FROM discover.user_follow WHERE followee_id = ${targetUserId}) AS followers_count,
+        (SELECT COUNT(*)::int FROM discover.user_follow WHERE follower_id = ${targetUserId}) AS following_count
+    `).then((r) => r.rows);
+
+    return {
+      postCount: Number(stats?.post_count ?? 0),
+      followersCount: Number(followCounts?.followers_count ?? 0),
+      followingCount: Number(followCounts?.following_count ?? 0),
+      totalLikes: Number(stats?.total_likes ?? 0),
+    };
+  }
+
+  /** Personalised recommendations: followed-user posts + popular unseen posts. @M-recommendations */
+  async recommended(userId: UserId, limit = 10) {
+    // Get posts from followed users first, then popular posts
+    const rows = await this.db.execute<{
+      id: string; author_id: string; place_id: string | null; type: string;
+      category: string | null; body: string; media_asset_ids: string[];
+      like_count: number; comment_count: number; view_count: number;
+      created_at: Date; removed_at: Date | null;
+    }>(sql`
+      SELECT DISTINCT ON (p.id) p.*
+      FROM discover.post p
+      LEFT JOIN discover.user_follow uf ON uf.followee_id = p.author_id AND uf.follower_id = ${userId}
+      LEFT JOIN discover.post_view pv ON pv.post_id = p.id AND pv.viewer_id = ${userId}
+      WHERE p.removed_at IS NULL
+        AND pv.post_id IS NULL  -- not yet seen
+        AND p.author_id != ${userId}
+      ORDER BY p.id,
+               (uf.followee_id IS NOT NULL) DESC,
+               (p.like_count * 2 + p.comment_count) DESC,
+               p.created_at DESC
+      LIMIT ${limit}
+    `);
+
+    const items = rows.rows;
+    const postIds = items.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+
+    return {
+      items: items.map((p) => ({
+        id: p.id as PostIdType,
+        authorId: p.author_id as UserId,
+        placeId: p.place_id ?? undefined,
+        type: p.type as 'photo' | 'tip' | 'event' | 'offer',
+        category: (p.category ?? undefined) as import('@iraq-maps/contracts').PostCategory | undefined,
+        body: p.body,
+        mediaAssetIds: p.media_asset_ids ?? [],
+        likeCount: p.like_count,
+        commentCount: p.comment_count,
+        viewCount: p.view_count ?? 0,
+        isLikedByMe: likedSet.has(p.id),
+        authorVerified: false,
+        createdAt: (p.created_at instanceof Date ? p.created_at : new Date(p.created_at)).toISOString(),
+      })),
+    };
+  }
+
+  /** Autocomplete: top 5 matching hashtags and user IDs. @M-autocomplete */
+  async searchSuggestions(query: string): Promise<{ hashtags: string[]; userIds: UserId[] }> {
+    const term = query.replace(/[^A-Za-z0-9_؀-ۿ]/g, '');
+    if (!term) return { hashtags: [], userIds: [] };
+
+    const hashtagRows = await this.db.execute<{ hashtag: string }>(sql`
+      WITH words AS (
+        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        FROM discover.post
+        WHERE removed_at IS NULL
+      )
+      SELECT lower(m[1]) AS hashtag, COUNT(*) AS cnt
+      FROM words
+      WHERE lower(m[1]) LIKE ${`${term.toLowerCase()}%`}
+      GROUP BY lower(m[1])
+      ORDER BY cnt DESC
+      LIMIT 5
+    `);
+
+    // Match userIds that appear as authors with matching prefix in body (best effort without user table)
+    const userRows = await this.db.execute<{ author_id: string }>(sql`
+      SELECT DISTINCT author_id
+      FROM discover.post
+      WHERE removed_at IS NULL
+        AND body ILIKE ${`%@${term}%`}
+      LIMIT 5
+    `);
+
+    return {
+      hashtags: hashtagRows.rows.map((r) => r.hashtag),
+      userIds: userRows.rows.map((r) => r.author_id as UserId),
     };
   }
 

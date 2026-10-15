@@ -1,4 +1,4 @@
-import { type AuthPrincipal, type PostIdType, CommentId, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
+import { type AuthPrincipal, type PostIdType, type UserId, CommentId, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
 import { type z } from 'zod';
 type CommentIdType = z.infer<typeof CommentId>;
 import { Controller, Inject, Optional, Req } from '@nestjs/common';
@@ -20,6 +20,7 @@ export class DiscoverController {
     private readonly svc: DiscoverService,
     @Optional() @Inject('DISCOVER_POST_RATE_LIMITER') private readonly postLimiter: SlidingWindowRateLimiter | null,
     @Optional() @Inject('DISCOVER_REPORT_RATE_LIMITER') private readonly reportLimiter: SlidingWindowRateLimiter | null,
+    @Optional() @Inject('DISCOVER_COMMENT_RATE_LIMITER') private readonly commentLimiter: SlidingWindowRateLimiter | null,
   ) {}
 
   @TsRestHandler(discoverContract)
@@ -85,6 +86,10 @@ export class DiscoverController {
 
       createComment: async ({ params, body }) => {
         if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        if (this.commentLimiter) {
+          const rl = await this.commentLimiter.check(`comment:${userId}`);
+          if (!rl.allowed) return problem(429, 'rate_limited', 'Too many comments', { retryAfterMs: rl.retryAfterMs }) as never;
+        }
         try {
           const comment = await this.svc.createComment(userId, params.postId as PostIdType, body.body);
           return { status: 201, body: comment };
@@ -181,6 +186,39 @@ export class DiscoverController {
       searchPosts: async ({ query }) => {
         if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
         const result = await this.svc.searchPosts(userId, query.q, query.cursor, query.limit);
+        return { status: 200, body: result };
+      },
+
+      getPostStats: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const stats = await this.svc.getPostStats(userId, params.postId as PostIdType);
+          return { status: 200, body: stats };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      trendingHashtags: async ({ query }) => {
+        const result = await this.svc.trendingHashtags(query.limit);
+        return { status: 200, body: { items: result } };
+      },
+
+      getUserStats: async ({ params }) => {
+        const stats = await this.svc.getUserStats(params.userId as UserId);
+        return { status: 200, body: stats };
+      },
+
+      recommended: async ({ query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.recommended(userId, query.limit);
+        return { status: 200, body: result };
+      },
+
+      searchSuggestions: async ({ query }) => {
+        if (!userId) return problem(401, 'unauthorized', 'Authentication required') as never;
+        const result = await this.svc.searchSuggestions(query.q);
         return { status: 200, body: result };
       },
     });
