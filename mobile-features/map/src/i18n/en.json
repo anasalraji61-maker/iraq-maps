@@ -45,7 +45,8 @@
     "km": "{n} km"
   },
   "source": {
-    "osm": "From OpenStreetMap"
+    "osm": "From OpenStreetMap",
+    "provider": "Verified Provider ✓"
   },
   "locate": {
     "label": "My location",

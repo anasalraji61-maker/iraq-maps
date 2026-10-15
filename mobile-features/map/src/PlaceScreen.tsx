@@ -94,8 +94,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
           {t('place.away', { dist: formatDistance(distM) })}
         </Text>
       ) : null}
-      {/* Everything on this card is OSM data: the name, the hours and the phone and website tags. */}
-      <Badge testID={testIDs.place.source} label={t('source.osm')} />
+      <Badge testID={testIDs.place.source} label={place.source === 'provider' ? t('source.provider') : t('source.osm')} />
       {place.hoursRaw ? (
         <ListItem
           title={t('place.hours')}

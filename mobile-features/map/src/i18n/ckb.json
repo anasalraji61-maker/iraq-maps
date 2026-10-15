@@ -45,7 +45,8 @@
     "km": "{n} کم"
   },
   "source": {
-    "osm": "سەرچاوە: OpenStreetMap"
+    "osm": "سەرچاوە: OpenStreetMap",
+    "provider": "دابینکەری پشتڕاستکراو ✓"
   },
   "locate": {
     "label": "شوێنی من",

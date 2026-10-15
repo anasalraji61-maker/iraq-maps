@@ -45,7 +45,8 @@
     "km": "{n} كم"
   },
   "source": {
-    "osm": "من OpenStreetMap"
+    "osm": "من OpenStreetMap",
+    "provider": "مزوّد موثّق ✓"
   },
   "locate": {
     "label": "موقعي",
