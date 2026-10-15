@@ -1,15 +1,17 @@
 import { type DiscoverPostType, type NotificationItem } from '@iraq-maps/contracts';
 import { recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, useSession } from '@iraq-maps/mobile-kit';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   I18nManager,
+  Modal,
   Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { t } from './strings';
@@ -284,7 +286,7 @@ function SavedTab(): ReactElement {
 // My posts tab
 // ──────────────────────────────────────────────
 
-function PostRow({ item, onDelete }: { item: DiscoverPostType; onDelete: (postId: string) => void }): ReactElement {
+function PostRow({ item, onDelete, onEdit }: { item: DiscoverPostType; onDelete: (postId: string) => void; onEdit: (postId: string, body: string) => void }): ReactElement {
   const hasMedia = item.mediaAssetIds && item.mediaAssetIds.length > 0;
 
   const handleDeletePress = useCallback(() => {
@@ -306,14 +308,24 @@ function PostRow({ item, onDelete }: { item: DiscoverPostType; onDelete: (postId
         <Text style={styles.rowSub}>{item.likeCount} · {item.commentCount}</Text>
         <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
-      <Pressable
-        style={styles.deletePostBtn}
-        onPress={handleDeletePress}
-        accessibilityRole="button"
-        accessibilityLabel={t('deletePost')}
-      >
-        <Text style={styles.deletePostBtnText}>{t('deletePost')}</Text>
-      </Pressable>
+      <View style={styles.postActions}>
+        <Pressable
+          style={styles.editPostBtn}
+          onPress={() => onEdit(item.id, item.body)}
+          accessibilityRole="button"
+          accessibilityLabel={t('editPost')}
+        >
+          <Text style={styles.editPostBtnText}>{t('editPost')}</Text>
+        </Pressable>
+        <Pressable
+          style={styles.deletePostBtn}
+          onPress={handleDeletePress}
+          accessibilityRole="button"
+          accessibilityLabel={t('deletePost')}
+        >
+          <Text style={styles.deletePostBtnText}>{t('deletePost')}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -324,6 +336,10 @@ function PostsTab(): ReactElement {
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
+  const [editingPost, setEditingPost] = useState<{ id: string; body: string } | null>(null);
+  const [editBody, setEditBody] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const editInputRef = useRef<TextInput>(null);
 
   const load = useCallback(async () => {
     if (!session) { setLoading(false); return; }
@@ -355,6 +371,29 @@ function PostsTab(): ReactElement {
     }
   }, [api]);
 
+  const handleOpenEdit = useCallback((postId: string, body: string) => {
+    setEditingPost({ id: postId, body });
+    setEditBody(body);
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingPost || editBody.trim().length === 0) return;
+    setEditSaving(true);
+    try {
+      const res = await api.discover.updatePost({ params: { postId: editingPost.id }, body: { body: editBody.trim() } });
+      if (res.status === 200) {
+        setPosts((prev) => prev.map((p) => p.id === editingPost.id ? { ...p, body: res.body.body } : p));
+        setEditingPost(null);
+      } else {
+        Alert.alert(t('editPostError'));
+      }
+    } catch {
+      Alert.alert(t('editPostError'));
+    } finally {
+      setEditSaving(false);
+    }
+  }, [api, editingPost, editBody]);
+
   useEffect(() => { void load(); }, [load]);
 
   if (!session) return <EmptyState icon="📝" title={t('loginPrompt')} subtitle="" />;
@@ -363,13 +402,59 @@ function PostsTab(): ReactElement {
   if (posts.length === 0) return <EmptyState icon="📝" title={t('emptyPosts')} subtitle={t('emptyPostsSubtext')} />;
 
   return (
+    <>
+      <Modal
+        visible={editingPost !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditingPost(null)}
+      >
+        <View style={styles.editModalOverlay}>
+          <View style={styles.editModalBox}>
+            <Text style={styles.editModalTitle}>{t('editPostTitle')}</Text>
+            <TextInput
+              ref={editInputRef}
+              style={styles.editModalInput}
+              value={editBody}
+              onChangeText={setEditBody}
+              multiline
+              maxLength={1000}
+              placeholder={t('editPostPlaceholder')}
+              autoFocus
+              accessibilityLabel={t('editPostPlaceholder')}
+            />
+            <View style={styles.editModalActions}>
+              <Pressable
+                style={styles.editModalCancel}
+                onPress={() => setEditingPost(null)}
+                accessibilityRole="button"
+                accessibilityLabel={t('editPostCancel')}
+              >
+                <Text style={styles.editModalCancelText}>{t('editPostCancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.editModalSave, editSaving && { opacity: 0.6 }]}
+                onPress={() => { void handleSaveEdit(); }}
+                disabled={editSaving}
+                accessibilityRole="button"
+                accessibilityLabel={t('editPostSave')}
+              >
+                {editSaving
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.editModalSaveText}>{t('editPostSave')}</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     <FlatList
       data={posts}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <PostRow item={item} onDelete={(id) => { void handleDelete(id); }} />}
+      renderItem={({ item }) => <PostRow item={item} onDelete={(id) => { void handleDelete(id); }} onEdit={handleOpenEdit} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
+    </>
   );
 }
 
@@ -490,8 +575,20 @@ const styles = StyleSheet.create({
   },
   removeBtn: { padding: 8, marginTop: -4 },
   removeBtnText: { fontSize: 16, color: '#999' },
-  deletePostBtn: { padding: 8, marginTop: -4 },
+  postActions: { flexDirection: 'column', alignItems: 'flex-end', gap: 4 },
+  editPostBtn: { padding: 6 },
+  editPostBtnText: { fontSize: 13, color: '#1976D2', fontWeight: '500' },
+  deletePostBtn: { padding: 6 },
   deletePostBtnText: { fontSize: 13, color: '#C62828', fontWeight: '500' },
+  editModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  editModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 20, width: '100%', maxWidth: 420 },
+  editModalTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12, textAlign: 'center' },
+  editModalInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 15, minHeight: 80, textAlignVertical: 'top', marginBottom: 16 },
+  editModalActions: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
+  editModalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+  editModalCancelText: { fontSize: 14, color: '#555' },
+  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#1976D2', minWidth: 70, alignItems: 'center' },
+  editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
   separator: { height: 1, backgroundColor: '#F0F0F0' },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 16, color: '#555', fontWeight: '500', textAlign: 'center', marginBottom: 6 },

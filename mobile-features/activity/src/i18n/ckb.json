@@ -34,5 +34,11 @@
   "deletePostConfirmTitle": "پۆستەکە بسڕیتەوە؟",
   "deletePostConfirmMsg": "ناتوانرێت بیگەڕێندرێتەوە.",
   "deletePostError": "هەڵەی سڕینەوەی پۆست",
-  "deletePostCancel": "هەڵوەشاندنەوە"
+  "deletePostCancel": "هەڵوەشاندنەوە",
+  "editPost": "دەستکاریکردنی پۆست",
+  "editPostTitle": "دەستکاریکردنی پۆست",
+  "editPostSave": "پاشەکەوتکردن",
+  "editPostCancel": "هەڵوەشاندنەوە",
+  "editPostError": "هەڵەی دەستکاریکردنی پۆست",
+  "editPostPlaceholder": "دەقی نوێ بنووسە..."
 }

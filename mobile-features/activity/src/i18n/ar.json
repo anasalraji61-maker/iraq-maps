@@ -34,5 +34,11 @@
   "deletePostConfirmTitle": "حذف المنشور؟",
   "deletePostConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
   "deletePostError": "فشل حذف المنشور",
-  "deletePostCancel": "إلغاء"
+  "deletePostCancel": "إلغاء",
+  "editPost": "تعديل المنشور",
+  "editPostTitle": "تعديل المنشور",
+  "editPostSave": "حفظ",
+  "editPostCancel": "إلغاء",
+  "editPostError": "فشل تعديل المنشور",
+  "editPostPlaceholder": "أدخل النص الجديد..."
 }

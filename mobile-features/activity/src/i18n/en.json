@@ -34,5 +34,11 @@
   "deletePostConfirmTitle": "Delete post?",
   "deletePostConfirmMsg": "This cannot be undone.",
   "deletePostError": "Failed to delete post",
-  "deletePostCancel": "Cancel"
+  "deletePostCancel": "Cancel",
+  "editPost": "Edit post",
+  "editPostTitle": "Edit post",
+  "editPostSave": "Save",
+  "editPostCancel": "Cancel",
+  "editPostError": "Failed to edit post",
+  "editPostPlaceholder": "Enter new text..."
 }

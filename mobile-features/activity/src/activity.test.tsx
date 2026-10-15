@@ -13,6 +13,7 @@ const mockListRoutes = jest.fn<() => Promise<RecentRoute[]>>();
 const mockListSaved = jest.fn<() => Promise<SavedPlace[]>>();
 const mockListFeed = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockDeletePost = jest.fn<(a?: unknown) => Promise<unknown>>();
+const mockUpdatePost = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockListNotifications = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockMarkRead = jest.fn<(a?: unknown) => Promise<unknown>>();
 
@@ -28,6 +29,7 @@ jest.mock('@iraq-maps/mobile-kit', () => {
     discover: {
       listFeed: (a: unknown) => mockListFeed(a),
       deletePost: (a: unknown) => mockDeletePost(a),
+      updatePost: (a: unknown) => mockUpdatePost(a),
     },
   };
   const _session = {
@@ -103,6 +105,7 @@ describe('ActivityScreen', () => {
     mockListSaved.mockResolvedValue([]);
     mockListFeed.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
     mockDeletePost.mockResolvedValue({ status: 204, body: undefined });
+    mockUpdatePost.mockResolvedValue({ status: 200, body: { id: 'post-uuid-1', body: 'Updated body', authorId: 'user-uuid', type: 'tip', mediaAssetIds: [], likeCount: 0, commentCount: 0, isLikedByMe: false, createdAt: new Date().toISOString() } });
     mockListNotifications.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
     mockMarkRead.mockResolvedValue({ status: 204, body: undefined });
   });
@@ -163,8 +166,32 @@ describe('ActivityScreen', () => {
     await waitFor(() => {
       expect(getByText('Test post body')).toBeTruthy();
     });
-    // Delete button is rendered for each post
+    // Delete and edit buttons are rendered for each post
     expect(getByLabelText('deletePost')).toBeTruthy();
+    expect(getByLabelText('editPost')).toBeTruthy();
+  });
+
+  it('posts tab shows edit button that opens edit modal', async () => {
+    const myPost = {
+      id: 'post-uuid-2',
+      authorId: 'user-uuid',
+      type: 'tip',
+      body: 'Original post body',
+      mediaAssetIds: [],
+      likeCount: 0,
+      commentCount: 0,
+      isLikedByMe: false,
+      createdAt: new Date().toISOString(),
+    };
+    mockListFeed.mockResolvedValue({ status: 200, body: { items: [myPost] } });
+    const { getByText, getByLabelText } = await render(<ActivityScreen />);
+    const postsTab = getByText('tabPosts');
+    await act(async () => { fireEvent.press(postsTab); });
+    await waitFor(() => expect(getByText('Original post body')).toBeTruthy());
+    const editBtn = getByLabelText('editPost');
+    await act(async () => { fireEvent.press(editBtn); });
+    // Edit modal title should appear
+    await waitFor(() => expect(getByText('editPostTitle')).toBeTruthy());
   });
 
   it('saved tab shows empty state when no saved places', async () => {

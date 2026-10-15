@@ -72,6 +72,18 @@ export class DiscoverController {
         }
       },
 
+      updatePost: async ({ params, body }) => {
+        if (!userId) return problem(403, 'forbidden', 'Not authenticated') as never;
+        try {
+          const updated = await this.svc.updatePost(userId, params.postId as PostIdType, body.body);
+          if (!updated) return problem(403, 'forbidden', 'Not the post author') as never;
+          return { status: 200, body: updated };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
       deletePost: async ({ params }) => {
         if (!userId) return problem(404, 'not_found', 'Not found') as never;
         try {

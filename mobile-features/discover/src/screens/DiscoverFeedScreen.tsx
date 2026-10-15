@@ -9,12 +9,14 @@ import {
   FlatList,
   I18nManager,
   Image,
+  Modal,
   Platform,
   Pressable,
   RefreshControl,
   Share,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useDiscoverClient } from '../client';
@@ -50,6 +52,7 @@ const PostItem = memo(function PostItem({
   onPlacePress,
   onReport,
   onDelete,
+  onEdit,
   currentUserId,
 }: {
   post: DiscoverPostType;
@@ -60,6 +63,7 @@ const PostItem = memo(function PostItem({
   onPlacePress: (placeId: string) => void;
   onReport: (postId: string, reason: ReportReason) => void;
   onDelete: (postId: string) => void;
+  onEdit: (postId: string, body: string) => void;
   currentUserId?: string;
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
@@ -72,11 +76,15 @@ const PostItem = memo(function PostItem({
 
   const handleMorePress = useCallback(() => {
     if (isOwn) {
-      // Own post: show delete option
+      // Own post: show edit and delete options
       Alert.alert(
         t('post.more'),
         undefined,
         [
+          {
+            text: t('post.edit'),
+            onPress: () => onEdit(post.id, post.body),
+          },
           {
             text: t('post.delete'),
             style: 'destructive' as const,
@@ -115,7 +123,7 @@ const PostItem = memo(function PostItem({
         ],
       );
     }
-  }, [post.id, onReport, onDelete, isOwn]);
+  }, [post.id, post.body, onReport, onDelete, onEdit, isOwn]);
 
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
@@ -204,6 +212,9 @@ export function DiscoverFeedScreen(): ReactElement {
   const [mediaUrls, setMediaUrls] = useState<Readonly<Record<string, string>>>({});
   const fetchingPlaceIds = useRef(new Set<string>());
   const fetchingAssetIds = useRef(new Set<string>());
+  const [editingPost, setEditingPost] = useState<{ id: string; body: string } | null>(null);
+  const [editBody, setEditBody] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -309,6 +320,29 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api]);
 
+  const handleOpenEdit = useCallback((postId: string, body: string) => {
+    setEditingPost({ id: postId, body });
+    setEditBody(body);
+  }, []);
+
+  const handleSaveEdit = useCallback(async () => {
+    if (!editingPost || editBody.trim().length === 0) return;
+    setEditSaving(true);
+    try {
+      const res = await api.updatePost({ params: { postId: editingPost.id }, body: { body: editBody.trim() } });
+      if (res.status === 200) {
+        setPosts((prev) => prev.map((p) => p.id === editingPost.id ? { ...p, body: res.body.body } : p));
+        setEditingPost(null);
+      } else {
+        Alert.alert(t('post.editError'));
+      }
+    } catch {
+      Alert.alert(t('post.editError'));
+    } finally {
+      setEditSaving(false);
+    }
+  }, [api, editingPost, editBody]);
+
   const handleLike = useCallback(async (post: DiscoverPostType) => {
     try {
       const postId = post.id;
@@ -380,6 +414,7 @@ export function DiscoverFeedScreen(): ReactElement {
             onPlacePress={handlePlacePress}
             onReport={handleReport}
             onDelete={handleDelete}
+            onEdit={handleOpenEdit}
             currentUserId={currentUserId}
           />
         )}
@@ -419,6 +454,49 @@ export function DiscoverFeedScreen(): ReactElement {
       >
         <Text style={styles.fabText}>+</Text>
       </Pressable>
+      <Modal
+        visible={editingPost !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditingPost(null)}
+      >
+        <View style={styles.editModalOverlay}>
+          <View style={styles.editModalBox}>
+            <Text style={styles.editModalTitle}>{t('post.editTitle')}</Text>
+            <TextInput
+              style={styles.editModalInput}
+              value={editBody}
+              onChangeText={setEditBody}
+              multiline
+              maxLength={1000}
+              placeholder={t('post.editPlaceholder')}
+              autoFocus
+              accessibilityLabel={t('post.editPlaceholder')}
+            />
+            <View style={styles.editModalActions}>
+              <Pressable
+                style={styles.editModalCancel}
+                onPress={() => setEditingPost(null)}
+                accessibilityRole="button"
+                accessibilityLabel={t('post.editCancel')}
+              >
+                <Text style={styles.editModalCancelText}>{t('post.editCancel')}</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.editModalSave, editSaving && { opacity: 0.6 }]}
+                onPress={() => { void handleSaveEdit(); }}
+                disabled={editSaving}
+                accessibilityRole="button"
+                accessibilityLabel={t('post.editSave')}
+              >
+                {editSaving
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.editModalSaveText}>{t('post.editSave')}</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -566,4 +644,13 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 32,
   },
+  editModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  editModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 20, width: '100%', maxWidth: 420 },
+  editModalTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12, textAlign: 'center' },
+  editModalInput: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 15, minHeight: 80, textAlignVertical: 'top', marginBottom: 16 },
+  editModalActions: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
+  editModalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+  editModalCancelText: { fontSize: 14, color: '#555' },
+  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#1976D2', minWidth: 70, alignItems: 'center' },
+  editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
 });

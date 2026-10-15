@@ -157,6 +157,20 @@ export class DiscoverService {
     return this.toCommentShape(comment);
   }
 
+  async updatePost(userId: UserId, postId: PostIdType, newBody: string): Promise<ReturnType<typeof this.toPostShape> | null> {
+    const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    if (post.authorId !== userId) return null;
+
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ body: newBody })
+      .where(eq(postTable.id, postId))
+      .returning();
+    if (!updated) throw new NotFoundException({ code: 'not_found' });
+    return this.toPostShape(updated, false);
+  }
+
   async deletePost(userId: UserId, postId: PostIdType): Promise<boolean> {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
