@@ -8,7 +8,7 @@ import { imageryContract } from './imagery';
 import { mediaContract } from './media';
 import { messagingContract } from './messaging';
 import { notificationsContract } from './notifications';
-import { citiesContract, placesContract } from './places';
+import { citiesContract, placesContract, reviewsContract } from './places';
 import { adminProvidersContract, providersContract } from './providers';
 import { routesContract } from './routing';
 
@@ -96,6 +96,7 @@ export const apiContract = c.router({
   me: meContract,
   cities: citiesContract,
   places: placesContract,
+  reviews: reviewsContract,
   // M2
   routes: routesContract,
   imagery: imageryContract,

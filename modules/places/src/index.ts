@@ -7,6 +7,8 @@ import { createLogger } from '@iraq-maps/observability';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { z } from 'zod';
 import { INTERNALS, PlacesController, RateLimiter, SEARCH_PER_MINUTE, TILES_PER_MINUTE } from './http';
+import { REVIEWS_SERVICE, ReviewsController } from './reviews.http';
+import { ReviewsService } from './reviews';
 import { PgPlaces } from './query';
 import { TileFiles } from './tiles';
 
@@ -44,10 +46,11 @@ export function placesModule(opts: PlacesModuleOptions): DynamicModule {
   return {
     module: PlacesModule,
     global: true,
-    controllers: [PlacesController],
+    controllers: [PlacesController, ReviewsController],
     providers: [
       { provide: INTERNALS, useValue: { places, tiles, limiter: new RateLimiter(SEARCH_PER_MINUTE), tileLimiter: new RateLimiter(TILES_PER_MINUTE) } },
       { provide: PortTokens.PlacesQueryPort, useValue: places },
+      { provide: REVIEWS_SERVICE, useValue: new ReviewsService(opts.db) },
     ],
     exports: [PortTokens.PlacesQueryPort],
   };

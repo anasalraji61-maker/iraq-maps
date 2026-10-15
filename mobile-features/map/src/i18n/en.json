@@ -104,5 +104,16 @@
     "dismiss": "Dismiss",
     "save": "Save",
     "saved": "Saved"
+  },
+  "reviews": {
+    "title": "Reviews & Ratings",
+    "empty": "No reviews yet. Be the first!",
+    "writeReview": "Write a review",
+    "ratingLabel": "Your rating",
+    "submitLabel": "Submit",
+    "deleteOwn": "Delete my review",
+    "avgRating": "Average: {avg}/5 ({count} ratings)",
+    "textPlaceholder": "Add your notes (optional)",
+    "loginRequired": "Sign in to leave a review"
   }
 }

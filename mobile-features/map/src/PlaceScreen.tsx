@@ -5,6 +5,7 @@ import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
+import { ReviewsSection } from './components/ReviewsSection';
 import { openNow } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
 import { isolate, kindLabel, t } from './strings';
@@ -103,6 +104,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         />
       ) : null}
       <InsightsSection place={place} onReportCrowded={reportCrowded} />
+      <ReviewsSection placeId={place.id} />
       <Button
         testID="place.save"
         label={isSaved ? t('place.saved') : t('place.save')}

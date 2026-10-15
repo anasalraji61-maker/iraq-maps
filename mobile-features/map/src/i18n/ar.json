@@ -104,5 +104,16 @@
     "dismiss": "إغلاق",
     "save": "حفظ",
     "saved": "محفوظ"
+  },
+  "reviews": {
+    "title": "التقييمات والمراجعات",
+    "empty": "لا توجد مراجعات بعد. كن أول من يُقيّم!",
+    "writeReview": "اكتب مراجعة",
+    "ratingLabel": "تقييمك",
+    "submitLabel": "إرسال",
+    "deleteOwn": "حذف مراجعتي",
+    "avgRating": "المتوسط: {avg} من 5 ({count} تقييم)",
+    "textPlaceholder": "أضف ملاحظاتك (اختياري)",
+    "loginRequired": "سجّل الدخول لإضافة مراجعة"
   }
 }

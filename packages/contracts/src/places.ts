@@ -148,6 +148,68 @@ export const citiesContract = c.router(
   { pathPrefix: '/v1', strictStatusCodes: true },
 );
 
+// ── Reviews (M75) ────────────────────────────────────────────────────────────
+
+export const ReviewId = z.string().uuid().brand<'ReviewId'>();
+export type ReviewId = z.infer<typeof ReviewId>;
+
+export const Review = z.object({
+  id: ReviewId,
+  placeId: PlaceId,
+  userId: z.string().uuid(),
+  rating: z.number().int().min(1).max(5),
+  text: z.string().max(500).nullable(),
+  createdAt: z.string().datetime(),
+});
+export type Review = z.infer<typeof Review>;
+
+export const RatingSummary = z.object({
+  placeId: PlaceId,
+  count: z.number().int(),
+  average: z.number().nullable(), // null when count === 0
+});
+export type RatingSummary = z.infer<typeof RatingSummary>;
+
+export const reviewsContract = c.router(
+  {
+    submit: {
+      method: 'POST',
+      path: '/places/:placeId/reviews',
+      pathParams: z.object({ placeId: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/).pipe(PlaceId) }),
+      body: z.object({ rating: z.number().int().min(1).max(5), text: z.string().max(500).optional() }),
+      responses: {
+        201: Review,
+        400: z.object({ code: z.string() }),
+        401: z.object({ code: z.literal('unauthenticated') }),
+      },
+      summary: "Submit or update the authenticated user's review for a place",
+    },
+    list: {
+      method: 'GET',
+      path: '/places/:placeId/reviews',
+      pathParams: z.object({ placeId: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/).pipe(PlaceId) }),
+      query: z.object({ cursor: z.string().optional() }),
+      responses: {
+        200: z.object({ items: z.array(Review), nextCursor: z.string().optional(), summary: RatingSummary }),
+        404: z.object({ code: z.literal('not_found') }),
+      },
+      summary: 'List reviews for a place with aggregate summary',
+    },
+    deleteOwn: {
+      method: 'DELETE',
+      path: '/places/:placeId/reviews/mine',
+      pathParams: z.object({ placeId: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/).pipe(PlaceId) }),
+      body: z.object({}),
+      responses: {
+        200: z.object({ ok: z.literal(true) }),
+        404: z.object({ code: z.literal('not_found') }),
+      },
+      summary: "Delete the authenticated user's own review",
+    },
+  },
+  { pathPrefix: '/v1', strictStatusCodes: true },
+);
+
 /** @public frozen contract (M1), served by modules/places */
 export const placesContract = c.router(
   {
