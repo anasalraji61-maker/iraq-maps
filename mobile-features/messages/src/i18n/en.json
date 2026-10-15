@@ -13,7 +13,8 @@
       "available": "Do you have availability now?",
       "location": "What is your exact address?",
       "delivery": "Do you offer delivery?"
-    }
+    },
+    "cancel": "Cancel"
   },
   "confirm": {
     "title": "Confirm send",

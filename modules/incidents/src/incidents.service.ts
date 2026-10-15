@@ -56,7 +56,7 @@ export class IncidentsService {
     const { type, lng, lat, description, reportedBy, ttlHours } = opts;
     const expiresAt = new Date(Date.now() + ttlHours * 3_600_000);
 
-    const rows = await this.db.execute<IncidentDbRow>(
+    const result = await this.db.execute(
       sql`
         INSERT INTO incidents.incident (type, location, description, reported_by, expires_at)
         VALUES (
@@ -72,8 +72,9 @@ export class IncidentsService {
           ST_Y(location::geometry) AS lat
       `,
     );
+    const rows = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
 
-    const row = rows[0];
+    const row = (rows as IncidentDbRow[])[0];
     if (!row) throw new Error('incident insert returned no rows');
     return rowToIncident(row);
   }
@@ -87,7 +88,7 @@ export class IncidentsService {
     const { lat, lng, radiusKm } = opts;
     const radiusM = radiusKm * 1000;
 
-    const rows = await this.db.execute<IncidentDbRow>(
+    const result2 = await this.db.execute(
       sql`
         SELECT
           id, type, description, reported_by, created_at, expires_at,
@@ -105,7 +106,8 @@ export class IncidentsService {
         LIMIT 200
       `,
     );
+    const rows2 = Array.isArray(result2) ? result2 : (result2 as { rows?: unknown[] }).rows ?? [];
 
-    return rows.map(rowToIncident);
+    return (rows2 as IncidentDbRow[]).map(rowToIncident);
   }
 }

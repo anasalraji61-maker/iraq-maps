@@ -48,7 +48,7 @@ export function GroupInboxScreen(): ReactElement {
   const renderItem = ({ item }: { item: GroupType }) => (
     <Pressable
       style={styles.row}
-      onPress={() => router.push({ pathname: '/messages/groups/[groupId]' as Parameters<typeof router.push>[0], params: { groupId: item.id } })}
+      onPress={() => router.push(`/messages/groups/${item.id}` as Parameters<typeof router.push>[0])}
       accessibilityRole="button"
     >
       <View style={styles.avatar}>

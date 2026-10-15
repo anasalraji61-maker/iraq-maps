@@ -5,7 +5,7 @@ import { eventsContract, challengesContract, marketplaceContract } from '@iraq-m
 import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { SocialService } from './social.service';
-import type { AuthPrincipal } from '@iraq-maps/contracts';
+import type { AuthPrincipal, UserId } from '@iraq-maps/contracts';
 import type { EventId, ChallengeId, ListingId } from '@iraq-maps/contracts';
 import type { z } from 'zod';
 
@@ -36,15 +36,15 @@ export class SocialController {
       },
 
       listEvents: async ({ query }) => {
-        const uid = userId ?? ('anon' as string);
-        const result = await this.svc.listEvents(uid!, query);
+        const uid = userId ?? ('anon' as unknown as UserId);
+        const result = await this.svc.listEvents(uid as UserId, query);
         return { status: 200, body: result };
       },
 
       getEvent: async ({ params }) => {
-        const uid = userId ?? ('anon' as string);
+        const uid = userId ?? ('anon' as unknown as UserId);
         try {
-          const event = await this.svc.getEvent(uid!, params.eventId as EventIdType);
+          const event = await this.svc.getEvent(uid as UserId, params.eventId as EventIdType);
           return { status: 200, body: event };
         } catch {
           return problem(404, 'not_found', 'Event not found') as never;
@@ -81,15 +81,15 @@ export class SocialController {
 
     return tsRestHandler(challengesContract, {
       listChallenges: async ({ query }) => {
-        const uid = userId ?? ('anon' as string);
-        const result = await this.svc.listChallenges(uid!, query.status);
+        const uid = userId ?? ('anon' as unknown as UserId);
+        const result = await this.svc.listChallenges(uid as UserId, query.status);
         return { status: 200, body: result };
       },
 
       getChallenge: async ({ params }) => {
-        const uid = userId ?? ('anon' as string);
+        const uid = userId ?? ('anon' as unknown as UserId);
         try {
-          const result = await this.svc.getChallenge(uid!, params.challengeId as ChallengeIdType);
+          const result = await this.svc.getChallenge(uid as UserId, params.challengeId as ChallengeIdType);
           return { status: 200, body: result };
         } catch {
           return problem(404, 'not_found', 'Challenge not found') as never;

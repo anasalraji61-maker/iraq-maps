@@ -25,7 +25,8 @@ I18nManager.forceRTL(true);
 export function GroupDetailScreen(): ReactElement {
   const { groupId, groupName } = useLocalSearchParams<{ groupId: string; groupName?: string }>();
   const client = useGroupsClient();
-  const { userId } = useSession();
+  const session = useSession();
+  const userId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const [messages, setMessages] = useState<GroupMessageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState('');

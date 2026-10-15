@@ -32,10 +32,9 @@ export function CreateGroupScreen(): ReactElement {
     try {
       const res = await client.createGroup({ body: { name: trimmed } });
       if (res.status === 201) {
-        router.replace({
-          pathname: '/messages/groups/[groupId]' as Parameters<typeof router.replace>[0],
-          params: { groupId: res.body.id, groupName: res.body.name },
-        });
+        router.replace(
+          `/messages/groups/${res.body.id}?groupName=${encodeURIComponent(res.body.name)}` as Parameters<typeof router.replace>[0],
+        );
       } else {
         Alert.alert(t('groups.createError'));
       }
