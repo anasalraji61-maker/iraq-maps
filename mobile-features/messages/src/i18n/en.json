@@ -1,13 +1,134 @@
 {
-  "compose": { "placeholder": "Write your request here...", "addPlace": "Add a place", "continue": "Continue", "maxPlaces": "Maximum 5 places", "title": "New message", "charCount": "{count}/500", "templatesLabel": "Quick suggestions", "templates": { "price": "What is the price?", "hours": "What are the opening hours?", "available": "Do you have availability now?", "location": "What is your exact address?", "delivery": "Do you offer delivery?" } },
-  "confirm": { "title": "Confirm send", "send": "Send", "offline": "Will be sent when internet is restored", "channel": { "in_app": "In-app", "whatsapp": "WhatsApp", "handoff": "Manual handoff" } },
-  "list": { "title": "Messages", "loading": "Loading messages...", "empty": "No conversations yet", "emptyBody": "Find a place and ask about prices or services", "start": "Start a conversation", "loadError": "Error loading messages", "placesCount": "{count} places", "placeCount": "1 place", "repliedBadge": "Replied", "badgePending": "Pending", "badgeSent": "Sent", "badgeReplied": "Replied", "badgeFailed": "Failed", "loadMore": "Load more", "status": { "sent": "Sent", "delivered": "Delivered", "read": "Read", "replied": "Replied", "queued": "Queued", "handed_off": "Handed off", "failed": "Failed" }, "filterAll": "All", "filterActive": "Active", "filterReplied": "Replied", "emptyFilter": "No conversations match this filter" },
-  "detail": { "title": "Request details", "copy": "Copy", "open": "Open", "loadError": "Error loading request", "whatsapp": "Contact via WhatsApp", "urlPreview": "Open link", "seenAt": "Seen at {time}", "unread": "Unread", "closed": "This inquiry is closed — no response received within 7 days", "status": { "queued": "Queued", "sent": "Sent", "delivered": "Delivered", "read": "Read", "replied": "Replied", "failed": "Failed", "handed_off": "Manual handoff" } },
-  "time": { "justNow": "Just now", "minutesAgo": "{n}m ago", "hoursAgo": "{n}h ago", "today": "Today", "yesterday": "Yesterday" },
-  "search": { "placeholder": "Search conversations...", "noResults": "No search results" },
-  "archive": { "tabAll": "All", "tabArchived": "Archived", "archiveAction": "Archive", "unarchiveAction": "Unarchive", "empty": "No archived conversations", "emptyBody": "Long-press a conversation to archive it" },
-  "attachment": { "addPhoto": "Add photo", "uploading": "Uploading...", "uploadError": "Failed to upload photo", "removePhoto": "Remove photo" },
-  "reaction": { "title": "React", "remove": "Remove reaction" },
-  "providerInfo": { "title": "Provider info", "totalInquiries": "Total inquiries", "firstContact": "First contact", "noData": "No information available" },
-  "typing": { "indicator": "Typing..." }
+  "compose": {
+    "placeholder": "Write your request here...",
+    "addPlace": "Add a place",
+    "continue": "Continue",
+    "maxPlaces": "Maximum 5 places",
+    "title": "New message",
+    "charCount": "{count}/500",
+    "templatesLabel": "Quick suggestions",
+    "templates": {
+      "price": "What is the price?",
+      "hours": "What are the opening hours?",
+      "available": "Do you have availability now?",
+      "location": "What is your exact address?",
+      "delivery": "Do you offer delivery?"
+    }
+  },
+  "confirm": {
+    "title": "Confirm send",
+    "send": "Send",
+    "offline": "Will be sent when internet is restored",
+    "channel": {
+      "in_app": "In-app",
+      "whatsapp": "WhatsApp",
+      "handoff": "Manual handoff"
+    }
+  },
+  "list": {
+    "title": "Messages",
+    "loading": "Loading messages...",
+    "empty": "No conversations yet",
+    "emptyBody": "Find a place and ask about prices or services",
+    "start": "Start a conversation",
+    "loadError": "Error loading messages",
+    "placesCount": "{count} places",
+    "placeCount": "1 place",
+    "repliedBadge": "Replied",
+    "badgePending": "Pending",
+    "badgeSent": "Sent",
+    "badgeReplied": "Replied",
+    "badgeFailed": "Failed",
+    "loadMore": "Load more",
+    "status": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "replied": "Replied",
+      "queued": "Queued",
+      "handed_off": "Handed off",
+      "failed": "Failed"
+    },
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterReplied": "Replied",
+    "emptyFilter": "No conversations match this filter"
+  },
+  "detail": {
+    "title": "Request details",
+    "copy": "Copy",
+    "open": "Open",
+    "loadError": "Error loading request",
+    "whatsapp": "Contact via WhatsApp",
+    "urlPreview": "Open link",
+    "seenAt": "Seen at {time}",
+    "unread": "Unread",
+    "closed": "This inquiry is closed — no response received within 7 days",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "replied": "Replied",
+      "failed": "Failed",
+      "handed_off": "Manual handoff"
+    }
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{n}m ago",
+    "hoursAgo": "{n}h ago",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "search": {
+    "placeholder": "Search conversations...",
+    "noResults": "No search results"
+  },
+  "archive": {
+    "tabAll": "All",
+    "tabArchived": "Archived",
+    "archiveAction": "Archive",
+    "unarchiveAction": "Unarchive",
+    "empty": "No archived conversations",
+    "emptyBody": "Long-press a conversation to archive it"
+  },
+  "attachment": {
+    "addPhoto": "Add photo",
+    "uploading": "Uploading...",
+    "uploadError": "Failed to upload photo",
+    "removePhoto": "Remove photo"
+  },
+  "reaction": {
+    "title": "React",
+    "remove": "Remove reaction"
+  },
+  "providerInfo": {
+    "title": "Provider info",
+    "totalInquiries": "Total inquiries",
+    "firstContact": "First contact",
+    "noData": "No information available"
+  },
+  "typing": {
+    "indicator": "Typing..."
+  },
+  "groups": {
+    "title": "Groups",
+    "create": "Create Group",
+    "nameLabel": "Group name",
+    "namePlaceholder": "e.g. Family, Work...",
+    "addMembers": "Add members",
+    "memberCount": "{n} members",
+    "sendPlaceholder": "Type a message...",
+    "send": "Send",
+    "sendError": "Failed to send message",
+    "loadError": "Failed to load groups",
+    "empty": "No groups yet",
+    "createError": "Failed to create group",
+    "addMember": "Add member",
+    "addMemberError": "Failed to add member",
+    "alreadyMember": "User is already a member",
+    "notAdmin": "Admin role required to add members",
+    "messagesEmpty": "No messages yet. Be the first to write!"
+  }
 }

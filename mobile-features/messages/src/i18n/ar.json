@@ -111,5 +111,24 @@
   },
   "typing": {
     "indicator": "يكتب..."
+  },
+  "groups": {
+    "title": "المجموعات",
+    "create": "إنشاء مجموعة",
+    "nameLabel": "اسم المجموعة",
+    "namePlaceholder": "مثال: عائلة، عمل...",
+    "addMembers": "إضافة أعضاء",
+    "memberCount": "{n} عضو",
+    "sendPlaceholder": "اكتب رسالة...",
+    "send": "إرسال",
+    "sendError": "فشل إرسال الرسالة",
+    "loadError": "فشل تحميل المجموعات",
+    "empty": "لا توجد مجموعات بعد",
+    "createError": "فشل إنشاء المجموعة",
+    "addMember": "إضافة عضو",
+    "addMemberError": "فشل إضافة العضو",
+    "alreadyMember": "هذا المستخدم عضو بالفعل",
+    "notAdmin": "يجب أن تكون مشرفاً لإضافة أعضاء",
+    "messagesEmpty": "لا توجد رسائل بعد. كن أول من يكتب!"
   }
 }

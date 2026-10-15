@@ -142,3 +142,105 @@ export const messagingContract = c.router({
     responses: { 200: z.object({ ok: z.literal(true) }) },
   },
 });
+
+// ─── Group Messaging ──────────────────────────────────────────────────────────
+
+export const GroupId = z.string().uuid().brand<'GroupId'>();
+export type GroupId = z.infer<typeof GroupId>;
+
+export const GroupMessageId = z.string().uuid().brand<'GroupMessageId'>();
+export type GroupMessageId = z.infer<typeof GroupMessageId>;
+
+export const GroupMemberRole = z.enum(['admin', 'member']);
+export type GroupMemberRole = z.infer<typeof GroupMemberRole>;
+
+export const Group = z.object({
+  id: GroupId,
+  name: z.string().max(100),
+  createdBy: UserId,
+  avatarUrl: z.string().url().optional(),
+  memberCount: z.number().int().default(0),
+  createdAt: z.string().datetime(),
+});
+export type GroupType = z.infer<typeof Group>;
+
+export const GroupMember = z.object({
+  groupId: GroupId,
+  userId: UserId,
+  role: GroupMemberRole,
+  joinedAt: z.string().datetime(),
+});
+export type GroupMemberType = z.infer<typeof GroupMember>;
+
+export const GroupMessage = z.object({
+  id: GroupMessageId,
+  groupId: GroupId,
+  senderId: UserId,
+  text: z.string().max(2000),
+  createdAt: z.string().datetime(),
+});
+export type GroupMessageType = z.infer<typeof GroupMessage>;
+
+export const messagingGroupsContract = c.router({
+  createGroup: {
+    method: 'POST',
+    path: '/messaging/groups',
+    body: z.object({
+      name: z.string().min(1).max(100),
+      avatarUrl: z.string().url().optional(),
+      memberIds: z.array(UserId).max(50).optional(),
+    }),
+    responses: {
+      201: Group,
+      400: z.object({ code: z.string() }),
+      401: z.object({ code: z.string() }),
+    },
+  },
+  listGroups: {
+    method: 'GET',
+    path: '/messaging/groups',
+    query: z.object({ cursor: z.string().optional() }),
+    responses: {
+      200: z.object({ items: z.array(Group), nextCursor: z.string().optional() }),
+      401: z.object({ code: z.string() }),
+    },
+  },
+  sendGroupMessage: {
+    method: 'POST',
+    path: '/messaging/groups/:groupId/messages',
+    pathParams: z.object({ groupId: GroupId }),
+    body: z.object({ text: z.string().min(1).max(2000) }),
+    responses: {
+      201: GroupMessage,
+      400: z.object({ code: z.string() }),
+      403: z.object({ code: z.string() }),
+      404: z.object({ code: z.string() }),
+    },
+  },
+  listGroupMessages: {
+    method: 'GET',
+    path: '/messaging/groups/:groupId/messages',
+    pathParams: z.object({ groupId: GroupId }),
+    query: z.object({ cursor: z.string().optional(), limit: z.coerce.number().int().max(50).default(20) }),
+    responses: {
+      200: z.object({ items: z.array(GroupMessage), nextCursor: z.string().optional() }),
+      403: z.object({ code: z.string() }),
+      404: z.object({ code: z.string() }),
+    },
+  },
+  addGroupMember: {
+    method: 'POST',
+    path: '/messaging/groups/:groupId/members',
+    pathParams: z.object({ groupId: GroupId }),
+    body: z.object({ userId: UserId, role: GroupMemberRole.optional() }),
+    responses: {
+      201: GroupMember,
+      403: z.object({ code: z.string() }),
+      404: z.object({ code: z.string() }),
+      409: z.object({ code: z.string() }),
+    },
+  },
+});
+
+export type GroupIdType = z.infer<typeof GroupId>;
+export type GroupMessageIdType = z.infer<typeof GroupMessageId>;

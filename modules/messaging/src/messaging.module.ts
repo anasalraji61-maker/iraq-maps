@@ -6,6 +6,8 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { FakeMessagingChannel } from './fake-channel';
 import { MessagingController } from './messaging.controller';
+import { MessagingGroupsController } from './messaging-groups.controller';
+import { MessagingGroupsService } from './messaging-groups.service';
 import { MessagingService } from './messaging.service';
 import { createMessagingWorker } from './messaging.worker';
 
@@ -54,7 +56,7 @@ export function messagingModule(opts: MessagingModuleOptions): DynamicModule {
   return {
     module: MessagingModule,
     global: true,
-    controllers: [MessagingController],
+    controllers: [MessagingController, MessagingGroupsController],
     providers: [
       { provide: 'MESSAGING_DB', useValue: opts.db },
       {
@@ -65,6 +67,7 @@ export function messagingModule(opts: MessagingModuleOptions): DynamicModule {
       { provide: 'MESSAGING_REDIS_CONN', useValue: redisConn },
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new InMemoryEventBus() },
       MessagingService,
+      MessagingGroupsService,
       {
         provide: 'MESSAGING_WORKER',
         useFactory: (svc: MessagingService) => createMessagingWorker(svc, redisConn),

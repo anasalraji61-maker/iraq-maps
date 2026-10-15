@@ -9,3 +9,7 @@ export { useReadAt, useMarkRead, useReadReceiptsMap } from './hooks/useReadRecei
 export { useUnreadMessagesCount } from './hooks/useUnreadCount';
 export { useArchive } from './hooks/useArchive';
 export { useReaction, REACTION_EMOJIS } from './hooks/useReactions';
+export { GroupInboxScreen } from './screens/GroupInboxScreen';
+export { GroupDetailScreen } from './screens/GroupDetailScreen';
+export { CreateGroupScreen } from './screens/CreateGroupScreen';
+export { useGroupsClient } from './client';

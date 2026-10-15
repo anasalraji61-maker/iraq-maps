@@ -16,3 +16,12 @@ export function useMessagingClient(): MessagingClient {
   const baseUrl = useApiBaseUrl();
   return initClient(messagingContract, { baseUrl, baseHeaders: {} });
 }
+
+import { messagingGroupsContract } from '@iraq-maps/contracts';
+
+export type MessagingGroupsClient = InitClientReturn<typeof messagingGroupsContract, { baseUrl: string; baseHeaders: Record<string, string> }>;
+
+export function useGroupsClient(): MessagingGroupsClient {
+  const baseUrl = useApiBaseUrl();
+  return initClient(messagingGroupsContract, { baseUrl, baseHeaders: {} });
+}
