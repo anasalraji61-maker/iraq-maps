@@ -7,6 +7,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { render } from '@testing-library/react-native';
 import React from 'react';
+import * as Ui from '@iraq-maps/ui';
 
 jest.mock('@expo-google-fonts/noto-sans-arabic', () => ({ useFonts: jest.fn(() => [true]) }));
 jest.mock('expo-font', () => ({ useFonts: jest.fn(() => [true, null]) }));
@@ -21,9 +22,9 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-// Lazy import after mocks
-async function getUi() {
-  return import('@iraq-maps/ui');
+// Static reference after mocks are set up
+function getUi() {
+  return Promise.resolve(Ui);
 }
 
 describe('Button renders', () => {
