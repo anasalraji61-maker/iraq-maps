@@ -167,7 +167,14 @@ const PostItem = memo(function PostItem({
           {
             text: t('post.delete'),
             style: 'destructive' as const,
-            onPress: () => onDelete(post.id),
+            onPress: () => Alert.alert(
+              t('post.deleteConfirmTitle'),
+              t('post.deleteConfirmMsg'),
+              [
+                { text: t('post.reportCancel'), style: 'cancel' as const },
+                { text: t('post.deleteConfirmOk'), style: 'destructive' as const, onPress: () => onDelete(post.id) },
+              ],
+            ),
           },
           { text: t('post.reportCancel'), style: 'cancel' as const },
         ],
