@@ -332,6 +332,30 @@ export function ProviderDashboardScreen(): ReactElement {
         label={t('dashboard.editProfile')}
         onPress={() => router.push('/provider/edit-profile' as never)}
       />
+      <Button
+        variant="secondary"
+        label={t('posts.dashboardLink')}
+        testID="provider.createPost"
+        onPress={() => router.push('/provider/create-post' as never)}
+      />
+      <Button
+        variant="secondary"
+        label={t('gallery.dashboardLink')}
+        testID="provider.photoGallery"
+        onPress={() => router.push('/provider/photo-gallery' as never)}
+      />
+      <Button
+        variant="secondary"
+        label={t('notifications.dashboardLink')}
+        testID="provider.notificationSettings"
+        onPress={() => router.push('/provider/notification-settings' as never)}
+      />
+      <Button
+        variant="secondary"
+        label={t('stats.dashboardLink')}
+        testID="provider.statsDetails"
+        onPress={() => router.push('/provider/stats-details' as never)}
+      />
       {providerMe?.claimedPlaceId ? (
         <Button
           testID="provider.viewPublicPage"

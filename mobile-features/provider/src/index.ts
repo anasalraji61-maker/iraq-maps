@@ -5,3 +5,7 @@ export { ProviderInboxDetailScreen } from './screens/ProviderInboxDetailScreen';
 export { ProviderInboxScreen } from './screens/ProviderInboxScreen';
 export { ProviderRegistrationScreen } from './screens/ProviderRegistrationScreen';
 export { ProviderConsentScreen } from './screens/ProviderConsentScreen';
+export { ProviderCreatePostScreen } from './screens/ProviderCreatePostScreen';
+export { ProviderPhotoGalleryScreen } from './screens/ProviderPhotoGalleryScreen';
+export { ProviderNotificationSettingsScreen } from './screens/ProviderNotificationSettingsScreen';
+export { ProviderStatsDetailsScreen } from './screens/ProviderStatsDetailsScreen';

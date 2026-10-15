@@ -47,6 +47,17 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface DailyMetric {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+export interface DailyTrend {
+  users: DailyMetric[];
+  posts: DailyMetric[];
+  inquiries: DailyMetric[];
+}
+
 export interface AssistantUsageEntry {
   date: string;
   inputTokens: number;
@@ -196,6 +207,34 @@ export const api = {
 
   async removePost(id: string): Promise<void> {
     await request<void>(`/v1/admin/discover/posts/${id}/remove`, { method: 'POST', body: JSON.stringify({}) });
+  },
+
+  async getDailyTrend(days: number): Promise<DailyTrend> {
+    try {
+      return await request<DailyTrend>(`/v1/admin/metrics/trend?days=${days}`);
+    } catch {
+      // Graceful degradation: generate empty placeholder if endpoint not yet live
+      const result: DailyMetric[] = Array.from({ length: days }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (days - 1 - i));
+        return { date: d.toISOString().slice(0, 10), count: 0 };
+      });
+      return { users: result, posts: [...result], inquiries: [...result] };
+    }
+  },
+
+  async bulkApprovePost(ids: string[]): Promise<void> {
+    await request<void>('/v1/admin/discover/posts/bulk-approve', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    });
+  },
+
+  async bulkRemovePost(ids: string[]): Promise<void> {
+    await request<void>('/v1/admin/discover/posts/bulk-remove', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    });
   },
 
   async getAuditLog(): Promise<AuditEntry[]> {

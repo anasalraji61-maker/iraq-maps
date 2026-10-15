@@ -167,6 +167,55 @@
     "inquiriesTotal": "Total: {n}",
     "last7days": "Last 7 days"
   },
+  "posts": {
+    "title": "Create Post",
+    "label": "Post text",
+    "placeholder": "Write a post about your business…",
+    "submit": "Post",
+    "cancel": "Cancel",
+    "success": "Post published",
+    "charCount": "{n} characters",
+    "charsMax": "Max {max} characters",
+    "dashboardLink": "Create a Post"
+  },
+  "gallery": {
+    "title": "Photo Gallery",
+    "add": "Add Photo",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this photo?",
+    "empty": "No photos yet",
+    "emptyBody": "Add photos to showcase your business",
+    "uploading": "Uploading…",
+    "uploadFailed": "Photo upload failed",
+    "dashboardLink": "Manage Photos",
+    "deleteIcon": "✕"
+  },
+  "notifications": {
+    "title": "Notification Settings",
+    "save": "Save",
+    "saved": "Saved",
+    "newInquiry": "New inquiry",
+    "newInquiryDesc": "When a visitor sends a new inquiry",
+    "inquiryUpdate": "Inquiry update",
+    "inquiryUpdateDesc": "When an existing inquiry is updated",
+    "verificationUpdate": "Verification update",
+    "verificationUpdateDesc": "When your business verification status changes",
+    "marketingTips": "Marketing tips",
+    "marketingTipsDesc": "Tips to improve your business visibility",
+    "dashboardLink": "Notification Settings"
+  },
+  "stats": {
+    "title": "Stats Details",
+    "views": "Views",
+    "inquiries": "Inquiries",
+    "clicks": "Clicks",
+    "hourly": "Hourly breakdown (today)",
+    "daily": "Daily breakdown (last 7 days)",
+    "noData": "Not enough data",
+    "dashboardLink": "View Stats Details",
+    "total": "Total: {n}",
+    "avgPerDay": "Daily avg: {n}"
+  },
   "quickReply": {
     "sectionLabel": "Quick Replies",
     "welcome": "Hello! We are happy to serve you.",
