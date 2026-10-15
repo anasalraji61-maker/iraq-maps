@@ -31,7 +31,8 @@
     "logout": "چوونەدەرەوە",
     "delete": "سڕینەوەی هەژمار",
     "registerBusiness": "کارووبارەکەت تۆمار بکە",
-    "version": "وەشان {version}"
+    "version": "وەشان {version}",
+    "myPosts": "پۆستەکانم"
   },
   "deleteSheet": {
     "title": "دەتەوێت هەژمارەکەت بە یەکجاری بسڕیتەوە؟",

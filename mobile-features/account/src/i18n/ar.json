@@ -31,7 +31,8 @@
     "logout": "تسجيل الخروج",
     "delete": "حذف الحساب",
     "registerBusiness": "سجّل نشاطك التجاري",
-    "version": "الإصدار {version}"
+    "version": "الإصدار {version}",
+    "myPosts": "مشاركاتي"
   },
   "deleteSheet": {
     "title": "هل تريد حذف حسابك نهائياً؟",

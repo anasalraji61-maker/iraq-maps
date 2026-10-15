@@ -31,7 +31,8 @@
     "logout": "Sign out",
     "delete": "Delete account",
     "registerBusiness": "Register your business",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "myPosts": "My Posts"
   },
   "deleteSheet": {
     "title": "Delete your account permanently?",
