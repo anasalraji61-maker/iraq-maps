@@ -531,6 +531,7 @@ function PostsTab(): ReactElement {
         transparent
         animationType="fade"
         onRequestClose={() => setEditingPost(null)}
+        accessibilityViewIsModal
       >
         <View style={styles.editModalOverlay}>
           <View style={styles.editModalBox}>

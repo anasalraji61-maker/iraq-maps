@@ -29,6 +29,7 @@ export function PhotoLightbox({ photos, initialIndex, visible, onClose }: Props)
       animationType="fade"
       onRequestClose={onClose}
       statusBarTranslucent
+      accessibilityViewIsModal
     >
       <View style={styles.backdrop}>
         <Pressable style={styles.closeHitArea} onPress={onClose} accessibilityRole="button" accessibilityLabel={t('lightbox.close')}>

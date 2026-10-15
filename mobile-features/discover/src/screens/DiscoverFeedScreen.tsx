@@ -253,7 +253,7 @@ const PostItem = memo(function PostItem({
           <Pressable onPress={() => setPhotoOpen(true)} accessibilityRole="button" accessibilityLabel={t('lightbox.photo')}>
             <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
           </Pressable>
-          <Modal visible={photoOpen} transparent animationType="fade" onRequestClose={() => setPhotoOpen(false)} statusBarTranslucent>
+          <Modal visible={photoOpen} transparent animationType="fade" onRequestClose={() => setPhotoOpen(false)} statusBarTranslucent accessibilityViewIsModal>
             <View style={styles.lightboxBackdrop}>
               <Pressable style={styles.lightboxClose} onPress={() => setPhotoOpen(false)} accessibilityRole="button" accessibilityLabel={t('lightbox.close')}>
                 <Text style={styles.lightboxCloseText}>{t('lightbox.closeSymbol')}</Text>
@@ -823,6 +823,7 @@ export function DiscoverFeedScreen(): ReactElement {
         transparent
         animationType="fade"
         onRequestClose={() => setEditingPost(null)}
+        accessibilityViewIsModal
       >
         <View style={styles.editModalOverlay}>
           <View style={styles.editModalBox}>

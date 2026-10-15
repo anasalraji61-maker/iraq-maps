@@ -75,6 +75,7 @@ function PhotoStrip({ uris }: { uris: string[] }): ReactElement | null {
           transparent
           animationType="fade"
           onRequestClose={() => setLightboxIndex(null)}
+          accessibilityViewIsModal
         >
           <View style={lightboxStyles.overlay}>
             <Pressable
