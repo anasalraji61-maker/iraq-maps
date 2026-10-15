@@ -4,7 +4,7 @@ import { type z } from 'zod';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
@@ -21,6 +21,37 @@ import { t } from '../strings';
 import { sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function SkeletonCommentRow(): ReactElement {
+  return (
+    <View testID="skeleton-comment-row" style={{ paddingHorizontal: 16, paddingVertical: 10, gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <SkeletonBlock width={28} height={28} />
+        <SkeletonBlock width={70} height={12} />
+      </View>
+      <SkeletonBlock width={220} height={12} />
+    </View>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
@@ -121,7 +152,7 @@ export function CommentsScreen(): ReactElement {
       </View>
 
       {loading ? (
-        <ActivityIndicator style={styles.loadingIndicator} size="large" color="#1976D2" />
+        <View>{[1, 2, 3, 4].map((k) => <SkeletonCommentRow key={k} />)}</View>
       ) : null}
 
       {error ? (
