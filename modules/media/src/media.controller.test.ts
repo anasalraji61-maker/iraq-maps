@@ -3,7 +3,7 @@
  */
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { AssetId, UserId } from '@iraq-maps/contracts';
+import type { AssetId } from '@iraq-maps/contracts';
 import { MediaController } from './media.controller.js';
 import type { MediaService } from './media.service.js';
 
@@ -11,12 +11,10 @@ type HandlerFn = (arg: unknown) => Promise<{ status: number; body: unknown }>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function callMethod(ctrl: any, method: string): HandlerFn {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   return ctrl[method]() as HandlerFn;
 }
 
 const ASSET_ID = 'asset-001' as AssetId;
-const USER_ID = 'user-001' as UserId;
 
 function makeService(): MediaService {
   return {

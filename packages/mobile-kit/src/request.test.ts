@@ -36,10 +36,12 @@ describe('expectStatus', () => {
   });
 
   it('throws ProblemError with code when status mismatches', () => {
-    const res = { status: 404 as const, body: { code: 'place_not_found', title: 'Place not found' } };
-    expect(() => expectStatus(res, 200)).toThrow(ProblemError);
+    const res = { status: 404, body: { code: 'place_not_found', title: 'Place not found' } };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(() => expectStatus(res as any, 200)).toThrow(ProblemError);
     try {
-      expectStatus(res, 200);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expectStatus(res as any, 200);
     } catch (e) {
       expect(e).toBeInstanceOf(ProblemError);
       expect((e as ProblemError).code).toBe('place_not_found');
@@ -47,10 +49,12 @@ describe('expectStatus', () => {
   });
 
   it('throws ProblemError with undefined code when body has no code', () => {
-    const res = { status: 500 as const, body: null };
-    expect(() => expectStatus(res, 200)).toThrow(ProblemError);
+    const res = { status: 500, body: null };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(() => expectStatus(res as any, 200)).toThrow(ProblemError);
     try {
-      expectStatus(res, 200);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expectStatus(res as any, 200);
     } catch (e) {
       expect((e as ProblemError).code).toBeUndefined();
     }
