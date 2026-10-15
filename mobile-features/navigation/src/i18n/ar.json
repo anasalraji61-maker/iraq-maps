@@ -11,7 +11,11 @@
     "eta": "تصل الساعة {time}",
     "stop": "إيقاف الملاحة",
     "distM": "{n} م",
-    "distKm": "{n} كم"
+    "distKm": "{n} كم",
+    "remaining": "{dist} · {duration}",
+    "durationMin": "{n} د",
+    "durationHour": "{h} س",
+    "durationHourMin": "{h} س {m} د"
   },
   "preview": {
     "from": "من: ",

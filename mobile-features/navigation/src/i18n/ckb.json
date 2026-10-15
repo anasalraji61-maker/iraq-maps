@@ -11,7 +11,11 @@
     "eta": "دەگەیت کاتژمێر {time}",
     "stop": "وەستاندنی ناڤیگەیشن",
     "distM": "{n} م",
-    "distKm": "{n} کم"
+    "distKm": "{n} کم",
+    "remaining": "{dist} · {duration}",
+    "durationMin": "{n} خ",
+    "durationHour": "{h} س",
+    "durationHourMin": "{h} س {m} خ"
   },
   "preview": {
     "from": "لە: ",

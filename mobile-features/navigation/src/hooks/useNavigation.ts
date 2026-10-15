@@ -23,6 +23,8 @@ export interface NavigationState {
   eta: Date | null;
   /** Remaining route duration in seconds (decreases as maneuvers are consumed). */
   remainingDurationS: number;
+  /** Remaining route distance in metres (decreases as maneuvers are consumed). */
+  remainingDistanceM: number;
   /** All maneuvers in the current route (for step list display). */
   allManeuvers: Maneuver[];
   onRecalculate: () => void;
@@ -154,6 +156,7 @@ export function useNavigation({
   const currentManeuver = maneuvers[maneuverIndex] ?? null;
   const nextManeuver = maneuvers[maneuverIndex + 1] ?? null;
   const remainingDurationS = maneuvers.slice(maneuverIndex).reduce((acc, m) => acc + m.durationS, 0);
+  const remainingDistanceM = maneuvers.slice(maneuverIndex).reduce((acc, m) => acc + m.distanceM, 0);
 
   return {
     currentManeuver,
@@ -170,6 +173,7 @@ export function useNavigation({
     isOffRoute,
     eta,
     remainingDurationS,
+    remainingDistanceM,
     allManeuvers: maneuvers,
     onRecalculate: recalculate,
   };

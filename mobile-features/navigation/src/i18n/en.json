@@ -11,7 +11,11 @@
     "eta": "Arrive at {time}",
     "stop": "Stop navigation",
     "distM": "{n} m",
-    "distKm": "{n} km"
+    "distKm": "{n} km",
+    "remaining": "{dist} · {duration}",
+    "durationMin": "{n} min",
+    "durationHour": "{h} hr",
+    "durationHourMin": "{h} hr {m} min"
   },
   "preview": {
     "from": "From: ",
