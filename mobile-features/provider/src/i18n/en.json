@@ -117,14 +117,6 @@
     "saved": "Saved",
     "name": "Business Name",
     "category": "Category",
-    "hours": "Working Hours",
-    "hoursPlaceholder": "e.g. Sat-Thu 09:00-22:00",
-    "photos": "Photos",
-    "addPhoto": "Add Photo",
-    "logo": "Logo",
-    "changeLogo": "Change Logo",
-    "hoursFormatHint": "Format: Sat-Thu 09:00-22:00",
-    "hoursInvalid": "Time format not supported — use HH:MM",
     "hours": {
       "label": "Working Hours",
       "from": "From",
@@ -139,7 +131,16 @@
       "day4": "Wed",
       "day5": "Thu",
       "day6": "Fri"
-    }
+    },
+    "hoursPlaceholder": "e.g. Sat-Thu 09:00-22:00",
+    "photos": "Photos",
+    "addPhoto": "Add Photo",
+    "logo": "Logo",
+    "changeLogo": "Change Logo",
+    "hoursFormatHint": "Format: Sat-Thu 09:00-22:00",
+    "hoursInvalid": "Time format not supported — use HH:MM",
+    "avgResponseHours": "Typical response time (hours)",
+    "avgResponseHoursPlaceholder": "e.g. 2"
   },
   "errors": {
     "provider_already_exists": "You already have a registered business.",

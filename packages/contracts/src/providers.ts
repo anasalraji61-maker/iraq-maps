@@ -147,6 +147,8 @@ export const ProviderMe = z.object({
   /** Active consents. */
   consents: z.array(ConsentScope),
   suspensionReason: z.string().max(500).nullable(),
+  /** Typical first-reply time in whole hours (M193/M194). Null when not set. */
+  avgResponseHours: z.number().int().min(1).max(168).nullable(),
 });
 export type ProviderMe = z.infer<typeof ProviderMe>;
 
@@ -191,6 +193,8 @@ export const providersContract = c.router(
         photoAssetIds: z.array(AssetId).max(10).optional(),
         /** Ready provider_logo asset id. */
         logoAssetId: AssetId.optional(),
+        /** Self-reported typical first-reply time in hours. Null to clear. */
+        avgResponseHours: z.number().int().min(1).max(168).nullable().optional(),
       }),
       responses: { 200: ProviderMe, 400: Problem, 401: Problem, 404: Problem, 409: Problem },
     },

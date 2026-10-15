@@ -49,6 +49,7 @@ export function ProviderEditProfileScreen(): ReactElement {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<PlaceCategory | null>(null);
   const [hoursSlots, setHoursSlots] = useState<WeekSlots>(defaultSlots());
+  const [avgResponseHours, setAvgResponseHours] = useState<string>('');
   const [logoUri, setLogoUri] = useState<string | null>(null);
   const [logoAssetId, setLogoAssetId] = useState<string | null>(null);
   const [photoUris, setPhotoUris] = useState<string[]>([]);
@@ -62,6 +63,7 @@ export function ProviderEditProfileScreen(): ReactElement {
         setName(res.body.name);
         setCategory(res.body.category);
         setHoursSlots(osmToSlots(res.body.hoursRaw ?? ''));
+        if (res.body.avgResponseHours != null) setAvgResponseHours(String(res.body.avgResponseHours));
       }
     }).catch(() => {
       setError(t('errors.invalid_request'));
@@ -118,6 +120,7 @@ export function ProviderEditProfileScreen(): ReactElement {
             name: name.trim(),
             ...(category ? { category } : {}),
             hoursRaw: slotsToOsm(hoursSlots) || null,
+            avgResponseHours: avgResponseHours.trim() ? parseInt(avgResponseHours.trim(), 10) || null : null,
             ...(photoAssetIds.length > 0 ? { photoAssetIds } : {}),
             ...(logoAssetId ? { logoAssetId } : {}),
           },
@@ -185,6 +188,16 @@ export function ProviderEditProfileScreen(): ReactElement {
 
       {/* Hours — structured day-by-day editor */}
       <HoursEditor slots={hoursSlots} onChange={setHoursSlots} />
+
+      {/* Response time */}
+      <TextField
+        label={t('edit.avgResponseHours')}
+        value={avgResponseHours}
+        onChangeText={setAvgResponseHours}
+        keyboardType="number-pad"
+        testID="provider.avgResponseHoursInput"
+        placeholder={t('edit.avgResponseHoursPlaceholder')}
+      />
 
       {/* Photos */}
       <Text variant="subtitle">{t('edit.photos')}</Text>

@@ -32,6 +32,7 @@ export interface UpdateProviderInput {
   prices?: unknown[];
   links?: unknown[];
   photoAssetIds?: string[];
+  avgResponseHours?: number | null;
 }
 
 export interface ConsentEvidence {
@@ -92,6 +93,7 @@ export class ProvidersService {
     if (input.prices !== undefined) updateData.prices = JSON.stringify(input.prices);
     if (input.links !== undefined) updateData.links = JSON.stringify(input.links);
     if (input.photoAssetIds !== undefined) updateData.photoAssetIds = JSON.stringify(input.photoAssetIds);
+    if ('avgResponseHours' in input) updateData.avgResponseHours = typeof input.avgResponseHours === 'number' ? input.avgResponseHours : null;
 
     const [updated] = await this.db.update(providerTable).set(updateData as never).where(eq(providerTable.id, providerId)).returning();
     if (!updated) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
@@ -364,6 +366,7 @@ export class ProvidersService {
       photos: [],
       consents: activeConsents,
       suspensionReason: provider.suspensionReason ?? null,
+      avgResponseHours: provider.avgResponseHours ?? null,
     };
   }
 

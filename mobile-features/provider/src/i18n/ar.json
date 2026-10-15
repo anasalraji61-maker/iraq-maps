@@ -117,14 +117,6 @@
     "saved": "تم الحفظ",
     "name": "اسم النشاط",
     "category": "الفئة",
-    "hours": "أوقات العمل",
-    "hoursPlaceholder": "مثال: السبت-الخميس 09:00-22:00",
-    "photos": "الصور",
-    "addPhoto": "إضافة صورة",
-    "logo": "الشعار",
-    "changeLogo": "تغيير الشعار",
-    "hoursFormatHint": "الصيغة: السبت-الخميس 09:00-22:00",
-    "hoursInvalid": "صيغة الوقت غير مدعومة — استخدم HH:MM",
     "hours": {
       "label": "أوقات العمل",
       "from": "من",
@@ -139,7 +131,16 @@
       "day4": "الأربعاء",
       "day5": "الخميس",
       "day6": "الجمعة"
-    }
+    },
+    "hoursPlaceholder": "مثال: السبت-الخميس 09:00-22:00",
+    "photos": "الصور",
+    "addPhoto": "إضافة صورة",
+    "logo": "الشعار",
+    "changeLogo": "تغيير الشعار",
+    "hoursFormatHint": "الصيغة: السبت-الخميس 09:00-22:00",
+    "hoursInvalid": "صيغة الوقت غير مدعومة — استخدم HH:MM",
+    "avgResponseHours": "مدة الرد المعتادة (بالساعات)",
+    "avgResponseHoursPlaceholder": "مثال: 2"
   },
   "errors": {
     "provider_already_exists": "لديك نشاط تجاري مسجّل بالفعل.",
