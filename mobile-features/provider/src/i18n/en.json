@@ -78,6 +78,7 @@
     "optOut": "Stop Receiving Messages",
     "optOutConfirm": "Are you sure you want to stop receiving messages?",
     "noMessages": "No messages yet",
+    "noMessagesBody": "Customer inquiries about your place will appear here",
     "cancel": "Cancel",
     "unread": "unread message"
   },

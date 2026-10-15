@@ -20,7 +20,8 @@
   "list": {
     "title": "Messages",
     "loading": "Loading messages...",
-    "empty": "No messages yet",
+    "empty": "No conversations yet",
+    "emptyBody": "Find a place and ask about prices or services",
     "start": "Start a conversation",
     "loadError": "Error loading messages",
     "placesCount": "{{count}} places",

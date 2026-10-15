@@ -121,6 +121,7 @@ export function InquiriesListScreen(): ReactElement {
       <Screen>
         <EmptyState
           title={t('list.empty')}
+          body={t('list.emptyBody')}
           action={{ label: t('list.start'), onPress: () => router.push('/messages/new') }}
         />
       </Screen>

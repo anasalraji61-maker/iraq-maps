@@ -118,7 +118,7 @@ export function ProviderInboxScreen(): ReactElement {
       <Screen>
         <View style={styles.emptyContainer}>
           <RNText style={styles.emptyIcon}>📭</RNText>
-          <EmptyState title={t('inbox.title')} body={t('inbox.noMessages')} />
+          <EmptyState title={t('inbox.noMessages')} body={t('inbox.noMessagesBody')} />
         </View>
       </Screen>
     );
