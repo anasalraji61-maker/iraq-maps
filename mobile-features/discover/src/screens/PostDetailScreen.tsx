@@ -59,7 +59,7 @@ function PostDetailSkeleton(): ReactElement {
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void; isOwn: boolean; onMorePress: () => void }): ReactElement {
+function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onReportPress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void; isOwn: boolean; onMorePress: () => void; onReportPress: () => void }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const [linkCopied, setLinkCopied] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -135,7 +135,17 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress }: { pos
           >
             <Text style={styles.shareBtnText}>{t('post.moreIcon')}</Text>
           </Pressable>
-        ) : null}
+        ) : (
+          <Pressable
+            style={styles.shareBtn}
+            onPress={onReportPress}
+            accessibilityRole="button"
+            accessibilityLabel={t('postDetail.report')}
+            testID={`post.report.${post.id}`}
+          >
+            <Text style={styles.shareBtnText}>{t('postDetail.report')}</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -286,6 +296,26 @@ export function PostDetailScreen(): ReactElement {
     );
   }, [post, api, router]);
 
+  const handleReportPress = useCallback(() => {
+    if (!post) return;
+    const reasons = ['spam', 'inappropriate', 'misinformation', 'other'] as const;
+    Alert.alert(
+      t('postDetail.reportTitle'),
+      t('postDetail.reportBody'),
+      [
+        ...reasons.map((reason) => ({
+          text: t(`postDetail.reason_${reason}`),
+          onPress: () => {
+            void extApi.discover.reportPost({ params: { postId: post.id }, body: { reason } }).catch(() => {
+              Alert.alert(t('postDetail.reportError'));
+            });
+          },
+        })),
+        { text: t('post.reportCancel'), style: 'cancel' as const },
+      ],
+    );
+  }, [post, extApi]);
+
   const handleSaveEdit = useCallback(async () => {
     if (!post || editBody.trim().length === 0) return;
     setEditSaving(true);
@@ -342,7 +372,7 @@ export function PostDetailScreen(): ReactElement {
         }
         ListHeaderComponent={
           <>
-            <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} isOwn={currentUserId === post.authorId} onMorePress={handleMorePress} />
+            <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} isOwn={currentUserId === post.authorId} onMorePress={handleMorePress} onReportPress={handleReportPress} />
             {sectionHeader}
           </>
         }

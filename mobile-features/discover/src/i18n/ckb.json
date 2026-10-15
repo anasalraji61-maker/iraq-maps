@@ -126,7 +126,15 @@
     "copyLink": "لینک کۆپی بکە",
     "linkCopied": "لینک کۆپی کرا",
     "bodyCopied": "دەق کۆپی کرا",
-    "bodyLongPressHint": "درێژ دابگرە بۆ کۆپیکردنی دەق"
+    "bodyLongPressHint": "درێژ دابگرە بۆ کۆپیکردنی دەق",
+    "report": "ڕاپۆرت",
+    "reportTitle": "ڕاپۆرتکردنی پۆست",
+    "reportBody": "بۆچی ئەم پۆستەت ڕاپۆرت دەکەیت؟",
+    "reason_spam": "سپام",
+    "reason_inappropriate": "ناگونجاو",
+    "reason_misinformation": "زانیاری هەڵە",
+    "reason_other": "هیتر",
+    "reportError": "ناتوانرێ ڕاپۆرت بنێردرێت. دووبارە هەوڵبدەرەوە."
   },
   "userPosts": {
     "title": "پۆستەکانی بەکارهێنەر",

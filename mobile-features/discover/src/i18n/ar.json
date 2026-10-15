@@ -126,7 +126,15 @@
     "copyLink": "نسخ الرابط",
     "linkCopied": "تم نسخ الرابط",
     "bodyCopied": "تم نسخ النص",
-    "bodyLongPressHint": "اضغط مطولاً لنسخ النص"
+    "bodyLongPressHint": "اضغط مطولاً لنسخ النص",
+    "report": "إبلاغ",
+    "reportTitle": "الإبلاغ عن منشور",
+    "reportBody": "لماذا تُبلّغ عن هذا المنشور؟",
+    "reason_spam": "بريد مزعج",
+    "reason_inappropriate": "محتوى غير لائق",
+    "reason_misinformation": "معلومات مضللة",
+    "reason_other": "أخرى",
+    "reportError": "تعذّر إرسال البلاغ. حاول مرة أخرى."
   },
   "userPosts": {
     "title": "منشورات المستخدم",

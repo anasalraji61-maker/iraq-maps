@@ -126,7 +126,15 @@
     "copyLink": "Copy link",
     "linkCopied": "Link copied",
     "bodyCopied": "Text copied",
-    "bodyLongPressHint": "Long press to copy text"
+    "bodyLongPressHint": "Long press to copy text",
+    "report": "Report",
+    "reportTitle": "Report post",
+    "reportBody": "Why are you reporting this post?",
+    "reason_spam": "Spam",
+    "reason_inappropriate": "Inappropriate",
+    "reason_misinformation": "Misinformation",
+    "reason_other": "Other",
+    "reportError": "Could not send report. Please try again."
   },
   "userPosts": {
     "title": "User Posts",
