@@ -130,6 +130,39 @@ describe('AssistantChatScreen', () => {
     }, { timeout: 5000 });
   });
 
+  it('shows place cards when focusPlaceIds returned', async () => {
+    const PLACE_A = 'aaaaaaaa-aaaa-4aaa-aaaa-000000000001';
+    const PLACE_B = 'aaaaaaaa-aaaa-4aaa-aaaa-000000000002';
+    mockChat.mockResolvedValue({
+      status: 200 as const,
+      body: {
+        sessionId: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
+        reply: 'إليك بعض الأماكن',
+        composeParams: undefined,
+        focusPlaceIds: [PLACE_A, PLACE_B],
+        focusPlaceNames: { [PLACE_A]: 'مطعم الوسط', [PLACE_B]: 'كافيه النور' },
+      },
+      headers: new Headers(),
+    });
+
+    const { getByTestId } = await render(<AssistantChatScreen />);
+    const input = getByTestId(assistantTestIDs.chatInput);
+    const sendBtn = getByTestId(assistantTestIDs.sendButton);
+
+    await act(async () => {
+      fireEvent.changeText(input, 'اقترح مطاعم');
+    });
+    await act(async () => {
+      fireEvent.press(sendBtn);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId(`assistant.placeCard.${PLACE_A}`)).toBeTruthy();
+      expect(getByTestId(`assistant.placeCard.${PLACE_B}`)).toBeTruthy();
+    }, { timeout: 5000 });
+  });
+
   it('shows compose deeplink when composeParams returned', async () => {
     mockChat.mockResolvedValue({
       status: 200 as const,
