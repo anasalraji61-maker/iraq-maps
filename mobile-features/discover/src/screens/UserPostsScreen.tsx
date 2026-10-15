@@ -2,9 +2,9 @@ import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useSession } from '@iraq-maps/mobile-kit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useCallback, useEffect, useMemo, type ReactElement } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, type ReactElement } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   Alert,
   FlatList,
   Pressable,
@@ -17,6 +17,40 @@ import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { useFollows } from '../useFollows';
 import { COLORS, sharedStyles, formatRelativeTime, getTypeBadgeColors } from './shared';
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function UserPostSkeletonCard(): ReactElement {
+  return (
+    <View testID="skeleton-user-post" style={[styles.card, { backgroundColor: COLORS.surface, gap: 8, padding: 14, marginBottom: 10 }]}>
+      <View style={styles.cardHeader}>
+        <SkeletonBlock width={80} height={10} />
+        <SkeletonBlock width={40} height={14} />
+      </View>
+      <SkeletonBlock width={240} height={12} />
+      <SkeletonBlock width={170} height={12} />
+      <View style={styles.counters}>
+        <SkeletonBlock width={60} height={10} />
+        <SkeletonBlock width={60} height={10} />
+      </View>
+    </View>
+  );
+}
 
 function pinnedKey(authorId: string): string {
   return `@iraq-maps/pinned-post/${authorId}`;
@@ -213,7 +247,9 @@ export function UserPostsScreen(): ReactElement {
         onEndReachedThreshold={0.3}
         ListEmptyComponent={
           loading ? (
-            <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#1976D2" />
+            <View style={{ gap: 0 }}>
+              {Array.from({ length: 4 }, (_, i) => <UserPostSkeletonCard key={i} />)}
+            </View>
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: COLORS.textSecondary }]}>{t('userPosts.empty')}</Text>
@@ -221,7 +257,7 @@ export function UserPostsScreen(): ReactElement {
           )
         }
         ListFooterComponent={
-          loadingMore ? <ActivityIndicator style={{ paddingVertical: 12 }} size="small" color="#1976D2" /> : null
+          loadingMore ? <UserPostSkeletonCard /> : null
         }
         contentContainerStyle={{ padding: 12, paddingBottom: 40 }}
       />

@@ -6,7 +6,7 @@ import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   FlatList,
   I18nManager,
   Pressable,
@@ -20,6 +20,37 @@ import { t } from '../strings';
 import { COLORS, formatRelativeTime, getTypeBadgeColors, HashtagText, sharedStyles } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function HashtagSkeletonCard(): ReactElement {
+  return (
+    <View testID="skeleton-hashtag-card" style={[styles.postCard, { backgroundColor: '#FFF' }]}>
+      <View style={styles.cardHeader}>
+        <SkeletonBlock width={80} height={10} />
+        <SkeletonBlock width={40} height={14} />
+      </View>
+      <SkeletonBlock width={240} height={12} />
+      <SkeletonBlock width={180} height={12} />
+      <SkeletonBlock width={120} height={10} />
+    </View>
+  );
+}
 
 function formatCount(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 < 100 ? 0 : 1)}k`;
@@ -134,7 +165,9 @@ export function HashtagFeedScreen(): ReactElement {
         <Text style={sharedStyles.headerTitle}>{hashtag}</Text>
       </View>
       {loading && !refreshing ? (
-        <ActivityIndicator style={{ marginTop: 32 }} size="large" color={COLORS.primary} />
+        <View style={sharedStyles.listContent}>
+          {Array.from({ length: 5 }, (_, i) => <HashtagSkeletonCard key={i} />)}
+        </View>
       ) : error ? (
         <View style={sharedStyles.emptyContainer}>
           <Text style={[sharedStyles.emptyText, { color: COLORS.error }]}>{error}</Text>
@@ -163,7 +196,7 @@ export function HashtagFeedScreen(): ReactElement {
           onEndReached={handleEndReached}
           onEndReachedThreshold={0.3}
           ListFooterComponent={
-            loadingMore ? <ActivityIndicator style={{ paddingVertical: 12 }} size="small" color={COLORS.primary} /> : null
+            loadingMore ? <HashtagSkeletonCard /> : null
           }
         />
       )}
