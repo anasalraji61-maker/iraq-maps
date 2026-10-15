@@ -653,6 +653,7 @@ export function DiscoverFeedScreen(): ReactElement {
           onPress={() => setActiveTab('all')}
           accessibilityRole="tab"
           accessibilityState={{ selected: activeTab === 'all' }}
+          accessibilityLabel={t('feed.title')}
         >
           <Text style={[styles.tabBtnText, activeTab === 'all' && styles.tabBtnTextActive]}>
             {t('feed.title')}
@@ -663,6 +664,7 @@ export function DiscoverFeedScreen(): ReactElement {
           onPress={() => setActiveTab('following')}
           accessibilityRole="tab"
           accessibilityState={{ selected: activeTab === 'following' }}
+          accessibilityLabel={t('follow.feedTab')}
         >
           <Text style={[styles.tabBtnText, activeTab === 'following' && styles.tabBtnTextActive]}>
             {t('follow.feedTab')}
@@ -679,6 +681,7 @@ export function DiscoverFeedScreen(): ReactElement {
               onPress={() => setTypeFilter(type)}
               accessibilityRole="button"
               accessibilityState={{ selected: typeFilter === type }}
+              accessibilityLabel={t(`feed.typeFilter.${type}`)}
             >
               <Text style={[styles.typeChipText, typeFilter === type && styles.typeChipTextActive]}>
                 {t(`feed.typeFilter.${type}`)}
@@ -697,6 +700,7 @@ export function DiscoverFeedScreen(): ReactElement {
               onPress={() => setCategoryFilter(cat)}
               accessibilityRole="button"
               accessibilityState={{ selected: categoryFilter === cat }}
+              accessibilityLabel={t(`feed.categoryFilter.${cat}`)}
             >
               <Text style={[styles.typeChipText, categoryFilter === cat && styles.typeChipTextActive]}>
                 {t(`feed.categoryFilter.${cat}`)}
