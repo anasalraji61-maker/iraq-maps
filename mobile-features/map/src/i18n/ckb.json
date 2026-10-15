@@ -100,7 +100,8 @@
     "whatsappLabel": "پەیام لە واتساپ",
     "nearbyTitle": "شوێنی نزیک و هاوشێوە",
     "openInMaps": "کردنەوە لە نەخشەی گووگڵ",
-    "todayHours": "ئەمڕۆ: {hours}"
+    "todayHours": "ئەمڕۆ: {hours}",
+    "away": "{dist} لێ دوورت"
   },
   "actions": {
     "directions": "ئاراستەکان",

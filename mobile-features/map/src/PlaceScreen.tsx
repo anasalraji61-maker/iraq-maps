@@ -9,8 +9,9 @@ import { PlaceSkeleton } from './components/PlaceSkeleton';
 import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
 import { openNow, closesAt, todayHours } from './hours';
+import { useDistanceFromUser } from './hooks/useDistanceFromUser';
 import { LoadStatus, ok, useLatest } from './load';
-import { isolate, kindLabel, t } from './strings';
+import { formatDistance, isolate, kindLabel, t } from './strings';
 
 /** Actions whose feature ships in a later milestone; each appears once its route is delivered (useRouteAvailable). */
 const actions = { routePreview: 'actions.directions', messageCompose: 'actions.message', assistant: 'actions.assistant' } as const;
@@ -59,6 +60,9 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
       .report({ body: { placeId: place.id, kind: 'crowded_now' } })
       .catch(() => undefined);
 
+  // ── Distance from user ────────────────────────────────────────────────────
+  const distM = useDistanceFromUser(place.location as [number, number] | undefined);
+
   // ── Save / favourite ──────────────────────────────────────────────────────
   const [isSaved, setIsSaved] = useState(false);
   useEffect(() => {
@@ -85,6 +89,11 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         {kindLabel(place)}
       </Text>
       {place.area ? <Text>{pickName(place.area, lang)}</Text> : null}
+      {distM !== null ? (
+        <Text tone="muted" testID="place.distanceAway">
+          {t('place.away', { dist: formatDistance(distM) })}
+        </Text>
+      ) : null}
       {/* Everything on this card is OSM data: the name, the hours and the phone and website tags. */}
       <Badge testID={testIDs.place.source} label={t('source.osm')} />
       {place.hoursRaw ? (

@@ -100,7 +100,8 @@
     "whatsappLabel": "Message on WhatsApp",
     "nearbyTitle": "Similar nearby places",
     "openInMaps": "Open in Google Maps",
-    "todayHours": "Today: {hours}"
+    "todayHours": "Today: {hours}",
+    "away": "{dist} away"
   },
   "actions": {
     "directions": "Directions",
