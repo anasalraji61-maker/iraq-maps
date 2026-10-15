@@ -153,6 +153,24 @@ describe('ActivityScreen', () => {
     });
   });
 
+  it('shows skeleton rows while routes are loading', async () => {
+    let resolveRoutes!: (v: RecentRoute[]) => void;
+    mockListRoutes.mockReturnValue(new Promise((res) => { resolveRoutes = res; }));
+    const { getByText, getByTestId } = await render(<ActivityScreen />);
+    await act(async () => { fireEvent.press(getByText('tabRoutes')); });
+    expect(getByTestId('skeleton-routes')).toBeTruthy();
+    await act(async () => { resolveRoutes([]); await Promise.resolve(); });
+  });
+
+  it('shows skeleton rows while saved places are loading', async () => {
+    let resolveSaved!: (v: SavedPlace[]) => void;
+    mockListSaved.mockReturnValue(new Promise((res) => { resolveSaved = res; }));
+    const { getByText, getByTestId } = await render(<ActivityScreen />);
+    await act(async () => { fireEvent.press(getByText('tabSaved')); });
+    expect(getByTestId('skeleton-saved')).toBeTruthy();
+    await act(async () => { resolveSaved([]); await Promise.resolve(); });
+  });
+
   it('renders routes tab and shows empty state when no routes', async () => {
     const { getByText } = await render(<ActivityScreen />);
     const routesTab = getByText('tabRoutes');
