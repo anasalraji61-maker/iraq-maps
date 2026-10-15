@@ -12,7 +12,8 @@
     "sectionPlaces": "شوێنەکان",
     "sectionStreets": "شەقامەکان",
     "sectionAreas": "ناوچەکان",
-    "suggestionsHint": "پێشنیازێک هەڵبژێرە یان بەردەوام بە نووسین"
+    "suggestionsHint": "پێشنیازێک هەڵبژێرە یان بەردەوام بە نووسین",
+    "resultCount": "{{count}} ئەنجام"
   },
   "focus": {
     "show": "پیشاندانی: {name}",

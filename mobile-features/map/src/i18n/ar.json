@@ -12,7 +12,8 @@
     "sectionPlaces": "أماكن",
     "sectionStreets": "شوارع",
     "sectionAreas": "مناطق",
-    "suggestionsHint": "اختر اقتراحاً أو تابع الكتابة"
+    "suggestionsHint": "اختر اقتراحاً أو تابع الكتابة",
+    "resultCount": "{{count}} نتيجة"
   },
   "focus": {
     "show": "عرض: {name}",

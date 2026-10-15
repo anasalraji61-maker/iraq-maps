@@ -319,6 +319,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
                   ? <Banner kind="error" message={globalT('common:errors.network')} onRetry={search.retry} retryLabel={globalT('common:actions.retry')} />
                   : <LoadStatus {...search} />}
                 {search.state?.status === 'ready' && !results.length ? <Banner kind="info" message={t('search.empty', { query: isolate(q) })} /> : null}
+                {search.state?.status === 'ready' && results.length > 0 ? (
+                  <Text variant="caption" tone="muted">{t('search.resultCount', { count: String(results.length) })}</Text>
+                ) : null}
               </>
             }
             renderSectionHeader={({ section }) =>
