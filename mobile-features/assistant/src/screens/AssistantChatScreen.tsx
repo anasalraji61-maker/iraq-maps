@@ -126,14 +126,14 @@ function PlaceCards({
 export function AssistantChatScreen(): ReactElement {
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
-  const { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error } =
+  const { messages, send, isLoading, historyLoaded, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error } =
     useAssistantChat(sessionId);
   const router = useRouter();
   const listRef = useRef<FlatList>(null);
   const { initialMessage } = useLocalSearchParams<{ initialMessage?: string }>();
   const initialMessageSent = useRef(false);
 
-  const showQuickReplies = messages.length === 0 && !isLoading;
+  const showQuickReplies = messages.length === 0 && !isLoading && historyLoaded;
 
   // Resume the persisted session on mount
   useEffect(() => {

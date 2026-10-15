@@ -5,6 +5,8 @@ import { useAssistantClient } from '../client';
 import { t } from '../strings';
 
 const SESSION_KEY = '@assistant_session_id';
+const MESSAGES_KEY = '@assistant_chat_history';
+const MAX_PERSISTED_MESSAGES = 40;
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -16,6 +18,8 @@ export interface UseAssistantChatResult {
   messages: ChatMessage[];
   send: (text: string) => Promise<void>;
   isLoading: boolean;
+  /** True once the persisted history has been loaded (or confirmed absent). */
+  historyLoaded: boolean;
   composeParams?: AssistantResponseType['composeParams'];
   focusPlaceId?: AssistantResponseType['focusPlaceId'];
   focusPlaceIds?: AssistantResponseType['focusPlaceIds'];
@@ -29,12 +33,29 @@ export function useAssistantChat(
 ): UseAssistantChatResult {
   const client = useAssistantClient();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [composeParams, setComposeParams] = useState<AssistantResponseType['composeParams']>(undefined);
   const [focusPlaceId, setFocusPlaceId] = useState<AssistantResponseType['focusPlaceId']>(undefined);
   const [focusPlaceIds, setFocusPlaceIds] = useState<AssistantResponseType['focusPlaceIds']>(undefined);
   const [focusPlaceNames, setFocusPlaceNames] = useState<AssistantResponseType['focusPlaceNames']>(undefined);
   const [error, setError] = useState<string | undefined>();
+
+  // Load persisted message history on mount (for the current session only)
+  useEffect(() => {
+    AsyncStorage.getItem(`${MESSAGES_KEY}:${sessionId}`)
+      .then((raw) => {
+        if (raw) {
+          try {
+            const loaded = JSON.parse(raw) as ChatMessage[];
+            setMessages(loaded);
+          } catch { /* ignore corrupt data */ }
+        }
+      })
+      .catch(() => { /* best-effort */ })
+      .finally(() => setHistoryLoaded(true));
+  // Only run on mount (sessionId won't change after construction)
+  }, []);
 
   // Persist sessionId to AsyncStorage
   useEffect(() => {
@@ -68,10 +89,13 @@ export function useAssistantChat(
 
         if (res.status === 200) {
           const { reply, composeParams: cp, focusPlaceId: fpid, focusPlaceIds: fpids, focusPlaceNames: fpnames } = res.body;
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: reply, timestamp: Date.now() },
-          ]);
+          const assistantMsg: ChatMessage = { role: 'assistant', content: reply, timestamp: Date.now() };
+          setMessages((prev) => {
+            const updated = [...prev, assistantMsg];
+            const toStore = updated.slice(-MAX_PERSISTED_MESSAGES);
+            AsyncStorage.setItem(`${MESSAGES_KEY}:${sessionId}`, JSON.stringify(toStore)).catch(() => {});
+            return updated;
+          });
           if (cp) setComposeParams(cp);
           if (fpid) setFocusPlaceId(fpid);
           if (fpids && fpids.length > 0) setFocusPlaceIds(fpids);
@@ -90,7 +114,7 @@ export function useAssistantChat(
     [client, messages, sessionId, isLoading],
   );
 
-  return { messages, send, isLoading, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error };
+  return { messages, send, isLoading, historyLoaded, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error };
 }
 
 /** Load the previously saved session id from storage. Returns null if none. */
@@ -106,6 +130,15 @@ export async function loadPersistedSessionId(): Promise<string | null> {
 export async function clearPersistedSessionId(): Promise<void> {
   try {
     await AsyncStorage.removeItem(SESSION_KEY);
+  } catch {
+    // best-effort
+  }
+}
+
+/** Clear the persisted message history for a given session. */
+export async function clearPersistedHistory(sessionId: string): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(`${MESSAGES_KEY}:${sessionId}`);
   } catch {
     // best-effort
   }
