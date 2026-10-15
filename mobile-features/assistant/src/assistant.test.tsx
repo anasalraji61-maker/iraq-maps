@@ -191,4 +191,39 @@ describe('AssistantChatScreen', () => {
       expect(getByTestId(assistantTestIDs.composeDeepLink)).toBeTruthy();
     }, { timeout: 5000 });
   });
+
+  it('shows retry button after error and retries last message on press', async () => {
+    mockChat.mockRejectedValueOnce(new Error('network error'));
+
+    const { getByTestId, queryByTestId } = await render(<AssistantChatScreen />);
+    const input = getByTestId(assistantTestIDs.chatInput);
+    const sendBtn = getByTestId(assistantTestIDs.sendButton);
+
+    await act(async () => {
+      fireEvent.changeText(input, 'مطاعم قريبة');
+    });
+    await act(async () => {
+      fireEvent.press(sendBtn);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('assistant-retry-btn')).toBeTruthy();
+    }, { timeout: 5000 });
+
+    // Now mock a successful response for the retry
+    mockChat.mockResolvedValueOnce(okResponse);
+
+    await act(async () => {
+      fireEvent.press(getByTestId('assistant-retry-btn'));
+      await Promise.resolve();
+    });
+
+    // After retry succeeds, error row (and retry button) disappear
+    await waitFor(() => {
+      expect(queryByTestId('assistant-retry-btn')).toBeNull();
+    }, { timeout: 5000 });
+    // chat was called twice (original + retry)
+    expect(mockChat).toHaveBeenCalledTimes(2);
+  });
 });

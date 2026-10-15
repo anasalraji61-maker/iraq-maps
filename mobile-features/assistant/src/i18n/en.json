@@ -21,6 +21,7 @@
     "quickReply4": "How do I get to...",
     "clearChat": "New Chat",
     "clearChatA11y": "Start a new conversation",
-    "charCount": "{{count}}/{{max}}"
+    "charCount": "{{count}}/{{max}}",
+    "retry": "Retry"
   }
 }

@@ -129,6 +129,7 @@ function PlaceCards({
 export function AssistantChatScreen(): ReactElement {
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
   const [inputText, setInputText] = useState('');
+  const [lastSentText, setLastSentText] = useState('');
   const { messages, send, isLoading, historyLoaded, composeParams, focusPlaceId, focusPlaceIds, focusPlaceNames, error } =
     useAssistantChat(sessionId);
   const router = useRouter();
@@ -157,7 +158,14 @@ export function AssistantChatScreen(): ReactElement {
     const text = inputText.trim();
     if (!text || isLoading) return;
     setInputText('');
+    setLastSentText(text);
     await send(text);
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+  };
+
+  const handleRetry = async () => {
+    if (!lastSentText || isLoading) return;
+    await send(lastSentText);
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
@@ -254,6 +262,18 @@ export function AssistantChatScreen(): ReactElement {
       {error ? (
         <View style={styles.errorRow}>
           <Text style={styles.errorText}>{error}</Text>
+          {lastSentText ? (
+            <Pressable
+              testID="assistant-retry-btn"
+              onPress={() => { void handleRetry(); }}
+              style={styles.retryBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t('chat.retry')}
+              disabled={isLoading}
+            >
+              <Text style={styles.retryBtnText}>{t('chat.retry')}</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
 
@@ -495,11 +515,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEE',
     paddingHorizontal: 16,
     paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   errorText: {
     color: '#C62828',
     fontSize: 13,
     textAlign: 'auto',
+    flex: 1,
+  },
+  retryBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#C62828',
+  },
+  retryBtnText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   mapBtn: {
     marginHorizontal: 12,

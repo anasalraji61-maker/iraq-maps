@@ -21,6 +21,7 @@
     "quickReply4": "چۆن دەگەمە...",
     "clearChat": "گفتوگۆی نوێ",
     "clearChatA11y": "دەستپێکردنی گفتوگۆیەکی نوێ",
-    "charCount": "{{count}}/{{max}}"
+    "charCount": "{{count}}/{{max}}",
+    "retry": "دووبارە هەوڵبدەوە"
   }
 }
