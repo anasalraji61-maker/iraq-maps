@@ -2,7 +2,8 @@ import { discoverTestIDs } from '@iraq-maps/contracts';
 import { useApi, useApiBaseUrl, useAppRating } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { useState, useCallback, type ReactElement } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   I18nManager,
@@ -40,6 +41,8 @@ interface UploadedPhoto {
   assetId: string;
 }
 
+const DRAFT_KEY = '@iraq-maps/create-post/draft';
+
 export function CreatePostScreen(): ReactElement {
   const api = useDiscoverClient();
   const placesApi = useApi();
@@ -48,6 +51,7 @@ export function CreatePostScreen(): ReactElement {
   const { onPostCreated } = useAppRating();
   const [body, setBody] = useState('');
   const [postType, setPostType] = useState<PostTypeValue>('tip');
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [placeQuery, setPlaceQuery] = useState('');
@@ -56,6 +60,29 @@ export function CreatePostScreen(): ReactElement {
   const [searchingPlace, setSearchingPlace] = useState(false);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // Restore draft on mount
+  useEffect(() => {
+    AsyncStorage.getItem(DRAFT_KEY)
+      .then((raw) => {
+        if (!raw) return;
+        try {
+          const draft = JSON.parse(raw) as { body: string; postType: PostTypeValue };
+          if (draft.body) setBody(draft.body);
+          if (draft.postType) setPostType(draft.postType);
+        } catch { /* ignore corrupt data */ }
+      })
+      .catch(() => undefined);
+  }, []);
+
+  // Auto-save draft (debounced 600ms)
+  const handleBodyChange = useCallback((text: string) => {
+    setBody(text.slice(0, 1000));
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ body: text.slice(0, 1000), postType })).catch(() => undefined);
+    }, 600);
+  }, [postType]);
 
   const handlePlaceSearch = useCallback(async (q: string) => {
     setPlaceQuery(q);
@@ -156,6 +183,7 @@ export function CreatePostScreen(): ReactElement {
         },
       });
       if (res.status === 201) {
+        AsyncStorage.removeItem(DRAFT_KEY).catch(() => undefined);
         void onPostCreated();
         router.back();
       } else {
@@ -204,7 +232,7 @@ export function CreatePostScreen(): ReactElement {
           testID={discoverTestIDs.postInput}
           style={styles.textInput}
           value={body}
-          onChangeText={(text) => setBody(text.slice(0, 1000))}
+          onChangeText={handleBodyChange}
           placeholder={t('create.placeholder')}
           placeholderTextColor="#999"
           multiline
