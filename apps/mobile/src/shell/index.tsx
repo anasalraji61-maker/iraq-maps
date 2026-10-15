@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
@@ -8,7 +9,6 @@ import { SymbolView, type AndroidSymbol } from 'expo-symbols';
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUnreadMessagesCount } from '@iraq-maps/feature-messages';
 import { availableRoutes } from './available-routes';
 import { apiBaseUrl, defaultApiUrl, isProduction, loadServerUrl, saveServerUrl } from './config';
 import ar from './i18n/ar.json';
@@ -36,6 +36,43 @@ const tabIcons: Record<Tab, AndroidSymbol> = {
 
 /** Primary tab bar order — six tabs visible to the user. */
 const tabs: Tab[] = ['map', 'discover', 'messages', 'assistant', 'activity', 'account'];
+
+const MESSAGES_POLL_MS = 60_000;
+const RECEIPTS_KEY = '@iraq-maps/messages/read-receipts';
+
+/** Polls unread inquiry count every 60 s when the user is signed in. Returns 0 when signed out.
+ *  Reads locally-stored read receipts (set by InquiryDetailScreen) to determine what's unread. */
+function useUnreadMessagesCount(): number {
+  const api = useApi();
+  const session = useSession();
+  const [count, setCount] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (session.state.status !== 'signedIn') {
+      setCount(0);
+      return;
+    }
+    const fetch = async () => {
+      try {
+        const res = await api.messaging.listInquiries({ query: {} });
+        if (res.status !== 200) return;
+        let receipts: Record<string, string> = {};
+        try {
+          const raw = await AsyncStorage.getItem(RECEIPTS_KEY);
+          if (raw) receipts = JSON.parse(raw) as Record<string, string>;
+        } catch { /* ignore */ }
+        const unread = res.body.items.filter((i: { id: string }) => !receipts[i.id]).length;
+        setCount(unread);
+      } catch { /* network error */ }
+    };
+    void fetch();
+    timerRef.current = setInterval(() => void fetch(), MESSAGES_POLL_MS);
+    return () => { if (timerRef.current !== null) clearInterval(timerRef.current); };
+  }, [api, session.state.status]);
+
+  return count;
+}
 
 /** Polls unread notification count every 30 s when the user is signed in. Returns 0 when signed out. */
 function useUnreadNotificationCount(): number {
