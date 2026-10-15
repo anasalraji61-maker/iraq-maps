@@ -348,6 +348,58 @@ const trendingStyles = StyleSheet.create({
   stats: { fontSize: 11, color: COLORS.textMuted },
 });
 
+// ─── Trending hashtags strip ──────────────────────────────────────────────────
+
+/** Extract top N hashtags by frequency from a list of posts. @internal exported for testing */
+export function topHashtags(posts: DiscoverPostType[], n: number): string[] {
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    const tags = post.body.match(/#[\p{L}\p{N}_]+/gu) ?? [];
+    for (const tag of tags) {
+      const lower = tag.toLowerCase();
+      counts.set(lower, (counts.get(lower) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([tag]) => tag);
+}
+
+function HashtagStrip({ tags, onPress }: { tags: string[]; onPress: (tag: string) => void }): ReactElement | null {
+  if (tags.length === 0) return null;
+  return (
+    <View style={hashtagStripStyles.container} testID="trending-hashtags-strip">
+      <Text style={trendingStyles.sectionTitle}>{t('feed.trendingHashtagsTitle')}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={hashtagStripStyles.row}>
+        {tags.map((tag) => (
+          <Pressable
+            key={tag}
+            style={hashtagStripStyles.chip}
+            onPress={() => onPress(tag)}
+            accessibilityRole="button"
+            accessibilityLabel={tag}
+          >
+            <Text style={hashtagStripStyles.chipText}>{tag}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+const hashtagStripStyles = StyleSheet.create({
+  container: { paddingBottom: 4 },
+  row: { paddingHorizontal: 12, gap: 8, paddingBottom: 4 },
+  chip: {
+    backgroundColor: COLORS.primaryXLight,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  chipText: { fontSize: 13, color: COLORS.primary, fontWeight: '600' },
+});
+
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
   const extApi = useApi();
@@ -382,6 +434,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [trendingPosts, setTrendingPosts] = useState<DiscoverPostType[]>([]);
   const [trendingLoaded, setTrendingLoaded] = useState(false);
+  // Derive top hashtags from loaded feed posts (client-side, no extra API call)
+  const trendingHashtags = useMemo(() => topHashtags(posts, 8), [posts]);
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -744,11 +798,18 @@ export function DiscoverFeedScreen(): ReactElement {
         keyExtractor={(item) => item.id}
         accessibilityRole="list"
         ListHeaderComponent={
-          !isSearchActive && trendingLoaded && trendingPosts.length > 0 ? (
-            <TrendingStrip
-              posts={trendingPosts}
-              onPress={(post) => router.push(href('discoverPost', { postId: post.id }))}
-            />
+          !isSearchActive ? (
+            <>
+              {trendingHashtags.length > 0 ? (
+                <HashtagStrip tags={trendingHashtags} onPress={handleHashtagPress} />
+              ) : null}
+              {trendingLoaded && trendingPosts.length > 0 ? (
+                <TrendingStrip
+                  posts={trendingPosts}
+                  onPress={(post) => router.push(href('discoverPost', { postId: post.id }))}
+                />
+              ) : null}
+            </>
           ) : null
         }
         renderItem={({ item }) => (

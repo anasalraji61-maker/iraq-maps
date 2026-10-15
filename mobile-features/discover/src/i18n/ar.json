@@ -14,6 +14,7 @@
     "trendingTitle": "المنشورات الرائجة",
     "trendingEmpty": "لا توجد منشورات رائجة حالياً",
     "trendingStats": "{likes} إعجاب · {comments} تعليق",
+    "trendingHashtagsTitle": "وسوم رائجة",
     "typeFilter": {
       "all": "الكل",
       "photo": "صور",
