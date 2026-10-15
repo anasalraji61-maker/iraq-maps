@@ -8,6 +8,7 @@ import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, 
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useRecentSearches } from './hooks/useRecentSearches';
 import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
 
 /** Maps place category to a representative emoji icon. */
@@ -41,7 +42,7 @@ import { formatDistance, isolate, kindLabel, t } from './strings';
 const SEARCH_DELAY_MS = 300;
 const LOCATED_ZOOM = 15;
 const NO_RESULTS: PlaceSummary[] = [];
-const MAX_RECENT = 5;
+
 /** Queries at or above this length use the full search endpoint; shorter (2–3) use fast suggestions. */
 const FULL_SEARCH_MIN_LEN = 4;
 
@@ -80,7 +81,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [locateError, setLocateError] = useState<string>();
   const [locationAddress, setLocationAddress] = useState<string>();
   const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const recentSearches = useRecentSearches();
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   /** When the user picks a suggestion, we promote to full search for that term. */
   const [promotedQuery, setPromotedQuery] = useState<string>();
@@ -113,11 +114,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   /** True when the query is short enough to use the fast suggestions endpoint. */
   const useSuggestions = q.length >= 2 && q.length < FULL_SEARCH_MIN_LEN && promotedQuery !== q;
 
-  const addRecent = (term: string) => {
-    const trimmed = term.trim();
-    if (!trimmed) return;
-    setRecentSearches((prev) => [trimmed, ...prev.filter((r) => r !== trimmed)].slice(0, MAX_RECENT));
-  };
+  const addRecent = (term: string) => { recentSearches.add(term); };
 
   // `near` is read when the debounced request starts, so a pan changes the next search without re-running this one.
   // 4 decimals (about 11m) are enough to rank by distance and send no more of the user's location than that.
@@ -269,16 +266,16 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         ) : null}
         {locateError ? <Banner kind="error" message={locateError} /> : null}
         {focusBanner ? <Banner kind="info" message={focusBanner} /> : null}
-        {searchPanelOpen && !q && recentSearches.length > 0 ? (
+        {searchPanelOpen && !q && recentSearches.items.length > 0 ? (
           <View style={{ maxHeight: maxResultsHeight }}>
             <View style={styles.recentHeader}>
               <Text variant="caption">{t('search.recentTitle')}</Text>
-              <Pressable onPress={() => setRecentSearches([])}>
+              <Pressable onPress={() => recentSearches.clear()}>
                 <RNText style={styles.clearText}>{t('search.clearRecent')}</RNText>
               </Pressable>
             </View>
             <View style={styles.chipsRow}>
-              {recentSearches.map((term) => (
+              {recentSearches.items.map((term) => (
                 <Pressable
                   key={term}
                   style={styles.chip}
