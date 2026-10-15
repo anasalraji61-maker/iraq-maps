@@ -129,7 +129,9 @@
     "loginRequired": "Sign in to leave a review",
     "addPhotosLabel": "Add photos (optional)",
     "addPhoto": "Add photo",
-    "removePhoto": "Remove photo"
+    "removePhoto": "Remove photo",
+    "sortNewest": "Newest",
+    "sortHighest": "Highest rated"
   },
   "lightbox": {
     "close": "Close",

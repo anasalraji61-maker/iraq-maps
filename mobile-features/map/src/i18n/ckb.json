@@ -129,7 +129,9 @@
     "loginRequired": "چوونەژوورەوە بکە بۆ زیادکردنی بۆچوون",
     "addPhotosLabel": "وێنە زیاد بکە (دەستیار)",
     "addPhoto": "زیادکردنی وێنە",
-    "removePhoto": "سڕینەوەی وێنە"
+    "removePhoto": "سڕینەوەی وێنە",
+    "sortNewest": "نوێترین",
+    "sortHighest": "بەرزترین هەڵسەنگاندن"
   },
   "lightbox": {
     "close": "داخستن",

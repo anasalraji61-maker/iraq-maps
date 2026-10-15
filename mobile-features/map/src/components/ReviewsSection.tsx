@@ -182,7 +182,9 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
   const session = useSession();
   const isSignedIn = session.state.status === 'signedIn';
 
+  type ReviewSort = 'newest' | 'highest';
   const [reviews, setReviews] = useState<ReviewWithPhotos[]>([]);
+  const [sort, setSort] = useState<ReviewSort>('newest');
   const [summary, setSummary] = useState<RatingSummary | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(0);
@@ -317,10 +319,38 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
         />
       )}
 
+      {reviews.length > 1 ? (
+        <View style={styles.sortRow}>
+          <TouchableOpacity
+            onPress={() => setSort('newest')}
+            style={[styles.sortChip, sort === 'newest' && styles.sortChipActive]}
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.sortNewest')}
+          >
+            <RNText style={[styles.sortChipText, sort === 'newest' && styles.sortChipTextActive]}>
+              {t('reviews.sortNewest')}
+            </RNText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setSort('highest')}
+            style={[styles.sortChip, sort === 'highest' && styles.sortChipActive]}
+            accessibilityRole="button"
+            accessibilityLabel={t('reviews.sortHighest')}
+          >
+            <RNText style={[styles.sortChipText, sort === 'highest' && styles.sortChipTextActive]}>
+              {t('reviews.sortHighest')}
+            </RNText>
+          </TouchableOpacity>
+        </View>
+      ) : null}
       {reviews.length === 0 ? (
         <Text tone="muted" variant="caption">{t('reviews.empty')}</Text>
       ) : (
-        reviews.map((r) => <ReviewCard key={r.id} review={r} />)
+        [...reviews]
+          .sort(sort === 'highest'
+            ? (a, b) => b.rating - a.rating
+            : (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .map((r) => <ReviewCard key={r.id} review={r} />)
       )}
     </View>
   );
@@ -328,6 +358,11 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
 
 const styles = StyleSheet.create({
   container: { marginTop: 16, gap: 8 },
+  sortRow: { flexDirection: 'row', gap: 6 },
+  sortChip: { borderRadius: 16, borderWidth: 1, borderColor: '#BDBDBD', paddingHorizontal: 10, paddingVertical: 4 },
+  sortChipActive: { borderColor: '#1976D2', backgroundColor: '#E3F2FD' },
+  sortChipText: { fontSize: 12, color: '#555' },
+  sortChipTextActive: { color: '#1976D2', fontWeight: '600' },
   stars: { flexDirection: 'row', gap: 4 },
   card: { gap: 4, paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#E0E0E0' },
   form: { gap: 8 },

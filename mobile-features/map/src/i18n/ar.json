@@ -129,7 +129,9 @@
     "loginRequired": "سجّل الدخول لإضافة مراجعة",
     "addPhotosLabel": "أضف صور (اختياري)",
     "addPhoto": "إضافة صورة",
-    "removePhoto": "إزالة الصورة"
+    "removePhoto": "إزالة الصورة",
+    "sortNewest": "الأحدث",
+    "sortHighest": "الأعلى تقييماً"
   },
   "lightbox": {
     "close": "إغلاق",
