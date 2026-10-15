@@ -1,10 +1,58 @@
 import { type Inquiry } from '@iraq-maps/contracts';
 import { Card, EmptyState, Screen, Text, Banner } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import { useState, useEffect, type ReactElement } from 'react';
-import { ScrollView, RefreshControl, View, StyleSheet, Text as RNText } from 'react-native';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { Animated, ScrollView, RefreshControl, View, StyleSheet, Text as RNText } from 'react-native';
 import { useMessagingClient } from '../client';
 import { t } from '../strings';
+
+// ─── Skeleton loader ─────────────────────────────────────────────────────────
+
+function SkeletonLine({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return (
+    <Animated.View
+      style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 4 }, { opacity }]}
+      accessibilityElementsHidden
+    />
+  );
+}
+
+function SkeletonInquiryCard(): ReactElement {
+  return (
+    <View testID="skeleton-inquiry-card" style={skeletonStyles.card}>
+      <SkeletonLine width={200} height={14} />
+      <View style={skeletonStyles.meta}>
+        <SkeletonLine width={60} height={11} />
+        <SkeletonLine width={50} height={11} />
+        <SkeletonLine width={48} height={20} />
+      </View>
+    </View>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+    gap: 8,
+  },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   meta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
@@ -21,7 +69,7 @@ type BadgeInfo = { label: string; color: string } | null;
 
 function getInquiryBadge(targets: Inquiry['targets']): BadgeInfo {
   if (targets.length === 0) return null;
-  const statuses = targets.map((t) => t.status);
+  const statuses = targets.map((tgt) => tgt.status);
   if (statuses.some((s) => s === 'replied')) {
     return { label: t('list.badgeReplied'), color: '#388E3C' };
   }
@@ -38,11 +86,12 @@ export function InquiriesListScreen(): ReactElement {
   const api = useMessagingClient();
   const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Start as true so the skeleton shows immediately on first render
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(undefined);
     try {
       const res = await api.listInquiries({ query: {} });
@@ -55,6 +104,17 @@ export function InquiriesListScreen(): ReactElement {
   };
 
   useEffect(() => { void load(); }, []);
+
+  if (loading && inquiries.length === 0) {
+    return (
+      <Screen>
+        <Text variant="title">{t('list.title')}</Text>
+        <View accessibilityLabel={t('list.loading')}>
+          {[1, 2, 3].map((k) => <SkeletonInquiryCard key={k} />)}
+        </View>
+      </Screen>
+    );
+  }
 
   if (!loading && inquiries.length === 0 && !error) {
     return (
@@ -71,7 +131,7 @@ export function InquiriesListScreen(): ReactElement {
     <Screen>
       <Text variant="title">{t('list.title')}</Text>
       {error ? <Banner kind="error" message={error} /> : null}
-      <ScrollView testID="inquiries-list-scroll" refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
+      <ScrollView testID="inquiries-list-scroll" refreshControl={<RefreshControl refreshing={loading} onRefresh={() => { void load(true); }} />}>
         {inquiries.map((inq) => {
           const badge = getInquiryBadge(inq.targets);
           const placesLabel = inq.targets.length === 1

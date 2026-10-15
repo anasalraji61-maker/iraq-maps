@@ -14,6 +14,22 @@ jest.mock('expo-router', () => ({
 const { useMessagingClient } = jest.requireMock<{ useMessagingClient: jest.Mock }>('../client');
 
 describe('InquiriesListScreen', () => {
+  it('shows skeleton cards while loading', async () => {
+    let resolveList!: (v: unknown) => void;
+    useMessagingClient.mockReturnValue({
+      listInquiries: jest.fn(() => new Promise((res) => { resolveList = res; })),
+    });
+    const view = await renderWithProviders(<InquiriesListScreen />);
+    // Skeleton cards should be visible immediately before data arrives
+    const skeletons = view.getAllByTestId('skeleton-inquiry-card');
+    expect(skeletons.length).toBeGreaterThanOrEqual(1);
+    // Clean up
+    await act(async () => {
+      resolveList({ status: 200, body: { items: [] } });
+      await Promise.resolve();
+    });
+  });
+
   it('shows empty state when there are no inquiries', async () => {
     useMessagingClient.mockReturnValue({
       listInquiries: jest.fn(async () => ({ status: 200, body: { items: [] } })),
