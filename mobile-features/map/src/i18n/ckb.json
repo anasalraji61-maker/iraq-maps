@@ -58,7 +58,7 @@
     "en": "English"
   },
   "place": {
-    "hours": "کاتەکانی کارکردن",
+    "hours": "کاتەکانی کار",
     "openNow": "ئێستا کراوەیە",
     "closedNow": "ئێستا داخراوە",
     "phone": "تەلەفۆن",
@@ -87,7 +87,13 @@
     "save": "شوێنەکە پاشەکەوت بکە",
     "saved": "پاشەکەوتکرا",
     "saveA11y": "{name} زیاد بکە بۆ دڵخوازەکان",
-    "savedA11y": "{name} لەوردەکانی دڵخوازەکان دەربکە"
+    "savedA11y": "{name} لەوردەکانی دڵخوازەکان دەربکە",
+    "providerTitle": "زانیاری دابینکەر",
+    "providerPhotos": "وێنەکانی شوێن",
+    "providerSocialLinks": "بەستەرەکانی تۆڕی کۆمەڵایەتی",
+    "providerPhone": "تەلەفۆنی دابینکەر",
+    "providerHours": "کاتەکانی کار",
+    "providerVerified": "دابینکەری پشتڕاستکراو"
   },
   "actions": {
     "directions": "ئاراستەکان",

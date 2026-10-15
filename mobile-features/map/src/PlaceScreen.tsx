@@ -5,6 +5,7 @@ import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Linking, Share, View } from 'react-native';
+import { ProviderSection } from './components/ProviderSection';
 import { ReviewsSection } from './components/ReviewsSection';
 import { openNow } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
@@ -103,6 +104,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
           onPress={() => Linking.openURL(website.startsWith('http') ? website : `https://${website}`).catch(() => undefined)}
         />
       ) : null}
+      {place.provider ? <ProviderSection provider={place.provider} /> : null}
       <InsightsSection place={place} onReportCrowded={reportCrowded} />
       <ReviewsSection placeId={place.id} />
       <Button

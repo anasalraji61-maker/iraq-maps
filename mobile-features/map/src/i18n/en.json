@@ -58,7 +58,7 @@
     "en": "English"
   },
   "place": {
-    "hours": "Opening hours",
+    "hours": "Opening Hours",
     "openNow": "Open now",
     "closedNow": "Closed now",
     "phone": "Phone",
@@ -87,7 +87,13 @@
     "save": "Save place",
     "saved": "Saved",
     "saveA11y": "Save {name} to favourites",
-    "savedA11y": "Remove {name} from favourites"
+    "savedA11y": "Remove {name} from favourites",
+    "providerTitle": "Provider Info",
+    "providerPhotos": "Photos",
+    "providerSocialLinks": "Social Links",
+    "providerPhone": "Provider Phone",
+    "providerHours": "Business Hours",
+    "providerVerified": "Verified Provider"
   },
   "actions": {
     "directions": "Directions",

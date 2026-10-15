@@ -87,7 +87,13 @@
     "save": "حفظ المكان",
     "saved": "تم الحفظ",
     "saveA11y": "حفظ {name} في المفضلة",
-    "savedA11y": "إزالة {name} من المفضلة"
+    "savedA11y": "إزالة {name} من المفضلة",
+    "providerTitle": "معلومات المزوّد",
+    "providerPhotos": "صور المكان",
+    "providerSocialLinks": "روابط التواصل الاجتماعي",
+    "providerPhone": "هاتف المزوّد",
+    "providerHours": "ساعات العمل (من المزوّد)",
+    "providerVerified": "مزوّد موثّق"
   },
   "actions": {
     "directions": "الاتجاهات",
