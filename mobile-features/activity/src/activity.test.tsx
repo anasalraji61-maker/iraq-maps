@@ -125,6 +125,18 @@ describe('ActivityScreen', () => {
     });
   });
 
+  it('shows skeleton rows while notifications are loading', async () => {
+    let resolveNotif!: (v: unknown) => void;
+    mockListNotifications.mockReturnValue(new Promise((res) => { resolveNotif = res; }));
+    const { getAllByTestId } = await render(<ActivityScreen />);
+    const skeletons = getAllByTestId('skeleton-notif-row');
+    expect(skeletons.length).toBeGreaterThanOrEqual(1);
+    await act(async () => {
+      resolveNotif({ status: 200, body: { items: [], nextCursor: undefined } });
+      await Promise.resolve();
+    });
+  });
+
   it('renders routes tab and shows empty state when no routes', async () => {
     const { getByText } = await render(<ActivityScreen />);
     const routesTab = getByText('tabRoutes');

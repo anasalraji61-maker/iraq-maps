@@ -4,6 +4,7 @@ import { useActivityMessagingClient } from './messagingClient';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Alert,
   FlatList,
   I18nManager,
@@ -18,6 +19,44 @@ import {
 import { t } from './strings';
 
 I18nManager.forceRTL(true);
+
+// ──────────────────────────────────────────────
+// Skeleton loader
+// ──────────────────────────────────────────────
+
+function SkeletonBox({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 4 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function SkeletonNotifRow(): ReactElement {
+  return (
+    <View testID="skeleton-notif-row" style={skeletonStyles.row}>
+      <View style={skeletonStyles.icon} />
+      <View style={skeletonStyles.body}>
+        <SkeletonBox width={160} height={12} />
+        <SkeletonBox width={220} height={11} />
+        <SkeletonBox width={60} height={10} />
+      </View>
+    </View>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  icon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E0E0E0' },
+  body: { flex: 1, gap: 6 },
+});
 
 // ──────────────────────────────────────────────
 // Shared helpers
@@ -140,7 +179,13 @@ function NotificationsTab(): ReactElement {
   if (!session) {
     return <EmptyState icon="🔔" title={t('loginPrompt')} subtitle="" />;
   }
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (loading) {
+    return (
+      <View style={styles.flex}>
+        {[1, 2, 3, 4].map((k) => <SkeletonNotifRow key={k} />)}
+      </View>
+    );
+  }
   if (error) return <LoadError onRetry={() => { void load(); }} />;
 
   return (
