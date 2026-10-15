@@ -11,6 +11,8 @@
     "searchEmpty": "هیچ ئەنجامێک نییە بۆ \"{q}\"",
     "searchError": "گەڕان شکستی خوارد، دووبارە هەوڵ بدەرەوە",
     "clearSearch": "سڕینەوە",
+    "newPostsToast": "{n} پۆستی نوێ",
+    "newPostsToastPlural": "{n} پۆستی نوێ",
     "trendingTitle": "پۆستە گەرمەکان",
     "trendingEmpty": "ئێستا هیچ پۆستێکی گەرم نییە",
     "trendingStats": "{likes} حەزکردن · {comments} بۆچوون",

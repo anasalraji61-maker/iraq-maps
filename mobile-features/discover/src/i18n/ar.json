@@ -11,6 +11,8 @@
     "searchEmpty": "لا توجد نتائج لـ \"{q}\"",
     "searchError": "فشل البحث، حاول مجدداً",
     "clearSearch": "مسح",
+    "newPostsToast": "{n} منشور جديد",
+    "newPostsToastPlural": "{n} منشورات جديدة",
     "trendingTitle": "المنشورات الرائجة",
     "trendingEmpty": "لا توجد منشورات رائجة حالياً",
     "trendingStats": "{likes} إعجاب · {comments} تعليق",

@@ -11,6 +11,8 @@
     "searchEmpty": "No results for \"{q}\"",
     "searchError": "Search failed, try again",
     "clearSearch": "Clear",
+    "newPostsToast": "{n} new post",
+    "newPostsToastPlural": "{n} new posts",
     "trendingTitle": "Trending Posts",
     "trendingEmpty": "No trending posts right now",
     "trendingStats": "{likes} likes · {comments} comments",

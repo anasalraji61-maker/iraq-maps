@@ -418,6 +418,9 @@ export function DiscoverFeedScreen(): ReactElement {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [newPostCount, setNewPostCount] = useState(0);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [isNetworkError, setIsNetworkError] = useState(false);
   const [placeNames, setPlaceNames] = useState<Readonly<Record<string, string>>>({});
@@ -437,6 +440,16 @@ export function DiscoverFeedScreen(): ReactElement {
   // Derive top hashtags from loaded feed posts (client-side, no extra API call)
   const trendingHashtags = useMemo(() => topHashtags(posts, 8), [posts]);
 
+  const showNewPostsToast = useCallback(() => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+    toastTimeoutRef.current = setTimeout(() => setNewPostCount(0), 2600);
+  }, [toastOpacity]);
+
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
     if (reset) {
@@ -451,7 +464,19 @@ export function DiscoverFeedScreen(): ReactElement {
       const res = await api.listFeed({ query: { cursor: reset ? undefined : cursor, limit: 10, ...(cat ? { category: cat } : {}) } });
       if (res.status === 200) {
         const { items, nextCursor } = res.body;
-        setPosts((prev) => (reset ? items : [...prev, ...items]));
+        if (reset) {
+          setPosts((prev) => {
+            const prevIds = new Set(prev.map((p) => p.id));
+            const count = items.filter((p) => !prevIds.has(p.id)).length;
+            if (count > 0 && prev.length > 0) {
+              setNewPostCount(count);
+              showNewPostsToast();
+            }
+            return items;
+          });
+        } else {
+          setPosts((prev) => [...prev, ...items]);
+        }
         setCursor(nextCursor);
         setHasMore(!!nextCursor);
       }
@@ -870,6 +895,14 @@ export function DiscoverFeedScreen(): ReactElement {
         }
         contentContainerStyle={styles.listContent}
       />
+      {/* New posts toast */}
+      {newPostCount > 0 ? (
+        <Animated.View style={[styles.newPostsToast, { opacity: toastOpacity }]} pointerEvents="none">
+          <Text style={styles.newPostsToastText}>
+            {newPostCount === 1 ? t('feed.newPostsToast', { n: newPostCount }) : t('feed.newPostsToastPlural', { n: newPostCount })}
+          </Text>
+        </Animated.View>
+      ) : null}
       <Pressable
         testID={discoverTestIDs.createPostButton}
         style={styles.fab}
@@ -1178,4 +1211,20 @@ const styles = StyleSheet.create({
   editModalCancelText: { fontSize: 14, color: '#555' },
   editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: COLORS.primary, minWidth: 70, alignItems: 'center' },
   editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
+  newPostsToast: {
+    position: 'absolute',
+    top: 60,
+    alignSelf: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    zIndex: 100,
+  },
+  newPostsToastText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
 });
