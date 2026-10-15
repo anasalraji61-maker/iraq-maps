@@ -79,8 +79,13 @@
     "deleteCommentConfirmTitle": "Delete comment?",
     "deleteCommentConfirmMsg": "This cannot be undone.",
     "deleteCommentCancel": "Cancel",
-    "deleteCommentError": "Failed to delete comment"
+    "deleteCommentError": "Failed to delete comment",
+    "charCount": "Characters used: {count} of {max}"
   },
+  "timeNow": "now",
+  "timeMinutes": "{n}m ago",
+  "timeHours": "{n}h ago",
+  "timeDays": "{n}d ago",
   "postDetail": {
     "title": "Post",
     "loadError": "Failed to load post",

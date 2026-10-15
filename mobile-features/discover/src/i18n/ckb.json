@@ -79,8 +79,13 @@
     "deleteCommentConfirmTitle": "کۆمێنتەکە بسڕیتەوە؟",
     "deleteCommentConfirmMsg": "ناتوانرێت بیگەڕێندرێتەوە.",
     "deleteCommentCancel": "هەڵوەشاندنەوە",
-    "deleteCommentError": "هەڵەی سڕینەوەی کۆمێنت"
+    "deleteCommentError": "هەڵەی سڕینەوەی کۆمێنت",
+    "charCount": "ژمارەی پیتەکان: {count} لە {max}"
   },
+  "timeNow": "ئێستا",
+  "timeMinutes": "{n} خ. پێش",
+  "timeHours": "{n} ک. پێش",
+  "timeDays": "{n} ر. پێش",
   "postDetail": {
     "title": "پۆست",
     "loadError": "هەڵەی بارکردنی پۆست",

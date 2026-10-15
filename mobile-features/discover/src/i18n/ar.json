@@ -79,8 +79,13 @@
     "deleteCommentConfirmTitle": "حذف التعليق؟",
     "deleteCommentConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
     "deleteCommentCancel": "إلغاء",
-    "deleteCommentError": "فشل حذف التعليق"
+    "deleteCommentError": "فشل حذف التعليق",
+    "charCount": "الأحرف المستخدمة: {count} من {max}"
   },
+  "timeNow": "الآن",
+  "timeMinutes": "منذ {n} د",
+  "timeHours": "منذ {n} س",
+  "timeDays": "منذ {n} ي",
   "postDetail": {
     "title": "المنشور",
     "loadError": "فشل تحميل المنشور",

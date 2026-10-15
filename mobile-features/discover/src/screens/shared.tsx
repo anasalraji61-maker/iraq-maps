@@ -86,14 +86,31 @@ export const sharedStyles = StyleSheet.create({
     padding: 12,
     paddingBottom: 8,
   },
+  inputRowWrapper: {
+    backgroundColor: COLORS.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.border,
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: 8,
-    backgroundColor: COLORS.surface,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.border,
     gap: 8,
+  },
+  inputWrap: {
+    flex: 1,
+    position: 'relative',
+  },
+  charCounter: {
+    position: 'absolute',
+    bottom: 4,
+    end: 10,
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
+  charCounterWarn: {
+    color: COLORS.error,
+    fontWeight: '600',
   },
   input: {
     flex: 1,
@@ -210,6 +227,8 @@ export function CenteredMessage({ text }: { text: string }): ReactElement {
   );
 }
 
+const COMMENT_MAX_LENGTH = 500;
+
 /** Shared TextInput + Send button row for comment screens */
 export function CommentInputRow({
   value,
@@ -226,29 +245,43 @@ export function CommentInputRow({
   inputRef?: React.RefObject<TextInput | null>;
   t: typeof TFunc;
 }): ReactElement {
+  const remaining = COMMENT_MAX_LENGTH - value.length;
+  const isNearLimit = remaining <= 50;
   return (
-    <View style={sharedStyles.inputRow}>
-      <TextInput
-        ref={inputRef}
-        style={sharedStyles.input}
-        value={value}
-        onChangeText={(text) => onChangeText(text.slice(0, 500))}
-        placeholder={t('comments.placeholder')}
-        placeholderTextColor="#999"
-        multiline
-        maxLength={500}
-      />
-      <Pressable
-        style={[sharedStyles.sendBtn, (!value.trim() || sending) && sharedStyles.sendBtnDisabled]}
-        onPress={onSend}
-        disabled={!value.trim() || sending}
-      >
-        {sending ? (
-          <ActivityIndicator color="#FFF" size="small" />
-        ) : (
-          <Text style={sharedStyles.sendBtnText}>{t('comments.send')}</Text>
-        )}
-      </Pressable>
+    <View style={sharedStyles.inputRowWrapper}>
+      <View style={sharedStyles.inputRow}>
+        <View style={sharedStyles.inputWrap}>
+          <TextInput
+            ref={inputRef}
+            style={sharedStyles.input}
+            value={value}
+            onChangeText={(text) => onChangeText(text.slice(0, COMMENT_MAX_LENGTH))}
+            placeholder={t('comments.placeholder')}
+            placeholderTextColor="#999"
+            multiline
+            maxLength={COMMENT_MAX_LENGTH}
+          />
+          {value.length > 0 ? (
+            <Text
+              style={[sharedStyles.charCounter, isNearLimit && sharedStyles.charCounterWarn]}
+              accessibilityLabel={t('comments.charCount', { count: value.length, max: COMMENT_MAX_LENGTH })}
+            >
+              {remaining}
+            </Text>
+          ) : null}
+        </View>
+        <Pressable
+          style={[sharedStyles.sendBtn, (!value.trim() || sending) && sharedStyles.sendBtnDisabled]}
+          onPress={onSend}
+          disabled={!value.trim() || sending}
+        >
+          {sending ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Text style={sharedStyles.sendBtnText}>{t('comments.send')}</Text>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 }

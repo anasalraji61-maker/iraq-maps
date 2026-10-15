@@ -98,6 +98,16 @@ function formatCount(n: number): string {
   return String(n);
 }
 
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return t('timeNow');
+  if (minutes < 60) return t('timeMinutes', { n: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t('timeHours', { n: hours });
+  return t('timeDays', { n: Math.floor(hours / 24) });
+}
+
 const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'post.type.event' | 'post.type.offer'> = {
   photo: 'post.type.photo',
   tip: 'post.type.tip',
@@ -194,7 +204,10 @@ const PostItem = memo(function PostItem({
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
+        <View>
+          <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
+          <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt)}</Text>
+        </View>
         <View style={styles.cardHeaderRight}>
           <View
             style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
@@ -607,6 +620,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     fontWeight: '500',
+  },
+  timestampText: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 1,
   },
   typeBadge: { backgroundColor: COLORS.primaryXLight, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 },
   typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
