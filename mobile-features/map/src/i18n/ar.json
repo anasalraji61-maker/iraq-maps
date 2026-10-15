@@ -121,5 +121,11 @@
     "avgRating": "المتوسط: {avg} من 5 ({count} تقييم)",
     "textPlaceholder": "أضف ملاحظاتك (اختياري)",
     "loginRequired": "سجّل الدخول لإضافة مراجعة"
+  },
+  "lightbox": {
+    "close": "إغلاق",
+    "closeSymbol": "✕",
+    "photo": "صورة",
+    "counter": "{{total}} صورة"
   }
 }

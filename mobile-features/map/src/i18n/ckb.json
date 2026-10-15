@@ -121,5 +121,11 @@
     "avgRating": "ناوەنجی: {avg} لە 5 ({count} هەڵسەنگاندن)",
     "textPlaceholder": "تێبینیت زیاد بکە (دەستیار)",
     "loginRequired": "چوونەژوورەوە بکە بۆ زیادکردنی بۆچوون"
+  },
+  "lightbox": {
+    "close": "داخستن",
+    "closeSymbol": "✕",
+    "photo": "وێنە",
+    "counter": "{{total}} وێنە"
   }
 }

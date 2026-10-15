@@ -1,8 +1,9 @@
 import { type PlaceProviderSection } from '@iraq-maps/contracts';
 import { Badge, ListItem, Text } from '@iraq-maps/ui';
-import { type ReactElement } from 'react';
-import { Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { type ReactElement, useState } from 'react';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { t } from '../strings';
+import { PhotoLightbox } from './PhotoLightbox';
 
 interface Props {
   provider: PlaceProviderSection;
@@ -13,6 +14,7 @@ export function ProviderSection({ provider }: Props): ReactElement | null {
   if (!provider.verified) return null;
 
   const { photos, hours, phone, social } = provider;
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
     <View style={styles.container}>
@@ -51,14 +53,32 @@ export function ProviderSection({ provider }: Props): ReactElement | null {
         <View>
           <Text tone="muted">{t('place.providerPhotos')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoRow}>
-            {photos.map((photo) => (
-              <View key={photo.assetId} style={styles.photoThumb}>
-                {/* Photo rendered by ZoomableImage or native Image in real app; placeholder here */}
-                <View style={styles.photoPlaceholder} accessibilityLabel={t('place.providerPhotos')} />
-              </View>
+            {photos.map((photo, index) => (
+              <Pressable
+                key={photo.assetId}
+                style={styles.photoThumb}
+                onPress={() => setLightboxIndex(index)}
+                accessibilityRole="button"
+                accessibilityLabel={t('lightbox.photo')}
+              >
+                <Image
+                  source={{ uri: photo.url }}
+                  style={styles.photoImage}
+                  accessibilityLabel={t('place.providerPhotos')}
+                  resizeMode="cover"
+                />
+              </Pressable>
             ))}
           </ScrollView>
         </View>
+      ) : null}
+      {lightboxIndex !== null ? (
+        <PhotoLightbox
+          photos={photos}
+          initialIndex={lightboxIndex}
+          visible
+          onClose={() => setLightboxIndex(null)}
+        />
       ) : null}
     </View>
   );
@@ -81,10 +101,9 @@ const styles = StyleSheet.create({
   photoThumb: {
     marginEnd: 8,
   },
-  photoPlaceholder: {
-    width: 80,
-    height: 80,
+  photoImage: {
+    width: 96,
+    height: 96,
     borderRadius: 8,
-    backgroundColor: '#E0E0E0',
   },
 });

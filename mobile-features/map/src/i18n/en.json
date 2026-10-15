@@ -121,5 +121,11 @@
     "avgRating": "Average: {avg}/5 ({count} ratings)",
     "textPlaceholder": "Add your notes (optional)",
     "loginRequired": "Sign in to leave a review"
+  },
+  "lightbox": {
+    "close": "Close",
+    "closeSymbol": "✕",
+    "photo": "Photo",
+    "counter": "{{total}} photos"
   }
 }
