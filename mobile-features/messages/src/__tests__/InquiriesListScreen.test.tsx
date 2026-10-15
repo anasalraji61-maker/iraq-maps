@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
-import { waitFor } from '@testing-library/react-native';
+import { act, waitFor } from '@testing-library/react-native';
 import { InquiriesListScreen } from '../screens/InquiriesListScreen';
 
 jest.mock('../client', () => ({
@@ -41,6 +41,26 @@ describe('InquiriesListScreen', () => {
     });
     const view = await renderWithProviders(<InquiriesListScreen />);
     await waitFor(() => expect(view.getByText(/هل المطعم مفتوح/)).toBeTruthy());
+  });
+
+  it('re-fetches inquiries on pull-to-refresh', async () => {
+    const item = { id: '33333333-3333-3333-3333-333333333333', text: 'سؤال', createdAt: '2026-10-15T08:00:00.000Z', userId: 'user-1', targets: [] };
+    const listInquiries = jest.fn(async () => ({ status: 200, body: { items: [item] } }));
+    useMessagingClient.mockReturnValue({ listInquiries });
+    const view = await renderWithProviders(<InquiriesListScreen />);
+    await waitFor(() => expect(listInquiries).toHaveBeenCalled());
+    const callsBefore = listInquiries.mock.calls.length;
+
+    const scrollView = view.getByTestId('inquiries-list-scroll');
+    await act(async () => {
+      const { onRefresh } = scrollView.props.refreshControl?.props ?? {};
+      if (typeof onRefresh === 'function') onRefresh();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(listInquiries.mock.calls.length).toBeGreaterThan(callsBefore);
+    });
   });
 
   it('shows targets count and replied badge when a target replied', async () => {

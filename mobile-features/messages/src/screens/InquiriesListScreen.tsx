@@ -55,7 +55,7 @@ export function InquiriesListScreen(): ReactElement {
     <Screen>
       <Text variant="title">{t('list.title')}</Text>
       {error ? <Banner kind="error" message={error} /> : null}
-      <ScrollView refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
+      <ScrollView testID="inquiries-list-scroll" refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
         {inquiries.map((inq) => {
           const hasReply = inq.targets.some((tgt) => tgt.status === 'replied');
           const placesLabel = inq.targets.length === 1
