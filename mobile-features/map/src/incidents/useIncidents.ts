@@ -50,7 +50,6 @@ export function useIncidents(
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [near?.[0], near?.[1], isOnline]);
 
   return { incidents, refresh };

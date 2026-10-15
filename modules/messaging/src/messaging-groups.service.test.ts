@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MessagingGroupsService } from './messaging-groups.service';
-import { ForbiddenException, ConflictException } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common';
 
 const GROUP_ID = '10000000-0000-0000-0000-000000000001' as const;
 const USER_A = '20000000-0000-0000-0000-000000000001' as const;

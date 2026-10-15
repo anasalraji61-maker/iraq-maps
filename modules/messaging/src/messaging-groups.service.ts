@@ -1,6 +1,6 @@
 import type { Db } from '@iraq-maps/db-kit';
 import type { UserId, GroupIdType, GroupMessageIdType } from '@iraq-maps/contracts';
-import { Inject, Injectable, ForbiddenException, NotFoundException, ConflictException } from '@nestjs/common';
+import { Inject, Injectable, ForbiddenException, ConflictException } from '@nestjs/common';
 import { and, desc, eq, inArray, lt } from 'drizzle-orm';
 import { groupMemberTable, groupMessageTable, groupTable } from './schema';
 
@@ -40,7 +40,7 @@ export class MessagingGroupsService {
 
     if (groupIds.length === 0) return { items: [], nextCursor: undefined };
 
-    let query = this.db
+    const query = this.db
       .select()
       .from(groupTable)
       .where(

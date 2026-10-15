@@ -4,7 +4,7 @@ import type { TextInputProps } from 'react-native';
 type Base = { testID?: string };
 
 export interface ScreenProps extends Base { children: ReactNode; scroll?: boolean }
-export interface TextProps extends Base { children: ReactNode; variant?: 'title' | 'subtitle' | 'body' | 'caption'; tone?: 'default' | 'muted' | 'danger' }
+export interface TextProps extends Base { children: ReactNode; variant?: 'title' | 'subtitle' | 'body' | 'caption'; tone?: 'default' | 'muted' | 'danger'; style?: import('react-native').StyleProp<import('react-native').TextStyle> }
 export interface ButtonProps extends Base { label: string; onPress(): void; variant?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityLabel?: string }
 export interface TextFieldProps extends Base {
   label: string;
@@ -57,7 +57,7 @@ export interface CardProps extends Base { children: ReactNode; onPress?(): void;
 export interface SheetProps extends Base { visible: boolean; onClose(): void; children: ReactNode }
 export interface BannerProps extends Base { kind: 'info' | 'success' | 'error'; message: string; onRetry?(): void; retryLabel?: string }
 export interface EmptyStateProps extends Base { title: string; body?: string; action?: { label: string; onPress(): void } }
-export interface IconButtonProps extends Base { icon: string; accessibilityLabel: string; onPress(): void }
+export interface IconButtonProps extends Base { icon: string; accessibilityLabel?: string; label?: string; onPress(): void }
 
 export interface Tokens {
   color: Record<'bg' | 'surface' | 'text' | 'textMuted' | 'primary' | 'onPrimary' | 'danger' | 'border', string>;

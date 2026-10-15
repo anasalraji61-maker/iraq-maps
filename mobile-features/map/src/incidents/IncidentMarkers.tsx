@@ -5,7 +5,7 @@
  * MapCanvas.  Each incident type gets a distinct emoji + colour.
  */
 import type { Incident, IncidentType } from '@iraq-maps/contracts';
-import { MarkerView } from '@maplibre/maplibre-react-native';
+import { Marker as MarkerView } from '@maplibre/maplibre-react-native';
 import { tokens } from '@iraq-maps/ui';
 import { useState, type ReactElement } from 'react';
 import { Pressable, StyleSheet, Text as RNText, View } from 'react-native';
@@ -43,7 +43,7 @@ export function IncidentMarkers({ incidents }: IncidentMarkersProps): ReactEleme
         const isSelected = selectedId === inc.id;
 
         return (
-          <MarkerView key={inc.id} coordinate={[lng, lat]}>
+          <MarkerView key={inc.id} lngLat={[lng, lat]}>
             <Pressable
               onPress={() => setSelectedId((prev) => (prev === inc.id ? null : inc.id))}
               accessibilityRole="button"

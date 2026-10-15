@@ -2,6 +2,7 @@
  * Unit tests for OfflineMapManager helpers.
  * The FileSystem calls are mocked so these run without a real device.
  */
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // ---------------------------------------------------------------------------
 // Mock expo-file-system
@@ -9,7 +10,7 @@
 const mockFiles: Record<string, string> = {};
 const mockSizes: Record<string, number> = {};
 
-jest.mock('expo-file-system', () => ({
+jest.mock('expo-file-system/legacy', () => ({
   documentDirectory: 'file:///docs/',
   getInfoAsync: jest.fn(async (path: string) => {
     if (path in mockFiles) {
@@ -73,7 +74,7 @@ describe('listOfflineRegions', () => {
     mockFiles['file:///docs/offline-maps/manifest.json'] = JSON.stringify(manifest);
     const result = await listOfflineRegions();
     expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('Baghdad');
+    expect(result[0]?.name).toBe('Baghdad');
   });
 });
 

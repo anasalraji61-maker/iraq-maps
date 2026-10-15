@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   FlatList,
   I18nManager,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -86,7 +85,7 @@ function ReviewCard({ review }: { review: Review }): ReactElement {
 
 export function ReviewsScreen(): ReactElement {
   const router = useRouter();
-  const { placeId, placeName } = useLocalSearchParams<{ placeId: string; placeName?: string }>();
+  const { placeId } = useLocalSearchParams<{ placeId: string; placeName?: string }>();
   const baseUrl = useApiBaseUrl();
   const client = initClient(reviewsContract, { baseUrl, baseHeaders: {} });
 
@@ -125,7 +124,7 @@ export function ReviewsScreen(): ReactElement {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('reviews.title')}</Text>
         <TouchableOpacity
-          onPress={() => router.push({ pathname: '/places/[placeId]/add-review' as Parameters<typeof router.push>[0], params: { placeId } })}
+          onPress={() => router.push(`/places/${placeId}/add-review` as Parameters<typeof router.push>[0])}
           style={styles.addBtn}
           accessibilityRole="button"
         >
@@ -180,8 +179,8 @@ const chartStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, gap: 8 },
   starLabel: { width: 36, fontSize: 13, color: '#757575' },
   barTrack: { flex: 1, height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' },
-  barFill: { height: '100%', backgroundColor: '#F5A623', borderRadius: 4 },
-  count: { width: 28, fontSize: 12, color: '#757575', textAlign: 'end' },
+  barFill: { height: 8, backgroundColor: '#F5A623', borderRadius: 4 },
+  count: { width: 28, fontSize: 12, color: '#757575', textAlign: 'right' },
 });
 
 const cardStyles = StyleSheet.create({

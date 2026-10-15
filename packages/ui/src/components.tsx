@@ -92,9 +92,9 @@ export function Screen({ children, scroll = false, testID }: ScreenProps): React
   );
 }
 
-export function Text({ children, variant = 'body', tone = 'default', testID }: TextProps): ReactElement {
+export function Text({ children, variant = 'body', tone = 'default', testID, style }: TextProps): ReactElement {
   return (
-    <RNText testID={testID} accessibilityRole={variant === 'title' ? 'header' : undefined} style={[text[variant], { color: tones[tone] }]}>
+    <RNText testID={testID} accessibilityRole={variant === 'title' ? 'header' : undefined} style={[text[variant], { color: tones[tone] }, style]}>
       {children}
     </RNText>
   );
@@ -247,14 +247,14 @@ export function EmptyState({ title, body, action, testID }: EmptyStateProps): Re
   );
 }
 
-export function IconButton({ icon, accessibilityLabel, onPress, testID }: IconButtonProps): ReactElement {
+export function IconButton({ icon, accessibilityLabel, label, onPress, testID }: IconButtonProps): ReactElement {
   const name = icon as AndroidSymbol;
   return (
     <Pressable
       testID={testID}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={accessibilityLabel ?? label}
       style={pressable(styles.icon, I18nManager.isRTL && MIRRORED.test(icon) && styles.mirrored)}
     >
       <SymbolView name={{ android: name, web: name }} size={24} tintColor={color.text} />

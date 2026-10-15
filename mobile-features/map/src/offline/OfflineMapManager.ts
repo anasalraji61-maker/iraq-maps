@@ -11,7 +11,7 @@
  * path that this manager has assembled.
  */
 
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // ---------------------------------------------------------------------------
 // Types

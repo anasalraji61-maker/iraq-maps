@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { reviewsContract } from '@iraq-maps/contracts';
 import { initClient } from '@ts-rest/core';
-import { uploadAsset, useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
+import { uploadAsset, useApi, useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
 import { t } from '../strings';
 
 I18nManager.forceRTL(true);
@@ -54,7 +54,9 @@ export function AddReviewScreen(): ReactElement {
   const router = useRouter();
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
   const baseUrl = useApiBaseUrl();
-  const { userId } = useSession();
+  const api = useApi();
+  const session = useSession();
+  const userId = session.state.status === 'signedIn' ? session.state.user.id : null;
   const client = initClient(reviewsContract, { baseUrl, baseHeaders: {} });
 
   const [rating, setRating] = useState(0);
@@ -92,7 +94,8 @@ export function AddReviewScreen(): ReactElement {
         setUploading(true);
         for (const uri of photos) {
           try {
-            const id = await uploadAsset(baseUrl, uri);
+            // TODO: extend MediaPurpose in contracts to include 'review_photo'
+            const id = await uploadAsset(api, baseUrl, { uri, purpose: 'provider_photo' });
             assetIds.push(id);
           } catch {
             // skip failed uploads silently
@@ -178,12 +181,14 @@ export function AddReviewScreen(): ReactElement {
                   accessibilityRole="button"
                   accessibilityLabel={t('reviews.removePhoto')}
                 >
+                  {/* eslint-disable-next-line i18next/no-literal-string */}
                   <Text style={styles.removePhotoText}>✕</Text>
                 </TouchableOpacity>
               </View>
             ))}
             {photos.length < MAX_PHOTOS && (
               <Pressable style={styles.addPhotoBtn} onPress={pickPhoto} accessibilityRole="button">
+                {/* eslint-disable-next-line i18next/no-literal-string */}
                 <Text style={styles.addPhotoBtnText}>＋</Text>
                 <Text style={styles.addPhotoBtnLabel}>{t('reviews.addPhoto')}</Text>
               </Pressable>
