@@ -1,6 +1,6 @@
 import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import {
@@ -22,7 +22,7 @@ import { DiscoverComment } from '@iraq-maps/contracts';
 import { ZoomableImage } from '@iraq-maps/ui';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
+import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow, HashtagText } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -72,7 +72,7 @@ function PostDetailSkeleton(): ReactElement {
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
-function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>> }): ReactElement {
+function PostBody({ post, mediaUrls, onHashtagPress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const [linkCopied, setLinkCopied] = useState(false);
 
@@ -111,7 +111,7 @@ function PostBody({ post, mediaUrls }: { post: DiscoverPostType; mediaUrls: Read
           ))}
         </ScrollView>
       )}
-      <Text style={styles.bodyText}>{post.body}</Text>
+      <HashtagText text={post.body} style={styles.bodyText} onHashtagPress={onHashtagPress} />
       <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
       <View style={styles.actionRow}>
         <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button" accessibilityLabel={t('post.share')}>
@@ -136,6 +136,10 @@ export function PostDetailScreen(): ReactElement {
   const { postId, postJson } = useLocalSearchParams<{ postId: string; postJson?: string }>();
   const api = useDiscoverClient();
   const extApi = useApi();
+  const router = useRouter();
+  const handleHashtagPress = useCallback((tag: string) => {
+    router.push({ pathname: '/discover/hashtag/[tag]', params: { tag: tag.slice(1) } });
+  }, [router]);
 
   // Parse post from navigation params (passed by DiscoverFeedScreen to avoid a redundant feed fetch)
   const initialPost = postJson ? (() => { try { return JSON.parse(postJson) as DiscoverPostType; } catch { return undefined; } })() : undefined;
@@ -254,7 +258,7 @@ export function PostDetailScreen(): ReactElement {
         }
         ListHeaderComponent={
           <>
-            <PostBody post={post} mediaUrls={mediaUrls} />
+            <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} />
             {sectionHeader}
           </>
         }

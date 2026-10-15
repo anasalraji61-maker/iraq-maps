@@ -145,5 +145,16 @@
     "closeSymbol": "✕",
     "photo": "Photo",
     "counter": "{{total}} photos"
+  },
+  "hashtag": {
+    "empty": "No posts with tag {tag}",
+    "title": "Hashtag posts"
+  },
+  "pin": {
+    "pin": "Pin post",
+    "unpin": "Unpin post",
+    "pinnedBadge": "Pinned",
+    "pinSuccess": "Post pinned",
+    "unpinSuccess": "Post unpinned"
   }
 }

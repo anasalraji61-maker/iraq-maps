@@ -1,8 +1,11 @@
 import { type DiscoverPostType } from '@iraq-maps/contracts';
+import { useSession } from '@iraq-maps/mobile-kit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useCallback, useEffect, type ReactElement } from 'react';
+import { useState, useCallback, useEffect, useMemo, type ReactElement } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -15,12 +18,37 @@ import { t } from '../strings';
 import { useFollows } from '../useFollows';
 import { COLORS, sharedStyles, formatRelativeTime, getTypeBadgeColors } from './shared';
 
+function pinnedKey(authorId: string): string {
+  return `@iraq-maps/pinned-post/${authorId}`;
+}
+
+async function loadPinnedId(authorId: string): Promise<string | null> {
+  try { return await AsyncStorage.getItem(pinnedKey(authorId)); } catch { return null; }
+}
+
+async function savePinnedId(authorId: string, postId: string | null): Promise<void> {
+  try {
+    if (postId) await AsyncStorage.setItem(pinnedKey(authorId), postId);
+    else await AsyncStorage.removeItem(pinnedKey(authorId));
+  } catch { /* non-critical */ }
+}
+
 function formatCount(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
 }
 
-function PostCard({ post }: { post: DiscoverPostType }): ReactElement {
+function PostCard({
+  post,
+  isPinned,
+  isOwnProfile,
+  onTogglePin,
+}: {
+  post: DiscoverPostType;
+  isPinned: boolean;
+  isOwnProfile: boolean;
+  onTogglePin: (postId: string) => void;
+}): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const TYPE_LABEL: Record<string, string> = {
     photo: t('post.type.photo'),
@@ -29,15 +57,34 @@ function PostCard({ post }: { post: DiscoverPostType }): ReactElement {
     offer: t('post.type.offer'),
   };
   return (
-    <View style={[styles.card, { backgroundColor: COLORS.surface }]}>
+    <View style={[styles.card, { backgroundColor: COLORS.surface, borderStartColor: isPinned ? COLORS.primary : 'transparent', borderStartWidth: isPinned ? 3 : 0 }]}>
       <View style={styles.cardHeader}>
-        <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>
-          {formatRelativeTime(post.createdAt, t)}
-        </Text>
-        <View style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}>
-          <Text style={[styles.typeText, { color: badgeColors.text }]}>
-            {TYPE_LABEL[post.type] ?? post.type}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>
+            {formatRelativeTime(post.createdAt, t)}
           </Text>
+          {isPinned ? (
+            <View style={styles.pinnedBadge}>
+              <Text style={styles.pinnedBadgeText}>{t('pin.pinnedBadge')}</Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}>
+            <Text style={[styles.typeText, { color: badgeColors.text }]}>
+              {TYPE_LABEL[post.type] ?? post.type}
+            </Text>
+          </View>
+          {isOwnProfile ? (
+            <Pressable
+              onPress={() => onTogglePin(post.id)}
+              accessibilityRole="button"
+              accessibilityLabel={isPinned ? t('pin.unpin') : t('pin.pin')}
+              style={styles.pinBtn}
+            >
+              <Text style={styles.pinBtnText}>{isPinned ? '📌' : '📍'}</Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
       <Text style={[styles.bodyText, { color: COLORS.textPrimary }]}>{post.body}</Text>
@@ -57,8 +104,11 @@ export function UserPostsScreen(): ReactElement {
   const { authorId } = useLocalSearchParams<{ authorId: string }>();
   const api = useDiscoverClient();
   const router = useRouter();
+  const session = useSession();
+  const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
   const { isFollowing, toggleFollow } = useFollows();
   const following = authorId ? isFollowing(authorId) : false;
+  const isOwnProfile = authorId === currentUserId;
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -66,6 +116,7 @@ export function UserPostsScreen(): ReactElement {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [pinnedPostId, setPinnedPostId] = useState<string | null>(null);
 
   const loadPosts = useCallback(async (reset = false) => {
     if (!authorId) return;
@@ -95,6 +146,27 @@ export function UserPostsScreen(): ReactElement {
 
   // Mount-only: loadPosts recreates on every state change, mount-only is intentional
   useEffect(() => { void loadPosts(true); }, []);
+
+  useEffect(() => {
+    if (!authorId) return;
+    void loadPinnedId(authorId).then(setPinnedPostId);
+  }, [authorId]);
+
+  const handleTogglePin = useCallback((postId: string) => {
+    if (!authorId) return;
+    const newPinned = pinnedPostId === postId ? null : postId;
+    setPinnedPostId(newPinned);
+    void savePinnedId(authorId, newPinned);
+    Alert.alert(t('pin.pinnedBadge'), newPinned ? t('pin.pinSuccess') : t('pin.unpinSuccess'));
+  }, [authorId, pinnedPostId]);
+
+  /** Sorted posts: pinned first */
+  const sortedPosts = useMemo(() => {
+    if (!pinnedPostId) return posts;
+    const pinned = posts.find((p) => p.id === pinnedPostId);
+    if (!pinned) return posts;
+    return [pinned, ...posts.filter((p) => p.id !== pinnedPostId)];
+  }, [posts, pinnedPostId]);
 
   return (
     <View style={[sharedStyles.container, { backgroundColor: COLORS.background }]}>
@@ -126,9 +198,16 @@ export function UserPostsScreen(): ReactElement {
         </View>
       ) : null}
       <FlatList
-        data={posts}
+        data={sortedPosts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={({ item }) => (
+          <PostCard
+            post={item}
+            isPinned={item.id === pinnedPostId}
+            isOwnProfile={isOwnProfile}
+            onTogglePin={handleTogglePin}
+          />
+        )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void loadPosts(true); }} />}
         onEndReached={() => { void loadPosts(false); }}
         onEndReachedThreshold={0.3}
@@ -196,4 +275,13 @@ const styles = StyleSheet.create({
   followBtnTextActive: {
     color: '#FFF',
   },
+  pinnedBadge: {
+    backgroundColor: COLORS.primaryXLight,
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  pinnedBadgeText: { fontSize: 10, color: COLORS.primaryDark, fontWeight: '600' },
+  pinBtn: { padding: 4 },
+  pinBtnText: { fontSize: 16 },
 });

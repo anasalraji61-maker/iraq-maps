@@ -2,10 +2,66 @@
  * Shared UI primitives and style tokens used across discover screens.
  * Keep this file free of screen-specific state or navigation logic.
  */
-import { useState, useCallback, type ReactElement } from 'react';
+import { useState, useCallback, type ReactElement, Fragment } from 'react';
 import React from 'react';
 import { Alert, ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { type t as TFunc } from '../strings';
+
+// ─── Hashtag utilities ────────────────────────────────────────────────────────
+
+/** Extract all unique lowercase hashtags from post body text. */
+export function extractHashtags(text: string): string[] {
+  const matches = text.match(/#[\p{L}\p{N}_]+/gu) ?? [];
+  return [...new Set(matches.map((h) => h.toLowerCase()))];
+}
+
+type TextPart = { kind: 'text'; value: string } | { kind: 'hashtag'; value: string };
+
+/** Split text into plain text parts and hashtag parts. */
+export function parseTextWithHashtags(text: string): TextPart[] {
+  const parts: TextPart[] = [];
+  const regex = /#[\p{L}\p{N}_]+/gu;
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) parts.push({ kind: 'text', value: text.slice(last, match.index) });
+    parts.push({ kind: 'hashtag', value: match[0] });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push({ kind: 'text', value: text.slice(last) });
+  return parts;
+}
+
+/** Render text with tappable #hashtag links. */
+export function HashtagText({
+  text,
+  style,
+  onHashtagPress,
+}: {
+  text: string;
+  style?: object;
+  onHashtagPress: (tag: string) => void;
+}): ReactElement {
+  const parts = parseTextWithHashtags(text);
+  return (
+    <Text style={style}>
+      {parts.map((part, i) =>
+        part.kind === 'hashtag' ? (
+          <Text
+            key={i}
+            style={{ color: COLORS.primary, fontWeight: '600' }}
+            onPress={() => onHashtagPress(part.value)}
+            accessibilityRole="link"
+          >
+            {part.value}
+          </Text>
+        ) : (
+          <Fragment key={i}>{part.value}</Fragment>
+        ),
+      )}
+    </Text>
+  );
+}
 
 export const COLORS = {
   primary: '#1976D2',

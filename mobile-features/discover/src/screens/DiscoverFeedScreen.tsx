@@ -26,7 +26,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime } from './shared';
+import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime, HashtagText } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -132,6 +132,7 @@ const PostItem = memo(function PostItem({
   onSave,
   isSaved,
   currentUserId,
+  onHashtagPress,
 }: {
   post: DiscoverPostType;
   placeName?: string;
@@ -146,6 +147,7 @@ const PostItem = memo(function PostItem({
   onSave: (post: DiscoverPostType) => void;
   isSaved: boolean;
   currentUserId?: string;
+  onHashtagPress: (tag: string) => void;
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
   const badgeColors = getTypeBadgeColors(post.type);
@@ -251,7 +253,7 @@ const PostItem = memo(function PostItem({
           </Pressable>
         </View>
       </View>
-      <Text style={[styles.bodyText, { color: COLORS.textPrimary }]}>{post.body}</Text>
+      <HashtagText text={post.body} style={[styles.bodyText, { color: COLORS.textPrimary }]} onHashtagPress={onHashtagPress} />
       {firstImageUrl ? (
         <>
           <Pressable onPress={() => setPhotoOpen(true)} accessibilityRole="button" accessibilityLabel={t('lightbox.photo')}>
@@ -581,6 +583,11 @@ export function DiscoverFeedScreen(): ReactElement {
     router.push({ pathname: '/discover/user/[authorId]', params: { authorId } });
   }, [router]);
 
+  const handleHashtagPress = useCallback((tag: string) => {
+    // tag is like "#بغداد" — pass raw, HashtagFeedScreen decodes
+    router.push({ pathname: '/discover/hashtag/[tag]', params: { tag: tag.slice(1) } });
+  }, [router]);
+
   const handleCreate = useCallback(() => {
     router.push('/discover/create');
   }, [router]);
@@ -756,6 +763,7 @@ export function DiscoverFeedScreen(): ReactElement {
             onDelete={handleDelete}
             onEdit={handleOpenEdit}
             onAuthorPress={handleAuthorPress}
+            onHashtagPress={handleHashtagPress}
             onSave={handleSave}
             isSaved={isSaved(item.id)}
             currentUserId={currentUserId}

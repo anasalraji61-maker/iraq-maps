@@ -4,5 +4,7 @@ export { CommentsScreen } from './screens/CommentsScreen';
 export { PostDetailScreen } from './screens/PostDetailScreen';
 export { UserPostsScreen } from './screens/UserPostsScreen';
 export { SavedPostsScreen } from './screens/SavedPostsScreen';
+export { HashtagFeedScreen } from './screens/HashtagFeedScreen';
+export { extractHashtags, parseTextWithHashtags } from './screens/shared';
 export { useSavedPosts } from './useSavedPosts';
 export { useFollows } from './useFollows';
