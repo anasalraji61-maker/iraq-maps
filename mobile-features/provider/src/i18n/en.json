@@ -82,7 +82,8 @@
       "phone": "Add phone number",
       "description": "Add a description",
       "location": "Set location"
-    }
+    },
+    "avgResponseHours": "Typical response time: {hours} h"
   },
   "common": {
     "selected": "Selected"

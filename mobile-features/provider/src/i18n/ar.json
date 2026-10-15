@@ -82,7 +82,8 @@
       "phone": "إضافة رقم الهاتف",
       "description": "إضافة وصف",
       "location": "تحديد الموقع"
-    }
+    },
+    "avgResponseHours": "مدة الرد المعتادة: {hours} ساعة"
   },
   "common": {
     "selected": "محدد"

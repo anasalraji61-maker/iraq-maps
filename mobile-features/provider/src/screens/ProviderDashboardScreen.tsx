@@ -1,6 +1,6 @@
 import { testIDs, type ProviderMe, type ProviderStatus } from '@iraq-maps/contracts';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
-import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
+import { Badge, Button, EmptyState, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText, Animated } from 'react-native';
@@ -264,6 +264,13 @@ export function ProviderDashboardScreen(): ReactElement {
         <CompletenessBar
           provider={providerMe}
           onEditPress={() => router.push('/provider/edit-profile' as never)}
+        />
+      )}
+
+      {providerMe?.avgResponseHours != null && (
+        <ListItem
+          testID="provider.avgResponseHours"
+          title={t('dashboard.avgResponseHours', { hours: providerMe.avgResponseHours })}
         />
       )}
 
