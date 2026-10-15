@@ -1,7 +1,7 @@
 import { messagingTestIDs, InquiryId, UserId, PlaceId, type Inquiry } from '@iraq-maps/contracts';
 import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Alert } from 'react-native';
 import type { useMessagingApi as UseMessagingApi } from '../messaging-api';
@@ -105,5 +105,22 @@ describe('ProviderInboxDetailScreen', () => {
 
     // The rendered output must not contain any phone number pattern.
     expect(view.queryByText(/0\d{9,}/)).toBeNull();
+  });
+
+  it('re-fetches inquiry on pull-to-refresh', async () => {
+    mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
+    const api = mockApi();
+    const view = await renderWithProviders(<ProviderInboxDetailScreen />);
+    await waitFor(() => expect(view.getByText('هل المطعم مفتوح الآن؟')).toBeTruthy());
+    const callsBefore = api.getInquiry.mock.calls.length;
+    const scrollView = view.getByTestId('provider-inbox-detail-scroll');
+    await act(async () => {
+      const { onRefresh } = scrollView.props.refreshControl?.props ?? {};
+      if (typeof onRefresh === 'function') onRefresh();
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(api.getInquiry.mock.calls.length).toBeGreaterThan(callsBefore);
+    });
   });
 });

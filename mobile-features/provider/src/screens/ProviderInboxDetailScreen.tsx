@@ -2,7 +2,7 @@ import { messagingTestIDs, type InquiryId } from '@iraq-maps/contracts';
 import { Banner, Button, Screen, Text } from '@iraq-maps/ui';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { Alert, I18nManager, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, I18nManager, RefreshControl, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
@@ -17,9 +17,11 @@ export function ProviderInboxDetailScreen(): ReactElement {
   const [sentReply, setSentReply] = useState('');
   const [inquiryText, setInquiryText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { busy, error, run } = useRequest();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const res = await api.getInquiry({ params: { id: id as InquiryId } });
       if (res.status === 200) {
@@ -27,6 +29,7 @@ export function ProviderInboxDetailScreen(): ReactElement {
       }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [api, id]);
 
@@ -59,7 +62,11 @@ export function ProviderInboxDetailScreen(): ReactElement {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        testID="provider-inbox-detail-scroll"
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { void load(true); }} colors={['#1976D2']} />}
+      >
         <Text variant="title">{t('inbox.title')}</Text>
         {error ? <Banner kind="error" message={error} /> : null}
 
