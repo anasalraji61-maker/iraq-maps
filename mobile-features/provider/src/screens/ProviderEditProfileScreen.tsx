@@ -127,6 +127,7 @@ export function ProviderEditProfileScreen(): ReactElement {
         <Pressable
           onPress={() => { void pickLogo(); }}
           accessibilityLabel={t('edit.changeLogo')}
+          accessibilityRole="button"
           style={styles.logoWrapper}
         >
           {logoUri ? (

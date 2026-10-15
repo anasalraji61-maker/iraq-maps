@@ -164,6 +164,7 @@ export function ProviderRegistrationScreen(): ReactElement {
               testID={testIDs.provider.photosAdd}
               onPress={() => { void pickLogo(); }}
               accessibilityLabel={t('logo.change')}
+              accessibilityRole="button"
               style={regStyles.logoWrapper}
             >
               {state.logoUri ? (
