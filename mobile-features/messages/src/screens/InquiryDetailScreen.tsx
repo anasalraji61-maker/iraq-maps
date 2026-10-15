@@ -5,11 +5,12 @@ import {
   type InquiryId,
   type MessageStatus,
 } from '@iraq-maps/contracts';
-import { Badge, Banner, Button, Card, ListItem, Screen, Text } from '@iraq-maps/ui';
+import { Badge, Banner, Button, Card, ListItem, Text } from '@iraq-maps/ui';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams } from 'expo-router';
-import { useState, useEffect, type ReactElement } from 'react';
-import { Linking, TouchableOpacity, View } from 'react-native';
+import { useState, useEffect, useCallback, type ReactElement } from 'react';
+import { Linking, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessagingClient } from '../client';
 import { t } from '../strings';
 
@@ -150,36 +151,56 @@ export function InquiryDetailScreen(): ReactElement {
   const api = useMessagingClient();
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [error, setError] = useState<string | undefined>();
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const loadInquiry = useCallback(async (isRefresh = false) => {
     if (!requestId) return;
-    api.getInquiry({ params: { id: requestId as InquiryId } })
-      .then((res) => { if (res.status === 200) setInquiry(res.body); })
-      .catch(() => setError(t('detail.loadError')));
-  }, [requestId]);
+    if (isRefresh) setRefreshing(true);
+    try {
+      const res = await api.getInquiry({ params: { id: requestId as InquiryId } });
+      if (res.status === 200) setInquiry(res.body);
+    } catch {
+      setError(t('detail.loadError'));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [api, requestId]);
+
+  useEffect(() => { void loadInquiry(); }, [loadInquiry]);
 
   return (
-    <Screen scroll>
-      <Text variant="title">{t('detail.title')}</Text>
-      {error ? <Banner kind="error" message={error} /> : null}
-      {inquiry ? (
-        <>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <View style={{ flex: 1 }}>
-              <MessageText text={inquiry.text} />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        testID="inquiry-detail-scroll"
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl testID="inquiry-detail-refresh" refreshing={refreshing} onRefresh={() => { void loadInquiry(true); }} colors={['#1976D2']} />}
+      >
+        <Text variant="title">{t('detail.title')}</Text>
+        {error ? <Banner kind="error" message={error} /> : null}
+        {inquiry ? (
+          <>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <View style={{ flex: 1 }}>
+                <MessageText text={inquiry.text} />
+              </View>
+              <View style={{ marginStart: 8 }}>
+                <Text tone="muted" variant="caption">
+                  {formatTime(inquiry.createdAt)}
+                </Text>
+              </View>
             </View>
-            <View style={{ marginStart: 8 }}>
-              <Text tone="muted" variant="caption">
-                {formatTime(inquiry.createdAt)}
-              </Text>
-            </View>
-          </View>
-          {inquiry.targets.map((target) => (
-            <TargetRow key={target.placeId} target={target} />
-          ))}
-          <WhatsAppButton targets={inquiry.targets} />
-        </>
-      ) : null}
-    </Screen>
+            {inquiry.targets.map((target) => (
+              <TargetRow key={target.placeId} target={target} />
+            ))}
+            <WhatsAppButton targets={inquiry.targets} />
+          </>
+        ) : null}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#FFF' },
+  content: { padding: 16 },
+});

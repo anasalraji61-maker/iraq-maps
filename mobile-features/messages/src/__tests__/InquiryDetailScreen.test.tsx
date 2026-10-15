@@ -1,6 +1,6 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
-import { fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { InquiryDetailScreen } from '../screens/InquiryDetailScreen';
 import { messagingTestIDs } from '@iraq-maps/contracts';
 import { Linking } from 'react-native';
@@ -45,5 +45,21 @@ describe('InquiryDetailScreen — handoff', () => {
     const copyBtn = await waitFor(() => view.getByTestId(messagingTestIDs.handoffCopy));
     fireEvent.press(copyBtn);
     await waitFor(() => expect(clipSpy).toHaveBeenCalledWith('هل لديكم طاولات؟'));
+  });
+
+  it('re-fetches inquiry on pull-to-refresh', async () => {
+    const view = await renderWithProviders(<InquiryDetailScreen />);
+    await waitFor(() => view.getByTestId(messagingTestIDs.handoffCopy));
+    const callsBefore = mockGetInquiry.mock.calls.length;
+    const scrollView = view.getByTestId('inquiry-detail-scroll');
+    // fire the onRefresh prop of the refreshControl
+    await act(async () => {
+      const { onRefresh } = scrollView.props.refreshControl?.props ?? {};
+      if (typeof onRefresh === 'function') onRefresh();
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(mockGetInquiry.mock.calls.length).toBeGreaterThan(callsBefore);
+    });
   });
 });
