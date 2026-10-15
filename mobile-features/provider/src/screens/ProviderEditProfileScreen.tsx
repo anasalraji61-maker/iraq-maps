@@ -2,8 +2,8 @@ import { testIDs, type PlaceCategory } from '@iraq-maps/contracts';
 import { useApi, useApiBaseUrl, uploadAsset } from '@iraq-maps/mobile-kit';
 import { Banner, Button, ListItem, Screen, Text, TextField } from '@iraq-maps/ui';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useState, type ReactElement } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View, Text as RNText } from 'react-native';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { ActivityIndicator, Animated, Image, Pressable, StyleSheet, View, Text as RNText } from 'react-native';
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
 
@@ -24,6 +24,45 @@ const CATEGORIES: PlaceCategory[] = [
 ];
 
 const LOGO_SIZE = 80;
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function EditProfileSkeleton(): ReactElement {
+  return (
+    <Screen>
+      <SkeletonBlock width={160} height={22} />
+      <View style={styles.logoContainer}>
+        <Animated.View
+          style={[{ width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2, backgroundColor: '#E0E0E0' }]}
+          accessibilityElementsHidden
+        />
+      </View>
+      <View style={{ gap: 10, marginTop: 8 }}>
+        <SkeletonBlock width={80} height={12} />
+        <SkeletonBlock width={280} height={40} />
+        <SkeletonBlock width={120} height={16} />
+        <SkeletonBlock width={280} height={40} />
+        <SkeletonBlock width={80} height={12} />
+        <SkeletonBlock width={280} height={40} />
+      </View>
+    </Screen>
+  );
+}
 
 /** Lets a verified provider update their name, category, hours, logo and photos. */
 export function ProviderEditProfileScreen(): ReactElement {
@@ -114,7 +153,7 @@ export function ProviderEditProfileScreen(): ReactElement {
       setTimeout(() => setSaved(false), 2500);
     });
 
-  if (loading) return <Screen>{null}</Screen>;
+  if (loading) return <EditProfileSkeleton />;
 
   return (
     <Screen scroll>
