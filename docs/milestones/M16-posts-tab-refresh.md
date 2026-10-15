@@ -1,7 +1,7 @@
 ---
 id: M16
 slug: posts-tab-refresh
-status: in_progress
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-activity:

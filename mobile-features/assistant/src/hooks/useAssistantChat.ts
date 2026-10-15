@@ -99,3 +99,12 @@ export async function loadPersistedSessionId(): Promise<string | null> {
     return null;
   }
 }
+
+/** Clear the persisted session id so the next mount starts a fresh session. */
+export async function clearPersistedSessionId(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(SESSION_KEY);
+  } catch {
+    // best-effort
+  }
+}

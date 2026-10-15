@@ -203,11 +203,13 @@ function RouteRow({ item, onRemove }: { item: RecentRoute; onRemove: (item: Rece
 function RoutesTab(): ReactElement {
   const [routes, setRoutes] = useState<RecentRoute[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     setRoutes(await recentRoutes.list());
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => { void load(); }, [load]);
@@ -227,6 +229,7 @@ function RoutesTab(): ReactElement {
       renderItem={({ item }) => <RouteRow item={item} onRemove={handleRemove} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
     />
   );
 }
@@ -254,11 +257,13 @@ function SavedRow({ item, onRemove }: { item: SavedPlace; onRemove: (item: Saved
 function SavedTab(): ReactElement {
   const [places, setPlaces] = useState<SavedPlace[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     setPlaces(await savedPlaces.list());
     setLoading(false);
+    setRefreshing(false);
   }, []);
 
   useEffect(() => { void load(); }, [load]);
@@ -278,6 +283,7 @@ function SavedTab(): ReactElement {
       renderItem={({ item }) => <SavedRow item={item} onRemove={handleRemove} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
     />
   );
 }

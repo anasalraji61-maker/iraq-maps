@@ -17,6 +17,8 @@
     "quickReply1": "Find a nearby restaurant",
     "quickReply2": "Plan a tour for today",
     "quickReply3": "Best places in Baghdad",
-    "quickReply4": "How do I get to..."
+    "quickReply4": "How do I get to...",
+    "clearChat": "New Chat",
+    "clearChatA11y": "Start a new conversation"
   }
 }

@@ -14,7 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useAssistantChat, loadPersistedSessionId } from '../hooks/useAssistantChat';
+import { useAssistantChat, loadPersistedSessionId, clearPersistedSessionId } from '../hooks/useAssistantChat';
 import { t } from '../strings';
 
 // Force RTL for Arabic
@@ -176,6 +176,11 @@ export function AssistantChatScreen(): ReactElement {
     router.push(`/?focusPlaceId=${id}`);
   };
 
+  const handleClearChat = () => {
+    void clearPersistedSessionId();
+    setSessionId(generateSessionId());
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -184,6 +189,15 @@ export function AssistantChatScreen(): ReactElement {
     >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t('chat.title')}</Text>
+        <Pressable
+          onPress={handleClearChat}
+          accessibilityRole="button"
+          accessibilityLabel={t('chat.clearChatA11y')}
+          style={styles.clearBtn}
+          testID="assistant-clear-btn"
+        >
+          <Text style={styles.clearBtnText}>{t('chat.clearChat')}</Text>
+        </Pressable>
       </View>
 
       <FlatList
@@ -322,12 +336,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#1976D2',
     paddingVertical: 14,
     paddingHorizontal: 16,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
+    flex: 1,
+  },
+  clearBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  clearBtnText: {
+    color: '#FFF',
+    fontSize: 13,
   },
   listContent: {
     padding: 12,

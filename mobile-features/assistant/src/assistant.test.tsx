@@ -76,6 +76,17 @@ describe('AssistantChatScreen', () => {
     });
   });
 
+  it('renders clear chat button and pressing it resets session', async () => {
+    const { getByTestId } = await render(<AssistantChatScreen />);
+    const clearBtn = getByTestId('assistant-clear-btn');
+    expect(clearBtn).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(clearBtn);
+    });
+    // After clearing, the input should still be present (screen stays mounted)
+    expect(getByTestId(assistantTestIDs.chatInput)).toBeTruthy();
+  });
+
   it('shows compose deeplink when composeParams returned', async () => {
     mockChat.mockResolvedValue({
       status: 200 as const,

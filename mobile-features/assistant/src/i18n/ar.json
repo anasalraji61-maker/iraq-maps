@@ -17,6 +17,8 @@
     "quickReply1": "ابحث عن مطعم قريب",
     "quickReply2": "خطط لي جولة اليوم",
     "quickReply3": "أفضل الأماكن في بغداد",
-    "quickReply4": "كيف أصل إلى..."
+    "quickReply4": "كيف أصل إلى...",
+    "clearChat": "محادثة جديدة",
+    "clearChatA11y": "بدء محادثة جديدة"
   }
 }
