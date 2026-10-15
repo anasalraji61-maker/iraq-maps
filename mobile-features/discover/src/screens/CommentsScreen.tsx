@@ -4,7 +4,6 @@ import { type z } from 'zod';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
-  Animated,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
@@ -18,26 +17,11 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { sharedStyles, COLORS, CommentCard, CommentInputRow } from './shared';
+import { sharedStyles, COLORS, CommentCard, CommentInputRow, SkeletonBlock } from './shared';
 
 I18nManager.forceRTL(true);
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
-
-function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
-  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
-}
 
 function SkeletonCommentRow(): ReactElement {
   return (

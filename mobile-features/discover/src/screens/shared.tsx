@@ -2,9 +2,9 @@
  * Shared UI primitives and style tokens used across discover screens.
  * Keep this file free of screen-specific state or navigation logic.
  */
-import { useState, useCallback, type ReactElement, Fragment } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactElement, Fragment } from 'react';
 import React from 'react';
-import { Alert, ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, ActivityIndicator, Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { type t as TFunc } from '../strings';
 
 // ─── Hashtag utilities ────────────────────────────────────────────────────────
@@ -92,6 +92,23 @@ export const TYPE_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 
 export function getTypeBadgeColors(type: string): { bg: string; text: string } {
   return TYPE_BADGE_COLORS[type] ?? DEFAULT_BADGE;
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+export function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
 }
 
 export function formatCount(n: number): string {

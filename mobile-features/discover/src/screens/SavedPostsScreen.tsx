@@ -3,9 +3,8 @@
  */
 import type { DiscoverPostType } from '@iraq-maps/contracts';
 import { useRouter } from 'expo-router';
-import { type ReactElement, useEffect, useRef } from 'react';
+import { type ReactElement } from 'react';
 import {
-  Animated,
   FlatList,
   I18nManager,
   Pressable,
@@ -15,26 +14,11 @@ import {
 } from 'react-native';
 import { t } from '../strings';
 import { useSavedPosts } from '../useSavedPosts';
-import { COLORS, getTypeBadgeColors, formatRelativeTime } from './shared';
+import { COLORS, getTypeBadgeColors, formatRelativeTime, SkeletonBlock } from './shared';
 
 I18nManager.forceRTL(true);
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
-
-function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
-  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
-}
 
 function SavedPostSkeletonCard(): ReactElement {
   return (

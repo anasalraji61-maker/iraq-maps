@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import {
-  Animated,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
@@ -22,26 +21,11 @@ import { DiscoverComment } from '@iraq-maps/contracts';
 import { ZoomableImage } from '@iraq-maps/ui';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow, HashtagText } from './shared';
+import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow, HashtagText, SkeletonBlock } from './shared';
 
 I18nManager.forceRTL(true);
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
-
-function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
-  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
-}
 
 function PostDetailSkeleton(): ReactElement {
   return (
