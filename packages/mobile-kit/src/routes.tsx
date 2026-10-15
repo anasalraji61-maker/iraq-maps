@@ -24,6 +24,7 @@ export const routes = {
   accountNotifPrefs: '/account/notif-prefs',
   accountTheme: '/account/theme',
   accountSavedPlaces: '/account/saved-places',
+  accountBlockedUsers: '/account/blocked-users',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',

@@ -67,6 +67,7 @@
     "licenses": "Open-source licences",
     "notifPrefs": "Notification Preferences",
     "theme": "Appearance",
+    "blockedUsers": "Blocked Users",
     "signOut": "Sign Out"
   },
   "errors": {
@@ -134,6 +135,13 @@
     "system": "System default",
     "light": "Light",
     "dark": "Dark"
+  },
+  "blockedUsers": {
+    "title": "Blocked Users",
+    "entry": "Blocked Users",
+    "empty": "No blocked users",
+    "unblock": "Unblock",
+    "unblockA11y": "Unblock {userId}"
   },
   "savedPlaces": {
     "title": "Saved Places",

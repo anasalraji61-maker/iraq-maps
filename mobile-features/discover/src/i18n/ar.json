@@ -182,5 +182,11 @@
     "pinnedBadge": "مثبّت",
     "pinSuccess": "تم تثبيت المنشور",
     "unpinSuccess": "تم إلغاء التثبيت"
+  },
+  "blockedUsers": {
+    "title": "المستخدمون المحظورون",
+    "empty": "لم تحظر أي مستخدم بعد",
+    "unblock": "إلغاء الحظر",
+    "unblockA11y": "إلغاء حظر {userId}"
   }
 }

@@ -9,3 +9,4 @@ export { extractHashtags, parseTextWithHashtags } from './screens/shared';
 export { useSavedPosts } from './useSavedPosts';
 export { useFollows } from './useFollows';
 export { useBlockedUsers } from './useBlockedUsers';
+export { BlockedUsersScreen } from './screens/BlockedUsersScreen';

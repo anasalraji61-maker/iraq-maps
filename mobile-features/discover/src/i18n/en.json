@@ -182,5 +182,11 @@
     "pinnedBadge": "Pinned",
     "pinSuccess": "Post pinned",
     "unpinSuccess": "Post unpinned"
+  },
+  "blockedUsers": {
+    "title": "Blocked Users",
+    "empty": "No blocked users",
+    "unblock": "Unblock",
+    "unblockA11y": "Unblock {userId}"
   }
 }
