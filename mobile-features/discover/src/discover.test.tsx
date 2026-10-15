@@ -6,6 +6,7 @@ import { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
 const mockListFeed = jest.fn<() => Promise<unknown>>();
 const mockLikePost = jest.fn<() => Promise<unknown>>();
 const mockUnlikePost = jest.fn<() => Promise<unknown>>();
+const mockReportPost = jest.fn<() => Promise<unknown>>();
 
 jest.mock('./client', () => ({
   useDiscoverClient: () => ({
@@ -16,6 +17,7 @@ jest.mock('./client', () => ({
     createComment: jest.fn(),
     listComments: jest.fn(),
     deletePost: jest.fn(),
+    reportPost: mockReportPost,
   }),
 }));
 
@@ -76,6 +78,7 @@ describe('DiscoverFeedScreen', () => {
     mockListFeed.mockResolvedValue(makeFeedResponse());
     mockLikePost.mockResolvedValue({ status: 200, body: { likeCount: 6 }, headers: new Headers() });
     mockUnlikePost.mockResolvedValue({ status: 200, body: { likeCount: 4 }, headers: new Headers() });
+    mockReportPost.mockResolvedValue({ status: 204, body: undefined, headers: new Headers() });
   });
 
   it('renders feed with posts', async () => {
@@ -105,5 +108,15 @@ describe('DiscoverFeedScreen', () => {
   it('create post button is visible', async () => {
     const { getByTestId } = await render(<DiscoverFeedScreen />);
     expect(getByTestId(discoverTestIDs.createPostButton)).toBeTruthy();
+  });
+
+  it('more button is visible on other users posts', async () => {
+    // Post author is bbbb…, current user is user-001 — different, so report button should appear
+    const { getByLabelText, getByTestId } = await render(<DiscoverFeedScreen />);
+    await waitFor(() => {
+      expect(getByTestId(discoverTestIDs.feedItem(POST_ID))).toBeTruthy();
+    });
+    // The "more options" button (⋯) should be accessible
+    expect(getByLabelText(/post.more/)).toBeTruthy();
   });
 });
