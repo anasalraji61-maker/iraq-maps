@@ -1,11 +1,11 @@
 import { CommentId, PortTokens, type EventBus, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, eq, lt, sql } from 'drizzle-orm';
+import { and, eq, isNull, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
-import { commentTable, postLikeTable, postTable } from './schema';
+import { commentTable, postLikeTable, postReportTable, postTable } from './schema';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -22,7 +22,7 @@ export class DiscoverService {
     const rows = await this.db
       .select()
       .from(postTable)
-      .where(cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined)
+      .where(and(isNull(postTable.removedAt), cursor ? lt(postTable.createdAt, new Date(cursor)) : undefined))
       .orderBy(sql`${postTable.createdAt} DESC`)
       .limit(limit + 1);
 
@@ -164,6 +164,52 @@ export class DiscoverService {
 
     await this.db.delete(postTable).where(eq(postTable.id, postId));
     return true;
+  }
+
+  async reportPost(userId: UserId, postId: PostIdType, reason: string): Promise<void> {
+    await this.getPostOrThrow(postId);
+    await this.db
+      .insert(postReportTable)
+      .values({ postId, reporterId: userId, reason })
+      .onConflictDoNothing(); // idempotent: one report per user per post
+  }
+
+  async adminListReported() {
+    const rows = await this.db.execute<{
+      id: string; author_id: string; body: string; type: string;
+      created_at: Date; removed_at: Date | null;
+      report_count: number; reasons: string[];
+    }>(sql`
+      SELECT p.id, p.author_id, p.body, p.type, p.created_at, p.removed_at,
+             COUNT(r.id)::int AS report_count,
+             ARRAY_AGG(DISTINCT r.reason) FILTER (WHERE r.reason IS NOT NULL) AS reasons
+      FROM discover.post p
+      JOIN discover.post_report r ON r.post_id = p.id
+      GROUP BY p.id
+      ORDER BY report_count DESC, p.created_at DESC
+    `);
+    return rows.rows.map((r) => ({
+      id: r.id as PostIdType,
+      authorId: r.author_id as UserId,
+      body: r.body,
+      type: r.type as 'photo' | 'tip' | 'event' | 'offer',
+      reportCount: r.report_count,
+      reasons: r.reasons ?? [],
+      createdAt: (r.created_at instanceof Date ? r.created_at : new Date(r.created_at)).toISOString(),
+      removedAt: r.removed_at ? (r.removed_at instanceof Date ? r.removed_at : new Date(r.removed_at)).toISOString() : null,
+    }));
+  }
+
+  async adminApprovePost(postId: PostIdType): Promise<void> {
+    const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    await this.db.delete(postReportTable).where(eq(postReportTable.postId, postId));
+  }
+
+  async adminRemovePost(postId: PostIdType): Promise<void> {
+    const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    await this.db.update(postTable).set({ removedAt: new Date() }).where(eq(postTable.id, postId));
   }
 
   private async getPostOrThrow(postId: PostIdType) {

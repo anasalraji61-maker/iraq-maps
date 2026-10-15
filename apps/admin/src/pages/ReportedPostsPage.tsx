@@ -66,7 +66,7 @@ export function ReportedPostsPage() {
                     {post.body}
                   </div>
                 </td>
-                <td style={tdStyle}>{post.authorName}</td>
+                <td style={tdStyle}>{post.authorId.slice(0, 8)}…</td>
                 <td style={tdStyle}>
                   <span style={{
                     padding: '3px 8px',
@@ -80,7 +80,7 @@ export function ReportedPostsPage() {
                   </span>
                 </td>
                 <td style={{ ...tdStyle, fontSize: 12, color: '#666' }}>
-                  {new Date(post.firstReportAt).toLocaleString('ar-IQ')}
+                  {new Date(post.createdAt).toLocaleString('ar-IQ')}
                 </td>
                 <td style={tdStyle}>
                   <button style={btnStyle('#2e7d32')} onClick={() => void handleApprove(post.id)}>موافقة</button>

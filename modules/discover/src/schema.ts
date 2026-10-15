@@ -14,6 +14,7 @@ export const postTable = discoverSchema.table(
     likeCount: integer('like_count').notNull().default(0),
     commentCount: integer('comment_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    removedAt: timestamp('removed_at', { withTimezone: true }),
   },
   (t) => [index('post_created_at_idx').on(t.createdAt)],
 );
@@ -25,6 +26,20 @@ export const postLikeTable = discoverSchema.table('post_like', {
   userId: uuid('user_id').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const postReportTable = discoverSchema.table(
+  'post_report',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    reporterId: uuid('reporter_id').notNull(),
+    reason: text('reason').notNull(), // 'spam' | 'inappropriate' | 'misinformation' | 'other'
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('post_report_post_id_idx').on(t.postId)],
+);
 
 export const commentTable = discoverSchema.table(
   'comment',

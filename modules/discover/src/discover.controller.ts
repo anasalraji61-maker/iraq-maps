@@ -1,4 +1,4 @@
-import { type AuthPrincipal, type PostIdType, discoverContract } from '@iraq-maps/contracts';
+import { type AuthPrincipal, type PostIdType, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
 import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { DiscoverService } from './discover.service';
@@ -80,6 +80,59 @@ export class DiscoverController {
           return { status: 204, body: undefined };
         } catch (e: unknown) {
           if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      reportPost: async ({ params, body }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          await this.svc.reportPost(userId, params.postId as PostIdType, body.reason);
+          return { status: 204, body: undefined };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+    });
+  }
+}
+
+@Controller()
+export class AdminDiscoverController {
+  constructor(private readonly svc: DiscoverService) {}
+
+  @TsRestHandler(adminDiscoverContract)
+  adminHandle(@Req() req: AuthedRequest) {
+    const roles = req.principal?.roles ?? [];
+    if (!roles.includes('admin') && !roles.includes('moderator')) {
+      return tsRestHandler(adminDiscoverContract, {
+        reportedPosts: async () => problem(403, 'forbidden', 'Admin role required'),
+        approvePost: async () => problem(403, 'forbidden', 'Admin role required'),
+        removePost: async () => problem(403, 'forbidden', 'Admin role required'),
+      });
+    }
+
+    return tsRestHandler(adminDiscoverContract, {
+      reportedPosts: async () => {
+        const posts = await this.svc.adminListReported();
+        return { status: 200, body: posts };
+      },
+      approvePost: async ({ params }) => {
+        try {
+          await this.svc.adminApprovePost(params.postId as PostIdType);
+          return { status: 204, body: undefined };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found');
+          throw e;
+        }
+      },
+      removePost: async ({ params }) => {
+        try {
+          await this.svc.adminRemovePost(params.postId as PostIdType);
+          return { status: 204, body: undefined };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found');
           throw e;
         }
       },

@@ -2,7 +2,7 @@ import type { Db } from '@iraq-maps/db-kit';
 import type { EventBus } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import { Module, type DynamicModule } from '@nestjs/common';
-import { DiscoverController } from './discover.controller';
+import { AdminDiscoverController, DiscoverController } from './discover.controller';
 import { DiscoverService } from './discover.service';
 
 export interface DiscoverModuleOptions {
@@ -24,7 +24,7 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
   return {
     module: DiscoverModule,
     global: true,
-    controllers: [DiscoverController],
+    controllers: [DiscoverController, AdminDiscoverController],
     providers: [
       { provide: 'DISCOVER_DB', useValue: opts.db },
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new NoopEventBus() },

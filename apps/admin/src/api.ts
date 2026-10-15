@@ -17,9 +17,11 @@ export interface Provider {
 export interface ReportedPost {
   id: string;
   body: string;
-  authorName: string;
+  authorId: string;
   reportCount: number;
-  firstReportAt: string;
+  reasons: string[];
+  createdAt: string;
+  removedAt: string | null;
 }
 
 export interface Metrics {
@@ -96,18 +98,6 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (res.status === 204) return undefined as unknown as T;
   return res.json() as Promise<T>;
 }
-
-// --- Reported posts mock (no backend support yet) ---
-
-const mockReportedPosts: ReportedPost[] = Array.from({ length: 8 }, (_, i) => ({
-  id: String(i + 1),
-  body: `هذا نص منشور تجريبي رقم ${i + 1} تم الإبلاغ عنه من قِبل المستخدمين.`,
-  authorName: `مستخدم ${i + 1}`,
-  reportCount: Math.floor(Math.random() * 10) + 1,
-  firstReportAt: new Date(Date.now() - i * 7_200_000).toISOString(),
-}));
-
-let mockReportedPostsMutable = [...mockReportedPosts];
 
 // Cursor state for provider pagination
 let providerCursor: string | null = null;
@@ -189,16 +179,15 @@ export const api = {
   },
 
   async getReportedPosts(): Promise<ReportedPost[]> {
-    // No backend support yet — return mock data
-    return Promise.resolve(mockReportedPostsMutable);
+    return request<ReportedPost[]>('/v1/admin/discover/reported');
   },
 
   async approvePost(id: string): Promise<void> {
-    mockReportedPostsMutable = mockReportedPostsMutable.filter((p) => p.id !== id);
+    await request<void>(`/v1/admin/discover/posts/${id}/approve`, { method: 'POST', body: JSON.stringify({}) });
   },
 
   async removePost(id: string): Promise<void> {
-    mockReportedPostsMutable = mockReportedPostsMutable.filter((p) => p.id !== id);
+    await request<void>(`/v1/admin/discover/posts/${id}/remove`, { method: 'POST', body: JSON.stringify({}) });
   },
 
   async getAuditLog(): Promise<AuditEntry[]> {

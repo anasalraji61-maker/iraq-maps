@@ -104,6 +104,67 @@ export const discoverContract = c.router({
     },
     summary: 'Delete own post',
   },
+  reportPost: {
+    method: 'POST',
+    path: '/discover/posts/:postId/report',
+    pathParams: z.object({ postId: PostId }),
+    body: z.object({ reason: z.enum(['spam', 'inappropriate', 'misinformation', 'other']) }),
+    responses: {
+      204: z.undefined(),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Report a post for review',
+  },
+});
+
+export const ReportedPostView = z.object({
+  id: PostId,
+  authorId: UserId,
+  body: z.string(),
+  type: PostType,
+  reportCount: z.number().int(),
+  reasons: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  removedAt: z.string().datetime().nullable(),
+});
+
+export const adminDiscoverContract = c.router({
+  reportedPosts: {
+    method: 'GET',
+    path: '/admin/discover/reported',
+    responses: {
+      200: z.array(ReportedPostView),
+      401: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(401), code: z.string() }),
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+    },
+    summary: 'List reported posts (admin/moderator)',
+  },
+  approvePost: {
+    method: 'POST',
+    path: '/admin/discover/posts/:postId/approve',
+    pathParams: z.object({ postId: PostId }),
+    body: z.object({}),
+    responses: {
+      204: z.undefined(),
+      401: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(401), code: z.string() }),
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Clear reports from a post (admin/moderator)',
+  },
+  removePost: {
+    method: 'POST',
+    path: '/admin/discover/posts/:postId/remove',
+    pathParams: z.object({ postId: PostId }),
+    body: z.object({}),
+    responses: {
+      204: z.undefined(),
+      401: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(401), code: z.string() }),
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Soft-delete a post (admin/moderator)',
+  },
 });
 
 export type PostIdType = z.infer<typeof PostId>;
