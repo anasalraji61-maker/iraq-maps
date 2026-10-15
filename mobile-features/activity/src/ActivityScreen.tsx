@@ -53,6 +53,23 @@ function SkeletonNotifRow(): ReactElement {
   );
 }
 
+function SkeletonTabRows({ testID }: { testID: string }): ReactElement {
+  return (
+    <View testID={testID}>
+      {[1, 2, 3].map((k) => (
+        <View key={k} style={skeletonStyles.row}>
+          <View style={skeletonStyles.icon} />
+          <View style={skeletonStyles.body}>
+            <SkeletonBox width={200} height={12} />
+            <SkeletonBox width={140} height={11} />
+            <SkeletonBox width={70} height={10} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const skeletonStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
   icon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E0E0E0' },
@@ -316,7 +333,7 @@ function RoutesTab(): ReactElement {
     await recentRoutes.remove(item.placeId, item.mode);
   }, []);
 
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (loading) return <SkeletonTabRows testID="skeleton-routes" />;
   if (routes.length === 0) return <EmptyState icon="🗺️" title={t('emptyRoutes')} subtitle={t('emptyRoutesSubtext')} />;
 
   return (
@@ -370,7 +387,7 @@ function SavedTab(): ReactElement {
     setPlaces((prev) => prev.filter((p) => p.placeId !== item.placeId));
   }, []);
 
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (loading) return <SkeletonTabRows testID="skeleton-saved" />;
   if (places.length === 0) return <EmptyState icon="🔖" title={t('emptySaved')} subtitle={t('emptySavedSubtext')} />;
 
   return (
@@ -501,7 +518,7 @@ function PostsTab(): ReactElement {
   useEffect(() => { void load(); }, [load]);
 
   if (!session) return <EmptyState icon="📝" title={t('loginPrompt')} subtitle="" />;
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (loading) return <SkeletonTabRows testID="skeleton-posts" />;
   if (error) return <LoadError onRetry={() => { void load(); }} />;
   if (posts.length === 0) return <EmptyState icon="📝" title={t('emptyPosts')} subtitle={t('emptyPostsSubtext')} />;
 
@@ -636,7 +653,7 @@ function InquiriesTab(): ReactElement {
   if (!session) {
     return <EmptyState icon={INQUIRY_ICON} title={t('loginPrompt')} subtitle="" />;
   }
-  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (loading) return <SkeletonTabRows testID="skeleton-inquiries" />;
   if (error) return <LoadError onRetry={() => { void load(); }} />;
   if (items.length === 0) return <EmptyState icon={INQUIRY_ICON} title={t('emptyInquiries')} subtitle={t('emptyInquiriesSubtext')} />;
 
