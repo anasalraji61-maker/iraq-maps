@@ -46,3 +46,9 @@ export { WidgetDataService, readWidgetSnapshot, writeWidgetSnapshot, type Widget
 
 /** @public mock crash reporter (logs in dev; swap for Sentry adapter in prod) */
 export { crashReporter, type CrashSeverity } from './crash-reporter';
+
+/** @public WebSocket hook with exponential backoff reconnection */
+export { useWebSocket, type WsStatus, type WsIncomingEvent, type UseWebSocketOptions, type UseWebSocketReturn } from './use-websocket';
+
+/** @public WebSocket connection status indicator dot */
+export { WsStatusIndicator, type WsStatusIndicatorProps } from './ws-status-indicator';
