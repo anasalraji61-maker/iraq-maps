@@ -1,5 +1,5 @@
-import { href } from '@iraq-maps/mobile-kit';
-import { ListItem, Screen, Text } from '@iraq-maps/ui';
+import { href, useSession } from '@iraq-maps/mobile-kit';
+import { Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import Constants from 'expo-constants';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
@@ -16,6 +16,8 @@ const buildNumber =
 
 export function SettingsScreen(): ReactElement {
   const router = useRouter();
+  const session = useSession();
+  const isSignedIn = session.state.status === 'signedIn';
 
   return (
     <Screen scroll>
@@ -27,6 +29,14 @@ export function SettingsScreen(): ReactElement {
       <ListItem title={t('settings.privacy')} onPress={() => router.push(href('accountPrivacy'))} />
       <ListItem title={t('settings.terms')} onPress={() => router.push(href('accountTerms'))} />
       <ListItem title={t('settings.licenses')} onPress={() => router.push(href('accountLicenses'))} />
+      {isSignedIn ? (
+        <Button
+          variant="secondary"
+          label={t('settings.signOut')}
+          onPress={() => void session.signOut()}
+          testID="settings.signOut"
+        />
+      ) : null}
       <View style={styles.versionRow}>
         <Text variant="caption">{t('settings.version', { version, build: buildNumber })}</Text>
       </View>
