@@ -28,3 +28,21 @@ export { ErrorBoundary } from './error-boundary';
 export { useHaptics } from './haptics';
 
 export { useNetworkStatus } from './use-network-status';
+
+/** @public feature-discovery tour overlay */
+export { TourOverlay, shouldShowTour, TOUR_DONE_KEY, type TourStep } from './tour-overlay';
+
+/** @public iPad/desktop keyboard shortcuts (no-op on phones) */
+export { useKeyboardShortcuts } from './keyboard-shortcuts';
+
+/** @public theme-aware color tokens */
+export { useTheme, lightColors, darkColors, type ThemeColors } from './use-theme';
+
+/** @public Dynamic Type / font scaling */
+export { useFontScale, useFontScaleValue } from './font-scale';
+
+/** @public home screen widget data */
+export { WidgetDataService, readWidgetSnapshot, writeWidgetSnapshot, type WidgetSnapshot } from './widget-data';
+
+/** @public mock crash reporter (logs in dev; swap for Sentry adapter in prod) */
+export { crashReporter, type CrashSeverity } from './crash-reporter';

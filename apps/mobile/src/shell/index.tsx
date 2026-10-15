@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
-import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
+import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession, crashReporter } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, ThemeProvider, tokens, useUiFonts } from '@iraq-maps/ui';
 import * as SecureStore from 'expo-secure-store';
 import * as Notifications from 'expo-notifications';
@@ -18,8 +18,12 @@ import en from './i18n/en.json';
 import { persistLocaleChanges, restoreLocale, useLocale } from './locale';
 import { NetworkBanner } from './NetworkBanner';
 import { OnboardingFlow, ONBOARDING_DONE_KEY } from './OnboardingFlow';
+import { TourOverlay, shouldShowTour } from '@iraq-maps/mobile-kit';
 
 registerNamespace('shell', { ar, ckb, en });
+
+// Attach global crash reporter as early as possible so unhandled rejections are captured.
+crashReporter.init();
 
 type ContractTab = keyof typeof testIDs.tabs;
 
@@ -198,8 +202,9 @@ export function RootLayout() {
         <AvailableRoutesProvider routes={availableRoutes()}>
           <SessionRestored>
             {/* Screens set their own (announced) title; '' only avoids showing a raw route path when one does not. */}
-            <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: font }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* animation: 'slide_from_right' gives a consistent cross-platform slide-in transition. */}
+            <Stack key={locale} screenOptions={{ title: '', headerTitleStyle: font, animation: 'slide_from_right' }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'none' }} />
               <Stack.Protected guard={!isProduction()}>
                 <Stack.Screen name="dev-settings" options={{ title: t('shell:devSettings.title') }} />
               </Stack.Protected>
@@ -333,5 +338,30 @@ export function DevSettingsScreen() {
       {result === 'saved' ? <Banner kind="success" message={t('shell:devSettings.saved', { url: apiBaseUrl() })} /> : null}
       <Button testID={testIDs.dev.serverUrlSave} label={t('common:actions.save')} onPress={save} />
     </Screen>
+  );
+}
+
+/**
+ * Feature-discovery tour overlay for the Discover tab.
+ * Render this inside the DiscoverFeedScreen (or any entry screen) — it shows
+ * once per install after onboarding and never again.
+ */
+export function DiscoverTourOverlay(): ReactNode {
+  const [show, setShow] = useState<boolean | null>(null);
+  useEffect(() => { void shouldShowTour().then(setShow); }, []);
+  if (!show) return null;
+  return (
+    <TourOverlay
+      visible={true}
+      steps={[
+        { id: 'like',    title: t('shell:tour.like.title'),    body: t('shell:tour.like.body') },
+        { id: 'search',  title: t('shell:tour.search.title'),  body: t('shell:tour.search.body') },
+        { id: 'newPost', title: t('shell:tour.newPost.title'), body: t('shell:tour.newPost.body') },
+      ]}
+      nextLabel={t('shell:tour.next')}
+      doneLabel={t('shell:tour.done')}
+      skipLabel={t('shell:tour.skip')}
+      onDone={() => setShow(false)}
+    />
   );
 }

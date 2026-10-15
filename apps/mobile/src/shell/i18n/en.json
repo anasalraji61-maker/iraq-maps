@@ -32,6 +32,40 @@
     "offline": "No internet connection",
     "restored": "Connection restored"
   },
+  "tour": {
+    "next": "Next",
+    "done": "Get started",
+    "skip": "Skip",
+    "like": {
+      "title": "Like something?",
+      "body": "Tap the heart to save posts you enjoy"
+    },
+    "search": {
+      "title": "Search easily",
+      "body": "Find places, businesses and users"
+    },
+    "newPost": {
+      "title": "Share your moments",
+      "body": "Post photos and videos with your community"
+    }
+  },
+  "tour": {
+    "next": "Next",
+    "done": "Get started",
+    "skip": "Skip",
+    "like": {
+      "title": "Like something?",
+      "body": "Tap the heart to save posts you enjoy"
+    },
+    "search": {
+      "title": "Search easily",
+      "body": "Find places, businesses and users"
+    },
+    "newPost": {
+      "title": "Share your moments",
+      "body": "Post photos and videos with your community"
+    }
+  },
   "devSettings": {
     "title": "Developer settings",
     "open": "Open developer settings",
