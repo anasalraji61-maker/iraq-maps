@@ -74,7 +74,12 @@
     },
     "verifiedBadge": "دابینکەری پشتڕاستکراو",
     "verifiedIcon": "✓",
-    "editCharCount": "{n} ماوە"
+    "editCharCount": "{n} ماوە",
+    "block": "بلۆک کردنی بەکارهێنەر",
+    "blockConfirmTitle": "ئایا ئەم بەکارهێنەرەت بلۆک بکەیت؟",
+    "blockConfirmMsg": "پۆستەکانی دیار نابن لە فیدەکەتدا.",
+    "blockConfirmOk": "بلۆک بکە",
+    "blockSuccess": "بلۆک کرا"
   },
   "create": {
     "title": "پۆستی نوێ",

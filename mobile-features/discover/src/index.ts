@@ -8,3 +8,4 @@ export { HashtagFeedScreen } from './screens/HashtagFeedScreen';
 export { extractHashtags, parseTextWithHashtags } from './screens/shared';
 export { useSavedPosts } from './useSavedPosts';
 export { useFollows } from './useFollows';
+export { useBlockedUsers } from './useBlockedUsers';

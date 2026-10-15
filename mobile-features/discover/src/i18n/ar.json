@@ -74,7 +74,12 @@
     },
     "verifiedBadge": "مزوّد موثّق",
     "verifiedIcon": "✓",
-    "editCharCount": "{n} متبقٍ"
+    "editCharCount": "{n} متبقٍ",
+    "block": "حظر المستخدم",
+    "blockConfirmTitle": "حظر هذا المستخدم؟",
+    "blockConfirmMsg": "لن تظهر منشوراته في تغذيتك بعد الآن.",
+    "blockConfirmOk": "حظر",
+    "blockSuccess": "تم الحظر"
   },
   "create": {
     "title": "منشور جديد",

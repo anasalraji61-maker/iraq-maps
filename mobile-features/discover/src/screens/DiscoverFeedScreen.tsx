@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import { useSavedPosts } from '../useSavedPosts';
 import { useFollows } from '../useFollows';
+import { useBlockedUsers } from '../useBlockedUsers';
 import {
   ActionSheetIOS,
   ActivityIndicator,
@@ -123,6 +124,7 @@ const PostItem = memo(function PostItem({
   onDelete,
   onEdit,
   onAuthorPress,
+  onBlock,
   onSave,
   isSaved,
   currentUserId,
@@ -138,6 +140,7 @@ const PostItem = memo(function PostItem({
   onDelete: (postId: string) => void;
   onEdit: (postId: string, body: string) => void;
   onAuthorPress: (authorId: string) => void;
+  onBlock: (authorId: string) => void;
   onSave: (post: DiscoverPostType) => void;
   isSaved: boolean;
   currentUserId?: string;
@@ -183,17 +186,18 @@ const PostItem = memo(function PostItem({
       );
       return;
     }
-    // Others' posts: show report reasons
+    // Others' posts: show report/block options
     const reasonLabels = REPORT_REASONS.map((r) => t(`post.reportReason.${r}`));
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
           title: t('post.reportTitle'),
-          options: [...reasonLabels, t('post.reportCancel')],
-          cancelButtonIndex: reasonLabels.length,
+          options: [...reasonLabels, t('post.block'), t('post.reportCancel')],
+          cancelButtonIndex: reasonLabels.length + 1,
           destructiveButtonIndex: undefined,
         },
         (idx) => {
+          if (idx === reasonLabels.length) { onBlock(post.authorId); return; }
           const reason = REPORT_REASONS[idx];
           if (reason) onReport(post.id, reason);
         },
@@ -207,11 +211,12 @@ const PostItem = memo(function PostItem({
             text: t(`post.reportReason.${r}`),
             onPress: () => onReport(post.id, r),
           })),
+          { text: t('post.block'), onPress: () => onBlock(post.authorId) },
           { text: t('post.reportCancel'), style: 'cancel' as const },
         ],
       );
     }
-  }, [post.id, post.body, onReport, onDelete, onEdit, isOwn]);
+  }, [post.id, post.body, post.authorId, onReport, onDelete, onEdit, onBlock, isOwn]);
 
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
@@ -444,6 +449,7 @@ export function DiscoverFeedScreen(): ReactElement {
   const { isSaved, toggleSave } = useSavedPosts();
   const handleSave = useCallback((post: DiscoverPostType) => { void toggleSave(post); }, [toggleSave]);
   const { followedIds } = useFollows();
+  const { blockedIds, blockUser } = useBlockedUsers();
   const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
@@ -607,6 +613,23 @@ export function DiscoverFeedScreen(): ReactElement {
     }
   }, [api]);
 
+  const handleBlock = useCallback((authorId: string) => {
+    Alert.alert(
+      t('post.blockConfirmTitle'),
+      t('post.blockConfirmMsg'),
+      [
+        { text: t('post.reportCancel'), style: 'cancel' as const },
+        {
+          text: t('post.blockConfirmOk'),
+          style: 'destructive' as const,
+          onPress: () => {
+            void blockUser(authorId).then(() => Alert.alert(t('post.blockSuccess')));
+          },
+        },
+      ],
+    );
+  }, [blockUser]);
+
   const handleDelete = useCallback(async (postId: string) => {
     try {
       await api.deletePost({ params: { postId } });
@@ -738,6 +761,9 @@ export function DiscoverFeedScreen(): ReactElement {
   const displayedPosts = useMemo(() => {
     const base = isSearchActive ? searchResults : posts;
     let filtered = base;
+    if (blockedIds.size > 0) {
+      filtered = filtered.filter((p) => !blockedIds.has(p.authorId));
+    }
     if (!isSearchActive && activeTab === 'following' && followedIds.size > 0) {
       filtered = filtered.filter((p) => followedIds.has(p.authorId));
     }
@@ -748,7 +774,7 @@ export function DiscoverFeedScreen(): ReactElement {
       filtered = filtered.filter((p) => p.category === categoryFilter);
     }
     return filtered;
-  }, [isSearchActive, searchResults, posts, activeTab, followedIds, typeFilter, categoryFilter]);
+  }, [isSearchActive, searchResults, posts, activeTab, followedIds, blockedIds, typeFilter, categoryFilter]);
 
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
@@ -893,6 +919,7 @@ export function DiscoverFeedScreen(): ReactElement {
             onDelete={handleDelete}
             onEdit={handleOpenEdit}
             onAuthorPress={handleAuthorPress}
+            onBlock={handleBlock}
             onHashtagPress={handleHashtagPress}
             onSave={handleSave}
             isSaved={isSaved(item.id)}
