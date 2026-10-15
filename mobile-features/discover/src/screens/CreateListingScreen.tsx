@@ -58,78 +58,78 @@ export function CreateListingScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: 16 }}>
-        <Text style={[styles.screenTitle, { color: COLORS.text }]}>{t('marketplace.createTitle')}</Text>
+      <ScrollView style={{ flex: 1, backgroundColor: COLORS.background }} contentContainerStyle={{ padding: 16 }}>
+        <Text style={[styles.screenTitle, { color: COLORS.textPrimary }]}>{t('marketplace.createTitle')}</Text>
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('marketplace.titleLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('marketplace.titleLabel')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={title}
           onChangeText={setTitle}
           placeholder={t('marketplace.titleLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('marketplace.descriptionLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('marketplace.descriptionLabel')}</Text>
         <TextInput
-          style={[styles.input, styles.multiline, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, styles.multiline, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={description}
           onChangeText={setDescription}
           multiline
           numberOfLines={4}
           placeholder={t('marketplace.descriptionLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('marketplace.priceLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('marketplace.priceLabel')}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <TextInput
-            style={[styles.input, { flex: 2, color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+            style={[styles.input, { flex: 2, color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
             value={priceStr}
             onChangeText={setPriceStr}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={COLORS.secondary}
+            placeholderTextColor={COLORS.textSecondary}
           />
           <TextInput
-            style={[styles.input, { flex: 1, color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+            style={[styles.input, { flex: 1, color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
             value={currency}
             onChangeText={setCurrency}
             placeholder="IQD"
-            placeholderTextColor={COLORS.secondary}
+            placeholderTextColor={COLORS.textSecondary}
             maxLength={3}
           />
         </View>
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('marketplace.categoryLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('marketplace.categoryLabel')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
           {CATEGORIES.map((cat) => (
             <Pressable
               key={cat}
-              style={[styles.catChip, { backgroundColor: cat === category ? COLORS.accent : COLORS.surface, borderColor: COLORS.border }]}
+              style={[styles.catChip, { backgroundColor: cat === category ? COLORS.primary : COLORS.surface, borderColor: COLORS.border }]}
               onPress={() => setCategory(cat)}
             >
-              <Text style={{ color: cat === category ? '#fff' : COLORS.text, fontSize: 13 }}>
+              <Text style={{ color: cat === category ? '#fff' : COLORS.textPrimary, fontSize: 13 }}>
                 {t(`marketplace.categories.${cat}` as never)}
               </Text>
             </Pressable>
           ))}
         </ScrollView>
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('marketplace.imagesLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('marketplace.imagesLabel')}</Text>
         <TextInput
-          style={[styles.input, styles.multiline, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, styles.multiline, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={imagesText}
           onChangeText={setImagesText}
           multiline
           numberOfLines={3}
           placeholder={t('marketplace.imagesLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
           keyboardType="url"
         />
 
         <Pressable
-          style={[styles.submitBtn, { backgroundColor: loading ? '#aaa' : COLORS.accent }]}
+          style={[styles.submitBtn, { backgroundColor: loading ? '#aaa' : COLORS.primary }]}
           onPress={handleCreate}
           disabled={loading}
           accessibilityRole="button"

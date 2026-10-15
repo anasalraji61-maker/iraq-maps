@@ -23,7 +23,7 @@ function ProgressBar({ value, max }: { value: number; max: number }) {
   const pct = Math.min(1, max > 0 ? value / max : 0);
   return (
     <View style={[progressStyles.track, { backgroundColor: COLORS.border }]}>
-      <View style={[progressStyles.fill, { width: `${pct * 100}%`, backgroundColor: COLORS.accent }]} />
+      <View style={[progressStyles.fill, { width: `${pct * 100}%`, backgroundColor: COLORS.primary }]} />
     </View>
   );
 }
@@ -37,26 +37,26 @@ function ChallengeCard({ challenge, onPress }: { challenge: ChallengeType2; onPr
   return (
     <Pressable style={[styles.card, { backgroundColor: COLORS.surface }]} onPress={onPress} accessibilityRole="button">
       <View style={styles.cardRow}>
-        <View style={[styles.typeBadge, { backgroundColor: COLORS.accent }]}>
+        <View style={[styles.typeBadge, { backgroundColor: COLORS.primary }]}>
           <Text style={styles.typeBadgeText}>{t(`challenges.types.${challenge.type}` as never)}</Text>
         </View>
-        <Text style={[styles.cardTitle, { color: COLORS.text }]} numberOfLines={1}>{challenge.title}</Text>
+        <Text style={[styles.cardTitle, { color: COLORS.textPrimary }]} numberOfLines={1}>{challenge.title}</Text>
       </View>
       <ProgressBar value={challenge.myProgress} max={challenge.targetCount} />
-      <Text style={[styles.progressText, { color: COLORS.secondary }]}>
+      <Text style={[styles.progressText, { color: COLORS.textSecondary }]}>
         {t('challenges.progress', { current: challenge.myProgress, total: challenge.targetCount })}
       </Text>
       {challenge.reward && (
-        <Text style={[styles.reward, { color: COLORS.accent }]}>
+        <Text style={[styles.reward, { color: COLORS.primary }]}>
           {t('challenges.reward', { reward: challenge.reward })}
         </Text>
       )}
       <View style={styles.cardFooter}>
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>
           {t('challenges.participants', { count: challenge.totalParticipants })}
         </Text>
         {challenge.myRank && (
-          <Text style={[styles.rank, { color: COLORS.accent }]}>
+          <Text style={[styles.rank, { color: COLORS.primary }]}>
             {t('challenges.myRank', { rank: challenge.myRank })}
           </Text>
         )}
@@ -95,19 +95,19 @@ export function ChallengesScreen() {
   const TABS: Tab[] = ['active', 'upcoming', 'completed'];
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t('challenges.title')}</Text>
+        <Text style={[styles.headerTitle, { color: COLORS.textPrimary }]}>{t('challenges.title')}</Text>
       </View>
 
       <View style={styles.tabs}>
         {TABS.map((tabKey) => (
           <Pressable
             key={tabKey}
-            style={[styles.tabBtn, tabKey === tab && { borderBottomColor: COLORS.accent, borderBottomWidth: 2 }]}
+            style={[styles.tabBtn, tabKey === tab && { borderBottomColor: COLORS.primary, borderBottomWidth: 2 }]}
             onPress={() => setTab(tabKey)}
           >
-            <Text style={[styles.tabText, { color: tabKey === tab ? COLORS.accent : COLORS.secondary }]}>
+            <Text style={[styles.tabText, { color: tabKey === tab ? COLORS.primary : COLORS.textSecondary }]}>
               {t(`challenges.${tabKey}` as never)}
             </Text>
           </Pressable>
@@ -116,11 +116,11 @@ export function ChallengesScreen() {
 
       {loading ? (
         <View style={[sharedStyles.center, { flex: 1 }]}>
-          <ActivityIndicator color={COLORS.accent} />
+          <ActivityIndicator color={COLORS.primary} />
         </View>
       ) : error ? (
         <View style={[sharedStyles.center, { flex: 1 }]}>
-          <Text style={{ color: COLORS.secondary }}>{t('challenges.loadError')}</Text>
+          <Text style={{ color: COLORS.textSecondary }}>{t('challenges.loadError')}</Text>
         </View>
       ) : (
         <FlatList
@@ -133,7 +133,7 @@ export function ChallengesScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
           ListEmptyComponent={
             <View style={sharedStyles.center}>
-              <Text style={{ color: COLORS.secondary }}>{t('challenges.empty')}</Text>
+              <Text style={{ color: COLORS.textSecondary }}>{t('challenges.empty')}</Text>
             </View>
           }
         />

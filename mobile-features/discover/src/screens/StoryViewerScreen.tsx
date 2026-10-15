@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   topGradient: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     top: 0,
     height: 140,
     backgroundColor: 'rgba(0,0,0,0.4)',

@@ -54,14 +54,14 @@ export function EventDetailScreen() {
   };
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   if (!event) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <Text style={{ color: COLORS.secondary }}>{t('events.loadError')}</Text>
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <Text style={{ color: COLORS.textSecondary }}>{t('events.loadError')}</Text>
     </View>
   );
 
@@ -70,28 +70,28 @@ export function EventDetailScreen() {
   const isFull = event.maxAttendees !== null && event.attendeeCount >= event.maxAttendees && !event.isAttending;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.background }}>
       {event.imageUrl ? (
         <Image source={{ uri: event.imageUrl }} style={styles.hero} accessibilityIgnoresInvertColors />
       ) : (
         <View style={[styles.hero, { backgroundColor: '#E0E0E0' }]} />
       )}
       <View style={styles.content}>
-        <Text style={[styles.title, { color: COLORS.text }]}>{event.title}</Text>
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>{t('events.startTime')}: {start}</Text>
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>{t('events.endTime')}: {end}</Text>
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>{t('events.address')}: {event.address}</Text>
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>
+        <Text style={[styles.title, { color: COLORS.textPrimary }]}>{event.title}</Text>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>{t('events.startTime')}: {start}</Text>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>{t('events.endTime')}: {end}</Text>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>{t('events.address')}: {event.address}</Text>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>
           {t('events.attendees', { count: event.attendeeCount })}
           {event.maxAttendees ? ` / ${event.maxAttendees}` : ''}
         </Text>
-        <Text style={[styles.description, { color: COLORS.text }]}>{event.description}</Text>
+        <Text style={[styles.description, { color: COLORS.textPrimary }]}>{event.description}</Text>
 
-        {session?.userId ? (
+        {( session.state.status === 'signedIn' ? session.state.user.id : undefined ) ? (
           <Pressable
             style={[
               styles.rsvpBtn,
-              { backgroundColor: event.isAttending ? '#ccc' : isFull ? '#aaa' : COLORS.accent },
+              { backgroundColor: event.isAttending ? '#ccc' : isFull ? '#aaa' : COLORS.primary },
             ]}
             onPress={handleRsvp}
             disabled={rsvpLoading || isFull}

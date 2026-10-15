@@ -27,7 +27,8 @@ interface Props {
 
 export function StoriesBar({ onSelectAuthor }: Props): ReactElement {
   const router = useRouter();
-  const { userId } = useSession();
+  const _session = useSession();
+  const userId = _session.state.status === 'signedIn' ? _session.state.user.id : undefined;
   const client = useStoriesClient();
   const [authors, setAuthors] = useState<StoryAuthorType[]>([]);
   const [loading, setLoading] = useState(true);

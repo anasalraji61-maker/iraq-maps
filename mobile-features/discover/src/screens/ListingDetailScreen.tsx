@@ -54,17 +54,17 @@ export function ListingDetailScreen() {
   };
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   if (!listing) return null;
 
-  const isOwner = session?.userId === listing.sellerId;
+  const isOwner = ( session.state.status === 'signedIn' ? session.state.user.id : undefined ) === listing.sellerId;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.background }}>
       {listing.images.length > 0 ? (
         <>
           <Image
@@ -79,7 +79,7 @@ export function ListingDetailScreen() {
                   <View
                     style={[
                       styles.dot,
-                      { backgroundColor: i === imageIdx ? COLORS.accent : COLORS.border },
+                      { backgroundColor: i === imageIdx ? COLORS.primary : COLORS.border },
                     ]}
                   />
                 </Pressable>
@@ -92,31 +92,31 @@ export function ListingDetailScreen() {
       )}
 
       <View style={styles.content}>
-        <Text style={[styles.title, { color: COLORS.text }]}>{listing.title}</Text>
-        <Text style={[styles.price, { color: COLORS.accent }]}>
+        <Text style={[styles.title, { color: COLORS.textPrimary }]}>{listing.title}</Text>
+        <Text style={[styles.price, { color: COLORS.primary }]}>
           {t('marketplace.price', { price: listing.price, currency: listing.currency })}
         </Text>
-        <Text style={[styles.badge, { backgroundColor: COLORS.surface, color: COLORS.secondary }]}>
+        <Text style={[styles.badge, { backgroundColor: COLORS.surface, color: COLORS.textSecondary }]}>
           {t(`marketplace.categories.${listing.category}` as never)}
         </Text>
         <Text style={[
           styles.statusBadge,
-          { color: listing.status === 'sold' ? '#E53E3E' : COLORS.secondary },
+          { color: listing.status === 'sold' ? '#E53E3E' : COLORS.textSecondary },
         ]}>
           {t(`marketplace.status.${listing.status}` as never)}
         </Text>
 
-        <Text style={[styles.description, { color: COLORS.text }]}>{listing.description}</Text>
+        <Text style={[styles.description, { color: COLORS.textPrimary }]}>{listing.description}</Text>
 
         <View style={[styles.sellerBox, { backgroundColor: COLORS.surface }]}>
-          <Text style={[styles.sellerName, { color: COLORS.text }]}>
+          <Text style={[styles.sellerName, { color: COLORS.textPrimary }]}>
             {t('marketplace.seller', { name: listing.sellerName })}
           </Text>
         </View>
 
         {!isOwner && listing.status === 'active' && (
           <Pressable
-            style={[styles.contactBtn, { backgroundColor: COLORS.accent }]}
+            style={[styles.contactBtn, { backgroundColor: COLORS.primary }]}
             onPress={() => {/* navigate to messaging */}}
             accessibilityRole="button"
           >

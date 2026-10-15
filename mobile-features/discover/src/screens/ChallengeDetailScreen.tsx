@@ -28,7 +28,7 @@ function CelebrationBanner({ visible }: { visible: boolean }) {
   }, [visible, opacity]);
 
   return (
-    <Animated.View style={[styles.banner, { opacity, backgroundColor: COLORS.accent }]}>
+    <Animated.View style={[styles.banner, { opacity, backgroundColor: COLORS.primary }]}>
       <Text style={styles.bannerText}>{t('challenges.completedBanner')}</Text>
     </Animated.View>
   );
@@ -49,7 +49,7 @@ function AnimatedProgressBar({ value, max }: { value: number; max: number }) {
           barStyles.fill,
           {
             width: anim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-            backgroundColor: COLORS.accent,
+            backgroundColor: COLORS.primary,
           },
         ]}
       />
@@ -105,48 +105,48 @@ export function ChallengeDetailScreen() {
   };
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   if (!challenge) return null;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <ScrollView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <CelebrationBanner visible={celebrated} />
       <View style={styles.content}>
-        <Text style={[styles.title, { color: COLORS.text }]}>{challenge.title}</Text>
-        <View style={[styles.typeBadge, { backgroundColor: COLORS.accent }]}>
+        <Text style={[styles.title, { color: COLORS.textPrimary }]}>{challenge.title}</Text>
+        <View style={[styles.typeBadge, { backgroundColor: COLORS.primary }]}>
           <Text style={styles.typeBadgeText}>{t(`challenges.types.${challenge.type}` as never)}</Text>
         </View>
-        <Text style={[styles.description, { color: COLORS.text }]}>{challenge.description}</Text>
+        <Text style={[styles.description, { color: COLORS.textPrimary }]}>{challenge.description}</Text>
 
         <AnimatedProgressBar value={challenge.myProgress} max={challenge.targetCount} />
-        <Text style={[styles.progressText, { color: COLORS.secondary }]}>
+        <Text style={[styles.progressText, { color: COLORS.textSecondary }]}>
           {t('challenges.progress', { current: challenge.myProgress, total: challenge.targetCount })}
         </Text>
 
         {challenge.reward ? (
-          <Text style={[styles.reward, { color: COLORS.accent }]}>
+          <Text style={[styles.reward, { color: COLORS.primary }]}>
             {t('challenges.reward', { reward: challenge.reward })}
           </Text>
         ) : (
-          <Text style={[styles.reward, { color: COLORS.secondary }]}>{t('challenges.noReward')}</Text>
+          <Text style={[styles.reward, { color: COLORS.textSecondary }]}>{t('challenges.noReward')}</Text>
         )}
 
-        <Text style={[styles.meta, { color: COLORS.secondary }]}>
+        <Text style={[styles.meta, { color: COLORS.textSecondary }]}>
           {t('challenges.participants', { count: challenge.totalParticipants })}
         </Text>
         {challenge.myRank ? (
-          <Text style={[styles.meta, { color: COLORS.accent }]}>
+          <Text style={[styles.meta, { color: COLORS.primary }]}>
             {t('challenges.myRank', { rank: challenge.myRank })}
           </Text>
         ) : null}
 
         {challenge.status === 'active' && (
           <Pressable
-            style={[styles.participateBtn, { backgroundColor: progLoading ? '#aaa' : COLORS.accent }]}
+            style={[styles.participateBtn, { backgroundColor: progLoading ? '#aaa' : COLORS.primary }]}
             onPress={handleParticipate}
             disabled={progLoading}
             accessibilityRole="button"
@@ -157,14 +157,14 @@ export function ChallengeDetailScreen() {
           </Pressable>
         )}
 
-        <Text style={[styles.sectionTitle, { color: COLORS.text }]}>{t('challenges.leaderboard')}</Text>
+        <Text style={[styles.sectionTitle, { color: COLORS.textPrimary }]}>{t('challenges.leaderboard')}</Text>
         {leaderboard.map((entry) => (
           <View key={`${entry.rank}-${entry.userId}`} style={[styles.leaderRow, { backgroundColor: COLORS.surface }]}>
-            <Text style={[styles.rankNum, { color: entry.rank <= 3 ? COLORS.accent : COLORS.secondary }]}>
+            <Text style={[styles.rankNum, { color: entry.rank <= 3 ? COLORS.primary : COLORS.textSecondary }]}>
               #{entry.rank}
             </Text>
-            <Text style={[styles.leaderName, { color: COLORS.text }]}>{entry.displayName}</Text>
-            <Text style={[styles.leaderProgress, { color: COLORS.secondary }]}>{entry.progress}</Text>
+            <Text style={[styles.leaderName, { color: COLORS.textPrimary }]}>{entry.displayName}</Text>
+            <Text style={[styles.leaderProgress, { color: COLORS.textSecondary }]}>{entry.progress}</Text>
           </View>
         ))}
       </View>

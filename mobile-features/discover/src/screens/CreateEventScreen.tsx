@@ -65,103 +65,103 @@ export function CreateEventScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={{ padding: 16 }}>
-        <Text style={[styles.screenTitle, { color: COLORS.text }]}>{t('events.createTitle')}</Text>
+      <ScrollView style={{ flex: 1, backgroundColor: COLORS.background }} contentContainerStyle={{ padding: 16 }}>
+        <Text style={[styles.screenTitle, { color: COLORS.textPrimary }]}>{t('events.createTitle')}</Text>
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.titleLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.titleLabel')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={title}
           onChangeText={setTitle}
           placeholder={t('events.titleLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.descriptionLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.descriptionLabel')}</Text>
         <TextInput
-          style={[styles.input, styles.multiline, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, styles.multiline, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={description}
           onChangeText={setDescription}
           multiline
           numberOfLines={4}
           placeholder={t('events.descriptionLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.address')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.address')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={address}
           onChangeText={setAddress}
           placeholder={t('events.address')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.locationLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.locationLabel')}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <TextInput
-            style={[styles.input, { flex: 1, color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+            style={[styles.input, { flex: 1, color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
             value={latStr}
             onChangeText={setLatStr}
             keyboardType="numeric"
             placeholder="33.3"
-            placeholderTextColor={COLORS.secondary}
+            placeholderTextColor={COLORS.textSecondary}
           />
           <TextInput
-            style={[styles.input, { flex: 1, color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+            style={[styles.input, { flex: 1, color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
             value={lngStr}
             onChangeText={setLngStr}
             keyboardType="numeric"
             placeholder="44.4"
-            placeholderTextColor={COLORS.secondary}
+            placeholderTextColor={COLORS.textSecondary}
           />
         </View>
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.startTime')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.startTime')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={startTime}
           onChangeText={setStartTime}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.endTime')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.endTime')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={endTime}
           onChangeText={setEndTime}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.maxAttendeesLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.maxAttendeesLabel')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={maxStr}
           onChangeText={setMaxStr}
           keyboardType="numeric"
           placeholder="100"
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.imageUrlLabel')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.imageUrlLabel')}</Text>
         <TextInput
-          style={[styles.input, { color: COLORS.text, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
+          style={[styles.input, { color: COLORS.textPrimary, borderColor: COLORS.border, backgroundColor: COLORS.surface }]}
           value={imageUrl}
           onChangeText={setImageUrl}
           placeholder={t('events.imageUrlLabel')}
-          placeholderTextColor={COLORS.secondary}
+          placeholderTextColor={COLORS.textSecondary}
           keyboardType="url"
         />
 
-        <Text style={[styles.label, { color: COLORS.secondary }]}>{t('events.category')}</Text>
+        <Text style={[styles.label, { color: COLORS.textSecondary }]}>{t('events.category')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
           {CATEGORIES.map((cat) => (
             <Pressable
               key={cat}
-              style={[styles.catChip, { backgroundColor: cat === category ? COLORS.accent : COLORS.surface, borderColor: COLORS.border }]}
+              style={[styles.catChip, { backgroundColor: cat === category ? COLORS.primary : COLORS.surface, borderColor: COLORS.border }]}
               onPress={() => setCategory(cat)}
             >
-              <Text style={{ color: cat === category ? '#fff' : COLORS.text, fontSize: 13 }}>
+              <Text style={{ color: cat === category ? '#fff' : COLORS.textPrimary, fontSize: 13 }}>
                 {t(`events.categories.${cat}` as never)}
               </Text>
             </Pressable>
@@ -169,7 +169,7 @@ export function CreateEventScreen() {
         </ScrollView>
 
         <Pressable
-          style={[styles.submitBtn, { backgroundColor: loading ? '#aaa' : COLORS.accent }]}
+          style={[styles.submitBtn, { backgroundColor: loading ? '#aaa' : COLORS.primary }]}
           onPress={handleCreate}
           disabled={loading}
           accessibilityRole="button"

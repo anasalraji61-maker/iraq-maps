@@ -24,31 +24,31 @@ export function MyListingsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async (refresh = false) => {
-    if (!session?.userId) return;
+    if (!( session.state.status === 'signedIn' ? session.state.user.id : undefined )) return;
     try {
       if (refresh) setRefreshing(true);
       else setLoading(true);
-      const res = await client.listListings({ query: { limit: 20, sellerId: session.userId } });
+      const res = await client.listListings({ query: { limit: 20, sellerId: ( session.state.status === 'signedIn' ? session.state.user.id : undefined ) } });
       if (res.status === 200) setItems(res.body.items);
     } catch { /* noop */ }
     setLoading(false);
     setRefreshing(false);
-  }, [client, session?.userId]);
+  }, [client, ( session.state.status === 'signedIn' ? session.state.user.id : undefined )]);
 
   useEffect(() => { void load(); }, [load]);
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t('marketplace.myListings')}</Text>
+        <Text style={[styles.headerTitle, { color: COLORS.textPrimary }]}>{t('marketplace.myListings')}</Text>
         <Pressable
-          style={[styles.createBtn, { backgroundColor: COLORS.accent }]}
+          style={[styles.createBtn, { backgroundColor: COLORS.primary }]}
           onPress={() => router.push('/discover/marketplace/create')}
           accessibilityRole="button"
         >
@@ -65,12 +65,12 @@ export function MyListingsScreen() {
             accessibilityRole="button"
           >
             <View style={{ flex: 1 }}>
-              <Text style={[styles.rowTitle, { color: COLORS.text }]} numberOfLines={1}>{item.title}</Text>
-              <Text style={[styles.rowPrice, { color: COLORS.accent }]}>
+              <Text style={[styles.rowTitle, { color: COLORS.textPrimary }]} numberOfLines={1}>{item.title}</Text>
+              <Text style={[styles.rowPrice, { color: COLORS.primary }]}>
                 {t('marketplace.price', { price: item.price, currency: item.currency })}
               </Text>
             </View>
-            <Text style={[styles.rowStatus, { color: item.status === 'sold' ? '#E53E3E' : COLORS.secondary }]}>
+            <Text style={[styles.rowStatus, { color: item.status === 'sold' ? '#E53E3E' : COLORS.textSecondary }]}>
               {t(`marketplace.status.${item.status}` as never)}
             </Text>
           </Pressable>
@@ -79,7 +79,7 @@ export function MyListingsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
         ListEmptyComponent={
           <View style={sharedStyles.center}>
-            <Text style={{ color: COLORS.secondary }}>{t('marketplace.empty')}</Text>
+            <Text style={{ color: COLORS.textSecondary }}>{t('marketplace.empty')}</Text>
           </View>
         }
       />

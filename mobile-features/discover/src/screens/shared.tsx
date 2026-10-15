@@ -136,6 +136,10 @@ export function formatRelativeTime(isoDate: string, tFn?: typeof TFunc): string 
 }
 
 export const sharedStyles = StyleSheet.create({
+  center: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

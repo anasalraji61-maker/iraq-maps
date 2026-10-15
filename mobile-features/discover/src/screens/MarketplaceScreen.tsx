@@ -27,14 +27,14 @@ function ListingCard({ listing, onPress }: { listing: ListingType; onPress: () =
         <View style={[styles.thumb, { backgroundColor: '#E0E0E0' }]} />
       )}
       <View style={styles.cardBody}>
-        <Text style={[styles.cardTitle, { color: COLORS.text }]} numberOfLines={2}>{listing.title}</Text>
-        <Text style={[styles.price, { color: COLORS.accent }]}>
+        <Text style={[styles.cardTitle, { color: COLORS.textPrimary }]} numberOfLines={2}>{listing.title}</Text>
+        <Text style={[styles.price, { color: COLORS.primary }]}>
           {t('marketplace.price', { price: listing.price, currency: listing.currency })}
         </Text>
-        <Text style={[styles.category, { color: COLORS.secondary }]}>
+        <Text style={[styles.category, { color: COLORS.textSecondary }]}>
           {t(`marketplace.categories.${listing.category}` as never)}
         </Text>
-        <Text style={[styles.status, { color: listing.status === 'sold' ? '#E53E3E' : COLORS.secondary }]}>
+        <Text style={[styles.status, { color: listing.status === 'sold' ? '#E53E3E' : COLORS.textSecondary }]}>
           {t(`marketplace.status.${listing.status}` as never)}
         </Text>
       </View>
@@ -69,17 +69,17 @@ export function MarketplaceScreen() {
   useEffect(() => { void load(); }, [load]);
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t('marketplace.title')}</Text>
+        <Text style={[styles.headerTitle, { color: COLORS.textPrimary }]}>{t('marketplace.title')}</Text>
         <Pressable
-          style={[styles.createBtn, { backgroundColor: COLORS.accent }]}
+          style={[styles.createBtn, { backgroundColor: COLORS.primary }]}
           onPress={() => router.push('/discover/marketplace/create')}
           accessibilityRole="button"
           accessibilityLabel={t('marketplace.create')}
@@ -90,7 +90,7 @@ export function MarketplaceScreen() {
 
       {error ? (
         <View style={sharedStyles.center}>
-          <Text style={{ color: COLORS.secondary }}>{t('marketplace.loadError')}</Text>
+          <Text style={{ color: COLORS.textSecondary }}>{t('marketplace.loadError')}</Text>
         </View>
       ) : (
         <FlatList
@@ -107,7 +107,7 @@ export function MarketplaceScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
           ListEmptyComponent={
             <View style={sharedStyles.center}>
-              <Text style={{ color: COLORS.secondary }}>{t('marketplace.empty')}</Text>
+              <Text style={{ color: COLORS.textSecondary }}>{t('marketplace.empty')}</Text>
             </View>
           }
         />

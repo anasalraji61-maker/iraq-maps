@@ -35,18 +35,18 @@ function EventCard({
         <View style={[styles.cardImage, styles.cardImagePlaceholder]} />
       )}
       <View style={styles.cardBody}>
-        <Text style={[styles.cardTitle, { color: COLORS.text }]} numberOfLines={2}>{event.title}</Text>
-        <Text style={[styles.cardMeta, { color: COLORS.secondary }]}>{dateStr}</Text>
-        <Text style={[styles.cardMeta, { color: COLORS.secondary }]} numberOfLines={1}>{event.address}</Text>
+        <Text style={[styles.cardTitle, { color: COLORS.textPrimary }]} numberOfLines={2}>{event.title}</Text>
+        <Text style={[styles.cardMeta, { color: COLORS.textSecondary }]}>{dateStr}</Text>
+        <Text style={[styles.cardMeta, { color: COLORS.textSecondary }]} numberOfLines={1}>{event.address}</Text>
         <View style={styles.cardFooter}>
-          <Text style={[styles.badge, { backgroundColor: COLORS.accent, color: '#fff' }]}>
+          <Text style={[styles.badge, { backgroundColor: COLORS.primary, color: '#fff' }]}>
             {t(`events.categories.${event.category}` as never)}
           </Text>
-          <Text style={[styles.cardMeta, { color: COLORS.secondary }]}>
+          <Text style={[styles.cardMeta, { color: COLORS.textSecondary }]}>
             {t('events.attendees', { count: event.attendeeCount })}
           </Text>
           {event.isAttending && (
-            <Text style={[styles.attendingBadge, { color: COLORS.accent }]}>{t('events.attending')}</Text>
+            <Text style={[styles.attendingBadge, { color: COLORS.primary }]}>{t('events.attending')}</Text>
           )}
         </View>
       </View>
@@ -81,17 +81,17 @@ export function EventsScreen() {
   useEffect(() => { void load(); }, [load]);
 
   if (loading) return (
-    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.bg }]}>
-      <ActivityIndicator color={COLORS.accent} />
+    <View style={[sharedStyles.center, { flex: 1, backgroundColor: COLORS.background }]}>
+      <ActivityIndicator color={COLORS.primary} />
     </View>
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: COLORS.text }]}>{t('events.title')}</Text>
+        <Text style={[styles.headerTitle, { color: COLORS.textPrimary }]}>{t('events.title')}</Text>
         <Pressable
-          style={[styles.createBtn, { backgroundColor: COLORS.accent }]}
+          style={[styles.createBtn, { backgroundColor: COLORS.primary }]}
           onPress={() => router.push('/discover/events/create')}
           accessibilityRole="button"
           accessibilityLabel={t('events.create')}
@@ -102,7 +102,7 @@ export function EventsScreen() {
 
       {error ? (
         <View style={sharedStyles.center}>
-          <Text style={{ color: COLORS.secondary }}>{t('events.loadError')}</Text>
+          <Text style={{ color: COLORS.textSecondary }}>{t('events.loadError')}</Text>
         </View>
       ) : (
         <FlatList
@@ -115,7 +115,7 @@ export function EventsScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />}
           ListEmptyComponent={
             <View style={sharedStyles.center}>
-              <Text style={{ color: COLORS.secondary }}>{t('events.empty')}</Text>
+              <Text style={{ color: COLORS.textSecondary }}>{t('events.empty')}</Text>
             </View>
           }
         />
