@@ -227,7 +227,7 @@ export const paymentsContract = c.router(
       method: 'GET',
       path: '/v1/payments/wallet',
       responses: { 200: Wallet, 401: Problem, 404: Problem },
-      summary: 'Get the current user's wallet',
+      summary: "Get the current user's wallet",
     },
 
     getTransactions: {
@@ -332,7 +332,7 @@ export const paymentsContract = c.router(
         limit: z.number().int().min(1).max(50).default(20),
       }),
       responses: { 200: paginated(PaymentIntent), 401: Problem },
-      summary: 'List the current user's payment intents',
+      summary: "List the current user's payment intents",
     },
   },
   { pathPrefix: '' },

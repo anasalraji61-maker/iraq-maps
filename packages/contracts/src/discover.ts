@@ -55,7 +55,7 @@ export const PostEditEntry = z.object({
   editedAt: z.string().datetime(),
 });
 
-export const UserSearchResult = z.object({
+export const DiscoverUserResult = z.object({
   userId: UserId,
   username: z.string(),
   displayName: z.string(),
@@ -379,7 +379,7 @@ export const discoverContract = c.router({
     path: '/discover/users/search',
     query: z.object({ q: z.string().min(1).max(100), limit: z.coerce.number().int().max(20).default(10) }),
     responses: {
-      200: z.object({ items: z.array(UserSearchResult) }),
+      200: z.object({ items: z.array(DiscoverUserResult) }),
       400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
     },
     summary: '@mention autocomplete: search users by username/displayName prefix',
@@ -439,7 +439,7 @@ export const adminDiscoverContract = c.router({
 export type PostIdType = z.infer<typeof PostId>;
 export type DiscoverPostType = z.infer<typeof DiscoverPost>;
 export type PostEditEntryType = z.infer<typeof PostEditEntry>;
-export type UserSearchResultType = z.infer<typeof UserSearchResult>;
+export type DiscoverUserResultType = z.infer<typeof DiscoverUserResult>;
 
 // ─── Stories ──────────────────────────────────────────────────────────────────
 

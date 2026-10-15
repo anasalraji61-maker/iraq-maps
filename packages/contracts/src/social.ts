@@ -1,10 +1,246 @@
 /**
- * Social features contracts: Events, Challenges, Marketplace
+ * Social features contracts: Events, Challenges, Marketplace, Follow Graph
  * @module social
  */
 import { z } from 'zod';
 import { initContract } from '@ts-rest/core';
 import { UserId } from './common';
+
+// ─── Follow Graph ─────────────────────────────────────────────────────────────
+
+const c2 = initContract();
+
+export const FollowRelation = z.object({
+  followerId: UserId,
+  followingId: UserId,
+  createdAt: z.string().datetime(),
+});
+export type FollowRelation = z.infer<typeof FollowRelation>;
+
+export const FollowStats = z.object({
+  followersCount: z.number().int().min(0),
+  followingCount: z.number().int().min(0),
+  isFollowing: z.boolean(),
+  isFollowedBy: z.boolean(),
+  mutualCount: z.number().int().min(0).default(0),
+});
+export type FollowStats = z.infer<typeof FollowStats>;
+
+export const UserProfile = z.object({
+  id: UserId,
+  displayName: z.string(),
+  avatarUrl: z.string().url().nullable(),
+  bio: z.string().max(300).nullable(),
+  followStats: FollowStats,
+  postCount: z.number().int().min(0),
+  isVerified: z.boolean(),
+});
+export type UserProfile = z.infer<typeof UserProfile>;
+
+export const FollowUser = z.object({
+  userId: UserId,
+  displayName: z.string(),
+  avatarUrl: z.string().url().nullable(),
+  isFollowing: z.boolean(),
+  isFollowedBy: z.boolean(),
+  isVerified: z.boolean(),
+  mutualCount: z.number().int().min(0).default(0),
+});
+export type FollowUser = z.infer<typeof FollowUser>;
+
+export const FollowSuggestion = z.object({
+  userId: UserId,
+  displayName: z.string(),
+  avatarUrl: z.string().url().nullable(),
+  isVerified: z.boolean(),
+  mutualCount: z.number().int().min(0),
+  reason: z.enum(['mutual_follow', 'location', 'popular', 'interest']),
+});
+export type FollowSuggestion = z.infer<typeof FollowSuggestion>;
+
+const errorSchema = <S extends 400 | 401 | 403 | 404 | 409>(s: S) =>
+  z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(s), code: z.string() });
+
+export const socialGraphContract = c2.router({
+  followUser: {
+    method: 'POST',
+    path: '/social/follow/:userId',
+    pathParams: z.object({ userId: UserId }),
+    body: z.object({}),
+    responses: {
+      200: FollowStats,
+      400: errorSchema(400),
+      401: errorSchema(401),
+      404: errorSchema(404),
+      409: errorSchema(409),
+    },
+    summary: 'Follow a user (idempotent)',
+  },
+
+  unfollowUser: {
+    method: 'DELETE',
+    path: '/social/follow/:userId',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      200: FollowStats,
+      401: errorSchema(401),
+      404: errorSchema(404),
+    },
+    summary: 'Unfollow a user',
+  },
+
+  getFollowers: {
+    method: 'GET',
+    path: '/social/followers/:userId',
+    pathParams: z.object({ userId: UserId }),
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().max(50).default(20),
+    }),
+    responses: {
+      200: z.object({ items: z.array(FollowUser), nextCursor: z.string().optional() }),
+      404: errorSchema(404),
+    },
+    summary: 'Paginated list of followers',
+  },
+
+  getFollowing: {
+    method: 'GET',
+    path: '/social/following/:userId',
+    pathParams: z.object({ userId: UserId }),
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().max(50).default(20),
+    }),
+    responses: {
+      200: z.object({ items: z.array(FollowUser), nextCursor: z.string().optional() }),
+      404: errorSchema(404),
+    },
+    summary: 'Paginated list of users this user follows',
+  },
+
+  getFollowFeed: {
+    method: 'GET',
+    path: '/social/feed',
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().max(20).default(10),
+    }),
+    responses: {
+      200: z.object({
+        items: z.array(z.object({
+          postId: z.string().uuid(),
+          authorId: UserId,
+          body: z.string(),
+          createdAt: z.string().datetime(),
+        })),
+        nextCursor: z.string().optional(),
+      }),
+      401: errorSchema(401),
+    },
+    summary: 'Feed of posts from followed users (auth required)',
+  },
+
+  getFollowSuggestions: {
+    method: 'GET',
+    path: '/social/suggestions',
+    query: z.object({
+      limit: z.coerce.number().int().max(20).default(10),
+    }),
+    responses: {
+      200: z.object({ items: z.array(FollowSuggestion) }),
+      401: errorSchema(401),
+    },
+    summary: 'Suggested users to follow (auth required)',
+  },
+
+  getUserProfile: {
+    method: 'GET',
+    path: '/social/users/:userId/profile',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      200: UserProfile,
+      404: errorSchema(404),
+    },
+    summary: 'Full user profile including follow stats',
+  },
+
+  blockUser: {
+    method: 'POST',
+    path: '/social/block/:userId',
+    pathParams: z.object({ userId: UserId }),
+    body: z.object({}),
+    responses: {
+      204: z.undefined(),
+      400: errorSchema(400),
+      401: errorSchema(401),
+    },
+    summary: 'Block a user',
+  },
+
+  unblockUser: {
+    method: 'DELETE',
+    path: '/social/block/:userId',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      204: z.undefined(),
+      401: errorSchema(401),
+    },
+    summary: 'Unblock a user',
+  },
+
+  getBlockedUsers: {
+    method: 'GET',
+    path: '/social/blocked',
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().max(50).default(20),
+    }),
+    responses: {
+      200: z.object({ items: z.array(FollowUser), nextCursor: z.string().optional() }),
+      401: errorSchema(401),
+    },
+    summary: 'List of users blocked by current user (auth required)',
+  },
+
+  getMutualFollowers: {
+    method: 'GET',
+    path: '/social/mutual/:userId',
+    pathParams: z.object({ userId: UserId }),
+    query: z.object({ limit: z.coerce.number().int().max(10).default(5) }),
+    responses: {
+      200: z.object({ items: z.array(FollowUser), totalCount: z.number().int() }),
+      401: errorSchema(401),
+      404: errorSchema(404),
+    },
+    summary: 'Mutual followers between current user and target user',
+  },
+
+  removeFollower: {
+    method: 'DELETE',
+    path: '/social/followers/:userId',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      200: FollowStats,
+      401: errorSchema(401),
+      404: errorSchema(404),
+    },
+    summary: 'Remove a follower from your own followers list',
+  },
+
+  dismissSuggestion: {
+    method: 'DELETE',
+    path: '/social/suggestions/:userId',
+    pathParams: z.object({ userId: UserId }),
+    responses: {
+      204: z.undefined(),
+      401: errorSchema(401),
+    },
+    summary: 'Dismiss a follow suggestion',
+  },
+});
+
+export type SocialGraphContractType = typeof socialGraphContract;
 
 const c = initContract();
 
