@@ -16,7 +16,9 @@
     "durationMin": "{n} د",
     "durationHour": "{h} س",
     "durationHourMin": "{h} س {m} د",
-    "speed": "{kmh} كم/س"
+    "speed": "{kmh} كم/س",
+    "tripDistance": "المسافة المقطوعة",
+    "tripDuration": "وقت الرحلة"
   },
   "preview": {
     "from": "من: ",

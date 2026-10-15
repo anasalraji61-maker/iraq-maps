@@ -16,7 +16,9 @@
     "durationMin": "{n} خ",
     "durationHour": "{h} س",
     "durationHourMin": "{h} س {m} خ",
-    "speed": "{kmh} کم/کاتژمێر"
+    "speed": "{kmh} کم/کاتژمێر",
+    "tripDistance": "بەربەستی گواستراو",
+    "tripDuration": "کاتی گەشت"
   },
   "preview": {
     "from": "لە: ",

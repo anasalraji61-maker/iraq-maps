@@ -18,6 +18,12 @@ interface Props extends NavigationState {
   lang?: string;
   /** Current GPS speed in m/s (null when unavailable). M195. */
   currentSpeedMps?: number | null;
+  /** Total planned route distance in metres — shown on trip summary at arrival. */
+  tripDistanceM?: number;
+  /** Total planned route duration in seconds — shown on trip summary at arrival. */
+  tripDurationS?: number;
+  /** Destination name — shown on trip summary at arrival. */
+  destinationName?: string;
 }
 
 /** Format remaining duration as a human-readable string. */
@@ -72,6 +78,9 @@ export function ActiveNavigationScreen({
   apiBaseUrl,
   lang,
   currentSpeedMps,
+  tripDistanceM,
+  tripDurationS,
+  destinationName,
 }: Props): ReactElement {
   const routeProp = useMemo(
     () => (routePolyline6 ? { polyline6: routePolyline6 } : undefined),
@@ -85,6 +94,27 @@ export function ActiveNavigationScreen({
           <Text variant="title" testID={navigationTestIDs.active.arrived}>
             {t('active.arrived')}
           </Text>
+          {destinationName ? (
+            <Text variant="subtitle" testID="arrived-destination">
+              {destinationName}
+            </Text>
+          ) : null}
+          {(tripDistanceM !== undefined || tripDurationS !== undefined) ? (
+            <View style={styles.tripSummaryCard} testID="trip-summary">
+              {tripDistanceM !== undefined ? (
+                <View style={styles.tripSummaryRow}>
+                  <RNText style={styles.tripSummaryLabel}>{t('active.tripDistance')}</RNText>
+                  <RNText style={styles.tripSummaryValue}>{fmtDist(tripDistanceM)}</RNText>
+                </View>
+              ) : null}
+              {tripDurationS !== undefined ? (
+                <View style={styles.tripSummaryRow}>
+                  <RNText style={styles.tripSummaryLabel}>{t('active.tripDuration')}</RNText>
+                  <RNText style={styles.tripSummaryValue}>{fmtDuration(tripDurationS)}</RNText>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
           <View style={styles.arrivedActions}>
             {onNavigateAgain ? (
               <View style={styles.flex1}>
@@ -187,6 +217,10 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   arrivedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.l, padding: space.m },
   arrivedActions: { flexDirection: 'row', gap: space.s, width: '100%' },
+  tripSummaryCard: { backgroundColor: '#F5F5F5', borderRadius: 12, padding: space.m, gap: space.s, width: '100%' },
+  tripSummaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  tripSummaryLabel: { fontSize: 14, color: '#777' },
+  tripSummaryValue: { fontSize: 15, fontWeight: '600', color: '#222' },
   instructionBlock: { flexDirection: 'row', alignItems: 'center', gap: space.m, backgroundColor: color.bg, padding: space.m, borderRadius: 8 },
   instructionBody: { flex: 1, gap: space.xs },
   turnArrow: { fontSize: 40, lineHeight: 48, color: color.primary },

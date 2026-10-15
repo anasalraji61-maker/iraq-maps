@@ -16,7 +16,9 @@
     "durationMin": "{n} min",
     "durationHour": "{h} hr",
     "durationHourMin": "{h} hr {m} min",
-    "speed": "{kmh} km/h"
+    "speed": "{kmh} km/h",
+    "tripDistance": "Distance",
+    "tripDuration": "Trip time"
   },
   "preview": {
     "from": "From: ",

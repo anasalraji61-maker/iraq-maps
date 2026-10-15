@@ -82,6 +82,9 @@ function NavigationSession({
       city={city}
       apiBaseUrl={apiBaseUrl}
       lang={lang}
+      tripDistanceM={route.distanceM}
+      tripDurationS={route.durationS}
+      destinationName={destinationName}
       currentSpeedMps={currentSpeedMps}
     />
   );
