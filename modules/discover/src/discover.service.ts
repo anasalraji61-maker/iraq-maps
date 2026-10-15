@@ -64,6 +64,13 @@ export class DiscoverService {
     return this.toPostShape(post, false);
   }
 
+  async getPost(userId: UserId, postId: PostIdType) {
+    const post = await this.getPostOrThrow(postId);
+    const [like] = await this.db.select().from(postLikeTable)
+      .where(and(eq(postLikeTable.postId, postId), eq(postLikeTable.userId, userId))).limit(1);
+    return this.toPostShape(post, !!like);
+  }
+
   async likePost(userId: UserId, postId: PostIdType) {
     const post = await this.getPostOrThrow(postId);
 

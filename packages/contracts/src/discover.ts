@@ -104,6 +104,16 @@ export const discoverContract = c.router({
     },
     summary: 'Delete own comment',
   },
+  getPost: {
+    method: 'GET',
+    path: '/discover/posts/:postId',
+    pathParams: z.object({ postId: PostId }),
+    responses: {
+      200: DiscoverPost,
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Fetch a single post by ID',
+  },
   updatePost: {
     method: 'PATCH',
     path: '/discover/posts/:postId',

@@ -119,7 +119,7 @@ export function PostDetailScreen(): ReactElement {
   // Parse post from navigation params (passed by DiscoverFeedScreen to avoid a redundant feed fetch)
   const initialPost = postJson ? (() => { try { return JSON.parse(postJson) as DiscoverPostType; } catch { return undefined; } })() : undefined;
 
-  const [post] = useState<DiscoverPostType | undefined>(initialPost);
+  const [post, setPost] = useState<DiscoverPostType | undefined>(initialPost);
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(!initialPost);
   const [refreshing, setRefreshing] = useState(false);
@@ -132,13 +132,16 @@ export function PostDetailScreen(): ReactElement {
 
   const loadData = useCallback(async (isRefresh = false) => {
     if (!postId) return;
-    if (isRefresh) setRefreshing(true); else if (!post) setLoading(true);
+    if (isRefresh) setRefreshing(true); else setLoading(true);
     setError(undefined);
     try {
-      const commentsRes = await api.listComments({ params: { postId }, query: { limit: 20 } });
-      if (commentsRes.status === 200) {
-        setComments(commentsRes.body.items);
-      }
+      // If we don't have the post (came from a deep link), fetch it first
+      const [postRes, commentsRes] = await Promise.all([
+        post && !isRefresh ? null : api.getPost({ params: { postId } }),
+        api.listComments({ params: { postId }, query: { limit: 20 } }),
+      ]);
+      if (postRes && postRes.status === 200) setPost(postRes.body);
+      if (commentsRes.status === 200) setComments(commentsRes.body.items);
     } catch {
       setError(t('postDetail.loadError'));
     } finally {

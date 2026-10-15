@@ -28,6 +28,16 @@ export class DiscoverController {
         return { status: 200, body: result };
       },
 
+      getPost: async ({ params }) => {
+        if (!userId) return problem(404, 'not_found', 'Not found') as never;
+        try {
+          const post = await this.svc.getPost(userId, params.postId as PostIdType);
+          return { status: 200, body: post };
+        } catch {
+          return problem(404, 'not_found', 'Post not found') as never;
+        }
+      },
+
       createPost: async ({ body }) => {
         if (!userId) return problem(400, 'unauthorized', 'Authentication required') as never;
         const post = await this.svc.createPost(userId, body);
