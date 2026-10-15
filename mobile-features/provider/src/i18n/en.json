@@ -62,6 +62,10 @@
     "suspended": "Suspended",
     "refresh": "Refresh Status",
     "editProfile": "Edit Profile",
+    "contactTitle": "Contact info visible to visitors",
+    "contactPhone": "Phone",
+    "contactSocial": "Social links",
+    "contactConsentOff": "Not visible — consent not enabled",
     "analytics": {
       "viewsToday": "Views Today",
       "incomingMessages": "Incoming Messages",

@@ -1,9 +1,9 @@
-import { testIDs, type ProviderStatus } from '@iraq-maps/contracts';
+import { testIDs, type ProviderMe, type ProviderStatus } from '@iraq-maps/contracts';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
+import { Animated, Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
@@ -89,6 +89,7 @@ export function ProviderDashboardScreen(): ReactElement {
   const session = useSession();
   const messagingApi = useMessagingApi();
   const [status, setStatus] = useState<ProviderStatus | null>(null);
+  const [providerMe, setProviderMe] = useState<ProviderMe | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData>({
@@ -102,7 +103,10 @@ export function ProviderDashboardScreen(): ReactElement {
   const fetchStatus = useCallback(async () => {
     try {
       const res = await api.providers.me();
-      if (res.status === 200) setStatus(res.body.status);
+      if (res.status === 200) {
+        setStatus(res.body.status);
+        setProviderMe(res.body);
+      }
     } finally {
       setLoading(false);
     }
@@ -218,6 +222,10 @@ export function ProviderDashboardScreen(): ReactElement {
         metric="inquiries"
       />
 
+      {providerMe && (providerMe.phone || (providerMe.links?.length ?? 0) > 0) ? (
+        <ContactInfoSection provider={providerMe} />
+      ) : null}
+
       {status !== 'verified' && (
         <Button
           label={t('dashboard.refresh')}
@@ -231,6 +239,46 @@ export function ProviderDashboardScreen(): ReactElement {
       />
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** Shows the provider's own contact info (phone + social) with consent state indicator. */
+function ContactInfoSection({ provider }: { provider: ProviderMe }): ReactElement {
+  const { phone, links = [], consents = [] } = provider;
+  const phoneVisible = consents.includes('show_phone');
+  const socialVisible = consents.includes('social_links');
+
+  return (
+    <View style={styles.contactSection}>
+      <RNText style={styles.contactTitle}>{t('dashboard.contactTitle')}</RNText>
+      {phone ? (
+        <View style={styles.contactRow}>
+          <RNText style={styles.contactLabel}>{t('dashboard.contactPhone')}</RNText>
+          <RNText
+            style={[styles.contactValue, phoneVisible ? styles.contactVisible : styles.contactHidden]}
+            onPress={phoneVisible ? () => Linking.openURL(`tel:${phone.number.replace(/\s/g, '')}`).catch(() => undefined) : undefined}
+          >
+            {phone.number}
+          </RNText>
+          {!phoneVisible ? <RNText style={styles.consentNote}>{t('dashboard.contactConsentOff')}</RNText> : null}
+        </View>
+      ) : null}
+      {links.length > 0 ? (
+        <View style={styles.contactRow}>
+          <RNText style={styles.contactLabel}>{t('dashboard.contactSocial')}</RNText>
+          {links.map((link) => (
+            <RNText
+              key={link.url}
+              style={[styles.contactValue, socialVisible ? styles.contactVisible : styles.contactHidden]}
+              onPress={socialVisible ? () => Linking.openURL(link.url).catch(() => undefined) : undefined}
+            >
+              {link.kind}: {link.url}
+            </RNText>
+          ))}
+          {!socialVisible ? <RNText style={styles.consentNote}>{t('dashboard.contactConsentOff')}</RNText> : null}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -253,4 +301,12 @@ const styles = StyleSheet.create({
   cardBody: { flex: 1 },
   cardValue: { fontSize: 22, fontWeight: '700' },
   cardLabel: { fontSize: 12, marginTop: 2 },
+  contactSection: { backgroundColor: '#F0F4FF', borderRadius: 10, padding: 14, gap: 8, marginVertical: 8 },
+  contactTitle: { fontSize: 14, fontWeight: '700', color: '#1565C0', marginBottom: 4, textAlign: 'auto' },
+  contactRow: { gap: 2 },
+  contactLabel: { fontSize: 12, color: '#555', textAlign: 'auto' },
+  contactValue: { fontSize: 14, textAlign: 'auto' },
+  contactVisible: { color: '#1976D2', textDecorationLine: 'underline' },
+  contactHidden: { color: '#999' },
+  consentNote: { fontSize: 11, color: '#EF4444', textAlign: 'auto' },
 });

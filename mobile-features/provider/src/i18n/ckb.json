@@ -62,6 +62,10 @@
     "suspended": "ڕاگیراوە",
     "refresh": "نوێکردنەوەی دۆخ",
     "editProfile": "دەستکاریکردنی پرۆفایل",
+    "contactTitle": "زانیاری پەیوەندی بینراو بۆ سەردانکەران",
+    "contactPhone": "تەلەفۆن",
+    "contactSocial": "بەستەری تۆڕی کۆمەڵایەتی",
+    "contactConsentOff": "نابینرێت — مووافەقەت چالاک نەکراوە",
     "analytics": {
       "viewsToday": "بینینەکانی ئەمڕۆ",
       "incomingMessages": "پەیامە هاتووەکان",

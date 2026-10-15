@@ -62,6 +62,10 @@
     "suspended": "موقوف",
     "refresh": "تحديث الحالة",
     "editProfile": "تعديل الملف التعريفي",
+    "contactTitle": "معلومات التواصل المرئية للزوار",
+    "contactPhone": "الهاتف",
+    "contactSocial": "روابط التواصل",
+    "contactConsentOff": "غير مرئي — الموافقة لم تُفعَّل",
     "analytics": {
       "viewsToday": "عدد المشاهدات اليوم",
       "incomingMessages": "عدد الرسائل الواردة",
