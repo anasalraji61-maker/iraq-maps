@@ -1,4 +1,4 @@
-import type { CrowdLevel, InsightsPort, PlaceId, PlaceInsights, PriceLevel } from '@iraq-maps/contracts';
+import type { CrowdLevel, InsightsPort, InsightsSummary, PlaceId, PlaceInsights, PriceLevel } from '@iraq-maps/contracts';
 import type { Clock } from '@iraq-maps/contracts';
 
 /** How long a crowded_now report influences the estimate (60 minutes). */
@@ -59,5 +59,38 @@ export class InsightsService implements InsightsPort {
 
   async reportPrice(placeId: PlaceId, priceLevel: PriceLevel, reportedAt: Date): Promise<void> {
     this.priceReports.set(placeId, { level: priceLevel, reportedAt });
+  }
+
+  /** Returns a summary suitable for the admin panel. */
+  getSummary(): InsightsSummary {
+    const now = this.clock.now();
+
+    // Recent price reports (last 24 h)
+    const recentPriceReports = [...this.priceReports.entries()]
+      .filter(([, v]) => now.getTime() - v.reportedAt.getTime() < 24 * 60 * 60 * 1000)
+      .map(([placeId, v]) => ({ placeId: placeId as PlaceId, priceLevel: v.level, observedAt: v.reportedAt.toISOString() }))
+      .sort((a, b) => b.observedAt.localeCompare(a.observedAt))
+      .slice(0, 20);
+
+    // Recent crowding reports (non-empty entries)
+    const recentCrowdingReports = [...this.crowdedReports.entries()]
+      .map(([placeId, dates]) => {
+        const active = dates.filter((d) => now.getTime() - d.getTime() < CROWDED_DECAY_MS);
+        if (active.length === 0) return null;
+        return {
+          placeId: placeId as PlaceId,
+          reportCount: active.length,
+          lastObservedAt: active[active.length - 1]!.toISOString(),
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+      .sort((a, b) => b.reportCount - a.reportCount)
+      .slice(0, 20);
+
+    // Most reported categories: use price-report place ids as a proxy (in-memory, no categories stored)
+    // Return empty array since category data is not tracked in this in-memory implementation.
+    const mostReportedCategories: { category: string; count: number }[] = [];
+
+    return { mostReportedCategories, recentPriceReports, recentCrowdingReports };
   }
 }

@@ -89,4 +89,15 @@ export const notificationsContract = c.router({
     },
     summary: 'Dismiss (delete) a notification (M176)',
   },
+  getDigest: {
+    method: 'GET',
+    path: '/v1/notifications/digest',
+    responses: {
+      200: z.object({
+        total: z.number().int(),
+        byType: z.record(z.string(), z.number().int()),
+      }),
+    },
+    summary: 'Get unread notification count grouped by type (for badge/digest)',
+  },
 });

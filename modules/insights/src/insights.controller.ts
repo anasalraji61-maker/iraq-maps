@@ -1,6 +1,7 @@
 import { insightsContract, PortTokens, type InsightsPort, type PriceLevel } from '@iraq-maps/contracts';
 import { Controller, HttpException, Inject } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
+import type { InsightsService } from './insights.service';
 
 @Controller()
 export class InsightsController {
@@ -27,6 +28,16 @@ export class InsightsController {
         await this.insights.reportPrice(body.placeId, body.priceLevel as PriceLevel, now);
       }
       return { status: 204 as const, body: undefined };
+    });
+  }
+
+  @TsRestHandler(insightsContract.summary)
+  getSummary() {
+    return tsRestHandler(insightsContract.summary, async () => {
+      // InsightsService extends InsightsPort and also exposes getSummary()
+      const svc = this.insights as unknown as InsightsService;
+      const result = svc.getSummary();
+      return { status: 200 as const, body: result };
     });
   }
 }

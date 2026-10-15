@@ -1,6 +1,6 @@
 import type { NotificationPrefs, PushSender, UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { and, desc, eq, isNull, lt } from 'drizzle-orm';
+import { and, desc, eq, isNull, lt, sql } from 'drizzle-orm';
 import { deviceTable, notificationTable, prefsTable } from './schema';
 
 export class NotificationsService {
@@ -66,10 +66,10 @@ export class NotificationsService {
   }
 
   /** Persist a notification row and push it to the user's devices. */
-  async sendToUser(userId: UserId, notification: { title: string; body: string; data?: Record<string, string> }): Promise<string> {
+  async sendToUser(userId: UserId, notification: { title: string; body: string; type?: string; data?: Record<string, string> }): Promise<string> {
     const [row] = await this.db
       .insert(notificationTable)
-      .values({ userId, title: notification.title, body: notification.body, data: notification.data ?? null })
+      .values({ userId, type: notification.type ?? 'general', title: notification.title, body: notification.body, data: notification.data ?? null })
       .returning({ id: notificationTable.id });
     if (!row) throw new Error('insert failed');
     const devices = await this.db.select().from(deviceTable).where(eq(deviceTable.userId, userId));
@@ -143,5 +143,22 @@ export class NotificationsService {
     await this.db.delete(deviceTable).where(eq(deviceTable.userId, userId));
     await this.db.delete(prefsTable).where(eq(prefsTable.userId, userId));
     await this.db.delete(notificationTable).where(eq(notificationTable.userId, userId));
+  }
+
+  /** Returns count of unread notifications grouped by type. */
+  async getDigest(userId: UserId): Promise<{ total: number; byType: Record<string, number> }> {
+    const rows = await this.db
+      .select({ type: notificationTable.type, count: sql<number>`count(*)::int` })
+      .from(notificationTable)
+      .where(and(eq(notificationTable.userId, userId), isNull(notificationTable.readAt)))
+      .groupBy(notificationTable.type);
+
+    const byType: Record<string, number> = {};
+    let total = 0;
+    for (const row of rows) {
+      byType[row.type] = row.count;
+      total += row.count;
+    }
+    return { total, byType };
   }
 }

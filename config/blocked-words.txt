@@ -1,0 +1,7 @@
+# Blocked words list – one word per line.
+# Lines starting with # are comments and are ignored.
+# Add words in Arabic, Kurdish or English as needed.
+# This file must NOT contain hate speech or graphic content as examples —
+# list only the identifier tokens that are blocked.
+spam
+scam

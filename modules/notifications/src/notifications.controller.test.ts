@@ -28,6 +28,8 @@ function makeService(): NotificationsService {
     markRead: vi.fn().mockResolvedValue(true),
     sendPush: vi.fn().mockResolvedValue(undefined),
     scheduleDigest: vi.fn().mockResolvedValue(undefined),
+    getDigest: vi.fn().mockResolvedValue({ total: 3, byType: { like: 2, comment: 1 } }),
+    dismissNotification: vi.fn().mockResolvedValue(true),
   } as unknown as NotificationsService;
 }
 
@@ -81,5 +83,12 @@ describe('NotificationsController', () => {
     const h = handler(ctrl, { principal: { userId: USER_ID, roles: ['user'] } });
     const result = await h['markRead']!({ params: { id: 'notif-missing' } });
     expect(result.status).toBe(404);
+  });
+
+  it('getDigest returns 200 with total and byType grouped counts', async () => {
+    const h = handler(ctrl, { principal: { userId: USER_ID, roles: ['user'] } });
+    const result = await h['getDigest']!({});
+    expect(result.status).toBe(200);
+    expect(svc.getDigest).toHaveBeenCalledWith(USER_ID);
   });
 });

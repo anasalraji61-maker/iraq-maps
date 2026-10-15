@@ -48,6 +48,11 @@ export class NotificationsController {
         if (!found) return { status: 404, body: { code: 'not_found' } };
         return { status: 200, body: { ok: true as const } };
       },
+
+      getDigest: async () => {
+        const digest = await this.svc.getDigest(userId);
+        return { status: 200, body: digest };
+      },
     });
   }
 }

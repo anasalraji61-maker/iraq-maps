@@ -50,8 +50,13 @@ export class DiscoverController {
           const rl = await this.postLimiter.check(`post:${userId}`);
           if (!rl.allowed) return problem(429, 'rate_limited', 'Too many posts', { retryAfterMs: rl.retryAfterMs }) as never;
         }
-        const post = await this.svc.createPost(userId, body);
-        return { status: 201, body: post };
+        try {
+          const post = await this.svc.createPost(userId, body);
+          return { status: 201, body: post };
+        } catch (e: unknown) {
+          if (isContentBlocked(e)) return problem(422, 'content_blocked', 'Content contains a blocked word') as never;
+          throw e;
+        }
       },
 
       likePost: async ({ params }) => {
@@ -93,7 +98,8 @@ export class DiscoverController {
         try {
           const comment = await this.svc.createComment(userId, params.postId as PostIdType, body.body);
           return { status: 201, body: comment };
-        } catch {
+        } catch (e: unknown) {
+          if (isContentBlocked(e)) return problem(422, 'content_blocked', 'Content contains a blocked word') as never;
           return problem(404, 'not_found', 'Post not found') as never;
         }
       },
@@ -150,6 +156,18 @@ export class DiscoverController {
           const deleted = await this.svc.deletePost(userId, params.postId as PostIdType);
           if (!deleted) return problem(403, 'forbidden', 'Not the post author') as never;
           return { status: 204, body: undefined };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
+          throw e;
+        }
+      },
+
+      pinPost: async ({ params, body }) => {
+        if (!userId) return problem(403, 'forbidden', 'Not authenticated') as never;
+        try {
+          const post = await this.svc.pinPost(userId, params.postId as PostIdType, body.pinned);
+          if (!post) return problem(403, 'forbidden', 'Not the post author') as never;
+          return { status: 200, body: post };
         } catch (e: unknown) {
           if (isNotFound(e)) return problem(404, 'not_found', 'Post not found') as never;
           throw e;
@@ -320,4 +338,17 @@ export class AdminDiscoverController {
 
 function isNotFound(e: unknown): boolean {
   return typeof e === 'object' && e !== null && 'status' in e && (e as { status: number }).status === 404;
+}
+
+function isContentBlocked(e: unknown): boolean {
+  if (typeof e !== 'object' || e === null) return false;
+  const err = e as Record<string, unknown>;
+  // NestJS UnprocessableEntityException has status 422
+  if ('status' in err && err['status'] === 422) return true;
+  // Or check for the code in the response object
+  if ('response' in err && typeof err['response'] === 'object' && err['response'] !== null) {
+    const resp = err['response'] as Record<string, unknown>;
+    return resp['code'] === 'content_blocked';
+  }
+  return false;
 }

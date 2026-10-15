@@ -46,6 +46,13 @@ export const InsightReport = z.object({
 });
 export type InsightReport = z.infer<typeof InsightReport>;
 
+export const InsightsSummary = z.object({
+  mostReportedCategories: z.array(z.object({ category: z.string(), count: z.number().int() })),
+  recentPriceReports: z.array(z.object({ placeId: PlaceId, priceLevel: PriceLevel, observedAt: z.string().datetime() })),
+  recentCrowdingReports: z.array(z.object({ placeId: PlaceId, reportCount: z.number().int(), lastObservedAt: z.string().datetime() })),
+});
+export type InsightsSummary = z.infer<typeof InsightsSummary>;
+
 /** @public frozen contract (M5), served by modules/insights */
 export const insightsContract = c.router(
   {
@@ -62,6 +69,12 @@ export const insightsContract = c.router(
       body: InsightReport,
       responses: { 204: z.undefined(), 400: Problem, 429: Problem },
       summary: 'Submit a crowded-now or price report for a place',
+    },
+    summary: {
+      method: 'GET',
+      path: '/insights/summary',
+      responses: { 200: InsightsSummary },
+      summary: 'Admin: summary of most reported place categories, recent price and crowding reports',
     },
   },
   { pathPrefix: '/v1', strictStatusCodes: true },

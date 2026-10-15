@@ -24,6 +24,7 @@ export const prefsTable = notificationsSchema.table('prefs', {
 export const notificationTable = notificationsSchema.table('notification', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull(),
+  type: text('type').notNull().default('general'), // e.g. 'like', 'comment', 'mention', 'message', 'general'
   title: text('title').notNull(),
   body: text('body').notNull(),
   data: jsonb('data').$type<Record<string, string>>(),

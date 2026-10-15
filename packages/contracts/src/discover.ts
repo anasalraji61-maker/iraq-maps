@@ -31,6 +31,8 @@ export const DiscoverPost = z.object({
   isLikedByMe: z.boolean().default(false),
   /** True when the post author is a verified provider. @M93 */
   authorVerified: z.boolean().default(false),
+  /** Whether this post is pinned to the top of the author's profile feed. */
+  isPinned: z.boolean().default(false),
   createdAt: z.string().datetime(),
 });
 
@@ -76,6 +78,7 @@ export const discoverContract = c.router({
     responses: {
       201: DiscoverPost,
       400: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(400), code: z.string() }),
+      422: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(422), code: z.string() }),
       429: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(429), code: z.string(), retryAfterMs: z.number().int() }),
     },
     summary: 'Create a discover post',
@@ -120,6 +123,7 @@ export const discoverContract = c.router({
     responses: {
       201: DiscoverComment,
       404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+      422: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(422), code: z.string() }),
     },
     summary: 'Comment on a post',
   },
@@ -187,6 +191,18 @@ export const discoverContract = c.router({
       404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
     },
     summary: 'Delete own post',
+  },
+  pinPost: {
+    method: 'PATCH',
+    path: '/discover/posts/:postId/pin',
+    pathParams: z.object({ postId: PostId }),
+    body: z.object({ pinned: z.boolean() }),
+    responses: {
+      200: DiscoverPost,
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Pin or unpin a post to the top of the author profile feed (provider only)',
   },
   reportPost: {
     method: 'POST',

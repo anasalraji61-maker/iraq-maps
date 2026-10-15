@@ -16,6 +16,7 @@ export const postTable = discoverSchema.table(
     commentCount: integer('comment_count').notNull().default(0),
     viewCount: integer('view_count').notNull().default(0),
     bookmarkCount: integer('bookmark_count').notNull().default(0),
+    isPinned: boolean('is_pinned').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     removedAt: timestamp('removed_at', { withTimezone: true }),
   },
@@ -55,6 +56,7 @@ export const commentTable = discoverSchema.table(
     body: text('body').notNull(),
     likeCount: integer('like_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    removedAt: timestamp('removed_at', { withTimezone: true }),
   },
   (t) => [index('comment_post_id_created_at_idx').on(t.postId, t.createdAt)],
 );

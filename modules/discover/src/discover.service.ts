@@ -1,11 +1,12 @@
 import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
 import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
 import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, userFollowTable } from './schema';
+import { WordFilter } from './word-filter';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -13,11 +14,16 @@ const noopEventBus: EventBus = { publish: async () => {}, subscribe: () => () =>
 
 @Injectable()
 export class DiscoverService {
+  private readonly wordFilter: WordFilter;
+
   constructor(
     @Inject('DISCOVER_DB') private readonly db: Db,
     @Inject(PortTokens.EventBus) private readonly eventBus: EventBus = noopEventBus,
     @Optional() @Inject(PortTokens.ProviderDirectoryPort) private readonly providerDirectory: ProviderDirectoryPort | null = null,
-  ) {}
+    @Optional() @Inject('WORD_FILTER_CONFIG_PATH') wordFilterConfigPath: string | null = null,
+  ) {
+    this.wordFilter = new WordFilter(wordFilterConfigPath ?? undefined);
+  }
 
   /** Returns a Set of userIds that are verified providers. Gracefully returns empty set on error. @M93 */
   private async verifiedAuthorIds(authorIds: UserId[]): Promise<Set<UserId>> {
@@ -68,6 +74,10 @@ export class DiscoverService {
     userId: UserId,
     data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[]; mentionedUserIds?: UserId[] },
   ) {
+    const blocked = this.wordFilter.check(data.body);
+    if (blocked) {
+      throw new UnprocessableEntityException({ code: 'content_blocked', detail: 'Content contains a blocked word' });
+    }
     const [post] = await this.db
       .insert(postTable)
       .values({
@@ -232,6 +242,10 @@ export class DiscoverService {
   }
 
   async createComment(userId: UserId, postId: PostIdType, body: string) {
+    const blocked = this.wordFilter.check(body);
+    if (blocked) {
+      throw new UnprocessableEntityException({ code: 'content_blocked', detail: 'Content contains a blocked word' });
+    }
     const post = await this.getPostOrThrow(postId);
 
     const [comment] = await this.db
@@ -259,13 +273,34 @@ export class DiscoverService {
     const [comment] = await this.db.select().from(commentTable).where(eq(commentTable.id, commentId)).limit(1);
     if (!comment) throw new NotFoundException({ code: 'not_found' });
     if (comment.authorId !== userId) return false;
-    await this.db.delete(commentTable).where(eq(commentTable.id, commentId));
+    // Soft-delete: mark removedAt instead of deleting the row
+    await this.db.update(commentTable).set({ removedAt: new Date() }).where(eq(commentTable.id, commentId));
     // Decrement comment count on the post
     await this.db
       .update(postTable)
       .set({ commentCount: sql`GREATEST(0, comment_count - 1)` })
       .where(eq(postTable.id, comment.postId as PostIdType));
     return true;
+  }
+
+  /** Pin or unpin a post for the given user. Only one post per author can be pinned at a time. */
+  async pinPost(userId: UserId, postId: PostIdType, pinned: boolean): Promise<ReturnType<typeof this.toPostShape> | null> {
+    const [post] = await this.db.select().from(postTable).where(and(eq(postTable.id, postId), isNull(postTable.removedAt))).limit(1);
+    if (!post) throw new NotFoundException({ code: 'not_found' });
+    if (post.authorId !== userId) return null; // caller interprets as 403
+
+    if (pinned) {
+      // Unpin all other posts by this author first (only one pinned at a time)
+      await this.db.update(postTable).set({ isPinned: false }).where(and(eq(postTable.authorId, userId), eq(postTable.isPinned, true)));
+    }
+
+    const [updated] = await this.db
+      .update(postTable)
+      .set({ isPinned: pinned })
+      .where(eq(postTable.id, postId))
+      .returning();
+    if (!updated) throw new NotFoundException({ code: 'not_found' });
+    return this.toPostShape(updated, false);
   }
 
   async updatePost(userId: UserId, postId: PostIdType, newBody: string): Promise<ReturnType<typeof this.toPostShape> | null> {
@@ -711,16 +746,18 @@ export class DiscoverService {
       mentionedUserIds,
       isLikedByMe,
       authorVerified,
+      isPinned: post.isPinned ?? false,
       createdAt: post.createdAt.toISOString(),
     };
   }
 
   private toCommentShape(comment: typeof commentTable.$inferSelect, isLikedByMe = false) {
+    const isDeleted = comment.removedAt != null;
     return {
       id: comment.id as CommentIdType,
       postId: comment.postId as PostIdType,
       authorId: comment.authorId as UserId,
-      body: comment.body,
+      body: isDeleted ? '[deleted]' : comment.body,
       likeCount: comment.likeCount,
       isLikedByMe,
       createdAt: comment.createdAt.toISOString(),
