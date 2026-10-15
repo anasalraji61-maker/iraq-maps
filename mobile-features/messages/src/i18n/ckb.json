@@ -5,7 +5,15 @@
     "continue": "بەردەوام بە",
     "maxPlaces": "زۆرترین ژمارەی شوێن ٥ ە",
     "title": "پەیامی نوێ",
-    "charCount": "{{count}}/500"
+    "charCount": "{{count}}/500",
+    "templatesLabel": "پێشنیارە خێراکان",
+    "templates": {
+      "price": "نرخەکە چەندە؟",
+      "hours": "کاتی کارکردن چەندەیە؟",
+      "available": "ئێستا جێی هەیە؟",
+      "location": "ناونیشانتان بە وردی چیە؟",
+      "delivery": "خزمەتگوزاری گەیاندن هەیە؟"
+    }
   },
   "confirm": {
     "title": "دڵنیابوونەوە",

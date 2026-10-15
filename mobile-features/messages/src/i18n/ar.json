@@ -5,7 +5,15 @@
     "continue": "متابعة",
     "maxPlaces": "الحد الأقصى 5 أماكن",
     "title": "رسالة جديدة",
-    "charCount": "{{count}}/500"
+    "charCount": "{{count}}/500",
+    "templatesLabel": "اقتراحات سريعة",
+    "templates": {
+      "price": "ما هو السعر؟",
+      "hours": "ما هي أوقات العمل؟",
+      "available": "هل لديكم توفر الآن؟",
+      "location": "ما هو عنوانكم بالتفصيل؟",
+      "delivery": "هل تتوفر خدمة التوصيل؟"
+    }
   },
   "confirm": {
     "title": "تأكيد الإرسال",

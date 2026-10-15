@@ -5,7 +5,15 @@
     "continue": "Continue",
     "maxPlaces": "Maximum 5 places",
     "title": "New message",
-    "charCount": "{{count}}/500"
+    "charCount": "{{count}}/500",
+    "templatesLabel": "Quick suggestions",
+    "templates": {
+      "price": "What is the price?",
+      "hours": "What are the opening hours?",
+      "available": "Do you have availability now?",
+      "location": "What is your exact address?",
+      "delivery": "Do you offer delivery?"
+    }
   },
   "confirm": {
     "title": "Confirm send",
