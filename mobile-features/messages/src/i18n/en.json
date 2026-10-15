@@ -38,7 +38,8 @@
     "badgePending": "Pending",
     "badgeSent": "Sent",
     "badgeReplied": "Replied",
-    "badgeFailed": "Failed"
+    "badgeFailed": "Failed",
+    "loadMore": "Load more"
   },
   "detail": {
     "title": "Request details",

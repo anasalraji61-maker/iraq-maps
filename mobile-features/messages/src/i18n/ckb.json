@@ -38,7 +38,8 @@
     "badgePending": "چاوەڕوانکردن",
     "badgeSent": "نێردرا",
     "badgeReplied": "وەڵامدراوە",
-    "badgeFailed": "سەرکەوتوو نەبوو"
+    "badgeFailed": "سەرکەوتوو نەبوو",
+    "loadMore": "زیاتر بارکە"
   },
   "detail": {
     "title": "وردەکاریەکانی داواکاری",

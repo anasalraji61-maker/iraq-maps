@@ -2,7 +2,7 @@ import { type Inquiry } from '@iraq-maps/contracts';
 import { Card, EmptyState, Screen, Text, Banner } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, ScrollView, RefreshControl, View, StyleSheet, Text as RNText } from 'react-native';
+import { Animated, ScrollView, RefreshControl, Pressable, View, StyleSheet, Text as RNText } from 'react-native';
 import { useMessagingClient } from '../client';
 import { useReadReceiptsMap } from '../hooks/useReadReceipts';
 import { t } from '../strings';
@@ -71,6 +71,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1976D2',
     marginTop: 5,
   },
+  loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
+  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
 });
 
 type BadgeInfo = { label: string; color: string } | null;
@@ -97,6 +99,8 @@ export function InquiriesListScreen(): ReactElement {
   const readMap = useReadReceiptsMap(inquiries.map((i) => i.id));
   // Start as true so the skeleton shows immediately on first render
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
 
   const load = async (silent = false) => {
@@ -104,11 +108,30 @@ export function InquiriesListScreen(): ReactElement {
     setError(undefined);
     try {
       const res = await api.listInquiries({ query: {} });
-      if (res.status === 200) setInquiries(res.body.items);
+      if (res.status === 200) {
+        setInquiries(res.body.items);
+        setNextCursor(res.body.nextCursor);
+      }
     } catch {
       setError(t('list.loadError'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await api.listInquiries({ query: { cursor: nextCursor } });
+      if (res.status === 200) {
+        setInquiries((prev) => [...prev, ...res.body.items]);
+        setNextCursor(res.body.nextCursor);
+      }
+    } catch {
+      // Best-effort; user can retry by scrolling again
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -141,7 +164,11 @@ export function InquiriesListScreen(): ReactElement {
     <Screen>
       <Text variant="title">{t('list.title')}</Text>
       {error ? <Banner kind="error" message={error} /> : null}
-      <ScrollView testID="inquiries-list-scroll" refreshControl={<RefreshControl refreshing={loading} onRefresh={() => { void load(true); }} />}>
+      <ScrollView
+        testID="inquiries-list-scroll"
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => { void load(true); }} />}
+        onScrollEndDrag={() => { void loadMore(); }}
+      >
         {inquiries.map((inq) => {
           const badge = getInquiryBadge(inq.targets);
           const placesLabel = inq.targets.length === 1
@@ -173,6 +200,18 @@ export function InquiriesListScreen(): ReactElement {
             </Card>
           );
         })}
+        {nextCursor ? (
+          <Pressable
+            style={styles.loadMoreBtn}
+            onPress={() => { void loadMore(); }}
+            disabled={loadingMore}
+            accessibilityRole="button"
+          >
+            <RNText style={styles.loadMoreText}>
+              {loadingMore ? '…' : t('list.loadMore')}
+            </RNText>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </Screen>
   );

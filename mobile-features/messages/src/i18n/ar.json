@@ -38,7 +38,8 @@
     "badgePending": "في الانتظار",
     "badgeSent": "مُرسَل",
     "badgeReplied": "تم الرد",
-    "badgeFailed": "فشل"
+    "badgeFailed": "فشل",
+    "loadMore": "تحميل المزيد"
   },
   "detail": {
     "title": "تفاصيل الطلب",
