@@ -4,7 +4,7 @@ import type { RouteName } from '@iraq-maps/mobile-kit';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent } from '@testing-library/react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Share } from 'react-native';
+import { Linking, Share } from 'react-native';
 import { PlaceScreen } from '../src';
 import { citadel, fakeApi, respond, show } from './render';
 
@@ -119,6 +119,22 @@ describe('PlaceScreen', () => {
   it.each(actionRoutes)('shows %s only once %s is delivered', async (key, route) => {
     const { view } = await open(details, { availableRoutes: ['map', 'place', route] });
     expect(shownActions(view)).toEqual([key]);
+  });
+
+  it('opens tel: link on phone press', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+    const { view } = await open();
+    await fireEvent.press(view.getByText(t('map:place.phone')));
+    expect(openURL).toHaveBeenCalledWith('tel:+9647701234567');
+    openURL.mockRestore();
+  });
+
+  it('opens https website link on website press', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+    const { view } = await open();
+    await fireEvent.press(view.getByText(t('map:place.website')));
+    expect(openURL).toHaveBeenCalledWith('https://example.com/citadel');
+    openURL.mockRestore();
   });
 
   it('shows each action once its screen is delivered, and opens it for this place', async () => {

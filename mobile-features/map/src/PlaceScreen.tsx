@@ -4,7 +4,7 @@ import { href, routes, useApi, useRouteAvailable } from '@iraq-maps/mobile-kit';
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import type { ReactElement } from 'react';
-import { Share, View } from 'react-native';
+import { Linking, Share, View } from 'react-native';
 import { openNow } from './hours';
 import { LoadStatus, ok, useLatest } from './load';
 import { isolate, kindLabel, t } from './strings';
@@ -72,8 +72,20 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
           trailing={open === null ? null : <Text tone={open ? 'default' : 'danger'}>{t(open ? 'place.openNow' : 'place.closedNow')}</Text>}
         />
       ) : null}
-      {phone ? <ListItem title={t('place.phone')} subtitle={isolate(phone)} /> : null}
-      {website ? <ListItem title={t('place.website')} subtitle={isolate(website)} /> : null}
+      {phone ? (
+        <ListItem
+          title={t('place.phone')}
+          subtitle={isolate(phone)}
+          onPress={() => Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => undefined)}
+        />
+      ) : null}
+      {website ? (
+        <ListItem
+          title={t('place.website')}
+          subtitle={isolate(website)}
+          onPress={() => Linking.openURL(website.startsWith('http') ? website : `https://${website}`).catch(() => undefined)}
+        />
+      ) : null}
       <InsightsSection place={place} onReportCrowded={reportCrowded} />
       <Button testID={testIDs.place.share} label={t('place.share')} onPress={share} />
       {(Object.keys(actions) as (keyof typeof actions)[]).map((route) => (
