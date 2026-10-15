@@ -157,6 +157,7 @@ export function HashtagFeedScreen(): ReactElement {
         </View>
       ) : (
         <FlatList
+          testID="hashtag-flatlist"
           data={posts}
           keyExtractor={(p) => p.id}
           contentContainerStyle={sharedStyles.listContent}
