@@ -32,6 +32,7 @@
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "*",
+    "expo-av": "*",
     "expo-image-picker": "*",
     "react": "*",
     "react-native": "*"

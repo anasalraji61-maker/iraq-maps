@@ -72,6 +72,7 @@ const makePost = (overrides: Partial<DiscoverPostType> = {}): DiscoverPostType =
   createdAt: '2024-04-01T00:00:00Z',
   bookmarkCount: 0,
   mentionedUserIds: [],
+  isPinned: false,
   ...overrides,
 });
 

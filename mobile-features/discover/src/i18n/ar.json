@@ -94,6 +94,7 @@
     "clearPlace": "✕",
     "addPhoto": "إضافة صورة",
     "photoLabel": "الصور (حتى 3)",
+    "photoLabelMulti": "الصور (حتى 5)",
     "uploadingPhoto": "جارٍ رفع الصورة...",
     "uploadError": "فشل رفع الصورة، حاول مجدداً",
     "removePhoto": "✕",
@@ -199,5 +200,67 @@
     "empty": "لم تتابع أي مستخدم بعد",
     "unfollow": "إلغاء المتابعة",
     "unfollowA11y": "إلغاء متابعة {userId}"
+  },
+  "poll": {
+    "addPoll": "إضافة استطلاع",
+    "removePoll": "إزالة الاستطلاع",
+    "label": "الاستطلاع",
+    "optionPlaceholder": "خيار {n}",
+    "addOption": "إضافة خيار",
+    "removeOption": "إزالة",
+    "vote": "التصويت",
+    "votedLabel": "{n} صوت",
+    "totalVotes": "{n} صوت إجمالاً",
+    "alreadyVoted": "لقد صوّتت مسبقاً",
+    "voteError": "فشل التصويت، حاول مجدداً",
+    "minOptions": "يجب إضافة خيارين على الأقل"
+  },
+  "video": {
+    "addVideo": "إضافة فيديو",
+    "removeVideo": "إزالة الفيديو",
+    "label": "الفيديو",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "tooLong": "مدة الفيديو تتجاوز 15 ثانية",
+    "uploadError": "فشل رفع الفيديو"
+  },
+  "gif": {
+    "addGif": "إضافة صورة GIF",
+    "label": "صور GIF",
+    "search": "بحث...",
+    "trending": "الرائجة",
+    "select": "اختر",
+    "empty": "لا توجد نتائج"
+  },
+  "translate": {
+    "translate": "ترجمة",
+    "translated": "(مُترجم)",
+    "showOriginal": "عرض الأصل",
+    "translating": "جاري الترجمة..."
+  },
+  "collections": {
+    "title": "المجموعات",
+    "createNew": "إنشاء مجموعة",
+    "collectionName": "اسم المجموعة",
+    "namePlaceholder": "مثال: سياحة، طعام...",
+    "create": "إنشاء",
+    "cancel": "إلغاء",
+    "save": "حفظ في مجموعة",
+    "saved": "محفوظ في: {name}",
+    "empty": "لا توجد مجموعات بعد",
+    "deleteConfirm": "حذف المجموعة؟",
+    "deleteMsg": "سيتم حذف المجموعة فقط، لن تُحذف المنشورات.",
+    "deleteOk": "حذف",
+    "deleteCancel": "إلغاء",
+    "postsCount": "{n} منشور",
+    "nameEmpty": "يرجى إدخال اسم المجموعة"
+  },
+  "commentPin": {
+    "pin": "تثبيت التعليق",
+    "unpin": "إلغاء تثبيت التعليق",
+    "pinnedLabel": "تعليق مثبّت",
+    "pinSuccess": "تم تثبيت التعليق",
+    "unpinSuccess": "تم إلغاء تثبيت التعليق",
+    "pinError": "فشل تثبيت التعليق"
   }
 }

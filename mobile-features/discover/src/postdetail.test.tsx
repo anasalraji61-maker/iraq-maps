@@ -72,6 +72,7 @@ const mockPost: DiscoverPostType = {
   createdAt: '2024-06-01T00:00:00Z',
   bookmarkCount: 0,
   mentionedUserIds: [],
+  isPinned: false,
 };
 
 const makeComment = (id = 'comment-001') => ({

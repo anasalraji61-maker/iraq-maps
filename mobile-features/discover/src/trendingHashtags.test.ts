@@ -20,6 +20,7 @@ function makePost(body: string): DiscoverPostType {
     createdAt: new Date().toISOString(),
     bookmarkCount: 0,
     mentionedUserIds: [],
+    isPinned: false,
   };
 }
 

@@ -94,6 +94,7 @@
     "clearPlace": "✕",
     "addPhoto": "Add photo",
     "photoLabel": "Photos (up to 3)",
+    "photoLabelMulti": "Photos (up to 5)",
     "uploadingPhoto": "Uploading photo...",
     "uploadError": "Failed to upload photo, try again",
     "removePhoto": "✕",
@@ -199,5 +200,67 @@
     "empty": "No followed users yet",
     "unfollow": "Unfollow",
     "unfollowA11y": "Unfollow {userId}"
+  },
+  "poll": {
+    "addPoll": "Add poll",
+    "removePoll": "Remove poll",
+    "label": "Poll",
+    "optionPlaceholder": "Option {n}",
+    "addOption": "Add option",
+    "removeOption": "Remove",
+    "vote": "Vote",
+    "votedLabel": "{n} vote",
+    "totalVotes": "{n} total votes",
+    "alreadyVoted": "You already voted",
+    "voteError": "Failed to vote, try again",
+    "minOptions": "Please add at least 2 options"
+  },
+  "video": {
+    "addVideo": "Add video",
+    "removeVideo": "Remove video",
+    "label": "Video",
+    "play": "Play",
+    "pause": "Pause",
+    "tooLong": "Video exceeds 15 seconds",
+    "uploadError": "Failed to upload video"
+  },
+  "gif": {
+    "addGif": "Add GIF",
+    "label": "GIFs",
+    "search": "Search...",
+    "trending": "Trending",
+    "select": "Select",
+    "empty": "No results"
+  },
+  "translate": {
+    "translate": "Translate",
+    "translated": "(translated)",
+    "showOriginal": "Show original",
+    "translating": "Translating..."
+  },
+  "collections": {
+    "title": "Collections",
+    "createNew": "New collection",
+    "collectionName": "Collection name",
+    "namePlaceholder": "e.g. Travel, Food...",
+    "create": "Create",
+    "cancel": "Cancel",
+    "save": "Save to collection",
+    "saved": "Saved in: {name}",
+    "empty": "No collections yet",
+    "deleteConfirm": "Delete collection?",
+    "deleteMsg": "Only the collection is deleted, not the posts.",
+    "deleteOk": "Delete",
+    "deleteCancel": "Cancel",
+    "postsCount": "{n} posts",
+    "nameEmpty": "Please enter a collection name"
+  },
+  "commentPin": {
+    "pin": "Pin comment",
+    "unpin": "Unpin comment",
+    "pinnedLabel": "Pinned comment",
+    "pinSuccess": "Comment pinned",
+    "unpinSuccess": "Comment unpinned",
+    "pinError": "Failed to pin comment"
   }
 }

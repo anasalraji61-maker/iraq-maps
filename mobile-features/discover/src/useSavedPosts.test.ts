@@ -26,6 +26,7 @@ function makePost(id: string, createdAt = '2026-10-15T12:00:00.000Z'): DiscoverP
     createdAt,
     bookmarkCount: 0,
     mentionedUserIds: [],
+    isPinned: false,
   };
 }
 

@@ -395,6 +395,8 @@ export function CommentCard({
   onReply,
   onDelete,
   onLike,
+  onPin,
+  pinnedCommentId,
   currentUserId,
   smallAvatar,
   t,
@@ -404,6 +406,9 @@ export function CommentCard({
   onDelete?: (commentId: string) => void;
   /** Called when the like button is tapped; returns updated likeCount. @M175 */
   onLike?: (commentId: string, currentlyLiked: boolean) => void;
+  /** Called to pin or unpin a comment; post author only. */
+  onPin?: (commentId: string) => void;
+  pinnedCommentId?: string;
   currentUserId?: string;
   smallAvatar?: boolean;
   t: typeof TFunc;
@@ -476,6 +481,18 @@ export function CommentCard({
             accessibilityLabel={t('comments.deleteComment')}
           >
             <Text style={[sharedStyles.commentActionText, { color: '#C62828' }]}>{t('comments.deleteComment')}</Text>
+          </Pressable>
+        ) : null}
+        {onPin ? (
+          <Pressable
+            style={sharedStyles.commentActionBtn}
+            onPress={() => onPin(item.id)}
+            accessibilityRole="button"
+            accessibilityLabel={pinnedCommentId === item.id ? t('commentPin.unpin') : t('commentPin.pin')}
+          >
+            <Text style={[sharedStyles.commentActionText, pinnedCommentId === item.id ? { color: COLORS.primary } : {}]}>
+              {pinnedCommentId === item.id ? t('commentPin.unpin') : t('commentPin.pin')}
+            </Text>
           </Pressable>
         ) : null}
       </View>

@@ -22,7 +22,7 @@ import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { sharedStyles, COLORS } from './shared';
 
-const MAX_PHOTOS = 3;
+const MAX_PHOTOS = 5;
 
 I18nManager.forceRTL(true);
 
@@ -51,6 +51,17 @@ interface UploadedPhoto {
   assetId: string;
 }
 
+// ─── Poll types ───────────────────────────────────────────────────────────────
+
+interface PollOption {
+  id: string;
+  text: string;
+}
+
+interface PollData {
+  options: PollOption[];
+}
+
 const DRAFT_KEY = '@iraq-maps/create-post/draft';
 
 export function CreatePostScreen(): ReactElement {
@@ -76,6 +87,15 @@ export function CreatePostScreen(): ReactElement {
   const [mentionResults, setMentionResults] = useState<string[]>([]);
   const [mentionLoading, setMentionLoading] = useState(false);
   const mentionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Poll state
+  const [pollData, setPollData] = useState<PollData | null>(null);
+  const [pollError, setPollError] = useState<string | undefined>();
+
+  // Video state
+  const [videoUri, setVideoUri] = useState<string | undefined>();
+  const [videoAssetId, setVideoAssetId] = useState<string | undefined>();
+  const [videoUploading, setVideoUploading] = useState(false);
 
   // Restore draft on mount
   useEffect(() => {
@@ -211,18 +231,124 @@ export function CreatePostScreen(): ReactElement {
     setPhotos((prev) => prev.filter((p) => p.assetId !== assetId));
   }, []);
 
+  const handleAddVideo = useCallback(async () => {
+    if (videoUri) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['videos'],
+      videoMaxDuration: 15,
+      allowsEditing: false,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0]!;
+    const mime = 'video/mp4';
+    const size = asset.fileSize ?? 0;
+    setVideoUploading(true);
+    setError(undefined);
+    try {
+      const ticketRes = await fetch(`${baseUrl}/v1/media/uploads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purpose: 'provider_photo', mime, size }),
+      });
+      if (!ticketRes.ok) { setError(t('video.uploadError')); setVideoUploading(false); return; }
+      const ticket = await ticketRes.json() as { assetId: string; uploadUrl: string; headers: Record<string, string> };
+      const fileRes = await fetch(asset.uri);
+      const blob = await fileRes.blob();
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', ticket.uploadUrl);
+        Object.entries(ticket.headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`PUT ${xhr.status}`)));
+        xhr.onerror = () => reject(new Error('network'));
+        xhr.send(blob);
+      });
+      const completeRes = await fetch(`${baseUrl}/v1/media/uploads/${encodeURIComponent(ticket.assetId)}/complete`, {
+        method: 'POST',
+      });
+      if (!completeRes.ok && completeRes.status !== 409) { setError(t('video.uploadError')); setVideoUploading(false); return; }
+      setVideoUri(asset.uri);
+      setVideoAssetId(ticket.assetId);
+    } catch {
+      setError(t('video.uploadError'));
+    } finally {
+      setVideoUploading(false);
+    }
+  }, [videoUri, baseUrl]);
+
+  const handleRemoveVideo = useCallback(() => {
+    setVideoUri(undefined);
+    setVideoAssetId(undefined);
+  }, []);
+
+  // Poll handlers
+  const handleTogglePoll = useCallback(() => {
+    if (pollData) {
+      setPollData(null);
+      setPollError(undefined);
+    } else {
+      setPollData({
+        options: [
+          { id: `opt_${Date.now()}_1`, text: '' },
+          { id: `opt_${Date.now()}_2`, text: '' },
+        ],
+      });
+    }
+  }, [pollData]);
+
+  const handlePollOptionChange = useCallback((optId: string, text: string) => {
+    setPollData((prev) => {
+      if (!prev) return prev;
+      return { ...prev, options: prev.options.map((o) => o.id === optId ? { ...o, text } : o) };
+    });
+  }, []);
+
+  const handleAddPollOption = useCallback(() => {
+    setPollData((prev) => {
+      if (!prev || prev.options.length >= 4) return prev;
+      return { ...prev, options: [...prev.options, { id: `opt_${Date.now()}`, text: '' }] };
+    });
+  }, []);
+
+  const handleRemovePollOption = useCallback((optId: string) => {
+    setPollData((prev) => {
+      if (!prev || prev.options.length <= 2) return prev;
+      return { ...prev, options: prev.options.filter((o) => o.id !== optId) };
+    });
+  }, []);
+
   const handleSubmit = async () => {
     if (!body.trim() || submitting) return;
+    // Validate poll if present
+    if (pollData) {
+      const filledOptions = pollData.options.filter((o) => o.text.trim());
+      if (filledOptions.length < 2) {
+        setPollError(t('poll.minOptions'));
+        return;
+      }
+      setPollError(undefined);
+    }
     setSubmitting(true);
     setError(undefined);
+    const pollMetadata = pollData
+      ? {
+          poll: {
+            options: pollData.options
+              .filter((o) => o.text.trim())
+              .map((o) => ({ id: o.id, text: o.text.trim(), votes: 0 })),
+          },
+        }
+      : undefined;
     try {
       const res = await api.createPost({
         body: {
           type: postType,
           body: body.trim(),
-          mediaAssetIds: photos.map((p) => p.assetId),
+          mediaAssetIds: [...photos.map((p) => p.assetId), ...(videoAssetId ? [videoAssetId] : [])],
           ...(selectedPlace ? { placeId: selectedPlace.id } : {}),
           ...(postCategory ? { category: postCategory } : {}),
+          ...(pollMetadata ? { metadata: pollMetadata } : {}),
         },
       });
       if (res.status === 201) {
@@ -326,7 +452,7 @@ export function CreatePostScreen(): ReactElement {
           </View>
         ) : null}
 
-        <Text style={styles.label}>{t('create.photoLabel')}</Text>
+        <Text style={styles.label}>{t('create.photoLabelMulti')}</Text>
         <View style={styles.photoRow}>
           {photos.map((p) => (
             <View key={p.assetId} style={styles.photoThumbWrap}>
@@ -355,6 +481,87 @@ export function CreatePostScreen(): ReactElement {
         {uploadProgress !== null ? (
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${uploadProgress}%` }]} />
+          </View>
+        ) : null}
+
+        {/* Video section */}
+        <Text style={styles.label}>{t('video.label')}</Text>
+        {videoUri ? (
+          <View style={styles.videoPreviewWrap}>
+            <View style={styles.videoPreview} accessibilityLabel={t('video.label')}>
+              <Text style={styles.videoPlayIcon}>{t('video.play')}</Text>
+            </View>
+            <Pressable
+              style={styles.videoRemoveBtn}
+              onPress={handleRemoveVideo}
+              accessibilityRole="button"
+              accessibilityLabel={t('video.removeVideo')}
+            >
+              <Text style={styles.videoRemoveText}>{t('create.removePhoto')}</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable
+            style={styles.addVideoBtn}
+            onPress={() => { void handleAddVideo(); }}
+            disabled={videoUploading}
+            accessibilityRole="button"
+            accessibilityLabel={t('video.addVideo')}
+          >
+            {videoUploading ? (
+              <ActivityIndicator size="small" color={COLORS.primary} />
+            ) : (
+              <Text style={styles.addVideoBtnText}>{t('video.addVideo')}</Text>
+            )}
+          </Pressable>
+        )}
+
+        {/* Poll section */}
+        <Pressable
+          style={styles.togglePollBtn}
+          onPress={handleTogglePoll}
+          accessibilityRole="button"
+          accessibilityLabel={pollData ? t('poll.removePoll') : t('poll.addPoll')}
+        >
+          <Text style={styles.togglePollText}>{pollData ? t('poll.removePoll') : t('poll.addPoll')}</Text>
+        </Pressable>
+
+        {pollData ? (
+          <View style={styles.pollContainer}>
+            <Text style={styles.label}>{t('poll.label')}</Text>
+            {pollError ? <Text style={styles.pollError}>{pollError}</Text> : null}
+            {pollData.options.map((opt, idx) => (
+              <View key={opt.id} style={styles.pollOptionRow}>
+                <TextInput
+                  style={styles.pollOptionInput}
+                  value={opt.text}
+                  onChangeText={(text) => handlePollOptionChange(opt.id, text)}
+                  placeholder={t('poll.optionPlaceholder', { n: idx + 1 })}
+                  placeholderTextColor="#999"
+                  maxLength={80}
+                />
+                {pollData.options.length > 2 ? (
+                  <Pressable
+                    style={styles.pollRemoveBtn}
+                    onPress={() => handleRemovePollOption(opt.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('poll.removeOption')}
+                  >
+                    <Text style={styles.pollRemoveBtnText}>{t('create.removePhoto')}</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ))}
+            {pollData.options.length < 4 ? (
+              <Pressable
+                style={styles.addPollOptionBtn}
+                onPress={handleAddPollOption}
+                accessibilityRole="button"
+                accessibilityLabel={t('poll.addOption')}
+              >
+                <Text style={styles.addPollOptionText}>{t('poll.addOption')}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
@@ -626,5 +833,120 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
     paddingStart: 8,
+  },
+  togglePollBtn: {
+    backgroundColor: COLORS.primaryXLight,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 12,
+    alignSelf: 'flex-start',
+  },
+  togglePollText: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  pollContainer: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  pollOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+  pollOptionInput: {
+    flex: 1,
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+  },
+  pollRemoveBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.errorBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pollRemoveBtnText: {
+    fontSize: 12,
+    color: COLORS.error,
+    fontWeight: '700',
+  },
+  addPollOptionBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  addPollOptionText: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  pollError: {
+    fontSize: 13,
+    color: COLORS.error,
+    marginBottom: 8,
+  },
+  videoPreviewWrap: {
+    marginBottom: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  videoPreview: {
+    width: '100%',
+    height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoPlayIcon: {
+    fontSize: 40,
+    color: '#FFF',
+  },
+  videoRemoveBtn: {
+    position: 'absolute',
+    top: 8,
+    end: 8,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 14,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoRemoveText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  addVideoBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  addVideoBtnText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
   },
 });

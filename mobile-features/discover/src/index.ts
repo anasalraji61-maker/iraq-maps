@@ -11,3 +11,5 @@ export { useFollows } from './useFollows';
 export { useBlockedUsers } from './useBlockedUsers';
 export { BlockedUsersScreen } from './screens/BlockedUsersScreen';
 export { FollowedUsersScreen } from './screens/FollowedUsersScreen';
+export { useCollections } from './useCollections';
+export { GifPicker } from './screens/GifPicker';

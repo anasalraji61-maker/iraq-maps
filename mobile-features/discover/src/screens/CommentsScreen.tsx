@@ -6,6 +6,7 @@ import { useState, useCallback, useEffect, useRef, type ReactElement } from 'rea
 import {
   FlatList,
   I18nManager,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,6 +19,8 @@ import {
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { sharedStyles, COLORS, CommentCard, CommentInputRow, SkeletonBlock } from './shared';
+import { GifPicker } from './GifPicker';
+import type { MockGif } from '../mockGifs';
 
 I18nManager.forceRTL(true);
 
@@ -56,6 +59,9 @@ export function CommentsScreen(): ReactElement {
   const [replyingToAuthor, setReplyingToAuthor] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | undefined>();
+  const [gifPickerVisible, setGifPickerVisible] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<MockGif | null>(null);
+  const [pinnedCommentId, setPinnedCommentId] = useState<string | undefined>();
   const listRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput | null>(null);
 
@@ -110,16 +116,28 @@ export function CommentsScreen(): ReactElement {
     setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
 
+  const handleGifSelect = useCallback((gif: MockGif) => {
+    setSelectedGif(gif);
+    setGifPickerVisible(false);
+  }, []);
+
+  const handlePinComment = useCallback((commentId: string) => {
+    // Local-only pin state — no API until endpoint is added to contracts
+    setPinnedCommentId((prev) => (prev === commentId ? undefined : commentId));
+  }, []);
+
   const handleSend = useCallback(async () => {
     const text = commentText.trim();
-    if (!text || sending || !postId) return;
+    if ((!text && !selectedGif) || sending || !postId) return;
     haptics.sent();
     setSending(true);
     setSendError(undefined);
+    const bodyText = selectedGif ? `${text} ${selectedGif.url}`.trim() : text;
     try {
-      const res = await api.createComment({ params: { postId }, body: { body: text } });
+      const res = await api.createComment({ params: { postId }, body: { body: bodyText } });
       if (res.status === 201) {
         setCommentText('');
+        setSelectedGif(null);
         setComments((prev) => [...prev, res.body]);
         setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
       } else {
@@ -170,13 +188,33 @@ export function CommentsScreen(): ReactElement {
 
       <FlatList
         ref={listRef}
-        data={comments}
+        data={[
+          ...comments.filter((c) => c.id === pinnedCommentId),
+          ...comments.filter((c) => c.id !== pinnedCommentId),
+        ]}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[COLORS.primary]} tintColor={COLORS.primary} />
         }
-        renderItem={({ item }) => <CommentCard item={item} onReply={handleReply} onDelete={(id) => { void handleDeleteComment(id); }} currentUserId={currentUserId} t={t} />}
+        renderItem={({ item }) => (
+          <View>
+            {item.id === pinnedCommentId ? (
+              <View style={styles.pinnedBanner}>
+                <Text style={styles.pinnedBannerText}>{t('commentPin.pinnedLabel')}</Text>
+              </View>
+            ) : null}
+            <CommentCard
+              item={item}
+              onReply={handleReply}
+              onDelete={(id) => { void handleDeleteComment(id); }}
+              onPin={(id) => handlePinComment(id)}
+              pinnedCommentId={pinnedCommentId}
+              currentUserId={currentUserId}
+              t={t}
+            />
+          </View>
+        )}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>
@@ -218,13 +256,46 @@ export function CommentsScreen(): ReactElement {
           </Pressable>
         </View>
       ) : null}
-      <CommentInputRow
-        value={commentText}
-        onChangeText={setCommentText}
-        onSend={handleSend}
-        sending={sending}
-        inputRef={inputRef}
-        t={t}
+
+      {selectedGif ? (
+        <View style={styles.gifPreviewRow}>
+          <Image source={{ uri: selectedGif.thumbUrl }} style={styles.gifPreview} resizeMode="cover" />
+          <Pressable
+            style={styles.gifRemoveBtn}
+            onPress={() => setSelectedGif(null)}
+            accessibilityRole="button"
+            accessibilityLabel={t('video.removeVideo')}
+          >
+            <Text style={styles.gifRemoveText}>{t('create.removePhoto')}</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      <View style={styles.inputToolbar}>
+        <Pressable
+          style={styles.gifBtn}
+          onPress={() => setGifPickerVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('gif.addGif')}
+        >
+          <Text style={styles.gifBtnText}>{t('gif.label')}</Text>
+        </Pressable>
+        <View style={styles.inputFlex}>
+          <CommentInputRow
+            value={commentText}
+            onChangeText={setCommentText}
+            onSend={handleSend}
+            sending={sending}
+            inputRef={inputRef}
+            t={t}
+          />
+        </View>
+      </View>
+
+      <GifPicker
+        visible={gifPickerVisible}
+        onClose={() => setGifPickerVisible(false)}
+        onSelect={handleGifSelect}
       />
     </KeyboardAvoidingView>
   );
@@ -273,4 +344,56 @@ const styles = StyleSheet.create({
   replyBannerClose: { fontSize: 14, color: '#666', paddingHorizontal: 6 },
   loadMoreBtn: { alignItems: 'center', paddingVertical: 12 },
   loadMoreText: { fontSize: 14, color: COLORS.primary, fontWeight: '500' },
+  pinnedBanner: {
+    backgroundColor: COLORS.primaryXLight,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  pinnedBannerText: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  inputToolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.border,
+  },
+  inputFlex: { flex: 1 },
+  gifBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+  },
+  gifBtnText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  gifPreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: COLORS.inputBg,
+  },
+  gifPreview: {
+    width: 60,
+    height: 45,
+    borderRadius: 6,
+  },
+  gifRemoveBtn: {
+    marginStart: 8,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: COLORS.errorBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gifRemoveText: {
+    fontSize: 11,
+    color: COLORS.error,
+    fontWeight: '700',
+  },
 });

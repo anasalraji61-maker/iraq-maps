@@ -59,10 +59,99 @@ function PostDetailSkeleton(): ReactElement {
 
 type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 
+// ─── Poll types ───────────────────────────────────────────────────────────────
+
+interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+}
+
+interface PollMeta {
+  options: PollOption[];
+}
+
+function PollCard({ poll, postId: _postId }: { poll: PollMeta; postId: string }): ReactElement {
+  const [votedId, setVotedId] = useState<string | null>(null);
+  const [options, setOptions] = useState<PollOption[]>(poll.options);
+  const [error, setError] = useState<string | undefined>();
+
+  const total = options.reduce((sum, o) => sum + o.votes, 0);
+
+  const handleVote = useCallback((optionId: string) => {
+    if (votedId) { setError(t('poll.alreadyVoted')); return; }
+    // Local optimistic update — no API call until poll endpoint exists
+    setVotedId(optionId);
+    setOptions((prev) => prev.map((o) => o.id === optionId ? { ...o, votes: o.votes + 1 } : o));
+  }, [votedId]);
+
+  return (
+    <View style={pollStyles.container}>
+      {options.map((opt) => {
+        const pct = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
+        const isVoted = votedId === opt.id;
+        return (
+          <Pressable
+            key={opt.id}
+            style={[pollStyles.option, isVoted && pollStyles.optionVoted]}
+            onPress={() => handleVote(opt.id)}
+            accessibilityRole="button"
+            accessibilityLabel={opt.text}
+            disabled={!!votedId}
+          >
+            {votedId ? (
+              <View style={[pollStyles.bar, { width: `${pct}%` as unknown as number }]} />
+            ) : null}
+            <Text style={[pollStyles.optionText, isVoted && pollStyles.optionTextVoted]}>{opt.text}</Text>
+            {votedId ? (
+              <Text style={pollStyles.pct}>{pct}%</Text>
+            ) : null}
+          </Pressable>
+        );
+      })}
+      {error ? <Text style={pollStyles.error}>{error}</Text> : null}
+      <Text style={pollStyles.total}>{t('poll.totalVotes', { n: total })}</Text>
+    </View>
+  );
+}
+
+const pollStyles = StyleSheet.create({
+  container: { marginBottom: 10 },
+  option: {
+    backgroundColor: COLORS.inputBg,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  optionVoted: { borderWidth: 1.5, borderColor: COLORS.primary },
+  bar: {
+    position: 'absolute',
+    start: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: COLORS.primaryXLight,
+    borderRadius: 8,
+  },
+  optionText: { flex: 1, fontSize: 14, color: COLORS.textPrimary, zIndex: 1 },
+  optionTextVoted: { color: COLORS.primary, fontWeight: '600' },
+  pct: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500', zIndex: 1 },
+  total: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto' },
+  error: { fontSize: 12, color: COLORS.error, marginBottom: 4 },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onReportPress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void; isOwn: boolean; onMorePress: () => void; onReportPress: () => void }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const [linkCopied, setLinkCopied] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+  const [translatedBody, setTranslatedBody] = useState<string | null>(null);
+  const [translating, setTranslating] = useState(false);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -77,9 +166,30 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
     });
   }, [post.id]);
 
-  const images = post.mediaAssetIds
+  const handleTranslate = useCallback(() => {
+    if (translatedBody) {
+      setTranslatedBody(null);
+      return;
+    }
+    setTranslating(true);
+    // Mock translation — append "(translated)" suffix after short delay
+    setTimeout(() => {
+      setTranslatedBody(`${post.body} ${t('translate.translated')}`);
+      setTranslating(false);
+    }, 600);
+  }, [post.body, translatedBody]);
+
+  const mediaItems = post.mediaAssetIds
     .map((id) => ({ id, url: mediaUrls[id] }))
     .filter((img): img is { id: string; url: string } => !!img.url);
+
+  const isVideoUrl = (url: string) => /\.(mp4|webm|mov)(\?|$)/i.test(url);
+  const images = mediaItems.filter((m) => !isVideoUrl(m.url));
+  const videos = mediaItems.filter((m) => isVideoUrl(m.url));
+
+  // Extract poll from metadata if present (metadata is stored in post as untyped extra field)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pollMeta = ((post as any).metadata as { poll?: PollMeta } | undefined)?.poll;
 
   return (
     <View style={styles.postCard}>
@@ -99,6 +209,13 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
           ))}
         </ScrollView>
       )}
+      {videos.map((vid) => (
+        <View key={vid.id} style={styles.videoWrap} accessibilityLabel={t('video.label')}>
+          <View style={styles.videoPlayer}>
+            <Text style={styles.videoPlayIcon}>{t('video.play')}</Text>
+          </View>
+        </View>
+      ))}
       <Pressable
         onLongPress={() => {
           void Clipboard.setStringAsync(post.body).then(() => {
@@ -108,9 +225,14 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
         }}
         accessibilityHint={t('postDetail.bodyLongPressHint')}
       >
-        <HashtagText text={post.body} style={styles.bodyText} onHashtagPress={onHashtagPress} />
+        <HashtagText
+          text={translatedBody ?? post.body}
+          style={styles.bodyText}
+          onHashtagPress={onHashtagPress}
+        />
       </Pressable>
       {copyFeedback ? <Text style={styles.copyFeedback}>{copyFeedback}</Text> : null}
+      {pollMeta ? <PollCard poll={pollMeta} postId={post.id} /> : null}
       <View style={styles.metaRow}>
         <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
         {post.viewCount > 0 && (
@@ -118,6 +240,16 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
         )}
       </View>
       <View style={styles.actionRow}>
+        <Pressable
+          style={styles.shareBtn}
+          onPress={handleTranslate}
+          accessibilityRole="button"
+          accessibilityLabel={translatedBody ? t('translate.showOriginal') : t('translate.translate')}
+        >
+          <Text style={styles.shareBtnText}>
+            {translating ? t('translate.translating') : (translatedBody ? t('translate.showOriginal') : t('translate.translate'))}
+          </Text>
+        </Pressable>
         <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button" accessibilityLabel={t('post.share')}>
           <Text style={styles.shareBtnText}>{t('post.share')}</Text>
         </Pressable>
@@ -494,6 +626,9 @@ const styles = StyleSheet.create({
   imageStrip: { marginBottom: 10, marginHorizontal: -14 },
   imageStripContent: { paddingHorizontal: 14, gap: 8 },
   detailImage: { width: 240, height: 180, borderRadius: 10 },
+  videoWrap: { marginBottom: 10, borderRadius: 10, overflow: 'hidden', backgroundColor: '#000' },
+  videoPlayer: { width: '100%', height: 220, alignItems: 'center', justifyContent: 'center' },
+  videoPlayIcon: { fontSize: 48, color: '#FFF' },
   actionRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   shareBtn: { backgroundColor: COLORS.inputBg, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   shareBtnText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500' },

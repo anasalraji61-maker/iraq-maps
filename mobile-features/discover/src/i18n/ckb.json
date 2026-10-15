@@ -94,6 +94,7 @@
     "clearPlace": "✕",
     "addPhoto": "وێنە زیاد بکە",
     "photoLabel": "وێنەکان (تا ٣)",
+    "photoLabelMulti": "وێنەکان (تا ٥)",
     "uploadingPhoto": "بارکردنی وێنە...",
     "uploadError": "هەڵەی بارکردنی وێنە",
     "removePhoto": "✕",
@@ -199,5 +200,67 @@
     "empty": "هیچ بەکارهێنەرێکت بەدواناکەوێت",
     "unfollow": "بەدواکەوتن پەکێشە",
     "unfollowA11y": "بەدواکەوتنی {userId} پەکێشە"
+  },
+  "poll": {
+    "addPoll": "زیادکردنی دەنگدان",
+    "removePoll": "لابردنی دەنگدان",
+    "label": "دەنگدان",
+    "optionPlaceholder": "هەڵبژاردن {n}",
+    "addOption": "زیادکردنی هەڵبژاردن",
+    "removeOption": "لابردن",
+    "vote": "دەنگدان",
+    "votedLabel": "{n} دەنگ",
+    "totalVotes": "{n} دەنگی گشتی",
+    "alreadyVoted": "پێشتر دەنگت داوە",
+    "voteError": "هەڵەی دەنگدان",
+    "minOptions": "تکایە دوو هەڵبژاردن زیاد بکە"
+  },
+  "video": {
+    "addVideo": "زیادکردنی ڤیدیۆ",
+    "removeVideo": "لابردنی ڤیدیۆ",
+    "label": "ڤیدیۆ",
+    "play": "لێدان",
+    "pause": "وەستاندن",
+    "tooLong": "ڤیدیۆ زیاتر لە ١٥ چرکە",
+    "uploadError": "هەڵەی بارکردنی ڤیدیۆ"
+  },
+  "gif": {
+    "addGif": "زیادکردنی GIF",
+    "label": "GIF",
+    "search": "گەڕان...",
+    "trending": "گەرمەکان",
+    "select": "هەڵبژاردن",
+    "empty": "هیچ ئەنجامێک نییە"
+  },
+  "translate": {
+    "translate": "وەرگێڕان",
+    "translated": "(وەرگێڕدراو)",
+    "showOriginal": "نیشاندانی ئەسڵ",
+    "translating": "وەرگێڕان..."
+  },
+  "collections": {
+    "title": "کۆکراوەکان",
+    "createNew": "کۆکراوەی نوێ",
+    "collectionName": "ناوی کۆکراوە",
+    "namePlaceholder": "نموونە: گەشت، خواردن...",
+    "create": "دروستکردن",
+    "cancel": "هەڵوەشاندنەوە",
+    "save": "پاراستن لە کۆکراوە",
+    "saved": "پارێزراو لە: {name}",
+    "empty": "هیچ کۆکراوەیەک نییە",
+    "deleteConfirm": "کۆکراوەکە بسڕیتەوە؟",
+    "deleteMsg": "تەنها کۆکراوەکە دەسڕدرێتەوە، پۆستەکان نا.",
+    "deleteOk": "سڕینەوە",
+    "deleteCancel": "هەڵوەشاندنەوە",
+    "postsCount": "{n} پۆست",
+    "nameEmpty": "تکایە ناوی کۆکراوە بنووسە"
+  },
+  "commentPin": {
+    "pin": "پیننەرەکردنی کۆمێنت",
+    "unpin": "لابردنی پیننەرەی کۆمێنت",
+    "pinnedLabel": "کۆمێنتی پیننەرەکراو",
+    "pinSuccess": "کۆمێنت پیننەرەکرا",
+    "unpinSuccess": "پیننەرەکە لادرا",
+    "pinError": "هەڵەی پیننەرەکردنی کۆمێنت"
   }
 }
