@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { testIDs } from '@iraq-maps/contracts';
 import { registerNamespace, t } from '@iraq-maps/i18n';
 import { AvailableRoutesProvider, href, SessionProvider, useApi, useRouteAvailable, useSession } from '@iraq-maps/mobile-kit';
-import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, tokens, useUiFonts } from '@iraq-maps/ui';
+import { Banner, Button, EmptyState, ErrorToast, IconButton, Screen, TextField, ThemeProvider, tokens, useUiFonts } from '@iraq-maps/ui';
 import * as SecureStore from 'expo-secure-store';
 import { Stack, Tabs, useRouter } from 'expo-router';
 import { SymbolView, type AndroidSymbol } from 'expo-symbols';
@@ -190,6 +190,7 @@ export function RootLayout() {
     );
   }
   return (
+    <ThemeProvider>
     <ErrorBoundary>
       <NetworkBanner />
       <SessionProvider apiBaseUrl={apiBaseUrl} onServerError={() => setServerError(true)}>
@@ -207,6 +208,7 @@ export function RootLayout() {
       </SessionProvider>
       {serverError ? <ErrorToast message={t('shell:error.serverError')} /> : null}
     </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 

@@ -8,6 +8,7 @@ export const availableRoutes = (): RouteName[] => [
   'accountLanguage',
   'accountSettings',
   'accountNotifPrefs',
+  'accountTheme',
   'authPhone',
   'authOtp',
   'authName',

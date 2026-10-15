@@ -64,7 +64,8 @@
     "terms": "Terms of use",
     "version": "Version {version} (build {build})",
     "licenses": "Open-source licences",
-    "notifPrefs": "Notification Preferences"
+    "notifPrefs": "Notification Preferences",
+    "theme": "Appearance"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",
@@ -125,5 +126,11 @@
   },
   "licenses": {
     "title": "Open-source licences"
+  },
+  "theme": {
+    "title": "Appearance",
+    "system": "System default",
+    "light": "Light",
+    "dark": "Dark"
   }
 }
