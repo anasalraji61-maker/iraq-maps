@@ -381,7 +381,11 @@ function RoutesTab(): ReactElement {
 
   const load = useCallback(async (isRefresh = false) => {
     if (!isRefresh) setLoading(true);
-    setRoutes(await recentRoutes.list());
+    try {
+      setRoutes(await recentRoutes.list());
+    } catch {
+      // ignore – empty list shown on error
+    }
     setLoading(false);
     setRefreshing(false);
   }, []);

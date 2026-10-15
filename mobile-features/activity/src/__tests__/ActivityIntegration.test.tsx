@@ -5,6 +5,7 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { act, render, fireEvent, waitFor } from '@testing-library/react-native';
 import type { RecentRoute, SavedPlace } from '@iraq-maps/mobile-kit';
+import { ActivityScreen } from '../ActivityScreen';
 
 // ─── Mock holders ──────────────────────────────────────────────────────────
 
@@ -99,8 +100,8 @@ describe('ActivityScreen — error recovery', () => {
   it('shows empty state after notifications API fails', async () => {
     mockListNotifications.mockRejectedValueOnce(new Error('network error'));
 
-    const { ActivityScreen } = await import('../ActivityScreen');
-    const { queryByTestId } = render(<ActivityScreen />);
+
+    const { queryByTestId } = await render(<ActivityScreen />);
 
     await waitFor(() => {
       // After error, skeletons should be gone
@@ -111,12 +112,12 @@ describe('ActivityScreen — error recovery', () => {
   it('shows empty state after routes API fails', async () => {
     mockListRoutes.mockRejectedValueOnce(new Error('network error'));
 
-    const { ActivityScreen } = await import('../ActivityScreen');
-    const { getByText } = render(<ActivityScreen />);
+
+    const { getByText } = await render(<ActivityScreen />);
 
     // Switch to routes tab
     await act(async () => {
-      const routesTab = getByText('routes');
+      const routesTab = getByText('tabRoutes');
       if (routesTab) fireEvent.press(routesTab);
     });
 
@@ -133,8 +134,8 @@ describe('ActivityScreen — offline behavior', () => {
   it('handles notifications API returning a network-like error gracefully', async () => {
     mockListNotifications.mockRejectedValue(new Error('Failed to fetch'));
 
-    const { ActivityScreen } = await import('../ActivityScreen');
-    const view = render(<ActivityScreen />);
+
+    const view = await render(<ActivityScreen />);
     queryByTestId = view.queryByTestId;
 
     await waitFor(() => {
@@ -160,8 +161,8 @@ describe('ActivityScreen — notification tap navigation', () => {
       body: { items: [notif], unreadCount: 1, nextCursor: null },
     });
 
-    const { ActivityScreen } = await import('../ActivityScreen');
-    const { getAllByText, queryAllByText } = render(<ActivityScreen />);
+
+    const { getAllByText } = await render(<ActivityScreen />);
 
     await waitFor(() => {
       const items = getAllByText('تم الإعجاب بمنشورك');
@@ -180,8 +181,8 @@ describe('ActivityScreen — notification tap navigation', () => {
 
 describe('ActivityScreen — pull-to-refresh', () => {
   it('re-fetches notifications on refresh', async () => {
-    const { ActivityScreen } = await import('../ActivityScreen');
-    render(<ActivityScreen />);
+
+    await render(<ActivityScreen />);
 
     await waitFor(() => expect(mockListNotifications).toHaveBeenCalledTimes(1));
 

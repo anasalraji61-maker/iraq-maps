@@ -4,11 +4,13 @@
  */
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { useAssistantChat } from '../hooks/useAssistantChat';
 
 // ─── Mock AsyncStorage ─────────────────────────────────────────────────────
 
 const store: Record<string, string> = {};
 jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
   default: {
     getItem: jest.fn(async (key: string) => store[key] ?? null),
     setItem: jest.fn(async (key: string, val: string) => { store[key] = val; }),
@@ -53,15 +55,15 @@ beforeEach(() => {
 
 describe('useAssistantChat — message flow', () => {
   it('starts with an empty message list', async () => {
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
     expect(result.current.messages).toEqual([]);
   });
 
   it('adds user message and assistant reply on send', async () => {
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     await act(async () => {
@@ -77,8 +79,8 @@ describe('useAssistantChat — message flow', () => {
     let resolve!: (v: unknown) => void;
     mockChat.mockImplementationOnce(() => new Promise((r) => { resolve = r; }));
 
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     let sendPromise!: Promise<void>;
@@ -103,8 +105,8 @@ describe('useAssistantChat — message flow', () => {
       headers: new Headers(),
     });
 
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     await act(async () => {
@@ -118,8 +120,8 @@ describe('useAssistantChat — message flow', () => {
   it('handles network errors gracefully without crashing', async () => {
     mockChat.mockRejectedValueOnce(new Error('network error'));
 
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     await act(async () => {
@@ -132,8 +134,8 @@ describe('useAssistantChat — message flow', () => {
 
 describe('useAssistantChat — session persistence', () => {
   it('persists messages to AsyncStorage after a successful send', async () => {
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     await act(async () => {
@@ -141,8 +143,8 @@ describe('useAssistantChat — session persistence', () => {
     });
 
     // AsyncStorage.setItem should have been called to persist history
-    const { default: AsyncStorage } = await import('@react-native-async-storage/async-storage');
-    expect(AsyncStorage.setItem).toHaveBeenCalled();
+    const AsyncStorageMock = jest.requireMock<{ default: { setItem: jest.Mock } }>('@react-native-async-storage/async-storage');
+    expect(AsyncStorageMock.default.setItem).toHaveBeenCalled();
   });
 
   it('loads persisted history on mount', async () => {
@@ -151,10 +153,10 @@ describe('useAssistantChat — session persistence', () => {
       { role: 'user', content: 'مرحبا', timestamp: Date.now() - 1000 },
       { role: 'assistant', content: 'أهلاً وسهلاً', timestamp: Date.now() - 900 },
     ]);
-    store['@assistant_chat_history'] = history;
+    store[`@assistant_chat_history:${SESSION_ID}`] = history;
 
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     expect(result.current.messages.some((m) => m.content === 'مرحبا')).toBe(true);
@@ -173,8 +175,8 @@ describe('useAssistantChat — composeParams propagation', () => {
       headers: new Headers(),
     });
 
-    const { useAssistantChat } = await import('../hooks/useAssistantChat');
-    const { result } = renderHook(() => useAssistantChat(SESSION_ID));
+
+    const { result } = await renderHook(() => useAssistantChat(SESSION_ID));
     await waitFor(() => expect(result.current.historyLoaded).toBe(true));
 
     await act(async () => {

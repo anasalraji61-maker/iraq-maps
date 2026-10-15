@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { SocialService } from './social.service';
 
 // Minimal in-memory DB mock
-function makeDb() {
+function _makeDb() {
   const events: Record<string, unknown>[] = [];
   const rsvps: Record<string, unknown>[] = [];
   const challenges: Record<string, unknown>[] = [];
@@ -12,7 +12,7 @@ function makeDb() {
   const makeTable = (arr: Record<string, unknown>[]) => ({
     _arr: arr,
     insert: (_vals: unknown) => {
-      const vals = _vals as Record<string, unknown>;
+      const _vals2 = _vals as Record<string, unknown>; void _vals2;
       return {
         values: (v: Record<string, unknown>) => {
           const row = { id: `id-${arr.length + 1}`, createdAt: new Date(), ...v };

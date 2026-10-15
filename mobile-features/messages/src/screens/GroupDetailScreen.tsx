@@ -1,7 +1,7 @@
 /**
  * GroupDetailScreen – shows messages in a group and lets the user send.
  */
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -77,6 +77,7 @@ export function GroupDetailScreen(): ReactElement {
         )}
         <Text style={[styles.msgText, isOwn && styles.ownMsgText]}>{item.text}</Text>
         <Text style={[styles.time, isOwn && styles.ownTime]}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </View>

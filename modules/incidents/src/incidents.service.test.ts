@@ -1,7 +1,7 @@
 /**
  * Unit tests for IncidentsService – uses an in-memory mock of the Db execute method.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { Db } from '@iraq-maps/db-kit';
 import { IncidentsService } from './incidents.service';
 

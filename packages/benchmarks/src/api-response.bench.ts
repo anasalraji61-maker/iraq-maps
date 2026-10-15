@@ -18,7 +18,7 @@ const sender = new FakeOtpSender();
 
 // Cached session for authenticated endpoints
 let accessToken: string | null = null;
-let refreshToken: string | null = null;
+let _refreshToken: string | null = null;
 
 type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 const call = (method: Method, url: string, opts: { token?: string; payload?: object } = {}) =>
@@ -47,7 +47,7 @@ beforeAll(async () => {
   });
   const body = res.json() as { accessToken: string; refreshToken: string };
   accessToken = body.accessToken;
-  refreshToken = body.refreshToken;
+  _refreshToken = body.refreshToken;
 });
 
 afterAll(async () => {
