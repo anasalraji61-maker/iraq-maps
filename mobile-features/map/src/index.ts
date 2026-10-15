@@ -23,5 +23,11 @@ export {
 } from './offline/OfflineMapManager';
 export { ReviewsScreen } from './screens/ReviewsScreen';
 export { AddReviewScreen } from './screens/AddReviewScreen';
+export { PlaceDetailScreen } from './screens/PlaceDetailScreen';
+export { AddPlaceScreen } from './screens/AddPlaceScreen';
+export { PlacePhotosScreen } from './screens/PlacePhotosScreen';
+export { PlaceReviewsScreen } from './screens/PlaceReviewsScreen';
+export { MapClusters, type ClusterableMarker, type MapClustersProps } from './components/MapClusters';
+export { PlaceCard, type PlaceCardProps } from './components/PlaceCard';
 export { LocationShareScreen } from './location-share/LocationShareScreen';
 export { LocationShareViewerScreen } from './location-share/LocationShareViewerScreen';

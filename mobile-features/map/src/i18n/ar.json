@@ -215,7 +215,16 @@
     "deleteError": "فشل حذف المراجعة",
     "loadError": "فشل تحميل المراجعات",
     "uploadingPhoto": "جارٍ رفع الصورة...",
-    "uploadError": "فشل رفع الصورة"
+    "uploadError": "فشل رفع الصورة",
+    "sortLowest": "الأقل تقييماً",
+    "helpfulQuestion": "هل كانت المراجعة مفيدة؟",
+    "helpful": "نعم",
+    "notHelpful": "لا",
+    "reportReview": "إبلاغ",
+    "reportTitle": "الإبلاغ عن المراجعة",
+    "reportMsg": "هل تريد إخفاء هذه المراجعة؟",
+    "reportConfirm": "تأكيد",
+    "retry": "إعادة المحاولة"
   },
   "lightbox": {
     "close": "إغلاق",
@@ -316,5 +325,62 @@
     "errorTitle": "حدث خطأ",
     "errorBody": "تعذّر الاتصال بالخادم. حاول مجدداً.",
     "shareBtn": "شارك موقعك"
+  },
+  "detail": {
+    "address": "العنوان",
+    "copy": "نسخ",
+    "copyAddress": "نسخ العنوان",
+    "phoneTapHint": "اضغط للاتصال"
+  },
+  "addPlace": {
+    "title": "إضافة مكان جديد",
+    "pendingNotice": "ملاحظة: ستُراجع الإضافة من قِبل فريقنا قبل نشرها.",
+    "locationSection": "الموقع على الخريطة",
+    "locationTap": "اضغط لتحديد الموقع",
+    "locationConfirmed": "تم تحديد الموقع",
+    "locationChange": "تغيير",
+    "namesSection": "اسم المكان",
+    "nameArLabel": "الاسم بالعربية",
+    "nameArPlaceholder": "مثال: مطعم أبو علي",
+    "nameEnLabel": "الاسم بالإنجليزية (اختياري)",
+    "nameEnPlaceholder": "e.g. Abu Ali Restaurant",
+    "categorySection": "الفئة",
+    "phoneSection": "رقم الهاتف (اختياري)",
+    "phonePlaceholder": "+964 7XX XXX XXXX",
+    "hoursSection": "ساعات العمل",
+    "dayMon": "الاثنين",
+    "dayTue": "الثلاثاء",
+    "dayWed": "الأربعاء",
+    "dayThu": "الخميس",
+    "dayFri": "الجمعة",
+    "daySat": "السبت",
+    "daySun": "الأحد",
+    "dayClosed": "مغلق",
+    "photosSection": "صور المكان (حتى 5)",
+    "descriptionSection": "وصف المكان",
+    "descriptionPlaceholder": "اكتب وصفاً مختصراً عن هذا المكان...",
+    "termsLabel": "أؤكد أن هذا مكان حقيقي وأن المعلومات صحيحة",
+    "submitBtn": "إرسال للمراجعة",
+    "submitting": "جارٍ الإرسال...",
+    "cancelBtn": "إلغاء",
+    "successTitle": "شكراً! تم إرسال اقتراحك",
+    "successSubtitle": "سيظهر المكان على الخريطة بعد مراجعته.",
+    "errorNameRequired": "الاسم بالعربية مطلوب",
+    "errorCategoryRequired": "يرجى اختيار فئة المكان",
+    "errorPhoneFormat": "رقم الهاتف يجب أن يكون بالصيغة الدولية العراقية",
+    "errorTerms": "يجب الموافقة على الشروط قبل الإرسال",
+    "errorSubmit": "حدث خطأ أثناء الإرسال. حاول مجدداً."
+  },
+  "photos": {
+    "empty": "لا توجد صور لهذا المكان بعد.",
+    "reportBtn": "أبلّغ عن صورة غير لائقة",
+    "reportTitle": "الإبلاغ عن الصورة",
+    "reportMsg": "هل تريد الإبلاغ عن هذه الصورة؟",
+    "reportConfirm": "تأكيد الإبلاغ",
+    "prev": "السابق",
+    "next": "التالي"
+  },
+  "cluster": {
+    "label": "{count} مكان"
   }
 }

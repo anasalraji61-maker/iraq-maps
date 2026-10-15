@@ -213,9 +213,18 @@
     "deleteOk": "سڕینەوە",
     "deleteCancel": "هەڵوەشاندنەوە",
     "deleteError": "سڕینەوەی پێداچوونەوە سەرنەکەوت",
-    "loadError": "بارکردنی پێداچوونەوەکان سەرنەکەوت",
+    "loadError": "شکستی هێنان لە بارکردنی نێرینەکان",
     "uploadingPhoto": "بارکردنی وێنە...",
-    "uploadError": "بارکردنی وێنە سەرنەکەوت"
+    "uploadError": "بارکردنی وێنە سەرنەکەوت",
+    "sortLowest": "کەمترین",
+    "helpfulQuestion": "ئایا بەسوودبوو؟",
+    "helpful": "بەڵێ",
+    "notHelpful": "نەخێر",
+    "reportReview": "ڕاپۆرت",
+    "reportTitle": "ڕاپۆرتدان",
+    "reportMsg": "ئایا ئەم نێرینەت بشارەوە؟",
+    "reportConfirm": "دڵنیابوون",
+    "retry": "دووبارە هەوڵدانەوە"
   },
   "lightbox": {
     "close": "داخستن",
@@ -316,5 +325,62 @@
     "errorTitle": "هەڵەیەک ڕووی دا",
     "errorBody": "ناتوانرێت پەیوەندی بکرێت. دووبارە هەوڵ بدەرەوە.",
     "shareBtn": "شوێنەکەت هاوبەش بکە"
+  },
+  "detail": {
+    "address": "ناونیشان",
+    "copy": "کۆپی",
+    "copyAddress": "کۆپیکردنی ناونیشان",
+    "phoneTapHint": "بکە بۆ پەیوەندی"
+  },
+  "addPlace": {
+    "title": "زیادکردنی شوێنێکی نوێ",
+    "pendingNotice": "تێبینی: پێشنیارەکەت پیش بڵاوکردنەوە دەبینرێتەوە.",
+    "locationSection": "شوێن لەسەر نەخشە",
+    "locationTap": "دەست بکە بۆ دیاریکردنی شوێن",
+    "locationConfirmed": "شوێن دیاریکرا",
+    "locationChange": "گۆڕان",
+    "namesSection": "ناوی شوێن",
+    "nameArLabel": "ناو بە عەرەبی",
+    "nameArPlaceholder": "نموونە: چێشتخانەی ئەبووعەلی",
+    "nameEnLabel": "ناو بە ئینگلیزی (ئارەزووی)",
+    "nameEnPlaceholder": "e.g. Abu Ali Restaurant",
+    "categorySection": "جۆر",
+    "phoneSection": "ژمارەی تەلەفۆن (ئارەزووی)",
+    "phonePlaceholder": "+964 7XX XXX XXXX",
+    "hoursSection": "کاتەکانی کارکردن",
+    "dayMon": "دووشەممە",
+    "dayTue": "سێشەممە",
+    "dayWed": "چوارشەممە",
+    "dayThu": "پێنجشەممە",
+    "dayFri": "ھەینی",
+    "daySat": "شەممە",
+    "daySun": "یەکشەممە",
+    "dayClosed": "داخراوە",
+    "photosSection": "وێنەکان (بۆ 5)",
+    "descriptionSection": "وەسف",
+    "descriptionPlaceholder": "کورتەیەک دەربارەی ئەم شوێنە بنووسە...",
+    "termsLabel": "ئەمەی کارباری ڕاستەقینەیە و زانیاریەکان دروستن",
+    "submitBtn": "ناردن بۆ پێداچوونەوە",
+    "submitting": "دەناردرێت...",
+    "cancelBtn": "هەڵوەشاندنەوە",
+    "successTitle": "سوپاس! نێردرا.",
+    "successSubtitle": "شوێنەکە دوای پێداچوونەوە لەسەر نەخشەکە دەردەکەوێت.",
+    "errorNameRequired": "ناوی عەرەبی پێویستە",
+    "errorCategoryRequired": "تکایە جۆرێک هەڵبژێرە",
+    "errorPhoneFormat": "ژمارەی تەلەفۆن دەبێت عێراقی بێت",
+    "errorTerms": "دەبێت ڕازی بیت پێش ناردن",
+    "errorSubmit": "هەڵە ڕوویدا. دووبارە هەوڵ بدەرەوە."
+  },
+  "photos": {
+    "empty": "هێشتا وێنەی نییە.",
+    "reportBtn": "ڕاپۆرتدان بەسەر وێنەی نەگونجاو",
+    "reportTitle": "ڕاپۆرتدان",
+    "reportMsg": "ئایا دەتەوێت ڕاپۆرت بدەیت؟",
+    "reportConfirm": "دڵنیابوون",
+    "prev": "پێشتر",
+    "next": "دواتر"
+  },
+  "cluster": {
+    "label": "{count} شوێن"
   }
 }

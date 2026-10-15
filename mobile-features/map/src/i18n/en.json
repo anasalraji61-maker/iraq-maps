@@ -215,7 +215,16 @@
     "deleteError": "Failed to delete review",
     "loadError": "Failed to load reviews",
     "uploadingPhoto": "Uploading photo...",
-    "uploadError": "Photo upload failed"
+    "uploadError": "Photo upload failed",
+    "sortLowest": "Lowest",
+    "helpfulQuestion": "Was this helpful?",
+    "helpful": "Yes",
+    "notHelpful": "No",
+    "reportReview": "Report",
+    "reportTitle": "Report review",
+    "reportMsg": "Hide this review?",
+    "reportConfirm": "Confirm",
+    "retry": "Retry"
   },
   "lightbox": {
     "close": "Close",
@@ -316,5 +325,62 @@
     "errorTitle": "Something Went Wrong",
     "errorBody": "Could not connect to the server. Please try again.",
     "shareBtn": "Share Your Location"
+  },
+  "detail": {
+    "address": "Address",
+    "copy": "Copy",
+    "copyAddress": "Copy address",
+    "phoneTapHint": "Tap to call"
+  },
+  "addPlace": {
+    "title": "Add a new place",
+    "pendingNotice": "Note: your submission will be reviewed before it appears on the map.",
+    "locationSection": "Location on map",
+    "locationTap": "Tap to set location",
+    "locationConfirmed": "Location set",
+    "locationChange": "Change",
+    "namesSection": "Place name",
+    "nameArLabel": "Name in Arabic",
+    "nameArPlaceholder": "e.g. Abu Ali Restaurant",
+    "nameEnLabel": "Name in English (optional)",
+    "nameEnPlaceholder": "e.g. Abu Ali Restaurant",
+    "categorySection": "Category",
+    "phoneSection": "Phone number (optional)",
+    "phonePlaceholder": "+964 7XX XXX XXXX",
+    "hoursSection": "Opening hours",
+    "dayMon": "Mon",
+    "dayTue": "Tue",
+    "dayWed": "Wed",
+    "dayThu": "Thu",
+    "dayFri": "Fri",
+    "daySat": "Sat",
+    "daySun": "Sun",
+    "dayClosed": "Closed",
+    "photosSection": "Photos (up to 5)",
+    "descriptionSection": "Description",
+    "descriptionPlaceholder": "Briefly describe this place...",
+    "termsLabel": "I confirm this is a real business and the information is accurate",
+    "submitBtn": "Submit for review",
+    "submitting": "Submitting…",
+    "cancelBtn": "Cancel",
+    "successTitle": "Thank you! Submitted.",
+    "successSubtitle": "The place will appear on the map after review.",
+    "errorNameRequired": "Arabic name is required",
+    "errorCategoryRequired": "Please select a category",
+    "errorPhoneFormat": "Phone must be a valid Iraqi number",
+    "errorTerms": "You must agree to the terms before submitting",
+    "errorSubmit": "An error occurred. Please try again."
+  },
+  "photos": {
+    "empty": "No photos yet for this place.",
+    "reportBtn": "Report inappropriate photo",
+    "reportTitle": "Report photo",
+    "reportMsg": "Report this photo?",
+    "reportConfirm": "Report",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "cluster": {
+    "label": "{count} places"
   }
 }
