@@ -57,11 +57,15 @@ function getUrgency(iso: string, replied: boolean): { color: string; label: stri
   return null;
 }
 
+type InboxFilter = 'all' | 'unread' | 'replied';
+const INBOX_FILTERS: InboxFilter[] = ['all', 'unread', 'replied'];
+
 /** Provider inbox: paginated list of inquiries with unread badge and empty state. */
 export function ProviderInboxScreen(): ReactElement {
   const api = useMessagingApi();
   const router = useRouter();
   const [items, setItems] = useState<Inquiry[]>([]);
+  const [activeFilter, setActiveFilter] = useState<InboxFilter>('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -122,6 +126,12 @@ export function ProviderInboxScreen(): ReactElement {
 
   const unreadCount = items.filter((i) => !readIds.has(i.id)).length;
 
+  const filteredItems = items.filter((i) => {
+    if (activeFilter === 'unread') return !readIds.has(i.id);
+    if (activeFilter === 'replied') return i.targets.some((tgt) => tgt.status === 'replied');
+    return true;
+  });
+
   const markAllRead = useCallback(() => {
     setReadIds(new Set(items.map((i) => i.id)));
   }, [items]);
@@ -171,9 +181,27 @@ export function ProviderInboxScreen(): ReactElement {
           </Pressable>
         )}
       </View>
+      {/* Status filter tabs */}
+      <View style={styles.filterRow}>
+        {INBOX_FILTERS.map((key) => (
+          <Pressable
+            key={key}
+            style={[styles.filterTab, activeFilter === key && styles.filterTabActive]}
+            onPress={() => setActiveFilter(key)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeFilter === key }}
+            testID={`inbox-filter-${key}`}
+          >
+            <RNText style={[styles.filterTabText, activeFilter === key && styles.filterTabTextActive]}>
+              {t(`inbox.filter${key.charAt(0).toUpperCase()}${key.slice(1)}` as Parameters<typeof t>[0])}
+            </RNText>
+          </Pressable>
+        ))}
+      </View>
       <FlatList
         testID="provider-inbox-list"
-        data={items}
+        data={filteredItems}
+        ListEmptyComponent={<RNText style={styles.emptyFilter}>{t('inbox.emptyFilter')}</RNText>}
         keyExtractor={(item) => item.id}
         onEndReached={() => { void loadMore(); }}
         onEndReachedThreshold={0.3}
@@ -263,4 +291,10 @@ const styles = StyleSheet.create({
   urgencyText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
   loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
   loadMoreText: { fontSize: 14, color: PRIMARY, fontWeight: '600' },
+  filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
+  filterTab: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: '#F0F0F0' },
+  filterTabActive: { backgroundColor: PRIMARY },
+  filterTabText: { fontSize: 13, color: '#555', fontWeight: '500' },
+  filterTabTextActive: { color: '#FFF' },
+  emptyFilter: { textAlign: 'center', color: '#9E9E9E', fontSize: 14, paddingTop: 32 },
 });

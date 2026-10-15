@@ -113,7 +113,11 @@
     "loadMore": "Load more",
     "replyCharsRemaining": "{n} characters remaining",
     "markAllRead": "Mark all as read",
-    "closed": "This inquiry is closed — no response was received within 7 days"
+    "closed": "This inquiry is closed — no response was received within 7 days",
+    "filterAll": "All",
+    "filterUnread": "Unread",
+    "filterReplied": "Replied",
+    "emptyFilter": "No messages match this filter"
   },
   "logo": {
     "title": "Business Logo",
