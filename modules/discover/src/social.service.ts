@@ -109,11 +109,11 @@ export class SocialService {
       .select()
       .from(eventRsvpTable)
       .where(and(eq(eventRsvpTable.eventId, eventId), eq(eventRsvpTable.userId, userId)));
-    const [countRow] = await this.db
+    const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(eventRsvpTable)
       .where(eq(eventRsvpTable.eventId, eventId));
-    return this.toEventDto(row, userId, countRow?.count ?? 0, !!rsvpRow);
+    return this.toEventDto(row, userId, count ?? 0, !!rsvpRow);
   }
 
   async rsvpEvent(userId: UserId, eventId: EventIdType) {
@@ -121,11 +121,11 @@ export class SocialService {
     if (!event) throw new NotFoundException('Event not found');
 
     if (event.maxAttendees !== null) {
-      const [countRow2] = await this.db
+      const [{ count }] = await this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(eventRsvpTable)
         .where(eq(eventRsvpTable.eventId, eventId));
-      if ((countRow2?.count ?? 0) >= event.maxAttendees) {
+      if ((count ?? 0) >= event.maxAttendees) {
         throw new BadRequestException('Event is full');
       }
     }

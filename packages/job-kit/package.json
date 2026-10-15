@@ -1,0 +1,25 @@
+{
+  "name": "@iraq-maps/job-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@iraq-maps/config": "workspace:*",
+    "@iraq-maps/observability": "workspace:*",
+    "bullmq": "^5.56.0",
+    "ioredis": "^5.6.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@iraq-maps/testing": "workspace:*",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,5 +1,6 @@
 export * from './sanitize';
 export * from './incidents';
+export * from './location-share';
 export * from './assistant'; // M5
 export * from './insights'; // M5
 export * from './discover'; // M6, M11
