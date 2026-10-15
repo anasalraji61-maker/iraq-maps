@@ -284,6 +284,8 @@ export function AssistantChatScreen(): ReactElement {
           testID="assistant.map.deeplink"
           style={styles.mapBtn}
           onPress={() => router.push(`/?focusPlaceId=${focusPlaceId}`)}
+          accessibilityRole="button"
+          accessibilityLabel={t('chat.showOnMap')}
         >
           <Text style={styles.mapBtnText}>{t('chat.showOnMap')}</Text>
         </Pressable>
@@ -294,6 +296,8 @@ export function AssistantChatScreen(): ReactElement {
           testID={assistantTestIDs.composeDeepLink}
           style={styles.composeBtn}
           onPress={handleCompose}
+          accessibilityRole="button"
+          accessibilityLabel={t('chat.compose')}
         >
           <Text style={styles.composeBtnText}>{t('chat.compose')}</Text>
         </Pressable>
@@ -320,6 +324,8 @@ export function AssistantChatScreen(): ReactElement {
               testID={`assistant.quickReply.${key}`}
               style={styles.quickChip}
               onPress={() => handleQuickReply(key)}
+              accessibilityRole="button"
+              accessibilityLabel={t(`chat.${key}`)}
             >
               <Text style={styles.quickChipText}>{t(`chat.${key}`)}</Text>
             </Pressable>
