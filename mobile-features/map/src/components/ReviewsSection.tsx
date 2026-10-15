@@ -9,7 +9,7 @@ import { useApi, useApiBaseUrl, uploadAsset, useSession } from '@iraq-maps/mobil
 import { Banner, Button, Text } from '@iraq-maps/ui';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { Image, ScrollView, StyleSheet, Text as RNText, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text as RNText, TextInput, TouchableOpacity, View } from 'react-native';
 import { t } from '../strings';
 
 const MAX_PHOTOS = 4;
@@ -50,16 +50,68 @@ function StarRow({
 
 // ── Photo strip (read-only thumbnails) ───────────────────────────────────────
 
+const SCREEN_W = Dimensions.get('window').width;
+
 function PhotoStrip({ uris }: { uris: string[] }): ReactElement | null {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   if (uris.length === 0) return null;
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoStrip}>
-      {uris.map((uri) => (
-        <Image key={uri} source={{ uri }} style={styles.thumbnail} resizeMode="cover" />
-      ))}
-    </ScrollView>
+    <>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoStrip}>
+        {uris.map((uri, i) => (
+          <TouchableOpacity
+            key={uri}
+            onPress={() => setLightboxIndex(i)}
+            accessibilityRole="button"
+            accessibilityLabel={t('lightbox.photo')}
+          >
+            <Image source={{ uri }} style={styles.thumbnail} resizeMode="cover" />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      {lightboxIndex !== null ? (
+        <Modal
+          visible
+          transparent
+          animationType="fade"
+          onRequestClose={() => setLightboxIndex(null)}
+        >
+          <View style={lightboxStyles.overlay}>
+            <Pressable
+              style={lightboxStyles.closeBtn}
+              onPress={() => setLightboxIndex(null)}
+              accessibilityRole="button"
+              accessibilityLabel={t('lightbox.close')}
+            >
+              <RNText style={lightboxStyles.closeText}>{t('lightbox.closeSymbol')}</RNText>
+            </Pressable>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              contentOffset={{ x: lightboxIndex * SCREEN_W, y: 0 }}
+            >
+              {uris.map((uri) => (
+                <Image
+                  key={uri}
+                  source={{ uri }}
+                  style={{ width: SCREEN_W, height: SCREEN_W }}
+                  resizeMode="contain"
+                />
+              ))}
+            </ScrollView>
+          </View>
+        </Modal>
+      ) : null}
+    </>
   );
 }
+
+const lightboxStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' },
+  closeBtn: { position: 'absolute', top: 48, end: 16, zIndex: 10, padding: 8 },
+  closeText: { fontSize: 24, color: '#fff' },
+});
 
 // ── Review card ───────────────────────────────────────────────────────────────
 
