@@ -197,5 +197,174 @@
     "clearAll": "Clear All",
     "clearAllConfirm": "Are you sure you want to remove all saved places?",
     "clearAllCancel": "Cancel"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Iraq Smart Maps",
+      "body": "Your smart guide to Iraq: places, restaurants, businesses and an AI assistant."
+    },
+    "map": {
+      "title": "Accurate Map & Navigation",
+      "body": "Find places, get turn-by-turn directions and browse maps offline."
+    },
+    "discover": {
+      "title": "Discover More",
+      "body": "Browse posts, read reviews and share your experiences with the community."
+    },
+    "assistant": {
+      "title": "Your Smart Assistant",
+      "body": "Ask about the best places, opening hours, prices and anything you need."
+    },
+    "next": "Next",
+    "skip": "Skip",
+    "getStarted": "Get Started",
+    "language": {
+      "title": "Choose Your Language",
+      "body": "You can change the language any time in Settings."
+    },
+    "permissions": {
+      "title": "A Few Permissions",
+      "body": "To get the most out of the app, we need your permission.",
+      "location": {
+        "title": "Location",
+        "body": "To show your position on the map and guide you to your destination."
+      },
+      "notifs": {
+        "title": "Notifications",
+        "body": "To notify you about replies and important updates."
+      },
+      "allow": "Allow",
+      "granted": "Enabled",
+      "denied": "Denied",
+      "continue": "Continue"
+    }
+  },
+  "phoneVerification": {
+    "title": "Phone Verification",
+    "sentTo": "We sent a 6-digit code to {phone}",
+    "otp": {
+      "label": "Verification code"
+    },
+    "verify": "Verify",
+    "resend": "Resend code",
+    "resendIn": "Resend in {time}",
+    "success": "Verified successfully!",
+    "hint": "The code fills in automatically from your text message"
+  },
+  "profileSetup": {
+    "title": "Complete Your Profile",
+    "body": "Add your details for a personalised experience. You can skip and come back later.",
+    "nameLabel": "Name",
+    "bioLabel": "About you",
+    "changePhoto": "Change photo",
+    "gallery": "Gallery",
+    "camera": "Camera",
+    "save": "Save",
+    "skip": "Skip",
+    "interests": {
+      "title": "Your Interests",
+      "body": "Pick what interests you to personalise your feed.",
+      "places": "Places",
+      "food": "Food",
+      "travel": "Travel",
+      "shopping": "Shopping",
+      "culture": "Culture",
+      "sports": "Sports",
+      "nature": "Nature",
+      "business": "Business"
+    }
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "body": "Enter your current password then choose a strong new one.",
+    "current": "Current password",
+    "new": "New password",
+    "confirm": "Confirm new password",
+    "show": "Show",
+    "hide": "Hide",
+    "save": "Save",
+    "mismatch": "Passwords do not match.",
+    "tooWeak": "Password is too weak.",
+    "notice": "The app currently uses OTP only. This feature will be enabled soon.",
+    "strength": {
+      "none": "",
+      "weak": "Weak",
+      "fair": "Fair",
+      "strong": "Strong",
+      "veryStrong": "Very strong"
+    },
+    "req": {
+      "length": "At least 8 characters",
+      "upper": "At least one uppercase letter",
+      "digit": "At least one number",
+      "special": "At least one special character"
+    }
+  },
+  "linkedAccounts": {
+    "title": "Linked Accounts",
+    "body": "Manage your phone number and social accounts linked to your profile.",
+    "linked": "Linked",
+    "notLinked": "Not linked",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "linkSuccess": "Account linked successfully",
+    "unlinkSuccess": "Account unlinked",
+    "phone": {
+      "heading": "Phone Number",
+      "label": "Phone number",
+      "none": "No phone number added",
+      "hint": "Your phone number is your primary sign-in method and cannot be removed."
+    },
+    "social": {
+      "heading": "Social Accounts",
+      "comingSoon": "Social sign-in is coming soon."
+    },
+    "securityNotice": "We recommend adding a second verification method to keep your account secure."
+  },
+  "wallet": {
+    "title": "My Wallet",
+    "balance": "Available Balance",
+    "held": "On Hold",
+    "topUp": "Top Up",
+    "transfer": "Transfer",
+    "history": "Transaction History",
+    "emptyHistory": "No transactions yet",
+    "comingSoon": "This feature is coming soon. Contact us at: support@iraqsmartmaps.com",
+    "topUpComingSoon": "Wallet top-up coming soon",
+    "transferComingSoon": "Transfer coming soon",
+    "txType": {
+      "credit": "Credit",
+      "debit": "Debit",
+      "hold": "Hold",
+      "release": "Release",
+      "refund": "Refund"
+    },
+    "txStatus": {
+      "pending": "Pending",
+      "completed": "Completed",
+      "failed": "Failed",
+      "reversed": "Reversed"
+    }
+  },
+  "payment": {
+    "methods": "Payment Methods",
+    "addCard": "Add Card",
+    "addCardNote": "Adding cards via the app is not yet available. Contact us to add your card manually.",
+    "cashOnDelivery": "Cash on Delivery",
+    "cashOnDeliveryDesc": "Pay in cash when your order is delivered",
+    "walletMethod": "E-Wallet",
+    "walletMethodDesc": "Pay from your wallet balance",
+    "noMethods": "No saved payment methods",
+    "defaultBadge": "Default",
+    "setDefault": "Set as Default",
+    "remove": "Remove",
+    "removeConfirm": "Remove this payment method?",
+    "cardEnding": "Card ending in {last4}",
+    "expires": "Expires {month}/{year}",
+    "card": {
+      "visa": "Visa",
+      "mastercard": "Mastercard",
+      "other": "Card"
+    }
   }
 }

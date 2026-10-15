@@ -13,3 +13,8 @@ export { TermsScreen } from './TermsScreen';
 export { NotifPrefsScreen } from './NotifPrefsScreen';
 export { ThemeScreen } from './ThemeScreen';
 export { SavedPlacesScreen } from './SavedPlacesScreen';
+export { OnboardingScreen } from './OnboardingScreen';
+export { PhoneVerificationScreen } from './PhoneVerificationScreen';
+export { ProfileSetupScreen } from './ProfileSetupScreen';
+export { ChangePasswordScreen } from './ChangePasswordScreen';
+export { LinkedAccountsScreen } from './LinkedAccountsScreen';
