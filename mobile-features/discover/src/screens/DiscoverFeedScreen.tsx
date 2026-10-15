@@ -800,7 +800,7 @@ export function DiscoverFeedScreen(): ReactElement {
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>{t('feed.empty')}</Text>
-              <Pressable style={styles.emptyCreateBtn} onPress={handleCreate}>
+              <Pressable style={styles.emptyCreateBtn} onPress={handleCreate} accessibilityRole="button" accessibilityLabel={t('post.create')}>
                 <Text style={styles.emptyCreateBtnText}>{t('post.create')}</Text>
               </Pressable>
             </View>
