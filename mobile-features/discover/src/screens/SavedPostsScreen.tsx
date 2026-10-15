@@ -3,9 +3,9 @@
  */
 import type { DiscoverPostType } from '@iraq-maps/contracts';
 import { useRouter } from 'expo-router';
-import { type ReactElement } from 'react';
+import { type ReactElement, useEffect, useRef } from 'react';
 import {
-  ActivityIndicator,
+  Animated,
   FlatList,
   I18nManager,
   Pressable,
@@ -18,6 +18,41 @@ import { useSavedPosts } from '../useSavedPosts';
 import { COLORS, getTypeBadgeColors, formatRelativeTime } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function SavedPostSkeletonCard(): ReactElement {
+  return (
+    <View testID="skeleton-saved-post" style={[styles.card, { gap: 8 }]}>
+      <View style={styles.cardHeader}>
+        <SkeletonBlock width={50} height={14} />
+        <SkeletonBlock width={60} height={10} />
+      </View>
+      <SkeletonBlock width={240} height={12} />
+      <SkeletonBlock width={180} height={12} />
+      <SkeletonBlock width={120} height={12} />
+      <View style={styles.cardFooter}>
+        <SkeletonBlock width={100} height={10} />
+        <SkeletonBlock width={60} height={26} />
+      </View>
+    </View>
+  );
+}
 
 // ─── Row ──────────────────────────────────────────────────────────────────────
 
@@ -66,8 +101,11 @@ export function SavedPostsScreen(): ReactElement {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={COLORS.primary} />
+      <View style={styles.container}>
+        <Text style={styles.heading}>{t('saved.title')}</Text>
+        <View style={styles.list}>
+          {Array.from({ length: 4 }, (_, i) => <SavedPostSkeletonCard key={i} />)}
+        </View>
       </View>
     );
   }
