@@ -30,6 +30,7 @@ jest.mock('@iraq-maps/mobile-kit', () => ({
     },
   }),
   useSession: () => ({ state: { status: 'signedIn', user: { id: 'user-001' } } }),
+  useHaptics: () => ({ tap: jest.fn(), like: jest.fn(), sent: jest.fn(), fail: jest.fn(), light: jest.fn(), medium: jest.fn(), success: jest.fn(), error: jest.fn() }),
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({

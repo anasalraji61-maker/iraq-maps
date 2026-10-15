@@ -19,6 +19,7 @@
     "@iraq-maps/observability": "workspace:*",
     "@react-native-community/netinfo": "^11.4.1",
     "expo-secure-store": "~57.0.4",
+    "expo-haptics": "~14.0.1",
     "expo-store-review": "~57.0.3",
     "@react-native-async-storage/async-storage": "^2.1.2"
   },

@@ -17,6 +17,7 @@ jest.mock('@iraq-maps/mobile-kit', () => ({
     markFailed: jest.fn(async () => undefined),
   })),
   useAppRating: () => ({ onMessageSent: jest.fn(async () => undefined) }),
+  useHaptics: () => ({ tap: jest.fn(), like: jest.fn(), sent: jest.fn(), fail: jest.fn(), light: jest.fn(), medium: jest.fn(), success: jest.fn(), error: jest.fn() }),
 }));
 
 const mockNetFetch = jest.fn(async () => ({ isConnected: true }));

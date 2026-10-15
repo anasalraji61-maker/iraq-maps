@@ -24,3 +24,5 @@ export {
 } from './offline-queue';
 /** @public error boundary with optional ErrorReporter integration */
 export { ErrorBoundary } from './error-boundary';
+/** @public haptic feedback helpers */
+export { useHaptics } from './haptics';

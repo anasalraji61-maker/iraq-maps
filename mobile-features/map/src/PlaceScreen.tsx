@@ -1,6 +1,6 @@
 import { pickName, placesContract, testIDs, type CrowdLevel, type PlaceDetails, type PriceLevel } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
-import { href, routes, savedPlaces, useApi, useRouteAvailable } from '@iraq-maps/mobile-kit';
+import { href, routes, savedPlaces, useApi, useHaptics, useRouteAvailable } from '@iraq-maps/mobile-kit';
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
@@ -44,6 +44,7 @@ function PlaceLoader({ id }: { id: string }) {
 function PlaceCard({ place }: { place: PlaceDetails }) {
   const lang = getLocale();
   const api = useApi();
+  const haptics = useHaptics();
   const name = pickName(place.names, lang);
   const open = place.hoursRaw ? openNow(place.hoursRaw) : null;
   // The app scheme (app.config `scheme`) plus the place route: iraqmaps://place/<id>.
@@ -112,7 +113,7 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         label={isSaved ? t('place.saved') : t('place.save')}
         variant={isSaved ? 'secondary' : 'primary'}
         accessibilityLabel={isSaved ? t('place.savedA11y', { name }) : t('place.saveA11y', { name })}
-        onPress={() => { void handleSave(); }}
+        onPress={() => { haptics.like(); void handleSave(); }}
       />
       <Button testID={testIDs.place.share} label={t('place.share')} onPress={share} />
       {(Object.keys(actions) as (keyof typeof actions)[]).map((route) => (

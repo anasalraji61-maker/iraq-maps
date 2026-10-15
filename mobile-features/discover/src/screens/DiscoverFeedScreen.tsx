@@ -1,5 +1,5 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
-import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { href, useApi, useHaptics, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import { useSavedPosts } from '../useSavedPosts';
@@ -21,7 +21,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Vibration,
   View,
 } from 'react-native';
 import { useDiscoverClient } from '../client';
@@ -147,6 +146,7 @@ const PostItem = memo(function PostItem({
 }): ReactElement {
   const isOwn = currentUserId === post.authorId;
   const badgeColors = getTypeBadgeColors(post.type);
+  const haptics = useHaptics();
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -254,7 +254,7 @@ const PostItem = memo(function PostItem({
         <Pressable
           testID={discoverTestIDs.likeButton(post.id)}
           style={[styles.actionBtn, { backgroundColor: COLORS.border }, post.isLikedByMe && styles.actionBtnActive]}
-          onPress={() => { Vibration.vibrate(30); onLike(post); }}
+          onPress={() => { haptics.like(); onLike(post); }}
           accessibilityRole="button"
           accessibilityLabel={t('post.likeA11y', { author: post.authorId.slice(0, 8) })}
         >
