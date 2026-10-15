@@ -133,7 +133,8 @@
     "removePhoto": "إزالة الصورة",
     "sortNewest": "الأحدث",
     "sortHighest": "الأعلى تقييماً",
-    "submitError": "حدث خطأ أثناء إرسال المراجعة. حاول مجدداً."
+    "submitError": "حدث خطأ أثناء إرسال المراجعة. حاول مجدداً.",
+    "cancelForm": "إلغاء"
   },
   "lightbox": {
     "close": "إغلاق",

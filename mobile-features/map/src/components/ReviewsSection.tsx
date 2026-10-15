@@ -307,7 +307,7 @@ export function ReviewsSection({ placeId }: { placeId: PlaceId }): ReactElement 
             testID="review-submit"
           />
           <Button
-            label={t('reviews.deleteOwn')}
+            label={t('reviews.cancelForm')}
             variant="secondary"
             onPress={() => setShowForm(false)}
           />
