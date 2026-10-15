@@ -80,7 +80,13 @@
     "noMessages": "لا توجد رسائل بعد",
     "noMessagesBody": "ستظهر هنا استفسارات العملاء عن مكانك",
     "cancel": "إلغاء",
-    "unread": "رسالة غير مقروءة"
+    "unread": "رسالة غير مقروءة",
+    "responseUrgent": "عاجل",
+    "responseOverdue": "متأخر",
+    "timeJustNow": "الآن",
+    "timeMinsAgo": "منذ {{n}} دقيقة",
+    "timeHoursAgo": "منذ {{n}} ساعة",
+    "timeDaysAgo": "منذ {{n}} يوم"
   },
   "logo": {
     "title": "شعار النشاط التجاري",

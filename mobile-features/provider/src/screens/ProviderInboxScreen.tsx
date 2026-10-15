@@ -49,9 +49,24 @@ function formatInitials(userId: string): string {
   return userId.slice(0, 2).toUpperCase();
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+/** Returns a relative time string for the given ISO timestamp. */
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 1) return t('inbox.timeJustNow');
+  if (mins < 60) return t('inbox.timeMinsAgo', { n: mins });
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return t('inbox.timeHoursAgo', { n: hours });
+  return t('inbox.timeDaysAgo', { n: Math.floor(hours / 24) });
+}
+
+/** Returns urgency color and label for a message that has not been replied to. */
+function getUrgency(iso: string, replied: boolean): { color: string; label: string } | null {
+  if (replied) return null;
+  const hours = (Date.now() - new Date(iso).getTime()) / 3_600_000;
+  if (hours >= 24) return { color: '#DC2626', label: t('inbox.responseOverdue') };
+  if (hours >= 1) return { color: '#F97316', label: t('inbox.responseUrgent') };
+  return null;
 }
 
 /** Provider inbox: paginated list of inquiries with unread badge and empty state. */
@@ -141,6 +156,8 @@ export function ProviderInboxScreen(): ReactElement {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => {
           const isUnread = !readIds.has(item.id);
+          const replied = item.targets.some((tgt) => tgt.status === 'replied');
+          const urgency = getUrgency(item.createdAt, replied);
           return (
             <Pressable
               testID={messagingTestIDs.inboxItem(item.id)}
@@ -155,7 +172,14 @@ export function ProviderInboxScreen(): ReactElement {
               </View>
               <View style={styles.content}>
                 <RNText numberOfLines={2} style={isUnread ? styles.boldText : undefined}>{item.text}</RNText>
-                <RNText style={styles.muted}>{formatDate(item.createdAt)}</RNText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <RNText style={styles.muted}>{timeAgo(item.createdAt)}</RNText>
+                  {urgency ? (
+                    <View style={[styles.urgencyChip, { backgroundColor: urgency.color }]}>
+                      <RNText style={styles.urgencyText}>{urgency.label}</RNText>
+                    </View>
+                  ) : null}
+                </View>
               </View>
               <View style={styles.badge}>
                 {isUnread && <View style={styles.dot} />}
@@ -193,4 +217,6 @@ const styles = StyleSheet.create({
   badge: { alignItems: 'flex-end', gap: 4 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#3B82F6', alignSelf: 'flex-end' },
   muted: { color: '#6B7280' },
+  urgencyChip: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
+  urgencyText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
 });

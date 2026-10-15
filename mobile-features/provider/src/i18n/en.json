@@ -80,7 +80,13 @@
     "noMessages": "No messages yet",
     "noMessagesBody": "Customer inquiries about your place will appear here",
     "cancel": "Cancel",
-    "unread": "unread message"
+    "unread": "unread message",
+    "responseUrgent": "Urgent",
+    "responseOverdue": "Overdue",
+    "timeJustNow": "Just now",
+    "timeMinsAgo": "{{n}}m ago",
+    "timeHoursAgo": "{{n}}h ago",
+    "timeDaysAgo": "{{n}}d ago"
   },
   "logo": {
     "title": "Business Logo",
