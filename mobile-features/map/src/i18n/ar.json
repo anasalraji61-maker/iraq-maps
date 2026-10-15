@@ -98,7 +98,8 @@
     "providerVerified": "مزوّد موثّق",
     "closesAt": "يغلق الساعة {time}",
     "whatsappLabel": "تواصل عبر واتساب",
-    "nearbyTitle": "أماكن قريبة مشابهة"
+    "nearbyTitle": "أماكن قريبة مشابهة",
+    "openInMaps": "فتح في خرائط جوجل"
   },
   "actions": {
     "directions": "الاتجاهات",

@@ -98,7 +98,8 @@
     "providerVerified": "دابینکەری پشتڕاستکراو",
     "closesAt": "دادەخرێت {time}",
     "whatsappLabel": "پەیام لە واتساپ",
-    "nearbyTitle": "شوێنی نزیک و هاوشێوە"
+    "nearbyTitle": "شوێنی نزیک و هاوشێوە",
+    "openInMaps": "کردنەوە لە نەخشەی گووگڵ"
   },
   "actions": {
     "directions": "ئاراستەکان",

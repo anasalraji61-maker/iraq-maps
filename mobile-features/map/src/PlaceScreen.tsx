@@ -129,6 +129,15 @@ function PlaceCard({ place }: { place: PlaceDetails }) {
         onPress={() => { haptics.like(); void handleSave(); }}
       />
       <Button testID={testIDs.place.share} label={t('place.share')} onPress={share} />
+      <Button
+        variant="secondary"
+        label={t('place.openInMaps')}
+        onPress={() => {
+          const [lng, lat] = place.location;
+          const encodedName = encodeURIComponent(name);
+          Linking.openURL(`geo:${lat},${lng}?q=${lat},${lng}(${encodedName})`).catch(() => undefined);
+        }}
+      />
       {(Object.keys(actions) as (keyof typeof actions)[]).map((route) => (
         <RouteAction key={route} route={route} placeId={place.id} />
       ))}

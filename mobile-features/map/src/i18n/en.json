@@ -98,7 +98,8 @@
     "providerVerified": "Verified Provider",
     "closesAt": "Closes at {time}",
     "whatsappLabel": "Message on WhatsApp",
-    "nearbyTitle": "Similar nearby places"
+    "nearbyTitle": "Similar nearby places",
+    "openInMaps": "Open in Google Maps"
   },
   "actions": {
     "directions": "Directions",
