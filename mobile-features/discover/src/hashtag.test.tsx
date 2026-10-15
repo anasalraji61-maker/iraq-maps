@@ -1,5 +1,5 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, act, waitFor } from '@testing-library/react-native';
 import { HashtagFeedScreen } from './screens/HashtagFeedScreen';
 
 const mockSearchPosts = jest.fn<() => Promise<unknown>>();
