@@ -48,7 +48,11 @@
       "queued": "چاوەڕوانە",
       "handed_off": "راگەیەندرا",
       "failed": "سەرکەوتوو نەبوو"
-    }
+    },
+    "filterAll": "هەموو",
+    "filterActive": "چالاک",
+    "filterReplied": "وەڵامدراوەتەوە",
+    "emptyFilter": "هیچ گفتوگۆیەک نەدۆزرایەوە"
   },
   "detail": {
     "title": "وردەکاریەکانی داواکاری",

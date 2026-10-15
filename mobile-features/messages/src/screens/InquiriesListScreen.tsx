@@ -126,6 +126,17 @@ const styles = StyleSheet.create({
   },
   loadMoreBtn: { alignItems: 'center', paddingVertical: 14 },
   loadMoreText: { fontSize: 14, color: PRIMARY, fontWeight: '600' },
+  filterRow: { flexDirection: 'row', gap: 8, paddingVertical: 8 },
+  filterTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F0F0F0',
+  },
+  filterTabActive: { backgroundColor: PRIMARY },
+  filterTabText: { fontSize: 13, color: '#555', fontWeight: '500' },
+  filterTabTextActive: { color: '#FFF' },
+  emptyFilter: { textAlign: 'center', color: '#9E9E9E', fontSize: 14, paddingTop: 32 },
 });
 
 type BadgeInfo = { label: string; color: string } | null;
@@ -145,10 +156,24 @@ function getInquiryBadge(targets: Inquiry['targets']): BadgeInfo {
   return { label: t('list.badgePending'), color: '#F57C00' };
 }
 
+type InquiryFilter = 'all' | 'active' | 'replied';
+
+const FILTER_KEYS: InquiryFilter[] = ['all', 'active', 'replied'];
+
+function filterInquiries(inquiries: Inquiry[], filter: InquiryFilter): Inquiry[] {
+  if (filter === 'all') return inquiries;
+  return inquiries.filter((inq) => {
+    const status = topStatus(inq.targets);
+    if (filter === 'replied') return status === 'replied';
+    return status !== 'replied';
+  });
+}
+
 export function InquiriesListScreen(): ReactElement {
   const api = useMessagingClient();
   const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [activeFilter, setActiveFilter] = useState<InquiryFilter>('all');
   const readMap = useReadReceiptsMap(inquiries.map((i) => i.id));
   // Start as true so the skeleton shows immediately on first render
   const [loading, setLoading] = useState(true);
@@ -213,16 +238,38 @@ export function InquiriesListScreen(): ReactElement {
     );
   }
 
+  const filteredInquiries = filterInquiries(inquiries, activeFilter);
+
   return (
     <Screen>
       <Text variant="title">{t('list.title')}</Text>
+      {/* Status filter tabs */}
+      <View style={styles.filterRow}>
+        {FILTER_KEYS.map((key) => (
+          <Pressable
+            key={key}
+            style={[styles.filterTab, activeFilter === key && styles.filterTabActive]}
+            onPress={() => setActiveFilter(key)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeFilter === key }}
+            testID={`filter-tab-${key}`}
+          >
+            <RNText style={[styles.filterTabText, activeFilter === key && styles.filterTabTextActive]}>
+              {t(`list.filter${key.charAt(0).toUpperCase()}${key.slice(1)}` as Parameters<typeof t>[0])}
+            </RNText>
+          </Pressable>
+        ))}
+      </View>
       {error ? <Banner kind="error" message={error} /> : null}
       <ScrollView
         testID="inquiries-list-scroll"
         refreshControl={<RefreshControl refreshing={loading} onRefresh={() => { void load(true); }} />}
         onScrollEndDrag={() => { void loadMore(); }}
       >
-        {inquiries.map((inq) => {
+        {filteredInquiries.length === 0 && !loading ? (
+          <RNText style={styles.emptyFilter}>{t('list.emptyFilter')}</RNText>
+        ) : null}
+        {filteredInquiries.map((inq) => {
           const badge = getInquiryBadge(inq.targets);
           const placesLabel = inq.targets.length === 1
             ? t('list.placeCount')

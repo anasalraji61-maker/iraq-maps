@@ -48,7 +48,11 @@
       "queued": "Queued",
       "handed_off": "Handed off",
       "failed": "Failed"
-    }
+    },
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterReplied": "Replied",
+    "emptyFilter": "No conversations match this filter"
   },
   "detail": {
     "title": "Request details",

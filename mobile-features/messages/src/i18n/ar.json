@@ -48,7 +48,11 @@
       "queued": "في الانتظار",
       "handed_off": "تم الإرسال",
       "failed": "فشل"
-    }
+    },
+    "filterAll": "الكل",
+    "filterActive": "نشط",
+    "filterReplied": "مُجاب",
+    "emptyFilter": "لا توجد محادثات تطابق هذا التصفية"
   },
   "detail": {
     "title": "تفاصيل الطلب",
