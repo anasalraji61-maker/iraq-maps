@@ -5,12 +5,48 @@ import { Banner, Button, EmptyState, ListItem, Screen, Sheet, Text } from '@iraq
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { useEffect, useState, type ReactElement } from 'react';
-import { Platform, StyleSheet, Text as RNText, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { Animated, Platform, StyleSheet, Text as RNText, View } from 'react-native';
 import { NotifPrefsSection } from './NotifPrefsSection';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
 import { useNotifApi } from './useNotifApi';
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function AccountSkeleton(): ReactElement {
+  return (
+    <Screen>
+      <View testID="skeleton-account" style={{ alignItems: 'center', paddingVertical: 24, gap: 12 }}>
+        <SkeletonBlock width={80} height={80} />
+        <SkeletonBlock width={120} height={16} />
+      </View>
+      {[1, 2, 3, 4].map((k) => (
+        <View key={k} style={{ paddingHorizontal: 16, paddingVertical: 14, gap: 6 }}>
+          <SkeletonBlock width={100} height={13} />
+          <SkeletonBlock width={160} height={11} />
+        </View>
+      ))}
+    </Screen>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 /** Derives up to 2 initials from a display name. */
 function initials(name: string | null | undefined): string {
@@ -61,7 +97,7 @@ export function AccountScreen(): ReactElement {
     })();
   }, [state.status, notifApi]);
 
-  if (state.status === 'loading') return <Screen>{null}</Screen>;
+  if (state.status === 'loading') return <AccountSkeleton />;
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 

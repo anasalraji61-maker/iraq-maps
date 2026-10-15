@@ -1,6 +1,7 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { getLocale, t } from '@iraq-maps/i18n';
-import { describe, expect, it } from '@jest/globals';
+import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
+import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, waitFor } from '@testing-library/react-native';
 import { AccountScreen, LanguageScreen } from '../src';
 import { reply, setup, user } from './render';
@@ -39,6 +40,17 @@ describe('AccountScreen', () => {
     await fireEvent.press(view.getByTestId(account.signIn));
     await fireEvent.press(view.getByTestId(account.language));
     expect(router.push.mock.calls).toEqual([['/auth/phone'], ['/account/language']]);
+  });
+
+  it('shows skeleton while session is loading', async () => {
+    const session = {
+      state: { status: 'loading' as const },
+      signIn: jest.fn(async () => {}),
+      updateUser: jest.fn(),
+      signOut: jest.fn(async () => {}),
+    };
+    const view = await renderWithProviders(<AccountScreen />, { api: {} as never, session, locale: 'ar' });
+    expect(view.getByTestId('skeleton-account')).toBeTruthy();
   });
 });
 
