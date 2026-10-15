@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { COLORS, formatRelativeTime, getTypeBadgeColors, HashtagText, sharedStyles } from './shared';
+import { COLORS, formatCount, formatRelativeTime, getTypeBadgeColors, HashtagText, sharedStyles } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -52,10 +52,6 @@ function HashtagSkeletonCard(): ReactElement {
   );
 }
 
-function formatCount(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 < 100 ? 0 : 1)}k`;
-  return String(n);
-}
 
 interface HashtagPostCardProps {
   post: DiscoverPostType;

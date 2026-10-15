@@ -26,7 +26,7 @@ import {
 } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime, HashtagText } from './shared';
+import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime, formatCount, HashtagText } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -95,12 +95,6 @@ function SkeletonFeed(): ReactElement {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    return `${(n / 1000).toFixed(n % 1000 < 100 ? 0 : 1)}k`;
-  }
-  return String(n);
-}
 
 
 const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'post.type.event' | 'post.type.offer'> = {

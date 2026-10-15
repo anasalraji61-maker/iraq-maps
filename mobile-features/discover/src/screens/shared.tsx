@@ -94,6 +94,11 @@ export function getTypeBadgeColors(type: string): { bg: string; text: string } {
   return TYPE_BADGE_COLORS[type] ?? DEFAULT_BADGE;
 }
 
+export function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n % 1000 < 100 ? 0 : 1)}k`;
+  return String(n);
+}
+
 export function formatRelativeTime(isoDate: string, tFn?: typeof TFunc): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const minutes = Math.floor(diff / 60_000);

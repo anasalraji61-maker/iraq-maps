@@ -16,7 +16,7 @@ import {
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { useFollows } from '../useFollows';
-import { COLORS, sharedStyles, formatRelativeTime, getTypeBadgeColors } from './shared';
+import { COLORS, sharedStyles, formatCount, formatRelativeTime, getTypeBadgeColors } from './shared';
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -67,10 +67,6 @@ async function savePinnedId(authorId: string, postId: string | null): Promise<vo
   } catch { /* non-critical */ }
 }
 
-function formatCount(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
 
 function PostCard({
   post,
