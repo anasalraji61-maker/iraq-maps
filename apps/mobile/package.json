@@ -35,6 +35,7 @@
     "expo-location": "~57.0.20",
     "expo-router": "~57.0.25",
     "expo-secure-store": "~57.0.4",
+    "expo-store-review": "~57.0.3",
     "expo-symbols": "~57.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",

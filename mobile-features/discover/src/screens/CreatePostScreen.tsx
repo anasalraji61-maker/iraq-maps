@@ -1,5 +1,5 @@
 import { discoverTestIDs } from '@iraq-maps/contracts';
-import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
+import { useApi, useApiBaseUrl, useAppRating } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useCallback, type ReactElement } from 'react';
@@ -45,6 +45,7 @@ export function CreatePostScreen(): ReactElement {
   const placesApi = useApi();
   const baseUrl = useApiBaseUrl();
   const router = useRouter();
+  const { onPostCreated } = useAppRating();
   const [body, setBody] = useState('');
   const [postType, setPostType] = useState<PostTypeValue>('tip');
   const [submitting, setSubmitting] = useState(false);
@@ -155,6 +156,7 @@ export function CreatePostScreen(): ReactElement {
         },
       });
       if (res.status === 201) {
+        void onPostCreated();
         router.back();
       } else {
         setError(t('create.submitError'));

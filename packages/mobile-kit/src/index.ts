@@ -13,5 +13,7 @@ export { InquiryOutbox, type OutboxEntry } from './outbox';
 export { expectStatus, ProblemError, useRequest } from './request';
 
 export { savedPlaces, type SavedPlace } from './saved-places';
+/** @public app-rating prompt: call after user creates a post or sends a message */
+export { useAppRating } from './app-rating';
 /** @public error boundary with optional ErrorReporter integration */
 export { ErrorBoundary } from './error-boundary';

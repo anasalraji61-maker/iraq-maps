@@ -1,5 +1,5 @@
 import { messagingTestIDs, type MessagingChannelKind } from '@iraq-maps/contracts';
-import { InquiryOutbox } from '@iraq-maps/mobile-kit';
+import { InquiryOutbox, useAppRating } from '@iraq-maps/mobile-kit';
 import { Badge, Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
 import { useLocalSearchParams } from 'expo-router';
 import { fetchNetInfo } from '../netinfo';
@@ -21,6 +21,7 @@ export function ConfirmScreen(): ReactElement {
   const [offline, setOffline] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const api = useMessagingClient();
+  const { onMessageSent } = useAppRating();
 
   const onSend = async () => {
     setSending(true);
@@ -41,6 +42,7 @@ export function ConfirmScreen(): ReactElement {
         });
         if (res.status === 201) {
           await outbox.markSent(idempotencyKey);
+          void onMessageSent();
         } else {
           throw new Error(`server error: ${res.status}`);
         }
