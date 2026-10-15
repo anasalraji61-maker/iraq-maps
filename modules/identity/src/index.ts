@@ -8,6 +8,7 @@ import { identityConfig } from './config';
 import { AuthController, INTERNALS, MeController } from './http';
 
 export { IdentityAuthGuard, type AuthenticatedRequest } from './http';
+export { writeAdminAudit, type AdminAction, type TargetType } from './audit';
 import { Otp, phoneVerification } from './otp';
 import { otpDelivery } from './senders';
 import { Sessions } from './sessions';

@@ -13,7 +13,7 @@ import {
   type ConsentLedger,
   type ProviderMe,
 } from '@iraq-maps/contracts';
-import { createOutboxPublisher, type Db } from '@iraq-maps/db-kit';
+import { createOutboxPublisher, writeAdminAuditLog, type Db } from '@iraq-maps/db-kit';
 import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { auditLogTable, consentTable, providerTable } from './schema';
@@ -255,6 +255,7 @@ export class ProvidersService {
     const [updated] = await this.db.update(providerTable).set({ status: 'verified', updatedAt: new Date() }).where(eq(providerTable.id, providerId)).returning();
 
     await this.db.insert(auditLogTable).values({ providerId, action: 'verified', actorUserId: adminUserId, reason: null });
+    await writeAdminAuditLog(this.db, adminUserId, 'approve_provider', providerId, 'provider').catch(() => undefined);
 
     await this.outbox.publish({
       id: randomUUID(),
@@ -280,6 +281,7 @@ export class ProvidersService {
       .where(eq(providerTable.id, providerId))
       .returning();
     await this.db.insert(auditLogTable).values({ providerId, action, actorUserId: adminUserId, reason });
+    await writeAdminAuditLog(this.db, adminUserId, 'suspend_provider', providerId, 'provider', { reason }).catch(() => undefined);
     return updated!;
   }
 

@@ -1,5 +1,5 @@
 import { Locale, Role, type UserId } from '@iraq-maps/contracts';
-import { integer, pgSchema, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { bigserial, integer, jsonb, pgSchema, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 const identity = pgSchema('identity');
 
@@ -18,4 +18,15 @@ export const sessions = identity.table('sessions', {
   userId: uuid('user_id').$type<UserId>().notNull(),
   generation: integer('generation').notNull(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
+});
+
+/** Immutable log of every admin / moderator action. */
+export const adminAuditLog = identity.table('admin_audit_log', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  adminId: uuid('admin_id').$type<UserId>().notNull(),
+  action: text('action').notNull(),
+  targetId: text('target_id').notNull(),
+  targetType: text('target_type').notNull(),
+  detail: jsonb('detail'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

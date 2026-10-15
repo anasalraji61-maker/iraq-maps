@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { defineModuleConfig } from '@iraq-maps/config';
 import { apiContract, healthContract, PortTokens, type Clock, type OtpSender, type UserDataEraser } from '@iraq-maps/contracts';
 import { createDb, createInProcessEventBus, createOutboxPublisher, startOutboxRelay, type OutboxRelay } from '@iraq-maps/db-kit';
@@ -64,9 +65,43 @@ export const apiConfig = (env?: Record<string, string | undefined>) =>
       TRUST_PROXY: z.string().default('false'),
       // Internal admin key for /internal/* endpoints. Must be set in production.
       ADMIN_KEY: z.string().optional(),
+      // HMAC secret for mobile→API request signing (X-Request-Signature header). Optional; off when absent.
+      REQUEST_SIGNING_SECRET: z.string().min(32).optional(),
     },
     { env, productionForbidden: { TRUST_PROXY: ['true'] } },
   );
+
+// ──────────────────────────────────────────────────────────────────────────────
+// HMAC request-signing helpers
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Computes the expected HMAC-SHA256 signature for a request.
+ * Canonical form: "<METHOD>\n<path>\n<unix-ts-seconds>\n<body-hex>"
+ * The client reads the clock from the X-Request-Timestamp header it sends alongside the signature.
+ */
+export function computeRequestSignature(secret: string, method: string, path: string, timestampSec: number, bodyHex: string): string {
+  const canonical = `${method.toUpperCase()}\n${path}\n${timestampSec}\n${bodyHex}`;
+  return createHmac('sha256', secret).update(canonical).digest('hex');
+}
+
+/** Returns true when the signature in the header matches the computed one and the timestamp is within ±5 min. */
+export function verifyRequestSignature(secret: string, method: string, path: string, bodyBuf: Buffer, header: string | undefined): boolean {
+  if (!header) return false;
+  const parts = header.split('.');
+  if (parts.length !== 2) return false;
+  const [tsStr, sig] = parts;
+  const ts = parseInt(tsStr ?? '', 10);
+  if (isNaN(ts)) return false;
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (Math.abs(nowSec - ts) > 300) return false; // 5-minute window
+  const expected = computeRequestSignature(secret, method, path, ts, bodyBuf.toString('hex'));
+  try {
+    return timingSafeEqual(Buffer.from(sig ?? '', 'hex'), Buffer.from(expected, 'hex'));
+  } catch {
+    return false;
+  }
+}
 
 const trustProxy = (v: string) => (v === 'true' ? true : v === 'false' ? false : /^\d+$/.test(v) ? Number(v) : v);
 
@@ -75,6 +110,7 @@ class HealthController {
   constructor(
     @Inject('HEALTH_DB') private readonly db: ReturnType<typeof createDb>['db'],
     @Inject('HEALTH_QUEUES') private readonly queues: Queue[],
+    @Inject('HEALTH_REDIS') private readonly redis: import('ioredis').Redis,
   ) {}
 
   @TsRestHandler(healthContract.health)
@@ -85,6 +121,16 @@ class HealthController {
       } catch {
         // Return 503 by throwing an HttpException that bypasses the 200 contract
         throw Object.assign(new HttpException(problem(503, 'db_unavailable', 'Database unavailable'), 503), {});
+      }
+      let redisOk: boolean;
+      try {
+        const pong = await this.redis.ping();
+        redisOk = pong === 'PONG';
+      } catch {
+        redisOk = false;
+      }
+      if (!redisOk) {
+        throw Object.assign(new HttpException(problem(503, 'redis_unavailable', 'Redis unavailable'), 503), {});
       }
       const queueStats: Record<string, { waiting: number; active: number; failed: number }> = {};
       for (const q of this.queues) {
@@ -108,15 +154,15 @@ const problem = (status: number, code: string, title: string) => ({ type: 'about
  * HttpException) become `invalid_request`, or `not_found`. Anything else is a generic 500 whose message is never
  * logged: a driver error such as drizzle's "Failed query: ... params: ..." carries user data.
  */
-function toProblem(err: unknown, route: string | undefined, log?: Logger): [number, object] {
+function toProblem(err: unknown, route: string | undefined, requestId?: string, log?: Logger): [number, object] {
   if (err instanceof HttpException && err.getStatus() < 500) {
     const [status, body] = [err.getStatus(), err.getResponse()];
-    if (typeof body === 'object' && 'title' in body) return [status, body];
-    return [status, status === 404 ? problem(404, 'not_found', 'Not found') : problem(status, 'invalid_request', 'Invalid request')];
+    if (typeof body === 'object' && 'title' in body) return [status, { ...body, requestId }];
+    return [status, status === 404 ? { ...problem(404, 'not_found', 'Not found'), requestId } : { ...problem(status, 'invalid_request', 'Invalid request'), requestId }];
   }
   const { name, cause } = (err ?? {}) as { name?: unknown; cause?: { code?: unknown } };
-  log?.error({ errorName: name, pgCode: cause?.code, route }, 'unhandled error');
-  return [500, problem(500, 'internal', 'Internal server error')];
+  log?.error({ errorName: name, pgCode: cause?.code, route, requestId }, 'unhandled error');
+  return [500, { ...problem(500, 'internal', 'Internal server error'), requestId }];
 }
 
 @Catch()
@@ -124,7 +170,9 @@ class ProblemFilter implements ExceptionFilter {
   constructor(private readonly log?: Logger) {}
   catch(err: unknown, host: ArgumentsHost) {
     const http = host.switchToHttp();
-    const [status, body] = toProblem(err, http.getRequest<FastifyRequest>().routeOptions?.url, this.log);
+    const req = http.getRequest<FastifyRequest>();
+    const requestId = req.id as string | undefined;
+    const [status, body] = toProblem(err, req.routeOptions?.url, requestId, this.log);
     void http.getResponse<FastifyReply>().status(status).send(body);
   }
 }
@@ -166,7 +214,8 @@ export interface CreateAppOptions {
 /** Composition root: wires modules and port bindings. Call app.listen() yourself, or use app.inject() in tests. */
 export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastifyApplication> {
   const config = apiConfig(opts.env);
-  const adminKey = config.ADMIN_KEY;
+  // Admin key is mutable so the rotate-key endpoint can swap it without a restart.
+  let adminKey = config.ADMIN_KEY;
   const { db, close } = createDb(config.DATABASE_URL);
   const messagingQueue = new Queue('messaging', { connection: { url: config.REDIS_URL } });
   const { Redis } = await import('ioredis');
@@ -232,6 +281,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         { provide: PortTokens.EventBus, useValue: bus },
         { provide: 'HEALTH_DB', useValue: db },
         { provide: 'HEALTH_QUEUES', useValue: [messagingQueue] },
+        { provide: 'HEALTH_REDIS', useValue: redis },
       ],
       exports: [PortTokens.EventBus],
     },
@@ -240,11 +290,46 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
   );
   app.useGlobalFilters(new ProblemFilter(log));
   const fastify = app.getHttpAdapter().getInstance();
-  // Clients must not sniff a JSON or tile answer into something executable.
+
+  // ── Security headers ────────────────────────────────────────────────────────
   fastify.addHook('onRequest', async (req, reply) => {
+    // Prevent MIME sniffing
     void reply.header('x-content-type-options', 'nosniff');
+    // Unique per-request tracing id
     void reply.header('x-request-id', req.id);
+    // Deny framing to prevent clickjacking
+    void reply.header('x-frame-options', 'DENY');
+    // Enforce TLS for 1 year (including subdomains) — only meaningful over HTTPS
+    void reply.header('strict-transport-security', 'max-age=31536000; includeSubDomains');
+    // Do not send Referer header to third parties
+    void reply.header('referrer-policy', 'strict-origin-when-cross-origin');
+    // Content-Security-Policy: this is a JSON API — no browser rendering, so lock it down hard
+    void reply.header(
+      'content-security-policy',
+      "default-src 'none'; frame-ancestors 'none'",
+    );
   });
+
+  // ── HMAC request-signature verification ───────────────────────────────────
+  // When REQUEST_SIGNING_SECRET is configured, every state-changing request from
+  // the mobile app must carry X-Request-Signature: <ts>.<hmac-hex>.
+  // Reads (GET/HEAD) and internal admin routes are exempt.
+  const sigSecret = config.REQUEST_SIGNING_SECRET;
+  if (sigSecret) {
+    fastify.addHook('preHandler', async (req, reply) => {
+      const method = req.method.toUpperCase();
+      if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return;
+      // Internal routes use the admin key, not the mobile signing secret
+      const route = req.routeOptions?.url ?? '';
+      if (route.startsWith('/internal/')) return;
+      const sig = (req.headers as Record<string, string | undefined>)['x-request-signature'];
+      const body = (req as FastifyRequest & { rawBody?: Buffer | string }).rawBody ?? Buffer.alloc(0);
+      if (!verifyRequestSignature(sigSecret, method, req.url, Buffer.isBuffer(body) ? body : Buffer.from(String(body)), sig)) {
+        void reply.status(401).send(problem(401, 'invalid_signature', 'Request signature missing or invalid'));
+        return reply;
+      }
+    });
+  }
   // A plain Fastify route: outside Nest routing, so the auth guard never sees it.
   const openApi = generateOpenApi(apiContract, { info: { title: 'iraq-maps API', version: '0.0.0' } }, { setOperationId: 'concatenated-path' });
   fastify.get('/openapi.json', async () => openApi);
@@ -286,6 +371,34 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
       const row = r as { id: string; name: string | null; locale: string; roles: string[]; created_at: Date };
       return { id: row.id, name: row.name ?? null, locale: row.locale, roles: row.roles, createdAt: row.created_at };
     }) });
+  });
+
+  // ── Admin key rotation (no restart required) ─────────────────────────────
+  // POST /internal/admin/rotate-key  { newKey: string }
+  // The caller must supply both the current admin key (x-admin-key) and a new key.
+  // The new key replaces the in-memory value immediately.  No secrets touch the DB.
+  fastify.post('/internal/admin/rotate-key', async (req, reply) => {
+    const key = (req.headers as Record<string, string | undefined>)['x-admin-key'];
+    if (!adminKey || key !== adminKey) {
+      return reply.status(401).send(problem(401, 'unauthorized', 'Unauthorized'));
+    }
+    const body = req.body as Record<string, unknown> | null;
+    const newKey = typeof body?.newKey === 'string' ? body.newKey.trim() : '';
+    if (newKey.length < 32) {
+      return reply.status(400).send(problem(400, 'invalid_request', 'newKey must be at least 32 characters'));
+    }
+    adminKey = newKey;
+    // Write an audit row so the rotation is traceable (target 'system', no user context here)
+    try {
+      await db.execute(sql`
+        INSERT INTO identity.admin_audit_log (admin_id, action, target_id, target_type, detail, created_at)
+        SELECT id, 'rotate_admin_key', 'api', 'system', NULL, now()
+        FROM identity.users WHERE roles @> ARRAY['admin']::text[] LIMIT 1
+      `);
+    } catch {
+      // Non-fatal: the rotation still succeeded; log but do not roll back
+    }
+    return reply.status(200).send({ rotated: true });
   });
 
   // Internal admin route: returns failed job counts per queue.

@@ -316,7 +316,7 @@ export class AdminDiscoverController {
       },
       approvePost: async ({ params }) => {
         try {
-          await this.svc.adminApprovePost(params.postId as PostIdType);
+          await this.svc.adminApprovePost(params.postId as PostIdType, req.principal?.userId);
           return { status: 204, body: undefined };
         } catch (e: unknown) {
           if (isNotFound(e)) return problem(404, 'not_found', 'Post not found');
@@ -325,7 +325,7 @@ export class AdminDiscoverController {
       },
       removePost: async ({ params }) => {
         try {
-          await this.svc.adminRemovePost(params.postId as PostIdType);
+          await this.svc.adminRemovePost(params.postId as PostIdType, req.principal?.userId);
           return { status: 204, body: undefined };
         } catch (e: unknown) {
           if (isNotFound(e)) return problem(404, 'not_found', 'Post not found');

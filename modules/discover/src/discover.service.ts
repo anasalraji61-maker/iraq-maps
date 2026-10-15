@@ -1,16 +1,24 @@
 import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId } from '@iraq-maps/contracts';
-import type { Db } from '@iraq-maps/db-kit';
+import { writeAdminAuditLog, type Db } from '@iraq-maps/db-kit';
 import { Inject, Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
 import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
 import { z } from 'zod';
+import type { Redis } from 'ioredis';
 import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, userFollowTable } from './schema';
 import { WordFilter } from './word-filter';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
 const noopEventBus: EventBus = { publish: async () => {}, subscribe: () => () => {} };
+
+/** TTL constants for Redis cache keys (seconds). */
+const CACHE_TTL = {
+  FEED: 30,
+  TRENDING: 300,
+  POST: 3600,
+} as const;
 
 @Injectable()
 export class DiscoverService {
@@ -21,9 +29,46 @@ export class DiscoverService {
     @Inject(PortTokens.EventBus) private readonly eventBus: EventBus = noopEventBus,
     @Optional() @Inject(PortTokens.ProviderDirectoryPort) private readonly providerDirectory: ProviderDirectoryPort | null = null,
     @Optional() @Inject('WORD_FILTER_CONFIG_PATH') wordFilterConfigPath: string | null = null,
+    @Optional() @Inject('DISCOVER_REDIS') private readonly redis: Redis | null = null,
   ) {
     this.wordFilter = new WordFilter(wordFilterConfigPath ?? undefined);
   }
+
+  // ── Redis cache helpers ──────────────────────────────────────────────────────
+
+  private async cacheGet<T>(key: string): Promise<T | null> {
+    if (!this.redis) return null;
+    try {
+      const raw = await this.redis.get(key);
+      return raw ? (JSON.parse(raw) as T) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async cacheSet(key: string, value: unknown, ttlSeconds: number): Promise<void> {
+    if (!this.redis) return;
+    try {
+      await this.redis.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    } catch {
+      // cache write failure is non-fatal
+    }
+  }
+
+  private async cacheDel(...keys: string[]): Promise<void> {
+    if (!this.redis || keys.length === 0) return;
+    try {
+      await this.redis.del(...keys);
+    } catch {
+      // cache delete failure is non-fatal
+    }
+  }
+
+  private feedCacheKey(userId: UserId, cursor: string | undefined, limit: number, category: string | undefined) {
+    return `discover:feed:${userId}:${cursor ?? ''}:${limit}:${category ?? ''}`;
+  }
+  private trendingCacheKey(limit: number) { return `discover:trending:${limit}`; }
+  private postCacheKey(postId: PostIdType) { return `discover:post:${postId}`; }
 
   /** Returns a Set of userIds that are verified providers. Gracefully returns empty set on error. @M93 */
   private async verifiedAuthorIds(authorIds: UserId[]): Promise<Set<UserId>> {
@@ -38,6 +83,15 @@ export class DiscoverService {
   }
 
   async listFeed(userId: UserId, cursor?: string, limit = 10, category?: string) {
+    const cacheKey = this.feedCacheKey(userId, cursor, limit, category);
+    const cached = await this.cacheGet<ReturnType<typeof this.toPostShape>[]>(cacheKey);
+    if (cached !== null) {
+      // Cached result carries the shaped posts; reconstruct the envelope
+      const hasMore = (cached as unknown as { _hasMore?: boolean })['_hasMore'] ?? false;
+      const nextCursor = (cached as unknown as { _nextCursor?: string })['_nextCursor'];
+      return { items: cached, nextCursor, hasMore };
+    }
+
     const rows = await this.db
       .select()
       .from(postTable)
@@ -64,10 +118,14 @@ export class DiscoverService {
     const likedSet = new Set(likes.map((l) => l.postId));
     const verifiedSet = await this.verifiedAuthorIds(items.map((p) => p.authorId as UserId));
 
-    return {
-      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id), verifiedSet.has(p.authorId as UserId))),
-      nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
-    };
+    const shapedItems = items.map((p) => this.toPostShape(p, likedSet.has(p.id), verifiedSet.has(p.authorId as UserId)));
+    const nextCursor = hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined;
+
+    // Cache the result; embed pagination metadata as hidden fields on the array object
+    const cacheVal = Object.assign(shapedItems, { _hasMore: hasMore, _nextCursor: nextCursor });
+    void this.cacheSet(this.feedCacheKey(userId, cursor, limit, category), cacheVal, CACHE_TTL.FEED);
+
+    return { items: shapedItems, nextCursor };
   }
 
   async createPost(
@@ -110,10 +168,17 @@ export class DiscoverService {
       }
     }
 
+    // Invalidate feed and trending caches on new post
+    void this.cacheDel(this.trendingCacheKey(10), this.trendingCacheKey(20));
+
     return this.toPostShape(post, false, false, mentionedIds);
   }
 
   async getPost(userId: UserId, postId: PostIdType) {
+    const cacheKey = this.postCacheKey(postId);
+    const cached = await this.cacheGet<ReturnType<typeof this.toPostShape>>(cacheKey);
+    if (cached !== null) return cached;
+
     const [post] = await Promise.all([
       this.getPostOrThrow(postId),
       // Increment view count fire-and-forget — does not block response
@@ -124,7 +189,9 @@ export class DiscoverService {
     ]);
     const [like] = await this.db.select().from(postLikeTable)
       .where(and(eq(postLikeTable.postId, postId), eq(postLikeTable.userId, userId))).limit(1);
-    return this.toPostShape({ ...post, viewCount: (post.viewCount ?? 0) + 1 }, !!like);
+    const shaped = this.toPostShape({ ...post, viewCount: (post.viewCount ?? 0) + 1 }, !!like);
+    void this.cacheSet(cacheKey, shaped, CACHE_TTL.POST);
+    return shaped;
   }
 
   async likePost(userId: UserId, postId: PostIdType) {
@@ -317,6 +384,10 @@ export class DiscoverService {
       .where(eq(postTable.id, postId))
       .returning();
     if (!updated) throw new NotFoundException({ code: 'not_found' });
+
+    // Invalidate post cache on update
+    void this.cacheDel(this.postCacheKey(postId));
+
     return this.toPostShape(updated, false);
   }
 
@@ -326,6 +397,10 @@ export class DiscoverService {
     if (post.authorId !== userId) return false;
 
     await this.db.delete(postTable).where(eq(postTable.id, postId));
+
+    // Invalidate post cache and trending on delete
+    void this.cacheDel(this.postCacheKey(postId), this.trendingCacheKey(10), this.trendingCacheKey(20));
+
     return true;
   }
 
@@ -363,16 +438,18 @@ export class DiscoverService {
     }));
   }
 
-  async adminApprovePost(postId: PostIdType): Promise<void> {
+  async adminApprovePost(postId: PostIdType, adminId?: UserId): Promise<void> {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
     await this.db.delete(postReportTable).where(eq(postReportTable.postId, postId));
+    if (adminId) await writeAdminAuditLog(this.db, adminId, 'approve_report', postId, 'post').catch(() => undefined);
   }
 
-  async adminRemovePost(postId: PostIdType): Promise<void> {
+  async adminRemovePost(postId: PostIdType, adminId?: UserId): Promise<void> {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });
     await this.db.update(postTable).set({ removedAt: new Date() }).where(eq(postTable.id, postId));
+    if (adminId) await writeAdminAuditLog(this.db, adminId, 'remove_post', postId, 'post').catch(() => undefined);
   }
 
   async userPosts(viewerUserId: UserId, authorId: UserId, cursor?: string, limit = 10) {
@@ -409,6 +486,10 @@ export class DiscoverService {
   }
 
   async trending(userId: UserId, limit = 10) {
+    const cacheKey = this.trendingCacheKey(limit);
+    const cached = await this.cacheGet<ReturnType<typeof this.toPostShape>[]>(cacheKey);
+    if (cached !== null) return { items: cached };
+
     // Score = likeCount * 2 + commentCount, only from posts in last 48 hours
     const rows = await this.db
       .select()
@@ -432,7 +513,9 @@ export class DiscoverService {
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
 
-    return { items: rows.map((p) => this.toPostShape(p, likedSet.has(p.id))) };
+    const items = rows.map((p) => this.toPostShape(p, likedSet.has(p.id)));
+    void this.cacheSet(cacheKey, items, CACHE_TTL.TRENDING);
+    return { items };
   }
 
   async searchPosts(userId: UserId, query: string, cursor?: string, limit = 10) {
