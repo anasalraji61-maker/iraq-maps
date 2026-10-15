@@ -10,6 +10,7 @@ owners:
     - "apps/mobile/eas.json"
     - "scripts/**"
     - "e2e/mobile/build-apk.sh"
+    - "e2e/mobile/build-aab.sh"
   builder-store-listing:
     - "store/**"
     - "docs/store/**"

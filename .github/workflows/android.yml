@@ -63,6 +63,30 @@ jobs:
           path: ${{ runner.temp }}/iraq-maps-arm64-v8a.apk
           if-no-files-found: error
           retention-days: 30
+      # AAB for Play Store upload — only when production keystore secrets are set.
+      - name: Build the release AAB for Play Store (production keystore only)
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: e2e/mobile/build-aab.sh "$RUNNER_TEMP/iraq-maps-release.aab"
+        env:
+          EXPO_PUBLIC_APP_ENV: production
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Check the AAB size budget
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: |
+          bytes=$(stat -c %s "$RUNNER_TEMP/iraq-maps-release.aab")
+          size="$(awk "BEGIN { printf \"%.1f\", $bytes / 1e6 }") MB ($bytes bytes)"
+          echo "### release AAB: $size, budget 40 MB" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$bytes" -le "$APK_BUDGET_BYTES" ] || { echo "::error title=AAB over budget::$size is over 40 MB"; exit 1; }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        with:
+          name: iraq-maps-release-aab
+          path: ${{ runner.temp }}/iraq-maps-release.aab
+          if-no-files-found: error
+          retention-days: 30
 
   e2e:
     runs-on: ubuntu-latest
