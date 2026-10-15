@@ -4,6 +4,7 @@ import { Banner, Button, ListItem, Screen, Text, TextField } from '@iraq-maps/ui
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState, type ReactElement } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View, Text as RNText } from 'react-native';
+import { useRouter } from 'expo-router';
 import { expectStatus, useRequest } from '../request';
 import { t } from '../strings';
 import { SkeletonBlock } from '../skeleton';
@@ -43,6 +44,7 @@ function EditProfileSkeleton(): ReactElement {
 export function ProviderEditProfileScreen(): ReactElement {
   const api = useApi();
   const apiBaseUrl = useApiBaseUrl();
+  const router = useRouter();
   const { busy, error, setError, run } = useRequest();
 
   // loaded from /providers/me
@@ -221,6 +223,12 @@ export function ProviderEditProfileScreen(): ReactElement {
         label={t('edit.save')}
         onPress={save}
         loading={busy}
+      />
+      <Button
+        variant="secondary"
+        testID="provider.manageConsents"
+        label={t('consents.entry')}
+        onPress={() => router.push('/provider/consents' as never)}
       />
     </Screen>
   );

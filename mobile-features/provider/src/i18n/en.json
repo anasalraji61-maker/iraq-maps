@@ -40,10 +40,16 @@
     "title": "Consents",
     "body": "Choose what information visitors can see.",
     "photos": "Show photos",
+    "desc_photos": "Your business photos appear on your public page.",
     "social_links": "Show social media links",
+    "desc_social_links": "Instagram, Facebook and other links are visible to visitors.",
     "whatsapp_messages": "Allow WhatsApp messages",
+    "desc_whatsapp_messages": "Visitors can contact you directly via WhatsApp.",
     "show_phone": "Show phone number",
-    "show_prices": "Show prices"
+    "desc_show_phone": "Your phone number is shown and visitors can call directly.",
+    "show_prices": "Show prices",
+    "desc_show_prices": "Your price list appears on your public business page.",
+    "entry": "Manage consents"
   },
   "otp": {
     "title": "Verify Phone Number",
