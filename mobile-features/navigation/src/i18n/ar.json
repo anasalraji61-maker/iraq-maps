@@ -1,0 +1,35 @@
+{
+  "active": {
+    "arrived": "وصلت إلى وجهتك",
+    "navigateAgain": "التنقل مرة أخرى",
+    "close": "إغلاق",
+    "rerouting": "يُعاد حساب المسار…",
+    "offRoute": "خارج المسار — إعادة الحساب",
+    "recalculate": "إعادة الحساب",
+    "recalculateA11y": "إعادة حساب المسار",
+    "then": "بعد ذلك:",
+    "eta": "تصل الساعة {time}",
+    "stop": "إيقاف الملاحة",
+    "distM": "{n} م",
+    "distKm": "{n} كم"
+  },
+  "preview": {
+    "from": "من: ",
+    "eta": "تصل الساعة {time}",
+    "walking": "مشياً",
+    "start": "ابدأ",
+    "loading": "…",
+    "durationMin": "{n} دقيقة",
+    "durationHour": "{h} ساعة",
+    "durationHourMin": "{h} س {m} د",
+    "distM": "{n} م",
+    "distKm": "{n} كم",
+    "dirRight": "انعطف يميناً",
+    "dirSharpRight": "تحول يميناً",
+    "dirLeft": "انعطف يساراً",
+    "dirSharpLeft": "تحول يساراً",
+    "dirStraight": "استمر",
+    "car": "سيارة",
+    "to": "إلى: "
+  }
+}

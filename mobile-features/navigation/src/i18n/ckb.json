@@ -1,0 +1,35 @@
+{
+  "active": {
+    "arrived": "گەیشتیت بە مەبەستەکەت",
+    "navigateAgain": "دووبارە ناڤیگەیشن",
+    "close": "داخستن",
+    "rerouting": "دووبارە حیسابکردنی ڕێگا…",
+    "offRoute": "دەرەوەی ڕێگا — دووبارە حیساب بکە",
+    "recalculate": "دووبارە حیساب بکە",
+    "recalculateA11y": "دووبارە حیسابکردنی ڕێگا",
+    "then": "دواتر:",
+    "eta": "دەگەیت کاتژمێر {time}",
+    "stop": "وەستاندنی ناڤیگەیشن",
+    "distM": "{n} م",
+    "distKm": "{n} کم"
+  },
+  "preview": {
+    "from": "لە: ",
+    "eta": "دەگەیت کاتژمێر {time}",
+    "walking": "پیاوی",
+    "start": "دەست پێبکە",
+    "loading": "…",
+    "durationMin": "{n} خ",
+    "durationHour": "{h} س",
+    "durationHourMin": "{h} س {m} خ",
+    "distM": "{n} م",
+    "distKm": "{n} کم",
+    "dirRight": "ڕاستەوخۆ بچە",
+    "dirSharpRight": "بپێچ ڕاستەوە",
+    "dirLeft": "بپێچ چەپەوە",
+    "dirSharpLeft": "بپێچ چەپی تیژ",
+    "dirStraight": "بەردەوام بە",
+    "car": "ئۆتۆمبێل",
+    "to": "بۆ: "
+  }
+}

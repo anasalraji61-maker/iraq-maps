@@ -1,0 +1,35 @@
+{
+  "active": {
+    "arrived": "You have arrived",
+    "navigateAgain": "Navigate again",
+    "close": "Close",
+    "rerouting": "Recalculating route…",
+    "offRoute": "Off route — recalculate",
+    "recalculate": "Recalculate",
+    "recalculateA11y": "Recalculate route",
+    "then": "Then:",
+    "eta": "Arrive at {time}",
+    "stop": "Stop navigation",
+    "distM": "{n} m",
+    "distKm": "{n} km"
+  },
+  "preview": {
+    "from": "From: ",
+    "eta": "Arrive at {time}",
+    "walking": "Walking",
+    "start": "Start",
+    "loading": "…",
+    "durationMin": "{n} min",
+    "durationHour": "{h} hr",
+    "durationHourMin": "{h} hr {m} min",
+    "distM": "{n} m",
+    "distKm": "{n} km",
+    "dirRight": "Turn right",
+    "dirSharpRight": "Turn sharp right",
+    "dirLeft": "Turn left",
+    "dirSharpLeft": "Turn sharp left",
+    "dirStraight": "Continue",
+    "car": "Car",
+    "to": "To: "
+  }
+}

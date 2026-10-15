@@ -5,6 +5,7 @@ import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
 import { useMemo, type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { NavigationState } from '../hooks/useNavigation';
+import { t } from '../strings';
 
 interface Props extends NavigationState {
   onStop: () => void;
@@ -18,10 +19,12 @@ interface Props extends NavigationState {
 }
 
 function fmtDist(m: number): string {
-  return m < 1000 ? `${Math.round(m)} م` : `${(m / 1000).toFixed(1)} كم`;
+  return m < 1000
+    ? t('active.distM', { n: Math.round(m) })
+    : t('active.distKm', { n: (m / 1000).toFixed(1) });
 }
 
-/** Format a Date as Arabic clock time, e.g. "3:45 م". */
+/** Format a Date as locale-aware clock time. */
 function fmtEta(date: Date): string {
   return date.toLocaleTimeString('ar-IQ', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
@@ -53,16 +56,16 @@ export function ActiveNavigationScreen({
       <Screen>
         <View style={styles.arrivedContainer}>
           <Text variant="title" testID={navigationTestIDs.active.arrived}>
-            وصلت إلى وجهتك 🎉
+            {t('active.arrived')}
           </Text>
           <View style={styles.arrivedActions}>
             {onNavigateAgain ? (
               <View style={styles.flex1}>
-                <Button label="التنقل مرة أخرى" onPress={onNavigateAgain} />
+                <Button label={t('active.navigateAgain')} onPress={onNavigateAgain} />
               </View>
             ) : null}
             <View style={styles.flex1}>
-              <Button label="إغلاق" onPress={onStop} variant="secondary" testID={navigationTestIDs.active.stop} />
+              <Button label={t('active.close')} onPress={onStop} variant="secondary" testID={navigationTestIDs.active.stop} />
             </View>
           </View>
         </View>
@@ -89,7 +92,7 @@ export function ActiveNavigationScreen({
       ) : null}
 
       {isRerouting ? (
-        <Banner kind="info" message="يُعاد حساب المسار…" testID={navigationTestIDs.active.reroute} />
+        <Banner kind="info" message={t('active.rerouting')} testID={navigationTestIDs.active.reroute} />
       ) : null}
 
       {isOffRoute && !isRerouting ? (
@@ -98,16 +101,16 @@ export function ActiveNavigationScreen({
           testID="nav.off_route"
           accessibilityRole="alert"
           accessibilityLiveRegion="assertive"
-          accessibilityLabel="خارج المسار — إعادة الحساب"
+          accessibilityLabel={t('active.offRoute')}
         >
           <View style={styles.offRouteTextWrap}>
-            <Text>خارج المسار — إعادة الحساب</Text>
+            <Text>{t('active.offRoute')}</Text>
           </View>
           <Button
-            label="إعادة الحساب"
+            label={t('active.recalculate')}
             onPress={onRecalculate}
             testID="nav.recalculate"
-            accessibilityLabel="إعادة حساب المسار"
+            accessibilityLabel={t('active.recalculateA11y')}
           />
         </View>
       ) : null}
@@ -121,7 +124,7 @@ export function ActiveNavigationScreen({
 
       {nextInstruction ? (
         <View style={styles.nextBlock}>
-          <Text tone="muted">بعد ذلك:</Text>
+          <Text tone="muted">{t('active.then')}</Text>
           <Text testID={navigationTestIDs.active.next}>
             {nextInstruction}
           </Text>
@@ -129,12 +132,12 @@ export function ActiveNavigationScreen({
       ) : null}
 
       <View style={styles.etaWrap}>
-        <Text tone="muted">{`تصل الساعة ${fmtEta(etaDate)}`}</Text>
+        <Text tone="muted">{t('active.eta', { time: fmtEta(etaDate) })}</Text>
       </View>
 
       <Button
         testID={navigationTestIDs.active.stop}
-        label="إيقاف الملاحة"
+        label={t('active.stop')}
         variant="secondary"
         onPress={onStop}
       />

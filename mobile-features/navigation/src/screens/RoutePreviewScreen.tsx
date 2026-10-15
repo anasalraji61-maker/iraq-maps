@@ -5,46 +5,51 @@ import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { t } from '../strings';
 
 function fmtDist(m: number): string {
-  return m < 1000 ? `${Math.round(m)} م` : `${(m / 1000).toFixed(1)} كم`;
+  return m < 1000
+    ? t('preview.distM', { n: Math.round(m) })
+    : t('preview.distKm', { n: (m / 1000).toFixed(1) });
 }
 
 function fmtDuration(s: number): string {
   const mins = Math.round(s / 60);
-  if (mins < 60) return `${mins} دقيقة`;
+  if (mins < 60) return t('preview.durationMin', { n: mins });
   const h = Math.floor(mins / 60);
   const rem = mins % 60;
-  return rem > 0 ? `${h} س ${rem} د` : `${h} ساعة`;
+  return rem > 0
+    ? t('preview.durationHourMin', { h, m: rem })
+    : t('preview.durationHour', { h });
 }
 
 /** Returns a Unicode arrow representing the maneuver direction. */
 function directionIcon(modifier?: ManeuverModifier): string {
   switch (modifier) {
-    case 'slight_right': return '↗';
-    case 'right': return '→';
-    case 'sharp_right': return '↘';
-    case 'slight_left': return '↖';
-    case 'left': return '←';
-    case 'sharp_left': return '↙';
-    default: return '↑';
+    case 'slight_right': return '↗'; // ↗
+    case 'right': return '→'; // →
+    case 'sharp_right': return '↘'; // ↘
+    case 'slight_left': return '↖'; // ↖
+    case 'left': return '←'; // ←
+    case 'sharp_left': return '↙'; // ↙
+    default: return '↑'; // ↑
   }
 }
 
-/** Short Arabic direction word for a maneuver modifier. */
+/** Localised direction word for a maneuver modifier. */
 function directionWord(modifier?: ManeuverModifier): string {
   switch (modifier) {
     case 'slight_right':
-    case 'right': return 'انعطف يميناً';
-    case 'sharp_right': return 'تحول يميناً';
+    case 'right': return t('preview.dirRight');
+    case 'sharp_right': return t('preview.dirSharpRight');
     case 'slight_left':
-    case 'left': return 'انعطف يساراً';
-    case 'sharp_left': return 'انعطف يساراً بحدة';
-    default: return 'استمر';
+    case 'left': return t('preview.dirLeft');
+    case 'sharp_left': return t('preview.dirSharpLeft');
+    default: return t('preview.dirStraight');
   }
 }
 
-/** Format a Date as Arabic clock time, e.g. "3:45 م". */
+/** Format a Date as locale-aware clock time. */
 function fmtEta(date: Date): string {
   return date.toLocaleTimeString('ar-IQ', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
@@ -106,17 +111,17 @@ export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoadi
       ) : null}
       {originAddress ? (
         <View style={styles.addressRow}>
-          <Text variant="caption" tone="muted">{'من: '}</Text>
+          <Text variant="caption" tone="muted">{t('preview.from')}</Text>
           <Text variant="caption" tone="muted">{originAddress}</Text>
         </View>
       ) : null}
       <Text variant="title" testID={navigationTestIDs.preview.summary}>
-        {fmtDist(route.distanceM)} · {fmtDuration(route.durationS)}
+        {`${fmtDist(route.distanceM)} · ${fmtDuration(route.durationS)}`}
       </Text>
-      <Text tone="muted">{`تصل الساعة ${fmtEta(eta)}`}</Text>
+      <Text tone="muted">{t('preview.eta', { time: fmtEta(eta) })}</Text>
       {destinationAddress ? (
         <View style={styles.addressRow}>
-          <Text variant="caption" tone="muted">{'إلى: '}</Text>
+          <Text variant="caption" tone="muted">{t('preview.to')}</Text>
           <Text variant="caption" tone="muted">{destinationAddress}</Text>
         </View>
       ) : null}
@@ -124,13 +129,13 @@ export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoadi
       <View style={styles.modeRow}>
         <Button
           testID={navigationTestIDs.preview.modeCar}
-          label="سيارة"
+          label={t('preview.car')}
           variant={mode === 'car' ? 'primary' : 'secondary'}
           onPress={() => onModeChange('car')}
         />
         <Button
           testID={navigationTestIDs.preview.modeWalk}
-          label="مشياً"
+          label={t('preview.walking')}
           variant={mode === 'walk' ? 'primary' : 'secondary'}
           onPress={() => onModeChange('walk')}
         />
@@ -146,7 +151,7 @@ export function RoutePreviewScreen({ route, mode, onModeChange, onStart, isLoadi
 
       <Button
         testID={navigationTestIDs.preview.start}
-        label={isLoading ? '…' : 'ابدأ'}
+        label={isLoading ? t('preview.loading') : t('preview.start')}
         onPress={onStart}
       />
     </Screen>
