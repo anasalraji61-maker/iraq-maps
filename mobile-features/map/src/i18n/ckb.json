@@ -13,7 +13,7 @@
     "sectionStreets": "شەقامەکان",
     "sectionAreas": "ناوچەکان",
     "suggestionsHint": "پێشنیازێک هەڵبژێرە یان بەردەوام بە نووسین",
-    "resultCount": "{{count}} ئەنجام",
+    "resultCount": "{count} ئەنجام",
     "categoryChipsTitle": "بڕووسکەی بە جۆر"
   },
   "focus": {
@@ -140,6 +140,6 @@
     "close": "داخستن",
     "closeSymbol": "✕",
     "photo": "وێنە",
-    "counter": "{{total}} وێنە"
+    "counter": "{total} وێنە"
   }
 }

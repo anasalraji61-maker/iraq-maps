@@ -5,7 +5,7 @@
     "continue": "متابعة",
     "maxPlaces": "الحد الأقصى 5 أماكن",
     "title": "رسالة جديدة",
-    "charCount": "{{count}}/500",
+    "charCount": "{count}/500",
     "templatesLabel": "اقتراحات سريعة",
     "templates": {
       "price": "ما هو السعر؟",
@@ -32,7 +32,7 @@
     "emptyBody": "ابحث عن مكان واسأل عن أسعاره أو خدماته",
     "start": "ابدأ محادثة",
     "loadError": "خطأ في تحميل الرسائل",
-    "placesCount": "{{count}} أماكن",
+    "placesCount": "{count} أماكن",
     "placeCount": "مكان واحد",
     "repliedBadge": "رد",
     "badgePending": "في الانتظار",
@@ -48,7 +48,7 @@
     "loadError": "خطأ في تحميل الطلب",
     "whatsapp": "تواصل عبر واتساب",
     "urlPreview": "افتح الرابط",
-    "seenAt": "شوهد في {{time}}",
+    "seenAt": "شوهد في {time}",
     "unread": "غير مقروء",
     "status": {
       "queued": "في الانتظار",

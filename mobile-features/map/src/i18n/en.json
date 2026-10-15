@@ -13,7 +13,7 @@
     "sectionAreas": "Areas",
     "networkError": "Search failed — check your connection",
     "suggestionsHint": "Pick a suggestion or keep typing",
-    "resultCount": "{{count}} results",
+    "resultCount": "{count} results",
     "categoryChipsTitle": "Browse by category"
   },
   "focus": {
@@ -140,6 +140,6 @@
     "close": "Close",
     "closeSymbol": "✕",
     "photo": "Photo",
-    "counter": "{{total}} photos"
+    "counter": "{total} photos"
   }
 }

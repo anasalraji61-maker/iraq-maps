@@ -5,7 +5,7 @@
     "continue": "Continue",
     "maxPlaces": "Maximum 5 places",
     "title": "New message",
-    "charCount": "{{count}}/500",
+    "charCount": "{count}/500",
     "templatesLabel": "Quick suggestions",
     "templates": {
       "price": "What is the price?",
@@ -32,7 +32,7 @@
     "emptyBody": "Find a place and ask about prices or services",
     "start": "Start a conversation",
     "loadError": "Error loading messages",
-    "placesCount": "{{count}} places",
+    "placesCount": "{count} places",
     "placeCount": "1 place",
     "repliedBadge": "Replied",
     "badgePending": "Pending",
@@ -48,7 +48,7 @@
     "loadError": "Error loading request",
     "whatsapp": "Contact via WhatsApp",
     "urlPreview": "Open link",
-    "seenAt": "Seen at {{time}}",
+    "seenAt": "Seen at {time}",
     "unread": "Unread",
     "status": {
       "queued": "Queued",

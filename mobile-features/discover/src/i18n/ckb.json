@@ -75,7 +75,7 @@
     "placeholder": "چی دەتەوێت هاوبەش بکەیت؟",
     "submit": "بڵاوکردنەوە",
     "typeLabel": "جۆری پۆست",
-    "charCount": "{{count}}/1000",
+    "charCount": "{count}/1000",
     "submitError": "هەڵەی بڵاوکردنەوە",
     "placeLabel": "شوێن (ئارەزوومەندانە)",
     "placePlaceholder": "ناوی شوێن بنووسە...",
@@ -145,7 +145,7 @@
     "close": "داخستن",
     "closeSymbol": "✕",
     "photo": "وێنە",
-    "counter": "{{total}} وێنە"
+    "counter": "{total} وێنە"
   },
   "hashtag": {
     "empty": "هیچ پۆستێک بە تاگی {tag} نییە",

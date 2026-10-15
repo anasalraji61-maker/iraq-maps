@@ -89,9 +89,9 @@
     "responseUrgent": "Urgent",
     "responseOverdue": "Overdue",
     "timeJustNow": "Just now",
-    "timeMinsAgo": "{{n}}m ago",
-    "timeHoursAgo": "{{n}}h ago",
-    "timeDaysAgo": "{{n}}d ago",
+    "timeMinsAgo": "{n}m ago",
+    "timeHoursAgo": "{n}h ago",
+    "timeDaysAgo": "{n}d ago",
     "itemA11y": "Message from {userId}",
     "loadMore": "Load more",
     "replyCharsRemaining": "{n} characters remaining"

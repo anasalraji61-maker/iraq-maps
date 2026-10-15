@@ -5,7 +5,7 @@
     "continue": "بەردەوام بە",
     "maxPlaces": "زۆرترین ژمارەی شوێن ٥ ە",
     "title": "پەیامی نوێ",
-    "charCount": "{{count}}/500",
+    "charCount": "{count}/500",
     "templatesLabel": "پێشنیارە خێراکان",
     "templates": {
       "price": "نرخەکە چەندە؟",
@@ -32,7 +32,7 @@
     "emptyBody": "شوێنێک بدۆزەرەوە و پرسیار لە نرخ یان خزمەتگوزاریەکانی بکە",
     "start": "دەستپێکردن بە گفتوگۆ",
     "loadError": "هەڵەیەک ڕوویدا لە بارکردنی پەیامەکان",
-    "placesCount": "{{count}} شوێن",
+    "placesCount": "{count} شوێن",
     "placeCount": "١ شوێن",
     "repliedBadge": "وەڵامدراوە",
     "badgePending": "چاوەڕوانکردن",
@@ -48,7 +48,7 @@
     "loadError": "هەڵەیەک ڕوویدا لە بارکردنی داواکاری",
     "whatsapp": "پەیوەندی بکە لە ڕێگەی واتساپەوە",
     "urlPreview": "کردنەوەی بەستەر",
-    "seenAt": "لە {{time}} بینرایەوە",
+    "seenAt": "لە {time} بینرایەوە",
     "unread": "نەخوێندراوەتەوە",
     "status": {
       "queued": "چاوەڕوان",

@@ -11,7 +11,7 @@
     "error": "حدث خطأ، حاول مجدداً",
     "dailyLimit": "وصلت للحد اليومي للمساعد — حاول غداً",
     "showOnMap": "عرض على الخريطة",
-    "showPlacesOnMap": "عرض {{count}} أماكن على الخريطة",
+    "showPlacesOnMap": "عرض {count} أماكن على الخريطة",
     "viewOnMap": "عرض على الخريطة",
     "welcomeTitle": "مرحباً! كيف أساعدك؟",
     "welcomeSubtitle": "اسألني عن أي مكان في العراق — مطاعم، فنادق، معالم سياحية، أسعار، اتجاهات والمزيد.",
@@ -21,7 +21,7 @@
     "quickReply4": "كيف أصل إلى...",
     "clearChat": "محادثة جديدة",
     "clearChatA11y": "بدء محادثة جديدة",
-    "charCount": "{{count}}/{{max}}",
+    "charCount": "{count}/{max}",
     "retry": "إعادة المحاولة"
   }
 }

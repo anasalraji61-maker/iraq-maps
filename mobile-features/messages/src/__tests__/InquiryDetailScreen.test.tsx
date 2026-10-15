@@ -32,7 +32,7 @@ const mockInquiry = {
   ],
 };
 
-const mockGetInquiry = jest.fn(async () => ({ status: 200, body: mockInquiry }));
+const mockGetInquiry = jest.fn<() => Promise<{ status: 200; body: unknown }>>().mockResolvedValue({ status: 200, body: mockInquiry });
 const mockMarkInquiryRead = jest.fn(async () => ({ status: 200, body: { ok: true } }));
 jest.mock('../client', () => ({ useMessagingClient: () => ({ getInquiry: mockGetInquiry, markInquiryRead: mockMarkInquiryRead }) }));
 
