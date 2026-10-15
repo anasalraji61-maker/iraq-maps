@@ -1,5 +1,6 @@
 import { describe, expect, it, jest, beforeEach } from '@jest/globals';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { ActionSheetIOS } from 'react-native';
 import { discoverTestIDs } from '@iraq-maps/contracts';
 import { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
 
@@ -118,5 +119,31 @@ describe('DiscoverFeedScreen', () => {
     });
     // The "more options" button (⋯) should be accessible
     expect(getByLabelText(/post.more/)).toBeTruthy();
+  });
+
+  it('pressing a report reason calls reportPost API', async () => {
+    // In the RNTL environment Platform.OS is 'ios', so the code uses
+    // ActionSheetIOS.showActionSheetWithOptions. We intercept that and
+    // immediately invoke the callback with index 0 (first report reason).
+    const actionSheetSpy = jest.spyOn(ActionSheetIOS, 'showActionSheetWithOptions').mockImplementation(
+      (_options, callback) => { callback(0); },
+    );
+
+    const { getByLabelText, getByTestId } = await render(<DiscoverFeedScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId(discoverTestIDs.feedItem(POST_ID))).toBeTruthy();
+    });
+
+    await act(async () => {
+      fireEvent.press(getByLabelText(/post.more/));
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(mockReportPost).toHaveBeenCalledTimes(1);
+    });
+
+    actionSheetSpy.mockRestore();
   });
 });
