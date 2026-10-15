@@ -1,4 +1,5 @@
 export * from './sanitize';
+export * from './search';
 export * from './incidents';
 export * from './location-share';
 export * from './assistant'; // M5
@@ -19,4 +20,5 @@ export * from './ports';
 export * from './providers';
 export * from './routing';
 export * from './test-ids';
-export type * from './tour3d';
+export * from './tour3d';
+export * from './payments';
