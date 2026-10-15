@@ -213,4 +213,25 @@ describe('ProviderInboxDetailScreen', () => {
       expect(input.props.value).not.toBe('');
     });
   });
+
+  it('shows closed banner when inquiry is older than 7 days with no reply', async () => {
+    const OLD_DATE = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+    mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
+    mockApi({
+      getInquiry: jest.fn(async () => ({ status: 200, body: makeInquiry({ createdAt: OLD_DATE, text: 'سؤال قديم جداً' }) })),
+    });
+    const view = await renderWithProviders(<ProviderInboxDetailScreen />);
+    await waitFor(() => view.getByText('سؤال قديم جداً'));
+    expect(view.getByTestId('provider-inquiry-closed-banner')).toBeTruthy();
+  });
+
+  it('does not show closed banner when inquiry is recent', async () => {
+    mockedUseLocalSearchParams.mockReturnValue({ id: INQUIRY_ID });
+    mockApi({
+      getInquiry: jest.fn(async () => ({ status: 200, body: makeInquiry({ text: 'سؤال حديث جداً' }) })),
+    });
+    const view = await renderWithProviders(<ProviderInboxDetailScreen />);
+    await waitFor(() => view.getByText('سؤال حديث جداً'));
+    expect(view.queryByTestId('provider-inquiry-closed-banner')).toBeNull();
+  });
 });

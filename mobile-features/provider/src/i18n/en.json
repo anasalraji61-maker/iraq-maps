@@ -112,7 +112,8 @@
     "itemA11y": "Message from {userId}",
     "loadMore": "Load more",
     "replyCharsRemaining": "{n} characters remaining",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "closed": "This inquiry is closed — no response was received within 7 days"
   },
   "logo": {
     "title": "Business Logo",

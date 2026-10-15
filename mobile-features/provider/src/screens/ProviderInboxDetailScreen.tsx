@@ -11,6 +11,7 @@ import { t } from '../strings';
 import { SkeletonBlock } from '../skeleton';
 
 const PRIMARY = '#1976D2';
+const INQUIRY_CLOSE_DAYS = 7;
 
 const MAX_REPLY_LENGTH = 1000;
 
@@ -25,9 +26,16 @@ export function ProviderInboxDetailScreen(): ReactElement {
   const [replyText, setReplyText] = useState('');
   const [sentReply, setSentReply] = useState('');
   const [inquiryText, setInquiryText] = useState('');
+  const [inquiryCreatedAt, setInquiryCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { busy, error, run } = useRequest();
+
+  /** True when inquiry is 7+ days old and the provider has not yet replied. */
+  const isClosed =
+    !sentReply &&
+    inquiryCreatedAt !== null &&
+    (Date.now() - new Date(inquiryCreatedAt).getTime()) / (1000 * 60 * 60 * 24) >= INQUIRY_CLOSE_DAYS;
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -35,6 +43,7 @@ export function ProviderInboxDetailScreen(): ReactElement {
       const res = await api.getInquiry({ params: { id: id as InquiryId } });
       if (res.status === 200) {
         setInquiryText(res.body.text);
+        setInquiryCreatedAt(res.body.createdAt);
       }
     } finally {
       setLoading(false);
@@ -94,6 +103,7 @@ export function ProviderInboxDetailScreen(): ReactElement {
       >
         <Text variant="title">{t('inbox.title')}</Text>
         {error ? <Banner kind="error" message={error} /> : null}
+        {isClosed ? <Banner testID="provider-inquiry-closed-banner" kind="info" message={t('inbox.closed')} /> : null}
 
         <View style={styles.bubble}>
           <Text>{inquiryText}</Text>
