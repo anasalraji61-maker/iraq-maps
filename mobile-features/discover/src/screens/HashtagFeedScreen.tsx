@@ -143,6 +143,11 @@ export function HashtagFeedScreen(): ReactElement {
           <Text style={styles.backText}>{'‹'}</Text>
         </Pressable>
         <Text style={sharedStyles.headerTitle}>{hashtag}</Text>
+        {!loading && posts.length > 0 ? (
+          <Text style={styles.postCountText} testID="hashtag-post-count">
+            {t('hashtag.postCount', { n: String(posts.length) })}
+          </Text>
+        ) : null}
       </View>
       {loading && !refreshing ? (
         <View style={sharedStyles.listContent}>
@@ -190,6 +195,7 @@ const styles = StyleSheet.create({
   backText: { color: '#FFF', fontSize: 28, lineHeight: 32 },
   retryBtn: { marginTop: 12, paddingHorizontal: 20, paddingVertical: 8, backgroundColor: COLORS.primary, borderRadius: 8 },
   retryText: { color: '#FFF', fontWeight: '600' },
+  postCountText: { color: 'rgba(255,255,255,0.75)', fontSize: 12, textAlign: 'center', paddingBottom: 4 },
   postCard: {
     backgroundColor: COLORS.surface,
     borderRadius: 10,

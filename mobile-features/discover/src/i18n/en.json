@@ -174,7 +174,8 @@
   },
   "hashtag": {
     "empty": "No posts with tag {tag}",
-    "title": "Hashtag posts"
+    "title": "Hashtag posts",
+    "postCount": "{n} posts"
   },
   "pin": {
     "pin": "Pin post",
