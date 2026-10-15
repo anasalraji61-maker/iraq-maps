@@ -1,7 +1,7 @@
 ---
 id: M11
 slug: post-moderation
-status: in_progress
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-discover:
@@ -10,6 +10,7 @@ owners:
     - "modules/discover/migrations/**"
     - "apps/admin/src/api.ts"
     - "apps/admin/src/**"
+    - "mobile-features/discover/src/**"
 ---
 
 # M11 — Post Reporting & Admin Moderation
@@ -31,4 +32,4 @@ owners:
 
 ## Completion
 
-SHA:
+SHA: 0b7821a

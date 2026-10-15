@@ -16,6 +16,19 @@
     "likeA11y": "Like post by {author}",
     "typeA11y": "Post type: {type}",
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
+    "more": "More",
+    "moreIcon": "⋯",
+    "report": "Report",
+    "reportTitle": "Report reason",
+    "reportCancel": "Cancel",
+    "reportSuccess": "Report submitted",
+    "reportError": "Failed to submit report",
+    "reportReason": {
+      "spam": "Spam",
+      "inappropriate": "Inappropriate",
+      "misinformation": "Misinformation",
+      "other": "Other"
+    },
     "type": {
       "photo": "Photo",
       "tip": "Tip",

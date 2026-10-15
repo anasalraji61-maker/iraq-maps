@@ -3,7 +3,9 @@ import { useApi } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import {
+  ActionSheetIOS,
   ActivityIndicator,
+  Alert,
   FlatList,
   I18nManager,
   Image,
@@ -36,6 +38,9 @@ const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'pos
 };
 
 
+const REPORT_REASONS = ['spam', 'inappropriate', 'misinformation', 'other'] as const;
+type ReportReason = typeof REPORT_REASONS[number];
+
 const PostItem = memo(function PostItem({
   post,
   placeName,
@@ -43,6 +48,7 @@ const PostItem = memo(function PostItem({
   onLike,
   onComment,
   onPlacePress,
+  onReport,
 }: {
   post: DiscoverPostType;
   placeName?: string;
@@ -50,6 +56,7 @@ const PostItem = memo(function PostItem({
   onLike: (post: DiscoverPostType) => void;
   onComment: (post: DiscoverPostType) => void;
   onPlacePress: (placeId: string) => void;
+  onReport: (postId: string, reason: ReportReason) => void;
 }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
 
@@ -58,18 +65,60 @@ const PostItem = memo(function PostItem({
     void Share.share({ message });
   }, [post.body, post.id]);
 
+  const handleMorePress = useCallback(() => {
+    const reasonLabels = REPORT_REASONS.map((r) => t(`post.reportReason.${r}`));
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: t('post.reportTitle'),
+          options: [...reasonLabels, t('post.reportCancel')],
+          cancelButtonIndex: reasonLabels.length,
+          destructiveButtonIndex: undefined,
+        },
+        (idx) => {
+          const reason = REPORT_REASONS[idx];
+          if (reason) onReport(post.id, reason);
+        },
+      );
+    } else {
+      // Android: use Alert with buttons for reason selection
+      Alert.alert(
+        t('post.report'),
+        t('post.reportTitle'),
+        [
+          ...REPORT_REASONS.map((r) => ({
+            text: t(`post.reportReason.${r}`),
+            onPress: () => onReport(post.id, r),
+          })),
+          { text: t('post.reportCancel'), style: 'cancel' as const },
+        ],
+      );
+    }
+  }, [post.id, onReport]);
+
   return (
     <View testID={discoverTestIDs.feedItem(post.id)} style={[styles.card, { backgroundColor: COLORS.surface }]}>
       <View style={styles.cardHeader}>
         <Text style={[styles.authorText, { color: COLORS.textSecondary }]}>{post.authorId.slice(0, 8)}</Text>
-        <View
-          style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
-          accessibilityRole="text"
-          accessibilityLabel={t('post.typeA11y', { type: TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type })}
-        >
-          <Text style={[styles.typeText, { color: badgeColors.text }]}>
-            {TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type}
-          </Text>
+        <View style={styles.cardHeaderRight}>
+          <View
+            style={[styles.typeBadge, { backgroundColor: badgeColors.bg }]}
+            accessibilityRole="text"
+            accessibilityLabel={t('post.typeA11y', { type: TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type })}
+          >
+            <Text style={[styles.typeText, { color: badgeColors.text }]}>
+              {TYPE_LABEL_KEYS[post.type] ? t(TYPE_LABEL_KEYS[post.type]!) : post.type}
+            </Text>
+          </View>
+          <Pressable
+            style={styles.moreBtn}
+            onPress={handleMorePress}
+            accessibilityRole="button"
+            accessibilityLabel={t('post.more')}
+
+          >
+            <Text style={[styles.moreBtnText, { color: COLORS.textSecondary }]}>{t('post.moreIcon')}</Text>
+          </Pressable>
         </View>
       </View>
       <Text style={[styles.bodyText, { color: COLORS.textPrimary }]}>{post.body}</Text>
@@ -219,6 +268,15 @@ export function DiscoverFeedScreen(): ReactElement {
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
 
+  const handleReport = useCallback(async (postId: string, reason: ReportReason) => {
+    try {
+      await api.reportPost({ params: { postId }, body: { reason } });
+      Alert.alert(t('post.reportSuccess'));
+    } catch {
+      Alert.alert(t('post.reportError'));
+    }
+  }, [api]);
+
   const handleLike = useCallback(async (post: DiscoverPostType) => {
     try {
       const postId = post.id;
@@ -288,6 +346,7 @@ export function DiscoverFeedScreen(): ReactElement {
             onLike={handleLike}
             onComment={handleComment}
             onPlacePress={handlePlacePress}
+            onReport={handleReport}
           />
         )}
         initialNumToRender={5}
@@ -355,6 +414,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  moreBtn: {
+    padding: 2,
+  },
+  moreBtnText: {
+    fontSize: 18,
+    lineHeight: 20,
+    fontWeight: '700',
   },
   authorText: {
     fontSize: 13,

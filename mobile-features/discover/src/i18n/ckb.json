@@ -16,6 +16,19 @@
     "likeA11y": "لایک بۆ پۆستی {author}",
     "typeA11y": "جۆری پۆست: {type}",
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
+    "more": "زیاتر",
+    "moreIcon": "⋯",
+    "report": "ڕاپۆرت",
+    "reportTitle": "هۆکاری ڕاپۆرت",
+    "reportCancel": "هەڵوەشاندنەوە",
+    "reportSuccess": "ڕاپۆرتەکە نێردرا",
+    "reportError": "هەڵەی نێردنی ڕاپۆرت",
+    "reportReason": {
+      "spam": "سپام",
+      "inappropriate": "ناگونجاو",
+      "misinformation": "زانیاری هەڵە",
+      "other": "هۆکاری تر"
+    },
     "type": {
       "photo": "وێنە",
       "tip": "تێبینی",

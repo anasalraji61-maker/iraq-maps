@@ -16,6 +16,19 @@
     "likeA11y": "الإعجاب بمنشور {author}",
     "typeA11y": "نوع المنشور: {type}",
     "shareText": "{body}\n\niraqsmartmaps://discover/{postId}",
+    "more": "المزيد",
+    "moreIcon": "⋯",
+    "report": "إبلاغ",
+    "reportTitle": "سبب الإبلاغ",
+    "reportCancel": "إلغاء",
+    "reportSuccess": "تم إرسال البلاغ",
+    "reportError": "فشل إرسال البلاغ",
+    "reportReason": {
+      "spam": "بريد عشوائي",
+      "inappropriate": "محتوى غير لائق",
+      "misinformation": "معلومات مضللة",
+      "other": "أسباب أخرى"
+    },
     "type": {
       "photo": "صورة",
       "tip": "نصيحة",
