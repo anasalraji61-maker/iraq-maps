@@ -153,7 +153,11 @@ export function ProviderRegistrationScreen(): ReactElement {
   return (
     <Screen scroll>
       <Text variant="title">{t('registration.title')}</Text>
-      <Text tone="muted">{stepTitle}</Text>
+      <View style={regStyles.stepDots} accessibilityLabel={stepTitle} accessibilityRole="progressbar">
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+          <View key={i} style={[regStyles.stepDot, i + 1 === step && regStyles.stepDotActive]} />
+        ))}
+      </View>
       {banner}
 
       {step === 1 && (
@@ -279,6 +283,9 @@ export function ProviderRegistrationScreen(): ReactElement {
 const LOGO_SIZE = 96;
 
 const regStyles = StyleSheet.create({
+  stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 8 },
+  stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#D1D5DB' },
+  stepDotActive: { backgroundColor: '#1976D2', width: 24 },
   logoContainer: { alignItems: 'center', marginVertical: 16 },
   logoWrapper: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2 },
   logoImage: { width: LOGO_SIZE, height: LOGO_SIZE, borderRadius: LOGO_SIZE / 2 },
