@@ -50,5 +50,7 @@
   "inquiryStatusPending": "في انتظار الرد",
   "inquiryStatusReplied": "تم الرد",
   "inquiryStatusClosed": "مغلق",
-  "inquiryStatusSent": "تم الإرسال"
+  "inquiryStatusSent": "تم الإرسال",
+  "postLikes": "{n} إعجاب",
+  "postComments": "{n} تعليق"
 }

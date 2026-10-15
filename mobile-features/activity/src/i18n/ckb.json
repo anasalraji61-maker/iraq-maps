@@ -50,5 +50,7 @@
   "inquiryStatusPending": "چاوەڕوانی وەڵام",
   "inquiryStatusReplied": "وەڵامی درایەوە",
   "inquiryStatusClosed": "داخراو",
-  "inquiryStatusSent": "نێردراوە"
+  "inquiryStatusSent": "نێردراوە",
+  "postLikes": "{n} حەزکردن",
+  "postComments": "{n} راماندن"
 }

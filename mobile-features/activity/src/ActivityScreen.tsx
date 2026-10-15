@@ -408,7 +408,7 @@ function PostRow({ item, onDelete, onEdit }: { item: DiscoverPostType; onDelete:
       <Text style={styles.rowIcon} accessibilityElementsHidden>{hasMedia ? '📷' : '📝'}</Text>
       <View style={styles.rowBody}>
         <Text style={styles.rowTitle} numberOfLines={2}>{item.body}</Text>
-        <Text style={styles.rowSub}>{item.likeCount} · {item.commentCount}</Text>
+        <Text style={styles.rowSub}>{t('postLikes', { n: item.likeCount })} · {t('postComments', { n: item.commentCount })}</Text>
         <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
       </View>
       <View style={styles.postActions}>

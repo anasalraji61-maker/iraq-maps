@@ -50,5 +50,7 @@
   "inquiryStatusPending": "Awaiting reply",
   "inquiryStatusReplied": "Replied",
   "inquiryStatusClosed": "Closed",
-  "inquiryStatusSent": "Sent"
+  "inquiryStatusSent": "Sent",
+  "postLikes": "{n} likes",
+  "postComments": "{n} comments"
 }
