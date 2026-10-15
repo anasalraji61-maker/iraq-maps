@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq, lt, sql as drizzleSql, notInArray } from 'drizzle-orm';
 import sharp from 'sharp';
 import type { Queue } from 'bullmq';
 import {
@@ -210,18 +210,50 @@ export class MediaService implements MediaPort {
 
   /** Deletes assets that remain in 'pending' status for longer than ORPHAN_GRACE_MS
    *  (i.e. the upload was never completed and no post referenced them).
+   *  Also deletes 'ready' assets that are no longer referenced by any discover post or provider photo.
    *  Intended to be called by a scheduled job.
-   *  TODO: also check discover.post.media_asset_ids and providers.photo tables once those schemas are queryable.
    */
   async cleanupOrphaned(): Promise<{ deleted: number }> {
     const cutoff = new Date(Date.now() - ORPHAN_GRACE_MS);
-    // Select only 'pending' assets (upload was never completed) older than the grace cutoff.
-    // 'ready' assets are referenced by their owner and must not be deleted here.
-    // TODO: also exclude assets referenced in discover.post or providers.photo once cross-schema joins are permitted.
-    const staleOrphans = await this.db
+
+    // Collect UUIDs referenced by discover.post.media_asset_ids (uuid[]) and providers.provider.photo_asset_ids (text JSON array).
+    // Cross-schema raw SQL: these schemas are on the same Postgres instance.
+    const referencedRows = await this.db.execute<{ id: string }>(
+      drizzleSql`
+        SELECT unnest(media_asset_ids) AS id FROM discover.post WHERE media_asset_ids IS NOT NULL
+        UNION
+        SELECT jsonb_array_elements_text(photo_asset_ids::jsonb)::uuid AS id
+        FROM providers.provider
+        WHERE photo_asset_ids <> '[]' AND photo_asset_ids <> 'null'
+      `,
+    );
+    const referenced = new Set(referencedRows.rows.map((r) => r.id));
+
+    // Pending assets older than grace period (upload never completed).
+    const stalePending = await this.db
       .select({ id: assetTable.id, storageKey: assetTable.storageKey })
       .from(assetTable)
       .where(and(eq(assetTable.status, 'pending'), lt(assetTable.createdAt, cutoff)));
+
+    // Ready assets not referenced by any discover post or provider.
+    const staleReady =
+      referenced.size > 0
+        ? await this.db
+            .select({ id: assetTable.id, storageKey: assetTable.storageKey })
+            .from(assetTable)
+            .where(
+              and(
+                eq(assetTable.status, 'ready'),
+                lt(assetTable.createdAt, cutoff),
+                notInArray(assetTable.id, [...referenced] as AssetId[]),
+              ),
+            )
+        : await this.db
+            .select({ id: assetTable.id, storageKey: assetTable.storageKey })
+            .from(assetTable)
+            .where(and(eq(assetTable.status, 'ready'), lt(assetTable.createdAt, cutoff)));
+
+    const staleOrphans = [...stalePending, ...staleReady];
 
     let deleted = 0;
     for (const row of staleOrphans) {
