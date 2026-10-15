@@ -9,9 +9,10 @@ import { Badge, Banner, Button, Card, ListItem, Text } from '@iraq-maps/ui';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useCallback, type ReactElement } from 'react';
-import { Linking, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Linking, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View, Text as RNText } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMessagingClient } from '../client';
+import { useMarkRead } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
 // URL detection regex (simple, covers http/https)
@@ -21,7 +22,7 @@ const URL_REGEX = /https?:\/\/[^\s]+/g;
 function statusIcon(status: MessageStatus): string {
   switch (status) {
     case 'read':
-      return '✓✓'; // shown in blue via style
+      return '✓✓';
     case 'delivered':
       return '✓✓';
     case 'sent':
@@ -31,15 +32,23 @@ function statusIcon(status: MessageStatus): string {
   }
 }
 
+const STATUS_COLORS: Partial<Record<MessageStatus, string>> = {
+  read: '#1976D2',
+  delivered: '#757575',
+  sent: '#757575',
+  replied: '#2E7D32',
+  failed: '#C62828',
+};
+
 function StatusIndicator({ status }: { status: MessageStatus }): ReactElement | null {
   const icon = statusIcon(status);
+  const color = STATUS_COLORS[status];
   if (!icon) return null;
-  const isRead = status === 'read';
   return (
     <View style={{ marginStart: 4 }}>
-      <Text variant="caption" tone={isRead ? 'default' : 'muted'}>
+      <RNText style={{ fontSize: 11, color: color ?? '#757575' }}>
         {icon}
-      </Text>
+      </RNText>
     </View>
   );
 }
@@ -152,6 +161,9 @@ export function InquiryDetailScreen(): ReactElement {
   const [inquiry, setInquiry] = useState<Inquiry | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [refreshing, setRefreshing] = useState(false);
+  const [seenAt, setSeenAt] = useState<string | null>(null);
+
+  const markRead = useMarkRead(requestId);
 
   const loadInquiry = useCallback(async (isRefresh = false) => {
     if (!requestId) return;
@@ -168,6 +180,11 @@ export function InquiryDetailScreen(): ReactElement {
 
   useEffect(() => { void loadInquiry(); }, [loadInquiry]);
 
+  // Mark as read when screen opens
+  useEffect(() => {
+    void markRead().then((ts) => { if (ts) setSeenAt(ts); });
+  }, [markRead]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -183,10 +200,18 @@ export function InquiryDetailScreen(): ReactElement {
               <View style={{ flex: 1 }}>
                 <MessageText text={inquiry.text} />
               </View>
-              <View style={{ marginStart: 8 }}>
+              <View style={{ marginStart: 8, alignItems: 'flex-end' }}>
                 <Text tone="muted" variant="caption">
                   {formatTime(inquiry.createdAt)}
                 </Text>
+                {seenAt ? (
+                  <RNText
+                    testID="seen-at-label"
+                    style={{ color: '#1976D2', marginTop: 2, fontSize: 11 }}
+                  >
+                    {t('detail.seenAt', { time: formatTime(seenAt) })}
+                  </RNText>
+                ) : null}
               </View>
             </View>
             {inquiry.targets.map((target) => (

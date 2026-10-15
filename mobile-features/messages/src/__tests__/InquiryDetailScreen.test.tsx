@@ -6,6 +6,13 @@ import { messagingTestIDs } from '@iraq-maps/contracts';
 import { Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  default: {
+    getItem: jest.fn(async () => null),
+    setItem: jest.fn(async () => undefined),
+  },
+}));
+
 const mockInquiry = {
   id: 'inq1',
   userId: 'user1',

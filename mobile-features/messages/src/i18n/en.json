@@ -39,6 +39,8 @@
     "loadError": "Error loading request",
     "whatsapp": "Contact via WhatsApp",
     "urlPreview": "Open link",
+    "seenAt": "Seen at {{time}}",
+    "unread": "Unread",
     "status": {
       "queued": "Queued",
       "sent": "Sent",

@@ -3,6 +3,13 @@ import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
 import { act, waitFor } from '@testing-library/react-native';
 import { InquiriesListScreen } from '../screens/InquiriesListScreen';
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  default: {
+    getItem: jest.fn(async () => null),
+    setItem: jest.fn(async () => undefined),
+  },
+}));
+
 jest.mock('../client', () => ({
   useMessagingClient: jest.fn(),
 }));

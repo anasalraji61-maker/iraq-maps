@@ -39,6 +39,8 @@
     "loadError": "خطأ في تحميل الطلب",
     "whatsapp": "تواصل عبر واتساب",
     "urlPreview": "افتح الرابط",
+    "seenAt": "شوهد في {{time}}",
+    "unread": "غير مقروء",
     "status": {
       "queued": "في الانتظار",
       "sent": "أُرسل",

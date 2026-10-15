@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Animated, ScrollView, RefreshControl, View, StyleSheet, Text as RNText } from 'react-native';
 import { useMessagingClient } from '../client';
+import { useReadReceiptsMap } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
@@ -63,6 +64,13 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#FFF', fontSize: 11, fontWeight: '600' },
   muted: { fontSize: 12, color: '#757575' },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#1976D2',
+    marginTop: 5,
+  },
 });
 
 type BadgeInfo = { label: string; color: string } | null;
@@ -86,6 +94,7 @@ export function InquiriesListScreen(): ReactElement {
   const api = useMessagingClient();
   const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const readMap = useReadReceiptsMap(inquiries.map((i) => i.id));
   // Start as true so the skeleton shows immediately on first render
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
@@ -138,9 +147,20 @@ export function InquiriesListScreen(): ReactElement {
           const placesLabel = inq.targets.length === 1
             ? t('list.placeCount')
             : t('list.placesCount', { count: inq.targets.length });
+          const isUnread = !readMap[inq.id];
           return (
             <Card key={inq.id} onPress={() => router.push({ pathname: '/messages/[requestId]', params: { requestId: inq.id } })}>
-              <Text>{inq.text.slice(0, 80)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
+                {isUnread ? (
+                  <View
+                    style={styles.unreadDot}
+                    accessibilityLabel={t('detail.unread')}
+                    accessibilityRole="text"
+                    testID="unread-dot"
+                  />
+                ) : null}
+                <RNText style={isUnread ? { fontWeight: '700', fontSize: 14 } : { fontSize: 14 }}>{inq.text.slice(0, 80)}</RNText>
+              </View>
               <View style={styles.meta}>
                 <RNText style={styles.muted}>{inq.createdAt.slice(0, 10)}</RNText>
                 {inq.targets.length > 0 ? <RNText style={styles.muted}>{placesLabel}</RNText> : null}
