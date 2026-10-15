@@ -94,9 +94,15 @@ export function SavedPostsScreen(): ReactElement {
     );
   }
 
+  const count = (savedPosts as DiscoverPostType[]).length;
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{t('saved.title')}</Text>
+      {count > 0 ? (
+        <Text style={styles.countText} testID="saved-count">
+          {t('saved.count', { n: String(count) })}
+        </Text>
+      ) : null}
       <FlatList
         data={savedPosts as DiscoverPostType[]}
         keyExtractor={(p) => p.id}
@@ -119,6 +125,7 @@ export function SavedPostsScreen(): ReactElement {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  countText: { fontSize: 13, color: COLORS.textSecondary, paddingHorizontal: 16, paddingBottom: 4 },
   heading: {
     fontSize: 20,
     fontWeight: '700',

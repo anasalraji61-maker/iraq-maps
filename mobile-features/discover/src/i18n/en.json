@@ -157,7 +157,8 @@
     "saved": "Saved",
     "remove": "Remove",
     "saveSuccess": "Post saved",
-    "removeSuccess": "Post removed"
+    "removeSuccess": "Post removed",
+    "count": "{n} saved posts"
   },
   "follow": {
     "follow": "Follow",

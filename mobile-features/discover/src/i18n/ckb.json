@@ -157,7 +157,8 @@
     "saved": "پارێزراو",
     "remove": "لابردن",
     "saveSuccess": "پۆست پارێزرا",
-    "removeSuccess": "پۆست لابرا"
+    "removeSuccess": "پۆست لابرا",
+    "count": "{n} پۆستی پاراستراو"
   },
   "follow": {
     "follow": "شوێنکەوتن",

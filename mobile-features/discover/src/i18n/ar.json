@@ -157,7 +157,8 @@
     "saved": "محفوظ",
     "remove": "إزالة",
     "saveSuccess": "تم حفظ المنشور",
-    "removeSuccess": "تمت إزالة المنشور"
+    "removeSuccess": "تمت إزالة المنشور",
+    "count": "{n} منشور محفوظ"
   },
   "follow": {
     "follow": "متابعة",
