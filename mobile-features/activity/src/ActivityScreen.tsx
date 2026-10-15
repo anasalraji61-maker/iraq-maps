@@ -89,7 +89,7 @@ function LoadError({ onRetry }: { onRetry: () => void }): ReactElement {
   return (
     <View style={styles.center}>
       <Text style={styles.errorText}>{t('loadError')}</Text>
-      <Pressable onPress={onRetry} style={styles.retryBtn}>
+      <Pressable onPress={onRetry} style={styles.retryBtn} accessibilityRole="button" accessibilityLabel={t('retry')}>
         <Text style={styles.retryText}>{t('retry')}</Text>
       </Pressable>
     </View>
