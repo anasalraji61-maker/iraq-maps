@@ -24,7 +24,7 @@ export class ReviewsController {
       submit: async ({ params, body }) => {
         if (!userId) return { status: 401, body: { code: 'unauthenticated' as const } };
         try {
-          const review = await this.svc.submit(params.placeId as PlaceId, userId, body.rating, body.text);
+          const review = await this.svc.submit(params.placeId as PlaceId, userId, body.rating, body.text, body.photoAssetIds);
           return { status: 201, body: review };
         } catch (e) {
           return { status: 400, body: { code: String(e) } };
@@ -41,6 +41,11 @@ export class ReviewsController {
         const deleted = await this.svc.deleteOwn(params.placeId as PlaceId, userId);
         if (!deleted) return { status: 404, body: { code: 'not_found' as const } };
         return { status: 200, body: { ok: true as const } };
+      },
+
+      summary: async ({ params }) => {
+        const result = await this.svc.getSummary(params.placeId as PlaceId);
+        return { status: 200, body: result };
       },
     });
   }

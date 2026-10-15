@@ -251,5 +251,25 @@
     "dismiss": "إغلاق",
     "zoneMutanabi": "شارع المتنبي",
     "zoneShorja": "سوق الشورجة"
+  },
+  "incidents": {
+    "typeAccident": "حادث",
+    "typeRoadblock": "حاجز طريق",
+    "typeFlood": "فيضان",
+    "typeConstruction": "أعمال بناء",
+    "typeOther": "عارض آخر",
+    "reportBtn": "أبلّغ عن عارض",
+    "reportTitle": "أبلّغ عن عارض مروري",
+    "reportSubtitle": "اختر نوع العارض في موقعك الحالي",
+    "noLocationTitle": "الموقع غير متاح",
+    "noLocationMsg": "لم يتم تحديد موقعك. فعّل خدمة الموقع وحاول مجدداً.",
+    "reportedTitle": "شكراً!",
+    "reportedMsg": "تم إرسال البلاغ. سيظهر على الخريطة قريباً.",
+    "errorTitle": "تعذّر الإرسال",
+    "errorMsg": "حدث خطأ. تأكد من اتصالك بالإنترنت وحاول مجدداً.",
+    "cancel": "إلغاء",
+    "expiresAt": "ينتهي {time}",
+    "expiresHours": "خلال {h} ساعة",
+    "expiresLessThanHour": "خلال أقل من ساعة"
   }
 }

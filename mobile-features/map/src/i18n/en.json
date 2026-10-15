@@ -251,5 +251,25 @@
     "dismiss": "Dismiss",
     "zoneMutanabi": "Al-Mutanabbi Street",
     "zoneShorja": "Al-Shorja Market"
+  },
+  "incidents": {
+    "typeAccident": "Accident",
+    "typeRoadblock": "Roadblock",
+    "typeFlood": "Flood",
+    "typeConstruction": "Construction",
+    "typeOther": "Other",
+    "reportBtn": "Report incident",
+    "reportTitle": "Report a traffic incident",
+    "reportSubtitle": "Choose the type of incident at your current location",
+    "noLocationTitle": "Location unavailable",
+    "noLocationMsg": "Your location could not be determined. Enable location services and try again.",
+    "reportedTitle": "Thank you!",
+    "reportedMsg": "Your report was submitted and will appear on the map shortly.",
+    "errorTitle": "Could not submit",
+    "errorMsg": "An error occurred. Check your connection and try again.",
+    "cancel": "Cancel",
+    "expiresAt": "Expires {time}",
+    "expiresHours": "in {h} hour(s)",
+    "expiresLessThanHour": "in less than an hour"
   }
 }

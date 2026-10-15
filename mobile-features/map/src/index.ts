@@ -3,6 +3,10 @@ export { MapScreen } from './MapScreen';
 export { PlaceScreen } from './PlaceScreen';
 export { useRecentSearches } from './hooks/useRecentSearches';
 export { useGeofence, type GeofenceZone } from './hooks/useGeofence';
+/** Traffic incidents */
+export { IncidentMarkers } from './incidents/IncidentMarkers';
+export { IncidentReportButton } from './incidents/IncidentReportButton';
+export { useIncidents } from './incidents/useIncidents';
 /** Offline maps */
 export { OfflineRegionsScreen } from './offline/OfflineRegionsScreen';
 export {

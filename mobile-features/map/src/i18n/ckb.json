@@ -251,5 +251,25 @@
     "dismiss": "داخستن",
     "zoneMutanabi": "شەقامی مەتەنەببی",
     "zoneShorja": "بازاڕی شووڕجە"
+  },
+  "incidents": {
+    "typeAccident": "ڕووداوی ترافیک",
+    "typeRoadblock": "گرتنەوەی ڕێگا",
+    "typeFlood": "لافاو",
+    "typeConstruction": "کارەکانی بیناسازی",
+    "typeOther": "یەکێکی تر",
+    "reportBtn": "راپۆرتی ڕووداوێک بکە",
+    "reportTitle": "راپۆرتی ڕووداوی ترافیک",
+    "reportSubtitle": "جۆری ڕووداو هەڵبژێرە لە شوێنەکەتدا",
+    "noLocationTitle": "شوێن بەردەست نیە",
+    "noLocationMsg": "شوێنەکەت دیاری نەکراوە. خزمەتگوزاری شوێن چالاک بکە.",
+    "reportedTitle": "سپاس!",
+    "reportedMsg": "راپۆرتەکە نێردرا. بەم زووانە لە نەخشەدا دەردەکەوێت.",
+    "errorTitle": "ناتوانرێت بنێردرێت",
+    "errorMsg": "هەڵەیەک ڕووی دا. پەیوەندی ئینتەرنێتت پشکنی.",
+    "cancel": "هەڵوەشاندنەوە",
+    "expiresAt": "کۆتایی {time}",
+    "expiresHours": "لە ماوەی {h} کاتژمێر",
+    "expiresLessThanHour": "لە ماوەی کەمتر لە کاتژمێرێک"
   }
 }
