@@ -1,9 +1,9 @@
-import type { CityDescriptor } from '@iraq-maps/contracts';
+import type { CityDescriptor, ManeuverModifier } from '@iraq-maps/contracts';
 import { navigationTestIDs } from '@iraq-maps/contracts';
 import { MapCanvas } from '@iraq-maps/map-kit';
 import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
 import { useMemo, type ReactElement } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text as RNText, View } from 'react-native';
 import type { NavigationState } from '../hooks/useNavigation';
 import { t } from '../strings';
 
@@ -18,6 +18,19 @@ interface Props extends NavigationState {
   lang?: string;
 }
 
+/** Returns a Unicode arrow for the current maneuver direction. */
+function directionIcon(modifier?: ManeuverModifier): string {
+  switch (modifier) {
+    case 'slight_right': return '↗';
+    case 'right': return '→';
+    case 'sharp_right': return '↘';
+    case 'slight_left': return '↖';
+    case 'left': return '←';
+    case 'sharp_left': return '↙';
+    default: return '↑';
+  }
+}
+
 function fmtDist(m: number): string {
   return m < 1000
     ? t('active.distM', { n: Math.round(m) })
@@ -30,6 +43,7 @@ function fmtEta(date: Date): string {
 }
 
 export function ActiveNavigationScreen({
+  currentManeuver,
   currentInstruction,
   nextInstruction,
   distanceToManeuver,
@@ -116,10 +130,15 @@ export function ActiveNavigationScreen({
       ) : null}
 
       <View style={styles.instructionBlock}>
-        <Text variant="title" testID={navigationTestIDs.active.instruction}>
-          {currentInstruction}
-        </Text>
-        <Text tone="muted">{fmtDist(distanceToManeuver)}</Text>
+        <RNText style={styles.turnArrow} accessibilityElementsHidden>
+          {directionIcon(currentManeuver?.modifier)}
+        </RNText>
+        <View style={styles.instructionBody}>
+          <Text variant="title" testID={navigationTestIDs.active.instruction}>
+            {currentInstruction}
+          </Text>
+          <Text tone="muted">{fmtDist(distanceToManeuver)}</Text>
+        </View>
       </View>
 
       {nextInstruction ? (
@@ -151,7 +170,9 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   arrivedContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.l, padding: space.m },
   arrivedActions: { flexDirection: 'row', gap: space.s, width: '100%' },
-  instructionBlock: { gap: space.xs, backgroundColor: color.bg, padding: space.m, borderRadius: 8 },
+  instructionBlock: { flexDirection: 'row', alignItems: 'center', gap: space.m, backgroundColor: color.bg, padding: space.m, borderRadius: 8 },
+  instructionBody: { flex: 1, gap: space.xs },
+  turnArrow: { fontSize: 40, lineHeight: 48, color: color.primary },
   nextBlock: { gap: space.xs, padding: space.s },
   offRouteBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF3CD', padding: space.s, borderRadius: 8, gap: space.s },
   offRouteTextWrap: { flex: 1 },
