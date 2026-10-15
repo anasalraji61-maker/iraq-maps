@@ -51,7 +51,10 @@
     "title": "تفضيلات الإشعارات",
     "newInquiry": "طلبات جديدة",
     "replyReceived": "ردود المزوّدين",
-    "statusUpdate": "تحديثات الحالة"
+    "statusUpdate": "تحديثات الحالة",
+    "discoverLikes": "إعجابات المنشورات",
+    "discoverComments": "تعليقات المنشورات",
+    "messages": "الرسائل والردود"
   },
   "settings": {
     "title": "الإعدادات",
@@ -60,7 +63,8 @@
     "privacy": "سياسة الخصوصية",
     "terms": "شروط الاستخدام",
     "version": "الإصدار {version} (بناء {build})",
-    "licenses": "تراخيص المصدر المفتوح"
+    "licenses": "تراخيص المصدر المفتوح",
+    "notifPrefs": "تفضيلات الإشعارات"
   },
   "errors": {
     "otp_invalid": "الرمز غير صحيح. حاول مرة أخرى.",

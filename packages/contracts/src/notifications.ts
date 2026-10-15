@@ -14,6 +14,9 @@ export const NotificationPrefs = z.object({
   newInquiry: z.boolean().default(true),
   replyReceived: z.boolean().default(true),
   statusUpdate: z.boolean().default(true),
+  discoverLikes: z.boolean().default(true),
+  discoverComments: z.boolean().default(true),
+  messages: z.boolean().default(true),
 });
 export type NotificationPrefs = z.infer<typeof NotificationPrefs>;
 

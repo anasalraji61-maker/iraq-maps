@@ -14,6 +14,9 @@ export function NotifPrefsSection({ prefs, onToggle }: Props): ReactElement {
     { key: 'newInquiry', label: t('notifPrefs.newInquiry') },
     { key: 'replyReceived', label: t('notifPrefs.replyReceived') },
     { key: 'statusUpdate', label: t('notifPrefs.statusUpdate') },
+    { key: 'discoverLikes', label: t('notifPrefs.discoverLikes') },
+    { key: 'discoverComments', label: t('notifPrefs.discoverComments') },
+    { key: 'messages', label: t('notifPrefs.messages') },
   ];
 
   return (

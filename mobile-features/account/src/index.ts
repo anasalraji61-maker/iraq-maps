@@ -8,3 +8,4 @@ export { OtpScreen } from './OtpScreen';
 export { PhoneScreen } from './PhoneScreen';
 export { PrivacyScreen } from './PrivacyScreen';
 export { TermsScreen } from './TermsScreen';
+export { NotifPrefsScreen } from './NotifPrefsScreen';

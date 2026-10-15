@@ -15,6 +15,9 @@ export const prefsTable = notificationsSchema.table('prefs', {
   newInquiry: boolean('new_inquiry').notNull().default(true),
   replyReceived: boolean('reply_received').notNull().default(true),
   statusUpdate: boolean('status_update').notNull().default(true),
+  discoverLikes: boolean('discover_likes').notNull().default(true),
+  discoverComments: boolean('discover_comments').notNull().default(true),
+  messages: boolean('messages').notNull().default(true),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

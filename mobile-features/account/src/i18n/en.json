@@ -51,7 +51,10 @@
     "title": "Notification Preferences",
     "newInquiry": "New inquiries",
     "replyReceived": "Provider replies",
-    "statusUpdate": "Status updates"
+    "statusUpdate": "Status updates",
+    "discoverLikes": "Post likes",
+    "discoverComments": "Post comments",
+    "messages": "Messages & replies"
   },
   "settings": {
     "title": "Settings",
@@ -60,7 +63,8 @@
     "privacy": "Privacy policy",
     "terms": "Terms of use",
     "version": "Version {version} (build {build})",
-    "licenses": "Open-source licences"
+    "licenses": "Open-source licences",
+    "notifPrefs": "Notification Preferences"
   },
   "errors": {
     "otp_invalid": "That code is not correct. Try again.",

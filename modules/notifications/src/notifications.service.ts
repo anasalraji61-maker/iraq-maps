@@ -24,6 +24,9 @@ export class NotificationsService {
       newInquiry: row?.newInquiry ?? true,
       replyReceived: row?.replyReceived ?? true,
       statusUpdate: row?.statusUpdate ?? true,
+      discoverLikes: row?.discoverLikes ?? true,
+      discoverComments: row?.discoverComments ?? true,
+      messages: row?.messages ?? true,
     };
   }
 
@@ -35,7 +38,15 @@ export class NotificationsService {
       .values({ userId, ...merged })
       .onConflictDoUpdate({
         target: prefsTable.userId,
-        set: { newInquiry: merged.newInquiry, replyReceived: merged.replyReceived, statusUpdate: merged.statusUpdate, updatedAt: new Date() },
+        set: {
+          newInquiry: merged.newInquiry,
+          replyReceived: merged.replyReceived,
+          statusUpdate: merged.statusUpdate,
+          discoverLikes: merged.discoverLikes,
+          discoverComments: merged.discoverComments,
+          messages: merged.messages,
+          updatedAt: new Date(),
+        },
       });
     return merged;
   }

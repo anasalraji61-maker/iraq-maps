@@ -21,6 +21,7 @@ export const routes = {
   accountPrivacy: '/account/privacy',
   accountTerms: '/account/terms',
   accountLicenses: '/account/licenses',
+  accountNotifPrefs: '/account/notif-prefs',
   authPhone: '/auth/phone',
   authOtp: '/auth/otp',
   authName: '/auth/name',
