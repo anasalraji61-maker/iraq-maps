@@ -50,10 +50,10 @@ describe('AddReviewScreen', () => {
   });
 
   it('submit button starts disabled when no rating', async () => {
-    const { getByRole } = await render(<AddReviewScreen />);
+    const { getAllByRole } = await render(<AddReviewScreen />);
     // The submit button should be disabled (rating === 0)
-    const btns = getByRole('button');
+    const btns = getAllByRole('button');
     // Just ensure it renders without crashing
-    expect(btns).toBeTruthy();
+    expect(btns.length).toBeGreaterThan(0);
   });
 });
