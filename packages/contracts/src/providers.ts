@@ -49,6 +49,8 @@ export const PlaceProviderSection = z.object({
   social: z.array(SocialLink),
   /** Only with the show_phone consent. */
   phone: IraqiPhone.optional(),
+  /** Typical first-reply time in whole hours (M193). Null when not enough history. */
+  avgResponseHours: z.number().int().positive().nullable().optional(),
 });
 export type PlaceProviderSection = z.infer<typeof PlaceProviderSection>;
 /** ProviderProfilePort's answer: the card section, plus prices only with show_prices (shown on the card from M5).
@@ -77,6 +79,8 @@ export interface ProviderRecord {
   social: SocialLink[];
   prices: PriceRange[];
   consents: ConsentScope[];
+  /** Typical first-reply time in whole hours (M193). Null until enough history. */
+  avgResponseHours: number | null;
 }
 
 /** The one consent filter, shared by modules/providers and the fakes: null unless verified, each field only under
@@ -93,6 +97,7 @@ export function publicProfileOf(p: ProviderRecord): PublicProviderProfile | null
     social: has('social_links') ? p.social : [],
     ...(has('show_phone') && p.phone ? { phone: p.phone } : {}),
     ...(has('show_prices') ? { prices: p.prices } : {}),
+    ...(p.avgResponseHours != null ? { avgResponseHours: p.avgResponseHours } : {}),
   };
 }
 

@@ -38,6 +38,7 @@ export class FakeProviderStore {
       hoursRaw: 'Mo-Su 09:00-22:00',
       social: [{ kind: 'instagram', url: 'https://instagram.com/example' }],
       prices: [{ label: 'Room', min: 50_000, max: 90_000, currency: 'IQD' }],
+      avgResponseHours: 2,
     });
     if (userId) this.userToProvider.set(userId, providerId);
     return providerId;

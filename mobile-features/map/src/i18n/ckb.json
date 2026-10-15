@@ -104,7 +104,9 @@
     "nearbyTitle": "شوێنی نزیک و هاوشێوە",
     "openInMaps": "کردنەوە لە نەخشەی گووگڵ",
     "todayHours": "ئەمڕۆ: {hours}",
-    "away": "{dist} لێ دوورت"
+    "away": "{dist} لێ دوورت",
+    "responseTime": "بەزامان {hours} کاتژمێر وەڵامت دەداتەوە",
+    "responseTimeLong": "بەزامان {hours} کاتژمێر وەڵامت دەداتەوە"
   },
   "actions": {
     "directions": "ئاراستەکان",

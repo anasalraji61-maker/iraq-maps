@@ -104,7 +104,9 @@
     "nearbyTitle": "Similar nearby places",
     "openInMaps": "Open in Google Maps",
     "todayHours": "Today: {hours}",
-    "away": "{dist} away"
+    "away": "{dist} away",
+    "responseTime": "Usually responds in {hours} h",
+    "responseTimeLong": "Usually responds in {hours} h"
   },
   "actions": {
     "directions": "Directions",

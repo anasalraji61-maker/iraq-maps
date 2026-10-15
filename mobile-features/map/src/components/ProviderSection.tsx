@@ -13,7 +13,7 @@ interface Props {
 export function ProviderSection({ provider }: Props): ReactElement | null {
   if (!provider.verified) return null;
 
-  const { photos, hours, phone, social } = provider;
+  const { photos, hours, phone, social, avgResponseHours } = provider;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   return (
@@ -22,6 +22,10 @@ export function ProviderSection({ provider }: Props): ReactElement | null {
         <Text variant="subtitle">{t('place.providerTitle')}</Text>
         <Badge label={t('place.providerVerified')} />
       </View>
+
+      {typeof avgResponseHours === 'number' && avgResponseHours != null ? (
+        <ListItem title={t('place.responseTime', { hours: avgResponseHours })} />
+      ) : null}
 
       {hours ? (
         <ListItem title={t('place.providerHours')} subtitle={hours} />

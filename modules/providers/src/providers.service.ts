@@ -392,6 +392,7 @@ export class ProvidersService {
       social: JSON.parse(provider.links) as never,
       prices: JSON.parse(provider.prices) as never,
       consents: activeConsents,
+      avgResponseHours: provider.avgResponseHours ?? null,
     };
   }
 

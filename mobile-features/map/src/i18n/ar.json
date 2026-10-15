@@ -104,7 +104,9 @@
     "nearbyTitle": "أماكن قريبة مشابهة",
     "openInMaps": "فتح في خرائط جوجل",
     "todayHours": "اليوم: {hours}",
-    "away": "{dist} منك"
+    "away": "{dist} منك",
+    "responseTime": "يردّ عادةً خلال {hours} ساعة",
+    "responseTimeLong": "يردّ عادةً خلال {hours} ساعة"
   },
   "actions": {
     "directions": "الاتجاهات",

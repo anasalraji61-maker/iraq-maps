@@ -137,6 +137,21 @@ describe('PlaceScreen', () => {
     openURL.mockRestore();
   });
 
+  it('shows provider response time badge when avgResponseHours is set', async () => {
+    const withProvider = PlaceDetails.parse({
+      ...details,
+      provider: {
+        providerId: '00000000-0000-0000-0000-000000000001',
+        verified: true,
+        photos: [],
+        social: [],
+        avgResponseHours: 3,
+      },
+    });
+    const { view } = await open(withProvider);
+    expect(view.getByText(t('map:place.responseTime', { hours: 3 }))).toBeTruthy();
+  });
+
   it('shows each action once its screen is delivered, and opens it for this place', async () => {
     const { router, view } = await open();
     for (const [key, pathname, paramsKey] of [

@@ -1,4 +1,4 @@
-import { customType, index, pgSchema, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { customType, index, integer, pgSchema, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
 export const providersSchema = pgSchema('providers');
 
@@ -30,6 +30,8 @@ export const providerTable = providersSchema.table(
     photoAssetIds: text('photo_asset_ids').notNull().default('[]'),
     suspensionReason: text('suspension_reason'),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
+    /** Typical first-reply time in whole hours (M193). */
+    avgResponseHours: integer('avg_response_hours'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
