@@ -8,6 +8,7 @@ I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
 import { useRequest } from '../request';
 import { t } from '../strings';
+import { SkeletonBlock } from '../skeleton';
 
 const MAX_REPLY_LENGTH = 1000;
 
@@ -64,7 +65,23 @@ export function ProviderInboxDetailScreen(): ReactElement {
     );
   };
 
-  if (loading) return <Screen>{null}</Screen>;
+  if (loading) {
+    return (
+      <Screen>
+        <View style={styles.container}>
+          <View testID="skeleton-inbox-detail" style={{ gap: 12 }}>
+            <SkeletonBlock width={160} height={20} />
+            <View style={[styles.bubble, { gap: 8 }]}>
+              <SkeletonBlock width={280} height={13} />
+              <SkeletonBlock width={220} height={13} />
+              <SkeletonBlock width={160} height={13} />
+            </View>
+            <SkeletonBlock width={180} height={40} />
+          </View>
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
