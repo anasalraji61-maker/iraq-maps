@@ -8,7 +8,15 @@ export type Db = NodePgDatabase<Record<string, unknown>>;
 export type DbTx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 export function createDb(url: string): { db: Db; close(): Promise<void> } {
-  const pool = new pg.Pool({ connectionString: url });
+  const pool = new pg.Pool({
+    connectionString: url,
+    // Keep enough connections for concurrent request bursts without exhausting the DB.
+    max: 20,
+    // Release idle connections after 30 s to avoid holding sockets over network devices.
+    idleTimeoutMillis: 30_000,
+    // Fail fast if the DB is unreachable at boot rather than queuing indefinitely.
+    connectionTimeoutMillis: 5_000,
+  });
   // An idle client dies on a database restart or failover; without a listener that 'error' event crashes the process.
   // The pool replaces the client. Only the SQLSTATE is logged: driver messages can carry data.
   pool.on('error', (err: Error & { code?: string }) => log.warn({ pgCode: err.code }, 'idle pg client error'));

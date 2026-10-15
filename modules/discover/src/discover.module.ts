@@ -44,6 +44,7 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
       { provide: 'DISCOVER_COMMENT_RATE_LIMITER', useValue: commentLimiter },
       { provide: 'DISCOVER_MESSAGE_RATE_LIMITER', useValue: messageLimiter },
       { provide: PortTokens.ProviderDirectoryPort, useValue: opts.providerDirectory ?? null },
+      { provide: 'DISCOVER_REDIS', useValue: opts.redis ?? null },
       DiscoverService,
     ],
     exports: [DiscoverService],

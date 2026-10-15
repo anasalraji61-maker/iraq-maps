@@ -20,16 +20,28 @@ export const postTable = discoverSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     removedAt: timestamp('removed_at', { withTimezone: true }),
   },
-  (t) => [index('post_created_at_idx').on(t.createdAt)],
+  (t) => [
+    index('post_created_at_idx').on(t.createdAt),
+    index('post_author_id_idx').on(t.authorId),
+    index('post_place_id_idx').on(t.placeId),
+    index('post_removed_at_created_at_idx').on(t.removedAt, t.createdAt),
+  ],
 );
 
-export const postLikeTable = discoverSchema.table('post_like', {
-  postId: uuid('post_id')
-    .notNull()
-    .references(() => postTable.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
+export const postLikeTable = discoverSchema.table(
+  'post_like',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => postTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.postId, t.userId] }),
+    index('post_like_user_id_idx').on(t.userId),
+  ],
+);
 
 export const postReportTable = discoverSchema.table(
   'post_report',
