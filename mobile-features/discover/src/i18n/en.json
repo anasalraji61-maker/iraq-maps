@@ -10,7 +10,10 @@
     "searchPlaceholder": "Search posts...",
     "searchEmpty": "No results for \"{q}\"",
     "searchError": "Search failed, try again",
-    "clearSearch": "Clear"
+    "clearSearch": "Clear",
+    "trendingTitle": "Trending Posts",
+    "trendingEmpty": "No trending posts right now",
+    "trendingStats": "{likes} likes · {comments} comments"
   },
   "post": {
     "like": "Like",

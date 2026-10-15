@@ -1,5 +1,5 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
-import { useApi, useSession } from '@iraq-maps/mobile-kit';
+import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import {
@@ -14,6 +14,7 @@ import {
   Platform,
   Pressable,
   RefreshControl,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -271,6 +272,41 @@ const PostItem = memo(function PostItem({
   );
 });
 
+// ─── Trending strip ──────────────────────────────────────────────────────────
+
+function TrendingStrip({ posts, onPress }: { posts: DiscoverPostType[]; onPress: (p: DiscoverPostType) => void }): ReactElement {
+  return (
+    <View style={trendingStyles.container}>
+      <Text style={trendingStyles.sectionTitle}>{t('feed.trendingTitle')}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={trendingStyles.row}>
+        {posts.map((post) => {
+          const colors = getTypeBadgeColors(post.type);
+          return (
+            <Pressable key={post.id} style={trendingStyles.card} onPress={() => onPress(post)} accessibilityRole="button">
+              <View style={[trendingStyles.badge, { backgroundColor: colors.bg }]}>
+                <Text style={[trendingStyles.badgeText, { color: colors.text }]}>{post.type}</Text>
+              </View>
+              <Text style={trendingStyles.body} numberOfLines={3}>{post.body}</Text>
+              <Text style={trendingStyles.stats}>{t('feed.trendingStats', { likes: post.likeCount, comments: post.commentCount })}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+const trendingStyles = StyleSheet.create({
+  container: { paddingBottom: 8 },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: COLORS.textSecondary, paddingHorizontal: 12, paddingBottom: 8, textAlign: 'auto' },
+  row: { paddingHorizontal: 12, gap: 10 },
+  card: { width: 160, backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, elevation: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  badge: { alignSelf: 'flex-start', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginBottom: 6 },
+  badgeText: { fontSize: 11, fontWeight: '600' },
+  body: { fontSize: 13, color: COLORS.textPrimary, lineHeight: 18, marginBottom: 6, textAlign: 'auto' },
+  stats: { fontSize: 11, color: COLORS.textMuted },
+});
+
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
   const extApi = useApi();
@@ -297,6 +333,8 @@ export function DiscoverFeedScreen(): ReactElement {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | undefined>();
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [trendingPosts, setTrendingPosts] = useState<DiscoverPostType[]>([]);
+  const [trendingLoaded, setTrendingLoaded] = useState(false);
 
   const loadFeed = useCallback(async (reset = false) => {
     if (!reset && (!hasMore || loadingMore)) return;
@@ -380,6 +418,19 @@ export function DiscoverFeedScreen(): ReactElement {
       }),
     );
   }, [posts, mediaUrls, extApi]);
+
+  // Load trending posts once on mount (best-effort — silent on failure)
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await api.trending({ query: { limit: 5 } });
+        if (res.status === 200) setTrendingPosts(res.body.items);
+      } catch { /* silent */ } finally {
+        setTrendingLoaded(true);
+      }
+    })();
+  // mount-only — api ref is stable
+  }, []); // mount-only: api ref is stable
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
@@ -566,6 +617,14 @@ export function DiscoverFeedScreen(): ReactElement {
         data={displayedPosts}
         keyExtractor={(item) => item.id}
         accessibilityRole="list"
+        ListHeaderComponent={
+          !isSearchActive && trendingLoaded && trendingPosts.length > 0 ? (
+            <TrendingStrip
+              posts={trendingPosts}
+              onPress={(post) => router.push(href('discoverPost', { postId: post.id }))}
+            />
+          ) : null
+        }
         renderItem={({ item }) => (
           <PostItem
             post={item}

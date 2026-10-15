@@ -10,7 +10,10 @@
     "searchPlaceholder": "گەڕان لە پۆستەکان...",
     "searchEmpty": "هیچ ئەنجامێک نییە بۆ \"{q}\"",
     "searchError": "گەڕان شکستی خوارد، دووبارە هەوڵ بدەرەوە",
-    "clearSearch": "سڕینەوە"
+    "clearSearch": "سڕینەوە",
+    "trendingTitle": "پۆستە گەرمەکان",
+    "trendingEmpty": "ئێستا هیچ پۆستێکی گەرم نییە",
+    "trendingStats": "{likes} حەزکردن · {comments} بۆچوون"
   },
   "post": {
     "like": "لایک",
