@@ -32,7 +32,10 @@
     "delete": "Delete account",
     "registerBusiness": "Register your business",
     "version": "Version {version}",
-    "myPosts": "My Posts"
+    "myPosts": "My Posts",
+    "changePhoto": "Change Profile Photo",
+    "photoUpdated": "Profile photo updated",
+    "photoError": "Failed to update photo, please try again"
   },
   "deleteSheet": {
     "title": "Delete your account permanently?",

@@ -97,7 +97,10 @@
     "uploadingPhoto": "جارٍ رفع الصورة...",
     "uploadError": "فشل رفع الصورة، حاول مجدداً",
     "removePhoto": "✕",
-    "categoryLabel": "الفئة (اختياري)"
+    "categoryLabel": "الفئة (اختياري)",
+    "mentionLabel": "الإشارات",
+    "mentionPlaceholder": "ابحث عن مستخدم...",
+    "mentionLoading": "جاري البحث..."
   },
   "comments": {
     "title": "التعليقات",

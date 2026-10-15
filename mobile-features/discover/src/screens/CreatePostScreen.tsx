@@ -71,6 +71,11 @@ export function CreatePostScreen(): ReactElement {
   const [searchingPlace, setSearchingPlace] = useState(false);
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  // Mention autocomplete
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionResults, setMentionResults] = useState<string[]>([]);
+  const [mentionLoading, setMentionLoading] = useState(false);
+  const mentionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Restore draft on mount
   useEffect(() => {
@@ -86,14 +91,40 @@ export function CreatePostScreen(): ReactElement {
       .catch(() => undefined);
   }, []);
 
-  // Auto-save draft (debounced 600ms)
+  // Auto-save draft + mention detection (debounced)
   const handleBodyChange = useCallback((text: string) => {
     setBody(text.slice(0, 1000));
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ body: text.slice(0, 1000), postType })).catch(() => undefined);
     }, 600);
-  }, [postType]);
+    // Detect @mention at cursor end
+    const atMatch = text.slice(0, 1000).match(/@([\p{L}\p{N}_]*)$/u);
+    const query = atMatch ? atMatch[1] ?? '' : null;
+    if (query === null) {
+      setMentionQuery(null);
+      setMentionResults([]);
+      return;
+    }
+    setMentionQuery(query);
+    if (mentionDebounceRef.current) clearTimeout(mentionDebounceRef.current);
+    if (query.length === 0) { setMentionResults([]); return; }
+    setMentionLoading(true);
+    mentionDebounceRef.current = setTimeout(() => {
+      api.searchSuggestions({ query: { q: `@${query}` } })
+        .then((res) => {
+          if (res.status === 200) setMentionResults(res.body.userIds.slice(0, 5));
+        })
+        .catch(() => undefined)
+        .finally(() => setMentionLoading(false));
+    }, 350);
+  }, [postType, api]);
+
+  const handleMentionSelect = useCallback((userId: string) => {
+    setBody((prev) => prev.replace(/@[\p{L}\p{N}_]*$/u, `@${userId} `));
+    setMentionQuery(null);
+    setMentionResults([]);
+  }, []);
 
   const handlePlaceSearch = useCallback(async (q: string) => {
     setPlaceQuery(q);
@@ -275,6 +306,26 @@ export function CreatePostScreen(): ReactElement {
         />
         <Text style={styles.charCount}>{t('create.charCount', { count: body.length })}</Text>
 
+        {mentionQuery !== null ? (
+          <View style={styles.mentionDropdown}>
+            {mentionLoading ? (
+              <Text style={styles.mentionLoading}>{t('create.mentionLoading')}</Text>
+            ) : mentionResults.length === 0 ? null : (
+              mentionResults.map((uid) => (
+                <Pressable
+                  key={uid}
+                  style={styles.mentionItem}
+                  onPress={() => handleMentionSelect(uid)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`@${uid}`}
+                >
+                  <Text style={styles.mentionItemText}>{`@${uid}`}</Text>
+                </Pressable>
+              ))
+            )}
+          </View>
+        ) : null}
+
         <Text style={styles.label}>{t('create.photoLabel')}</Text>
         <View style={styles.photoRow}>
           {photos.map((p) => (
@@ -416,7 +467,30 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'auto',
     marginTop: 4,
-    marginBottom: 20,
+    marginBottom: 4,
+  },
+  mentionDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  mentionLoading: {
+    fontSize: 13,
+    color: '#999',
+    padding: 10,
+  },
+  mentionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E0E0E0',
+  },
+  mentionItemText: {
+    fontSize: 14,
+    color: '#1976D2',
   },
   submitBtn: {
     backgroundColor: COLORS.primary,

@@ -1,17 +1,20 @@
 import { testIDs, type NotificationPrefs } from '@iraq-maps/contracts';
 import { getLocale } from '@iraq-maps/i18n';
-import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { href, useApi, useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
 import { Banner, Button, EmptyState, ListItem, Screen, Sheet, Text } from '@iraq-maps/ui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, Platform, StyleSheet, Text as RNText, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { Animated, Image, Platform, Pressable, StyleSheet, Text as RNText, View } from 'react-native';
 import { NotifPrefsSection } from './NotifPrefsSection';
 import { expectStatus, useRequest } from './request';
 import { t } from './strings';
 
 const PRIMARY = '#1976D2';
+const AVATAR_STORAGE_KEY = '@iraq-maps/account/avatar-uri';
 import { useNotifApi } from './useNotifApi';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -58,10 +61,14 @@ function initials(name: string | null | undefined): string {
   return (parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0)).toUpperCase();
 }
 
-function AvatarCircle({ name }: { name: string | null | undefined }): ReactElement {
+function AvatarCircle({ name, uri }: { name: string | null | undefined; uri?: string | null }): ReactElement {
   return (
     <View style={styles.avatar} accessibilityRole="image" accessibilityLabel={name ?? ''}>
-      <RNText style={styles.avatarText}>{initials(name)}</RNText>
+      {uri ? (
+        <Image source={{ uri }} style={styles.avatarImage} />
+      ) : (
+        <RNText style={styles.avatarText}>{initials(name)}</RNText>
+      )}
     </View>
   );
 }
@@ -71,10 +78,57 @@ export function AccountScreen(): ReactElement {
   const session = useSession();
   const router = useRouter();
   const notifApi = useNotifApi();
+  const baseUrl = useApiBaseUrl();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const { busy, error, run } = useRequest();
   const { state } = session;
+
+  // Load stored avatar URI
+  useEffect(() => {
+    AsyncStorage.getItem(AVATAR_STORAGE_KEY).then((v) => { if (v) setAvatarUri(v); }).catch(() => undefined);
+  }, []);
+
+  const handleChangePhoto = useCallback(async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+    });
+    if (result.canceled || result.assets.length === 0) return;
+    const asset = result.assets[0]!;
+    setAvatarUri(asset.uri);
+    AsyncStorage.setItem(AVATAR_STORAGE_KEY, asset.uri).catch(() => undefined);
+    // Best-effort upload
+    setAvatarUploading(true);
+    try {
+      const mime = (asset.mimeType === 'image/png' || asset.mimeType === 'image/webp')
+        ? asset.mimeType as 'image/png' | 'image/webp'
+        : 'image/jpeg';
+      const size = asset.fileSize ?? 0;
+      const ticketRes = await fetch(`${baseUrl}/v1/media/uploads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purpose: 'provider_photo', mime, size }),
+      });
+      if (ticketRes.ok) {
+        const ticket = await ticketRes.json() as { assetId: string; uploadUrl: string; headers: Record<string, string> };
+        const fileRes = await fetch(asset.uri);
+        const blob = await fileRes.blob();
+        await fetch(ticket.uploadUrl, { method: 'PUT', headers: ticket.headers, body: blob });
+        await fetch(`${baseUrl}/v1/media/uploads/${encodeURIComponent(ticket.assetId)}/complete`, { method: 'POST' });
+      }
+    } catch {
+      // Best-effort: local URI already set, ignore upload failure
+    } finally {
+      setAvatarUploading(false);
+    }
+  }, [baseUrl]);
 
   // Register device push token and load notification prefs on sign-in
   useEffect(() => {
@@ -145,7 +199,17 @@ export function AccountScreen(): ReactElement {
     <Screen scroll>
       {confirmingDelete ? null : banner}
       <View style={styles.profileHeader}>
-        <AvatarCircle name={state.user.name} />
+        <Pressable
+          onPress={() => { void handleChangePhoto(); }}
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.changePhoto')}
+          disabled={avatarUploading}
+        >
+          <AvatarCircle name={state.user.name} uri={avatarUri} />
+          <View style={styles.photoEditBadge}>
+            <RNText style={styles.photoEditBadgeText}>{avatarUploading ? '…' : '📷'}</RNText>
+          </View>
+        </Pressable>
         <Text variant="subtitle">{state.user.name ?? t('profile.noName')}</Text>
       </View>
       <ListItem title={t('profile.name')} subtitle={state.user.name ?? t('profile.noName')} onPress={() => router.push(href('authName'))} />
@@ -201,6 +265,27 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#fff',
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  photoEditBadge: {
+    position: 'absolute',
+    bottom: 0,
+    end: 0,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  photoEditBadgeText: {
+    fontSize: 12,
   },
   versionRow: {
     alignItems: 'center',

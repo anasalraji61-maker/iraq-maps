@@ -32,7 +32,10 @@
     "delete": "حذف الحساب",
     "registerBusiness": "سجّل نشاطك التجاري",
     "version": "الإصدار {version}",
-    "myPosts": "مشاركاتي"
+    "myPosts": "مشاركاتي",
+    "changePhoto": "تغيير الصورة الشخصية",
+    "photoUpdated": "تم تحديث الصورة الشخصية",
+    "photoError": "فشل تحديث الصورة، حاول مجدداً"
   },
   "deleteSheet": {
     "title": "هل تريد حذف حسابك نهائياً؟",

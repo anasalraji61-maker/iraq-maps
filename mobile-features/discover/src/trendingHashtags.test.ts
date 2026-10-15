@@ -18,6 +18,8 @@ function makePost(body: string): DiscoverPostType {
     isLikedByMe: false,
     authorVerified: false,
     createdAt: new Date().toISOString(),
+    bookmarkCount: 0,
+    mentionedUserIds: [],
   };
 }
 

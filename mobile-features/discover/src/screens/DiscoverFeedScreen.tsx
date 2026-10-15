@@ -15,6 +15,7 @@ import {
   I18nManager,
   Image,
   Modal,
+  PanResponder,
   Platform,
   Pressable,
   RefreshControl,
@@ -25,6 +26,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import type { PanResponderInstance } from 'react-native';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
 import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime, formatCount, HashtagText } from './shared';
@@ -254,7 +256,7 @@ const PostItem = memo(function PostItem({
         </Pressable>
         {!isOwn ? (
           <Pressable
-            onPress={() => onFollow(post.authorId)}
+            onPress={() => { haptics.tap(); onFollow(post.authorId); }}
             style={[styles.followBtn, isFollowing && styles.followBtnActive]}
             accessibilityRole="button"
             accessibilityLabel={isFollowing ? t('follow.unfollow') : t('follow.follow')}
@@ -355,7 +357,7 @@ const PostItem = memo(function PostItem({
         <Pressable
           testID={discoverTestIDs.commentButton(post.id)}
           style={[styles.actionBtn, { backgroundColor: COLORS.border }]}
-          onPress={() => onComment(post)}
+          onPress={() => { haptics.tap(); onComment(post); }}
           accessibilityRole="button"
         >
           <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>
@@ -367,7 +369,7 @@ const PostItem = memo(function PostItem({
         </Pressable>
         <Pressable
           style={[styles.actionBtn, { backgroundColor: isSaved ? COLORS.primaryXLight : COLORS.border }]}
-          onPress={() => onSave(post)}
+          onPress={() => { haptics.tap(); onSave(post); }}
           accessibilityRole="button"
           accessibilityLabel={isSaved ? t('saved.saved') : t('saved.save')}
         >
@@ -478,7 +480,25 @@ export function DiscoverFeedScreen(): ReactElement {
   const { followedIds, toggleFollow } = useFollows();
   const handleFollow = useCallback((authorId: string) => { void toggleFollow(authorId); }, [toggleFollow]);
   const { blockedIds, blockUser } = useBlockedUsers();
+  const feedHaptics = useHaptics();
+  const feedHapticsRef = useRef(feedHaptics);
+  feedHapticsRef.current = feedHaptics;
   const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
+  const tabPanResponder = useRef<PanResponderInstance>(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 10 && Math.abs(g.dy) < 30,
+      onPanResponderRelease: (_, g) => {
+        if (Math.abs(g.dx) < 50) return;
+        const tabs: Array<'all' | 'following'> = ['all', 'following'];
+        setActiveTab((prev) => {
+          const idx = tabs.indexOf(prev);
+          if (g.dx < 0 && idx < tabs.length - 1) { feedHapticsRef.current.tap(); return tabs[idx + 1]!; }
+          if (g.dx > 0 && idx > 0) { feedHapticsRef.current.tap(); return tabs[idx - 1]!; }
+          return prev;
+        });
+      },
+    }),
+  ).current;
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
@@ -917,6 +937,7 @@ export function DiscoverFeedScreen(): ReactElement {
         </View>
       ) : null}
       <FlatList
+        {...tabPanResponder.panHandlers}
         data={displayedPosts}
         keyExtractor={(item) => item.id}
         accessibilityRole="list"

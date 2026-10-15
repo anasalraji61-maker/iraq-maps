@@ -70,6 +70,8 @@ const makePost = (overrides: Partial<DiscoverPostType> = {}): DiscoverPostType =
   isLikedByMe: false,
   authorVerified: false,
   createdAt: '2024-04-01T00:00:00Z',
+  bookmarkCount: 0,
+  mentionedUserIds: [],
   ...overrides,
 });
 

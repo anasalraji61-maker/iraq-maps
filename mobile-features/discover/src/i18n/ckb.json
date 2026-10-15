@@ -97,7 +97,10 @@
     "uploadingPhoto": "بارکردنی وێنە...",
     "uploadError": "هەڵەی بارکردنی وێنە",
     "removePhoto": "✕",
-    "categoryLabel": "پۆل (ئارەزووی)"
+    "categoryLabel": "پۆل (ئارەزووی)",
+    "mentionLabel": "ئاماژەکان",
+    "mentionPlaceholder": "بەدوای بەکارهێنەر بگەڕێ...",
+    "mentionLoading": "گەڕان..."
   },
   "comments": {
     "title": "کۆمێنتەکان",

@@ -97,7 +97,10 @@
     "uploadingPhoto": "Uploading photo...",
     "uploadError": "Failed to upload photo, try again",
     "removePhoto": "✕",
-    "categoryLabel": "Category (optional)"
+    "categoryLabel": "Category (optional)",
+    "mentionLabel": "Mentions",
+    "mentionPlaceholder": "Search for a user...",
+    "mentionLoading": "Searching..."
   },
   "comments": {
     "title": "Comments",

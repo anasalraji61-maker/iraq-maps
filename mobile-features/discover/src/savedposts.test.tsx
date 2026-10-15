@@ -26,6 +26,8 @@ const mockPost: DiscoverPostType = {
   isLikedByMe: false,
   authorVerified: false,
   createdAt: '2024-03-01T00:00:00Z',
+  bookmarkCount: 0,
+  mentionedUserIds: [],
 };
 
 describe('SavedPostsScreen', () => {
