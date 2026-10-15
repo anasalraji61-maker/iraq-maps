@@ -63,7 +63,7 @@ describe('InquiriesListScreen', () => {
     });
   });
 
-  it('shows targets count and replied badge when a target replied', async () => {
+  it('shows replied badge when at least one target replied', async () => {
     useMessagingClient.mockReturnValue({
       listInquiries: jest.fn(async () => ({
         status: 200,
@@ -86,8 +86,84 @@ describe('InquiriesListScreen', () => {
     const view = await renderWithProviders(<InquiriesListScreen />);
     await waitFor(() => {
       expect(view.getByText(/استفسار عن السعر/)).toBeTruthy();
-      // replied badge text should be present
-      expect(view.getByText('رد')).toBeTruthy();
+      expect(view.getByText('تم الرد')).toBeTruthy();
+    });
+  });
+
+  it('shows sent badge when targets are sent/delivered/read but none replied', async () => {
+    useMessagingClient.mockReturnValue({
+      listInquiries: jest.fn(async () => ({
+        status: 200,
+        body: {
+          items: [
+            {
+              id: '44444444-4444-4444-4444-444444444444',
+              text: 'سؤال عن المواعيد',
+              createdAt: '2026-10-15T09:00:00.000Z',
+              userId: 'user-1',
+              targets: [
+                { placeId: 'place-1', channel: 'in_app', status: 'sent' },
+                { placeId: 'place-2', channel: 'in_app', status: 'delivered' },
+              ],
+            },
+          ],
+        },
+      })),
+    });
+    const view = await renderWithProviders(<InquiriesListScreen />);
+    await waitFor(() => {
+      expect(view.getByText('مُرسَل')).toBeTruthy();
+    });
+  });
+
+  it('shows pending badge when all targets are queued', async () => {
+    useMessagingClient.mockReturnValue({
+      listInquiries: jest.fn(async () => ({
+        status: 200,
+        body: {
+          items: [
+            {
+              id: '55555555-5555-5555-5555-555555555555',
+              text: 'رسالة قيد الانتظار',
+              createdAt: '2026-10-15T10:00:00.000Z',
+              userId: 'user-1',
+              targets: [
+                { placeId: 'place-1', channel: 'in_app', status: 'queued' },
+              ],
+            },
+          ],
+        },
+      })),
+    });
+    const view = await renderWithProviders(<InquiriesListScreen />);
+    await waitFor(() => {
+      expect(view.getByText('في الانتظار')).toBeTruthy();
+    });
+  });
+
+  it('shows failed badge when all targets failed', async () => {
+    useMessagingClient.mockReturnValue({
+      listInquiries: jest.fn(async () => ({
+        status: 200,
+        body: {
+          items: [
+            {
+              id: '66666666-6666-6666-6666-666666666666',
+              text: 'رسالة فاشلة',
+              createdAt: '2026-10-15T11:00:00.000Z',
+              userId: 'user-1',
+              targets: [
+                { placeId: 'place-1', channel: 'in_app', status: 'failed' },
+                { placeId: 'place-2', channel: 'in_app', status: 'failed' },
+              ],
+            },
+          ],
+        },
+      })),
+    });
+    const view = await renderWithProviders(<InquiriesListScreen />);
+    await waitFor(() => {
+      expect(view.getByText('فشل')).toBeTruthy();
     });
   });
 });

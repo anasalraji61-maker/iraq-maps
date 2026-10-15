@@ -24,7 +24,11 @@
     "loadError": "هەڵەیەک ڕوویدا لە بارکردنی پەیامەکان",
     "placesCount": "{{count}} شوێن",
     "placeCount": "١ شوێن",
-    "repliedBadge": "وەڵامدراوە"
+    "repliedBadge": "وەڵامدراوە",
+    "badgePending": "چاوەڕوانکردن",
+    "badgeSent": "نێردرا",
+    "badgeReplied": "وەڵامدراوە",
+    "badgeFailed": "سەرکەوتوو نەبوو"
   },
   "detail": {
     "title": "وردەکاریەکانی داواکاری",

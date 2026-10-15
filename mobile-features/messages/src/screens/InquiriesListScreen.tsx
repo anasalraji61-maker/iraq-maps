@@ -9,7 +9,6 @@ import { t } from '../strings';
 const styles = StyleSheet.create({
   meta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
   badge: {
-    backgroundColor: '#1976D2',
     borderRadius: 8,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -17,6 +16,23 @@ const styles = StyleSheet.create({
   badgeText: { color: '#FFF', fontSize: 11, fontWeight: '600' },
   muted: { fontSize: 12, color: '#757575' },
 });
+
+type BadgeInfo = { label: string; color: string } | null;
+
+function getInquiryBadge(targets: Inquiry['targets']): BadgeInfo {
+  if (targets.length === 0) return null;
+  const statuses = targets.map((t) => t.status);
+  if (statuses.some((s) => s === 'replied')) {
+    return { label: t('list.badgeReplied'), color: '#388E3C' };
+  }
+  if (statuses.every((s) => s === 'failed')) {
+    return { label: t('list.badgeFailed'), color: '#C62828' };
+  }
+  if (statuses.some((s) => s === 'sent' || s === 'delivered' || s === 'read')) {
+    return { label: t('list.badgeSent'), color: '#1976D2' };
+  }
+  return { label: t('list.badgePending'), color: '#F57C00' };
+}
 
 export function InquiriesListScreen(): ReactElement {
   const api = useMessagingClient();
@@ -57,7 +73,7 @@ export function InquiriesListScreen(): ReactElement {
       {error ? <Banner kind="error" message={error} /> : null}
       <ScrollView testID="inquiries-list-scroll" refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
         {inquiries.map((inq) => {
-          const hasReply = inq.targets.some((tgt) => tgt.status === 'replied');
+          const badge = getInquiryBadge(inq.targets);
           const placesLabel = inq.targets.length === 1
             ? t('list.placeCount')
             : t('list.placesCount', { count: inq.targets.length });
@@ -66,10 +82,10 @@ export function InquiriesListScreen(): ReactElement {
               <Text>{inq.text.slice(0, 80)}</Text>
               <View style={styles.meta}>
                 <RNText style={styles.muted}>{inq.createdAt.slice(0, 10)}</RNText>
-                <RNText style={styles.muted}>{placesLabel}</RNText>
-                {hasReply ? (
-                  <View style={styles.badge} accessibilityRole="text" accessibilityLabel={t('list.repliedBadge')}>
-                    <RNText style={styles.badgeText}>{t('list.repliedBadge')}</RNText>
+                {inq.targets.length > 0 ? <RNText style={styles.muted}>{placesLabel}</RNText> : null}
+                {badge ? (
+                  <View style={[styles.badge, { backgroundColor: badge.color }]} accessibilityRole="text" accessibilityLabel={badge.label}>
+                    <RNText style={styles.badgeText}>{badge.label}</RNText>
                   </View>
                 ) : null}
               </View>

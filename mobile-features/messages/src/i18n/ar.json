@@ -24,7 +24,11 @@
     "loadError": "خطأ في تحميل الرسائل",
     "placesCount": "{{count}} أماكن",
     "placeCount": "مكان واحد",
-    "repliedBadge": "رد"
+    "repliedBadge": "رد",
+    "badgePending": "في الانتظار",
+    "badgeSent": "مُرسَل",
+    "badgeReplied": "تم الرد",
+    "badgeFailed": "فشل"
   },
   "detail": {
     "title": "تفاصيل الطلب",

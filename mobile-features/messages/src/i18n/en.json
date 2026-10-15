@@ -24,7 +24,11 @@
     "loadError": "Error loading messages",
     "placesCount": "{{count}} places",
     "placeCount": "1 place",
-    "repliedBadge": "Replied"
+    "repliedBadge": "Replied",
+    "badgePending": "Pending",
+    "badgeSent": "Sent",
+    "badgeReplied": "Replied",
+    "badgeFailed": "Failed"
   },
   "detail": {
     "title": "Request details",
