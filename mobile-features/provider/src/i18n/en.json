@@ -111,7 +111,8 @@
     "timeDaysAgo": "{n}d ago",
     "itemA11y": "Message from {userId}",
     "loadMore": "Load more",
-    "replyCharsRemaining": "{n} characters remaining"
+    "replyCharsRemaining": "{n} characters remaining",
+    "markAllRead": "Mark all as read"
   },
   "logo": {
     "title": "Business Logo",

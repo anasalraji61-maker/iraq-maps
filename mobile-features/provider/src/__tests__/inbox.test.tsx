@@ -59,6 +59,46 @@ describe('ProviderInboxScreen', () => {
     await waitFor(() => expect(view.getByText(/لا توجد رسائل/)).toBeTruthy());
   });
 
+  it('shows markAllRead button when there are new items after refresh', async () => {
+    // Initially all items are "read" (marked on first load).
+    // After refresh, new items arrive and are unread → button appears.
+    const INQUIRY_ID2 = InquiryId.parse('33333333-3333-3333-3333-333333333333');
+    let callCount = 0;
+    mockApi({
+      listProviderInquiries: jest.fn(async () => {
+        callCount += 1;
+        if (callCount === 1) {
+          return { status: 200, body: { items: [makeInquiry()], nextCursor: undefined } };
+        }
+        return {
+          status: 200,
+          body: {
+            items: [makeInquiry(), makeInquiry({ id: INQUIRY_ID2 })],
+            nextCursor: undefined,
+          },
+        };
+      }),
+    });
+    const view = await renderWithProviders(<ProviderInboxScreen />);
+    await waitFor(() => expect(view.getByTestId(messagingTestIDs.inboxItem(INQUIRY_ID))).toBeTruthy());
+    // No markAllRead button yet (all items read on first load)
+    expect(view.queryByTestId('provider.inbox.markAllRead')).toBeNull();
+
+    // Trigger refresh
+    const list = view.getByTestId('provider-inbox-list');
+    await act(async () => {
+      list.props.refreshControl?.props?.onRefresh?.();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(view.queryByTestId('provider.inbox.markAllRead')).toBeTruthy());
+
+    // Press mark all read — button disappears
+    await act(async () => {
+      fireEvent.press(view.getByTestId('provider.inbox.markAllRead'));
+    });
+    await waitFor(() => expect(view.queryByTestId('provider.inbox.markAllRead')).toBeNull());
+  });
+
   it('shows skeleton rows while loading', async () => {
     let resolve!: (v: unknown) => void;
     mockApi({

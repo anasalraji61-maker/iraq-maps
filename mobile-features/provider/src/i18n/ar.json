@@ -111,7 +111,8 @@
     "timeDaysAgo": "منذ {n} يوم",
     "itemA11y": "رسالة من {userId}",
     "loadMore": "تحميل المزيد",
-    "replyCharsRemaining": "متبقٍ {n} حرف"
+    "replyCharsRemaining": "متبقٍ {n} حرف",
+    "markAllRead": "تحديد الكل كمقروء"
   },
   "logo": {
     "title": "شعار النشاط التجاري",

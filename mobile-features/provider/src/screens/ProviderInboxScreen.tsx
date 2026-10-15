@@ -122,6 +122,10 @@ export function ProviderInboxScreen(): ReactElement {
 
   const unreadCount = items.filter((i) => !readIds.has(i.id)).length;
 
+  const markAllRead = useCallback(() => {
+    setReadIds(new Set(items.map((i) => i.id)));
+  }, [items]);
+
   if (loading) {
     return (
       <Screen>
@@ -147,11 +151,24 @@ export function ProviderInboxScreen(): ReactElement {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text variant="title">{t('inbox.title')}</Text>
+        <View style={styles.headerStart}>
+          <Text variant="title">{t('inbox.title')}</Text>
+          {unreadCount > 0 && (
+            <View style={styles.unreadBadge} accessibilityLabel={`${unreadCount} ${t('inbox.unread')}`}>
+              <RNText style={styles.unreadText}>{unreadCount}</RNText>
+            </View>
+          )}
+        </View>
         {unreadCount > 0 && (
-          <View style={styles.unreadBadge} accessibilityLabel={`${unreadCount} ${t('inbox.unread')}`}>
-            <RNText style={styles.unreadText}>{unreadCount}</RNText>
-          </View>
+          <Pressable
+            testID="provider.inbox.markAllRead"
+            onPress={markAllRead}
+            accessibilityRole="button"
+            accessibilityLabel={t('inbox.markAllRead')}
+            style={styles.markAllBtn}
+          >
+            <RNText style={styles.markAllText}>{t('inbox.markAllRead')}</RNText>
+          </Pressable>
         )}
       </View>
       <FlatList
@@ -216,7 +233,10 @@ export function ProviderInboxScreen(): ReactElement {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
+  headerStart: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  markAllBtn: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, backgroundColor: '#EFF6FF' },
+  markAllText: { fontSize: 12, color: '#1D4ED8', fontWeight: '600' },
   unreadBadge: {
     backgroundColor: '#EF4444',
     borderRadius: 12,
