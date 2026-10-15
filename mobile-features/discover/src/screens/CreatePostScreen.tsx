@@ -232,6 +232,9 @@ export function CreatePostScreen(): ReactElement {
               key={val}
               style={[styles.typeChip, postType === val && styles.typeChipActive]}
               onPress={() => setPostType(val)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: postType === val }}
+              accessibilityLabel={t(POST_TYPE_KEYS[val])}
             >
               <Text style={[styles.typeChipText, postType === val && styles.typeChipTextActive]}>
                 {t(POST_TYPE_KEYS[val])}
@@ -247,6 +250,9 @@ export function CreatePostScreen(): ReactElement {
               key={val}
               style={[styles.typeChip, postCategory === val && styles.typeChipActive]}
               onPress={() => setPostCategory(postCategory === val ? undefined : val)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: postCategory === val }}
+              accessibilityLabel={t(POST_CATEGORY_KEYS[val])}
             >
               <Text style={[styles.typeChipText, postCategory === val && styles.typeChipTextActive]}>
                 {t(POST_CATEGORY_KEYS[val])}
@@ -274,7 +280,7 @@ export function CreatePostScreen(): ReactElement {
           {photos.map((p) => (
             <View key={p.assetId} style={styles.photoThumbWrap}>
               <Image source={{ uri: p.uri }} style={styles.photoThumb} />
-              <Pressable style={styles.photoRemoveBtn} onPress={() => handleRemovePhoto(p.assetId)}>
+              <Pressable style={styles.photoRemoveBtn} onPress={() => handleRemovePhoto(p.assetId)} accessibilityRole="button" accessibilityLabel={t('create.removePhoto')}>
                 <Text style={styles.photoRemoveText}>{t('create.removePhoto')}</Text>
               </Pressable>
             </View>
@@ -284,6 +290,8 @@ export function CreatePostScreen(): ReactElement {
               style={styles.addPhotoBtn}
               onPress={() => { void handleAddPhoto(); }}
               disabled={uploadProgress !== null}
+              accessibilityRole="button"
+              accessibilityLabel={t('create.addPhoto')}
             >
               {uploadProgress !== null ? (
                 <ActivityIndicator size="small" color="#1976D2" />
@@ -303,7 +311,7 @@ export function CreatePostScreen(): ReactElement {
         {selectedPlace ? (
           <View style={styles.selectedPlaceRow}>
             <Text style={styles.selectedPlaceText}>{t('create.placeSelected', { name: selectedPlace.name })}</Text>
-            <Pressable onPress={() => setSelectedPlace(undefined)}>
+            <Pressable onPress={() => setSelectedPlace(undefined)} accessibilityRole="button" accessibilityLabel={t('create.clearPlace')}>
               <Text style={styles.clearPlaceText}>{t('create.clearPlace')}</Text>
             </Pressable>
           </View>
@@ -321,7 +329,7 @@ export function CreatePostScreen(): ReactElement {
             {placeResults.length > 0 ? (
               <View style={styles.placeDropdown}>
                 {placeResults.map((p) => (
-                  <Pressable key={p.id} style={styles.placeResultItem} onPress={() => handleSelectPlace(p)}>
+                  <Pressable key={p.id} style={styles.placeResultItem} onPress={() => handleSelectPlace(p)} accessibilityRole="button" accessibilityLabel={p.name}>
                     <Text style={styles.placeResultText}>📍 {p.name}</Text>
                   </Pressable>
                 ))}
@@ -335,6 +343,8 @@ export function CreatePostScreen(): ReactElement {
           style={[styles.submitBtn, (!body.trim() || submitting) && styles.submitBtnDisabled]}
           onPress={handleSubmit}
           disabled={!body.trim() || submitting}
+          accessibilityRole="button"
+          accessibilityLabel={t('create.submit')}
         >
           {submitting ? (
             <ActivityIndicator color="#FFF" size="small" />
