@@ -18,7 +18,21 @@
     "durationHourMin": "{h} س {m} د",
     "speed": "{kmh} كم/س",
     "tripDistance": "المسافة المقطوعة",
-    "tripDuration": "وقت الرحلة"
+    "tripDuration": "وقت الرحلة",
+    "speedLimit": "الحد: {kmh} كم/س",
+    "speedingWarning": "تجاوزت السرعة المسموحة",
+    "voiceBanner": "{direction} بعد {dist} على {street}",
+    "voiceBannerNoStreet": "{direction} بعد {dist}",
+    "favoriteRoutes": "المسارات المحفوظة",
+    "saveFavoriteRoute": "حفظ المسار",
+    "savedRouteName": "اسم المسار",
+    "savedRouteNamePlaceholder": "مثلاً: إلى البيت، إلى العمل",
+    "savedRouteAdd": "حفظ",
+    "savedRouteCancel": "إلغاء",
+    "savedRouteEmpty": "لا توجد مسارات محفوظة بعد",
+    "savedRouteStart": "ابدأ",
+    "savedRouteDelete": "حذف",
+    "savedRouteSaved": "تم حفظ المسار"
   },
   "nearbyNav": {
     "title": "قريب منك",

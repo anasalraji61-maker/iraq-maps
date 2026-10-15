@@ -160,7 +160,9 @@
     "directions": "Get Directions",
     "dismiss": "Dismiss",
     "save": "Save",
-    "saved": "Saved"
+    "saved": "Saved",
+    "openBadge": "Open",
+    "closedBadge": "Closed"
   },
   "reviews": {
     "title": "Reviews & Ratings",
@@ -211,5 +213,14 @@
     "gas": "Gas station",
     "food": "Restaurant",
     "cafe": "Café"
+  },
+  "compass": {
+    "label": "Reset to north"
+  },
+  "geofence": {
+    "entered": "You entered {name}",
+    "dismiss": "Dismiss",
+    "zoneMutanabi": "Al-Mutanabbi Street",
+    "zoneShorja": "Al-Shorja Market"
   }
 }

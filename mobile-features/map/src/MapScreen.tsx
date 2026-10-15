@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { useRecentSearches } from './hooks/useRecentSearches';
+import { useGeofence, type GeofenceZone } from './hooks/useGeofence';
 import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
 
 /** Maps place category to a representative emoji icon. */
@@ -50,6 +51,32 @@ const NO_RESULTS: PlaceSummary[] = [];
 const FULL_SEARCH_MIN_LEN = 4;
 
 const BAGHDAD_CENTER: LngLat = [44.4009, 33.3152];
+
+/** Returns mock geofence zones — tourist and market areas in Baghdad. Replace with API data in a later milestone. */
+function getMockGeofenceZones(): GeofenceZone[] {
+  return [
+    {
+      id: 'gf-mutanabi',
+      name: t('geofence.zoneMutanabi'),
+      polygon: [
+        [44.3920, 33.3400],
+        [44.3960, 33.3400],
+        [44.3960, 33.3370],
+        [44.3920, 33.3370],
+      ],
+    },
+    {
+      id: 'gf-shorja',
+      name: t('geofence.zoneShorja'),
+      polygon: [
+        [44.3970, 33.3430],
+        [44.4010, 33.3430],
+        [44.4010, 33.3400],
+        [44.3970, 33.3400],
+      ],
+    },
+  ];
+}
 
 /** The map tab: the first city from GET /v1/cities, with search, locate-me and the map label language. */
 export function MapScreen(): ReactElement {
@@ -98,6 +125,17 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   /** The place shown in the compact bottom sheet after tapping a map marker. */
   const [sheetPlace, setSheetPlace] = useState<PlaceSummary | null>(null);
   const [sheetIsSaved, setSheetIsSaved] = useState(false);
+  /** Feature 6: geofence alert message, null when dismissed. */
+  const [geofenceAlert, setGeofenceAlert] = useState<string | null>(null);
+  /** Track user's last known position for geofencing. */
+  const [userPosition, setUserPosition] = useState<LngLat | null>(null);
+  // Feature 6: geofencing alerts — notify on entering mock zones
+  const geofenceZones = useMemo(() => getMockGeofenceZones(), []);
+  const handleGeofenceEnter = useCallback((zone: GeofenceZone) => {
+    setGeofenceAlert(t('geofence.entered', { name: zone.name }));
+  }, []);
+  useGeofence({ zones: geofenceZones, userPosition, onEnter: handleGeofenceEnter });
+
   // Handle deep-link focusPlaceId: fetch place and move camera.
   useEffect(() => {
     if (!focusPlaceId) return;
@@ -209,6 +247,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
       setLocated(true);
       setNear(point);
       setCamera({ center: point, zoom: LOCATED_ZOOM });
+      setUserPosition(point);
       // Reverse geocode: find nearest named places to build an address label
       try {
         const nearbyResult = await api.places.nearby({
@@ -257,6 +296,15 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           <RNText style={styles.offlineBannerText}>{t('offline.banner')}</RNText>
         </View>
       )}
+      {/* Feature 6: geofence alert */}
+      {geofenceAlert ? (
+        <View style={styles.geofenceAlert} testID="map.geofence-alert" accessibilityRole="alert">
+          <RNText style={styles.geofenceAlertText}>{geofenceAlert}</RNText>
+          <Pressable onPress={() => setGeofenceAlert(null)} accessibilityRole="button" accessibilityLabel={t('geofence.dismiss')}>
+            <RNText style={styles.geofenceAlertDismiss}>{t('geofence.dismiss')}</RNText>
+          </Pressable>
+        </View>
+      ) : null}
       <View style={styles.panel}>
         <View style={styles.searchRow}>
           <View style={styles.fill}>
@@ -425,6 +473,19 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         ) : null}
       </View>
       <View style={styles.locate}>
+        {/* Feature 5: compass/north reset button */}
+        <IconButton
+          testID="map.compass"
+          icon="explore"
+          accessibilityLabel={t('compass.label')}
+          onPress={() => {
+            setCamera((prev) => {
+              const center = (prev && 'center' in prev) ? prev.center : city.center;
+              const zoom = (prev && 'zoom' in prev) ? prev.zoom : 13;
+              return { center, zoom };
+            });
+          }}
+        />
         <IconButton testID={testIDs.map.locate} icon="my_location" accessibilityLabel={t('locate.label')} onPress={locate} />
         <Button
           testID="map.near.me"
@@ -554,4 +615,8 @@ const styles = StyleSheet.create({
   sectionHeader: { paddingVertical: space.xs, paddingHorizontal: space.xs, backgroundColor: color.bg },
   // At the end side, above the attribution that MapCanvas pins to the bottom-end corner.
   locate: { position: 'absolute', end: space.m, bottom: space.xl * 2, borderRadius: minTouch / 2, backgroundColor: color.bg, elevation: 4 },
+  // Feature 6: geofence alert toast
+  geofenceAlert: { position: 'absolute', top: 80, start: space.m, end: space.m, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1D4ED8', paddingVertical: space.s, paddingHorizontal: space.m, borderRadius: 8, elevation: 8, gap: space.s },
+  geofenceAlertText: { flex: 1, color: '#fff', fontSize: 14, fontWeight: '600' },
+  geofenceAlertDismiss: { color: '#93C5FD', fontSize: 13, fontWeight: '600' },
 });

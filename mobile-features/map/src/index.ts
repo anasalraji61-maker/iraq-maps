@@ -2,3 +2,4 @@
 export { MapScreen } from './MapScreen';
 export { PlaceScreen } from './PlaceScreen';
 export { useRecentSearches } from './hooks/useRecentSearches';
+export { useGeofence, type GeofenceZone } from './hooks/useGeofence';

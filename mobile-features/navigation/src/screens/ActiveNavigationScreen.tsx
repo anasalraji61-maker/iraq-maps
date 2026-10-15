@@ -2,10 +2,11 @@ import type { CityDescriptor, ManeuverModifier } from '@iraq-maps/contracts';
 import { navigationTestIDs } from '@iraq-maps/contracts';
 import { MapCanvas } from '@iraq-maps/map-kit';
 import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
-import { useMemo, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 import { StyleSheet, Text as RNText, View } from 'react-native';
 import type { NavigationState } from '../hooks/useNavigation';
 import { t } from '../strings';
+import { SavedRoutesSheet } from './SavedRoutesSheet';
 
 interface Props extends NavigationState {
   onStop: () => void;
@@ -18,6 +19,8 @@ interface Props extends NavigationState {
   lang?: string;
   /** Current GPS speed in m/s (null when unavailable). M195. */
   currentSpeedMps?: number | null;
+  /** Speed limit on the current road segment in km/h (null when not available). */
+  speedLimitKmh?: number | null;
   /** Total planned route distance in metres — shown on trip summary at arrival. */
   tripDistanceM?: number;
   /** Total planned route duration in seconds — shown on trip summary at arrival. */
@@ -59,6 +62,14 @@ function fmtEta(date: Date): string {
   return date.toLocaleTimeString('ar-IQ', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+/** Build the voice/text banner instruction line from the current maneuver. */
+function buildVoiceBanner(instruction: string, distM: number, streetNames?: string[]): string {
+  const dist = fmtDist(distM);
+  const street = streetNames?.[0];
+  if (street) return t('active.voiceBanner', { direction: instruction, dist, street });
+  return t('active.voiceBannerNoStreet', { direction: instruction, dist });
+}
+
 export function ActiveNavigationScreen({
   currentManeuver,
   currentInstruction,
@@ -78,10 +89,12 @@ export function ActiveNavigationScreen({
   apiBaseUrl,
   lang,
   currentSpeedMps,
+  speedLimitKmh,
   tripDistanceM,
   tripDurationS,
   destinationName,
 }: Props): ReactElement {
+  const [showSavedRoutes, setShowSavedRoutes] = useState(false);
   const routeProp = useMemo(
     () => (routePolyline6 ? { polyline6: routePolyline6 } : undefined),
     [routePolyline6],
@@ -148,6 +161,15 @@ export function ActiveNavigationScreen({
         </View>
       ) : null}
 
+      {/* Feature: Voice prompts text banner — turn instruction at top of screen */}
+      {!isRerouting && currentInstruction && distanceToManeuver > 0 ? (
+        <View style={styles.voiceBanner} accessibilityRole="alert" accessibilityLiveRegion="polite">
+          <RNText style={styles.voiceBannerText} testID="nav.voice-banner">
+            {buildVoiceBanner(currentInstruction, distanceToManeuver, currentManeuver?.streetNames)}
+          </RNText>
+        </View>
+      ) : null}
+
       {isRerouting ? (
         <Banner kind="info" message={t('active.rerouting')} testID={navigationTestIDs.active.reroute} />
       ) : null}
@@ -201,11 +223,56 @@ export function ActiveNavigationScreen({
         ) : null}
       </View>
 
+      {/* Feature: Speed limit display + speeding warning */}
+      {typeof speedLimitKmh === 'number' && speedLimitKmh != null ? (() => {
+        const currentKmh = typeof currentSpeedMps === 'number' && currentSpeedMps != null
+          ? Math.round(currentSpeedMps * 3.6)
+          : 0;
+        const isSpeeding = currentKmh > speedLimitKmh;
+        return (
+          <View
+            style={[styles.speedLimitWrap, isSpeeding && styles.speedLimitWrapWarning]}
+            testID="nav.speed-limit"
+            accessibilityRole="text"
+            accessibilityLabel={isSpeeding ? t('active.speedingWarning') : t('active.speedLimit', { kmh: speedLimitKmh })}
+          >
+            <RNText style={[styles.speedLimitText, isSpeeding && styles.speedLimitTextWarning]}>
+              {t('active.speedLimit', { kmh: speedLimitKmh })}
+            </RNText>
+            {isSpeeding ? (
+              <RNText style={styles.speedingWarningText} testID="nav.speeding-warning">
+                {t('active.speedingWarning')}
+              </RNText>
+            ) : null}
+          </View>
+        );
+      })() : null}
+
+      {/* Feature 7: Save / view favorite routes */}
+      <Button
+        testID="nav.saved-routes"
+        label={t('active.favoriteRoutes')}
+        variant="secondary"
+        onPress={() => setShowSavedRoutes(true)}
+      />
+
       <Button
         testID={navigationTestIDs.active.stop}
         label={t('active.stop')}
         variant="secondary"
         onPress={onStop}
+      />
+
+      <SavedRoutesSheet
+        visible={showSavedRoutes}
+        onClose={() => setShowSavedRoutes(false)}
+        currentRoute={destinationName ? {
+          placeId: 'dest:unknown',
+          destinationName,
+          mode: 'car',
+          distanceM: remainingDistanceM,
+          durationS: remainingDurationS,
+        } : null}
       />
     </Screen>
   );
@@ -228,4 +295,13 @@ const styles = StyleSheet.create({
   offRouteBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF3CD', padding: space.s, borderRadius: 8, gap: space.s },
   offRouteTextWrap: { flex: 1 },
   etaWrap: { alignItems: 'center', paddingVertical: space.xs },
+  // Feature 4: voice prompts text banner
+  voiceBanner: { backgroundColor: color.primary, paddingVertical: space.s, paddingHorizontal: space.m, borderRadius: 8, marginBottom: space.xs },
+  voiceBannerText: { color: '#fff', fontSize: 15, fontWeight: '600', textAlign: 'center' },
+  // Feature 1: speed limit
+  speedLimitWrap: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.s, paddingVertical: space.xs, paddingHorizontal: space.m, borderRadius: 8, backgroundColor: color.surface, borderWidth: 2, borderColor: color.border },
+  speedLimitWrapWarning: { backgroundColor: '#FEF2F2', borderColor: '#EF4444' },
+  speedLimitText: { fontSize: 13, fontWeight: '600', color: color.text },
+  speedLimitTextWarning: { color: '#EF4444' },
+  speedingWarningText: { fontSize: 13, fontWeight: '700', color: '#EF4444' },
 });

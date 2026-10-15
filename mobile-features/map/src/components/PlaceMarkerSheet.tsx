@@ -2,6 +2,7 @@ import type { PlaceSummary } from '@iraq-maps/contracts';
 import { Button, tokens } from '@iraq-maps/ui';
 import { useEffect, useRef, type ReactElement } from 'react';
 import { Animated, Pressable, StyleSheet, Text as RNText, View } from 'react-native';
+import { openNow } from '../hours';
 import { formatDistance, t } from '../strings';
 
 export interface PlaceMarkerSheetProps {
@@ -14,6 +15,11 @@ export interface PlaceMarkerSheetProps {
   category: string | undefined;
   /** Whether the place is currently saved by the user. */
   isSaved?: boolean;
+  /**
+   * OSM opening_hours raw string, when available (e.g. from a cached place details call).
+   * When provided, an Open / Closed badge is shown in the popup.
+   */
+  hoursRaw?: string | null;
   onViewDetails: () => void;
   onDirections: () => void;
   onDismiss: () => void;
@@ -34,6 +40,7 @@ export function PlaceMarkerSheet({
   icon,
   category,
   isSaved = false,
+  hoursRaw,
   onViewDetails,
   onDirections,
   onDismiss,
@@ -52,6 +59,8 @@ export function PlaceMarkerSheet({
   if (!place) return null;
 
   const distanceText = place.distanceM !== null && place.distanceM !== undefined ? formatDistance(place.distanceM) : undefined;
+  // Feature 3: open/closed badge from hoursRaw
+  const openStatus: boolean | null = hoursRaw ? openNow(hoursRaw) : null;
 
   return (
     <>
@@ -68,6 +77,13 @@ export function PlaceMarkerSheet({
           <RNText style={[styles.flex1, styles.titleText]} numberOfLines={1}>
             {`${icon} ${name}`}
           </RNText>
+          {openStatus !== null ? (
+            <View style={[styles.openBadge, openStatus ? styles.openBadgeOpen : styles.openBadgeClosed]}>
+              <RNText style={[styles.openBadgeText, openStatus ? styles.openBadgeTextOpen : styles.openBadgeTextClosed]}>
+                {openStatus ? t('markerSheet.openBadge') : t('markerSheet.closedBadge')}
+              </RNText>
+            </View>
+          ) : null}
         </View>
         {(category || distanceText) ? (
           <View style={styles.meta}>
@@ -129,7 +145,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: space.s,
   },
+  openBadge: { paddingHorizontal: space.s, paddingVertical: 2, borderRadius: 12 },
+  openBadgeOpen: { backgroundColor: '#DCFCE7' },
+  openBadgeClosed: { backgroundColor: '#FEE2E2' },
+  openBadgeText: { fontSize: 12, fontWeight: '600' },
+  openBadgeTextOpen: { color: '#16A34A' },
+  openBadgeTextClosed: { color: '#DC2626' },
   meta: {
     flexDirection: 'row',
     gap: space.s,

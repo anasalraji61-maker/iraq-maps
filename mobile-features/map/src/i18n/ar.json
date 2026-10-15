@@ -160,7 +160,9 @@
     "directions": "الطريق إليه",
     "dismiss": "إغلاق",
     "save": "حفظ",
-    "saved": "محفوظ"
+    "saved": "محفوظ",
+    "openBadge": "مفتوح",
+    "closedBadge": "مغلق"
   },
   "reviews": {
     "title": "التقييمات والمراجعات",
@@ -211,5 +213,14 @@
     "gas": "محطة وقود",
     "food": "مطعم",
     "cafe": "مقهى"
+  },
+  "compass": {
+    "label": "إعادة الاتجاه شمالاً"
+  },
+  "geofence": {
+    "entered": "دخلت منطقة {name}",
+    "dismiss": "إغلاق",
+    "zoneMutanabi": "شارع المتنبي",
+    "zoneShorja": "سوق الشورجة"
   }
 }

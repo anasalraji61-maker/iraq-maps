@@ -18,7 +18,21 @@
     "durationHourMin": "{h} س {m} خ",
     "speed": "{kmh} کم/کاتژمێر",
     "tripDistance": "بەربەستی گواستراو",
-    "tripDuration": "کاتی گەشت"
+    "tripDuration": "کاتی گەشت",
+    "speedLimit": "سنوور: {kmh} کم/کاتژمێر",
+    "speedingWarning": "خێرایت زیادە",
+    "voiceBanner": "{direction} لە {dist} بە {street}",
+    "voiceBannerNoStreet": "{direction} لە {dist}",
+    "favoriteRoutes": "ڕێگاکانی پاشەکەوتکراو",
+    "saveFavoriteRoute": "پاشەکەوتکردنی ڕێگا",
+    "savedRouteName": "ناوی ڕێگا",
+    "savedRouteNamePlaceholder": "بۆ نموونە: بۆ ماڵ، بۆ کار",
+    "savedRouteAdd": "پاشەکەوتکردن",
+    "savedRouteCancel": "پاشگەزبوونەوە",
+    "savedRouteEmpty": "هیچ ڕێگایەکی پاشەکەوتکراو نییە",
+    "savedRouteStart": "دەستپێبکە",
+    "savedRouteDelete": "سڕینەوە",
+    "savedRouteSaved": "ڕێگاکە پاشەکەوت کرا"
   },
   "nearbyNav": {
     "title": "نزیکت",

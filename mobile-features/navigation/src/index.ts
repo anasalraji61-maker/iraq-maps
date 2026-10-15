@@ -9,3 +9,5 @@ export { RoutePreviewContainer } from './screens/RoutePreviewContainer';
 export { ActiveNavigationContainer } from './screens/ActiveNavigationContainer';
 export { WaypointsEditor, type WaypointEntry } from './screens/WaypointsEditor';
 export { NearbyNavChips } from './screens/NearbyNavChips';
+export { SavedRoutesSheet } from './screens/SavedRoutesSheet';
+export { favoriteRoutes, type FavoriteRoute } from './favoriteRoutes';

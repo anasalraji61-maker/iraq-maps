@@ -18,7 +18,21 @@
     "durationHourMin": "{h} hr {m} min",
     "speed": "{kmh} km/h",
     "tripDistance": "Distance",
-    "tripDuration": "Trip time"
+    "tripDuration": "Trip time",
+    "speedLimit": "Limit: {kmh} km/h",
+    "speedingWarning": "Speeding",
+    "voiceBanner": "{direction} in {dist} onto {street}",
+    "voiceBannerNoStreet": "{direction} in {dist}",
+    "favoriteRoutes": "Saved Routes",
+    "saveFavoriteRoute": "Save Route",
+    "savedRouteName": "Route name",
+    "savedRouteNamePlaceholder": "e.g. Home, Work",
+    "savedRouteAdd": "Save",
+    "savedRouteCancel": "Cancel",
+    "savedRouteEmpty": "No saved routes yet",
+    "savedRouteStart": "Start",
+    "savedRouteDelete": "Delete",
+    "savedRouteSaved": "Route saved"
   },
   "nearbyNav": {
     "title": "Nearby",
