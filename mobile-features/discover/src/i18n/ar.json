@@ -65,7 +65,9 @@
       "tip": "نصيحة",
       "event": "فعالية",
       "offer": "عرض"
-    }
+    },
+    "verifiedBadge": "مزوّد موثّق",
+    "verifiedIcon": "✓"
   },
   "create": {
     "title": "منشور جديد",

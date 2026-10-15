@@ -65,7 +65,9 @@
       "tip": "Tip",
       "event": "Event",
       "offer": "Offer"
-    }
+    },
+    "verifiedBadge": "Verified provider",
+    "verifiedIcon": "✓"
   },
   "create": {
     "title": "New Post",

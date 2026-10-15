@@ -25,6 +25,8 @@ export const DiscoverPost = z.object({
   likeCount: z.number().int().default(0),
   commentCount: z.number().int().default(0),
   isLikedByMe: z.boolean().default(false),
+  /** True when the post author is a verified provider. @M93 */
+  authorVerified: z.boolean().default(false),
   createdAt: z.string().datetime(),
 });
 

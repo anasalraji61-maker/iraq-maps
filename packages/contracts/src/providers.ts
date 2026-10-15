@@ -121,6 +121,8 @@ export interface ProviderProfilePort {
 
 export interface ProviderDirectoryPort {
   contactChannels(providerId: ProviderId): Promise<ContactChannel[]>;
+  /** Returns true when the given user ID belongs to a verified provider. @M93 */
+  isVerifiedProvider(userId: UserId): Promise<boolean>;
 }
 
 /** The owner's own view.

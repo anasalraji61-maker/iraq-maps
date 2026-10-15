@@ -1,6 +1,6 @@
-import { CommentId, PortTokens, type EventBus, type UserId } from '@iraq-maps/contracts';
+import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { and, desc, eq, isNull, ilike, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
@@ -16,7 +16,20 @@ export class DiscoverService {
   constructor(
     @Inject('DISCOVER_DB') private readonly db: Db,
     @Inject(PortTokens.EventBus) private readonly eventBus: EventBus = noopEventBus,
+    @Optional() @Inject(PortTokens.ProviderDirectoryPort) private readonly providerDirectory: ProviderDirectoryPort | null = null,
   ) {}
+
+  /** Returns a Set of userIds that are verified providers. Gracefully returns empty set on error. @M93 */
+  private async verifiedAuthorIds(authorIds: UserId[]): Promise<Set<UserId>> {
+    if (!this.providerDirectory || authorIds.length === 0) return new Set();
+    const unique = [...new Set(authorIds)];
+    try {
+      const results = await Promise.all(unique.map((id) => this.providerDirectory!.isVerifiedProvider(id)));
+      return new Set(unique.filter((_, i) => results[i]));
+    } catch {
+      return new Set();
+    }
+  }
 
   async listFeed(userId: UserId, cursor?: string, limit = 10, category?: string) {
     const rows = await this.db
@@ -43,9 +56,10 @@ export class DiscoverService {
             .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
+    const verifiedSet = await this.verifiedAuthorIds(items.map((p) => p.authorId as UserId));
 
     return {
-      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id))),
+      items: items.map((p) => this.toPostShape(p, likedSet.has(p.id), verifiedSet.has(p.authorId as UserId))),
       nextCursor: hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined,
     };
   }
@@ -350,7 +364,7 @@ export class DiscoverService {
     return post;
   }
 
-  private toPostShape(post: typeof postTable.$inferSelect, isLikedByMe: boolean) {
+  private toPostShape(post: typeof postTable.$inferSelect, isLikedByMe: boolean, authorVerified = false) {
     return {
       id: post.id as PostIdType,
       authorId: post.authorId as UserId,
@@ -362,6 +376,7 @@ export class DiscoverService {
       likeCount: post.likeCount,
       commentCount: post.commentCount,
       isLikedByMe,
+      authorVerified,
       createdAt: post.createdAt.toISOString(),
     };
   }

@@ -216,7 +216,18 @@ const PostItem = memo(function PostItem({
           accessibilityRole="button"
           accessibilityLabel={post.authorId.slice(0, 8)}
         >
-          <Text style={[styles.authorText, { color: COLORS.primary }]}>{post.authorId.slice(0, 8)}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Text style={[styles.authorText, { color: COLORS.primary }]}>{post.authorId.slice(0, 8)}</Text>
+            {post.authorVerified ? (
+              <View
+                style={{ backgroundColor: '#1976D2', borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1 }}
+                accessibilityLabel={t('post.verifiedBadge')}
+                accessibilityRole="text"
+              >
+                <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '700' }}>{t('post.verifiedIcon')}</Text>
+              </View>
+            ) : null}
+          </View>
           <Text style={[styles.timestampText, { color: COLORS.textSecondary }]}>{formatRelativeTime(post.createdAt, t)}</Text>
         </Pressable>
         <View style={styles.cardHeaderRight}>

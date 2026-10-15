@@ -13,17 +13,20 @@ import {
   type ProviderProfilePort,
   type ProviderRecord,
   type ProviderStatus,
+  type UserId,
 } from '@iraq-maps/contracts';
 import { describe, expect, it } from 'vitest';
 import { randomPhone } from './env';
 
-type SeedInput = { placeId: PlaceId; status: ProviderStatus; consents: ConsentScope[] };
+type SeedInput = { placeId: PlaceId; status: ProviderStatus; consents: ConsentScope[]; userId?: UserId };
 
 /** Records shared by FakeProviderProfile and FakeProviderDirectory; seed() fills every field. Filtering is the
  * contracts' publicProfileOf / contactChannelsOf, the same functions modules/providers uses. */
 export class FakeProviderStore {
   readonly records = new Map<ProviderId, ProviderRecord & { placeId: PlaceId }>();
-  seed({ placeId, status, consents }: SeedInput): ProviderId {
+  /** Maps userId → providerId for isVerifiedProvider lookups. @M93 */
+  readonly userToProvider = new Map<UserId, ProviderId>();
+  seed({ placeId, status, consents, userId }: SeedInput): ProviderId {
     const providerId = randomUUID() as ProviderId;
     this.records.set(providerId, {
       providerId,
@@ -36,6 +39,7 @@ export class FakeProviderStore {
       social: [{ kind: 'instagram', url: 'https://instagram.com/example' }],
       prices: [{ label: 'Room', min: 50_000, max: 90_000, currency: 'IQD' }],
     });
+    if (userId) this.userToProvider.set(userId, providerId);
     return providerId;
   }
 }
@@ -53,6 +57,13 @@ export class FakeProviderDirectory implements ProviderDirectoryPort {
   async contactChannels(providerId: ProviderId) {
     const record = this.store.records.get(providerId);
     return record ? contactChannelsOf(record) : [];
+  }
+  /** @M93 */
+  async isVerifiedProvider(userId: UserId) {
+    const providerId = this.store.userToProvider.get(userId);
+    if (!providerId) return false;
+    const record = this.store.records.get(providerId);
+    return record?.status === 'verified';
   }
 }
 

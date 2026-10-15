@@ -65,7 +65,9 @@
       "tip": "تێبینی",
       "event": "ئیتفاق",
       "offer": "پێشکەش"
-    }
+    },
+    "verifiedBadge": "دابینکەری پشتڕاستکراو",
+    "verifiedIcon": "✓"
   },
   "create": {
     "title": "پۆستی نوێ",

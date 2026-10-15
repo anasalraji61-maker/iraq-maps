@@ -1,5 +1,5 @@
 import type { Db } from '@iraq-maps/db-kit';
-import type { EventBus } from '@iraq-maps/contracts';
+import type { EventBus, ProviderDirectoryPort } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import { Module, type DynamicModule } from '@nestjs/common';
 import type { Redis } from 'ioredis';
@@ -11,6 +11,8 @@ export interface DiscoverModuleOptions {
   db: Db;
   eventBus?: EventBus;
   redis?: Redis;
+  /** Optional: when provided, posts are enriched with authorVerified. @M93 */
+  providerDirectory?: ProviderDirectoryPort;
 }
 
 class NoopEventBus implements EventBus {
@@ -37,6 +39,7 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new NoopEventBus() },
       { provide: 'DISCOVER_POST_RATE_LIMITER', useValue: postLimiter },
       { provide: 'DISCOVER_REPORT_RATE_LIMITER', useValue: reportLimiter },
+      { provide: PortTokens.ProviderDirectoryPort, useValue: opts.providerDirectory ?? null },
       DiscoverService,
     ],
     exports: [DiscoverService],
