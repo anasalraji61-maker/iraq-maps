@@ -6,7 +6,7 @@
  * PostGIS column definitions not exported by db-kit.
  */
 import type { Incident, IncidentId, IncidentType, UserId } from '@iraq-maps/contracts';
-import { sql } from 'drizzle-orm';
+import { sql, type SQLWrapper } from 'drizzle-orm';
 import type { Db } from '@iraq-maps/db-kit';
 
 // ---------------------------------------------------------------------------
@@ -56,8 +56,7 @@ export class IncidentsService {
     const { type, lng, lat, description, reportedBy, ttlHours } = opts;
     const expiresAt = new Date(Date.now() + ttlHours * 3_600_000);
 
-    const result = await this.db.execute(
-      sql`
+    const insertSql: SQLWrapper = sql`
         INSERT INTO incidents.incident (type, location, description, reported_by, expires_at)
         VALUES (
           ${type},
@@ -70,8 +69,8 @@ export class IncidentsService {
           id, type, description, reported_by, created_at, expires_at,
           ST_X(location::geometry) AS lng,
           ST_Y(location::geometry) AS lat
-      `,
-    );
+      `;
+    const result = await this.db.execute(insertSql);
     const rows = Array.isArray(result) ? result : (result as { rows?: unknown[] }).rows ?? [];
 
     const row = (rows as IncidentDbRow[])[0];
@@ -88,8 +87,7 @@ export class IncidentsService {
     const { lat, lng, radiusKm } = opts;
     const radiusM = radiusKm * 1000;
 
-    const result2 = await this.db.execute(
-      sql`
+    const selectSql: SQLWrapper = sql`
         SELECT
           id, type, description, reported_by, created_at, expires_at,
           ST_X(location::geometry) AS lng,
@@ -104,8 +102,8 @@ export class IncidentsService {
           )
         ORDER BY created_at DESC
         LIMIT 200
-      `,
-    );
+      `;
+    const result2 = await this.db.execute(selectSql);
     const rows2 = Array.isArray(result2) ? result2 : (result2 as { rows?: unknown[] }).rows ?? [];
 
     return (rows2 as IncidentDbRow[]).map(rowToIncident);
