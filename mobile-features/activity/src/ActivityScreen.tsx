@@ -339,6 +339,7 @@ function PostsTab(): ReactElement {
   const [editingPost, setEditingPost] = useState<{ id: string; body: string } | null>(null);
   const [editBody, setEditBody] = useState('');
   const [editSaving, setEditSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const editInputRef = useRef<TextInput>(null);
 
   const load = useCallback(async () => {
@@ -453,6 +454,14 @@ function PostsTab(): ReactElement {
       renderItem={({ item }) => <PostRow item={item} onDelete={(id) => { void handleDelete(id); }} onEdit={handleOpenEdit} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => { setRefreshing(true); void load().finally(() => setRefreshing(false)); }}
+          colors={['#1976D2']}
+          tintColor="#1976D2"
+        />
+      }
     />
     </>
   );
