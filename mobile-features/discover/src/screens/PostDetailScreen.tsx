@@ -62,6 +62,7 @@ type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress }: { post: DiscoverPostType; mediaUrls: Readonly<Record<string, string>>; onHashtagPress: (tag: string) => void; isOwn: boolean; onMorePress: () => void }): ReactElement {
   const badgeColors = getTypeBadgeColors(post.type);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -98,7 +99,18 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress }: { pos
           ))}
         </ScrollView>
       )}
-      <HashtagText text={post.body} style={styles.bodyText} onHashtagPress={onHashtagPress} />
+      <Pressable
+        onLongPress={() => {
+          void Clipboard.setStringAsync(post.body).then(() => {
+            setCopyFeedback(t('postDetail.bodyCopied'));
+            setTimeout(() => setCopyFeedback(null), 2000);
+          });
+        }}
+        accessibilityHint={t('postDetail.bodyLongPressHint')}
+      >
+        <HashtagText text={post.body} style={styles.bodyText} onHashtagPress={onHashtagPress} />
+      </Pressable>
+      {copyFeedback ? <Text style={styles.copyFeedback}>{copyFeedback}</Text> : null}
       <Text style={styles.postDate}>{formatRelativeTime(post.createdAt)}</Text>
       <View style={styles.actionRow}>
         <Pressable style={styles.shareBtn} onPress={handleShare} accessibilityRole="button" accessibilityLabel={t('post.share')}>
@@ -417,6 +429,7 @@ const styles = StyleSheet.create({
   typeText: { fontSize: 12, color: COLORS.primary, fontWeight: '600' },
   bodyText: { fontSize: 16, color: COLORS.textPrimary, lineHeight: 24, textAlign: 'auto', marginBottom: 8 },
   postDate: { fontSize: 12, color: COLORS.textMuted, textAlign: 'auto', marginBottom: 10 },
+  copyFeedback: { fontSize: 12, color: COLORS.primary ?? '#1976D2', textAlign: 'auto', marginBottom: 4 },
   imageStrip: { marginBottom: 10, marginHorizontal: -14 },
   imageStripContent: { paddingHorizontal: 14, gap: 8 },
   detailImage: { width: 240, height: 180, borderRadius: 10 },

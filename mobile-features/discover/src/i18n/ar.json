@@ -124,7 +124,9 @@
     "loadError": "فشل تحميل المنشور",
     "commentsSection": "التعليقات",
     "copyLink": "نسخ الرابط",
-    "linkCopied": "تم نسخ الرابط"
+    "linkCopied": "تم نسخ الرابط",
+    "bodyCopied": "تم نسخ النص",
+    "bodyLongPressHint": "اضغط مطولاً لنسخ النص"
   },
   "userPosts": {
     "title": "منشورات المستخدم",

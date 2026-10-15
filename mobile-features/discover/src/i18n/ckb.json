@@ -124,7 +124,9 @@
     "loadError": "هەڵەی بارکردنی پۆست",
     "commentsSection": "کۆمێنتەکان",
     "copyLink": "لینک کۆپی بکە",
-    "linkCopied": "لینک کۆپی کرا"
+    "linkCopied": "لینک کۆپی کرا",
+    "bodyCopied": "دەق کۆپی کرا",
+    "bodyLongPressHint": "درێژ دابگرە بۆ کۆپیکردنی دەق"
   },
   "userPosts": {
     "title": "پۆستەکانی بەکارهێنەر",

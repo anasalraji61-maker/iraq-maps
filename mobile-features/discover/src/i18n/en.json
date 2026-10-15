@@ -124,7 +124,9 @@
     "loadError": "Failed to load post",
     "commentsSection": "Comments",
     "copyLink": "Copy link",
-    "linkCopied": "Link copied"
+    "linkCopied": "Link copied",
+    "bodyCopied": "Text copied",
+    "bodyLongPressHint": "Long press to copy text"
   },
   "userPosts": {
     "title": "User Posts",
