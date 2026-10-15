@@ -4,7 +4,15 @@ import { PortTokens } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { eq, and, sql, desc } from 'drizzle-orm';
 import { sessionTable, messageTable, rateLimitTable, usageDailyTable } from './schema.js';
-import type { AssistantTurnType } from '@iraq-maps/contracts';
+import type {
+  AssistantTurnType,
+  TripPlanRequestType,
+  TripPlanResponseType,
+  RecommendationsResponseType,
+  NLPSearchResponseType,
+} from '@iraq-maps/contracts';
+import { z } from 'zod';
+import { PlaceRecommendation, NLPSearchResult } from '@iraq-maps/contracts';
 
 const DAILY_LIMIT = parseInt(process.env['ASSISTANT_DAILY_LIMIT'] ?? process.env['ASSISTANT_DAILY_LIMIT_PER_USER'] ?? '20', 10);
 
@@ -384,5 +392,291 @@ export class AssistantService {
       return { text: reply.slice(0, 200) };
     }
     return undefined;
+  }
+
+  // ─── Trip Planner ──────────────────────────────────────────────────────────
+
+  async planTrip(request: TripPlanRequestType): Promise<TripPlanResponseType> {
+    const { destination, startDate, endDate, interests, budget, partySize } = request;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const numDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000) + 1);
+
+    const budgetLabels: Record<string, string> = { budget: 'اقتصادي', mid: 'متوسط', luxury: 'فاخر' };
+    const interestLabels: Record<string, string> = {
+      food: 'الطعام والمطاعم', culture: 'الثقافة والفنون', shopping: 'التسوق',
+      nature: 'الطبيعة والحدائق', history: 'التاريخ والمواقع الأثرية', religious: 'المواقع الدينية',
+    };
+
+    const systemPrompt = `أنت مخطط رحلات خبير للعراق. أنشئ خططاً سياحية تفصيلية.
+أجب دائماً بتنسيق JSON صالح فقط، بدون أي نص آخر.`;
+
+    const userPrompt = `أنشئ خطة سياحية تفصيلية بتنسيق JSON:
+الوجهة: ${destination}
+من: ${startDate} إلى: ${endDate} (${numDays} أيام)
+الاهتمامات: ${interests.map(i => interestLabels[i] ?? i).join('، ')}
+الميزانية: ${budgetLabels[budget] ?? budget}
+عدد الأشخاص: ${partySize}
+
+الرد يجب أن يكون JSON فقط بهذا الشكل بالضبط:
+{
+  "summary": "ملخص الخطة",
+  "totalEstimatedCost": "تقدير التكلفة الإجمالية",
+  "tips": ["نصيحة 1", "نصيحة 2"],
+  "days": [
+    {
+      "theme": "موضوع اليوم",
+      "activities": [
+        {
+          "time": "09:00",
+          "title": "اسم النشاط",
+          "description": "وصف قصير",
+          "estimatedCost": "تكلفة تقريبية",
+          "duration": "مدة الزيارة"
+        }
+      ],
+      "totalEstimatedCost": "تكلفة اليوم"
+    }
+  ]
+}`;
+
+    const llmReply = await this.llm.chat({
+      systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+      maxTokens: 2048,
+    });
+
+    let parsed: {
+      summary?: string;
+      totalEstimatedCost?: string;
+      tips?: string[];
+      days?: Array<{
+        theme?: string;
+        activities?: Array<{ time?: string; title?: string; description?: string; estimatedCost?: string; duration?: string }>;
+        totalEstimatedCost?: string;
+      }>;
+    };
+
+    try {
+      const jsonMatch = llmReply.content.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch?.[0] ?? llmReply.content) as typeof parsed;
+    } catch {
+      // Fallback if LLM didn't return valid JSON
+      parsed = {
+        summary: llmReply.content.slice(0, 300),
+        tips: [],
+        days: [],
+      };
+    }
+
+    const planId = crypto.randomUUID();
+    const days = (parsed.days ?? []).slice(0, numDays).map((d, idx) => {
+      const dayDate = new Date(start);
+      dayDate.setDate(start.getDate() + idx);
+      return {
+        day: idx + 1,
+        date: dayDate.toISOString().slice(0, 10),
+        theme: d.theme ?? `اليوم ${idx + 1}`,
+        activities: (d.activities ?? []).map(a => ({
+          time: a.time ?? '09:00',
+          title: a.title ?? '',
+          description: a.description ?? '',
+          estimatedCost: a.estimatedCost,
+          duration: a.duration,
+        })),
+        totalEstimatedCost: d.totalEstimatedCost,
+      };
+    });
+
+    // If LLM returned fewer days than requested, pad
+    while (days.length < numDays) {
+      const idx = days.length;
+      const dayDate = new Date(start);
+      dayDate.setDate(start.getDate() + idx);
+      days.push({
+        day: idx + 1,
+        date: dayDate.toISOString().slice(0, 10),
+        theme: `استكشاف ${destination}`,
+        activities: [],
+        totalEstimatedCost: undefined,
+      });
+    }
+
+    return {
+      planId,
+      destination,
+      summary: parsed.summary ?? `خطة رحلة إلى ${destination}`,
+      days,
+      totalEstimatedCost: parsed.totalEstimatedCost,
+      tips: parsed.tips ?? [],
+    };
+  }
+
+  // ─── Recommendations ───────────────────────────────────────────────────────
+
+  async getRecommendations(
+    category: RecommendationsResponseType['category'],
+    _lat?: number,
+    _lng?: number,
+  ): Promise<RecommendationsResponseType> {
+    const categoryQueries: Record<string, string> = {
+      restaurants: 'مطاعم',
+      cafes: 'مقاهي',
+      hotels: 'فنادق',
+      shopping: 'مراكز تسوق',
+      attractions: 'معالم سياحية',
+    };
+
+    const query = categoryQueries[category] ?? category;
+    const places = await this.placesSearch(query);
+
+    if (places.length === 0) {
+      return { category, places: [], contextNote: 'لا توجد أماكن متاحة حالياً' };
+    }
+
+    // Ask LLM to add AI reasons for each place
+    const systemPrompt = `أنت مرشد سياحي خبير في العراق. اكتب سبباً موجزاً ومشجعاً لزيارة كل مكان.
+أجب بـ JSON فقط.`;
+
+    const placesText = places.slice(0, 8).map((p, i) =>
+      `${i + 1}. ${p.name} - ${p.address ?? ''}${p.category ? ` (${p.category})` : ''}`
+    ).join('\n');
+
+    const locationHint = _lat != null && _lng != null ? `الموقع الحالي: ${_lat.toFixed(4)}, ${_lng.toFixed(4)}` : '';
+
+    const userPrompt = `${locationHint}
+الأماكن في تصنيف "${query}":
+${placesText}
+
+أضف سبباً مشجعاً للزيارة لكل مكان وتقدير سعر. أجب بـ JSON فقط:
+{
+  "contextNote": "ملاحظة عامة",
+  "places": [
+    {"index": 1, "aiReason": "السبب", "estimatedPrice": "السعر"}
+  ]
+}`;
+
+    let aiEnrichment: Array<{ index?: number; aiReason?: string; estimatedPrice?: string }> = [];
+    try {
+      const llmReply = await this.llm.chat({
+        systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+        maxTokens: 1024,
+      });
+      const jsonMatch = llmReply.content.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(jsonMatch?.[0] ?? '{}') as { places?: typeof aiEnrichment; contextNote?: string };
+      aiEnrichment = parsed.places ?? [];
+    } catch {
+      // non-critical, fall back to empty reasons
+    }
+
+    const enrichedPlaces = places.slice(0, 8).map((p, i) => {
+      const enriched = aiEnrichment.find(e => e.index === i + 1);
+      return {
+        placeId: p.id as z.infer<typeof PlaceRecommendation>['placeId'],
+        name: p.name,
+        address: p.address,
+        category: p.category ?? query,
+        aiReason: enriched?.aiReason ?? `مكان مميز في ${query}`,
+        estimatedPrice: enriched?.estimatedPrice,
+        distanceMeters: p.distanceMeters,
+      };
+    });
+
+    return { category, places: enrichedPlaces };
+  }
+
+  // ─── NLP Search ────────────────────────────────────────────────────────────
+
+  async naturalLanguageSearch(
+    query: string,
+    _lat?: number,
+    _lng?: number,
+  ): Promise<NLPSearchResponseType> {
+    // Step 1: use LLM to parse the natural language query into structured filters
+    const parsePrompt = `استخرج مرشحات البحث من هذا الاستعلام وأجب بـ JSON فقط:
+الاستعلام: "${query}"
+
+{
+  "searchTerms": "كلمات البحث الرئيسية",
+  "category": "تصنيف المكان إن وجد",
+  "priceRange": "رخيص/متوسط/غالي إن ذُكر",
+  "features": ["ميزة1", "ميزة2"],
+  "area": "المنطقة أو الحي إن ذُكر"
+}`;
+
+    let parsedFilters: Record<string, unknown> = { raw: query };
+    let searchQuery = query;
+
+    try {
+      const parseReply = await this.llm.chat({
+        systemPrompt: 'أنت محلل استعلامات بحث. أجب بـ JSON فقط.',
+        messages: [{ role: 'user', content: parsePrompt }],
+        maxTokens: 256,
+      });
+      const jsonMatch = parseReply.content.match(/\{[\s\S]*\}/);
+      parsedFilters = JSON.parse(jsonMatch?.[0] ?? '{}') as Record<string, unknown>;
+      searchQuery = (parsedFilters['searchTerms'] as string | undefined) ?? query;
+    } catch {
+      // fall back to raw query
+    }
+
+    // Step 2: search places with extracted terms
+    const results = await this.placesSearch(searchQuery, parsedFilters['area'] as string | undefined);
+
+    if (results.length === 0) {
+      return { query, parsedFilters, results: [], totalFound: 0 };
+    }
+
+    // Step 3: ask LLM to score and explain why each result matches
+    const resultsText = results.slice(0, 10).map((r, i) =>
+      `${i + 1}. ${r.name} - ${r.address ?? ''}${r.category ? ` (${r.category})` : ''}`
+    ).join('\n');
+
+    const scorePrompt = `الاستعلام: "${query}"
+النتائج:
+${resultsText}
+
+لكل نتيجة، أضف سبب التطابق ودرجة (0-1). أجب بـ JSON فقط:
+{
+  "results": [
+    {"index": 1, "matchReason": "السبب", "score": 0.9}
+  ]
+}`;
+
+    let scoredResults: Array<{ index?: number; matchReason?: string; score?: number }> = [];
+    try {
+      const scoreReply = await this.llm.chat({
+        systemPrompt: 'أنت محرك بحث ذكي. أجب بـ JSON فقط.',
+        messages: [{ role: 'user', content: scorePrompt }],
+        maxTokens: 512,
+      });
+      const jsonMatch = scoreReply.content.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(jsonMatch?.[0] ?? '{}') as { results?: typeof scoredResults };
+      scoredResults = parsed.results ?? [];
+    } catch {
+      // fall back
+    }
+
+    const finalResults = results.slice(0, 10).map((r, i) => {
+      const scored = scoredResults.find(s => s.index === i + 1);
+      return {
+        placeId: r.id as z.infer<typeof NLPSearchResult>['placeId'],
+        name: r.name,
+        address: r.address,
+        category: r.category,
+        matchReason: scored?.matchReason ?? 'يطابق معايير البحث',
+        distanceMeters: r.distanceMeters,
+        score: scored?.score ?? 0.5,
+      };
+    }).sort((a, b) => b.score - a.score);
+
+    return {
+      query,
+      parsedFilters,
+      results: finalResults,
+      totalFound: finalResults.length,
+    };
   }
 }

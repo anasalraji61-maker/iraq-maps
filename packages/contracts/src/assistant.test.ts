@@ -1,6 +1,5 @@
 /**
- * Unit tests for assistant contract schemas: AssistantToolName, AssistantMessage,
- * AssistantTurn, AssistantResponse, AssistantSessionId.
+ * Unit tests for assistant contract schemas.
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -9,6 +8,11 @@ import {
   AssistantTurn,
   AssistantResponse,
   AssistantSessionId,
+  TripPlanRequest,
+  TripPlanResponse,
+  RecommendationsResponse,
+  NLPSearchRequest,
+  NLPSearchResponse,
 } from './assistant';
 
 const SESSION_ID = '00000000-0000-0000-0000-000000000001';
@@ -138,5 +142,92 @@ describe('AssistantSessionId', () => {
 
   it('rejects non-UUID', () => {
     expect(() => AssistantSessionId.parse('session-abc')).toThrow();
+  });
+});
+
+describe('TripPlanRequest', () => {
+  const VALID = {
+    destination: 'بغداد',
+    startDate: '2026-11-01',
+    endDate: '2026-11-03',
+    interests: ['food', 'culture'],
+    budget: 'mid',
+    partySize: 2,
+  };
+
+  it('parses a valid request', () => {
+    const r = TripPlanRequest.parse(VALID);
+    expect(r.destination).toBe('بغداد');
+    expect(r.budget).toBe('mid');
+  });
+
+  it('defaults partySize to 2', () => {
+    const r = TripPlanRequest.parse({ ...VALID, partySize: undefined });
+    expect(r.partySize).toBe(2);
+  });
+
+  it('rejects empty interests', () => {
+    expect(() => TripPlanRequest.parse({ ...VALID, interests: [] })).toThrow();
+  });
+
+  it('rejects invalid budget', () => {
+    expect(() => TripPlanRequest.parse({ ...VALID, budget: 'expensive' })).toThrow();
+  });
+});
+
+describe('TripPlanResponse', () => {
+  it('parses a valid response', () => {
+    const r = TripPlanResponse.parse({
+      planId: SESSION_ID,
+      destination: 'بغداد',
+      summary: 'جولة رائعة',
+      days: [{
+        day: 1,
+        date: '2026-11-01',
+        theme: 'التاريخ والثقافة',
+        activities: [{ time: '09:00', title: 'متحف بغداد', description: 'زيارة المتحف' }],
+      }],
+      tips: ['احضر معك الماء'],
+    });
+    expect(r.days).toHaveLength(1);
+  });
+});
+
+describe('RecommendationsResponse', () => {
+  it('parses a valid response', () => {
+    const r = RecommendationsResponse.parse({
+      category: 'restaurants',
+      places: [{
+        name: 'مطعم بغداد',
+        category: 'مطعم عراقي',
+        aiReason: 'يقدم أفضل المسكوف في المنطقة',
+      }],
+    });
+    expect(r.places).toHaveLength(1);
+    expect(r.places[0]?.aiReason).toBeTruthy();
+  });
+});
+
+describe('NLPSearchRequest', () => {
+  it('parses a text query', () => {
+    const r = NLPSearchRequest.parse({ query: 'فندق رخيص قرب المركز بموقف سيارات' });
+    expect(r.query).toBeTruthy();
+  });
+
+  it('accepts optional lat/lng', () => {
+    const r = NLPSearchRequest.parse({ query: 'مطعم', lat: 33.3, lng: 44.4 });
+    expect(r.lat).toBe(33.3);
+  });
+});
+
+describe('NLPSearchResponse', () => {
+  it('parses a valid response', () => {
+    const r = NLPSearchResponse.parse({
+      query: 'فندق رخيص',
+      parsedFilters: { category: 'hotel', maxPrice: 'budget' },
+      results: [{ name: 'فندق الرشيد', matchReason: 'سعر مناسب', score: 0.9 }],
+      totalFound: 1,
+    });
+    expect(r.results).toHaveLength(1);
   });
 });

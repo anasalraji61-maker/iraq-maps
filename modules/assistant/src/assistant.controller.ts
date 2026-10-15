@@ -27,10 +27,32 @@ export class AssistantController {
         chat: async () => unauthorized,
         getSession: async () => unauthorized as never,
         deleteSession: async () => unauthorized as never,
+        planTrip: async () => unauthorized as never,
+        getRecommendations: async () => unauthorized as never,
+        naturalLanguageSearch: async () => unauthorized as never,
       });
     }
 
     return tsRestHandler(assistantContract, {
+      planTrip: async ({ body }) => {
+        try {
+          const plan = await this.svc.planTrip(body);
+          return { status: 200 as const, body: plan };
+        } catch (e: unknown) {
+          if (isHttpException(e, 429)) {
+            return { status: 429 as const, body: { type: 'about:blank' as const, title: 'Too many requests', status: 429 as const, code: 'daily_limit_exceeded' } };
+          }
+          throw e;
+        }
+      },
+      getRecommendations: async ({ query }) => {
+        const places = await this.svc.getRecommendations(query.category, query.lat, query.lng);
+        return { status: 200 as const, body: places };
+      },
+      naturalLanguageSearch: async ({ body }) => {
+        const results = await this.svc.naturalLanguageSearch(body.query, body.lat, body.lng);
+        return { status: 200 as const, body: results };
+      },
       chat: async ({ body }) => {
         try {
           const result = await this.svc.chat(userId, body);

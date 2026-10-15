@@ -163,3 +163,140 @@ describe.skipIf(!process.env['DATABASE_URL'])('AssistantService DB integration',
     expect(true).toBe(true);
   });
 });
+
+describe('AssistantService.planTrip', () => {
+  let llm: FakeLlmClient;
+  let svc: AssistantService;
+
+  beforeEach(() => {
+    llm = new FakeLlmClient();
+    svc = new AssistantService(makeRateLimitDb(0), llm, fakePlacesSearch);
+  });
+
+  it('returns a plan with days for multi-day request', async () => {
+    llm.nextReply = JSON.stringify({
+      summary: 'جولة رائعة في بغداد',
+      totalEstimatedCost: '150,000 IQD',
+      tips: ['احضر الماء', 'ابدأ مبكراً'],
+      days: [
+        {
+          theme: 'التاريخ',
+          activities: [
+            { time: '09:00', title: 'متحف بغداد', description: 'زيارة المتحف الوطني', estimatedCost: '5,000 IQD', duration: 'ساعتان' },
+          ],
+          totalEstimatedCost: '50,000 IQD',
+        },
+        {
+          theme: 'الطعام',
+          activities: [
+            { time: '12:00', title: 'مطعم المسكوف', description: 'غداء عراقي أصيل', estimatedCost: '20,000 IQD', duration: 'ساعة' },
+          ],
+          totalEstimatedCost: '60,000 IQD',
+        },
+      ],
+    });
+
+    const result = await svc.planTrip({
+      destination: 'بغداد',
+      startDate: '2026-11-01',
+      endDate: '2026-11-02',
+      interests: ['history', 'food'],
+      budget: 'mid',
+      partySize: 2,
+    });
+
+    expect(result.planId).toBeTruthy();
+    expect(result.destination).toBe('بغداد');
+    expect(result.days).toHaveLength(2);
+    expect(result.days[0]?.activities[0]?.title).toBe('متحف بغداد');
+    expect(result.tips).toHaveLength(2);
+  });
+
+  it('pads days when LLM returns fewer than requested', async () => {
+    llm.nextReply = JSON.stringify({ summary: 'خطة', tips: [], days: [] });
+    const result = await svc.planTrip({
+      destination: 'أربيل',
+      startDate: '2026-12-01',
+      endDate: '2026-12-03',
+      interests: ['culture'],
+      budget: 'budget',
+      partySize: 1,
+    });
+    expect(result.days).toHaveLength(3);
+  });
+
+  it('handles invalid JSON from LLM gracefully', async () => {
+    llm.nextReply = 'هذه خطة رائعة لبغداد بدون JSON';
+    const result = await svc.planTrip({
+      destination: 'بغداد',
+      startDate: '2026-11-01',
+      endDate: '2026-11-01',
+      interests: ['food'],
+      budget: 'mid',
+      partySize: 2,
+    });
+    expect(result.planId).toBeTruthy();
+    expect(result.days).toHaveLength(1);
+  });
+});
+
+describe('AssistantService.getRecommendations', () => {
+  let llm: FakeLlmClient;
+  let svc: AssistantService;
+
+  beforeEach(() => {
+    llm = new FakeLlmClient();
+    svc = new AssistantService(makeRateLimitDb(0), llm, fakePlacesSearch);
+  });
+
+  it('returns recommendations with AI reasons', async () => {
+    llm.nextReply = JSON.stringify({
+      contextNote: 'أفضل المطاعم في المنطقة',
+      places: [
+        { index: 1, aiReason: 'يقدم أشهى المأكولات العراقية', estimatedPrice: '20,000 IQD' },
+        { index: 2, aiReason: 'تجربة فريدة', estimatedPrice: '15,000 IQD' },
+      ],
+    });
+
+    const result = await svc.getRecommendations('restaurants');
+    expect(result.category).toBe('restaurants');
+    expect(result.places.length).toBeGreaterThan(0);
+    expect(result.places[0]?.aiReason).toBeTruthy();
+  });
+
+  it('returns empty list when no places found', async () => {
+    const emptySearch = async () => [];
+    const emptySvc = new AssistantService(makeRateLimitDb(0), llm, emptySearch);
+    const result = await emptySvc.getRecommendations('hotels');
+    expect(result.places).toHaveLength(0);
+  });
+});
+
+describe('AssistantService.naturalLanguageSearch', () => {
+  let llm: FakeLlmClient;
+  let svc: AssistantService;
+
+  beforeEach(() => {
+    llm = new FakeLlmClient();
+    svc = new AssistantService(makeRateLimitDb(0), llm, fakePlacesSearch);
+  });
+
+  it('parses query and returns scored results', async () => {
+    // First LLM call: parse filters
+    // Second LLM call: score results
+    llm.nextReply = JSON.stringify({ searchTerms: 'فندق', category: 'hotel', priceRange: 'رخيص' });
+
+    const result = await svc.naturalLanguageSearch('فندق رخيص قرب المركز');
+    expect(result.query).toBe('فندق رخيص قرب المركز');
+    expect(result.results.length).toBeGreaterThan(0);
+    expect(result.totalFound).toBeGreaterThan(0);
+  });
+
+  it('returns empty when no places match', async () => {
+    const emptySearch = async () => [];
+    const emptySvc = new AssistantService(makeRateLimitDb(0), llm, emptySearch);
+    const result = await emptySvc.naturalLanguageSearch('شيء غير موجود');
+    expect(result.results).toHaveLength(0);
+    expect(result.totalFound).toBe(0);
+  });
+});
