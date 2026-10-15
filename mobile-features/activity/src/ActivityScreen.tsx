@@ -21,6 +21,8 @@ import { t } from './strings';
 
 I18nManager.forceRTL(true);
 
+const PRIMARY = '#1976D2';
+
 // ──────────────────────────────────────────────
 // Skeleton loader
 // ──────────────────────────────────────────────
@@ -248,7 +250,7 @@ function NotificationsTab(): ReactElement {
           data={items.slice(0, visibleCount)}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setVisibleCount(NOTIF_PAGE_SIZE); void load(true); }} colors={['#1976D2']} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setVisibleCount(NOTIF_PAGE_SIZE); void load(true); }} colors={[PRIMARY]} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           onEndReached={() => {
@@ -343,7 +345,7 @@ function RoutesTab(): ReactElement {
       renderItem={({ item }) => <RouteRow item={item} onRemove={handleRemove} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={[PRIMARY]} />}
     />
   );
 }
@@ -397,7 +399,7 @@ function SavedTab(): ReactElement {
       renderItem={({ item }) => <SavedRow item={item} onRemove={handleRemove} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={[PRIMARY]} />}
     />
   );
 }
@@ -578,7 +580,7 @@ function PostsTab(): ReactElement {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => { setRefreshing(true); void load().finally(() => setRefreshing(false)); }}
-          colors={['#1976D2']}
+          colors={[PRIMARY]}
           tintColor="#1976D2"
         />
       }
@@ -662,7 +664,7 @@ function InquiriesTab(): ReactElement {
       data={items}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => <InquiryRow item={item} />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={[PRIMARY]} />}
       contentContainerStyle={styles.list}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
     />
@@ -728,7 +730,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   flex: { flex: 1 },
   header: {
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -748,14 +750,14 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {},
   tabLabel: { fontSize: 12, color: '#888', textAlign: 'center' },
-  tabLabelActive: { color: '#1976D2', fontWeight: '600' },
+  tabLabelActive: { color: PRIMARY, fontWeight: '600' },
   tabUnderline: {
     position: 'absolute',
     bottom: 0,
     start: 4,
     end: 4,
     height: 2,
-    backgroundColor: '#1976D2',
+    backgroundColor: PRIMARY,
     borderRadius: 1,
   },
   markAllBar: {
@@ -764,7 +766,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'flex-end',
   },
-  markAllText: { color: '#1976D2', fontSize: 13 },
+  markAllText: { color: PRIMARY, fontSize: 13 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   list: { paddingVertical: 8 },
   row: {
@@ -779,20 +781,20 @@ const styles = StyleSheet.create({
   rowIcon: { fontSize: 24, lineHeight: 28 },
   rowBody: { flex: 1 },
   rowTitle: { fontSize: 14, fontWeight: '500', color: '#333', marginBottom: 2 },
-  rowTitleUnread: { fontWeight: '700', color: '#1976D2' },
+  rowTitleUnread: { fontWeight: '700', color: PRIMARY },
   rowSub: { fontSize: 13, color: '#666', lineHeight: 18 },
   rowTime: { fontSize: 11, color: '#999', marginTop: 4 },
   unreadDot: {
-    width: 8, height: 8, borderRadius: 4, backgroundColor: '#1976D2',
+    width: 8, height: 8, borderRadius: 4, backgroundColor: PRIMARY,
     marginTop: 8, flexShrink: 0,
   },
   removeBtn: { padding: 8, marginTop: -4 },
   navigateAgainBtn: { alignSelf: 'flex-start', marginTop: 2 },
-  navigateAgainText: { fontSize: 13, color: '#1976D2', fontWeight: '600' },
+  navigateAgainText: { fontSize: 13, color: PRIMARY, fontWeight: '600' },
   removeBtnText: { fontSize: 16, color: '#999' },
   postActions: { flexDirection: 'column', alignItems: 'flex-end', gap: 4 },
   editPostBtn: { padding: 6 },
-  editPostBtnText: { fontSize: 13, color: '#1976D2', fontWeight: '500' },
+  editPostBtnText: { fontSize: 13, color: PRIMARY, fontWeight: '500' },
   deletePostBtn: { padding: 6 },
   deletePostBtnText: { fontSize: 13, color: '#C62828', fontWeight: '500' },
   editModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 24 },
@@ -802,15 +804,15 @@ const styles = StyleSheet.create({
   editModalActions: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   editModalCancel: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
   editModalCancelText: { fontSize: 14, color: '#555' },
-  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#1976D2', minWidth: 70, alignItems: 'center' },
+  editModalSave: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: PRIMARY, minWidth: 70, alignItems: 'center' },
   editModalSaveText: { fontSize: 14, color: '#fff', fontWeight: '600' },
   separator: { height: 1, backgroundColor: '#F0F0F0' },
   loadMoreBtn: { alignItems: 'center', padding: 14 },
-  loadMoreText: { fontSize: 14, color: '#1976D2', fontWeight: '600' },
+  loadMoreText: { fontSize: 14, color: PRIMARY, fontWeight: '600' },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { fontSize: 16, color: '#555', fontWeight: '500', textAlign: 'center', marginBottom: 6 },
   emptySubtext: { fontSize: 13, color: '#888', textAlign: 'center', lineHeight: 18 },
   errorText: { fontSize: 15, color: '#C62828', textAlign: 'center', marginBottom: 16 },
-  retryBtn: { backgroundColor: '#1976D2', borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10 },
+  retryBtn: { backgroundColor: PRIMARY, borderRadius: 8, paddingHorizontal: 20, paddingVertical: 10 },
   retryText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
 });
