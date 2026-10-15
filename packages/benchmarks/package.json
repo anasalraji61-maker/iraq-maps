@@ -1,0 +1,21 @@
+{
+  "name": "@iraq-maps/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "bench": "vitest bench --passWithNoTests"
+  },
+  "dependencies": {
+    "@iraq-maps/api": "workspace:*",
+    "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/db-kit": "workspace:*",
+    "@iraq-maps/testing": "workspace:*"
+  },
+  "devDependencies": {
+    "@iraq-maps/tooling": "workspace:*"
+  }
+}
