@@ -74,7 +74,12 @@
     "replyA11y": "الرد على التعليق",
     "replyingTo": "الرد على @{author}",
     "cancelReply": "إلغاء الرد",
-    "cancelReplyIcon": "✕"
+    "cancelReplyIcon": "✕",
+    "deleteComment": "حذف التعليق",
+    "deleteCommentConfirmTitle": "حذف التعليق؟",
+    "deleteCommentConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
+    "deleteCommentCancel": "إلغاء",
+    "deleteCommentError": "فشل حذف التعليق"
   },
   "postDetail": {
     "title": "المنشور",

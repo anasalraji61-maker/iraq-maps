@@ -1,4 +1,6 @@
-import { type AuthPrincipal, type PostIdType, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
+import { type AuthPrincipal, type PostIdType, CommentId, adminDiscoverContract, discoverContract } from '@iraq-maps/contracts';
+import { type z } from 'zod';
+type CommentIdType = z.infer<typeof CommentId>;
 import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { DiscoverService } from './discover.service';
@@ -69,6 +71,18 @@ export class DiscoverController {
           return { status: 201, body: comment };
         } catch {
           return problem(404, 'not_found', 'Post not found') as never;
+        }
+      },
+
+      deleteComment: async ({ params }) => {
+        if (!userId) return problem(403, 'forbidden', 'Not authenticated') as never;
+        try {
+          const deleted = await this.svc.deleteComment(userId, params.commentId as CommentIdType);
+          if (!deleted) return problem(403, 'forbidden', 'Not the comment author') as never;
+          return { status: 204, body: undefined };
+        } catch (e: unknown) {
+          if (isNotFound(e)) return problem(404, 'not_found', 'Comment not found') as never;
+          throw e;
         }
       },
 

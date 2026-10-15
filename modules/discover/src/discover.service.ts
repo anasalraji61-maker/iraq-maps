@@ -157,6 +157,19 @@ export class DiscoverService {
     return this.toCommentShape(comment);
   }
 
+  async deleteComment(userId: UserId, commentId: CommentIdType): Promise<boolean> {
+    const [comment] = await this.db.select().from(commentTable).where(eq(commentTable.id, commentId)).limit(1);
+    if (!comment) throw new NotFoundException({ code: 'not_found' });
+    if (comment.authorId !== userId) return false;
+    await this.db.delete(commentTable).where(eq(commentTable.id, commentId));
+    // Decrement comment count on the post
+    await this.db
+      .update(postTable)
+      .set({ commentCount: sql`GREATEST(0, comment_count - 1)` })
+      .where(eq(postTable.id, comment.postId as PostIdType));
+    return true;
+  }
+
   async updatePost(userId: UserId, postId: PostIdType, newBody: string): Promise<ReturnType<typeof this.toPostShape> | null> {
     const [post] = await this.db.select().from(postTable).where(eq(postTable.id, postId)).limit(1);
     if (!post) throw new NotFoundException({ code: 'not_found' });

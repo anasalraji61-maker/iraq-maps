@@ -74,7 +74,12 @@
     "replyA11y": "وەڵام بۆ کۆمێنت",
     "replyingTo": "وەڵامدانەوە بۆ @{author}",
     "cancelReply": "هەڵوەشاندنەوەی وەڵام",
-    "cancelReplyIcon": "✕"
+    "cancelReplyIcon": "✕",
+    "deleteComment": "سڕینەوەی کۆمێنت",
+    "deleteCommentConfirmTitle": "کۆمێنتەکە بسڕیتەوە؟",
+    "deleteCommentConfirmMsg": "ناتوانرێت بیگەڕێندرێتەوە.",
+    "deleteCommentCancel": "هەڵوەشاندنەوە",
+    "deleteCommentError": "هەڵەی سڕینەوەی کۆمێنت"
   },
   "postDetail": {
     "title": "پۆست",

@@ -93,6 +93,17 @@ export const discoverContract = c.router({
     },
     summary: 'Comment on a post',
   },
+  deleteComment: {
+    method: 'DELETE',
+    path: '/discover/posts/:postId/comments/:commentId',
+    pathParams: z.object({ postId: PostId, commentId: CommentId }),
+    responses: {
+      204: z.undefined(),
+      403: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(403), code: z.string() }),
+      404: z.object({ type: z.literal('about:blank'), title: z.string(), status: z.literal(404), code: z.string() }),
+    },
+    summary: 'Delete own comment',
+  },
   updatePost: {
     method: 'PATCH',
     path: '/discover/posts/:postId',

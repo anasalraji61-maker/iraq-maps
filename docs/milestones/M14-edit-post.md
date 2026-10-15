@@ -1,7 +1,7 @@
 ---
 id: M14
 slug: edit-post
-status: in_progress
+status: completed
 branch: claude/iraq-smart-maps-app-aybpjn
 owners:
   builder-discover:

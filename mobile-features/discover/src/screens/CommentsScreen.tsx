@@ -1,4 +1,5 @@
 import { DiscoverComment } from '@iraq-maps/contracts';
+import { useSession } from '@iraq-maps/mobile-kit';
 import { type z } from 'zod';
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
@@ -27,6 +28,8 @@ type DiscoverCommentType = z.infer<typeof DiscoverComment>;
 export function CommentsScreen(): ReactElement {
   const { postId } = useLocalSearchParams<{ postId: string }>();
   const api = useDiscoverClient();
+  const session = useSession();
+  const currentUserId = session?.state.status === 'signedIn' ? session.state.user.id : undefined;
   const [comments, setComments] = useState<DiscoverCommentType[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -94,6 +97,19 @@ export function CommentsScreen(): ReactElement {
     }
   }, [api, commentText, postId, sending]);
 
+  const handleDeleteComment = useCallback(async (commentId: string) => {
+    try {
+      const res = await api.deleteComment({ params: { postId: postId ?? '', commentId } });
+      if (res.status === 204) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+      } else {
+        // Show error silently
+      }
+    } catch {
+      // Show nothing — best effort
+    }
+  }, [api, postId]);
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -122,7 +138,7 @@ export function CommentsScreen(): ReactElement {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={['#1976D2']} tintColor="#1976D2" />
         }
-        renderItem={({ item }) => <CommentCard item={item} onReply={handleReply} t={t} />}
+        renderItem={({ item }) => <CommentCard item={item} onReply={handleReply} onDelete={(id) => { void handleDeleteComment(id); }} currentUserId={currentUserId} t={t} />}
         ListEmptyComponent={
           !loading ? (
             <View style={styles.emptyContainer}>

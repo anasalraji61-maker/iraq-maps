@@ -74,7 +74,12 @@
     "replyA11y": "Reply to comment",
     "replyingTo": "Replying to @{author}",
     "cancelReply": "Cancel reply",
-    "cancelReplyIcon": "✕"
+    "cancelReplyIcon": "✕",
+    "deleteComment": "Delete comment",
+    "deleteCommentConfirmTitle": "Delete comment?",
+    "deleteCommentConfirmMsg": "This cannot be undone.",
+    "deleteCommentCancel": "Cancel",
+    "deleteCommentError": "Failed to delete comment"
   },
   "postDetail": {
     "title": "Post",

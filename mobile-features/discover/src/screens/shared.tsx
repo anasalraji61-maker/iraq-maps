@@ -4,7 +4,7 @@
  */
 import { useState, useCallback, type ReactElement } from 'react';
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { type t as TFunc } from '../strings';
 
 export const COLORS = {
@@ -254,6 +254,7 @@ export function CommentInputRow({
 }
 
 interface CommentCardItem {
+  id: string;
   authorId: string;
   createdAt: string;
   body: string;
@@ -266,11 +267,15 @@ interface CommentCardItem {
 export function CommentCard({
   item,
   onReply,
+  onDelete,
+  currentUserId,
   smallAvatar,
   t,
 }: {
   item: CommentCardItem;
   onReply?: (authorId: string) => void;
+  onDelete?: (commentId: string) => void;
+  currentUserId?: string;
   smallAvatar?: boolean;
   t: typeof TFunc;
 }): ReactElement {
@@ -321,6 +326,25 @@ export function CommentCard({
             accessibilityLabel={t('comments.replyA11y')}
           >
             <Text style={sharedStyles.commentActionText}>{t('comments.replyComment')}</Text>
+          </Pressable>
+        ) : null}
+        {onDelete && currentUserId === item.authorId ? (
+          <Pressable
+            style={sharedStyles.commentActionBtn}
+            onPress={() => {
+              Alert.alert(
+                t('comments.deleteCommentConfirmTitle'),
+                t('comments.deleteCommentConfirmMsg'),
+                [
+                  { text: t('comments.deleteCommentCancel'), style: 'cancel' as const },
+                  { text: t('comments.deleteComment'), style: 'destructive' as const, onPress: () => onDelete(item.id) },
+                ],
+              );
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('comments.deleteComment')}
+          >
+            <Text style={[sharedStyles.commentActionText, { color: '#C62828' }]}>{t('comments.deleteComment')}</Text>
           </Pressable>
         ) : null}
       </View>
