@@ -224,5 +224,43 @@
     "available": "نعم، متوفر لدينا. تفضل بالزيارة!",
     "notAvailable": "عذراً، هذا المنتج غير متوفر حالياً.",
     "callUs": "يمكنكم التواصل معنا عبر الهاتف لمزيد من التفاصيل."
+  },
+  "earnings": {
+    "title": "متابعة الأرباح",
+    "dashboardLink": "سجّل بيعاً",
+    "total": "الإجمالي",
+    "addSale": "إضافة بيع",
+    "amount": "المبلغ (د.ع)",
+    "date": "التاريخ",
+    "note": "ملاحظة (اختيارية)",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "noSales": "لا توجد مبيعات مسجَّلة بعد",
+    "noSalesBody": "ابدأ بتسجيل مبيعاتك لمتابعة أرباحك",
+    "currency": "د.ع",
+    "chart7days": "آخر 7 أيام",
+    "delete": "حذف",
+    "deleteConfirm": "هل تريد حذف هذا البيع؟",
+    "amountPlaceholder": "مثال: 25000",
+    "notePlaceholder": "وصف البيع…",
+    "savedSuccess": "تم تسجيل البيع",
+    "deletedSuccess": "تم حذف البيع"
+  },
+  "reviewResponse": {
+    "title": "الردود على التقييمات",
+    "dashboardLink": "التقييمات",
+    "respond": "رد",
+    "editResponse": "تعديل الرد",
+    "deleteResponse": "حذف الرد",
+    "responsePlaceholder": "اكتب ردك على هذا التقييم…",
+    "save": "حفظ الرد",
+    "cancel": "إلغاء",
+    "noReviews": "لا توجد تقييمات بعد",
+    "noReviewsBody": "ستظهر هنا تقييمات العملاء بعد نشر ملفك التعريفي",
+    "ownerResponse": "رد صاحب النشاط",
+    "charsMax": "الحد الأقصى {max} حرف",
+    "savedSuccess": "تم حفظ الرد",
+    "deletedSuccess": "تم حذف الرد",
+    "stars": "{n} نجوم"
   }
 }

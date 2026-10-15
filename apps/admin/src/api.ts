@@ -45,6 +45,9 @@ export interface AdminUser {
   locale: string;
   roles: string[];
   createdAt: string;
+  postCount?: number;
+  inquiryCount?: number;
+  suspended?: boolean;
 }
 
 export interface DailyMetric {
@@ -249,4 +252,71 @@ export const api = {
     const qs = q.trim().length > 0 ? `?q=${encodeURIComponent(q)}` : '';
     return request<{ items: AdminUser[] }>(`/v1/admin/users${qs}`).then((r) => r.items);
   },
+
+  async suspendUser(id: string): Promise<void> {
+    await request<void>(`/v1/admin/users/${id}/suspend`, { method: 'POST', body: JSON.stringify({ reason: 'Suspended by admin' }) });
+  },
+
+  async unsuspendUser(id: string): Promise<void> {
+    await request<void>(`/v1/admin/users/${id}/unsuspend`, { method: 'POST', body: JSON.stringify({}) });
+  },
+
+  async getReportedComments(): Promise<ReportedComment[]> {
+    return request<ReportedComment[]>('/v1/admin/discover/reported-comments');
+  },
+
+  async approveComment(id: string): Promise<void> {
+    await request<void>(`/v1/admin/discover/comments/${id}/approve`, { method: 'POST', body: JSON.stringify({}) });
+  },
+
+  async removeComment(id: string): Promise<void> {
+    await request<void>(`/v1/admin/discover/comments/${id}/remove`, { method: 'POST', body: JSON.stringify({}) });
+  },
+
+  async getPlaces(q: string): Promise<AdminPlace[]> {
+    const qs = q.trim() ? `?q=${encodeURIComponent(q)}` : '';
+    return request<{ items: AdminPlace[] }>(`/v1/admin/places${qs}`).then((r) => r.items);
+  },
+
+  async updatePlace(id: string, patch: Partial<AdminPlace>): Promise<void> {
+    await request<void>(`/v1/admin/places/${id}`, { method: 'PATCH', body: JSON.stringify(patch) });
+  },
+
+  async exportCsv(entity: 'users' | 'posts' | 'providers', from: string, to: string): Promise<string> {
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (ADMIN_KEY) headers['x-admin-key'] = ADMIN_KEY;
+    const res = await fetch(
+      `${BASE_URL}/v1/admin/export/${entity}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      { headers },
+    );
+    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    return res.text();
+  },
 };
+
+// ─── Additional types ─────────────────────────────────────────────────────────
+
+export interface ReportedComment {
+  id: string;
+  body: string;
+  authorId: string;
+  postId: string;
+  postBody: string;
+  reportCount: number;
+  reasons: string[];
+  createdAt: string;
+  removedAt: string | null;
+}
+
+export interface AdminPlace {
+  id: string;
+  nameAr: string;
+  nameEn: string | null;
+  category: string;
+  phone: string | null;
+  hoursRaw: string | null;
+  lat: number;
+  lon: number;
+}

@@ -7,6 +7,10 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ReportedPostsPage } from './pages/ReportedPostsPage';
 import { AssistantUsagePage } from './pages/AssistantUsagePage';
 import { UserSearchPage } from './pages/UserSearchPage';
+import { UserManagementPage } from './pages/UserManagementPage';
+import { ReportedCommentsPage } from './pages/ReportedCommentsPage';
+import { PlaceManagementPage } from './pages/PlaceManagementPage';
+import { ExportDataPage } from './pages/ExportDataPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -57,6 +61,18 @@ function NavBar() {
       </NavLink>
       <NavLink to="/users" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         المستخدمون
+      </NavLink>
+      <NavLink to="/user-management" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        إدارة المستخدمين
+      </NavLink>
+      <NavLink to="/reported-comments" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        التعليقات المُبلَّغ عنها
+      </NavLink>
+      <NavLink to="/places" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        الأماكن
+      </NavLink>
+      <NavLink to="/export" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        تصدير البيانات
       </NavLink>
       <button
         onClick={logout}
@@ -135,6 +151,38 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><UserSearchPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/user-management"
+            element={
+              <AuthGate>
+                <Layout><UserManagementPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/reported-comments"
+            element={
+              <AuthGate>
+                <Layout><ReportedCommentsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/places"
+            element={
+              <AuthGate>
+                <Layout><PlaceManagementPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/export"
+            element={
+              <AuthGate>
+                <Layout><ExportDataPage /></Layout>
               </AuthGate>
             }
           />

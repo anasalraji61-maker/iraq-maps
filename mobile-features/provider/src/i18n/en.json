@@ -224,5 +224,43 @@
     "available": "Yes, it is available. Please visit us!",
     "notAvailable": "Sorry, this item is currently unavailable.",
     "callUs": "Feel free to call us for more details."
+  },
+  "earnings": {
+    "title": "Earnings Tracker",
+    "dashboardLink": "Log a Sale",
+    "total": "Total",
+    "addSale": "Add Sale",
+    "amount": "Amount (IQD)",
+    "date": "Date",
+    "note": "Note (optional)",
+    "save": "Save",
+    "cancel": "Cancel",
+    "noSales": "No sales recorded yet",
+    "noSalesBody": "Start logging your sales to track earnings",
+    "currency": "IQD",
+    "chart7days": "Last 7 days",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this sale?",
+    "amountPlaceholder": "e.g. 25000",
+    "notePlaceholder": "Sale description…",
+    "savedSuccess": "Sale recorded",
+    "deletedSuccess": "Sale deleted"
+  },
+  "reviewResponse": {
+    "title": "Review Responses",
+    "dashboardLink": "Reviews",
+    "respond": "Respond",
+    "editResponse": "Edit Response",
+    "deleteResponse": "Delete Response",
+    "responsePlaceholder": "Write your response to this review…",
+    "save": "Save Response",
+    "cancel": "Cancel",
+    "noReviews": "No reviews yet",
+    "noReviewsBody": "Customer reviews will appear here once your profile is published",
+    "ownerResponse": "Owner's Response",
+    "charsMax": "Max {max} characters",
+    "savedSuccess": "Response saved",
+    "deletedSuccess": "Response deleted",
+    "stars": "{n} stars"
   }
 }

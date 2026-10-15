@@ -356,6 +356,18 @@ export function ProviderDashboardScreen(): ReactElement {
         testID="provider.statsDetails"
         onPress={() => router.push('/provider/stats-details' as never)}
       />
+      <Button
+        variant="secondary"
+        label={t('earnings.dashboardLink')}
+        testID="provider.earnings"
+        onPress={() => router.push('/provider/earnings' as never)}
+      />
+      <Button
+        variant="secondary"
+        label={t('reviewResponse.dashboardLink')}
+        testID="provider.reviewResponse"
+        onPress={() => router.push('/provider/review-response' as never)}
+      />
       {providerMe?.claimedPlaceId ? (
         <Button
           testID="provider.viewPublicPage"

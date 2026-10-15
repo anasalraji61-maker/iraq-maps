@@ -9,3 +9,5 @@ export { ProviderCreatePostScreen } from './screens/ProviderCreatePostScreen';
 export { ProviderPhotoGalleryScreen } from './screens/ProviderPhotoGalleryScreen';
 export { ProviderNotificationSettingsScreen } from './screens/ProviderNotificationSettingsScreen';
 export { ProviderStatsDetailsScreen } from './screens/ProviderStatsDetailsScreen';
+export { ProviderEarningsScreen } from './screens/ProviderEarningsScreen';
+export { ProviderReviewResponseScreen } from './screens/ProviderReviewResponseScreen';
