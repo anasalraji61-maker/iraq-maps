@@ -11,6 +11,7 @@ import { UserManagementPage } from './pages/UserManagementPage';
 import { ReportedCommentsPage } from './pages/ReportedCommentsPage';
 import { PlaceManagementPage } from './pages/PlaceManagementPage';
 import { ExportDataPage } from './pages/ExportDataPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -70,6 +71,9 @@ function NavBar() {
       </NavLink>
       <NavLink to="/places" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         الأماكن
+      </NavLink>
+      <NavLink to="/analytics" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        التحليلات
       </NavLink>
       <NavLink to="/export" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         تصدير البيانات
@@ -183,6 +187,14 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><ExportDataPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <AuthGate>
+                <Layout><AnalyticsPage /></Layout>
               </AuthGate>
             }
           />

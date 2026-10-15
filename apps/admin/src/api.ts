@@ -282,6 +282,20 @@ export const api = {
     await request<void>(`/v1/admin/places/${id}`, { method: 'PATCH', body: JSON.stringify(patch) });
   },
 
+  async getAnalyticsOverview(days?: number): Promise<AnalyticsOverview> {
+    const qs = days ? `?days=${days}` : '';
+    return request<AnalyticsOverview>(`/v1/admin/analytics/overview${qs}`);
+  },
+
+  async getAnalyticsFunnel(): Promise<FunnelStep[]> {
+    return request<FunnelStep[]>('/v1/admin/analytics/funnels');
+  },
+
+  async getAnalyticsRetention(days?: number): Promise<RetentionRow[]> {
+    const qs = days ? `?days=${days}` : '';
+    return request<RetentionRow[]>(`/v1/admin/analytics/retention${qs}`);
+  },
+
   async exportCsv(entity: 'users' | 'posts' | 'providers', from: string, to: string): Promise<string> {
     const token = getToken();
     const headers: Record<string, string> = {};
@@ -308,6 +322,26 @@ export interface ReportedComment {
   reasons: string[];
   createdAt: string;
   removedAt: string | null;
+}
+
+export interface AnalyticsOverview {
+  dau: number;
+  totalEvents: number;
+  topEventTypes: { eventType: string; count: number }[];
+  eventsByDay: { date: string; count: number }[];
+}
+
+export interface FunnelStep {
+  step: string;
+  eventType: string;
+  count: number;
+  dropoffRate: number | null;
+}
+
+export interface RetentionRow {
+  cohortDate: string;
+  dayOffset: number;
+  retainedCount: number;
 }
 
 export interface AdminPlace {
