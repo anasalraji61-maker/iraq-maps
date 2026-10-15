@@ -22,6 +22,7 @@ import { t } from '../strings';
 I18nManager.forceRTL(true);
 
 const PRIMARY = '#1976D2';
+const SUCCESS = '#388E3C';
 const MAX_INPUT_LENGTH = 500;
 const CHAR_WARN_THRESHOLD = 400;
 
@@ -560,7 +561,7 @@ const styles = StyleSheet.create({
   composeBtn: {
     marginHorizontal: 12,
     marginBottom: 4,
-    backgroundColor: '#388E3C',
+    backgroundColor: SUCCESS,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,

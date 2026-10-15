@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
   },
   selectedPlaceText: {
     fontSize: 14,
-    color: '#388E3C',
+    color: COLORS.success,
     fontWeight: '500',
     flex: 1,
     textAlign: 'auto',

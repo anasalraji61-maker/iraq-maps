@@ -8,6 +8,9 @@ import { type ReactElement } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { t } from '../strings';
 
+const PRIMARY = '#1976D2';
+const SUCCESS = '#388E3C';
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -84,7 +87,7 @@ export interface AnalyticsChartCardProps {
 export function AnalyticsChartCard({ providerId, metric, data: realData }: AnalyticsChartCardProps): ReactElement {
   const data = realData ?? generateWeekData(providerId, metric);
   const max = Math.max(...data, 1);
-  const color = metric === 'views' ? '#1976D2' : '#388E3C';
+  const color = metric === 'views' ? PRIMARY : SUCCESS;
   const total = data.reduce((s, v) => s + v, 0);
   const titleKey = metric === 'views' ? 'analytics.viewsTitle' : 'analytics.inquiriesTitle';
   const totalKey = metric === 'views' ? 'analytics.viewsTotal' : 'analytics.inquiriesTotal';

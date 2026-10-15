@@ -8,6 +8,7 @@ import { useReadReceiptsMap } from '../hooks/useReadReceipts';
 import { t } from '../strings';
 
 const PRIMARY = '#1976D2';
+const SUCCESS = '#388E3C';
 
 /** Converts an ISO datetime string into a human-readable relative time label. */
 function fmtRelative(iso: string): string {
@@ -98,7 +99,7 @@ function getInquiryBadge(targets: Inquiry['targets']): BadgeInfo {
   if (targets.length === 0) return null;
   const statuses = targets.map((tgt) => tgt.status);
   if (statuses.some((s) => s === 'replied')) {
-    return { label: t('list.badgeReplied'), color: '#388E3C' };
+    return { label: t('list.badgeReplied'), color: SUCCESS };
   }
   if (statuses.every((s) => s === 'failed')) {
     return { label: t('list.badgeFailed'), color: '#C62828' };

@@ -1056,7 +1056,7 @@ const styles = StyleSheet.create({
   },
   placeChipText: {
     fontSize: 13,
-    color: '#388E3C',
+    color: COLORS.success,
     fontWeight: '500',
   },
   emptyContainer: {
