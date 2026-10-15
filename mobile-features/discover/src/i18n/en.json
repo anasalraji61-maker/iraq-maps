@@ -13,7 +13,14 @@
     "clearSearch": "Clear",
     "trendingTitle": "Trending Posts",
     "trendingEmpty": "No trending posts right now",
-    "trendingStats": "{likes} likes · {comments} comments"
+    "trendingStats": "{likes} likes · {comments} comments",
+    "typeFilter": {
+      "all": "All",
+      "photo": "Photos",
+      "tip": "Tips",
+      "event": "Events",
+      "offer": "Offers"
+    }
   },
   "post": {
     "like": "Like",

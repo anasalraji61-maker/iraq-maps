@@ -112,6 +112,8 @@ const TYPE_LABEL_KEYS: Record<string, 'post.type.photo' | 'post.type.tip' | 'pos
 
 
 const REPORT_REASONS = ['spam', 'inappropriate', 'misinformation', 'other'] as const;
+const TYPE_FILTER_KEYS = ['all', 'photo', 'tip', 'event', 'offer'] as const;
+type TypeFilter = typeof TYPE_FILTER_KEYS[number];
 type ReportReason = typeof REPORT_REASONS[number];
 
 const PostItem = memo(function PostItem({
@@ -333,6 +335,7 @@ export function DiscoverFeedScreen(): ReactElement {
   const handleSave = useCallback((post: DiscoverPostType) => { void toggleSave(post); }, [toggleSave]);
   const { followedIds } = useFollows();
   const [activeTab, setActiveTab] = useState<'all' | 'following'>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [posts, setPosts] = useState<DiscoverPostType[]>([]);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(true);
@@ -589,11 +592,15 @@ export function DiscoverFeedScreen(): ReactElement {
   const isSearchActive = searchQuery.trim().length > 0;
   const displayedPosts = useMemo(() => {
     const base = isSearchActive ? searchResults : posts;
+    let filtered = base;
     if (!isSearchActive && activeTab === 'following' && followedIds.size > 0) {
-      return base.filter((p) => followedIds.has(p.authorId));
+      filtered = filtered.filter((p) => followedIds.has(p.authorId));
     }
-    return base;
-  }, [isSearchActive, searchResults, posts, activeTab, followedIds]);
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter((p) => p.type === typeFilter);
+    }
+    return filtered;
+  }, [isSearchActive, searchResults, posts, activeTab, followedIds, typeFilter]);
 
   return (
     <View style={[styles.container, { backgroundColor: COLORS.background }]}>
@@ -622,6 +629,24 @@ export function DiscoverFeedScreen(): ReactElement {
           </Text>
         </Pressable>
       </View>
+      {/* Post type filter chips */}
+      {!isSearchActive ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typeFilterRow} contentContainerStyle={styles.typeFilterContent}>
+          {TYPE_FILTER_KEYS.map((type) => (
+            <Pressable
+              key={type}
+              style={[styles.typeChip, typeFilter === type && styles.typeChipActive]}
+              onPress={() => setTypeFilter(type)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: typeFilter === type }}
+            >
+              <Text style={[styles.typeChipText, typeFilter === type && styles.typeChipTextActive]}>
+                {t(`feed.typeFilter.${type}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
       <View style={styles.searchRow}>
         <TextInput
           style={[styles.searchInput, { backgroundColor: COLORS.surface, color: COLORS.textPrimary }]}
@@ -811,6 +836,27 @@ const styles = StyleSheet.create({
   },
   tabBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
   tabBtnTextActive: { color: '#FFF' },
+  typeFilterRow: { maxHeight: 40 },
+  typeFilterContent: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    gap: 6,
+  },
+  typeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
+  },
+  typeChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  typeChipText: { fontSize: 12, fontWeight: '500', color: COLORS.textSecondary },
+  typeChipTextActive: { color: '#FFF' },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',

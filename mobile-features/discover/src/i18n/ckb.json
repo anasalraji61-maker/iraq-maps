@@ -13,7 +13,14 @@
     "clearSearch": "سڕینەوە",
     "trendingTitle": "پۆستە گەرمەکان",
     "trendingEmpty": "ئێستا هیچ پۆستێکی گەرم نییە",
-    "trendingStats": "{likes} حەزکردن · {comments} بۆچوون"
+    "trendingStats": "{likes} حەزکردن · {comments} بۆچوون",
+    "typeFilter": {
+      "all": "هەموو",
+      "photo": "وێنەکان",
+      "tip": "شیکاری",
+      "event": "بۆنەکان",
+      "offer": "پێشکەش"
+    }
   },
   "post": {
     "like": "لایک",

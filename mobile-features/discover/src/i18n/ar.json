@@ -13,7 +13,14 @@
     "clearSearch": "مسح",
     "trendingTitle": "المنشورات الرائجة",
     "trendingEmpty": "لا توجد منشورات رائجة حالياً",
-    "trendingStats": "{likes} إعجاب · {comments} تعليق"
+    "trendingStats": "{likes} إعجاب · {comments} تعليق",
+    "typeFilter": {
+      "all": "الكل",
+      "photo": "صور",
+      "tip": "نصائح",
+      "event": "فعاليات",
+      "offer": "عروض"
+    }
   },
   "post": {
     "like": "إعجاب",

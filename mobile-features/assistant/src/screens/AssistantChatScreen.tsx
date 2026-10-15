@@ -15,7 +15,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useAssistantChat, loadPersistedSessionId, clearPersistedSessionId } from '../hooks/useAssistantChat';
+import { useAssistantChat, loadPersistedSessionId, clearPersistedSessionId, clearPersistedHistory } from '../hooks/useAssistantChat';
 import { t } from '../strings';
 
 // Force RTL for Arabic
@@ -179,6 +179,7 @@ export function AssistantChatScreen(): ReactElement {
 
   const handleClearChat = () => {
     void clearPersistedSessionId();
+    void clearPersistedHistory(sessionId);
     setSessionId(generateSessionId());
   };
 
