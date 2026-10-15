@@ -15,6 +15,7 @@ import { createLogger, type Logger } from '@iraq-maps/observability';
 import { placesMigrationsDir, placesModule } from '@iraq-maps/places';
 import { providersMigrationsDir, providersModule } from '@iraq-maps/providers';
 import { routingModule } from '@iraq-maps/routing';
+import { incidentsModule, incidentsMigrationsDir } from '@iraq-maps/incidents';
 import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
 import { sql } from 'drizzle-orm';
 import {
@@ -50,6 +51,7 @@ export const moduleMigrations = [
   { schema: 'assistant', migrationsDir: assistantMigrationsDir },
   { schema: 'insights', migrationsDir: insightsMigrationsDir },
   { schema: 'discover', migrationsDir: discoverMigrationsDir },
+  { schema: 'incidents', migrationsDir: incidentsMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -274,6 +276,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         } as unknown as typeof AssistantModule,
         InsightsModule,
         discoverModule({ db, eventBus: bus, redis }),
+        incidentsModule({ db }),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [

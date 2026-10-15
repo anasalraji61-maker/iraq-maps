@@ -40,6 +40,9 @@ import { useMapStyle, isDarkMode, type MapMode } from './hooks/useMapStyle';
 import { LoadStatus, ok, useLatest } from './load';
 import { formatDistance, isolate, kindLabel, t } from './strings';
 import { isOfflineAvailable } from './offline/OfflineMapManager';
+import { IncidentMarkers } from './incidents/IncidentMarkers';
+import { IncidentReportButton } from './incidents/IncidentReportButton';
+import { useIncidents } from './incidents/useIncidents';
 
 const SEARCH_DELAY_MS = 300;
 
@@ -143,6 +146,9 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   useEffect(() => {
     void isOfflineAvailable(near).then(setOfflineCached);
   }, [near]);
+
+  // Traffic incidents near the map centre.
+  const { incidents, refresh: refreshIncidents } = useIncidents(near, isOnline);
 
   // Handle deep-link focusPlaceId: fetch place and move camera.
   useEffect(() => {
@@ -298,6 +304,10 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         </Pressable>
         {mapMode === 'satellite' && city.satellite ? <SatelliteDisclaimer layer={city.satellite} /> : null}
         {darkOverlay ? <View style={styles.darkOverlay} pointerEvents="none" /> : null}
+      </View>
+      {/* Incident markers overlay – absolute over the map canvas */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        <IncidentMarkers incidents={incidents} />
       </View>
       {!isOnline && (
         <View style={styles.offlineBanner} testID="offline-banner" accessibilityRole="alert">
@@ -526,6 +536,10 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           icon="⬇"
           accessibilityLabel={t('offline.title')}
           onPress={() => router.push(href('offlineMaps'))}
+        />
+        <IncidentReportButton
+          userLocation={userPosition}
+          onReported={refreshIncidents}
         />
       </View>
       <Sheet visible={choosingLang} onClose={() => setChoosingLang(false)}>
