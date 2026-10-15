@@ -115,7 +115,7 @@ type ReportReason = typeof REPORT_REASONS[number];
 const PostItem = memo(function PostItem({
   post,
   placeName,
-  firstImageUrl,
+  imageUrls,
   onLike,
   onComment,
   onPlacePress,
@@ -130,7 +130,7 @@ const PostItem = memo(function PostItem({
 }: {
   post: DiscoverPostType;
   placeName?: string;
-  firstImageUrl?: string;
+  imageUrls?: string[];
   onLike: (post: DiscoverPostType) => void;
   onComment: (post: DiscoverPostType) => void;
   onPlacePress: (placeId: string) => void;
@@ -147,6 +147,8 @@ const PostItem = memo(function PostItem({
   const badgeColors = getTypeBadgeColors(post.type);
   const haptics = useHaptics();
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [photoIdx, setPhotoIdx] = useState(0);
+  const firstImageUrl = imageUrls?.[0];
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -257,7 +259,7 @@ const PostItem = memo(function PostItem({
       <HashtagText text={post.body} style={[styles.bodyText, { color: COLORS.textPrimary }]} onHashtagPress={onHashtagPress} />
       {firstImageUrl ? (
         <>
-          <Pressable onPress={() => setPhotoOpen(true)} accessibilityRole="button" accessibilityLabel={t('lightbox.photo')}>
+          <Pressable onPress={() => { setPhotoIdx(0); setPhotoOpen(true); }} accessibilityRole="button" accessibilityLabel={t('lightbox.photo')}>
             <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
           </Pressable>
           <Modal visible={photoOpen} transparent animationType="fade" onRequestClose={() => setPhotoOpen(false)} statusBarTranslucent accessibilityViewIsModal>
@@ -265,7 +267,33 @@ const PostItem = memo(function PostItem({
               <Pressable style={styles.lightboxClose} onPress={() => setPhotoOpen(false)} accessibilityRole="button" accessibilityLabel={t('lightbox.close')}>
                 <Text style={styles.lightboxCloseText}>{t('lightbox.closeSymbol')}</Text>
               </Pressable>
-              <ZoomableImage source={{ uri: firstImageUrl }} style={styles.lightboxImage} resizeMode="contain" accessibilityLabel={t('lightbox.photo')} />
+              <ZoomableImage
+                source={{ uri: imageUrls![photoIdx]! }}
+                style={styles.lightboxImage}
+                resizeMode="contain"
+                accessibilityLabel={t('lightbox.photo')}
+              />
+              {(imageUrls?.length ?? 0) > 1 ? (
+                <View style={styles.lightboxNav}>
+                  <Pressable
+                    style={[styles.lightboxNavBtn, photoIdx === 0 && styles.lightboxNavBtnDisabled]}
+                    onPress={() => setPhotoIdx((i) => Math.max(0, i - 1))}
+                    disabled={photoIdx === 0}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.lightboxNavText}>‹</Text>
+                  </Pressable>
+                  <Text style={styles.lightboxCounter}>{t('lightbox.counter', { total: String(imageUrls!.length) })}</Text>
+                  <Pressable
+                    style={[styles.lightboxNavBtn, photoIdx === (imageUrls!.length - 1) && styles.lightboxNavBtnDisabled]}
+                    onPress={() => setPhotoIdx((i) => Math.min(imageUrls!.length - 1, i + 1))}
+                    disabled={photoIdx === imageUrls!.length - 1}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.lightboxNavText}>›</Text>
+                  </Pressable>
+                </View>
+              ) : null}
             </View>
           </Modal>
         </>
@@ -848,7 +876,7 @@ export function DiscoverFeedScreen(): ReactElement {
           <PostItem
             post={item}
             placeName={item.placeId ? placeNames[item.placeId] : undefined}
-            firstImageUrl={item.mediaAssetIds[0] ? mediaUrls[item.mediaAssetIds[0]] : undefined}
+            imageUrls={item.mediaAssetIds.map((id) => mediaUrls[id]).filter((u): u is string => u !== undefined)}
             onLike={handleLike}
             onComment={handleComment}
             onPlacePress={handlePlacePress}
@@ -1125,6 +1153,31 @@ const styles = StyleSheet.create({
   lightboxImage: {
     width: '100%',
     height: '80%',
+  },
+  lightboxNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 8,
+  },
+  lightboxNavBtn: {
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 20,
+  },
+  lightboxNavBtnDisabled: {
+    opacity: 0.3,
+  },
+  lightboxNavText: {
+    color: '#FFF',
+    fontSize: 28,
+    lineHeight: 32,
+  },
+  lightboxCounter: {
+    color: '#FFF',
+    fontSize: 13,
+    opacity: 0.8,
   },
   actions: {
     flexDirection: 'row',
