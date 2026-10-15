@@ -39,7 +39,16 @@
     "badgeSent": "نێردرا",
     "badgeReplied": "وەڵامدراوە",
     "badgeFailed": "سەرکەوتوو نەبوو",
-    "loadMore": "زیاتر بارکە"
+    "loadMore": "زیاتر بارکە",
+    "status": {
+      "sent": "نێردرا",
+      "delivered": "گەیشت",
+      "read": "خوێندرایەوە",
+      "replied": "وەڵامدرایەوە",
+      "queued": "چاوەڕوانە",
+      "handed_off": "راگەیەندرا",
+      "failed": "سەرکەوتوو نەبوو"
+    }
   },
   "detail": {
     "title": "وردەکاریەکانی داواکاری",

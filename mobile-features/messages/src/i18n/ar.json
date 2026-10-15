@@ -39,7 +39,16 @@
     "badgeSent": "مُرسَل",
     "badgeReplied": "تم الرد",
     "badgeFailed": "فشل",
-    "loadMore": "تحميل المزيد"
+    "loadMore": "تحميل المزيد",
+    "status": {
+      "sent": "مُرسَل",
+      "delivered": "وصل",
+      "read": "تمت القراءة",
+      "replied": "تم الرد",
+      "queued": "في الانتظار",
+      "handed_off": "تم الإرسال",
+      "failed": "فشل"
+    }
   },
   "detail": {
     "title": "تفاصيل الطلب",

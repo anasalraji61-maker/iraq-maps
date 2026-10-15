@@ -1,4 +1,4 @@
-import { type Inquiry } from '@iraq-maps/contracts';
+import { type Inquiry, type MessageStatus } from '@iraq-maps/contracts';
 import { Card, EmptyState, Screen, Text, Banner } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
@@ -9,6 +9,41 @@ import { t } from '../strings';
 
 const PRIMARY = '#1976D2';
 const SUCCESS = '#388E3C';
+
+/** Priority order: read > delivered > replied > sent > queued/handed_off/failed. */
+const STATUS_RANK: Record<MessageStatus, number> = {
+  read: 6,
+  delivered: 5,
+  replied: 4,
+  sent: 3,
+  handed_off: 2,
+  queued: 1,
+  failed: 0,
+};
+
+/** Return the most-advanced status across all targets of an inquiry. */
+function topStatus(targets: Inquiry['targets']): MessageStatus | null {
+  if (targets.length === 0) return null;
+  return targets.reduce<MessageStatus>((best, tgt) => {
+    return (STATUS_RANK[tgt.status] ?? 0) > (STATUS_RANK[best] ?? 0) ? tgt.status : best;
+  }, targets[0]!.status);
+}
+
+/** Inline checkmark indicator that mirrors WhatsApp / Telegram conventions. */
+function InlineStatusIcon({ status }: { status: MessageStatus | null }): ReactElement | null {
+  if (!status || status === 'queued' || status === 'failed') return null;
+  const isRead = status === 'read';
+  const icon = status === 'sent' ? '✓' : '✓✓';
+  return (
+    <RNText
+      style={{ fontSize: 12, color: isRead ? PRIMARY : '#9E9E9E', marginStart: 4 }}
+      accessibilityLabel={t(`list.status.${status}`)}
+      testID={`status-icon-${status}`}
+    >
+      {icon}
+    </RNText>
+  );
+}
 
 /** Converts an ISO datetime string into a human-readable relative time label. */
 function fmtRelative(iso: string): string {
@@ -193,6 +228,7 @@ export function InquiriesListScreen(): ReactElement {
             ? t('list.placeCount')
             : t('list.placesCount', { count: inq.targets.length });
           const isUnread = !readMap[inq.id];
+          const msgStatus = topStatus(inq.targets);
           return (
             <Card key={inq.id} onPress={() => router.push({ pathname: '/messages/[requestId]', params: { requestId: inq.id } })}>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
@@ -205,6 +241,7 @@ export function InquiriesListScreen(): ReactElement {
                   />
                 ) : null}
                 <RNText style={isUnread ? { fontWeight: '700', fontSize: 14 } : { fontSize: 14 }}>{inq.text.slice(0, 80)}</RNText>
+                <InlineStatusIcon status={msgStatus} />
               </View>
               <View style={styles.meta}>
                 <RNText style={styles.muted}>{fmtRelative(inq.createdAt)}</RNText>

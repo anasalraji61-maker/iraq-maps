@@ -39,7 +39,16 @@
     "badgeSent": "Sent",
     "badgeReplied": "Replied",
     "badgeFailed": "Failed",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "status": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "replied": "Replied",
+      "queued": "Queued",
+      "handed_off": "Handed off",
+      "failed": "Failed"
+    }
   },
   "detail": {
     "title": "Request details",
