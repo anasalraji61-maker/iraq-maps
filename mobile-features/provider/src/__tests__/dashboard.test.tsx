@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, waitFor } from '@testing-library/react-native';
 import type { useMessagingApi as UseMessagingApi } from '../messaging-api';
 import { ProviderInboxScreen } from '../screens/ProviderInboxScreen';
+import { ProviderDashboardScreen } from '../screens/ProviderDashboardScreen';
 
 jest.mock('../messaging-api', () => ({ useMessagingApi: jest.fn() }));
 
@@ -33,6 +34,33 @@ function mockApi(overrides?: object) {
   mockedUseMessagingApi.mockReturnValue(api as never);
   return api;
 }
+
+describe('ProviderDashboardScreen', () => {
+  afterEach(() => { jest.clearAllMocks(); });
+
+  it('shows skeleton while loading', async () => {
+    let resolveMe!: (v: unknown) => void;
+    const pendingMe = new Promise((res) => { resolveMe = res; });
+    // Build an api where providers.me never resolves during render so loading stays true
+    const api = {
+      providers: { me: jest.fn(() => pendingMe) },
+      discover: { listFeed: jest.fn(async () => ({ status: 200, body: { items: [], nextCursor: undefined } })) },
+    };
+    const session = {
+      state: { status: 'signedIn' as const, user: { id: UserId.parse('22222222-2222-2222-2222-222222222222'), name: 'Test', locale: 'ar' as const, roles: ['user'] as never[], createdAt: '2026-01-01T00:00:00.000Z' } },
+      signIn: jest.fn(async () => {}),
+      updateUser: jest.fn(),
+      signOut: jest.fn(async () => {}),
+    };
+    const view = await renderWithProviders(<ProviderDashboardScreen />, { api: api as never, session, locale: 'ar' });
+    const skeleton = view.getByTestId('skeleton-dashboard');
+    expect(skeleton).toBeTruthy();
+    await act(async () => {
+      resolveMe({ status: 200, body: { status: 'verified' } });
+      await Promise.resolve();
+    });
+  });
+});
 
 describe('ProviderInboxScreen — pull-to-refresh', () => {
   afterEach(() => { jest.clearAllMocks(); });

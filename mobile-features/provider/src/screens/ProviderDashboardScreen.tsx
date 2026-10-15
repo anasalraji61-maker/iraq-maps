@@ -2,11 +2,50 @@ import { testIDs, type ProviderStatus } from '@iraq-maps/contracts';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { Animated, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
+
+// ─── Skeleton loader ─────────────────────────────────────────────────────────
+
+function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
+  const opacity = useRef(new Animated.Value(0.3)).current;
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [opacity]);
+  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
+}
+
+function DashboardSkeleton(): ReactElement {
+  return (
+    <Screen>
+      <View testID="skeleton-dashboard" style={{ gap: 12, padding: 16 }}>
+        <SkeletonBlock width={120} height={20} />
+        <SkeletonBlock width={80} height={14} />
+        <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
+          {[1, 2, 3, 4].map((k) => (
+            <View key={k} style={{ flex: 1, backgroundColor: '#FFF', borderRadius: 8, padding: 12, gap: 6, borderStartWidth: 4, borderStartColor: '#E0E0E0' }}>
+              <SkeletonBlock width={28} height={28} />
+              <SkeletonBlock width={36} height={18} />
+              <SkeletonBlock width={60} height={11} />
+            </View>
+          ))}
+        </View>
+      </View>
+    </Screen>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -104,7 +143,7 @@ export function ProviderDashboardScreen(): ReactElement {
     return () => clearInterval(interval);
   }, [status, fetchStatus]);
 
-  if (loading) return <Screen>{null}</Screen>;
+  if (loading) return <DashboardSkeleton />;
 
   if (!status) {
     return (
