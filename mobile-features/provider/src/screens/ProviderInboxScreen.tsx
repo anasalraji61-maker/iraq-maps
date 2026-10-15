@@ -2,36 +2,22 @@ import { messagingTestIDs, type Inquiry } from '@iraq-maps/contracts';
 import { EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, FlatList, I18nManager, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
+import { FlatList, I18nManager, Pressable, RefreshControl, StyleSheet, Text as RNText, View } from 'react-native';
 
 I18nManager.forceRTL(true);
 import { useMessagingApi } from '../messaging-api';
 import { t } from '../strings';
+import { SkeletonBlock } from '../skeleton';
 
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
-
-function SkeletonBox({ width, height }: { width: number; height: number }): ReactElement {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
-  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 4 }, { opacity }]} accessibilityElementsHidden />;
-}
 
 function SkeletonInboxRow(): ReactElement {
   return (
     <View testID="skeleton-inbox-row" style={skeletonStyles.row}>
       <View style={skeletonStyles.avatar} />
       <View style={skeletonStyles.content}>
-        <SkeletonBox width={200} height={13} />
-        <SkeletonBox width={120} height={11} />
+        <SkeletonBlock width={200} height={13} />
+        <SkeletonBlock width={120} height={11} />
       </View>
     </View>
   );

@@ -2,29 +2,13 @@ import { testIDs, type ProviderMe, type ProviderStatus } from '@iraq-maps/contra
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
 import { Badge, Button, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { Animated, Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { Linking, RefreshControl, ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { t } from '../strings';
 import { useMessagingApi } from '../messaging-api';
+import { SkeletonBlock } from '../skeleton';
 import { AnalyticsChartCard } from './AnalyticsChartCard';
-
-// ─── Skeleton loader ─────────────────────────────────────────────────────────
-
-function SkeletonBlock({ width, height }: { width: number; height: number }): ReactElement {
-  const opacity = useRef(new Animated.Value(0.3)).current;
-  useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 600, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.3, duration: 600, useNativeDriver: true }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [opacity]);
-  return <Animated.View style={[{ width, height, backgroundColor: '#E0E0E0', borderRadius: 6 }, { opacity }]} accessibilityElementsHidden />;
-}
 
 function DashboardSkeleton(): ReactElement {
   return (
