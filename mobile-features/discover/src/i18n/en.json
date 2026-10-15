@@ -127,5 +127,11 @@
     "unfollow": "Unfollow",
     "feedTab": "Following",
     "feedEmpty": "No posts from people you follow yet"
+  },
+  "lightbox": {
+    "close": "Close",
+    "closeSymbol": "✕",
+    "photo": "Photo",
+    "counter": "{{total}} photos"
   }
 }

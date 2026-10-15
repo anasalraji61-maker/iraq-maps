@@ -1,5 +1,6 @@
 import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
 import { href, useApi, useHaptics, useSession } from '@iraq-maps/mobile-kit';
+import { ZoomableImage } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
 import { useSavedPosts } from '../useSavedPosts';
@@ -147,6 +148,7 @@ const PostItem = memo(function PostItem({
   const isOwn = currentUserId === post.authorId;
   const badgeColors = getTypeBadgeColors(post.type);
   const haptics = useHaptics();
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const handleShare = useCallback(() => {
     const message = t('post.shareText', { body: post.body, postId: post.id });
@@ -238,7 +240,19 @@ const PostItem = memo(function PostItem({
       </View>
       <Text style={[styles.bodyText, { color: COLORS.textPrimary }]}>{post.body}</Text>
       {firstImageUrl ? (
-        <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
+        <>
+          <Pressable onPress={() => setPhotoOpen(true)} accessibilityRole="button" accessibilityLabel={t('lightbox.photo')}>
+            <Image source={{ uri: firstImageUrl }} style={styles.postImage} resizeMode="cover" />
+          </Pressable>
+          <Modal visible={photoOpen} transparent animationType="fade" onRequestClose={() => setPhotoOpen(false)} statusBarTranslucent>
+            <View style={styles.lightboxBackdrop}>
+              <Pressable style={styles.lightboxClose} onPress={() => setPhotoOpen(false)} accessibilityRole="button" accessibilityLabel={t('lightbox.close')}>
+                <Text style={styles.lightboxCloseText}>{t('lightbox.closeSymbol')}</Text>
+              </Pressable>
+              <ZoomableImage source={{ uri: firstImageUrl }} style={styles.lightboxImage} resizeMode="contain" accessibilityLabel={t('lightbox.photo')} />
+            </View>
+          </Modal>
+        </>
       ) : null}
       {post.placeId ? (
         <Pressable
@@ -936,6 +950,33 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  lightboxBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lightboxClose: {
+    position: 'absolute',
+    top: 16,
+    insetInlineEnd: 16,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lightboxCloseText: {
+    color: '#fff',
+    fontSize: 20,
+    lineHeight: 22,
+  },
+  lightboxImage: {
+    width: '100%',
+    height: '80%',
   },
   actions: {
     flexDirection: 'row',

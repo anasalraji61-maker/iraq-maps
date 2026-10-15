@@ -1,7 +1,7 @@
+import { ZoomableImage } from '@iraq-maps/ui';
 import { type ReactElement } from 'react';
 import {
   Dimensions,
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -45,7 +45,7 @@ export function PhotoLightbox({ photos, initialIndex, visible, onClose }: Props)
         >
           {photos.map((photo) => (
             <View key={photo.assetId} style={styles.page}>
-              <Image
+              <ZoomableImage
                 source={{ uri: photo.url }}
                 style={styles.image}
                 resizeMode="contain"

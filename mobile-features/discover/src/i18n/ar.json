@@ -127,5 +127,11 @@
     "unfollow": "إلغاء المتابعة",
     "feedTab": "المتابَعون",
     "feedEmpty": "لا توجد منشورات من المستخدمين الذين تتابعهم"
+  },
+  "lightbox": {
+    "close": "إغلاق",
+    "closeSymbol": "✕",
+    "photo": "صورة",
+    "counter": "{{total}} صورة"
   }
 }
