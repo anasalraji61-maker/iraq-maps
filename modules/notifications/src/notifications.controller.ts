@@ -27,12 +27,13 @@ export class NotificationsController {
         return { status: 200, body: prefs };
       },
       listNotifications: async ({ query }) => {
-        const result = await this.svc.listNotifications(userId, query.unreadOnly ?? true);
+        const result = await this.svc.listNotifications(userId, query.unreadOnly ?? true, query.cursor, query.limit);
         return {
           status: 200,
           body: {
             items: result.items.map((n) => ({ ...n, id: n.id as NotificationId })),
             unreadCount: result.unreadCount,
+            nextCursor: result.nextCursor,
           },
         };
       },

@@ -58,11 +58,15 @@ export const notificationsContract = c.router({
   listNotifications: {
     method: 'GET',
     path: '/v1/notifications',
-    query: z.object({ unreadOnly: z.coerce.boolean().optional() }),
+    query: z.object({
+      unreadOnly: z.coerce.boolean().optional(),
+      cursor: z.string().max(200).optional(),
+      limit: z.coerce.number().int().min(1).max(50).default(20),
+    }),
     responses: {
-      200: z.object({ items: z.array(NotificationItem), unreadCount: z.number().int() }),
+      200: z.object({ items: z.array(NotificationItem), unreadCount: z.number().int(), nextCursor: z.string().nullable() }),
     },
-    summary: 'List notifications (unread by default)',
+    summary: 'List notifications with cursor-based pagination',
   },
   markRead: {
     method: 'POST',

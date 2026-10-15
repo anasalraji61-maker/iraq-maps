@@ -1,6 +1,6 @@
 import type { NotificationPrefs, PushSender, UserId } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, lt } from 'drizzle-orm';
 import { deviceTable, notificationTable, prefsTable } from './schema';
 
 export class NotificationsService {
@@ -77,17 +77,39 @@ export class NotificationsService {
     return row.id;
   }
 
-  async listNotifications(userId: UserId, unreadOnly = true) {
-    const rows = unreadOnly
-      ? await this.db.select().from(notificationTable).where(and(eq(notificationTable.userId, userId), isNull(notificationTable.readAt))).orderBy(notificationTable.createdAt)
-      : await this.db.select().from(notificationTable).where(eq(notificationTable.userId, userId)).orderBy(notificationTable.createdAt);
+  async listNotifications(userId: UserId, unreadOnly = true, cursor?: string, limit = 20) {
+    const pageSize = Math.min(limit, 50);
+    // cursor is the ISO createdAt of the last seen item (exclusive lower bound for DESC order)
+    const cursorDate = cursor ? new Date(cursor) : undefined;
 
-    const unreadCount = unreadOnly
-      ? rows.length
-      : rows.filter((r) => r.readAt === null).length;
+    const baseWhere = unreadOnly
+      ? and(eq(notificationTable.userId, userId), isNull(notificationTable.readAt))
+      : eq(notificationTable.userId, userId);
+
+    const where = cursorDate
+      ? and(baseWhere, lt(notificationTable.createdAt, cursorDate))
+      : baseWhere;
+
+    const rows = await this.db
+      .select()
+      .from(notificationTable)
+      .where(where)
+      .orderBy(desc(notificationTable.createdAt))
+      .limit(pageSize + 1);
+
+    const hasMore = rows.length > pageSize;
+    const pageRows = hasMore ? rows.slice(0, pageSize) : rows;
+
+    // unreadCount is total across all pages (not just this page)
+    const allUnread = await this.db
+      .select({ id: notificationTable.id })
+      .from(notificationTable)
+      .where(and(eq(notificationTable.userId, userId), isNull(notificationTable.readAt)));
+
+    const nextCursor = hasMore ? pageRows[pageRows.length - 1]!.createdAt.toISOString() : null;
 
     return {
-      items: rows.map((r) => ({
+      items: pageRows.map((r) => ({
         id: r.id,
         title: r.title,
         body: r.body,
@@ -95,7 +117,8 @@ export class NotificationsService {
         readAt: r.readAt?.toISOString() ?? null,
         createdAt: r.createdAt.toISOString(),
       })),
-      unreadCount,
+      unreadCount: allUnread.length,
+      nextCursor,
     };
   }
 

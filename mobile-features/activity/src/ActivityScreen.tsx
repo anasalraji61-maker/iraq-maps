@@ -151,14 +151,14 @@ function NotifRow({ item, onPress }: { item: NotifItem; onPress: (item: NotifIte
   );
 }
 
-const NOTIF_PAGE_SIZE = 15;
 
 function NotificationsTab(): ReactElement {
   const api = useApi();
   const session = useSession();
   const router = useRouter();
   const [items, setItems] = useState<NotifItem[]>([]);
-  const [visibleCount, setVisibleCount] = useState(NOTIF_PAGE_SIZE);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -170,6 +170,7 @@ function NotificationsTab(): ReactElement {
       const res = await api.notifications.listNotifications({ query: {} });
       if (res.status === 200) {
         setItems(res.body.items as NotifItem[]);
+        setNextCursor(res.body.nextCursor ?? null);
         setError(undefined);
       } else {
         setError(t('loadError'));
@@ -181,6 +182,20 @@ function NotificationsTab(): ReactElement {
       setRefreshing(false);
     }
   }, [api, session]);
+
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await api.notifications.listNotifications({ query: { cursor: nextCursor } });
+      if (res.status === 200) {
+        setItems((prev) => [...prev, ...res.body.items as NotifItem[]]);
+        setNextCursor(res.body.nextCursor ?? null);
+      }
+    } catch { /* best-effort */ } finally {
+      setLoadingMore(false);
+    }
+  }, [api, nextCursor, loadingMore]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -247,21 +262,23 @@ function NotificationsTab(): ReactElement {
         <EmptyState icon="🔔" title={t('empty')} subtitle={t('emptySubtext')} />
       ) : (
         <FlatList
-          data={items.slice(0, visibleCount)}
+          data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <NotifRow item={item} onPress={handlePress} />}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setVisibleCount(NOTIF_PAGE_SIZE); void load(true); }} colors={[PRIMARY]} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setNextCursor(null); void load(true); }} colors={[PRIMARY]} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          onEndReached={() => {
-            if (visibleCount < items.length) setVisibleCount((c) => c + NOTIF_PAGE_SIZE);
-          }}
+          onEndReached={() => { void loadMore(); }}
           onEndReachedThreshold={0.3}
           ListFooterComponent={
-            visibleCount < items.length ? (
+            loadingMore ? (
+              <View style={styles.loadMoreBtn}>
+                <ActivityIndicator size="small" color={PRIMARY} />
+              </View>
+            ) : nextCursor ? (
               <Pressable
                 style={styles.loadMoreBtn}
-                onPress={() => setVisibleCount((c) => c + NOTIF_PAGE_SIZE)}
+                onPress={() => { void loadMore(); }}
                 accessibilityRole="button"
               >
                 <Text style={styles.loadMoreText}>{t('loadMore')}</Text>

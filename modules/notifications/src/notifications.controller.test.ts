@@ -24,7 +24,7 @@ function makeService(): NotificationsService {
     registerDevice: vi.fn().mockResolvedValue({ deviceId: 'dev-1' }),
     getPrefs: vi.fn().mockResolvedValue(DEFAULT_PREFS),
     updatePrefs: vi.fn().mockResolvedValue(DEFAULT_PREFS),
-    listNotifications: vi.fn().mockResolvedValue({ items: [], unreadCount: 0 }),
+    listNotifications: vi.fn().mockResolvedValue({ items: [], unreadCount: 0, nextCursor: null }),
     markRead: vi.fn().mockResolvedValue(true),
     sendPush: vi.fn().mockResolvedValue(undefined),
     scheduleDigest: vi.fn().mockResolvedValue(undefined),
@@ -67,7 +67,7 @@ describe('NotificationsController', () => {
     const h = handler(ctrl, { principal: { userId: USER_ID, roles: ['user'] } });
     const result = await h['listNotifications']!({ query: { unreadOnly: true } });
     expect(result.status).toBe(200);
-    expect(svc.listNotifications).toHaveBeenCalledWith(USER_ID, true);
+    expect(svc.listNotifications).toHaveBeenCalledWith(USER_ID, true, undefined, undefined);
   });
 
   it('markRead returns 200 when notification found', async () => {
