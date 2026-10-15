@@ -40,5 +40,14 @@
   "editPostSave": "حفظ",
   "editPostCancel": "إلغاء",
   "editPostError": "فشل تعديل المنشور",
-  "editPostPlaceholder": "أدخل النص الجديد..."
+  "editPostPlaceholder": "أدخل النص الجديد...",
+  "tabInquiries": "طلباتي",
+  "emptyInquiries": "لا توجد طلبات مرسلة",
+  "emptyInquiriesSubtext": "الطلبات التي ترسلها للأماكن ستظهر هنا",
+  "inquiryTargets": "{n} مكان",
+  "inquiryTarget": "مكان واحد",
+  "inquiryStatusPending": "في انتظار الرد",
+  "inquiryStatusReplied": "تم الرد",
+  "inquiryStatusClosed": "مغلق",
+  "inquiryStatusSent": "تم الإرسال"
 }

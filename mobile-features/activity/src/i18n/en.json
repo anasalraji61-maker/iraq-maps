@@ -40,5 +40,14 @@
   "editPostSave": "Save",
   "editPostCancel": "Cancel",
   "editPostError": "Failed to edit post",
-  "editPostPlaceholder": "Enter new text..."
+  "editPostPlaceholder": "Enter new text...",
+  "tabInquiries": "My Inquiries",
+  "emptyInquiries": "No inquiries sent yet",
+  "emptyInquiriesSubtext": "Requests you send to places will appear here",
+  "inquiryTargets": "{n} places",
+  "inquiryTarget": "1 place",
+  "inquiryStatusPending": "Awaiting reply",
+  "inquiryStatusReplied": "Replied",
+  "inquiryStatusClosed": "Closed",
+  "inquiryStatusSent": "Sent"
 }

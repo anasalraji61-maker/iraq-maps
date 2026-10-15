@@ -1,5 +1,6 @@
-import { type DiscoverPostType, type NotificationItem } from '@iraq-maps/contracts';
+import { type DiscoverPostType, type Inquiry, type NotificationItem } from '@iraq-maps/contracts';
 import { recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { useActivityMessagingClient } from './messagingClient';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -22,7 +23,7 @@ I18nManager.forceRTL(true);
 // Shared helpers
 // ──────────────────────────────────────────────
 
-type Tab = 'notifications' | 'routes' | 'saved' | 'posts';
+type Tab = 'notifications' | 'routes' | 'saved' | 'posts' | 'inquiries';
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -474,6 +475,88 @@ function PostsTab(): ReactElement {
 }
 
 // ──────────────────────────────────────────────
+// My inquiries tab
+// ──────────────────────────────────────────────
+
+function inquiryStatus(targets: Inquiry['targets']): string {
+  if (targets.some((t) => t.status === 'replied')) return t('inquiryStatusReplied');
+  if (targets.every((t) => t.status === 'failed')) return t('inquiryStatusClosed');
+  if (targets.some((t) => t.status === 'sent' || t.status === 'delivered' || t.status === 'read')) return t('inquiryStatusSent');
+  return t('inquiryStatusPending');
+}
+
+const INQUIRY_ICON = '✉️'; // ✉️ — kept as variable to avoid jsx-literal-string lint
+
+function InquiryRow({ item }: { item: Inquiry }): ReactElement {
+  const count = item.targets.length;
+  const placesLabel = count === 1 ? t('inquiryTarget') : t('inquiryTargets', { n: count });
+  const statusLabel = inquiryStatus(item.targets);
+
+  return (
+    <View style={styles.row} accessibilityRole="none">
+      <Text style={styles.rowIcon} accessibilityElementsHidden>{INQUIRY_ICON}</Text>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle} numberOfLines={2}>{item.text}</Text>
+        <Text style={styles.rowSub}>{placesLabel} · {statusLabel}</Text>
+        <Text style={styles.rowTime}>{formatRelativeTime(item.createdAt)}</Text>
+      </View>
+    </View>
+  );
+}
+
+function InquiriesTab(): ReactElement {
+  const messagingApi = useActivityMessagingClient();
+  const session = useSession();
+  const [items, setItems] = useState<Inquiry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  // Use a ref to stable-ise the client so useEffect doesn't re-trigger on each render
+  const apiRef = useRef(messagingApi);
+  apiRef.current = messagingApi;
+
+  const load = useCallback(async (silent = false) => {
+    if (!session) { setLoading(false); return; }
+    if (!silent) setLoading(true);
+    try {
+      const res = await apiRef.current.listInquiries({ query: {} });
+      if (res.status === 200) {
+        setItems(res.body.items);
+        setError(undefined);
+      } else {
+        setError(t('loadError'));
+      }
+    } catch {
+      setError(t('loadError'));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [session]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  if (!session) {
+    return <EmptyState icon={INQUIRY_ICON} title={t('loginPrompt')} subtitle="" />;
+  }
+  if (loading) return <View style={styles.center}><ActivityIndicator size="large" color="#1976D2" /></View>;
+  if (error) return <LoadError onRetry={() => { void load(); }} />;
+  if (items.length === 0) return <EmptyState icon={INQUIRY_ICON} title={t('emptyInquiries')} subtitle={t('emptyInquiriesSubtext')} />;
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => <InquiryRow item={item} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); void load(true); }} colors={['#1976D2']} />}
+      contentContainerStyle={styles.list}
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────
 // Root screen
 // ──────────────────────────────────────────────
 
@@ -485,6 +568,7 @@ export function ActivityScreen(): ReactElement {
     { id: 'routes', label: t('tabRoutes') },
     { id: 'saved', label: t('tabSaved') },
     { id: 'posts', label: t('tabPosts') },
+    { id: 'inquiries', label: t('tabInquiries') },
   ];
 
   return (
@@ -521,6 +605,7 @@ export function ActivityScreen(): ReactElement {
         {activeTab === 'routes' && <RoutesTab />}
         {activeTab === 'saved' && <SavedTab />}
         {activeTab === 'posts' && <PostsTab />}
+        {activeTab === 'inquiries' && <InquiriesTab />}
       </View>
     </View>
   );

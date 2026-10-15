@@ -16,6 +16,7 @@ const mockDeletePost = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockUpdatePost = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockListNotifications = jest.fn<(a?: unknown) => Promise<unknown>>();
 const mockMarkRead = jest.fn<(a?: unknown) => Promise<unknown>>();
+const mockListInquiries = jest.fn<(a?: unknown) => Promise<unknown>>();
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,12 @@ jest.mock('@iraq-maps/mobile-kit', () => {
     useSession: () => _session,
   };
 });
+
+jest.mock('./messagingClient', () => ({
+  useActivityMessagingClient: () => ({
+    listInquiries: (a: unknown) => mockListInquiries(a),
+  }),
+}));
 
 jest.mock('@iraq-maps/i18n', () => ({
   registerNamespace: jest.fn(),
@@ -108,6 +115,7 @@ describe('ActivityScreen', () => {
     mockUpdatePost.mockResolvedValue({ status: 200, body: { id: 'post-uuid-1', body: 'Updated body', authorId: 'user-uuid', type: 'tip', mediaAssetIds: [], likeCount: 0, commentCount: 0, isLikedByMe: false, createdAt: new Date().toISOString() } });
     mockListNotifications.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
     mockMarkRead.mockResolvedValue({ status: 204, body: undefined });
+    mockListInquiries.mockResolvedValue({ status: 200, body: { items: [] } });
   });
 
   it('shows notifications tab by default with empty state', async () => {
@@ -200,6 +208,33 @@ describe('ActivityScreen', () => {
     await act(async () => { fireEvent.press(savedTab); });
     await waitFor(() => {
       expect(getByText('emptySaved')).toBeTruthy();
+    });
+  });
+
+  it('inquiries tab shows empty state when no inquiries', async () => {
+    mockListInquiries.mockResolvedValue({ status: 200, body: { items: [] } });
+    const { getByText } = await render(<ActivityScreen />);
+    const inquiriesTab = getByText('tabInquiries');
+    await act(async () => { fireEvent.press(inquiriesTab); });
+    await waitFor(() => {
+      expect(getByText('emptyInquiries')).toBeTruthy();
+    });
+  });
+
+  it('inquiries tab shows inquiry rows with status', async () => {
+    const inquiry = {
+      id: 'inq-1',
+      userId: 'user-uuid',
+      text: 'Hello can I book a table?',
+      targets: [{ placeId: 'place-1', channel: 'in_app', status: 'replied', handoffLink: undefined }],
+      createdAt: new Date().toISOString(),
+    };
+    mockListInquiries.mockResolvedValue({ status: 200, body: { items: [inquiry] } });
+    const { getByText } = await render(<ActivityScreen />);
+    const inquiriesTab = getByText('tabInquiries');
+    await act(async () => { fireEvent.press(inquiriesTab); });
+    await waitFor(() => {
+      expect(getByText('Hello can I book a table?')).toBeTruthy();
     });
   });
 });

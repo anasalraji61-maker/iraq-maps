@@ -40,5 +40,14 @@
   "editPostSave": "پاشەکەوتکردن",
   "editPostCancel": "هەڵوەشاندنەوە",
   "editPostError": "هەڵەی دەستکاریکردنی پۆست",
-  "editPostPlaceholder": "دەقی نوێ بنووسە..."
+  "editPostPlaceholder": "دەقی نوێ بنووسە...",
+  "tabInquiries": "داواکارییەکانم",
+  "emptyInquiries": "هیچ داواکارییەکی نەشانداو نییە",
+  "emptyInquiriesSubtext": "داواکارییەکانت بۆ شوێنەکان لێرە دەردەکەون",
+  "inquiryTargets": "{n} شوێن",
+  "inquiryTarget": "یەک شوێن",
+  "inquiryStatusPending": "چاوەڕوانی وەڵام",
+  "inquiryStatusReplied": "وەڵامی درایەوە",
+  "inquiryStatusClosed": "داخراو",
+  "inquiryStatusSent": "نێردراوە"
 }
