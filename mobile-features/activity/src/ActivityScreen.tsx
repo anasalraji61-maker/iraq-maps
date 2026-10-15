@@ -1,5 +1,6 @@
 import { type DiscoverPostType, type Inquiry, type NotificationItem } from '@iraq-maps/contracts';
-import { recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { href, recentRoutes, savedPlaces, type RecentRoute, type SavedPlace, useApi, useSession } from '@iraq-maps/mobile-kit';
+import { useRouter } from 'expo-router';
 import { useActivityMessagingClient } from './messagingClient';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
@@ -134,6 +135,7 @@ function NotifRow({ item, onPress }: { item: NotifItem; onPress: (item: NotifIte
 function NotificationsTab(): ReactElement {
   const api = useApi();
   const session = useSession();
+  const router = useRouter();
   const [items, setItems] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -161,12 +163,24 @@ function NotificationsTab(): ReactElement {
   useEffect(() => { void load(); }, [load]);
 
   const handlePress = useCallback(async (item: NotifItem) => {
-    if (item.readAt !== null) return;
+    // Mark as read (best-effort, regardless of current state)
     try {
-      await api.notifications.markRead({ params: { id: item.id }, body: {} });
-      setItems((prev) => prev.map((n) => n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n));
+      if (item.readAt === null) {
+        await api.notifications.markRead({ params: { id: item.id }, body: {} });
+        setItems((prev) => prev.map((n) => n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n));
+      }
     } catch { /* best-effort */ }
-  }, [api]);
+    // Deep-link navigation based on notification data
+    const data = item.data ?? {};
+    const type = data['type'];
+    if ((type === 'post_liked' || type === 'post_commented') && data['postId']) {
+      router.push(href('discoverPost', { postId: data['postId'] }));
+    } else if (type === 'new_message' && data['requestId']) {
+      router.push(href('messageThread', { requestId: data['requestId'] }));
+    } else if (type === 'inquiry_replied' && data['requestId']) {
+      router.push(href('messageThread', { requestId: data['requestId'] }));
+    }
+  }, [api, router]);
 
   const markAllRead = useCallback(async () => {
     const unread = items.filter((n) => n.readAt === null);

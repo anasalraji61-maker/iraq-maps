@@ -52,6 +52,15 @@ jest.mock('@iraq-maps/mobile-kit', () => {
     },
     useApi: () => _api,
     useSession: () => _session,
+    href: (name: string, params?: Record<string, string>) => {
+      const routes: Record<string, string> = {
+        discoverPost: '/discover/[postId]',
+        messageThread: '/messages/[requestId]',
+      };
+      const pattern = routes[name] ?? `/${name}`;
+      if (!params) return pattern;
+      return pattern.replace(/\[(\w+)\]/g, (_: string, key: string) => encodeURIComponent(params[key] ?? ''));
+    },
   };
 });
 
@@ -59,6 +68,12 @@ jest.mock('./messagingClient', () => ({
   useActivityMessagingClient: () => ({
     listInquiries: (a: unknown) => mockListInquiries(a),
   }),
+}));
+
+const mockRouterPush = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockRouterPush, replace: jest.fn(), back: jest.fn() }),
+  useLocalSearchParams: () => ({}),
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({
@@ -116,6 +131,7 @@ describe('ActivityScreen', () => {
     mockListNotifications.mockResolvedValue({ status: 200, body: { items: [], nextCursor: undefined } });
     mockMarkRead.mockResolvedValue({ status: 204, body: undefined });
     mockListInquiries.mockResolvedValue({ status: 200, body: { items: [] } });
+    mockRouterPush.mockClear();
   });
 
   it('shows notifications tab by default with empty state', async () => {
@@ -247,6 +263,26 @@ describe('ActivityScreen', () => {
     await act(async () => { fireEvent.press(inquiriesTab); });
     await waitFor(() => {
       expect(getByText('Hello can I book a table?')).toBeTruthy();
+    });
+  });
+
+  it('tapping a post_liked notification marks it read and navigates to the post', async () => {
+    const notif: NotifItem = {
+      id: 'notif-deep-1',
+      title: 'إعجاب جديد',
+      body: 'أعجب شخص ما بمنشورك',
+      readAt: null,
+      createdAt: new Date().toISOString(),
+      data: { type: 'post_liked', postId: 'post-abc' },
+    };
+    mockMarkRead.mockResolvedValue({ status: 200, body: { ok: true } });
+    mockListNotifications.mockResolvedValue({ status: 200, body: { items: [notif], unreadCount: 1 } });
+    const { getByText } = await render(<ActivityScreen />);
+    await waitFor(() => expect(getByText('إعجاب جديد')).toBeTruthy());
+    await act(async () => { fireEvent.press(getByText('إعجاب جديد')); });
+    await waitFor(() => {
+      expect(mockMarkRead).toHaveBeenCalledWith(expect.objectContaining({ params: { id: 'notif-deep-1' } }));
+      expect(mockRouterPush).toHaveBeenCalledWith('/discover/post-abc');
     });
   });
 });
