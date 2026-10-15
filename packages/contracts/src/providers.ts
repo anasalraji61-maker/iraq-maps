@@ -333,3 +333,171 @@ export const providerTestIDs = {
   },
   place: { section: 'place.provider', verified: 'place.provider.verified', photos: 'place.provider.photos', phone: 'place.provider.phone', claim: 'place.claim' },
 } as const;
+
+// ─── Promotions ──────────────────────────────────────────────────────────────
+
+/** @public M31 */
+export const PromotionId = z.string().uuid().brand<'PromotionId'>();
+export type PromotionId = z.infer<typeof PromotionId>;
+
+export const PromotionStatus = z.enum(['active', 'expired', 'deleted']);
+export type PromotionStatus = z.infer<typeof PromotionStatus>;
+
+export const Promotion = z.object({
+  id: PromotionId,
+  providerId: ProviderId,
+  title: z.string().min(1).max(120),
+  description: z.string().min(1).max(500),
+  discountPct: z.number().int().min(1).max(100).nullable(),
+  validFrom: z.string().datetime(),
+  validTo: z.string().datetime(),
+  conditions: z.string().max(300).nullable(),
+  status: PromotionStatus,
+  createdAt: z.string().datetime(),
+});
+export type Promotion = z.infer<typeof Promotion>;
+
+export const CreatePromotionBody = z.object({
+  title: z.string().trim().min(1).max(120),
+  description: z.string().trim().min(1).max(500),
+  discountPct: z.number().int().min(1).max(100).optional(),
+  validFrom: z.string().datetime(),
+  validTo: z.string().datetime(),
+  conditions: z.string().max(300).optional(),
+});
+export type CreatePromotionBody = z.infer<typeof CreatePromotionBody>;
+
+export const promotionsContract = c.router(
+  {
+    create: {
+      method: 'POST',
+      path: '/providers/promotions',
+      body: CreatePromotionBody,
+      responses: { 201: Promotion, 400: Problem, 401: Problem, 404: Problem },
+    },
+    listActive: {
+      method: 'GET',
+      path: '/providers/promotions',
+      responses: { 200: z.array(Promotion), 401: Problem },
+    },
+    listByProvider: {
+      method: 'GET',
+      path: '/providers/:providerId/promotions',
+      pathParams: z.object({ providerId: ProviderId }),
+      responses: { 200: z.array(Promotion), 404: Problem },
+    },
+    delete: {
+      method: 'DELETE',
+      path: '/providers/promotions/:id',
+      pathParams: z.object({ id: PromotionId }),
+      body: c.noBody(),
+      responses: { 204: c.noBody(), 401: Problem, 403: Problem, 404: Problem },
+    },
+  },
+  { pathPrefix: '/v1', strictStatusCodes: true },
+);
+
+// ─── Appointments ─────────────────────────────────────────────────────────────
+
+/** @public M31 */
+export const AppointmentId = z.string().uuid().brand<'AppointmentId'>();
+export type AppointmentId = z.infer<typeof AppointmentId>;
+
+export const AppointmentStatus = z.enum(['pending', 'confirmed', 'cancelled', 'completed']);
+export type AppointmentStatus = z.infer<typeof AppointmentStatus>;
+
+export const Appointment = z.object({
+  id: AppointmentId,
+  providerId: ProviderId,
+  userId: UserId,
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+  service: z.string().min(1).max(200),
+  status: AppointmentStatus,
+  notes: z.string().max(500).nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type Appointment = z.infer<typeof Appointment>;
+
+export const RequestAppointmentBody = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+  service: z.string().trim().min(1).max(200),
+  notes: z.string().max(500).optional(),
+});
+export type RequestAppointmentBody = z.infer<typeof RequestAppointmentBody>;
+
+export const UpdateAppointmentBody = z.object({
+  status: z.enum(['confirmed', 'cancelled', 'completed']),
+});
+export type UpdateAppointmentBody = z.infer<typeof UpdateAppointmentBody>;
+
+export const appointmentsContract = c.router(
+  {
+    request: {
+      method: 'POST',
+      path: '/providers/:providerId/appointments/request',
+      pathParams: z.object({ providerId: ProviderId }),
+      body: RequestAppointmentBody,
+      responses: { 201: Appointment, 400: Problem, 401: Problem, 404: Problem },
+    },
+    listForProvider: {
+      method: 'GET',
+      path: '/providers/:providerId/appointments',
+      pathParams: z.object({ providerId: ProviderId }),
+      responses: { 200: z.array(Appointment), 401: Problem, 403: Problem, 404: Problem },
+    },
+    update: {
+      method: 'PATCH',
+      path: '/providers/:providerId/appointments/:id',
+      pathParams: z.object({ providerId: ProviderId, id: AppointmentId }),
+      body: UpdateAppointmentBody,
+      responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
+    },
+    myAppointments: {
+      method: 'GET',
+      path: '/appointments',
+      responses: { 200: z.array(Appointment), 401: Problem },
+    },
+  },
+  { pathPrefix: '/v1', strictStatusCodes: true },
+);
+
+// ─── Provider Insights (expanded M31) ─────────────────────────────────────────
+
+export const ProviderInsightsDateRange = z.enum(['7d', '30d', '90d']);
+export type ProviderInsightsDateRange = z.infer<typeof ProviderInsightsDateRange>;
+
+export const HourlyBucket = z.object({ hour: z.number().int().min(0).max(23), count: z.number().int() });
+export type HourlyBucket = z.infer<typeof HourlyBucket>;
+
+export const InquirySourceBreakdown = z.object({
+  mapSearch: z.number().int(),
+  direct: z.number().int(),
+  discover: z.number().int(),
+});
+export type InquirySourceBreakdown = z.infer<typeof InquirySourceBreakdown>;
+
+export const ProviderInsights = z.object({
+  providerId: ProviderId,
+  range: ProviderInsightsDateRange,
+  topKeywords: z.array(z.object({ keyword: z.string(), count: z.number().int() })),
+  peakHours: z.array(HourlyBucket),
+  sourceBreakdown: InquirySourceBreakdown,
+  conversionRate: z.number().min(0).max(1).nullable(),
+});
+export type ProviderInsights = z.infer<typeof ProviderInsights>;
+
+export const providerInsightsContract = c.router(
+  {
+    get: {
+      method: 'GET',
+      path: '/providers/:providerId/insights',
+      pathParams: z.object({ providerId: ProviderId }),
+      query: z.object({ range: ProviderInsightsDateRange.optional() }),
+      responses: { 200: ProviderInsights, 401: Problem, 403: Problem, 404: Problem },
+    },
+  },
+  { pathPrefix: '/v1', strictStatusCodes: true },
+);

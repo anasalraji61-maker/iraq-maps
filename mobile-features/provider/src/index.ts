@@ -11,3 +11,8 @@ export { ProviderNotificationSettingsScreen } from './screens/ProviderNotificati
 export { ProviderStatsDetailsScreen } from './screens/ProviderStatsDetailsScreen';
 export { ProviderEarningsScreen } from './screens/ProviderEarningsScreen';
 export { ProviderReviewResponseScreen } from './screens/ProviderReviewResponseScreen';
+export { ProviderPromotionsScreen, PromotionBadge } from './screens/ProviderPromotionsScreen';
+export { ProviderAppointmentsScreen } from './screens/ProviderAppointmentsScreen';
+export { RequestAppointmentScreen } from './screens/RequestAppointmentScreen';
+export { MyAppointmentsScreen } from './screens/MyAppointmentsScreen';
+export { InsightsDashboardScreen } from './screens/InsightsDashboardScreen';

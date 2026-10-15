@@ -3,6 +3,8 @@ import { PortTokens } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { AdminProvidersController, ProvidersController } from './providers.controller';
+import { PromotionsController } from './promotions.controller';
+import { PromotionsService } from './promotions.service';
 import { ProvidersService } from './providers.service';
 
 export interface ProvidersModuleOptions {
@@ -24,12 +26,13 @@ export function providersModule(opts: ProvidersModuleOptions): DynamicModule {
   return {
     module: ProvidersModule,
     global: true,
-    controllers: [ProvidersController, AdminProvidersController],
+    controllers: [ProvidersController, AdminProvidersController, PromotionsController],
     providers: [
       { provide: 'PROVIDERS_DB', useValue: opts.db },
       { provide: PortTokens.PhoneVerificationPort, useValue: opts.phoneVerification },
       ProvidersService,
+      PromotionsService,
     ],
-    exports: [ProvidersService],
+    exports: [ProvidersService, PromotionsService],
   };
 }
