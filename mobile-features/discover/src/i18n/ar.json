@@ -113,7 +113,8 @@
     "deleteCommentConfirmMsg": "لا يمكن التراجع عن هذا الإجراء.",
     "deleteCommentCancel": "إلغاء",
     "deleteCommentError": "فشل حذف التعليق",
-    "charCount": "الأحرف المستخدمة: {count} من {max}"
+    "charCount": "الأحرف المستخدمة: {count} من {max}",
+    "typing": "أنت تكتب..."
   },
   "timeNow": "الآن",
   "timeMinutes": "منذ {n} د",

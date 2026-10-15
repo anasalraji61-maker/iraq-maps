@@ -113,7 +113,8 @@
     "deleteCommentConfirmMsg": "ناتوانرێت بیگەڕێندرێتەوە.",
     "deleteCommentCancel": "هەڵوەشاندنەوە",
     "deleteCommentError": "هەڵەی سڕینەوەی کۆمێنت",
-    "charCount": "ژمارەی پیتەکان: {count} لە {max}"
+    "charCount": "ژمارەی پیتەکان: {count} لە {max}",
+    "typing": "تۆ دەنووسیت..."
   },
   "timeNow": "ئێستا",
   "timeMinutes": "{n} خ. پێش",

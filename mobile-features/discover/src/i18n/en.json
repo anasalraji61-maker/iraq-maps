@@ -113,7 +113,8 @@
     "deleteCommentConfirmMsg": "This cannot be undone.",
     "deleteCommentCancel": "Cancel",
     "deleteCommentError": "Failed to delete comment",
-    "charCount": "Characters used: {count} of {max}"
+    "charCount": "Characters used: {count} of {max}",
+    "typing": "You are typing..."
   },
   "timeNow": "now",
   "timeMinutes": "{n}m ago",

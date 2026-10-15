@@ -24,7 +24,7 @@ import { DiscoverComment } from '@iraq-maps/contracts';
 import { ZoomableImage } from '@iraq-maps/ui';
 import { useDiscoverClient } from '../client';
 import { t } from '../strings';
-import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow, HashtagText, SkeletonBlock } from './shared';
+import { formatRelativeTime, getTypeBadgeColors, sharedStyles, COLORS, CommentCard, CommentInputRow, HashtagText, SkeletonBlock, TypingIndicator } from './shared';
 
 I18nManager.forceRTL(true);
 
@@ -400,6 +400,7 @@ export function PostDetailScreen(): ReactElement {
           </>
         }
         renderItem={({ item }) => <CommentCard item={item} onLike={handleLikeComment} onDelete={handleDeleteComment} currentUserId={currentUserId ?? undefined} smallAvatar t={t} />}
+        ListFooterComponent={commentText.trim().length > 0 ? <TypingIndicator t={t} /> : null}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>{t('comments.empty')}</Text>
