@@ -86,4 +86,34 @@ export function formatNumber(value: number, options?: Intl.NumberFormatOptions):
 registerNamespace('common', { ar, ckb, en });
 
 /** @public validate that all locale JSON files have the same keys and {param} sets */
-export { validateLocales, missingInLocale, exportFlatTable, type ValidationResult } from './validate';
+export {
+  validateLocales,
+  missingInLocale,
+  exportFlatTable,
+  findMissingKeys,
+  findExtraKeys,
+  validateAllLocales,
+  type ValidationResult,
+  type AllLocalesReport,
+} from './validate';
+
+/** @public Iraq-specific formatters (IQD, dates, distances, phone, etc.) */
+export {
+  toArabicIndicDigits,
+  usesArabicIndicDigits,
+  formatIqd,
+  formatDate,
+  formatTime,
+  formatPhone,
+  formatPhoneLocale,
+  formatDistance,
+  formatDuration,
+  formatCount,
+  formatRelativeTime,
+  formatAddress,
+  formatNumber as formatNumberIraq,
+  formatPercent,
+  formatFileSize,
+  formatSpeed,
+  arabicPluralCategory,
+} from './formatters';

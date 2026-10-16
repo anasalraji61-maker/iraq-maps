@@ -581,5 +581,320 @@
       "error": "خطأ",
       "success": "نجاح"
     }
+  },
+  "challenges": {
+    "title": "التحديات",
+    "subtitle": "شارك وتنافس مع المجتمع",
+    "types": {
+      "photo": "تحدي الصور",
+      "checkin": "تحدي الحضور",
+      "review": "تحدي التقييمات",
+      "distance": "تحدي المسافة",
+      "social": "التحدي الاجتماعي",
+      "exploration": "تحدي الاستكشاف"
+    },
+    "status": {
+      "active": "نشط",
+      "upcoming": "قادم",
+      "completed": "منتهٍ",
+      "expired": "منتهية المدة",
+      "joined": "منضم"
+    },
+    "progress": {
+      "title": "تقدمك",
+      "current": "{current} من {total}",
+      "percentage": "{pct}٪ مكتمل",
+      "remaining": "{n} {unit} متبقٍ",
+      "completed": "أتممت التحدي!",
+      "notStarted": "لم تبدأ بعد"
+    },
+    "rewards": {
+      "title": "المكافآت",
+      "points": "{n} نقطة",
+      "badge": "شارة: {name}",
+      "noReward": "بدون مكافأة",
+      "claimed": "تم الاستلام",
+      "claim": "استلام المكافأة",
+      "claimError": "فشل استلام المكافأة"
+    },
+    "leaderboard": {
+      "title": "لوحة المتصدرين",
+      "rank": "المركز #{n}",
+      "notRanked": "غير مصنف",
+      "participants": "{n} مشارك"
+    },
+    "join": "انضم للتحدي",
+    "leave": "مغادرة التحدي",
+    "detail": "تفاصيل التحدي",
+    "endsIn": "ينتهي خلال {time}",
+    "startedAgo": "بدأ منذ {time}",
+    "empty": "لا توجد تحديات حالياً",
+    "loadError": "فشل تحميل التحديات",
+    "completedBanner": "🎉 أتممت التحدي!"
+  },
+  "promotions": {
+    "title": "العروض والخصومات",
+    "subtitle": "اكتشف أفضل العروض القريبة منك",
+    "types": {
+      "discount": "خصم",
+      "buyOneGetOne": "اشترِ واحداً واحصل على آخر مجاناً",
+      "freeDelivery": "توصيل مجاني",
+      "cashback": "استرداد نقدي",
+      "bundle": "عرض حزمة",
+      "flash": "عرض مؤقت"
+    },
+    "status": {
+      "active": "ساري",
+      "expired": "منتهي",
+      "upcoming": "قادم",
+      "limited": "كميات محدودة"
+    },
+    "redeem": {
+      "title": "استرداد العرض",
+      "code": "كود العرض: {code}",
+      "copyCode": "نسخ الكود",
+      "codeCopied": "تم نسخ الكود",
+      "steps": "خطوات الاسترداد",
+      "confirm": "تأكيد الاسترداد",
+      "success": "تم استرداد العرض بنجاح",
+      "error": "فشل استرداد العرض",
+      "alreadyUsed": "تم استخدام هذا العرض مسبقاً",
+      "expired": "انتهت صلاحية هذا العرض"
+    },
+    "details": {
+      "discount": "خصم {pct}٪",
+      "validUntil": "صالح حتى {date}",
+      "minOrder": "حد أدنى للطلب: {amount}",
+      "maxDiscount": "أقصى خصم: {amount}",
+      "terms": "الشروط والأحكام"
+    },
+    "filter": {
+      "all": "الكل",
+      "nearby": "القريبة",
+      "expiringSoon": "تنتهي قريباً",
+      "highValue": "عالية القيمة"
+    },
+    "empty": "لا توجد عروض حالياً",
+    "loadError": "فشل تحميل العروض",
+    "share": "مشاركة العرض",
+    "save": "حفظ العرض",
+    "saved": "تم حفظ العرض"
+  },
+  "appointments": {
+    "title": "المواعيد",
+    "subtitle": "احجز موعدك بسهولة",
+    "book": {
+      "title": "حجز موعد",
+      "selectDate": "اختر التاريخ",
+      "selectTime": "اختر الوقت",
+      "selectService": "اختر الخدمة",
+      "notes": "ملاحظات إضافية (اختياري)",
+      "notesPlaceholder": "أي طلبات أو ملاحظات خاصة…",
+      "confirm": "تأكيد الحجز",
+      "confirming": "جارٍ تأكيد الحجز…",
+      "confirmed": "تم تأكيد حجزك",
+      "error": "فشل حجز الموعد"
+    },
+    "status": {
+      "pending": "في انتظار التأكيد",
+      "confirmed": "مؤكد",
+      "cancelled": "ملغى",
+      "completed": "منتهٍ",
+      "noShow": "لم يحضر",
+      "rescheduled": "تم إعادة الجدولة"
+    },
+    "cancel": {
+      "title": "إلغاء الموعد",
+      "reason": "سبب الإلغاء",
+      "confirm": "تأكيد الإلغاء",
+      "cancelled": "تم إلغاء الموعد",
+      "error": "فشل إلغاء الموعد",
+      "policy": "سياسة الإلغاء"
+    },
+    "reschedule": {
+      "title": "إعادة جدولة الموعد",
+      "confirm": "تأكيد إعادة الجدولة",
+      "success": "تم إعادة جدولة الموعد",
+      "error": "فشل إعادة الجدولة"
+    },
+    "reminder": {
+      "title": "تذكير بالموعد",
+      "oneDay": "بعد يوم",
+      "oneHour": "بعد ساعة",
+      "thirtyMin": "بعد ٣٠ دقيقة"
+    },
+    "upcoming": "المواعيد القادمة",
+    "past": "المواعيد السابقة",
+    "empty": "لا توجد مواعيد",
+    "loadError": "فشل تحميل المواعيد",
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "at": "الساعة {time}",
+    "with": "مع {name}",
+    "duration": "المدة: {duration}"
+  },
+  "listings": {
+    "title": "السوق",
+    "subtitle": "اشترِ وبِع في مجتمعك",
+    "categories": {
+      "all": "الكل",
+      "electronics": "إلكترونيات",
+      "clothing": "ملابس",
+      "vehicles": "مركبات",
+      "furniture": "أثاث",
+      "food": "طعام",
+      "services": "خدمات",
+      "realEstate": "عقارات",
+      "books": "كتب",
+      "sports": "رياضة",
+      "other": "أخرى"
+    },
+    "create": {
+      "title": "إضافة إعلان",
+      "titleLabel": "عنوان الإعلان",
+      "titlePlaceholder": "مثال: هاتف آيفون ١٤ للبيع",
+      "description": "الوصف",
+      "descriptionPlaceholder": "صف المنتج أو الخدمة بالتفصيل…",
+      "price": "السعر",
+      "pricePlaceholder": "٠",
+      "negotiable": "قابل للتفاوض",
+      "condition": "الحالة",
+      "conditionNew": "جديد",
+      "conditionUsed": "مستعمل",
+      "conditionRefurbished": "مجدد",
+      "photos": "الصور",
+      "location": "الموقع",
+      "submit": "نشر الإعلان",
+      "submitting": "جارٍ النشر…",
+      "success": "تم نشر الإعلانك",
+      "error": "فشل نشر الإعلان"
+    },
+    "status": {
+      "active": "نشط",
+      "sold": "تم البيع",
+      "reserved": "محجوز",
+      "removed": "محذوف"
+    },
+    "contact": "تواصل مع البائع",
+    "makeOffer": "تقديم عرض",
+    "markSold": "تعليم كمباع",
+    "report": "الإبلاغ عن الإعلان",
+    "save": "حفظ الإعلان",
+    "share": "مشاركة الإعلان",
+    "myListings": "إعلاناتي",
+    "savedListings": "الإعلانات المحفوظة",
+    "empty": "لا توجد إعلانات",
+    "loadError": "فشل تحميل الإعلانات",
+    "postedAgo": "نشر منذ {time}",
+    "views": "{n} مشاهدة",
+    "seller": "البائع",
+    "verified": "بائع موثق"
+  },
+  "reputation": {
+    "title": "السمعة والمستوى",
+    "subtitle": "ابنِ سمعتك في المجتمع",
+    "levels": {
+      "newcomer": "قادم جديد",
+      "explorer": "مستكشف",
+      "contributor": "مساهم",
+      "expert": "خبير",
+      "ambassador": "سفير",
+      "legend": "أسطورة"
+    },
+    "points": {
+      "title": "النقاط",
+      "total": "{n} نقطة",
+      "earned": "ربحت {n} نقطة",
+      "thisWeek": "{n} نقطة هذا الأسبوع",
+      "breakdown": "تفاصيل النقاط"
+    },
+    "badges": {
+      "title": "الشارات",
+      "earned": "الشارات المكتسبة",
+      "locked": "شارات مقفلة",
+      "new": "شارة جديدة!",
+      "detail": "تفاصيل الشارة"
+    },
+    "activities": {
+      "post": "نشر منشور",
+      "review": "كتابة تقييم",
+      "photo": "رفع صورة",
+      "checkin": "تسجيل حضور",
+      "report": "الإبلاغ عن محتوى",
+      "addPlace": "إضافة مكان",
+      "helpfulAnswer": "إجابة مفيدة",
+      "verifiedInfo": "معلومات موثقة"
+    },
+    "progress": {
+      "toNextLevel": "{n} نقطة للمستوى التالي",
+      "atMaxLevel": "وصلت إلى أعلى مستوى!",
+      "percentage": "{pct}٪ نحو {level}"
+    },
+    "streak": {
+      "title": "السلسلة",
+      "days": "{n} يوم متتالٍ",
+      "longest": "أطول سلسلة: {n} يوم",
+      "broken": "انكسرت السلسلة"
+    },
+    "rank": {
+      "local": "الترتيب المحلي: #{n}",
+      "global": "الترتيب العالمي: #{n}",
+      "city": "الترتيب في {city}: #{n}"
+    },
+    "history": "سجل النشاط",
+    "empty": "لا توجد نقاط بعد. ابدأ بالمساهمة!",
+    "loadError": "فشل تحميل بيانات السمعة"
+  },
+  "analytics": {
+    "title": "إحصائياتي",
+    "subtitle": "تابع نشاطك وأداءك",
+    "overview": {
+      "title": "ملخص",
+      "posts": "المنشورات",
+      "views": "المشاهدات",
+      "likes": "الإعجابات",
+      "comments": "التعليقات",
+      "followers": "المتابعون",
+      "following": "المتابَعون",
+      "reach": "مدى الانتشار",
+      "engagement": "معدل التفاعل"
+    },
+    "period": {
+      "today": "اليوم",
+      "week": "آخر ٧ أيام",
+      "month": "آخر ٣٠ يوماً",
+      "year": "آخر سنة",
+      "custom": "فترة مخصصة"
+    },
+    "posts": {
+      "title": "أداء المنشورات",
+      "topPost": "أفضل منشور",
+      "totalPosts": "{n} منشور",
+      "avgLikes": "متوسط الإعجابات: {n}",
+      "avgViews": "متوسط المشاهدات: {n}",
+      "growth": "النمو: {pct}٪"
+    },
+    "audience": {
+      "title": "الجمهور",
+      "newFollowers": "{n} متابع جديد",
+      "lostFollowers": "{n} متابع غادر",
+      "topLocations": "المواقع الأكثر",
+      "activeHours": "أوقات النشاط"
+    },
+    "places": {
+      "title": "أماكنك",
+      "visited": "الأماكن المزارة",
+      "reviewed": "الأماكن المقيَّمة",
+      "added": "الأماكن المضافة",
+      "topCity": "أكثر مدينة زيارة"
+    },
+    "charts": {
+      "viewsOverTime": "المشاهدات عبر الزمن",
+      "likesOverTime": "الإعجابات عبر الزمن",
+      "followersGrowth": "نمو المتابعين"
+    },
+    "export": "تصدير البيانات",
+    "empty": "لا توجد بيانات كافية بعد",
+    "loadError": "فشل تحميل الإحصائيات"
   }
 }

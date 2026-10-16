@@ -581,5 +581,320 @@
       "error": "Error",
       "success": "Success"
     }
+  },
+  "challenges": {
+    "title": "Challenges",
+    "subtitle": "Participate and compete with the community",
+    "types": {
+      "photo": "Photo challenge",
+      "checkin": "Check-in challenge",
+      "review": "Review challenge",
+      "distance": "Distance challenge",
+      "social": "Social challenge",
+      "exploration": "Exploration challenge"
+    },
+    "status": {
+      "active": "Active",
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "expired": "Expired",
+      "joined": "Joined"
+    },
+    "progress": {
+      "title": "Your progress",
+      "current": "{current} of {total}",
+      "percentage": "{pct}% complete",
+      "remaining": "{n} {unit} remaining",
+      "completed": "Challenge completed!",
+      "notStarted": "Not started yet"
+    },
+    "rewards": {
+      "title": "Rewards",
+      "points": "{n} points",
+      "badge": "Badge: {name}",
+      "noReward": "No reward",
+      "claimed": "Claimed",
+      "claim": "Claim reward",
+      "claimError": "Failed to claim reward"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "rank": "Rank #{n}",
+      "notRanked": "Not ranked",
+      "participants": "{n} participants"
+    },
+    "join": "Join challenge",
+    "leave": "Leave challenge",
+    "detail": "Challenge details",
+    "endsIn": "Ends in {time}",
+    "startedAgo": "Started {time} ago",
+    "empty": "No challenges available",
+    "loadError": "Failed to load challenges",
+    "completedBanner": "🎉 Challenge completed!"
+  },
+  "promotions": {
+    "title": "Offers and discounts",
+    "subtitle": "Discover the best offers near you",
+    "types": {
+      "discount": "Discount",
+      "buyOneGetOne": "Buy one get one free",
+      "freeDelivery": "Free delivery",
+      "cashback": "Cashback",
+      "bundle": "Bundle offer",
+      "flash": "Flash sale"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "upcoming": "Upcoming",
+      "limited": "Limited stock"
+    },
+    "redeem": {
+      "title": "Redeem offer",
+      "code": "Offer code: {code}",
+      "copyCode": "Copy code",
+      "codeCopied": "Code copied",
+      "steps": "Redemption steps",
+      "confirm": "Confirm redemption",
+      "success": "Offer redeemed successfully",
+      "error": "Failed to redeem offer",
+      "alreadyUsed": "This offer has already been used",
+      "expired": "This offer has expired"
+    },
+    "details": {
+      "discount": "{pct}% off",
+      "validUntil": "Valid until {date}",
+      "minOrder": "Min. order: {amount}",
+      "maxDiscount": "Max discount: {amount}",
+      "terms": "Terms and conditions"
+    },
+    "filter": {
+      "all": "All",
+      "nearby": "Nearby",
+      "expiringSoon": "Expiring soon",
+      "highValue": "High value"
+    },
+    "empty": "No offers available",
+    "loadError": "Failed to load offers",
+    "share": "Share offer",
+    "save": "Save offer",
+    "saved": "Offer saved"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "subtitle": "Book your appointment easily",
+    "book": {
+      "title": "Book appointment",
+      "selectDate": "Select date",
+      "selectTime": "Select time",
+      "selectService": "Select service",
+      "notes": "Additional notes (optional)",
+      "notesPlaceholder": "Any special requests or notes…",
+      "confirm": "Confirm booking",
+      "confirming": "Confirming booking…",
+      "confirmed": "Booking confirmed",
+      "error": "Failed to book appointment"
+    },
+    "status": {
+      "pending": "Pending confirmation",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "noShow": "No show",
+      "rescheduled": "Rescheduled"
+    },
+    "cancel": {
+      "title": "Cancel appointment",
+      "reason": "Cancellation reason",
+      "confirm": "Confirm cancellation",
+      "cancelled": "Appointment cancelled",
+      "error": "Failed to cancel appointment",
+      "policy": "Cancellation policy"
+    },
+    "reschedule": {
+      "title": "Reschedule appointment",
+      "confirm": "Confirm reschedule",
+      "success": "Appointment rescheduled",
+      "error": "Failed to reschedule"
+    },
+    "reminder": {
+      "title": "Appointment reminder",
+      "oneDay": "1 day before",
+      "oneHour": "1 hour before",
+      "thirtyMin": "30 minutes before"
+    },
+    "upcoming": "Upcoming appointments",
+    "past": "Past appointments",
+    "empty": "No appointments",
+    "loadError": "Failed to load appointments",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "at": "At {time}",
+    "with": "With {name}",
+    "duration": "Duration: {duration}"
+  },
+  "listings": {
+    "title": "Marketplace",
+    "subtitle": "Buy and sell in your community",
+    "categories": {
+      "all": "All",
+      "electronics": "Electronics",
+      "clothing": "Clothing",
+      "vehicles": "Vehicles",
+      "furniture": "Furniture",
+      "food": "Food",
+      "services": "Services",
+      "realEstate": "Real estate",
+      "books": "Books",
+      "sports": "Sports",
+      "other": "Other"
+    },
+    "create": {
+      "title": "Create listing",
+      "titleLabel": "Listing title",
+      "titlePlaceholder": "e.g. iPhone 14 for sale",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the product or service in detail…",
+      "price": "Price",
+      "pricePlaceholder": "0",
+      "negotiable": "Negotiable",
+      "condition": "Condition",
+      "conditionNew": "New",
+      "conditionUsed": "Used",
+      "conditionRefurbished": "Refurbished",
+      "photos": "Photos",
+      "location": "Location",
+      "submit": "Post listing",
+      "submitting": "Posting…",
+      "success": "Listing posted",
+      "error": "Failed to post listing"
+    },
+    "status": {
+      "active": "Active",
+      "sold": "Sold",
+      "reserved": "Reserved",
+      "removed": "Removed"
+    },
+    "contact": "Contact seller",
+    "makeOffer": "Make an offer",
+    "markSold": "Mark as sold",
+    "report": "Report listing",
+    "save": "Save listing",
+    "share": "Share listing",
+    "myListings": "My listings",
+    "savedListings": "Saved listings",
+    "empty": "No listings",
+    "loadError": "Failed to load listings",
+    "postedAgo": "Posted {time} ago",
+    "views": "{n} views",
+    "seller": "Seller",
+    "verified": "Verified seller"
+  },
+  "reputation": {
+    "title": "Reputation and level",
+    "subtitle": "Build your community reputation",
+    "levels": {
+      "newcomer": "Newcomer",
+      "explorer": "Explorer",
+      "contributor": "Contributor",
+      "expert": "Expert",
+      "ambassador": "Ambassador",
+      "legend": "Legend"
+    },
+    "points": {
+      "title": "Points",
+      "total": "{n} points",
+      "earned": "Earned {n} points",
+      "thisWeek": "{n} points this week",
+      "breakdown": "Points breakdown"
+    },
+    "badges": {
+      "title": "Badges",
+      "earned": "Earned badges",
+      "locked": "Locked badges",
+      "new": "New badge!",
+      "detail": "Badge details"
+    },
+    "activities": {
+      "post": "Posted",
+      "review": "Wrote a review",
+      "photo": "Uploaded photo",
+      "checkin": "Checked in",
+      "report": "Reported content",
+      "addPlace": "Added a place",
+      "helpfulAnswer": "Helpful answer",
+      "verifiedInfo": "Verified information"
+    },
+    "progress": {
+      "toNextLevel": "{n} points to next level",
+      "atMaxLevel": "Max level reached!",
+      "percentage": "{pct}% toward {level}"
+    },
+    "streak": {
+      "title": "Streak",
+      "days": "{n} days in a row",
+      "longest": "Longest streak: {n} days",
+      "broken": "Streak broken"
+    },
+    "rank": {
+      "local": "Local rank: #{n}",
+      "global": "Global rank: #{n}",
+      "city": "Rank in {city}: #{n}"
+    },
+    "history": "Activity history",
+    "empty": "No points yet. Start contributing!",
+    "loadError": "Failed to load reputation data"
+  },
+  "analytics": {
+    "title": "My analytics",
+    "subtitle": "Track your activity and performance",
+    "overview": {
+      "title": "Overview",
+      "posts": "Posts",
+      "views": "Views",
+      "likes": "Likes",
+      "comments": "Comments",
+      "followers": "Followers",
+      "following": "Following",
+      "reach": "Reach",
+      "engagement": "Engagement rate"
+    },
+    "period": {
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days",
+      "year": "Last year",
+      "custom": "Custom range"
+    },
+    "posts": {
+      "title": "Post performance",
+      "topPost": "Top post",
+      "totalPosts": "{n} posts",
+      "avgLikes": "Avg. likes: {n}",
+      "avgViews": "Avg. views: {n}",
+      "growth": "Growth: {pct}%"
+    },
+    "audience": {
+      "title": "Audience",
+      "newFollowers": "{n} new followers",
+      "lostFollowers": "{n} unfollowed",
+      "topLocations": "Top locations",
+      "activeHours": "Active hours"
+    },
+    "places": {
+      "title": "Your places",
+      "visited": "Places visited",
+      "reviewed": "Places reviewed",
+      "added": "Places added",
+      "topCity": "Most visited city"
+    },
+    "charts": {
+      "viewsOverTime": "Views over time",
+      "likesOverTime": "Likes over time",
+      "followersGrowth": "Follower growth"
+    },
+    "export": "Export data",
+    "empty": "Not enough data yet",
+    "loadError": "Failed to load analytics"
   }
 }

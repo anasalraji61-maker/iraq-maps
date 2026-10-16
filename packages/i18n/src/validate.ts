@@ -121,6 +121,83 @@ export function missingInLocale(
 }
 
 /**
+ * Find all keys present in `base` locale that are missing in `compare`.
+ * This is an alias for `missingInLocale` with clearer naming.
+ */
+export function findMissingKeys(
+  baseLocale: Locale,
+  compareLocale: Locale,
+  resources: LocaleMessages = { ar, ckb, en },
+): string[] {
+  return missingInLocale(baseLocale, compareLocale, resources);
+}
+
+/**
+ * Find keys present in `compare` locale but absent in `base`.
+ * These are "extra" keys that the base doesn't have — possibly added to
+ * the wrong locale or not yet back-ported to the base.
+ */
+export function findExtraKeys(
+  baseLocale: Locale,
+  compareLocale: Locale,
+  resources: LocaleMessages = { ar, ckb, en },
+): string[] {
+  const basePaths = new Set(leafPaths(resources[baseLocale] ?? {}));
+  const comparePaths = new Set(leafPaths(resources[compareLocale] ?? {}));
+  return [...comparePaths].filter((p) => !basePaths.has(p));
+}
+
+export interface AllLocalesReport {
+  /** Per-locale list of keys missing (relative to the union of all keys). */
+  missing: Record<Locale, string[]>;
+  /** Keys present in some locales but not all. */
+  inconsistentKeys: string[];
+  /** Param mismatches across any two locales. */
+  paramMismatches: string[];
+  /** Whether all locales are fully consistent. */
+  valid: boolean;
+  /** Human-readable summary. */
+  summary: string;
+}
+
+/**
+ * Run a full cross-locale validation: check that ar, ckb and en all share
+ * the same key set with matching {param} placeholders.
+ *
+ * This wraps `validateLocales` and returns an enriched report.
+ */
+export function validateAllLocales(
+  resources: LocaleMessages = { ar, ckb, en },
+): AllLocalesReport {
+  const result = validateLocales(resources);
+
+  const allPaths = new Set<string>([
+    ...leafPaths(resources.ar ?? {}),
+    ...leafPaths(resources.ckb ?? {}),
+    ...leafPaths(resources.en ?? {}),
+  ]);
+
+  const inconsistentKeys: string[] = [];
+  for (const path of allPaths) {
+    const presentCount = LOCALES.filter((l) => {
+      const paths = new Set(leafPaths(resources[l] ?? {}));
+      return paths.has(path);
+    }).length;
+    if (presentCount < LOCALES.length) {
+      inconsistentKeys.push(path);
+    }
+  }
+
+  return {
+    missing: result.missing,
+    inconsistentKeys,
+    paramMismatches: result.paramMismatches,
+    valid: result.valid,
+    summary: result.summary,
+  };
+}
+
+/**
  * Produces a flat report of every key in every locale with its value.
  * Useful for translator handoffs.
  */
@@ -142,17 +219,45 @@ export function exportFlatTable(
 }
 
 // --- CLI entry point ---
+// Run with: npx tsx packages/i18n/src/validate.ts
 if (typeof process !== 'undefined' && process.argv[1]?.endsWith('validate.ts')) {
-  const result = validateLocales();
-  console.log(result.summary);
-  if (!result.valid) {
-    console.log('\nFull missing-key list:');
-    for (const [locale, keys] of Object.entries(result.missing)) {
-      if (keys.length) console.log(`  ${locale} (${keys.length}):\n    ${keys.join('\n    ')}`);
+  const report = validateAllLocales();
+  console.log('\n=== Iraq Maps Locale Validation Report ===\n');
+  console.log(report.summary);
+
+  if (!report.valid) {
+    console.log('\n--- Missing keys (per locale) ---');
+    for (const [locale, keys] of Object.entries(report.missing)) {
+      if (keys.length) {
+        console.log(`\n  ${locale} is missing ${keys.length} key(s):`);
+        for (const k of keys) console.log(`    - ${k}`);
+      }
     }
-    if (result.paramMismatches.length) {
-      console.log('\nParam mismatches:\n  ' + result.paramMismatches.join('\n  '));
+
+    if (report.inconsistentKeys.length) {
+      console.log(`\n--- Inconsistent keys (${report.inconsistentKeys.length} total) ---`);
+      for (const k of report.inconsistentKeys) console.log(`  - ${k}`);
     }
+
+    if (report.paramMismatches.length) {
+      console.log('\n--- Param mismatches ---');
+      for (const m of report.paramMismatches) console.log(`  ${m}`);
+    }
+
+    console.log('\n--- Quick diff commands ---');
+    const pairs: [Locale, Locale][] = [['ar', 'ckb'], ['ar', 'en'], ['ckb', 'en']];
+    for (const [base, compare] of pairs) {
+      const missing = findMissingKeys(base, compare);
+      const extra = findExtraKeys(base, compare);
+      if (missing.length || extra.length) {
+        console.log(`\n  ${compare} vs ${base}:`);
+        if (missing.length) console.log(`    missing ${missing.length} key(s) from ${base}: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '…' : ''}`);
+        if (extra.length) console.log(`    extra ${extra.length} key(s) not in ${base}: ${extra.slice(0, 3).join(', ')}${extra.length > 3 ? '…' : ''}`);
+      }
+    }
+
     process.exit(1);
+  } else {
+    console.log('\nAll 3 locales (ar, ckb, en) are in full sync. No action needed.\n');
   }
 }
