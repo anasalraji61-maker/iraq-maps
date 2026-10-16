@@ -41,7 +41,7 @@ function mockSuggestions(): Suggestion[] {
   const reasons: SuggestionReason[] = ['mutual_follow', 'popular', 'location', 'interest', 'mutual_follow'];
   return Array.from({ length: 12 }, (_, i) => ({
     userId: `suggest-${i}`,
-    displayName: `مستخدم مقترح ${i + 1}`,
+    displayName: t('suggestions.mock.displayName', { n: String(i + 1) }),
     avatarUrl: null,
     isVerified: i % 4 === 0,
     mutualCount: i % 3 === 0 ? i + 1 : 0,
@@ -94,7 +94,7 @@ function SuggestionCard({
         accessibilityLabel={t('suggestions.dismissA11y', { name: suggestion.displayName })}
         testID={`suggestion.dismiss.${suggestion.userId}`}
       >
-        <Text style={styles.dismissIcon}>✕</Text>
+        <Text style={styles.dismissIcon}>{t('suggestions.dismissIcon')}</Text>
       </Pressable>
 
       {/* Selection checkbox */}
@@ -105,7 +105,7 @@ function SuggestionCard({
         accessibilityState={{ checked: selected }}
         accessibilityLabel={t('suggestions.selectA11y', { name: suggestion.displayName })}
       >
-        {selected && <Text style={styles.checkmark}>✓</Text>}
+        {selected && <Text style={styles.checkmark}>{t('suggestions.checkmark')}</Text>}
       </Pressable>
 
       {/* Avatar */}
@@ -118,7 +118,7 @@ function SuggestionCard({
         <Text style={styles.displayName} numberOfLines={1}>{suggestion.displayName}</Text>
         {suggestion.isVerified && (
           <View style={styles.verifiedBadge}>
-            <Text style={styles.verifiedIcon}>✓</Text>
+            <Text style={styles.verifiedIcon}>{t('suggestions.verifiedIcon')}</Text>
           </View>
         )}
       </View>
@@ -250,7 +250,7 @@ export function FollowSuggestionsScreen({ onNavigateProfile, onBack }: Props): R
           <View style={styles.toolbar}>
             <Pressable onPress={handleSelectAll} accessibilityRole="button" style={styles.selectAllBtn}>
               <View style={[styles.checkbox, allSelected && styles.checkboxSelected]}>
-                {allSelected && <Text style={styles.checkmark}>✓</Text>}
+                {allSelected && <Text style={styles.checkmark}>{t('suggestions.checkmark')}</Text>}
               </View>
               <Text style={styles.selectAllText}>
                 {allSelected ? t('suggestions.deselectAll') : t('suggestions.selectAll')}

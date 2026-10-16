@@ -20,7 +20,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  FlatList,
   I18nManager,
   PanResponder,
   Platform,

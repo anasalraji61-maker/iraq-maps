@@ -49,8 +49,11 @@
     },
     "annotation": {
       "tapToLearnMore": "Tap to learn more",
-      "linkedPlace": "View Place"
-    }
+      "linkedPlace": "View Place",
+      "linkedPlaceArrow": "View Place →"
+    },
+    "pitchHeading": "↑ {pitch}° → {heading}°",
+    "back": "Back"
   },
   "map": {
     "title": "Tours Map",

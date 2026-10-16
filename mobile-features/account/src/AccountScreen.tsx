@@ -136,8 +136,8 @@ export function AccountScreen(): ReactElement {
     if (state.status !== 'signedIn') return;
     void (async () => {
       try {
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status === 'granted') {
+        const perms = await Notifications.requestPermissionsAsync();
+        if ((perms as { granted?: boolean }).granted ?? (perms as { status?: string }).status === 'granted') {
           const tokenData = await Notifications.getExpoPushTokenAsync();
           const platform = Platform.OS === 'ios' ? 'ios' : 'android';
           await notifApi.registerDevice(tokenData.data, platform);

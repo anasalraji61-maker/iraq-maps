@@ -10,6 +10,8 @@
 
 import {
   type CityId,
+  type PlaceCategory,
+  type PlaceId,
   type SearchFilters,
   type SearchHistoryEntry,
   type SearchResponse,
@@ -21,8 +23,8 @@ import {
 } from '@iraq-maps/contracts';
 import type { Db } from '@iraq-maps/db-kit';
 import { normalizeArabic } from '@iraq-maps/i18n';
-import { and, desc, eq, gt, isNull, or, sql } from 'drizzle-orm';
-import { searchClicks, searchHistory, searchTrending } from './schema';
+import { desc, eq, sql } from 'drizzle-orm';
+import { searchClicks, searchHistory } from './schema';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,7 +44,7 @@ export interface CacheClient {
 
 // Raw DB row shapes
 
-interface PlaceRow {
+interface PlaceRow extends Record<string, unknown> {
   id: string;
   kind: string;
   names: Record<string, string>;
@@ -56,7 +58,7 @@ interface PlaceRow {
   city_id: string;
 }
 
-interface PostRow {
+interface PostRow extends Record<string, unknown> {
   id: string;
   author_id: string;
   author_name: string;
@@ -65,7 +67,7 @@ interface PostRow {
   like_count: number;
 }
 
-interface UserRow {
+interface UserRow extends Record<string, unknown> {
   id: string;
   display_name: string;
   avatar_url: string | null;
@@ -74,7 +76,7 @@ interface UserRow {
   is_provider: boolean;
 }
 
-interface EventRow {
+interface EventRow extends Record<string, unknown> {
   id: string;
   title: Record<string, string>;
   start_at: string;
@@ -86,7 +88,7 @@ interface EventRow {
   attendee_count: number;
 }
 
-interface ListingRow {
+interface ListingRow extends Record<string, unknown> {
   id: string;
   title: Record<string, string>;
   price_iqd: number | null;
@@ -96,7 +98,7 @@ interface ListingRow {
   posted_at: string;
 }
 
-interface TourRow {
+interface TourRow extends Record<string, unknown> {
   id: string;
   title: Record<string, string>;
   duration_minutes: number | null;
@@ -104,7 +106,7 @@ interface TourRow {
   thumbnail_url: string | null;
 }
 
-interface TrendingRow {
+interface TrendingRow extends Record<string, unknown> {
   query: string;
   city_id: string | null;
   count: number;
@@ -112,7 +114,7 @@ interface TrendingRow {
   updated_at: string;
 }
 
-interface HistoryRow {
+interface _HistoryRow {
   id: string;
   query: string;
   filters: string | null;
@@ -304,15 +306,15 @@ export class SearchService {
       }
       return {
         type: 'place',
-        id: row.id as any,
+        id: row.id as unknown as PlaceId,
         name: pickName(row.names, lang),
-        category: (row.category as any) ?? null,
+        category: (row.category as unknown as PlaceCategory) ?? null,
         distanceM: row.distance_m ?? null,
         location: [row.lng, row.lat],
         openNow,
         rating: row.review_avg ?? null,
         reviewCount: row.review_count,
-        city: row.city_id as any,
+        city: row.city_id as unknown as CityId,
       };
     });
   }
@@ -353,7 +355,7 @@ export class SearchService {
         type: 'post',
         id: row.id,
         authorName: row.author_name,
-        authorId: row.author_id as any,
+        authorId: row.author_id as unknown as UserId,
         excerpt: row.body.slice(0, 200),
         createdAt: row.created_at,
         likeCount: row.like_count,
@@ -391,7 +393,7 @@ export class SearchService {
 
       return rows.map((row): SearchResultItem => ({
         type: 'user',
-        id: row.id as any,
+        id: row.id as unknown as UserId,
         displayName: row.display_name,
         avatarUrl: row.avatar_url,
         bio: row.bio,
@@ -451,7 +453,7 @@ export class SearchService {
         endAt: row.end_at,
         location: row.lng != null && row.lat != null ? [row.lng, row.lat] : null,
         venueName: row.venue_name,
-        city: row.city_id as any,
+        city: row.city_id as unknown as CityId,
         attendeeCount: row.attendee_count,
       }));
     } catch {
@@ -511,7 +513,7 @@ export class SearchService {
         priceIqd: row.price_iqd,
         thumbnailUrl: row.thumbnail_url,
         sellerName: row.seller_name,
-        city: row.city_id as any,
+        city: row.city_id as unknown as CityId,
         postedAt: row.posted_at,
       }));
     } catch {
@@ -551,7 +553,7 @@ export class SearchService {
         id: row.id,
         title: pickName(row.title, lang),
         durationMinutes: row.duration_minutes,
-        city: row.city_id as any,
+        city: row.city_id as unknown as CityId,
         thumbnailUrl: row.thumbnail_url,
       }));
     } catch {
@@ -601,9 +603,9 @@ export class SearchService {
       suggestions: rows.map((row) => ({
         text: pickName(row.names, lang),
         type: 'place' as const,
-        placeId: row.id as any,
-        category: (row.category as any) ?? null,
-        city: row.city_id as any,
+        placeId: row.id as unknown as PlaceId,
+        category: (row.category as unknown as PlaceCategory) ?? null,
+        city: row.city_id as unknown as CityId,
       })),
     };
   }
@@ -721,7 +723,7 @@ export class SearchService {
       .values({
         userId,
         query,
-        filters: Object.keys(filters).length > 0 ? (filters as any) : null,
+        filters: Object.keys(filters).length > 0 ? (filters as unknown as SearchFilters) : null,
         resultCount,
       })
       .execute();
@@ -751,7 +753,7 @@ export class SearchService {
     return rows.map((row) => ({
       id: row.id,
       query: row.query,
-      filters: row.filters as any,
+      filters: (row.filters as unknown as SearchFilters) ?? undefined,
       searchedAt: row.searchedAt.toISOString(),
       resultCount: row.resultCount,
     }));

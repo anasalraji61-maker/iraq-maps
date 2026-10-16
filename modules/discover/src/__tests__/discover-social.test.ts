@@ -7,7 +7,7 @@
  * All tests use vi.fn() mocks — no real DB required.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { NotFoundException, UnprocessableEntityException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import type { UserId, PostIdType, StoryIdType } from '@iraq-maps/contracts';
 import { DiscoverService } from '../discover.service';
@@ -43,6 +43,7 @@ function makeSelectChain(rows: unknown[] = []) {
   chain['limit'] = vi.fn().mockResolvedValue(rows);
   chain['orderBy'] = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows), where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }) });
   chain['where'] = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows), orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }) });
+  chain['innerJoin'] = vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows), orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }) }) });
   return chain;
 }
 
@@ -145,7 +146,7 @@ describe('DiscoverService – Stories', () => {
   });
 
   it('markStoryViewed – inserts view record', async () => {
-    const db = makeDb({ insertRows: [] });
+    const db = makeDb({ insertRows: [], selectRows: [storyRow] });
     const svc = new DiscoverService(db as never);
     await svc.markStoryViewed(U2, STORY1);
     expect(db.insert).toHaveBeenCalled();
@@ -534,7 +535,8 @@ describe('SocialService – Events', () => {
     // For simplicity test the logic via service with direct count mock
     const svc2 = new SocialService(dbFull as never);
     // Force attendee count >= maxAttendees via mock
-    const countSpy = vi.spyOn(svc2 as never, 'rsvpEvent' as never);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const countSpy = vi.spyOn(svc2 as any, 'rsvpEvent');
     countSpy.mockRejectedValueOnce(new BadRequestException('Event is full'));
     await expect(svc2.rsvpEvent(U1, EVENT1)).rejects.toBeInstanceOf(BadRequestException);
   });

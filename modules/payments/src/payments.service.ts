@@ -400,37 +400,26 @@ export class PaymentsService {
   ): Promise<{ items: Transaction[]; nextCursor: string | null }> {
     const { type, status, from, to, cursor, limit } = filters;
 
-    let query = this.db
-      .select()
-      .from(transactionTable)
-      .where(eq(transactionTable.userId, userId))
-      .orderBy(desc(transactionTable.createdAt))
-      .limit((limit ?? 20) + 1);
-
-    if (type) {
-      query = query.where(and(eq(transactionTable.userId, userId), eq(transactionTable.type, type))) as typeof query;
-    }
-    if (status) {
-      query = query.where(and(eq(transactionTable.userId, userId), eq(transactionTable.status, status))) as typeof query;
-    }
-    if (from) {
-      query = query.where(and(eq(transactionTable.userId, userId), gt(transactionTable.createdAt, new Date(from)))) as typeof query;
-    }
-    if (to) {
-      query = query.where(and(eq(transactionTable.userId, userId), lt(transactionTable.createdAt, new Date(to)))) as typeof query;
-    }
+    const conditions = [eq(transactionTable.userId, userId)];
+    if (type) conditions.push(eq(transactionTable.type, type) as typeof conditions[0]);
+    if (status) conditions.push(eq(transactionTable.status, status) as typeof conditions[0]);
+    if (from) conditions.push(gt(transactionTable.createdAt, new Date(from)) as typeof conditions[0]);
+    if (to) conditions.push(lt(transactionTable.createdAt, new Date(to)) as typeof conditions[0]);
     if (cursor) {
       try {
         const cursorDate = new Date(Buffer.from(cursor, 'base64').toString('utf-8'));
-        query = query.where(
-          and(eq(transactionTable.userId, userId), lt(transactionTable.createdAt, cursorDate)),
-        ) as typeof query;
+        conditions.push(lt(transactionTable.createdAt, cursorDate) as typeof conditions[0]);
       } catch {
         // Invalid cursor — ignore
       }
     }
 
-    const rows = await query;
+    const rows = await this.db
+      .select()
+      .from(transactionTable)
+      .where(and(...conditions))
+      .orderBy(desc(transactionTable.createdAt))
+      .limit((limit ?? 20) + 1);
     const pageLimit = limit ?? 20;
     const hasMore = rows.length > pageLimit;
     const items = hasMore ? rows.slice(0, pageLimit) : rows;
@@ -660,7 +649,7 @@ export class PaymentsService {
       }
 
       const method = methodRows[0]!;
-      let newStatus: typeof intent.status;
+      let newStatus: 'pending' | 'requires_confirmation' | 'processing' | 'succeeded' | 'failed' | 'refunded' | 'partially_refunded' | 'cancelled';
 
       switch (method.type) {
         case 'wallet': {
@@ -896,37 +885,25 @@ export class PaymentsService {
   ): Promise<{ items: PaymentIntent[]; nextCursor: string | null }> {
     const limit = (query.limit ?? 20) + 1;
 
-    let dbQuery = this.db
-      .select()
-      .from(paymentIntentTable)
-      .where(eq(paymentIntentTable.userId, userId))
-      .orderBy(desc(paymentIntentTable.createdAt))
-      .limit(limit);
-
+    const intentConditions = [eq(paymentIntentTable.userId, userId)];
     if (query.status) {
-      dbQuery = dbQuery.where(
-        and(
-          eq(paymentIntentTable.userId, userId),
-          eq(paymentIntentTable.status, query.status),
-        ),
-      ) as typeof dbQuery;
+      intentConditions.push(eq(paymentIntentTable.status, query.status as 'pending') as typeof intentConditions[0]);
     }
-
     if (query.cursor) {
       try {
         const cursorDate = new Date(Buffer.from(query.cursor, 'base64').toString('utf-8'));
-        dbQuery = dbQuery.where(
-          and(
-            eq(paymentIntentTable.userId, userId),
-            lt(paymentIntentTable.createdAt, cursorDate),
-          ),
-        ) as typeof dbQuery;
+        intentConditions.push(lt(paymentIntentTable.createdAt, cursorDate) as typeof intentConditions[0]);
       } catch {
         // Invalid cursor — ignore
       }
     }
 
-    const rows = await dbQuery;
+    const rows = await this.db
+      .select()
+      .from(paymentIntentTable)
+      .where(and(...intentConditions))
+      .orderBy(desc(paymentIntentTable.createdAt))
+      .limit(limit);
     const pageLimit = query.limit ?? 20;
     const hasMore = rows.length > pageLimit;
     const items = hasMore ? rows.slice(0, pageLimit) : rows;

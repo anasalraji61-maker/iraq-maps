@@ -91,6 +91,13 @@ export function ChangePasswordScreen(): ReactElement {
   const tooWeak = submitted && (strength === 'weak' || strength === 'none');
   const canSubmit = current.length > 0 && next.length >= 8 && next === confirm && strength !== 'weak';
 
+  const REQUIREMENTS: { met: boolean; key: Parameters<typeof t>[0] }[] = [
+    { met: next.length >= 8, key: 'changePassword.req.length' },
+    { met: /[A-Z]/.test(next), key: 'changePassword.req.upper' },
+    { met: /[0-9]/.test(next), key: 'changePassword.req.digit' },
+    { met: /[^A-Za-z0-9]/.test(next), key: 'changePassword.req.special' },
+  ];
+
   const handleSubmit = () => {
     setSubmitted(true);
     if (!canSubmit) return;
@@ -142,14 +149,9 @@ export function ChangePasswordScreen(): ReactElement {
       <StrengthBar strength={strength} />
 
       <View style={styles.requirements}>
-        {[
-          { met: next.length >= 8, key: 'changePassword.req.length' as Parameters<typeof t>[0] },
-          { met: /[A-Z]/.test(next), key: 'changePassword.req.upper' as Parameters<typeof t>[0] },
-          { met: /[0-9]/.test(next), key: 'changePassword.req.digit' as Parameters<typeof t>[0] },
-          { met: /[^A-Za-z0-9]/.test(next), key: 'changePassword.req.special' as Parameters<typeof t>[0] },
-        ].map(({ met, key }) => (
+        {REQUIREMENTS.map(({ met, key }) => (
           <Text key={key} variant="caption" style={[styles.req, met ? styles.reqMet : styles.reqUnmet]}>
-            {met ? '✓ ' : '○ '}{t(key)}
+            {met ? t('changePassword.req.met') : t('changePassword.req.unmet')}{t(key)}
           </Text>
         ))}
       </View>

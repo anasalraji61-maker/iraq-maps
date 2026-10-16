@@ -49,8 +49,11 @@
     },
     "annotation": {
       "tapToLearnMore": "اضغط لمعرفة المزيد",
-      "linkedPlace": "عرض المكان"
-    }
+      "linkedPlace": "عرض المكان",
+      "linkedPlaceArrow": "عرض المكان ←"
+    },
+    "pitchHeading": "↑ {pitch}° → {heading}°",
+    "back": "رجوع"
   },
   "map": {
     "title": "خريطة الجولات",

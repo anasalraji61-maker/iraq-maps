@@ -106,5 +106,7 @@
   "prefsPreviewBody": "هذا مثال على كيف تبدو الإشعارات",
   "prefsSave": "حفظ",
   "prefsCancel": "إلغاء",
-  "prefsSaveError": "فشل حفظ الإعدادات، حاول مجدداً"
+  "prefsSaveError": "فشل حفظ الإعدادات، حاول مجدداً",
+  "bannerDismissIcon": "✕",
+  "prefsTimePlaceholder": "HH:MM"
 }

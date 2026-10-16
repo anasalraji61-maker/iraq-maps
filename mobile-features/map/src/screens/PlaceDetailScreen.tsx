@@ -37,14 +37,12 @@ import {
   useHaptics,
   useRouteAvailable,
 } from '@iraq-maps/mobile-kit';
-import { Badge, Button, Screen, Text } from '@iraq-maps/ui';
+import { Button, Screen } from '@iraq-maps/ui';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   Alert,
-  Animated,
   Dimensions,
-  FlatList,
   I18nManager,
   Image,
   Linking,
@@ -135,8 +133,9 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
 
   // ── Phone (consent check) ──────────────────────────────────────────────────
   const phone = place.provider?.phone ?? place.osmContacts.phone;
+  // Phone is already filtered by consent server-side; presence of provider.phone means show_phone is consented
   const phoneConsented =
-    !place.provider || place.provider.consents?.includes('show_phone') || !!place.osmContacts.phone;
+    !place.provider || !!place.provider.phone || !!place.osmContacts.phone;
 
   // ── Directions ────────────────────────────────────────────────────────────
   const hasDirections = useRouteAvailable('routePreview');
@@ -201,7 +200,7 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
               </View>
               {place.source === 'provider' ? (
                 <View style={styles.verifiedBadge}>
-                  <RNText style={styles.verifiedText}>✓ {t('source.provider')}</RNText>
+                  <RNText style={styles.verifiedText}>{t('source.provider')}</RNText>
                 </View>
               ) : null}
             </View>
@@ -385,8 +384,8 @@ const heroStyles = StyleSheet.create({
   dots: {
     position: 'absolute',
     bottom: 10,
-    left: 0,
-    right: 0,
+    start: 0,
+    end: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 6,
@@ -628,7 +627,7 @@ const infoStyles = StyleSheet.create({
 // ── Address row with copy ─────────────────────────────────────────────────────
 
 function AddressRow({ names, lang }: { names: Record<string, string>; lang: string }): ReactElement {
-  const address = pickName(names as Parameters<typeof pickName>[0], lang);
+  const address = pickName(names as Parameters<typeof pickName>[0], lang as import('@iraq-maps/contracts').Locale);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -654,7 +653,7 @@ function AddressRow({ names, lang }: { names: Record<string, string>; lang: stri
         accessibilityLabel={t('detail.copyAddress')}
         style={addrStyles.copyBtn}
       >
-        <RNText style={addrStyles.copyText}>{copied ? '✓' : t('detail.copy')}</RNText>
+        <RNText style={addrStyles.copyText}>{copied ? t('detail.copied') : t('detail.copy')}</RNText>
       </TouchableOpacity>
     </View>
   );
@@ -719,7 +718,7 @@ const miniMapStyles = StyleSheet.create({
 
 function PhotosGrid({
   photos,
-  placeId,
+  placeId: _placeId,
 }: {
   photos: string[];
   placeId: string;

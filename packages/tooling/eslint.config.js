@@ -50,7 +50,7 @@ export default defineConfig(
   },
   {
     files: ['**/*.cjs'],
-    languageOptions: { sourceType: 'commonjs', globals: { module: 'writable', require: 'readonly', __dirname: 'readonly' } },
+    languageOptions: { sourceType: 'commonjs', globals: { module: 'writable', require: 'readonly', __dirname: 'readonly', process: 'readonly' } },
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
 );

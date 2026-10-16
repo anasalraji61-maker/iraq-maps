@@ -9,7 +9,7 @@
  *   social.user.unfollowed.v1 { followerId, followingId }
  *   social.user.blocked.v1   { blockerId, blockedId }
  */
-import { BadRequestException, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Optional } from '@nestjs/common';
 import { and, desc, eq, inArray, lt, ne, not, notInArray, or, sql } from 'drizzle-orm';
 import type { Db } from '@iraq-maps/db-kit';
 import { PortTokens, type EventBus, type UserId } from '@iraq-maps/contracts';

@@ -4,15 +4,14 @@
  * Balance is shown in IQD with Arabic-Indic digits (٬ thousands separator, د.ع suffix).
  * Transaction history is paginated and shows type, amount, description and date.
  */
-import { useApi } from '@iraq-maps/mobile-kit';
-import { Banner, Button, ListItem, Screen, Text } from '@iraq-maps/ui';
-import { useRouter } from 'expo-router';
+import { Banner, Screen, Text } from '@iraq-maps/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
+  Text as RNText,
   View,
 } from 'react-native';
 import { ScreenTitle } from './ScreenTitle';
@@ -20,22 +19,24 @@ import { t } from './strings';
 
 // ─── IQD formatter (Arabic-Indic digits) ─────────────────────────────────────
 
-const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-
 /** Format an IQD integer amount using Arabic-Indic digits and Arabic thousands separator. */
 export function formatIqdArabic(amount: number): string {
-  if (!Number.isFinite(amount) || amount < 0) return '٠ د.ع';
+  if (!Number.isFinite(amount) || amount < 0) return t('wallet.iqdSuffixZero');
+
+  const digits = t('wallet.iqdDigits');
+  const sep = t('wallet.iqdThousandSep');
+  const suffix = t('wallet.iqdSuffix');
 
   const intStr = Math.floor(amount).toString();
   let result = '';
   for (let i = 0; i < intStr.length; i++) {
     if (i > 0 && (intStr.length - i) % 3 === 0) {
-      result += '٬';
+      result += sep;
     }
     const digit = parseInt(intStr[i]!, 10);
-    result += ARABIC_DIGITS[digit];
+    result += digits[digit] ?? intStr[i]!;
   }
-  return `${result} د.ع`;
+  return `${result}${suffix}`;
 }
 
 /** Format an IQD amount using Western digits (for accessibility / English locale). */
@@ -84,9 +85,9 @@ function TxRow({ item }: { item: TransactionRow }): ReactElement {
   return (
     <View style={styles.txRow}>
       <View style={styles.txLeft}>
-        <Text style={styles.txDesc} numberOfLines={1}>
+        <RNText style={styles.txDesc} numberOfLines={1}>
           {item.description || typeLabel}
-        </Text>
+        </RNText>
         <Text style={styles.txMeta}>
           {typeLabel}
           {statusLabel} · {dateStr}
@@ -106,12 +107,12 @@ function BalanceCard({ wallet }: { wallet: WalletData }): ReactElement {
   return (
     <View style={styles.card} accessibilityRole="summary">
       <Text style={styles.balanceLabel}>{t('wallet.balance')}</Text>
-      <Text
+      <RNText
         style={styles.balanceAmount}
         accessibilityLabel={formatIqdWestern(wallet.availableIqd)}
       >
         {formatIqdArabic(wallet.availableIqd)}
-      </Text>
+      </RNText>
       {wallet.heldIqd > 0 && (
         <Text style={styles.heldAmount}>
           {t('wallet.held')}: {formatIqdArabic(wallet.heldIqd)}
@@ -124,10 +125,6 @@ function BalanceCard({ wallet }: { wallet: WalletData }): ReactElement {
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export function WalletScreen(): ReactElement {
-  const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = useApi() as any;
-
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<TransactionRow[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);

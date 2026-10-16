@@ -4,6 +4,7 @@
  */
 import React, { type ReactElement } from 'react';
 import { I18nManager, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { t } from '../../strings';
 
 export interface HeatmapCell {
   day: number;   // 0=Sun … 6=Sat
@@ -23,6 +24,7 @@ export interface HeatmapGridProps {
   cellSize?: number;
 }
 
+// eslint-disable-next-line no-restricted-syntax
 const DEFAULT_DAYS_AR = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -61,7 +63,7 @@ export function HeatmapGrid({
   const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
   for (const cell of data) {
     if (cell.day >= 0 && cell.day < 7 && cell.hour >= 0 && cell.hour < 24) {
-      grid[cell.day][cell.hour] = cell.value;
+      grid[cell.day]![cell.hour] = cell.value;
     }
   }
 
@@ -115,7 +117,7 @@ export function HeatmapGrid({
                     <Text style={styles.dayLabelText}>{days[rowIdx]}</Text>
                   </View>
                   {Array.from({ length: 24 }, (_, h) => {
-                    const val = grid[di][h];
+                    const val = grid[di]![h] ?? 0;
                     const t = computedMax > 0 ? val / computedMax : 0;
                     const bg = interpolateColor(colorFrom, colorTo, t);
                     return (
@@ -137,7 +139,7 @@ export function HeatmapGrid({
 
           {/* Color scale legend */}
           <View style={[styles.scaleRow, { marginStart: 40 }]}>
-            <Text style={styles.scaleLabel}>أقل</Text>
+            <Text style={styles.scaleLabel}>{t('analytics.heatmapScaleMin')}</Text>
             {Array.from({ length: 10 }, (_, i) => (
               <View
                 key={i}
@@ -147,7 +149,7 @@ export function HeatmapGrid({
                 ]}
               />
             ))}
-            <Text style={styles.scaleLabel}>أكثر</Text>
+            <Text style={styles.scaleLabel}>{t('analytics.heatmapScaleMax')}</Text>
           </View>
         </View>
       </ScrollView>

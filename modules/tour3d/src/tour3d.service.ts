@@ -17,7 +17,6 @@ import type {
   Tour3DScene,
   Tour3DSceneDetail,
   Tour3DSceneId,
-  TourPoint,
 } from '@iraq-maps/contracts';
 import { sql } from 'drizzle-orm';
 import type { Db } from '@iraq-maps/db-kit';

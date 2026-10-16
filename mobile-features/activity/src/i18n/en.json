@@ -106,5 +106,7 @@
   "prefsPreviewBody": "This is how your notifications will look",
   "prefsSave": "Save",
   "prefsCancel": "Cancel",
-  "prefsSaveError": "Failed to save settings, please try again"
+  "prefsSaveError": "Failed to save settings, please try again",
+  "bannerDismissIcon": "✕",
+  "prefsTimePlaceholder": "HH:MM"
 }

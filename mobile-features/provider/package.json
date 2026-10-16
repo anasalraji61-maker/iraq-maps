@@ -22,7 +22,8 @@
   "peerDependencies": {
     "expo-router": "*",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-svg": "*"
   },
   "devDependencies": {
     "@iraq-maps/tooling": "workspace:*",

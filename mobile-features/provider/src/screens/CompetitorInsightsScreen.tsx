@@ -33,7 +33,7 @@ const C = {
   market: '#9CA3AF',
 };
 
-interface BenchmarkMetric {
+interface _BenchmarkMetric {
   label: string;
   yourValue: number;
   marketAvg: number;
@@ -170,7 +170,7 @@ function TipCard({ text, index }: { text: string; index: number }): ReactElement
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
-export function CompetitorInsightsScreen({ providerId }: { providerId: string }): ReactElement {
+export function CompetitorInsightsScreen({ providerId: _providerId }: { providerId: string }): ReactElement {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<MarketData | null>(null);
@@ -247,7 +247,7 @@ export function CompetitorInsightsScreen({ providerId }: { providerId: string })
                   label={t('competitor.avgResponseMin')}
                   yours={data.yourResponseTimeMin}
                   market={data.marketResponseTimeMin}
-                  unit=" دق"
+                  unit={t('competitor.minuteUnit')}
                   higherIsBetter={false}
                 />
               )}

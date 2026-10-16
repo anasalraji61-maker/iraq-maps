@@ -74,9 +74,9 @@ interface Props {
 function mockProfile(userId: string): UserProfile {
   return {
     id: userId,
-    displayName: `مستخدم_${userId.slice(0, 6)}`,
+    displayName: t('profile.mock.displayName', { id: userId.slice(0, 6) }),
     avatarUrl: null,
-    bio: 'مرحباً بكم في ملفي الشخصي على خرائط العراق الذكية.',
+    bio: t('profile.mock.bio'),
     followStats: {
       followersCount: 128,
       followingCount: 64,
@@ -93,7 +93,7 @@ function mockPosts(userId: string): Post[] {
   return Array.from({ length: 9 }, (_, i) => ({
     postId: `${userId}-post-${i}`,
     authorId: userId,
-    body: `منشور رقم ${i + 1}`,
+    body: t('profile.mock.postBody', { n: String(i + 1) }),
     mediaUrl: undefined,
     createdAt: new Date(Date.now() - i * 3600000).toISOString(),
   }));
@@ -101,10 +101,16 @@ function mockPosts(userId: string): Post[] {
 
 function mockMutualUsers(): MutualUser[] {
   return [
-    { userId: 'a1b2c3', displayName: 'أحمد', avatarUrl: null },
-    { userId: 'd4e5f6', displayName: 'سارة', avatarUrl: null },
-    { userId: 'g7h8i9', displayName: 'محمد', avatarUrl: null },
+    { userId: 'a1b2c3', displayName: t('profile.mock.mutual1'), avatarUrl: null },
+    { userId: 'd4e5f6', displayName: t('profile.mock.mutual2'), avatarUrl: null },
+    { userId: 'g7h8i9', displayName: t('profile.mock.mutual3'), avatarUrl: null },
   ];
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatCountAr(n: number): string {
+  return n.toLocaleString('ar-IQ');
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -150,7 +156,7 @@ function StatPill({
 }): ReactElement {
   return (
     <Pressable style={styles.statPill} onPress={onPress} accessibilityRole={onPress ? 'button' : 'text'}>
-      <Text style={styles.statCount}>{count.toLocaleString('ar-IQ')}</Text>
+      <Text style={styles.statCount}>{formatCountAr(count)}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </Pressable>
   );
@@ -159,7 +165,7 @@ function StatPill({
 function VerifiedBadge(): ReactElement {
   return (
     <View style={styles.verifiedBadge} accessibilityLabel={t('profile.verifiedA11y')}>
-      <Text style={styles.verifiedIcon}>✓</Text>
+      <Text style={styles.verifiedIcon}>{t('profile.verifiedIcon')}</Text>
     </View>
   );
 }
@@ -359,7 +365,7 @@ export function UserProfileScreen({ userId, onNavigateFollowers, onNavigatePost,
             accessibilityRole="button"
             accessibilityLabel={t('profile.menuA11y')}
           >
-            <Text style={styles.menuIcon}>⋯</Text>
+            <Text style={styles.menuIcon}>{t('profile.menuIcon')}</Text>
           </Pressable>
         )}
       </View>

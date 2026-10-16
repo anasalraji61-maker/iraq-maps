@@ -17,7 +17,7 @@ import { type Review, type RatingSummary, reviewsContract } from '@iraq-maps/con
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { initClient } from '@ts-rest/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -36,13 +36,8 @@ I18nManager.forceRTL(true);
 const PRIMARY = '#1976D2';
 const STAR_FULL = '★';
 const STAR_EMPTY = '☆';
-const PAGE_SIZE = 20;
-
 type SortMode = 'newest' | 'highest' | 'lowest';
 type StarFilter = 0 | 1 | 2 | 3 | 4 | 5;
-
-// Local-only helpful votes map (placeId:reviewId -> delta)
-const helpfulVotes = new Map<string, number>();
 
 // ── Entry ─────────────────────────────────────────────────────────────────────
 
@@ -135,6 +130,7 @@ function ReviewsList({ placeId }: { placeId: string }): ReactElement {
 
       {/* Sort chips */}
       <View style={styles.chipRow}>
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         {(['newest', 'highest', 'lowest'] as SortMode[]).map((mode) => {
           const labels: Record<SortMode, string> = {
             newest: t('reviews.sortNewest'),
@@ -275,10 +271,10 @@ const chartStyles = StyleSheet.create({
   avgNum: { fontSize: 44, fontWeight: '700', color: '#222', lineHeight: 52 },
   countText: { fontSize: 12, color: '#888' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  starLabel: { width: 32, fontSize: 12, color: '#555', textAlign: 'end' },
+  starLabel: { width: 32, fontSize: 12, color: '#555', textAlign: 'auto' },
   track: { flex: 1, height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' },
   fill: { height: '100%', backgroundColor: '#F5A623', borderRadius: 4 },
-  count: { width: 28, fontSize: 12, color: '#888', textAlign: 'start' },
+  count: { width: 28, fontSize: 12, color: '#888', textAlign: 'auto' },
 });
 
 // ── Review card ───────────────────────────────────────────────────────────────

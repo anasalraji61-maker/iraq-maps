@@ -4,7 +4,6 @@
  * Supported types: card (display-only stub), wallet (link to WalletScreen),
  * cash_on_delivery (always available).
  */
-import { useApi } from '@iraq-maps/mobile-kit';
 import { Banner, Button, Screen, Sheet, Text } from '@iraq-maps/ui';
 import { href } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
@@ -12,7 +11,6 @@ import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -154,14 +152,12 @@ function StaticOptionCard({
 
 export function PaymentMethodsScreen(): ReactElement {
   const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = useApi() as any;
 
   const [methods, setMethods] = useState<RawPaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [successMsg] = useState<string | null>(null);
   const [showAddCardNote, setShowAddCardNote] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
 
@@ -227,7 +223,6 @@ export function PaymentMethodsScreen(): ReactElement {
   }, []);
 
   const savedCards = methods.filter((m) => m.type === 'card');
-  const hasWalletMethod = methods.some((m) => m.type === 'wallet');
 
   return (
     <Screen scroll>
@@ -290,7 +285,7 @@ export function PaymentMethodsScreen(): ReactElement {
             <Button
               variant="secondary"
               label={t('wallet.title')}
-              onPress={() => router.push(href('accountWallet') as never)}
+              onPress={() => router.push(href('accountWallet' as never) as never)}
             />
           </View>
         </>

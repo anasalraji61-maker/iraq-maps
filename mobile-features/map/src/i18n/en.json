@@ -18,10 +18,12 @@
     "noResultsSuggest": "No results found. Did you mean one of these places?",
     "backBtn": "Go back",
     "clearInput": "Clear input",
+    "clearIcon": "✕",
     "loadingLabel": "Searching…",
     "voiceInput": "Voice search",
     "trendingTitle": "Trending searches",
     "filterBtn": "Filter results",
+    "filterIcon": "⚙️",
     "filterTitle": "Filter options",
     "filterTypeLabel": "Result type",
     "filterRadiusLabel": "Search radius",
@@ -171,7 +173,9 @@
     "directions": "Directions",
     "message": "Message this place",
     "assistant": "Ask the assistant",
-    "nearMe": "Near me"
+    "nearMe": "Near me",
+    "retry": "Retry",
+    "close": "Close"
   },
   "satellite": {
     "label": "Satellite"
@@ -329,6 +333,7 @@
   "detail": {
     "address": "Address",
     "copy": "Copy",
+    "copied": "✓",
     "copyAddress": "Copy address",
     "phoneTapHint": "Tap to call"
   },
@@ -369,7 +374,12 @@
     "errorCategoryRequired": "Please select a category",
     "errorPhoneFormat": "Phone must be a valid Iraqi number",
     "errorTerms": "You must agree to the terms before submitting",
-    "errorSubmit": "An error occurred. Please try again."
+    "errorSubmit": "An error occurred. Please try again.",
+    "successIcon": "✓",
+    "checkmark": "✓",
+    "removeIcon": "✕",
+    "addIcon": "＋",
+    "uploadingIcon": "…"
   },
   "photos": {
     "empty": "No photos yet for this place.",
@@ -378,7 +388,9 @@
     "reportMsg": "Report this photo?",
     "reportConfirm": "Report",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "localBadge": "✓",
+    "addPhotoBtnLabel": "＋ Add photo"
   },
   "cluster": {
     "label": "{count} places"

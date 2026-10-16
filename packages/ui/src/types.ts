@@ -4,7 +4,7 @@ import type { TextInputProps } from 'react-native';
 type Base = { testID?: string };
 
 export interface ScreenProps extends Base { children: ReactNode; scroll?: boolean }
-export interface TextProps extends Base { children: ReactNode; variant?: 'title' | 'subtitle' | 'body' | 'caption'; tone?: 'default' | 'muted' | 'danger'; style?: import('react-native').StyleProp<import('react-native').TextStyle> }
+export interface TextProps extends Base { children: ReactNode; variant?: 'title' | 'subtitle' | 'body' | 'caption'; tone?: 'default' | 'muted' | 'danger'; style?: import('react-native').StyleProp<import('react-native').TextStyle>; onPress?: () => void; accessibilityRole?: import('react-native').TextProps['accessibilityRole'] }
 export interface ButtonProps extends Base { label: string; onPress(): void; variant?: 'primary' | 'secondary' | 'danger'; disabled?: boolean; loading?: boolean; accessibilityLabel?: string }
 export interface TextFieldProps extends Base {
   label: string;
@@ -23,6 +23,10 @@ export interface TextFieldProps extends Base {
   accessibilityRole?: TextInputProps['accessibilityRole'];
   /** Accessibility label override (defaults to `label` when omitted). */
   accessibilityLabel?: string;
+  secureTextEntry?: boolean;
+  multiline?: boolean;
+  /** Optional element rendered to the right of the input (e.g. show/hide toggle). */
+  rightElement?: import('react').ReactNode;
 }
 export interface ListItemProps extends Base {
   title: string;

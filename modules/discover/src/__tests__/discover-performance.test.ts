@@ -12,7 +12,7 @@
  * "Performance" here means the service doesn't do N+1 work per item.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { UserId, PostIdType } from '@iraq-maps/contracts';
 import { DiscoverService } from '../discover.service';
 
@@ -82,6 +82,7 @@ function makeFastDb(rows: unknown[], extraSelectRows: unknown[] = []) {
       set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue(rows.slice(0, 1)) }) }),
     }),
     delete: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
+    execute: vi.fn().mockResolvedValue({ rows: [] }),
   };
 }
 
@@ -198,7 +199,7 @@ describe('Performance – trending hashtags', () => {
     const svc = new DiscoverService(db as never, undefined, null, null, redis as never);
 
     const result = await svc.trendingHashtags(10);
-    expect(db.select).toHaveBeenCalled();
+    expect(db.execute).toHaveBeenCalled();
     expect(redis.set).toHaveBeenCalled();
     expect(Array.isArray(result)).toBe(true);
   });
@@ -352,10 +353,11 @@ describe('Performance – concurrent like/unlike', () => {
   });
 
   it('25 concurrent bookmarkPost and 25 concurrent unbookmarkPost', async () => {
+    const postRow = { id: 'post-bmark-concurrent', authorId: U1, placeId: null, type: 'tip', body: '', mediaAssetIds: [], likeCount: 0, commentCount: 0, viewCount: 0, bookmarkCount: 0, isPinned: false, createdAt: new Date(), removedAt: null };
     const db = {
-      select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }) }) }),
+      select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([postRow]) }) }) }),
       insert: vi.fn().mockReturnValue({ values: vi.fn().mockReturnValue({ onConflictDoNothing: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }), returning: vi.fn().mockResolvedValue([]) }) }),
-      update: vi.fn(),
+      update: vi.fn().mockReturnValue({ set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ ...postRow, bookmarkCount: 1 }]) }) }) }),
       delete: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) }),
     };
 

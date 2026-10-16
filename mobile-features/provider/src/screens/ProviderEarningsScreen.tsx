@@ -58,7 +58,6 @@ function last7Days(): string[] {
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-use-before-define
 function SaleAmountText({ amount }: { amount: number }): ReactElement {
   const display = `${amount.toLocaleString('ar-IQ')} ${t('earnings.currency')}`;
   return <Text style={{ fontSize: 16, fontWeight: '700', color: '#1565C0' }}>{display}</Text>;
@@ -191,7 +190,6 @@ export function ProviderEarningsScreen(): ReactElement {
               onChangeText={setAmount}
               placeholder={t('earnings.amountPlaceholder')}
               keyboardType="numeric"
-              textAlign="right"
             />
             <Text style={styles.formLabel}>{t('earnings.date')}</Text>
             <TextInput
@@ -200,7 +198,6 @@ export function ProviderEarningsScreen(): ReactElement {
               onChangeText={setDate}
               placeholder="YYYY-MM-DD"
               keyboardType="ascii-capable"
-              textAlign="right"
             />
             <Text style={styles.formLabel}>{t('earnings.note')}</Text>
             <TextInput
@@ -209,7 +206,6 @@ export function ProviderEarningsScreen(): ReactElement {
               onChangeText={(v) => setNote(v.slice(0, MAX_NOTE))}
               placeholder={t('earnings.notePlaceholder')}
               multiline
-              textAlign="right"
             />
             <View style={styles.formButtons}>
               <Button label={t('earnings.save')} onPress={() => void handleSave()} disabled={saving} />

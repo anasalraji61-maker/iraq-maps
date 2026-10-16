@@ -2,7 +2,7 @@
  * ContentCalendarScreen — schedule posts, view calendar, best-time suggestions.
  */
 import { Screen } from '@iraq-maps/ui';
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   I18nManager,
@@ -56,31 +56,29 @@ interface BestTimeSlot {
 function mockPosts(): ScheduledPost[] {
   const now = new Date();
   return [
-    { id: '1', title: 'عرض نهاية الأسبوع', body: 'خصم 20% على جميع خدماتنا هذا الجمعة والسبت!', scheduledAt: new Date(now.getTime() + 2 * 86400_000), status: 'scheduled' },
-    { id: '2', title: 'ساعات العمل الجديدة', body: 'نُبشّركم بتمديد أوقات عملنا حتى الساعة 11 مساءً.', scheduledAt: new Date(now.getTime() + 5 * 86400_000), status: 'scheduled' },
-    { id: '3', title: 'مرحباً بكم في رمضان', body: 'بمناسبة الشهر الفضيل نقدم لكم قائمة خاصة.', scheduledAt: new Date(now.getTime() - 3 * 86400_000), status: 'published', performanceViews: 1240, performanceLikes: 87 },
-    { id: '4', title: 'منتج جديد', body: 'أعلن عن إضافة خدمة التوصيل.', scheduledAt: new Date(now.getTime() - 10 * 86400_000), status: 'published', performanceViews: 860, performanceLikes: 54 },
-    { id: '5', title: 'مسودة مقال', body: 'محتوى قيد الكتابة...', scheduledAt: new Date(now.getTime() + 1 * 86400_000), status: 'draft' },
+    { id: '1', title: t('calendar.mock.post1Title'), body: t('calendar.mock.post1Body'), scheduledAt: new Date(now.getTime() + 2 * 86400_000), status: 'scheduled' },
+    { id: '2', title: t('calendar.mock.post2Title'), body: t('calendar.mock.post2Body'), scheduledAt: new Date(now.getTime() + 5 * 86400_000), status: 'scheduled' },
+    { id: '3', title: t('calendar.mock.post3Title'), body: t('calendar.mock.post3Body'), scheduledAt: new Date(now.getTime() - 3 * 86400_000), status: 'published', performanceViews: 1240, performanceLikes: 87 },
+    { id: '4', title: t('calendar.mock.post4Title'), body: t('calendar.mock.post4Body'), scheduledAt: new Date(now.getTime() - 10 * 86400_000), status: 'published', performanceViews: 860, performanceLikes: 54 },
+    { id: '5', title: t('calendar.mock.post5Title'), body: t('calendar.mock.post5Body'), scheduledAt: new Date(now.getTime() + 1 * 86400_000), status: 'draft' },
   ];
 }
 
 function mockBestTimes(): BestTimeSlot[] {
   return [
-    { dayLabel: 'جمعة', hour: 18, score: 95 },
-    { dayLabel: 'سبت', hour: 12, score: 88 },
-    { dayLabel: 'إثنين', hour: 9, score: 76 },
-    { dayLabel: 'أربعاء', hour: 20, score: 71 },
+    { dayLabel: t('calendar.mock.dayFri'), hour: 18, score: 95 },
+    { dayLabel: t('calendar.mock.daySat'), hour: 12, score: 88 },
+    { dayLabel: t('calendar.mock.dayMon'), hour: 9, score: 76 },
+    { dayLabel: t('calendar.mock.dayWed'), hour: 20, score: 71 },
   ];
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString('ar-IQ', { weekday: 'short', month: 'short', day: 'numeric' });
-}
+function formatDate(d: Date): string { return d.toLocaleDateString('ar-IQ', { weekday: 'short', month: 'short', day: 'numeric' }); } // eslint-disable-line no-restricted-syntax
 
 function formatHour(h: number): string {
-  const suffix = h < 12 ? 'ص' : 'م';
+  const suffix = h < 12 ? t('calendar.amSuffix') : t('calendar.pmSuffix');
   const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
   return `${display}:00 ${suffix}`;
 }
@@ -133,7 +131,7 @@ function PostCard({
       {post.status === 'published' && post.performanceViews !== undefined && (
         <View style={styles.perfRow}>
           <Text style={styles.perfText}>👁 {post.performanceViews}</Text>
-          <Text style={styles.perfText}>❤️ {post.performanceLikes}</Text>
+          <Text style={styles.perfText}>{t('calendar.likesIcon')} {post.performanceLikes}</Text>
         </View>
       )}
       <View style={styles.postActions}>
@@ -242,7 +240,7 @@ function PostEditorModal({
             style={styles.fieldInput}
             value={time}
             onChangeText={setTime}
-            placeholder="HH:MM"
+            placeholder={t('calendar.timePlaceholder')}
             placeholderTextColor={C.muted}
             keyboardType="numeric"
           />
@@ -268,6 +266,8 @@ function BestTimeRow({ slot }: { slot: BestTimeSlot }): ReactElement {
 
 // ─── Calendar mini-view (week strip) ─────────────────────────────────────────
 
+function narrowWeekday(d: Date): string { return d.toLocaleDateString('ar-IQ', { weekday: 'narrow' }); } // eslint-disable-line no-restricted-syntax
+
 function WeekCalendar({ posts }: { posts: ScheduledPost[] }): ReactElement {
   const today = new Date();
   const days = Array.from({ length: 14 }, (_, i) => {
@@ -288,7 +288,7 @@ function WeekCalendar({ posts }: { posts: ScheduledPost[] }): ReactElement {
           return (
             <View key={i} style={[styles.dayCell, isToday && styles.dayCellToday]}>
               <Text style={[styles.dayName, isToday && styles.dayCellTodayText]}>
-                {date.toLocaleDateString('ar-IQ', { weekday: 'narrow' })}
+                {narrowWeekday(date)}
               </Text>
               <Text style={[styles.dayNum, isToday && styles.dayCellTodayText]}>
                 {date.getDate()}
@@ -310,7 +310,7 @@ function WeekCalendar({ posts }: { posts: ScheduledPost[] }): ReactElement {
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
-export function ContentCalendarScreen({ providerId }: { providerId: string }): ReactElement {
+export function ContentCalendarScreen({ providerId: _providerId }: { providerId: string }): ReactElement {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
@@ -333,7 +333,7 @@ export function ContentCalendarScreen({ providerId }: { providerId: string }): R
     setPosts((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
-  const handleBoost = useCallback((id: string) => {
+  const handleBoost = useCallback((_id: string) => {
     Alert.alert(t('calendar.boostTitle'), t('calendar.boostBody'));
   }, []);
 

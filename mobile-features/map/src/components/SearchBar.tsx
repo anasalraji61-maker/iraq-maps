@@ -18,7 +18,6 @@ import {
   Text as RNText,
   TextInput,
   View,
-  type TextInputProps,
 } from 'react-native';
 import { t } from '../strings';
 
@@ -140,7 +139,7 @@ export function SearchBar({
       ) : loading ? (
         <ActivityIndicator
           size="small"
-          color={tokens.colorContentSecondary}
+          color={tokens.color.textMuted}
           style={styles.iconBtn}
           accessibilityLabel={t('search.loadingLabel')}
         />
@@ -175,14 +174,14 @@ export function SearchBar({
           onFocus={onFocus}
           onBlur={onBlur}
           placeholder={t('search.placeholder')}
-          placeholderTextColor={tokens.colorContentSecondary}
+          placeholderTextColor={tokens.color.textMuted}
           returnKeyType="search"
           autoCorrect={false}
           autoCapitalize="none"
           accessibilityLabel={t('search.a11yLabel')}
           testID={testID ?? 'search-input'}
           // RTL is handled by the OS via textAlign start.
-          textAlign="auto"
+          textAlign="left"
         />
       )}
 
@@ -196,7 +195,7 @@ export function SearchBar({
           hitSlop={8}
         >
           <RNText style={styles.clearIcon} allowFontScaling={false}>
-            {'✕'}
+            {t('search.clearIcon')}
           </RNText>
         </Pressable>
       )}
@@ -227,7 +226,7 @@ export function SearchBar({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: tokens.colorSurface,
+    backgroundColor: tokens.color.surface,
     borderRadius: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -252,11 +251,11 @@ const styles = StyleSheet.create({
   },
   backIcon: {
     fontSize: 20,
-    color: tokens.colorContentPrimary,
+    color: tokens.color.text,
   },
   clearIcon: {
     fontSize: 14,
-    color: tokens.colorContentSecondary,
+    color: tokens.color.textMuted,
   },
   micIcon: {
     fontSize: 16,
@@ -267,7 +266,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: tokens.colorContentPrimary,
+    color: tokens.color.text,
     paddingVertical: 8,
     paddingHorizontal: 4,
   },
@@ -278,6 +277,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     fontSize: 15,
-    color: tokens.colorContentSecondary,
+    color: tokens.color.textMuted,
   },
 });

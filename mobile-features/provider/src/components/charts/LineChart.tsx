@@ -54,10 +54,10 @@ function skeletonPath(w: number, h: number): string {
 
 function buildBezierPath(points: { x: number; y: number }[]): string {
   if (points.length < 2) return '';
-  let d = `M ${points[0].x} ${points[0].y}`;
+  let d = `M ${points[0]!.x} ${points[0]!.y}`;
   for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
     const cpx = (prev.x + curr.x) / 2;
     d += ` C ${cpx} ${prev.y} ${cpx} ${curr.y} ${curr.x} ${curr.y}`;
   }
@@ -67,8 +67,8 @@ function buildBezierPath(points: { x: number; y: number }[]): string {
 function buildAreaPath(points: { x: number; y: number }[], bottom: number): string {
   if (points.length < 2) return '';
   const line = buildBezierPath(points);
-  const last = points[points.length - 1];
-  const first = points[0];
+  const last = points[points.length - 1]!;
+  const first = points[0]!;
   return `${line} L ${last.x} ${bottom} L ${first.x} ${bottom} Z`;
 }
 
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginBottom: 4,
-    textAlign: 'left',
+    textAlign: 'auto',
   },
   empty: {
     alignItems: 'center',

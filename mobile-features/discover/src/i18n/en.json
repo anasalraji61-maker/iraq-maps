@@ -352,7 +352,9 @@
     "verifiedA11y": "Verified account",
     "posts": "Posts",
     "followers": "Followers",
+    "followingCount": "Following",
     "following": "Following",
+    "unfollow": "Unfollow",
     "follow": "Follow",
     "followBack": "Follow Back",
     "followA11y": "Follow {name}",
@@ -378,7 +380,17 @@
     "cancel": "Cancel",
     "followError": "Failed to follow",
     "loadError": "Failed to load profile",
-    "retry": "Retry"
+    "retry": "Retry",
+    "verifiedIcon": "✓",
+    "menuIcon": "⋯",
+    "mock": {
+      "displayName": "user_{id}",
+      "bio": "Welcome to my profile on Iraq Smart Maps.",
+      "postBody": "Post #{n}",
+      "mutual1": "Ahmed",
+      "mutual2": "Sara",
+      "mutual3": "Mohammed"
+    }
   },
   "followers": {
     "title": "Followers",
@@ -405,7 +417,13 @@
     "followError": "Failed to follow",
     "cancel": "Cancel",
     "loadError": "Failed to load list",
-    "retry": "Retry"
+    "retry": "Retry",
+    "verifiedIcon": "✓",
+    "removeIcon": "✕",
+    "clearIcon": "✕",
+    "mock": {
+      "displayName": "User {n}"
+    }
   },
   "suggestions": {
     "title": "People You May Know",
@@ -425,7 +443,13 @@
     "bulkFollowError": "Bulk follow failed",
     "empty": "No suggestions right now",
     "loadError": "Failed to load suggestions",
-    "retry": "Retry"
+    "retry": "Retry",
+    "dismissIcon": "✕",
+    "checkmark": "✓",
+    "verifiedIcon": "✓",
+    "mock": {
+      "displayName": "Suggested User {n}"
+    }
   },
   "marketplace": {
     "title": "Marketplace",

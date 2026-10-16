@@ -45,7 +45,7 @@ function PanoramaStub({ asset }: { asset: Tour3DAsset }) {
           <Text style={stubStyles.metaText}>
             {asset.type === 'photo360' ? '📷' : asset.type === 'video360' ? '🎥' : '🗿'} {asset.type}
           </Text>
-          <Text style={stubStyles.metaText}>↑ {asset.pitch}° → {asset.heading}°</Text>
+          <Text style={stubStyles.metaText}>{t('viewer.pitchHeading', { pitch: String(asset.pitch), heading: String(asset.heading) })}</Text>
         </View>
       </View>
     </View>
@@ -202,7 +202,7 @@ export function Tour3DViewerScreen() {
     <View style={styles.container}>
       {/* Back button */}
       <View style={styles.backRow}>
-        <Pressable style={styles.backButton} onPress={handleBack} accessibilityRole="button" accessibilityLabel="back">
+        <Pressable style={styles.backButton} onPress={handleBack} accessibilityRole="button" accessibilityLabel={t('viewer.back')}>
           <Text style={styles.backButtonText}>{'←'}</Text>
         </Pressable>
         <Text style={styles.headerTitle} numberOfLines={1}>{sceneName}</Text>
@@ -229,7 +229,7 @@ export function Tour3DViewerScreen() {
                   styles.annotationPosition,
                   {
                     // Distribute annotations across the viewport width based on index
-                    left: ((scene.annotations.indexOf(ann) + 1) / (scene.annotations.length + 1)) * SCREEN_W,
+                    start: ((scene.annotations.indexOf(ann) + 1) / (scene.annotations.length + 1)) * SCREEN_W,
                     top: VIEWER_HEIGHT * 0.3 + (scene.annotations.indexOf(ann) % 3) * 40,
                   },
                 ]}
@@ -299,7 +299,7 @@ export function Tour3DViewerScreen() {
             </Text>
             {selectedAnnotation.linkedPlaceId && (
               <Text style={styles.annotationDetailLink}>
-                {t('viewer.annotation.linkedPlace')} →
+                {t('viewer.annotation.linkedPlaceArrow')}
               </Text>
             )}
           </View>
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   annotationOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   annotationPosition: {
     position: 'absolute',
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
     lineHeight: 22,
-    textAlign: 'right',
+    textAlign: 'auto',
     writingDirection: 'rtl',
   },
   statsRow: {
@@ -435,11 +435,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '700',
-    textAlign: 'right',
+    textAlign: 'auto',
   },
   annotationDetailLink: {
     color: '#c9a84c',
     fontSize: 13,
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 });

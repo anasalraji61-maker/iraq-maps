@@ -45,7 +45,7 @@ interface Props {
 function mockUsers(tab: Tab): FollowUser[] {
   return Array.from({ length: 15 }, (_, i) => ({
     userId: `user-${tab}-${i}`,
-    displayName: `مستخدم ${i + 1}`,
+    displayName: t('followers.mock.displayName', { n: String(i + 1) }),
     avatarUrl: null,
     isFollowing: i % 3 === 0,
     isFollowedBy: i % 4 === 0,
@@ -122,7 +122,7 @@ function UserRow({
           <Text style={styles.displayName} numberOfLines={1}>{user.displayName}</Text>
           {user.isVerified && (
             <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedIcon}>✓</Text>
+              <Text style={styles.verifiedIcon}>{t('followers.verifiedIcon')}</Text>
             </View>
           )}
           {user.isFollowedBy && (
@@ -166,7 +166,7 @@ function UserRow({
             accessibilityRole="button"
             accessibilityLabel={t('followers.removeA11y', { name: user.displayName })}
           >
-            <Text style={styles.removeIcon}>✕</Text>
+            <Text style={styles.removeIcon}>{t('followers.removeIcon')}</Text>
           </Pressable>
         )}
       </View>
@@ -177,7 +177,7 @@ function UserRow({
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export function FollowersScreen({
-  userId,
+  userId: _userId,
   initialTab = 'followers',
   isOwnProfile = false,
   onNavigateProfile,
@@ -288,7 +288,7 @@ export function FollowersScreen({
         />
         {query.length > 0 && (
           <Pressable onPress={() => setQuery('')} accessibilityRole="button" accessibilityLabel={t('followers.clearSearch')}>
-            <Text style={styles.clearIcon}>✕</Text>
+            <Text style={styles.clearIcon}>{t('followers.clearIcon')}</Text>
           </Pressable>
         )}
       </View>

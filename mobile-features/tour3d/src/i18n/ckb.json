@@ -49,8 +49,11 @@
     },
     "annotation": {
       "tapToLearnMore": "بکە بۆ زانیاری زیاتر",
-      "linkedPlace": "شوێنەکە ببینە"
-    }
+      "linkedPlace": "شوێنەکە ببینە",
+      "linkedPlaceArrow": "شوێنەکە ببینە ←"
+    },
+    "pitchHeading": "↑ {pitch}° → {heading}°",
+    "back": "گەڕانەوە"
   },
   "map": {
     "title": "خەریتەی گەشتەکان",

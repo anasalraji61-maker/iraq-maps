@@ -20,12 +20,11 @@
 
 import { PlaceCategory } from '@iraq-maps/contracts';
 import { useApi, uploadAsset, useApiBaseUrl } from '@iraq-maps/mobile-kit';
-import { Banner, Button, Screen, Text } from '@iraq-maps/ui';
+import { Banner, Button, Screen } from '@iraq-maps/ui';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { type ReactElement, useState } from 'react';
 import {
-  Alert,
   I18nManager,
   Image,
   ScrollView,
@@ -145,7 +144,7 @@ export function AddPlaceScreen(): ReactElement {
     }));
 
   /** Convert WeekHours to OSM opening_hours string */
-  const buildHoursRaw = (): string => {
+  const _buildHoursRaw = (): string => {
     const parts = DAYS.filter(({ key }) => weekHours[key]!.open).map(({ key }) => {
       const { from, to } = weekHours[key]!;
       return `${key} ${from}-${to}`;
@@ -176,7 +175,7 @@ export function AddPlaceScreen(): ReactElement {
     return (
       <Screen>
         <View style={styles.successBox}>
-          <RNText style={styles.successIcon}>✓</RNText>
+          <RNText style={styles.successIcon}>{t('addPlace.successIcon')}</RNText>
           <RNText style={styles.successTitle}>{t('addPlace.successTitle')}</RNText>
           <RNText style={styles.successSubtitle}>{t('addPlace.successSubtitle')}</RNText>
         </View>
@@ -205,7 +204,6 @@ export function AddPlaceScreen(): ReactElement {
         placeholder={t('addPlace.nameArPlaceholder')}
         accessibilityLabel={t('addPlace.nameArLabel')}
         testID="addPlace.nameAr"
-        textAlign="right"
       />
       <FieldLabel label={t('addPlace.nameEnLabel')} />
       <TextInput
@@ -231,7 +229,6 @@ export function AddPlaceScreen(): ReactElement {
         keyboardType="phone-pad"
         accessibilityLabel={t('addPlace.phoneSection')}
         testID="addPlace.phone"
-        textAlign="right"
       />
 
       {/* ── Hours ────────────────────────────────────────────────────────── */}
@@ -271,7 +268,7 @@ export function AddPlaceScreen(): ReactElement {
         testID="addPlace.terms"
       >
         <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
-          {agreed ? <RNText style={styles.checkmark}>✓</RNText> : null}
+          {agreed ? <RNText style={styles.checkmark}>{t('addPlace.checkmark')}</RNText> : null}
         </View>
         <RNText style={styles.termsText}>{t('addPlace.termsLabel')}</RNText>
       </TouchableOpacity>
@@ -526,7 +523,7 @@ function PhotoUploadRow({
           >
             <Image source={{ uri }} style={{ width: THUMB, height: THUMB, borderRadius: 8 }} resizeMode="cover" />
             <View style={photoStyles.removeOverlay}>
-              <RNText style={photoStyles.removeIcon}>✕</RNText>
+              <RNText style={photoStyles.removeIcon}>{t('addPlace.removeIcon')}</RNText>
             </View>
           </TouchableOpacity>
         ))}
@@ -538,12 +535,12 @@ function PhotoUploadRow({
             accessibilityLabel={t('reviews.addPhoto')}
             testID="addPlace.addPhoto"
           >
-            <RNText style={photoStyles.addIcon}>＋</RNText>
+            <RNText style={photoStyles.addIcon}>{t('addPlace.addIcon')}</RNText>
           </TouchableOpacity>
         ) : null}
         {uploading ? (
           <View style={[photoStyles.addBtn, { opacity: 0.5 }]}>
-            <RNText style={photoStyles.addIcon}>…</RNText>
+            <RNText style={photoStyles.addIcon}>{t('addPlace.uploadingIcon')}</RNText>
           </View>
         ) : null}
       </View>
@@ -619,7 +616,7 @@ const styles = StyleSheet.create({
     color: '#222',
     backgroundColor: '#FAFAFA',
   },
-  inputRTL: { textAlign: 'right' },
+  inputRTL: { textAlign: 'auto' },
   multiline: { minHeight: 96, textAlignVertical: 'top' },
   termsRow: {
     flexDirection: 'row',

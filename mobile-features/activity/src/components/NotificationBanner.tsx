@@ -175,7 +175,7 @@ export function NotificationBanner({ payload, onDismiss }: NotificationBannerPro
           accessibilityLabel={t('bannerDismiss')}
           style={styles.dismissBtn}
         >
-          <Text style={[styles.dismissIcon, { color: meta.accent }]} accessibilityElementsHidden>{'✕'}</Text>
+          <Text style={[styles.dismissIcon, { color: meta.accent }]} accessibilityElementsHidden>{t('bannerDismissIcon')}</Text>
         </Pressable>
       </Pressable>
 

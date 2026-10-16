@@ -82,25 +82,25 @@ function mockCustomerData(): CustomerData {
     ],
     avgVisitsPerMonth: 2.4,
     sentimentKeywords: [
-      { word: 'سريع', count: 48, positive: true },
-      { word: 'نظيف', count: 41, positive: true },
-      { word: 'مميز', count: 37, positive: true },
-      { word: 'رائع', count: 32, positive: true },
-      { word: 'بطيء', count: 14, positive: false },
-      { word: 'غالي', count: 11, positive: false },
-      { word: 'ممتاز', count: 28, positive: true },
-      { word: 'جيد', count: 22, positive: true },
-      { word: 'مزدحم', count: 9, positive: false },
+      { word: t('customers.mock.kw1'), count: 48, positive: true },
+      { word: t('customers.mock.kw2'), count: 41, positive: true },
+      { word: t('customers.mock.kw3'), count: 37, positive: true },
+      { word: t('customers.mock.kw4'), count: 32, positive: true },
+      { word: t('customers.mock.kw5'), count: 14, positive: false },
+      { word: t('customers.mock.kw6'), count: 11, positive: false },
+      { word: t('customers.mock.kw7'), count: 28, positive: true },
+      { word: t('customers.mock.kw8'), count: 22, positive: true },
+      { word: t('customers.mock.kw9'), count: 9, positive: false },
     ],
     positiveScore: 78,
     topQuotes: [
-      { text: 'خدمة ممتازة وسرعة في التنفيذ، سأعود بالتأكيد!', rating: 5, positive: true },
-      { text: 'النظافة عالية جداً والموظفون محترمون', rating: 5, positive: true },
-      { text: 'أفضل مكان في المنطقة، ننصح به الجميع', rating: 5, positive: true },
+      { text: t('customers.mock.quote1'), rating: 5, positive: true },
+      { text: t('customers.mock.quote2'), rating: 5, positive: true },
+      { text: t('customers.mock.quote3'), rating: 5, positive: true },
     ],
     topIssues: [
-      { text: 'الانتظار كان طويلاً في أوقات الذروة', rating: 2, positive: false },
-      { text: 'الأسعار مرتفعة قليلاً مقارنة بالمنافسين', rating: 3, positive: false },
+      { text: t('customers.mock.issue1'), rating: 2, positive: false },
+      { text: t('customers.mock.issue2'), rating: 3, positive: false },
     ],
   };
 }
@@ -210,7 +210,7 @@ function QuoteCard({ quote }: { quote: ReviewQuote }): ReactElement {
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
-export function CustomerInsightsScreen({ providerId }: { providerId: string }): ReactElement {
+export function CustomerInsightsScreen({ providerId: _providerId }: { providerId: string }): ReactElement {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<CustomerData | null>(null);

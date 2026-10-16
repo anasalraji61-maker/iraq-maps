@@ -18,10 +18,12 @@
     "noResultsSuggest": "لم نجد نتائج. هل تقصد أحد هذه الأماكن؟",
     "backBtn": "رجوع",
     "clearInput": "مسح النص",
+    "clearIcon": "✕",
     "loadingLabel": "جارٍ البحث…",
     "voiceInput": "البحث الصوتي",
     "trendingTitle": "الأكثر بحثاً",
     "filterBtn": "تصفية النتائج",
+    "filterIcon": "⚙️",
     "filterTitle": "خيارات التصفية",
     "filterTypeLabel": "نوع النتيجة",
     "filterRadiusLabel": "نطاق البحث",
@@ -171,7 +173,9 @@
     "directions": "الاتجاهات",
     "message": "راسِل المكان",
     "assistant": "اسأل المساعد",
-    "nearMe": "قريب مني"
+    "nearMe": "قريب مني",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق"
   },
   "satellite": {
     "label": "القمر الصناعي"
@@ -329,6 +333,7 @@
   "detail": {
     "address": "العنوان",
     "copy": "نسخ",
+    "copied": "✓",
     "copyAddress": "نسخ العنوان",
     "phoneTapHint": "اضغط للاتصال"
   },
@@ -369,7 +374,12 @@
     "errorCategoryRequired": "يرجى اختيار فئة المكان",
     "errorPhoneFormat": "رقم الهاتف يجب أن يكون بالصيغة الدولية العراقية",
     "errorTerms": "يجب الموافقة على الشروط قبل الإرسال",
-    "errorSubmit": "حدث خطأ أثناء الإرسال. حاول مجدداً."
+    "errorSubmit": "حدث خطأ أثناء الإرسال. حاول مجدداً.",
+    "successIcon": "✓",
+    "checkmark": "✓",
+    "removeIcon": "✕",
+    "addIcon": "＋",
+    "uploadingIcon": "…"
   },
   "photos": {
     "empty": "لا توجد صور لهذا المكان بعد.",
@@ -378,7 +388,9 @@
     "reportMsg": "هل تريد الإبلاغ عن هذه الصورة؟",
     "reportConfirm": "تأكيد الإبلاغ",
     "prev": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "localBadge": "✓",
+    "addPhotoBtnLabel": "＋ إضافة صورة"
   },
   "cluster": {
     "label": "{count} مكان"

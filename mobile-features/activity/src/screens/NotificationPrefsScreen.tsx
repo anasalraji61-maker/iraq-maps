@@ -172,7 +172,7 @@ function TimePickerModal({ visible, title, initial, onDone, onCancel }: TimePick
                 setVal(clean.slice(0, 5));
               }
             }}
-            placeholder="HH:MM"
+            placeholder={t('prefsTimePlaceholder')}
             keyboardType="numeric"
             maxLength={5}
             accessibilityLabel={title}

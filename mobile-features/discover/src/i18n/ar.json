@@ -380,7 +380,17 @@
     "cancel": "إلغاء",
     "followError": "فشلت عملية المتابعة",
     "loadError": "فشل تحميل الملف الشخصي",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "verifiedIcon": "✓",
+    "menuIcon": "⋯",
+    "mock": {
+      "displayName": "مستخدم_{id}",
+      "bio": "مرحباً بكم في ملفي الشخصي على خرائط العراق الذكية.",
+      "postBody": "منشور رقم {n}",
+      "mutual1": "أحمد",
+      "mutual2": "سارة",
+      "mutual3": "محمد"
+    }
   },
   "followers": {
     "title": "المتابِعون",
@@ -407,7 +417,13 @@
     "followError": "فشلت عملية المتابعة",
     "cancel": "إلغاء",
     "loadError": "فشل تحميل القائمة",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "verifiedIcon": "✓",
+    "removeIcon": "✕",
+    "clearIcon": "✕",
+    "mock": {
+      "displayName": "مستخدم {n}"
+    }
   },
   "suggestions": {
     "title": "أشخاص قد تعرفهم",
@@ -427,7 +443,13 @@
     "bulkFollowError": "فشلت عملية المتابعة الجماعية",
     "empty": "لا توجد اقتراحات متاحة الآن",
     "loadError": "فشل تحميل الاقتراحات",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "dismissIcon": "✕",
+    "checkmark": "✓",
+    "verifiedIcon": "✓",
+    "mock": {
+      "displayName": "مستخدم مقترح {n}"
+    }
   },
   "marketplace": {
     "title": "السوق",

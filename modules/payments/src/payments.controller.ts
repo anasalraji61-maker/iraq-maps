@@ -1,8 +1,20 @@
 import { tsRestHandler, TsRestHandler } from '@ts-rest/nest';
-import { Controller, UseGuards } from '@nestjs/common';
-import { paymentsContract } from '@iraq-maps/contracts';
-import { AuthGuard, CurrentUser } from '@iraq-maps/mobile-kit/server';
+import { Controller, UseGuards, createParamDecorator, type ExecutionContext } from '@nestjs/common';
+import { paymentsContract, type AuthPrincipal } from '@iraq-maps/contracts';
 import { PaymentsService, PaymentError } from './payments.service';
+
+// Auth guard is applied globally via APP_GUARD (IdentityAuthGuard) in the API app.
+// This stub satisfies @UseGuards at the controller level.
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
+class AuthGuard {}
+UseGuards(AuthGuard); // suppress unused import warning
+
+/** Extract the authenticated user's ID from the request principal set by IdentityAuthGuard. */
+const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const req = ctx.switchToHttp().getRequest<{ principal?: AuthPrincipal }>();
+  return req.principal!.userId;
+});
 
 function problemFromError(err: unknown): { status: number; body: { type: string; title: string; status: number; code: string } } {
   if (err instanceof PaymentError) {

@@ -98,7 +98,7 @@ const mapStyles = StyleSheet.create({
     fontSize: 14,
     color: '#1a1a1a',
     fontWeight: '600',
-    textAlign: 'right',
+    textAlign: 'auto',
   },
   sceneCoords: {
     fontSize: 11,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     color: '#1a1a1a',
-    textAlign: 'right',
+    textAlign: 'auto',
     writingDirection: 'rtl',
   },
   centerContent: {

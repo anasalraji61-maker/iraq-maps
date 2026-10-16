@@ -18,10 +18,12 @@
     "noResultsSuggest": "ئەنجامێک نەدۆزرایەوە. مەبەستت یەکێک لەم شوێنانەیە؟",
     "backBtn": "گەڕانەوە",
     "clearInput": "سڕینەوەی دەق",
+    "clearIcon": "✕",
     "loadingLabel": "بەدوایدەگەڕێت…",
     "voiceInput": "گەڕانی دەنگی",
     "trendingTitle": "زیاترین گەڕانەکان",
     "filterBtn": "پاڵاوتنی ئەنجامەکان",
+    "filterIcon": "⚙️",
     "filterTitle": "هەڵبژاردەکانی پاڵاوتن",
     "filterTypeLabel": "جۆری ئەنجام",
     "filterRadiusLabel": "مەودای گەڕان",
@@ -171,7 +173,9 @@
     "directions": "ئاراستەکان",
     "message": "نامە بنێرە بۆ شوێنەکە",
     "assistant": "پرسیار لە یاریدەدەر بکە",
-    "nearMe": "نزیکم"
+    "nearMe": "نزیکم",
+    "retry": "دووبارە هەوڵ بدەرەوە",
+    "close": "داخستن"
   },
   "satellite": {
     "label": "ماهوارە"
@@ -329,6 +333,7 @@
   "detail": {
     "address": "ناونیشان",
     "copy": "کۆپی",
+    "copied": "✓",
     "copyAddress": "کۆپیکردنی ناونیشان",
     "phoneTapHint": "بکە بۆ پەیوەندی"
   },
@@ -369,7 +374,12 @@
     "errorCategoryRequired": "تکایە جۆرێک هەڵبژێرە",
     "errorPhoneFormat": "ژمارەی تەلەفۆن دەبێت عێراقی بێت",
     "errorTerms": "دەبێت ڕازی بیت پێش ناردن",
-    "errorSubmit": "هەڵە ڕوویدا. دووبارە هەوڵ بدەرەوە."
+    "errorSubmit": "هەڵە ڕوویدا. دووبارە هەوڵ بدەرەوە.",
+    "successIcon": "✓",
+    "checkmark": "✓",
+    "removeIcon": "✕",
+    "addIcon": "＋",
+    "uploadingIcon": "…"
   },
   "photos": {
     "empty": "هێشتا وێنەی نییە.",
@@ -378,7 +388,9 @@
     "reportMsg": "ئایا دەتەوێت ڕاپۆرت بدەیت؟",
     "reportConfirm": "دڵنیابوون",
     "prev": "پێشتر",
-    "next": "دواتر"
+    "next": "دواتر",
+    "localBadge": "✓",
+    "addPhotoBtnLabel": "＋ زیادکردنی وێنە"
   },
   "cluster": {
     "label": "{count} شوێن"

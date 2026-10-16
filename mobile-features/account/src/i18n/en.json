@@ -220,7 +220,10 @@
     "getStarted": "Get Started",
     "language": {
       "title": "Choose Your Language",
-      "body": "You can change the language any time in Settings."
+      "body": "You can change the language any time in Settings.",
+      "arabic": "العربية",
+      "kurdish": "کوردی",
+      "english": "English"
     },
     "permissions": {
       "title": "A Few Permissions",
@@ -237,7 +240,8 @@
       "granted": "Enabled",
       "denied": "Denied",
       "continue": "Continue"
-    }
+    },
+    "checkmark": "✓"
   },
   "phoneVerification": {
     "title": "Phone Verification",
@@ -249,7 +253,8 @@
     "resend": "Resend code",
     "resendIn": "Resend in {time}",
     "success": "Verified successfully!",
-    "hint": "The code fills in automatically from your text message"
+    "hint": "The code fills in automatically from your text message",
+    "checkmark": "✓"
   },
   "profileSetup": {
     "title": "Complete Your Profile",
@@ -297,7 +302,9 @@
       "length": "At least 8 characters",
       "upper": "At least one uppercase letter",
       "digit": "At least one number",
-      "special": "At least one special character"
+      "special": "At least one special character",
+      "met": "✓ ",
+      "unmet": "○ "
     }
   },
   "linkedAccounts": {
@@ -322,6 +329,10 @@
     "securityNotice": "We recommend adding a second verification method to keep your account secure."
   },
   "wallet": {
+    "iqdSuffix": " د.ع",
+    "iqdSuffixZero": "٠ د.ع",
+    "iqdThousandSep": "٬",
+    "iqdDigits": "٠١٢٣٤٥٦٧٨٩",
     "title": "My Wallet",
     "balance": "Available Balance",
     "held": "On Hold",

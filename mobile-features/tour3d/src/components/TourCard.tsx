@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#1a1a1a',
-    textAlign: 'right',
+    textAlign: 'auto',
     writingDirection: 'rtl',
   },
   stats: {

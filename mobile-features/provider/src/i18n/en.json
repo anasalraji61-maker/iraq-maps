@@ -161,11 +161,35 @@
     "invalid_request": "Check your input and try again."
   },
   "analytics": {
-    "viewsTitle": "Page Views",
-    "inquiriesTitle": "Inquiries",
-    "viewsTotal": "Total: {n}",
-    "inquiriesTotal": "Total: {n}",
-    "last7days": "Last 7 days"
+    "title": "Analytics Dashboard",
+    "dashboardLink": "Analytics",
+    "range7d": "7 days",
+    "range30d": "30 days",
+    "range90d": "90 days",
+    "rangeCustom": "Custom",
+    "exportPdf": "Export PDF",
+    "views": "Views",
+    "clicks": "Clicks",
+    "messages": "Messages",
+    "bookings": "Bookings",
+    "viewsOverTime": "Views Over Time",
+    "peakHours": "Peak Hours",
+    "trafficSources": "Traffic Sources",
+    "viewsByDay": "Views by Day",
+    "conversionFunnel": "Conversion Funnel",
+    "reviewTrend": "Review Score Trend",
+    "demographics": "Customer Type",
+    "newCustomers": "New",
+    "repeatCustomers": "Repeat",
+    "sourceMap": "Map",
+    "sourceSearch": "Search",
+    "sourceDiscover": "Discover",
+    "sourceDirect": "Direct",
+    "last7days": "Last 7 days",
+    "heatmapScaleMin": "Low",
+    "heatmapScaleMax": "High",
+    "arrowUp": "▲",
+    "arrowDown": "▼"
   },
   "posts": {
     "title": "Create Post",
@@ -343,32 +367,6 @@
     "count": "Count",
     "pct": "{n}%"
   },
-  "analytics": {
-    "title": "Analytics Dashboard",
-    "dashboardLink": "Analytics",
-    "range7d": "7 days",
-    "range30d": "30 days",
-    "range90d": "90 days",
-    "rangeCustom": "Custom",
-    "exportPdf": "Export PDF",
-    "views": "Views",
-    "clicks": "Clicks",
-    "messages": "Messages",
-    "bookings": "Bookings",
-    "viewsOverTime": "Views Over Time",
-    "peakHours": "Peak Hours",
-    "trafficSources": "Traffic Sources",
-    "viewsByDay": "Views by Day",
-    "conversionFunnel": "Conversion Funnel",
-    "reviewTrend": "Review Score Trend",
-    "demographics": "Customer Type",
-    "newCustomers": "New",
-    "repeatCustomers": "Repeat",
-    "sourceMap": "Map",
-    "sourceSearch": "Search",
-    "sourceDiscover": "Discover",
-    "sourceDirect": "Direct"
-  },
   "competitor": {
     "title": "Competitor Insights",
     "subtitle": "Anonymous comparison with similar businesses",
@@ -396,7 +394,8 @@
     "tip1": "Reply to messages within 15 min to boost ranking",
     "tip2": "Add high-quality professional photos",
     "tip3": "Encourage satisfied customers to leave a review",
-    "tip4": "Run weekly promotions to increase Discover visibility"
+    "tip4": "Run weekly promotions to increase Discover visibility",
+    "minuteUnit": " min"
   },
   "customers": {
     "title": "Customer Insights",
@@ -418,7 +417,16 @@
     "bestQuotes": "Best Quotes to Share",
     "issuesToFix": "Issues to Address",
     "shareQuote": "Share this review",
-    "addressIssue": "Address this issue"
+    "addressIssue": "Address this issue",
+    "mock": {
+      "kw1": "Fast", "kw2": "Clean", "kw3": "Excellent", "kw4": "Great", "kw5": "Slow",
+      "kw6": "Expensive", "kw7": "Wonderful", "kw8": "Good", "kw9": "Crowded",
+      "quote1": "Excellent service and fast execution, I will definitely return!",
+      "quote2": "Very clean and staff are respectful",
+      "quote3": "Best place in the area, highly recommended",
+      "issue1": "Waiting was long during peak hours",
+      "issue2": "Prices are slightly high compared to competitors"
+    }
   },
   "calendar": {
     "title": "Content Calendar",
@@ -449,6 +457,18 @@
     "deleteConfirmTitle": "Delete Post",
     "deleteConfirmBody": "Are you sure you want to delete this post?",
     "boostTitle": "Boost Post",
-    "boostBody": "Paid boost will be available soon"
+    "boostBody": "Paid boost will be available soon",
+    "timePlaceholder": "HH:MM",
+    "amSuffix": "AM",
+    "pmSuffix": "PM",
+    "likesIcon": "❤️",
+    "mock": {
+      "post1Title": "Weekend Offer", "post1Body": "20% off all our services this Friday and Saturday!",
+      "post2Title": "New Working Hours", "post2Body": "We are extending our working hours until 11 PM.",
+      "post3Title": "Ramadan Welcome", "post3Body": "For this blessed month we offer a special menu.",
+      "post4Title": "New Product", "post4Body": "Announcing addition of delivery service.",
+      "post5Title": "Article Draft", "post5Body": "Content in progress...",
+      "dayFri": "Fri", "daySat": "Sat", "dayMon": "Mon", "dayWed": "Wed"
+    }
   }
 }

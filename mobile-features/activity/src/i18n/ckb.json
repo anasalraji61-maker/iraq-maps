@@ -106,5 +106,7 @@
   "prefsPreviewBody": "ئەمەش چۆنیەتی ئاگادارکردنەوەکانتە",
   "prefsSave": "پاشەکەوتکردن",
   "prefsCancel": "هەڵوەشاندنەوە",
-  "prefsSaveError": "هەڵەی پاشەکەوتکردنی ڕێکخستنەکان، دووبارە هەوڵ بدەرەوە"
+  "prefsSaveError": "هەڵەی پاشەکەوتکردنی ڕێکخستنەکان، دووبارە هەوڵ بدەرەوە",
+  "bannerDismissIcon": "✕",
+  "prefsTimePlaceholder": "HH:MM"
 }

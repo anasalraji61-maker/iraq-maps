@@ -86,7 +86,8 @@ export class SocialService {
     const rsvps = await this.db
       .select()
       .from(eventRsvpTable)
-      .where(eq(eventRsvpTable.userId, userId));
+      .where(eq(eventRsvpTable.userId, userId))
+      .limit(1000);
     const myRsvpSet = new Set(rsvps.map((r) => r.eventId));
 
     const counts = await this.db
@@ -103,29 +104,32 @@ export class SocialService {
   }
 
   async getEvent(userId: UserId, eventId: EventIdType) {
-    const [row] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId));
+    const [row] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId)).limit(1);
     if (!row) throw new NotFoundException('Event not found');
     const [rsvpRow] = await this.db
       .select()
       .from(eventRsvpTable)
-      .where(and(eq(eventRsvpTable.eventId, eventId), eq(eventRsvpTable.userId, userId)));
+      .where(and(eq(eventRsvpTable.eventId, eventId), eq(eventRsvpTable.userId, userId)))
+      .limit(1);
     const countResult = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(eventRsvpTable)
-      .where(eq(eventRsvpTable.eventId, eventId));
+      .where(eq(eventRsvpTable.eventId, eventId))
+      .limit(1);
     const rsvpCount = countResult[0]?.count ?? 0;
     return this.toEventDto(row, userId, rsvpCount, !!rsvpRow);
   }
 
   async rsvpEvent(userId: UserId, eventId: EventIdType) {
-    const [event] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId));
+    const [event] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId)).limit(1);
     if (!event) throw new NotFoundException('Event not found');
 
     if (event.maxAttendees !== null) {
       const countResult2 = await this.db
         .select({ count: sql<number>`count(*)::int` })
         .from(eventRsvpTable)
-        .where(eq(eventRsvpTable.eventId, eventId));
+        .where(eq(eventRsvpTable.eventId, eventId))
+        .limit(1);
       if ((countResult2[0]?.count ?? 0) >= event.maxAttendees) {
         throw new BadRequestException('Event is full');
       }
@@ -138,7 +142,7 @@ export class SocialService {
   }
 
   async cancelRsvp(userId: UserId, eventId: EventIdType) {
-    const [event] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId));
+    const [event] = await this.db.select().from(eventTable).where(eq(eventTable.id, eventId)).limit(1);
     if (!event) throw new NotFoundException('Event not found');
     await this.db
       .delete(eventRsvpTable)
@@ -174,7 +178,7 @@ export class SocialService {
 
   async listChallenges(userId: UserId, statusFilter?: string) {
     const now = new Date();
-    let rows = await this.db.select().from(challengeTable).orderBy(desc(challengeTable.startsAt));
+    let rows = await this.db.select().from(challengeTable).orderBy(desc(challengeTable.startsAt)).limit(100);
 
     if (statusFilter) {
       rows = rows.filter((r) => this.getChallengeStatus(r, now) === statusFilter);
@@ -183,7 +187,8 @@ export class SocialService {
     const myProgress = await this.db
       .select()
       .from(challengeProgressTable)
-      .where(eq(challengeProgressTable.userId, userId));
+      .where(eq(challengeProgressTable.userId, userId))
+      .limit(1000);
     const progressMap = new Map(myProgress.map((p) => [p.challengeId, p.progress]));
 
     const totalParticipants = await this.db
@@ -200,13 +205,14 @@ export class SocialService {
   }
 
   async getChallenge(userId: UserId, challengeId: ChallengeIdType) {
-    const [row] = await this.db.select().from(challengeTable).where(eq(challengeTable.id, challengeId));
+    const [row] = await this.db.select().from(challengeTable).where(eq(challengeTable.id, challengeId)).limit(1);
     if (!row) throw new NotFoundException('Challenge not found');
 
     const [myP] = await this.db
       .select()
       .from(challengeProgressTable)
-      .where(and(eq(challengeProgressTable.challengeId, challengeId), eq(challengeProgressTable.userId, userId)));
+      .where(and(eq(challengeProgressTable.challengeId, challengeId), eq(challengeProgressTable.userId, userId)))
+      .limit(1);
 
     const allProgress = await this.db
       .select()
@@ -217,12 +223,14 @@ export class SocialService {
 
     const myRank = allProgress.findIndex((p) => p.userId === userId) + 1 || null;
 
-    const leaderboard = allProgress.map((p, i) => ({
-      rank: i + 1,
-      userId: p.userId as UserId,
-      displayName: `user_${p.userId.slice(0, 6)}`,
-      progress: p.progress,
-    }));
+    const leaderboard = allProgress
+      .filter((p) => p.userId != null)
+      .map((p, i) => ({
+        rank: i + 1,
+        userId: p.userId as UserId,
+        displayName: `user_${p.userId.slice(0, 6)}`,
+        progress: p.progress,
+      }));
 
     const challenge = this.toChallengeDto(
       row,
@@ -235,7 +243,7 @@ export class SocialService {
   }
 
   async recordProgress(userId: UserId, challengeId: ChallengeIdType, increment: number) {
-    const [row] = await this.db.select().from(challengeTable).where(eq(challengeTable.id, challengeId));
+    const [row] = await this.db.select().from(challengeTable).where(eq(challengeTable.id, challengeId)).limit(1);
     if (!row) throw new NotFoundException('Challenge not found');
 
     const now = new Date();
@@ -246,7 +254,8 @@ export class SocialService {
     const [existing] = await this.db
       .select()
       .from(challengeProgressTable)
-      .where(and(eq(challengeProgressTable.challengeId, challengeId), eq(challengeProgressTable.userId, userId)));
+      .where(and(eq(challengeProgressTable.challengeId, challengeId), eq(challengeProgressTable.userId, userId)))
+      .limit(1);
 
     const currentProgress = existing?.progress ?? 0;
     const newProgress = currentProgress + increment;
@@ -353,7 +362,7 @@ export class SocialService {
   }
 
   async getListing(listingId: ListingIdType) {
-    const [row] = await this.db.select().from(listingTable).where(eq(listingTable.id, listingId));
+    const [row] = await this.db.select().from(listingTable).where(eq(listingTable.id, listingId)).limit(1);
     if (!row) throw new NotFoundException('Listing not found');
     return this.toListingDto(row);
   }
@@ -369,7 +378,7 @@ export class SocialService {
       images?: string[];
     },
   ) {
-    const [row] = await this.db.select().from(listingTable).where(eq(listingTable.id, listingId));
+    const [row] = await this.db.select().from(listingTable).where(eq(listingTable.id, listingId)).limit(1);
     if (!row) throw new NotFoundException('Listing not found');
     if (row.sellerId !== userId) throw new ForbiddenException('Not your listing');
 

@@ -237,10 +237,12 @@ describe('DiscoverService.recommended (unit)', () => {
         },
       ],
     });
-    // For likes lookup: select().from().where() must resolve to an array
+    // For likes lookup: select().from().where().limit() must resolve to an array
     (db.select as ReturnType<typeof vi.fn>).mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([]),
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
       }),
     });
 

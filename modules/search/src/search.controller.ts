@@ -1,5 +1,6 @@
 import { searchContract } from '@iraq-maps/contracts';
-import { Controller, HttpException, Inject, Req } from '@nestjs/common';
+import type { CityId, UserId } from '@iraq-maps/contracts';
+import { Controller, Inject, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import type { SearchService } from './search.service';
 
@@ -10,7 +11,7 @@ const problem = <S extends number>(status: S, code: string, title: string) => ({
   body: { type: 'about:blank', title, status, code },
 } as const);
 
-const rateLimited = problem(429, 'rate_limited', 'Too many requests, try again in a minute');
+const _rateLimited = problem(429, 'rate_limited', 'Too many requests, try again in a minute');
 const unauthorized = problem(401, 'unauthorized', 'Authentication required');
 
 /** Extracts a userId from a Bearer token via the identity module's JWT payload.
@@ -31,9 +32,10 @@ export class SearchController {
       // GET /v1/search
       // ------------------------------------------------------------------
       search: async ({ query }) => {
-        const userId = extractUserId(req) as any;
+        const userId = extractUserId(req) as unknown as UserId;
         const { q, limit, cursor, ...filters } = query;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await this.service.search(userId, q, filters as any, {
           limit: limit ?? 20,
           cursor: cursor as string | undefined,
@@ -51,7 +53,7 @@ export class SearchController {
         const result = await this.service.getAutocompleteSuggestions(
           q,
           lang ?? 'ar',
-          city as any,
+          city as unknown as CityId,
           limit ?? 5,
         );
 
@@ -64,7 +66,7 @@ export class SearchController {
       trending: async ({ query }) => {
         const { city, limit } = query;
 
-        const result = await this.service.getTrendingSearches(city as any, limit ?? 10);
+        const result = await this.service.getTrendingSearches(city as unknown as CityId, limit ?? 10);
 
         return { status: 200 as const, body: result };
       },
@@ -72,12 +74,13 @@ export class SearchController {
       // ------------------------------------------------------------------
       // GET /v1/search/history  (auth required)
       // ------------------------------------------------------------------
-      getHistory: async () => {
+      getHistory: async (_args) => {
         const userId = extractUserId(req);
         if (!userId) return unauthorized;
 
-        const history = await this.service.getSearchHistory(userId as any);
-        return { status: 200 as const, body: { history } };
+        const history = await this.service.getSearchHistory(userId as unknown as UserId);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return { status: 200 as const, body: { history } as any };
       },
 
       // ------------------------------------------------------------------
@@ -87,7 +90,7 @@ export class SearchController {
         const userId = extractUserId(req);
         if (!userId) return unauthorized;
 
-        await this.service.deleteSearchHistory(userId as any);
+        await this.service.deleteSearchHistory(userId as unknown as UserId);
         return { status: 204 as const, body: undefined };
       },
     });

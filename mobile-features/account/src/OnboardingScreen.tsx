@@ -1,7 +1,7 @@
 import { Locale } from '@iraq-maps/contracts';
 import { setLocale } from '@iraq-maps/i18n';
 import { href } from '@iraq-maps/mobile-kit';
-import { Button, Text, tokens } from '@iraq-maps/ui';
+import { Button, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
@@ -38,10 +38,10 @@ const SLIDES: Slide[] = [
   { key: 'assistant', titleKey: 'onboarding.assistant.title', bodyKey: 'onboarding.assistant.body', icon: '🤖', gradient: [ACCENT, '#FF8C5A'] },
 ];
 
-const LANGUAGES: { locale: Locale; label: string; nativeLabel: string }[] = [
-  { locale: 'ar', label: 'العربية', nativeLabel: 'Arabic' },
-  { locale: 'ckb', label: 'کوردی', nativeLabel: 'Kurdish' },
-  { locale: 'en', label: 'English', nativeLabel: 'English' },
+const LANGUAGES: { locale: Locale; labelKey: Parameters<typeof t>[0] }[] = [
+  { locale: 'ar', labelKey: 'onboarding.language.arabic' },
+  { locale: 'ckb', labelKey: 'onboarding.language.kurdish' },
+  { locale: 'en', labelKey: 'onboarding.language.english' },
 ];
 
 type Step = 'slides' | 'language' | 'permissions';
@@ -80,19 +80,19 @@ function LanguagePicker({
       <Text variant="title" style={styles.sectionTitle}>{t('onboarding.language.title')}</Text>
       <Text tone="muted" style={styles.sectionBody}>{t('onboarding.language.body')}</Text>
       <View style={styles.languageList}>
-        {LANGUAGES.map(({ locale, label }) => (
+        {LANGUAGES.map(({ locale, labelKey }) => (
           <Pressable
             key={locale}
             onPress={() => onSelect(locale)}
             style={[styles.languageItem, selected === locale && styles.languageItemSelected]}
             accessibilityRole="radio"
             accessibilityState={{ checked: selected === locale }}
-            accessibilityLabel={label}
+            accessibilityLabel={t(labelKey)}
           >
             <Text style={[styles.languageLabel, selected === locale && styles.languageLabelSelected]}>
-              {label}
+              {t(labelKey)}
             </Text>
-            {selected === locale && <Text style={styles.checkmark}>✓</Text>}
+            {selected === locale && <Text style={styles.checkmark}>{t('onboarding.checkmark')}</Text>}
           </Pressable>
         ))}
       </View>
@@ -116,8 +116,9 @@ function PermissionsStep({
   };
 
   const requestNotifs = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    setNotifStatus(status === 'granted' ? 'granted' : 'denied');
+    const perms = await Notifications.requestPermissionsAsync();
+    const ok = (perms as { granted?: boolean }).granted ?? (perms as { status?: string }).status === 'granted';
+    setNotifStatus(ok ? 'granted' : 'denied');
   };
 
   const allDone = locationStatus !== 'idle' && notifStatus !== 'idle';

@@ -1,6 +1,6 @@
 import { CommentId, PortTokens, type EventBus, type ProviderDirectoryPort, type UserId, type StoryIdType } from '@iraq-maps/contracts';
 import { writeAdminAuditLog, type Db } from '@iraq-maps/db-kit';
-import { Inject, Injectable, NotFoundException, Optional, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, Optional, UnprocessableEntityException, HttpException, HttpStatus } from '@nestjs/common';
 import { and, desc, eq, gt, isNull, ilike, inArray, lt, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { PostIdType } from '@iraq-maps/contracts';
@@ -8,6 +8,7 @@ import { z } from 'zod';
 import type { Redis } from 'ioredis';
 import { commentLikeTable, commentTable, postBookmarkTable, postEditHistoryTable, postLikeTable, postMentionTable, postReportTable, postTable, postViewTable, storyTable, storyViewTable, userFollowTable } from './schema';
 import { WordFilter } from './word-filter';
+import { SlidingWindowRateLimiter } from './rate-limiter';
 
 type CommentIdType = z.infer<typeof CommentId>;
 
@@ -23,6 +24,7 @@ const CACHE_TTL = {
 @Injectable()
 export class DiscoverService {
   private readonly wordFilter: WordFilter;
+  private readonly postRateLimiter: SlidingWindowRateLimiter | null;
 
   constructor(
     @Inject('DISCOVER_DB') private readonly db: Db,
@@ -32,6 +34,7 @@ export class DiscoverService {
     @Optional() @Inject('DISCOVER_REDIS') private readonly redis: Redis | null = null,
   ) {
     this.wordFilter = new WordFilter(wordFilterConfigPath ?? undefined);
+    this.postRateLimiter = redis ? new SlidingWindowRateLimiter(redis, 5, 60) : null;
   }
 
   // ── Redis cache helpers ──────────────────────────────────────────────────────
@@ -113,7 +116,7 @@ export class DiscoverService {
         ? await this.db
             .select()
             .from(postLikeTable)
-            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))            .limit(postIds.length)
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
     const verifiedSet = await this.verifiedAuthorIds(items.map((p) => p.authorId as UserId));
@@ -130,11 +133,15 @@ export class DiscoverService {
 
   async createPost(
     userId: UserId,
-    data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[]; mentionedUserIds?: UserId[] },
+    data: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[]; mentionedUserIds?: UserId[]; mentions?: UserId[] },
   ) {
     const blocked = this.wordFilter.check(data.body);
     if (blocked) {
       throw new UnprocessableEntityException({ code: 'content_blocked', detail: 'Content contains a blocked word' });
+    }
+    if (this.postRateLimiter) {
+      const rl = await this.postRateLimiter.check(`post:${userId}`);
+      if (!rl.allowed) throw new HttpException('Post rate limit exceeded', HttpStatus.TOO_MANY_REQUESTS);
     }
     const [post] = await this.db
       .insert(postTable)
@@ -150,7 +157,7 @@ export class DiscoverService {
     if (!post) throw new Error('insert failed');
 
     // Store @mentions and fire notification events
-    const mentionedIds = data.mentionedUserIds ?? [];
+    const mentionedIds = data.mentionedUserIds ?? data.mentions ?? [];
     if (mentionedIds.length > 0) {
       await this.db
         .insert(postMentionTable)
@@ -182,10 +189,12 @@ export class DiscoverService {
     const [post] = await Promise.all([
       this.getPostOrThrow(postId),
       // Increment view count fire-and-forget — does not block response
-      this.db.update(postTable)
-        .set({ viewCount: sql`${postTable.viewCount} + 1` })
-        .where(eq(postTable.id, postId))
-        .catch(() => undefined),
+      Promise.resolve(
+        this.db.update(postTable)
+          .set({ viewCount: sql`${postTable.viewCount} + 1` })
+          .where(eq(postTable.id, postId))
+          .returning()
+      ).catch(() => undefined),
     ]);
     const [like] = await this.db.select().from(postLikeTable)
       .where(and(eq(postLikeTable.postId, postId), eq(postLikeTable.userId, userId))).limit(1);
@@ -475,7 +484,7 @@ export class DiscoverService {
         ? await this.db
             .select()
             .from(postLikeTable)
-            .where(and(eq(postLikeTable.userId, viewerUserId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .where(and(eq(postLikeTable.userId, viewerUserId), sql`${postLikeTable.postId} = ANY(${postIds})`))            .limit(postIds.length)
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
 
@@ -509,7 +518,7 @@ export class DiscoverService {
         ? await this.db
             .select()
             .from(postLikeTable)
-            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))            .limit(postIds.length)
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
 
@@ -518,7 +527,12 @@ export class DiscoverService {
     return { items };
   }
 
-  async searchPosts(userId: UserId, query: string, cursor?: string, limit = 10) {
+  async searchPosts(userId: UserId, queryOrOpts: string | { q: string; limit?: number; cursor?: string }, cursor?: string, limit = 10) {
+    const query = typeof queryOrOpts === 'string' ? queryOrOpts : queryOrOpts.q;
+    if (typeof queryOrOpts !== 'string') {
+      cursor = queryOrOpts.cursor;
+      limit = queryOrOpts.limit ?? 10;
+    }
     const rows = await this.db
       .select()
       .from(postTable)
@@ -541,7 +555,7 @@ export class DiscoverService {
         ? await this.db
             .select()
             .from(postLikeTable)
-            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))            .limit(postIds.length)
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
 
@@ -576,6 +590,10 @@ export class DiscoverService {
 
   /** Top hashtags extracted from post bodies in the last 24h. @M-trending */
   async trendingHashtags(limit = 10): Promise<Array<{ hashtag: string; count: number }>> {
+    const cacheKey = this.trendingCacheKey(limit);
+    const cached = await this.cacheGet<Array<{ hashtag: string; count: number }>>(cacheKey);
+    if (cached !== null) return cached;
+
     const rows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
       WITH words AS (
         SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
@@ -589,7 +607,9 @@ export class DiscoverService {
       ORDER BY cnt DESC, hashtag ASC
       LIMIT ${limit}
     `);
-    return rows.rows.map((r) => ({ hashtag: r.hashtag, count: Number(r.cnt) }));
+    const result = rows.rows.map((r) => ({ hashtag: r.hashtag, count: Number(r.cnt) }));
+    void this.cacheSet(cacheKey, result, CACHE_TTL.TRENDING);
+    return result;
   }
 
   /** Aggregated stats for a user profile. @M-user-stats */
@@ -651,7 +671,7 @@ export class DiscoverService {
         ? await this.db
             .select()
             .from(postLikeTable)
-            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))            .limit(postIds.length)
         : [];
     const likedSet = new Set(likes.map((l) => l.postId));
 
@@ -851,7 +871,8 @@ export class DiscoverService {
     const follows = await this.db
       .select({ followedId: userFollowTable.followeeId })
       .from(userFollowTable)
-      .where(eq(userFollowTable.followerId, userId));
+      .where(eq(userFollowTable.followerId, userId))
+      .limit(1000);
     const followedIds = follows.map((f) => f.followedId);
     // Include own stories
     const authorIds = [...new Set([userId, ...followedIds])];
@@ -862,7 +883,8 @@ export class DiscoverService {
       .select()
       .from(storyTable)
       .where(and(inArray(storyTable.authorId, authorIds), gt(storyTable.expiresAt, now)))
-      .orderBy(storyTable.authorId, storyTable.createdAt);
+      .orderBy(storyTable.authorId, storyTable.createdAt)
+      .limit(500);
 
     if (stories.length === 0) return { authors: [] };
 
@@ -870,7 +892,8 @@ export class DiscoverService {
     const views = await this.db
       .select({ storyId: storyViewTable.storyId })
       .from(storyViewTable)
-      .where(and(eq(storyViewTable.userId, userId), inArray(storyViewTable.storyId, storyIds)));
+      .where(and(eq(storyViewTable.userId, userId), inArray(storyViewTable.storyId, storyIds)))
+      .limit(storyIds.length);
     const viewedSet = new Set(views.map((v) => v.storyId));
 
     // Group by author
@@ -946,5 +969,81 @@ export class DiscoverService {
       isLikedByMe,
       createdAt: comment.createdAt.toISOString(),
     };
+  }
+
+  // ─── Aliases / convenience wrappers for test compatibility ────────────────
+
+  /** Alias for listFeed with object params. */
+  async getFeed(userId: UserId, opts: { limit?: number; cursor?: string; category?: string } = {}) {
+    return this.listFeed(userId, opts.cursor, opts.limit ?? 10, opts.category);
+  }
+
+  /** Alias for getStoriesFeed returning a flat array. */
+  async listStories(userId: UserId) {
+    const result = await this.getStoriesFeed(userId);
+    return result.authors.flatMap((a) => a.stories);
+  }
+
+  /** List bookmarked posts for a user. */
+  async listBookmarks(userId: UserId, opts: { limit?: number; cursor?: string } = {}): Promise<{ items: object[] }> {
+    const limit = opts.limit ?? 10;
+    const rows = await this.db
+      .select({ post: postTable })
+      .from(postBookmarkTable)
+      .innerJoin(postTable, eq(postBookmarkTable.postId, postTable.id))
+      .where(eq(postBookmarkTable.userId, userId))
+      .orderBy(desc(postBookmarkTable.createdAt))
+      .limit(limit);
+    return { items: rows.filter((r) => r.post != null).map((r) => this.toPostShape(r.post, false)) };
+  }
+
+  /** Get posts that mention a specific user. */
+  async getMentions(userId: UserId, opts: { limit?: number; cursor?: string } = {}): Promise<{ items: Array<{ postId: PostIdType; mentionedUserId: UserId }> }> {
+    const limit = opts.limit ?? 10;
+    const rows = await this.db
+      .select()
+      .from(postMentionTable)
+      .where(eq(postMentionTable.mentionedUserId, userId))
+      .limit(limit);
+    return {
+      items: rows.map((r) => ({
+        postId: r.postId as PostIdType,
+        mentionedUserId: r.mentionedUserId as UserId,
+      })),
+    };
+  }
+
+  /** Edit a post body (author only). Records edit history and applies word filter. */
+  async editPost(userId: UserId, postId: PostIdType, data: { body: string }) {
+    const { ForbiddenException } = await import('@nestjs/common');
+    const post = await this.getPostOrThrow(postId);
+    if (post.authorId !== userId) throw new ForbiddenException({ code: 'forbidden' });
+    const blocked = this.wordFilter.check(data.body);
+    if (blocked) throw new UnprocessableEntityException({ code: 'content_blocked', detail: 'Content contains a blocked word' });
+    await this.db.insert(postEditHistoryTable).values({ postId, previousBody: post.body });
+    const [updated] = await this.db.update(postTable).set({ body: data.body }).where(eq(postTable.id, postId)).returning();
+    if (!updated) throw new NotFoundException({ code: 'not_found' });
+    return this.toPostShape(updated, false);
+  }
+
+  /** Get edit history for a post. */
+  async getEditHistory(postId: PostIdType) {
+    const rows = await this.db
+      .select()
+      .from(postEditHistoryTable)
+      .where(eq(postEditHistoryTable.postId, postId))
+      .orderBy(desc(postEditHistoryTable.editedAt))
+      .limit(100);
+    return rows.map((r) => ({
+      id: r.id,
+      postId: r.postId as PostIdType,
+      previousBody: r.previousBody,
+      editedAt: r.editedAt.toISOString(),
+    }));
+  }
+
+  /** searchPosts overload accepting object params for test compatibility. */
+  async searchPostsObj(userId: UserId, opts: { q: string; limit?: number; cursor?: string }) {
+    return this.searchPosts(userId, opts.q, opts.cursor, opts.limit);
   }
 }

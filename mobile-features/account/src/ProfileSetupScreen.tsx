@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   photoButtonText: { color: PRIMARY, fontWeight: '600' },
   bioSection: { gap: 4 },
-  charCount: { textAlign: 'end' },
+  charCount: { textAlign: 'auto' },
   charCountLimit: { color: '#C62828' },
   tagsHeading: { marginTop: 8 },
   tagsSubtext: { marginBottom: 8 },

@@ -1,7 +1,7 @@
 import { testIDs } from '@iraq-maps/contracts';
 import { formatNumber, getLocale, toAsciiDigits } from '@iraq-maps/i18n';
 import { href, useApi, useSession } from '@iraq-maps/mobile-kit';
-import { Button, Screen, Text, TextField } from '@iraq-maps/ui';
+import { Button, Screen, Text } from '@iraq-maps/ui';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Animated, StyleSheet, TextInput, View } from 'react-native';
@@ -124,7 +124,7 @@ function SuccessAnimation(): ReactElement {
   }, [scaleAnim]);
   return (
     <Animated.View style={[styles.successCircle, { transform: [{ scale: scaleAnim }] }]}>
-      <Text style={styles.successCheck}>✓</Text>
+      <Text style={styles.successCheck}>{t('phoneVerification.checkmark')}</Text>
     </Animated.View>
   );
 }
@@ -168,11 +168,10 @@ export function PhoneVerificationScreen(): ReactElement {
       setCode('');
     });
 
-  // Auto-submit when all 6 digits are entered
+  // Auto-submit when all 6 digits are entered; verify is intentionally excluded from deps
   useEffect(() => {
     if (code.length === OTP_LENGTH && !busy && !succeeded) verify();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, busy, succeeded]);
 
   return (
     <Screen scroll>

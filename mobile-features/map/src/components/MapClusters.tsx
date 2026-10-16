@@ -20,8 +20,7 @@
  */
 
 import type { PlaceCategory, PlaceSummary } from '@iraq-maps/contracts';
-import { getLocale } from '@iraq-maps/i18n';
-import { type ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactElement, useEffect, useMemo, useRef } from 'react';
 import {
   Animated,
   I18nManager,
@@ -219,6 +218,7 @@ function ClusterBubble({ cluster, onPress }: ClusterBubbleProps): ReactElement {
       style={[
         bubbleStyles.wrap,
         {
+          // eslint-disable-next-line no-restricted-syntax
           left: cluster.x - size / 2,
           top: cluster.y - size / 2,
           transform: [{ scale }],
@@ -293,6 +293,7 @@ function SingleMarker({ marker, onPress }: SingleMarkerProps): ReactElement {
       style={[
         markerStyles.wrap,
         {
+          // eslint-disable-next-line no-restricted-syntax
           left: marker.screenX - 18,
           top: marker.screenY - 36,
           transform: [{ scale }],

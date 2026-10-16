@@ -12,8 +12,7 @@
  * Route: place/[placeId]/photos
  */
 
-import { pickName, placesContract } from '@iraq-maps/contracts';
-import { getLocale } from '@iraq-maps/i18n';
+import { placesContract } from '@iraq-maps/contracts';
 import { useApi, useApiBaseUrl, uploadAsset } from '@iraq-maps/mobile-kit';
 import { Screen } from '@iraq-maps/ui';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,7 +22,6 @@ import {
   Alert,
   Animated,
   Dimensions,
-  GestureResponderEvent,
   I18nManager,
   Image,
   Modal,
@@ -79,10 +77,11 @@ function PhotosLoader({ id }: { id: string }): ReactElement {
     );
   }
 
+  const placeData = place.state.status === 'ready' ? place.state.data : null;
   const providerPhotos: Photo[] =
-    place.state.data.provider?.photos?.map((p) => ({
+    placeData?.provider?.photos?.map((p) => ({
       uri: p.url,
-      attribution: place.state!.data.attribution,
+      attribution: placeData.attribution,
     })) ?? [];
 
   const allPhotos = [...providerPhotos, ...localPhotos];
@@ -122,7 +121,7 @@ function PhotosLoader({ id }: { id: string }): ReactElement {
           accessibilityLabel={t('reviews.addPhoto')}
           testID="photos.addPhoto"
         >
-          <RNText style={styles.addBtnText}>{uploading ? '…' : '＋ ' + t('reviews.addPhoto')}</RNText>
+          <RNText style={styles.addBtnText}>{uploading ? t('reviews.uploadingPhoto') : t('photos.addPhotoBtnLabel')}</RNText>
         </TouchableOpacity>
       </View>
 
@@ -165,7 +164,7 @@ function GalleryGrid({ photos, placeId }: { photos: Photo[]; placeId: string }):
               />
               {photo.local ? (
                 <View style={gridStyles.localBadge}>
-                  <RNText style={gridStyles.localBadgeText}>✓</RNText>
+                  <RNText style={gridStyles.localBadgeText}>{t('photos.localBadge')}</RNText>
                 </View>
               ) : null}
             </TouchableOpacity>
@@ -207,7 +206,7 @@ const gridStyles = StyleSheet.create({
 function FullscreenViewer({
   photos,
   initialIndex,
-  placeId,
+  placeId: _placeId,
   onClose,
 }: {
   photos: Photo[];

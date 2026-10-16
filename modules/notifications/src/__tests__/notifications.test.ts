@@ -10,7 +10,7 @@
  * - Old notification cleanup
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { UserId } from '@iraq-maps/contracts';
 import { NotificationsService } from '../notifications.service';
 import { FakePushSender } from '@iraq-maps/testing';
@@ -21,6 +21,15 @@ const U2 = uid('22222222-2222-4222-a222-222222222222');
 const U3 = uid('33333333-3333-4333-a333-333333333333');
 
 // ─── DB mock helpers ──────────────────────────────────────────────────────────
+
+/** Returns a thenable mock for .where() that also exposes .limit() and .orderBy() */
+function makeWhere(rows: unknown[]) {
+  const p = Object.assign(Promise.resolve(rows), {
+    limit: vi.fn().mockResolvedValue(rows),
+    orderBy: vi.fn().mockReturnValue(Object.assign(Promise.resolve(rows), { limit: vi.fn().mockResolvedValue(rows) })),
+  });
+  return vi.fn().mockReturnValue(p);
+}
 
 const DEVICE_ROW = { id: 'dev-001', userId: U1, token: 'fcm-token-001', platform: 'android', createdAt: new Date() };
 const NOTIF_ROW = { id: 'notif-001', userId: U1, type: 'general', title: 'إشعار', body: 'رسالة', data: null, readAt: null, createdAt: new Date() };
@@ -37,11 +46,8 @@ function makeDb(opts: {
   let selectCallCount = 0;
   const makeSelectFrom = (rows: unknown[]) => ({
     from: vi.fn().mockReturnValue({
-      where: vi.fn().mockReturnValue({
-        limit: vi.fn().mockResolvedValue(rows),
-        orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }),
-      }),
-      orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }),
+      where: makeWhere(rows),
+      orderBy: vi.fn().mockReturnValue(Object.assign(Promise.resolve(rows), { limit: vi.fn().mockResolvedValue(rows) })),
     }),
   });
 
@@ -145,7 +151,7 @@ describe('NotificationsService – batch notify', () => {
     const truePrefRow = [{ userId: U1, newInquiry: false, replyReceived: true, statusUpdate: true, discoverLikes: true, discoverComments: true, messages: true, updatedAt: new Date() }];
     db.select = vi.fn().mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(truePrefRow) }),
+        where: makeWhere(truePrefRow),
       }),
     });
     const push = new FakePushSender();
@@ -160,7 +166,7 @@ describe('NotificationsService – batch notify', () => {
     const db = makeDb({ devices: [DEVICE_ROW] });
     db.select = vi.fn().mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(falsePrefRow) }),
+        where: makeWhere(falsePrefRow),
       }),
     });
     const push = new FakePushSender();
@@ -179,7 +185,7 @@ describe('NotificationsService – batch notify', () => {
     db.select = vi.fn().mockImplementation(() => {
       callIdx++;
       const deviceForCall = callIdx % 2 === 1 ? [] : callIdx === 2 ? [device1] : [device2];
-      return { from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(deviceForCall) }) }) };
+      return { from: vi.fn().mockReturnValue({ where: makeWhere(deviceForCall) }) };
     });
 
     const push = new FakePushSender();
@@ -199,7 +205,7 @@ describe('NotificationsService – prefs', () => {
     const db = makeDb({ prefs: undefined });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+        where: makeWhere([]),
       }),
     });
     const push = new FakePushSender();
@@ -218,7 +224,7 @@ describe('NotificationsService – prefs', () => {
     const db = makeDb();
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(existingPrefs) }),
+        where: makeWhere(existingPrefs),
       }),
     });
     const push = new FakePushSender();
@@ -232,7 +238,7 @@ describe('NotificationsService – prefs', () => {
   it('updatePrefs calls insert with onConflictDoUpdate', async () => {
     const db = makeDb();
     db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }) }),
+      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
     });
     const push = new FakePushSender();
     const svc = new NotificationsService(db as never, push);
@@ -244,7 +250,7 @@ describe('NotificationsService – prefs', () => {
   it('all pref fields can be toggled to false', async () => {
     const db = makeDb();
     db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }) }),
+      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
     });
     const push = new FakePushSender();
     const svc = new NotificationsService(db as never, push);
@@ -274,10 +280,12 @@ describe('NotificationsService – listNotifications and markRead', () => {
     const db = makeDb({ notifs });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(notifs) }),
-          limit: vi.fn().mockResolvedValue(notifs),
-        }),
+        where: vi.fn().mockReturnValue(
+          Object.assign(Promise.resolve(notifs), {
+            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(notifs) }),
+            limit: vi.fn().mockResolvedValue(notifs),
+          }),
+        ),
       }),
     });
     const push = new FakePushSender();
@@ -316,7 +324,7 @@ describe('NotificationsService – listNotifications and markRead', () => {
   it('dismissNotification returns true and calls delete', async () => {
     const db = makeDb({ notifs: [NOTIF_ROW] });
     db.delete = vi.fn().mockReturnValue({
-      where: vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]),
+      where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]) }),
     });
     const push = new FakePushSender();
     const svc = new NotificationsService(db as never, push);
@@ -328,7 +336,7 @@ describe('NotificationsService – listNotifications and markRead', () => {
 
   it('dismissNotification returns false for missing notification', async () => {
     const db = makeDb({ notifs: [] });
-    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) });
+    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) });
     const push = new FakePushSender();
     const svc = new NotificationsService(db as never, push);
 
@@ -385,7 +393,7 @@ describe('NotificationsService – quiet hours simulation', () => {
     const db = makeDb({ devices: [DEVICE_ROW] });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+        where: makeWhere([]),
       }),
     });
     const push = new FakePushSender();
@@ -398,9 +406,9 @@ describe('NotificationsService – quiet hours simulation', () => {
   it('eraseUserData removes all devices and resets prefs', async () => {
     const db = makeDb({ devices: [DEVICE_ROW] });
     // delete calls: delete devices, delete prefs
-    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([]) });
+    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) });
     db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }) }),
+      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
     });
     const push = new FakePushSender();
     const svc = new NotificationsService(db as never, push);
@@ -438,9 +446,12 @@ describe('NotificationsService – cleanup old notifications', () => {
     const db = makeDb({ notifs: [] });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
-        }),
+        where: vi.fn().mockReturnValue(
+          Object.assign(Promise.resolve([]), {
+            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        ),
       }),
     });
     const push = new FakePushSender();
@@ -452,16 +463,19 @@ describe('NotificationsService – cleanup old notifications', () => {
   });
 
   it('listNotifications with unreadOnly=false returns all rows', async () => {
-    const readNotif = { ...NOTIF_ROW, readAt: new Date() };
-    const unreadNotif = { ...NOTIF_ROW, id: 'notif-unread' };
+    const readNotif = { ...NOTIF_ROW, readAt: new Date() as Date | null };
+    const unreadNotif = { ...NOTIF_ROW, id: 'notif-unread', readAt: null as Date | null };
     const allNotifs = [readNotif, unreadNotif];
 
-    const db = makeDb({ notifs: allNotifs });
+    const db = makeDb({ notifs: allNotifs as typeof NOTIF_ROW[] });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(allNotifs) }),
-        }),
+        where: vi.fn().mockReturnValue(
+          Object.assign(Promise.resolve(allNotifs), {
+            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(allNotifs) }),
+            limit: vi.fn().mockResolvedValue(allNotifs),
+          }),
+        ),
       }),
     });
     const push = new FakePushSender();
@@ -476,9 +490,12 @@ describe('NotificationsService – cleanup old notifications', () => {
     const db = makeDb({ notifs: [older] });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([older]) }),
-        }),
+        where: vi.fn().mockReturnValue(
+          Object.assign(Promise.resolve([older]), {
+            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([older]) }),
+            limit: vi.fn().mockResolvedValue([older]),
+          }),
+        ),
       }),
     });
     const push = new FakePushSender();
@@ -500,7 +517,7 @@ describe('NotificationsService – concurrent push', () => {
     });
     db.select = vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([DEVICE_ROW]) }),
+        where: makeWhere([DEVICE_ROW]),
       }),
     });
     const push = new FakePushSender();

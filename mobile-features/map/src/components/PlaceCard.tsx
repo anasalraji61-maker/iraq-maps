@@ -14,7 +14,6 @@
 import type { PlaceSummary } from '@iraq-maps/contracts';
 import { type ReactElement } from 'react';
 import {
-  Animated,
   Image,
   I18nManager,
   StyleSheet,
@@ -27,7 +26,6 @@ import { formatDistance, t } from '../strings';
 
 I18nManager.forceRTL(true);
 
-const PRIMARY = '#1976D2';
 const STAR = '★';
 
 // ── Props ──────────────────────────────────────────────────────────────────────

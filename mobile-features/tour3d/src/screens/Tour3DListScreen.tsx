@@ -140,7 +140,6 @@ export function Tour3DListScreen() {
           onChangeText={handleSearchChange}
           placeholder={t('list.searchPlaceholder')}
           placeholderTextColor="#aaa"
-          textAlign="right"
           returnKeyType="search"
           clearButtonMode="while-editing"
           accessibilityLabel={t('list.searchPlaceholder')}
@@ -248,7 +247,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
     color: '#1a1a1a',
-    textAlign: 'right',
+    textAlign: 'auto',
     writingDirection: 'rtl',
   },
   searchBar: {

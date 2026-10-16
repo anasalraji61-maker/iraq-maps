@@ -161,11 +161,35 @@
     "invalid_request": "تحقّق من البيانات المُدخلة وحاول مرة أخرى."
   },
   "analytics": {
-    "viewsTitle": "مشاهدات الصفحة",
-    "inquiriesTitle": "الاستفسارات",
-    "viewsTotal": "المجموع: {n}",
-    "inquiriesTotal": "المجموع: {n}",
-    "last7days": "آخر 7 أيام"
+    "title": "لوحة التحليلات",
+    "dashboardLink": "التحليلات",
+    "range7d": "٧ أيام",
+    "range30d": "٣٠ يوماً",
+    "range90d": "٩٠ يوماً",
+    "rangeCustom": "مخصص",
+    "exportPdf": "تصدير PDF",
+    "views": "مشاهدة",
+    "clicks": "نقرة",
+    "messages": "رسالة",
+    "bookings": "حجز",
+    "viewsOverTime": "المشاهدات عبر الزمن",
+    "peakHours": "أوقات الذروة",
+    "trafficSources": "مصادر الزيارات",
+    "viewsByDay": "المشاهدات حسب اليوم",
+    "conversionFunnel": "قمع التحويل",
+    "reviewTrend": "اتجاه التقييمات",
+    "demographics": "نوع العملاء",
+    "newCustomers": "عملاء جدد",
+    "repeatCustomers": "عملاء متكررون",
+    "sourceMap": "خريطة",
+    "sourceSearch": "بحث",
+    "sourceDiscover": "اكتشف",
+    "sourceDirect": "مباشر",
+    "last7days": "آخر ٧ أيام",
+    "heatmapScaleMin": "أقل",
+    "heatmapScaleMax": "أكثر",
+    "arrowUp": "▲",
+    "arrowDown": "▼"
   },
   "posts": {
     "title": "إنشاء منشور",
@@ -293,32 +317,6 @@
     "shareToDiscover": "شارك العرض في اكتشف",
     "validUntil": "صالح حتى {date}"
   },
-  "analytics": {
-    "title": "لوحة التحليلات",
-    "dashboardLink": "التحليلات",
-    "range7d": "٧ أيام",
-    "range30d": "٣٠ يوماً",
-    "range90d": "٩٠ يوماً",
-    "rangeCustom": "مخصص",
-    "exportPdf": "تصدير PDF",
-    "views": "مشاهدة",
-    "clicks": "نقرة",
-    "messages": "رسالة",
-    "bookings": "حجز",
-    "viewsOverTime": "المشاهدات عبر الزمن",
-    "peakHours": "أوقات الذروة",
-    "trafficSources": "مصادر الزيارات",
-    "viewsByDay": "المشاهدات حسب اليوم",
-    "conversionFunnel": "قمع التحويل",
-    "reviewTrend": "اتجاه التقييمات",
-    "demographics": "نوع العملاء",
-    "newCustomers": "عملاء جدد",
-    "repeatCustomers": "عملاء متكررون",
-    "sourceMap": "خريطة",
-    "sourceSearch": "بحث",
-    "sourceDiscover": "اكتشف",
-    "sourceDirect": "مباشر"
-  },
   "competitor": {
     "title": "رؤى المنافسين",
     "subtitle": "مقارنة مجهولة مع أعمال مشابهة",
@@ -346,7 +344,8 @@
     "tip1": "ردّ على الرسائل خلال ١٥ دقيقة لتحسين ترتيبك",
     "tip2": "أضف صور احترافية عالية الجودة لجذب العملاء",
     "tip3": "شجّع العملاء الراضين على ترك تقييم",
-    "tip4": "فعّل عروضاً أسبوعية لزيادة الظهور في الاكتشاف"
+    "tip4": "فعّل عروضاً أسبوعية لزيادة الظهور في الاكتشاف",
+    "minuteUnit": " دق"
   },
   "customers": {
     "title": "رؤى العملاء",
@@ -368,7 +367,16 @@
     "bestQuotes": "أفضل اقتباسات للمشاركة",
     "issuesToFix": "مشكلات تحتاج معالجة",
     "shareQuote": "شارك هذا التقييم",
-    "addressIssue": "معالجة هذه المشكلة"
+    "addressIssue": "معالجة هذه المشكلة",
+    "mock": {
+      "kw1": "سريع", "kw2": "نظيف", "kw3": "مميز", "kw4": "رائع", "kw5": "بطيء",
+      "kw6": "غالي", "kw7": "ممتاز", "kw8": "جيد", "kw9": "مزدحم",
+      "quote1": "خدمة ممتازة وسرعة في التنفيذ، سأعود بالتأكيد!",
+      "quote2": "النظافة عالية جداً والموظفون محترمون",
+      "quote3": "أفضل مكان في المنطقة، ننصح به الجميع",
+      "issue1": "الانتظار كان طويلاً في أوقات الذروة",
+      "issue2": "الأسعار مرتفعة قليلاً مقارنة بالمنافسين"
+    }
   },
   "calendar": {
     "title": "تقويم المحتوى",
@@ -399,7 +407,19 @@
     "deleteConfirmTitle": "حذف المنشور",
     "deleteConfirmBody": "هل تريد حذف هذا المنشور؟",
     "boostTitle": "تعزيز المنشور",
-    "boostBody": "ستتوفر ميزة التعزيز المدفوع قريباً"
+    "boostBody": "ستتوفر ميزة التعزيز المدفوع قريباً",
+    "timePlaceholder": "HH:MM",
+    "amSuffix": "ص",
+    "pmSuffix": "م",
+    "likesIcon": "❤️",
+    "mock": {
+      "post1Title": "عرض نهاية الأسبوع", "post1Body": "خصم 20% على جميع خدماتنا هذا الجمعة والسبت!",
+      "post2Title": "ساعات العمل الجديدة", "post2Body": "نُبشّركم بتمديد أوقات عملنا حتى الساعة 11 مساءً.",
+      "post3Title": "مرحباً بكم في رمضان", "post3Body": "بمناسبة الشهر الفضيل نقدم لكم قائمة خاصة.",
+      "post4Title": "منتج جديد", "post4Body": "أعلن عن إضافة خدمة التوصيل.",
+      "post5Title": "مسودة مقال", "post5Body": "محتوى قيد الكتابة...",
+      "dayFri": "جمعة", "daySat": "سبت", "dayMon": "إثنين", "dayWed": "أربعاء"
+    }
   },
   "appointments": {
     "title": "المواعيد",

@@ -72,6 +72,7 @@ function makeSourceSlices(): PieSlice[] {
 }
 
 function makeWeekdayBarData(): Array<{ label: string; value: number; color?: string }> {
+  // eslint-disable-next-line no-restricted-syntax
   const labels = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
   return labels.map((label) => ({
     label,
@@ -130,7 +131,7 @@ function KpiCard({
       <Text style={styles.kpiLabel}>{label}</Text>
       <View style={styles.kpiDelta}>
         <Text style={[styles.kpiDeltaText, { color: up ? C.green : C.red }]}>
-          {up ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}%
+          {up ? t('analytics.arrowUp') : t('analytics.arrowDown')} {Math.abs(delta).toFixed(1)}%
         </Text>
       </View>
     </View>
@@ -193,7 +194,7 @@ function DemographicsSection({ newPct }: { newPct: number }): ReactElement {
 
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
-export function AnalyticsDashboardScreen({ providerId }: { providerId: string }): ReactElement {
+export function AnalyticsDashboardScreen({ providerId: _providerId }: { providerId: string }): ReactElement {
   const [range, setRange] = useState<DateRange>('30d');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
