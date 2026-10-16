@@ -39,3 +39,8 @@ export { LocationShareScreen } from './location-share/LocationShareScreen';
 export { LocationShareViewerScreen } from './location-share/LocationShareViewerScreen';
 export { AddressPickerScreen } from './screens/AddressPickerScreen';
 export { AddressDisplay, type AddressDisplayProps } from './components/AddressDisplay';
+/** Advanced search, recommendations and collections */
+export { AdvancedSearchScreen, type AdvancedFilters } from './screens/AdvancedSearchScreen';
+export { SearchResultsMap, type SearchResultsMapProps } from './components/SearchResultsMap';
+export { RecommendationsScreen } from './screens/RecommendationsScreen';
+export { CollectionsScreen, type Collection } from './screens/CollectionsScreen';
