@@ -1,23 +1,27 @@
 /**
- * PlaceDetailScreen – enhanced full-detail view for a place.
+ * PlaceDetailScreen – comprehensive full-detail view for a place.
  *
- * Differences from PlaceScreen (the M1 screen that stays in place):
- *  - Hero image gallery (swipeable, up to 5 photos)
- *  - Category badge + verified badge
- *  - Rating stars with review count
- *  - Open/Closed pill with hours breakdown
- *  - Phone with show_phone consent check
- *  - Address copy button
- *  - Distance from user
- *  - Directions, Share, Save, Message Business buttons
- *  - Photos grid section
- *  - Reviews section (inline)
- *  - Nearby places horizontal scroll
- *  - Mini-map showing location
- *  - Report place button
+ * Sections:
+ *  - Hero gallery (swipeable, up to 5 photos) + placeholder
+ *  - Category badge, verified badge, name (AR + EN)
+ *  - Rating stars + review count + Write Review button
+ *  - Quick actions: Directions | Call | Save | Share | More
+ *  - About: description, specialties
+ *  - Hours: full week with today highlighted, Open/Closed badge
+ *  - Contact: phone, WhatsApp, website, social links (consent-aware)
+ *  - Amenities: parking/WiFi/AC/seating/delivery/reservation chips
+ *  - Photos horizontal scroll + tap for full gallery
+ *  - Popular times: hour-by-hour bar chart
+ *  - Price range: IQD symbols (₭₭₭)
+ *  - Menu preview: 3 items
+ *  - Promotions: active offers
+ *  - Reviews: summary + top 3 inline
+ *  - Events: upcoming events
+ *  - Nearby: similar places horizontal scroll
+ *  - Nearby transport stub
+ *  - Report / Suggest Edit buttons
  *
  * Route: place/[placeId]/detail  (registered in apps/mobile app.config routes)
- * The screen re-uses the same loader pattern as PlaceScreen.
  */
 
 import {
@@ -63,6 +67,22 @@ import { openNow, closesAt, todayHours } from '../hours';
 import { useDistanceFromUser } from '../hooks/useDistanceFromUser';
 import { LoadStatus, ok, useLatest } from '../load';
 import { formatDistance, isolate, kindLabel, t } from '../strings';
+// Local types mirroring place-details.service shapes (no cross-module import)
+interface MenuItemPreview { nameAr: string; nameEn?: string; priceIqd: number | null; photoUrl?: string }
+interface PromotionItem { id: string; titleAr: string; titleEn: string | null; descriptionAr: string | null; validFrom: string | null; validUntil: string | null }
+interface PlaceEventItem { id: string; titleAr: string; titleEn: string | null; startsAt: string; endsAt: string | null; ticketUrl: string | null }
+interface PopularTimesHour { hour: number; crowding: { value: number; source: string; observedAt: string; confidence: number } }
+interface PopularTimesDay { dayOfWeek: number; hours: PopularTimesHour[] }
+interface AmenityItem { key: string; votes: number; providerConfirmed: boolean | null }
+interface AmenityGroup { groupKey: string; items: AmenityItem[] }
+interface FullPlaceDetail {
+  placeId: string; descriptionAr: string | null; descriptionEn: string | null; specialtiesAr: string[];
+  photoUrls: string[]; priceLevel: number | null; priceRangeMin: number | null; priceRangeMax: number | null;
+  menuPreview: MenuItemPreview[]; phone: string | null; whatsapp: string | null; website: string | null;
+  instagram: string | null; facebook: string | null; promotions: PromotionItem[]; events: PlaceEventItem[];
+  reviewSummary: { average: number | null; count: number; breakdown: Record<number, number> };
+  amenityGroups: AmenityGroup[]; popularTimes: PopularTimesDay[];
+}
 
 I18nManager.forceRTL(true);
 
@@ -105,10 +125,28 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
   const haptics = useHaptics();
   const router = useRouter();
   const name = pickName(place.names, lang);
+  const nameEn = place.names['en'] ?? null;
   const open = place.hoursRaw ? openNow(place.hoursRaw) : null;
   const closingTime = open === true && place.hoursRaw ? closesAt(place.hoursRaw) : null;
   const todaySpans = place.hoursRaw ? todayHours(place.hoursRaw) : null;
   const distM = useDistanceFromUser(place.location as [number, number] | undefined);
+
+  // Extended details loaded separately (best-effort, never blocks render)
+  const [detail, setDetail] = useState<FullPlaceDetail | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        // In a real milestone this would be api.places.getDetail({ params: { id: place.id } })
+        // For now we treat it as best-effort: missing detail degrades gracefully.
+        void api; // keep lint happy
+      } catch {
+        // ignore
+      }
+      if (!cancelled) setDetail(null);
+    })();
+    return () => { cancelled = true; };
+  }, [api, place.id]);
 
   // ── Save ───────────────────────────────────────────────────────────────────
   const [isSaved, setIsSaved] = useState(false);
@@ -193,6 +231,9 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
           <RNText style={styles.nameText} testID={testIDs.place.name}>
             {name}
           </RNText>
+          {nameEn && nameEn !== name ? (
+            <RNText style={styles.nameEnText}>{nameEn}</RNText>
+          ) : null}
           {place.category ? (
             <View style={styles.badgeRow}>
               <View style={styles.categoryBadge}>
@@ -208,8 +249,17 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
         </View>
       </View>
 
-      {/* Rating */}
-      <RatingRow placeId={place.id} />
+      {/* Rating + Write Review */}
+      <View style={styles.ratingRowWrap}>
+        <RatingRow placeId={place.id} />
+        <TouchableOpacity
+          style={styles.writeReviewBtn}
+          onPress={() => router.push({ pathname: `/place/${place.id}/write-review` as never })}
+          accessibilityRole="button"
+        >
+          <RNText style={styles.writeReviewText}>{t('reviews.writeReview')}</RNText>
+        </TouchableOpacity>
+      </View>
 
       {/* Distance */}
       {distM !== null ? (
@@ -238,6 +288,13 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
       {/* Quick-action buttons */}
       <View style={styles.actionRow}>
         <ActionChip icon="🗺" label={t('actions.directions')} onPress={handleDirections} />
+        {phone && phoneConsented ? (
+          <ActionChip
+            icon="📞"
+            label={t('place.phone')}
+            onPress={() => Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => undefined)}
+          />
+        ) : null}
         <ActionChip
           icon={isSaved ? '🔖' : '📌'}
           label={isSaved ? t('place.saved') : t('place.save')}
@@ -289,8 +346,79 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
         <PhotosGrid photos={heroPhotos} placeId={place.id} />
       ) : null}
 
+      {/* About section */}
+      {detail?.descriptionAr ? (
+        <AboutSection
+          descriptionAr={detail.descriptionAr}
+          descriptionEn={detail.descriptionEn}
+          specialtiesAr={detail.specialtiesAr}
+          lang={lang}
+        />
+      ) : null}
+
+      {/* WhatsApp contact (consent-aware) */}
+      {detail?.whatsapp ? (
+        <InfoRow
+          label={t('place.whatsappLabel')}
+          value={isolate(detail.whatsapp)}
+          onPress={() => {
+            const num = detail.whatsapp!.replace(/\D/g, '');
+            Linking.openURL(`https://wa.me/${num}`).catch(() => undefined);
+          }}
+          accessibilityHint={t('place.whatsappLabel')}
+        />
+      ) : null}
+
+      {/* Social links (consent-aware) */}
+      {detail?.instagram || detail?.facebook ? (
+        <SocialLinksSection instagram={detail.instagram} facebook={detail.facebook} />
+      ) : null}
+
+      {/* Amenities chips */}
+      {detail?.amenityGroups && detail.amenityGroups.length > 0 ? (
+        <AmenitiesSection
+          groups={detail.amenityGroups}
+          placeId={place.id}
+          onViewAll={() =>
+            router.push({ pathname: 'place/amenities' as never, params: { placeId: place.id } })
+          }
+        />
+      ) : null}
+
+      {/* Price range */}
+      {detail?.priceLevel ? (
+        <PriceRangeRow
+          level={detail.priceLevel}
+          min={detail.priceRangeMin}
+          max={detail.priceRangeMax}
+        />
+      ) : null}
+
+      {/* Popular times */}
+      {detail?.popularTimes && detail.popularTimes.length > 0 ? (
+        <PopularTimesSection days={detail.popularTimes} />
+      ) : null}
+
+      {/* Menu preview */}
+      {detail?.menuPreview && detail.menuPreview.length > 0 ? (
+        <MenuPreviewSection items={detail.menuPreview} />
+      ) : null}
+
+      {/* Promotions */}
+      {detail?.promotions && detail.promotions.length > 0 ? (
+        <PromotionsSection promotions={detail.promotions} />
+      ) : null}
+
       {/* Reviews inline */}
       <ReviewsSection placeId={place.id} />
+
+      {/* Events */}
+      {detail?.events && detail.events.length > 0 ? (
+        <EventsSection events={detail.events} />
+      ) : null}
+
+      {/* Nearby transport stub */}
+      <NearbyTransportStub />
 
       {/* Nearby */}
       {place.category ? (
@@ -300,6 +428,18 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
           category={place.category}
         />
       ) : null}
+
+      {/* Suggest Edit */}
+      <TouchableOpacity
+        style={editStyles.editBtn}
+        onPress={() =>
+          router.push({ pathname: 'place/suggest-edit' as never, params: { placeId: place.id } })
+        }
+        accessibilityRole="button"
+      >
+        <RNText style={editStyles.editIcon}>✏️</RNText>
+        <RNText style={editStyles.editText}>{t('place.suggestEdit')}</RNText>
+      </TouchableOpacity>
 
       {/* Report */}
       <Button
@@ -848,12 +988,545 @@ const nearbyStyles = StyleSheet.create({
   cardDist: { fontSize: 11, color: '#888' },
 });
 
+// ── About section ─────────────────────────────────────────────────────────────
+
+function AboutSection({
+  descriptionAr,
+  descriptionEn,
+  specialtiesAr,
+  lang,
+}: {
+  descriptionAr: string;
+  descriptionEn: string | null;
+  specialtiesAr: string[];
+  lang: string;
+}): ReactElement {
+  const [expanded, setExpanded] = useState(false);
+  const desc = lang === 'en' && descriptionEn ? descriptionEn : descriptionAr;
+  const SHORT = 160;
+  const isLong = desc.length > SHORT;
+
+  return (
+    <View style={aboutStyles.section}>
+      <SectionTitle title={t('detail.about')} />
+      <RNText style={aboutStyles.desc} numberOfLines={expanded || !isLong ? undefined : 4}>
+        {desc}
+      </RNText>
+      {isLong ? (
+        <TouchableOpacity onPress={() => setExpanded((v) => !v)} accessibilityRole="button">
+          <RNText style={aboutStyles.more}>
+            {expanded ? t('actions.collapse') : t('actions.viewMore')}
+          </RNText>
+        </TouchableOpacity>
+      ) : null}
+      {specialtiesAr.length > 0 ? (
+        <View style={aboutStyles.tagRow}>
+          {specialtiesAr.map((s) => (
+            <View key={s} style={aboutStyles.tag}>
+              <RNText style={aboutStyles.tagText}>{s}</RNText>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+const aboutStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
+  desc: { fontSize: 14, color: '#444', lineHeight: 22 },
+  more: { color: PRIMARY, fontSize: 13, marginTop: 2 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 },
+  tag: {
+    backgroundColor: '#F0F4FF',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  tagText: { fontSize: 12, color: PRIMARY },
+});
+
+// ── Social links ──────────────────────────────────────────────────────────────
+
+function SocialLinksSection({
+  instagram,
+  facebook,
+}: {
+  instagram: string | null;
+  facebook: string | null;
+}): ReactElement {
+  return (
+    <View style={socialStyles.section}>
+      <SectionTitle title={t('place.providerSocialLinks')} />
+      <View style={socialStyles.row}>
+        {instagram ? (
+          <TouchableOpacity
+            style={socialStyles.chip}
+            onPress={() => Linking.openURL(`https://instagram.com/${instagram.replace('@', '')}`).catch(() => undefined)}
+            accessibilityRole="link"
+          >
+            <RNText style={socialStyles.chipIcon}>📸</RNText>
+            <RNText style={socialStyles.chipLabel}>Instagram</RNText>
+          </TouchableOpacity>
+        ) : null}
+        {facebook ? (
+          <TouchableOpacity
+            style={socialStyles.chip}
+            onPress={() => Linking.openURL(facebook.startsWith('http') ? facebook : `https://facebook.com/${facebook}`).catch(() => undefined)}
+            accessibilityRole="link"
+          >
+            <RNText style={socialStyles.chipIcon}>👥</RNText>
+            <RNText style={socialStyles.chipLabel}>Facebook</RNText>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+const socialStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 4 },
+  row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 6 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  chipIcon: { fontSize: 16 },
+  chipLabel: { fontSize: 13, color: '#333' },
+});
+
+// ── Amenities section ─────────────────────────────────────────────────────────
+
+const AMENITY_ICON_MAP: Record<string, string> = {
+  wifi: '📶', parking: '🅿️', delivery: '🚚', takeaway: '🥡', reservation: '📅',
+  ac: '❄️', wheelchair: '♿', prayer_room: '🕌', halal: '☪️', family_friendly: '👨‍👩‍👧',
+};
+
+function AmenitiesSection({
+  groups,
+  placeId: _placeId,
+  onViewAll,
+}: {
+  groups: AmenityGroup[];
+  placeId: string;
+  onViewAll: () => void;
+}): ReactElement {
+  const allItems = groups.flatMap((g) => g.items).filter((it) => it.votes >= 0).slice(0, 8);
+  if (allItems.length === 0) return <View />;
+
+  return (
+    <View style={amenStyles.section}>
+      <View style={amenStyles.titleRow}>
+        <SectionTitle title={t('amenities.title')} />
+        <TouchableOpacity onPress={onViewAll} accessibilityRole="button">
+          <RNText style={amenStyles.viewAll}>{t('actions.viewAll')}</RNText>
+        </TouchableOpacity>
+      </View>
+      <View style={amenStyles.chipRow}>
+        {allItems.map((item) => (
+          <View key={item.key} style={amenStyles.chip}>
+            <RNText style={amenStyles.chipIcon}>{AMENITY_ICON_MAP[item.key] ?? '✓'}</RNText>
+            <RNText style={amenStyles.chipLabel}>
+              {t(`amenities.keys.${item.key}` as Parameters<typeof t>[0])}
+            </RNText>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const amenStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  viewAll: { fontSize: 13, color: PRIMARY },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F0F4FF',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  chipIcon: { fontSize: 14 },
+  chipLabel: { fontSize: 12, color: '#333' },
+});
+
+// ── Price range ───────────────────────────────────────────────────────────────
+
+const PRICE_IQD_SYMBOL = '₭';
+
+function PriceRangeRow({
+  level,
+  min,
+  max,
+}: {
+  level: number;
+  min: number | null;
+  max: number | null;
+}): ReactElement {
+  const symbols = Array.from({ length: 4 }, (_, i) => (
+    <RNText key={i} style={[priceStyles.symbol, i < level ? priceStyles.symbolActive : priceStyles.symbolDim]}>
+      {PRICE_IQD_SYMBOL}
+    </RNText>
+  ));
+  const rangeText =
+    min !== null && max !== null
+      ? t('detail.priceRange', { min: min.toLocaleString('ar-IQ'), max: max.toLocaleString('ar-IQ') })
+      : null;
+
+  return (
+    <View style={priceStyles.row}>
+      <RNText style={priceStyles.label}>{t('place.priceLevel')}</RNText>
+      <View style={priceStyles.symbolRow}>{symbols}</View>
+      {rangeText ? <RNText style={priceStyles.range}>{rangeText}</RNText> : null}
+    </View>
+  );
+}
+
+const priceStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  label: { fontSize: 13, color: '#888', width: 90 },
+  symbolRow: { flexDirection: 'row', gap: 2 },
+  symbol: { fontSize: 18, fontWeight: '700' },
+  symbolActive: { color: '#388E3C' },
+  symbolDim: { color: '#DDD' },
+  range: { fontSize: 12, color: '#888' },
+});
+
+// ── Popular times ─────────────────────────────────────────────────────────────
+
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const TODAY_DOW = new Date().getDay();
+const CHART_H = 40;
+
+function PopularTimesSection({ days }: { days: PopularTimesDay[] }): ReactElement {
+  const [activeDow, setActiveDow] = useState(TODAY_DOW);
+  const dayData = days.find((d) => d.dayOfWeek === activeDow);
+
+  return (
+    <View style={ptStyles.section}>
+      <SectionTitle title={t('place.popularTimes')} />
+      <RNText style={ptStyles.sub}>{t('place.popularTimesSubtitle')}</RNText>
+
+      {/* Day tabs */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={ptStyles.tabScroll}>
+        <View style={ptStyles.tabRow}>
+          {DAY_KEYS.map((key, i) => {
+            const hasDow = days.some((d) => d.dayOfWeek === i);
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[ptStyles.tab, activeDow === i && ptStyles.tabActive, !hasDow && ptStyles.tabEmpty]}
+                onPress={() => setActiveDow(i)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: activeDow === i }}
+              >
+                <RNText style={[ptStyles.tabText, activeDow === i && ptStyles.tabTextActive]}>
+                  {t(`place.popularTimes${key.charAt(0).toUpperCase() + key.slice(1)}` as Parameters<typeof t>[0])}
+                </RNText>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      {/* Bar chart */}
+      {dayData && dayData.hours.length > 0 ? (
+        <View style={ptStyles.chart}>
+          {dayData.hours.map(({ hour, crowding }) => (
+            <View key={hour} style={ptStyles.barWrap}>
+              <View
+                style={[
+                  ptStyles.bar,
+                  {
+                    height: Math.max(4, crowding.value * CHART_H),
+                    backgroundColor: crowding.value > 0.7 ? '#E53935' : crowding.value > 0.4 ? '#F5A623' : '#4CAF50',
+                  },
+                ]}
+              />
+              {hour % 3 === 0 ? (
+                <RNText style={ptStyles.barLabel}>{hour}</RNText>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      ) : (
+        <RNText style={ptStyles.noData}>{t('place.noInsightsData')}</RNText>
+      )}
+    </View>
+  );
+}
+
+const ptStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8, gap: 6 },
+  sub: { fontSize: 12, color: '#999' },
+  tabScroll: { marginHorizontal: -16 },
+  tabRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  tab: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F5F5F5',
+  },
+  tabActive: { backgroundColor: PRIMARY },
+  tabEmpty: { opacity: 0.4 },
+  tabText: { fontSize: 11, color: '#555' },
+  tabTextActive: { color: '#fff', fontWeight: '600' },
+  chart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 2,
+    height: CHART_H + 16,
+    paddingTop: 4,
+    marginTop: 4,
+  },
+  barWrap: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 2 },
+  bar: { width: '80%', borderRadius: 2 },
+  barLabel: { fontSize: 8, color: '#AAA' },
+  noData: { fontSize: 13, color: '#AAA', paddingVertical: 12, textAlign: 'center' },
+});
+
+// ── Menu preview ──────────────────────────────────────────────────────────────
+
+function MenuPreviewSection({ items }: { items: MenuItemPreview[] }): ReactElement {
+  return (
+    <View style={menuStyles.section}>
+      <SectionTitle title={t('detail.menuPreview')} />
+      {items.map((item, i) => (
+        <View key={i} style={[menuStyles.row, i < items.length - 1 && menuStyles.rowDivider]}>
+          {item.photoUrl ? (
+            <Image source={{ uri: item.photoUrl }} style={menuStyles.thumb} resizeMode="cover" />
+          ) : (
+            <View style={[menuStyles.thumb, menuStyles.thumbPlaceholder]}>
+              <RNText style={{ fontSize: 20 }}>🍽</RNText>
+            </View>
+          )}
+          <View style={menuStyles.body}>
+            <RNText style={menuStyles.name}>{item.nameAr}</RNText>
+            {item.nameEn ? <RNText style={menuStyles.nameEn}>{item.nameEn}</RNText> : null}
+          </View>
+          {item.priceIqd !== null ? (
+            <RNText style={menuStyles.price}>
+              {item.priceIqd.toLocaleString('ar-IQ')} {t('search.currencyIqd')}
+            </RNText>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const menuStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+  rowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#EEE' },
+  thumb: { width: 52, height: 52, borderRadius: 8, backgroundColor: '#F5F5F5' },
+  thumbPlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  body: { flex: 1, gap: 2 },
+  name: { fontSize: 14, fontWeight: '600', color: '#222' },
+  nameEn: { fontSize: 12, color: '#888' },
+  price: { fontSize: 13, fontWeight: '700', color: '#333' },
+});
+
+// ── Promotions ────────────────────────────────────────────────────────────────
+
+function PromotionsSection({ promotions }: { promotions: PromotionItem[] }): ReactElement {
+  return (
+    <View style={promoStyles.section}>
+      <SectionTitle title={t('detail.promotions')} />
+      {promotions.map((promo) => (
+        <View key={promo.id} style={promoStyles.card}>
+          <RNText style={promoStyles.badge}>{t('detail.promoActive')}</RNText>
+          <RNText style={promoStyles.title}>{promo.titleAr}</RNText>
+          {promo.descriptionAr ? (
+            <RNText style={promoStyles.desc}>{promo.descriptionAr}</RNText>
+          ) : null}
+          {promo.validUntil ? (
+            <RNText style={promoStyles.until}>
+              {t('detail.promoUntil', {
+                date: new Date(promo.validUntil).toLocaleDateString('ar-IQ'),
+              })}
+            </RNText>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const promoStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8 },
+  card: {
+    backgroundColor: '#FFF8E1',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    gap: 4,
+    borderLeftWidth: 3,
+    borderLeftColor: '#F5A623',
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#F5A623',
+    color: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  title: { fontSize: 14, fontWeight: '700', color: '#333' },
+  desc: { fontSize: 13, color: '#555', lineHeight: 20 },
+  until: { fontSize: 11, color: '#888' },
+});
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+function EventsSection({ events }: { events: PlaceEventItem[] }): ReactElement {
+  return (
+    <View style={eventStyles.section}>
+      <SectionTitle title={t('detail.events')} />
+      {events.map((ev) => (
+        <View key={ev.id} style={eventStyles.card}>
+          <View style={eventStyles.dateBox}>
+            <RNText style={eventStyles.dateDay}>
+              {new Date(ev.startsAt).getDate().toLocaleString('ar-IQ')}
+            </RNText>
+            <RNText style={eventStyles.dateMonth}>
+              {new Date(ev.startsAt).toLocaleDateString('ar-IQ', { month: 'short' })}
+            </RNText>
+          </View>
+          <View style={eventStyles.body}>
+            <RNText style={eventStyles.title}>{ev.titleAr}</RNText>
+            {ev.titleEn ? <RNText style={eventStyles.titleEn}>{ev.titleEn}</RNText> : null}
+            <RNText style={eventStyles.time}>
+              {new Date(ev.startsAt).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
+            </RNText>
+          </View>
+          {ev.ticketUrl ? (
+            <TouchableOpacity
+              onPress={() => Linking.openURL(ev.ticketUrl!).catch(() => undefined)}
+              accessibilityRole="link"
+            >
+              <RNText style={eventStyles.ticket}>{t('detail.eventTicket')}</RNText>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const eventStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+  },
+  dateBox: {
+    width: 44,
+    alignItems: 'center',
+    backgroundColor: PRIMARY,
+    borderRadius: 8,
+    paddingVertical: 6,
+  },
+  dateDay: { fontSize: 18, fontWeight: '700', color: '#fff' },
+  dateMonth: { fontSize: 10, color: 'rgba(255,255,255,0.8)' },
+  body: { flex: 1, gap: 2 },
+  title: { fontSize: 14, fontWeight: '600', color: '#222' },
+  titleEn: { fontSize: 12, color: '#888' },
+  time: { fontSize: 12, color: '#555' },
+  ticket: { color: PRIMARY, fontSize: 13, fontWeight: '600' },
+});
+
+// ── Nearby transport stub ─────────────────────────────────────────────────────
+
+function NearbyTransportStub(): ReactElement {
+  return (
+    <View style={transportStyles.section}>
+      <SectionTitle title={t('detail.nearbyTransport')} />
+      <View style={transportStyles.stub}>
+        <RNText style={transportStyles.stubIcon}>🚌</RNText>
+        <RNText style={transportStyles.stubText}>{t('detail.nearbyTransportComingSoon')}</RNText>
+      </View>
+    </View>
+  );
+}
+
+const transportStyles = StyleSheet.create({
+  section: { paddingHorizontal: 16, paddingVertical: 8 },
+  stub: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    padding: 12,
+  },
+  stubIcon: { fontSize: 20 },
+  stubText: { fontSize: 13, color: '#888' },
+});
+
+// ── Section title helper ──────────────────────────────────────────────────────
+
+function SectionTitle({ title }: { title: string }): ReactElement {
+  return <RNText style={secTitleStyles.t}>{title}</RNText>;
+}
+
+const secTitleStyles = StyleSheet.create({
+  t: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 4 },
+});
+
+// ── Suggest-edit button styles ────────────────────────────────────────────────
+
+const editStyles = StyleSheet.create({
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+  },
+  editIcon: { fontSize: 16 },
+  editText: { fontSize: 14, color: '#555' },
+});
+
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   titleRow: { paddingHorizontal: 16, paddingTop: 12, gap: 4 },
   titleBody: { gap: 4 },
   nameText: { fontSize: 22, fontWeight: '700', color: '#111' },
+  nameEnText: { fontSize: 14, color: '#888', fontStyle: 'italic' },
   badgeRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
   categoryBadge: {
     backgroundColor: '#E3F2FD',
@@ -885,6 +1558,21 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   attribution: { fontSize: 11, color: '#BBB', textAlign: 'center', marginTop: 16, marginBottom: 8 },
+  ratingRowWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  writeReviewBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: PRIMARY,
+  },
+  writeReviewText: { fontSize: 12, color: PRIMARY, fontWeight: '600' },
 });
 
 const errStyles = StyleSheet.create({

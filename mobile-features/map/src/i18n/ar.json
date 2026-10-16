@@ -175,7 +175,13 @@
     "assistant": "اسأل المساعد",
     "nearMe": "قريب مني",
     "retry": "إعادة المحاولة",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "viewAll": "عرض الكل",
+    "viewMore": "عرض المزيد",
+    "collapse": "طي",
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "done": "تم"
   },
   "satellite": {
     "label": "القمر الصناعي"

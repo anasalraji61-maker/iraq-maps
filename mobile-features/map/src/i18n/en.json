@@ -175,7 +175,13 @@
     "assistant": "Ask the assistant",
     "nearMe": "Near me",
     "retry": "Retry",
-    "close": "Close"
+    "close": "Close",
+    "viewAll": "View all",
+    "viewMore": "View more",
+    "collapse": "Collapse",
+    "back": "Back",
+    "cancel": "Cancel",
+    "done": "Done"
   },
   "satellite": {
     "label": "Satellite"
