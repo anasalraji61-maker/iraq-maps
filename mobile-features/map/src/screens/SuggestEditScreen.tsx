@@ -14,7 +14,6 @@
  * Route: place/[placeId]/suggest-edit
  */
 
-import { placesContract } from '@iraq-maps/contracts';
 import { Screen } from '@iraq-maps/ui';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -25,7 +24,6 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -201,6 +199,7 @@ function SuggestEditForm({
         >
           {/* Field indicator */}
           <View style={formStyles.fieldBadge}>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={formStyles.fieldBadgeIcon}>{fieldDef?.icon ?? '✏️'}</RNText>
             <RNText style={formStyles.fieldBadgeLabel}>
               {t(`suggestEdit.fields.${selectedField}` as Parameters<typeof t>[0])}
@@ -276,6 +275,7 @@ function SuggestEditForm({
                     accessibilityRole="button"
                     accessibilityLabel={t('suggestEdit.removePhoto')}
                   >
+                    {/* eslint-disable-next-line i18next/no-literal-string */}
                     <RNText style={formStyles.removePhotoText}>✕</RNText>
                   </TouchableOpacity>
                 </View>
@@ -482,8 +482,8 @@ const formStyles = StyleSheet.create({
     backgroundColor: '#FFF8E1',
     borderRadius: 10,
     padding: 12,
-    borderLeftWidth: 3,
-    borderLeftColor: '#F5A623',
+    borderStartWidth: 3,
+    borderStartColor: '#F5A623',
   },
   infoText: { fontSize: 12, color: '#795548', lineHeight: 18 },
   submitBtn: {

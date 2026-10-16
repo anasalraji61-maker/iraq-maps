@@ -437,6 +437,7 @@ function DetailCard({ place }: { place: PlaceDetails }): ReactElement {
         }
         accessibilityRole="button"
       >
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <RNText style={editStyles.editIcon}>✏️</RNText>
         <RNText style={editStyles.editText}>{t('place.suggestEdit')}</RNText>
       </TouchableOpacity>
@@ -1066,6 +1067,7 @@ function SocialLinksSection({
             accessibilityRole="link"
           >
             <RNText style={socialStyles.chipIcon}>📸</RNText>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={socialStyles.chipLabel}>Instagram</RNText>
           </TouchableOpacity>
         ) : null}
@@ -1076,6 +1078,7 @@ function SocialLinksSection({
             accessibilityRole="link"
           >
             <RNText style={socialStyles.chipIcon}>👥</RNText>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={socialStyles.chipLabel}>Facebook</RNText>
           </TouchableOpacity>
         ) : null}
@@ -1130,6 +1133,7 @@ function AmenitiesSection({
       <View style={amenStyles.chipRow}>
         {allItems.map((item) => (
           <View key={item.key} style={amenStyles.chip}>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={amenStyles.chipIcon}>{AMENITY_ICON_MAP[item.key] ?? '✓'}</RNText>
             <RNText style={amenStyles.chipLabel}>
               {t(`amenities.keys.${item.key}` as Parameters<typeof t>[0])}
@@ -1324,11 +1328,13 @@ function MenuPreviewSection({ items }: { items: MenuItemPreview[] }): ReactEleme
             <RNText style={menuStyles.name}>{item.nameAr}</RNText>
             {item.nameEn ? <RNText style={menuStyles.nameEn}>{item.nameEn}</RNText> : null}
           </View>
+          {/* eslint-disable i18next/no-literal-string */}
           {item.priceIqd !== null ? (
             <RNText style={menuStyles.price}>
               {item.priceIqd.toLocaleString('ar-IQ')} {t('search.currencyIqd')}
             </RNText>
           ) : null}
+          {/* eslint-enable i18next/no-literal-string */}
         </View>
       ))}
     </View>
@@ -1381,8 +1387,8 @@ const promoStyles = StyleSheet.create({
     padding: 12,
     marginBottom: 8,
     gap: 4,
-    borderLeftWidth: 3,
-    borderLeftColor: '#F5A623',
+    borderStartWidth: 3,
+    borderStartColor: '#F5A623',
   },
   badge: {
     alignSelf: 'flex-start',
@@ -1408,17 +1414,23 @@ function EventsSection({ events }: { events: PlaceEventItem[] }): ReactElement {
       {events.map((ev) => (
         <View key={ev.id} style={eventStyles.card}>
           <View style={eventStyles.dateBox}>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={eventStyles.dateDay}>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               {new Date(ev.startsAt).getDate().toLocaleString('ar-IQ')}
             </RNText>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={eventStyles.dateMonth}>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               {new Date(ev.startsAt).toLocaleDateString('ar-IQ', { month: 'short' })}
             </RNText>
           </View>
           <View style={eventStyles.body}>
             <RNText style={eventStyles.title}>{ev.titleAr}</RNText>
             {ev.titleEn ? <RNText style={eventStyles.titleEn}>{ev.titleEn}</RNText> : null}
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <RNText style={eventStyles.time}>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               {new Date(ev.startsAt).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}
             </RNText>
           </View>

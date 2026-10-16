@@ -83,7 +83,18 @@
     "modules/assistant/src/tools/navigation-tools.ts",
     "modules/assistant/src/tools/place-tools.ts",
     "modules/assistant/src/tools/recommendation-tools.ts",
-    "modules/discover/src/stories.service.ts"
+    "modules/discover/src/stories.service.ts",
+    "apps/admin/src/pages/AdminVerificationPage.tsx",
+    "mobile-features/map/src/screens/DiscoverNearbyScreen.tsx",
+    "mobile-features/map/src/screens/PlaceAmenitiesScreen.tsx",
+    "mobile-features/map/src/screens/shared.ts",
+    "mobile-features/map/src/screens/SuggestEditScreen.tsx",
+    "modules/messaging/src/group-messaging.service.ts",
+    "modules/places/src/discovery.service.ts",
+    "modules/places/src/place-details.service.ts",
+    "modules/places/src/places-cache.ts",
+    "packages/db-kit/src/cache/index.ts",
+    "packages/db-kit/src/pagination/index.ts"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",

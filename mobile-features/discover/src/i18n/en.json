@@ -813,6 +813,7 @@
     "newInCityEmpty": "No new places this week",
     "trendingLikeEmpty": "No similar recommendations right now",
     "loadMore": "Load more",
-    "loadError": "Could not load recommendations"
+    "loadError": "Could not load recommendations",
+    "new": "New"
   }
 }

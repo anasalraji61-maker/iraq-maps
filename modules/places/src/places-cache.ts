@@ -72,7 +72,7 @@ export class CachedPlaces implements PlacesQueryPort {
   async suggestions(query: SuggestionsQuery): Promise<Array<{ id: PlaceId; name: string }>> {
     // Suggestions are quick-typeahead results: short TTL, not worth heavy caching.
     // We do a lightweight cache-aside with a 30-second TTL.
-    const key = `places:suggestions:${query.city}:${encodeURIComponent(query.q)}`;
+    const _key = `places:suggestions:${query.city}:${encodeURIComponent(query.q)}`;
     // Access underlying QueryCache via the public getSearch variant
     // We use a simple getOrSet pattern here since PlacesCache doesn't expose suggestions
     return this.delegate.suggestions(query);

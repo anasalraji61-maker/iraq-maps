@@ -369,6 +369,42 @@ export const api = {
   async forceCompleteChallenge(challengeId: string, userId: string): Promise<void> {
     await request<void>(`/v1/admin/challenges/${challengeId}/force-complete`, { method: 'POST', body: JSON.stringify({ userId }) });
   },
+
+  /** Alias for getMetrics() */
+  async metrics(): Promise<Metrics> {
+    return request<Metrics>('/v1/admin/metrics');
+  },
+
+  /** Provider verification queue operations */
+  adminProviders: {
+    async queue(opts: { status?: string }): Promise<{ items: Array<{ id: string; name: string; category: string | null; submittedAt: string | null; status: string; ownerUserId: string | null; suspensionReason: string | null }> }> {
+      const status = opts.status ?? 'pending';
+      const result = await request<{ items: Array<Record<string, unknown>>; nextCursor: string | null }>(`/v1/admin/providers?status=${encodeURIComponent(status)}`);
+      return {
+        items: result.items.map((p) => ({
+          id: String(p['id'] ?? ''),
+          name: String(p['name'] ?? ''),
+          category: p['category'] ? String(p['category']) : null,
+          submittedAt: p['submittedAt'] ? String(p['submittedAt']) : null,
+          status: String(p['status'] ?? ''),
+          ownerUserId: p['ownerUserId'] ? String(p['ownerUserId']) : null,
+          suspensionReason: p['suspensionReason'] ? String(p['suspensionReason']) : null,
+        })),
+      };
+    },
+    async verify(id: string): Promise<void> {
+      await request<unknown>(`/v1/admin/providers/${id}/verify`, { method: 'POST' });
+    },
+    async reject(id: string, opts: { reason?: string }): Promise<void> {
+      await request<unknown>(`/v1/admin/providers/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason: opts.reason ?? '' }) });
+    },
+    async suspend(id: string, opts: { reason?: string }): Promise<void> {
+      await request<unknown>(`/v1/admin/providers/${id}/suspend`, { method: 'POST', body: JSON.stringify({ reason: opts.reason ?? '' }) });
+    },
+    async get(id: string): Promise<{ audit: unknown[] }> {
+      return request<{ audit: unknown[] }>(`/v1/admin/providers/${id}`);
+    },
+  },
 };
 
 // ─── Additional types ─────────────────────────────────────────────────────────

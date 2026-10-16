@@ -17,15 +17,14 @@
  * Route: place/[placeId]/amenities
  */
 
-import { placesContract, testIDs } from '@iraq-maps/contracts';
+import { testIDs } from '@iraq-maps/contracts';
 import { Screen } from '@iraq-maps/ui';
 import { useApi } from '@iraq-maps/mobile-kit';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -356,6 +355,7 @@ function AmenityRow({
           accessibilityRole="button"
           accessibilityLabel={t('amenities.votePresent')}
         >
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <RNText style={rowStyles.voteBtnText}>✓</RNText>
         </Pressable>
         <Pressable
@@ -367,6 +367,7 @@ function AmenityRow({
           accessibilityRole="button"
           accessibilityLabel={t('amenities.voteAbsent')}
         >
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <RNText style={rowStyles.voteBtnText}>✕</RNText>
         </Pressable>
       </View>

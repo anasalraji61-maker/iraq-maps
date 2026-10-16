@@ -53,7 +53,7 @@ function FeedPlaceChip({ card, onPress }: { card: DiscoveryPlaceCard; onPress: (
       </View>
       {card.isNew ? (
         <View style={chipStyles.newDot} accessibilityRole="text" accessibilityLabel={t('personalizedSections.forYou')}>
-          <Text style={chipStyles.newDotText}>جديد</Text>
+          <Text style={chipStyles.newDotText}>{t('personalizedSections.new')}</Text>
         </View>
       ) : null}
     </Pressable>
@@ -86,7 +86,7 @@ function PersonalizedPlaceSection({
   titleKey,
   items,
   loading,
-  emptyKey,
+  emptyKey: _emptyKey,
   onPlacePress,
 }: {
   titleKey: 'personalizedSections.forYou' | 'personalizedSections.savedLike' | 'personalizedSections.newInCity' | 'personalizedSections.trendingLike';
@@ -765,7 +765,7 @@ export function DiscoverFeedScreen(): ReactElement {
     const now = new Date();
     const hourOfDay = now.getHours();
     const dow = now.getDay() === 0 ? 7 : now.getDay();
-    const accessToken = session.state.status === 'signedIn' ? session.state.accessToken : null;
+    const accessToken = session.state.status === 'signedIn' ? ((session.state as Record<string, unknown>)['accessToken'] as string | undefined) ?? null : null;
     const headers: Record<string, string> = accessToken != null ? { Authorization: `Bearer ${accessToken}` } : {};
 
     // Shared safe fetch helper
@@ -806,7 +806,6 @@ export function DiscoverFeedScreen(): ReactElement {
       city, windowDays: 7, limit: 8,
     }).then((r) => { if (r) setTrendingLikePlaces(r.items); }).finally(() => setTrendingLikeLoading(false));
   // mount-only
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);

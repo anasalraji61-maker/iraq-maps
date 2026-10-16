@@ -296,6 +296,7 @@ export const adminProvidersContract = c.router(
 export const providerEventPayloads = {
   'providers.provider.verified.v1': z.object({ providerId: ProviderId }),
   'providers.provider.suspended.v1': z.object({ providerId: ProviderId }),
+  'providers.provider.submitted.v1': z.object({ providerId: ProviderId }),
   'providers.consent.changed.v1': z.object({ providerId: ProviderId, scope: ConsentScope, granted: z.boolean() }),
   'providers.profile.updated.v1': z.object({
     providerId: ProviderId,
@@ -304,6 +305,9 @@ export const providerEventPayloads = {
     location: LngLat.nullable(),
     claimedPlaceId: PlaceId.nullable(),
   }),
+  'providers.verification.step_updated.v1': z.object({ providerId: ProviderId, step: z.string(), notes: z.string().nullable().optional() }),
+  'providers.verification.info_requested.v1': z.object({ providerId: ProviderId, questions: z.array(z.string()), adminId: UserId.optional() }),
+  'providers.verification.document_uploaded.v1': z.object({ providerId: ProviderId, documentId: z.string(), type: z.string().optional() }),
 } as const;
 
 /** @public frozen contract (M3) */

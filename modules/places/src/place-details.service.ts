@@ -18,12 +18,9 @@ import {
 import type { Db } from '@iraq-maps/db-kit';
 import {
   and,
-  avg,
-  count,
   desc,
   eq,
   gte,
-  lte,
   sql,
 } from 'drizzle-orm';
 import {
@@ -254,7 +251,7 @@ export class PlaceDetailsService {
    * Phone, WhatsApp and social links are returned only when the matching consent scope is active.
    * Prices always carry source/observedAt/confidence per the Estimate<T> contract.
    */
-  async getFullPlaceDetail(placeId: PlaceId, userId: UserId | null): Promise<FullPlaceDetail> {
+  async getFullPlaceDetail(placeId: PlaceId, _userId: UserId | null): Promise<FullPlaceDetail> {
     const [detail, consent, promotions, events, reviewSummary, amenityGroups, popularTimes] =
       await Promise.all([
         this.getProviderDetail(placeId),

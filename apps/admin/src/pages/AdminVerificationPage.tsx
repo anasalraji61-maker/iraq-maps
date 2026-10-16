@@ -1038,7 +1038,7 @@ export function AdminVerificationPage(): ReactElement {
     };
     try {
       const adminView = await api.adminProviders.get(p.id);
-      detail.audit = adminView.audit ?? [];
+      detail.audit = (adminView.audit ?? []) as AuditEntry[];
     } catch {
       // fallback to empty
     }
@@ -1083,14 +1083,12 @@ export function AdminVerificationPage(): ReactElement {
     <div style={pg.wrap} dir="rtl">
       <PageHeader
         title="إدارة التوثيق"
-        subtitle="مراجعة طلبات التوثيق وإدارة مراحل التحقق للمزوِّدين"
+        meta={<span>مراجعة طلبات التوثيق وإدارة مراحل التحقق للمزوِّدين</span>}
       />
 
       {flash && (
         <FlashBanner
-          kind={flash.kind}
-          message={flash.msg}
-          onDismiss={() => setFlash(null)}
+          msg={flash.kind === 'error' ? `❌ ${flash.msg}` : `✅ ${flash.msg}`}
         />
       )}
 

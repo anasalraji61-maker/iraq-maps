@@ -28,14 +28,13 @@ import type {
   ContextualSuggestionsResult,
   PersonalizedFeedResult,
   SeasonalResult,
-  AdminPick,
 } from '@iraq-maps/contracts';
 import type { CityId, PlaceId, UserId } from '@iraq-maps/contracts';
 import type { PlaceCategory } from '@iraq-maps/contracts';
 
 // ─── Internal row types returned by raw SQL ──────────────────────────────────
 
-interface PlaceRow {
+interface PlaceRow extends Record<string, unknown> {
   id: string;
   name_ar: string | null;
   name_ckb: string | null;
@@ -52,7 +51,7 @@ interface PlaceRow {
   opened_at: string | null;
 }
 
-interface UserInteractionRow {
+interface UserInteractionRow extends Record<string, unknown> {
   place_id: string;
   visit_count: number;
   last_visit_at: string | null;
@@ -61,7 +60,7 @@ interface UserInteractionRow {
   searched: boolean;
 }
 
-interface AdminPickRow {
+interface AdminPickRow extends Record<string, unknown> {
   id: string;
   place_id: string;
   city_id: string;
@@ -90,13 +89,13 @@ const MIN_JACCARD_SIMILARITY = 0.15;
 const HOT_TEMP_THRESHOLD = 38;
 
 /** Categories strongly associated with Ramadan (iftar, sweets, mosques). */
-const RAMADAN_BOOSTED_CATEGORIES: PlaceCategory[] = ['food', 'tourism'];
+const _RAMADAN_BOOSTED_CATEGORIES: PlaceCategory[] = ['food', 'tourism'];
 
 /**
  * Categories boosted on Friday (family outings, lunches).
  * ISO day 5 = Friday.
  */
-const FRIDAY_BOOSTED_CATEGORIES: PlaceCategory[] = ['food', 'tourism', 'shopping'];
+const _FRIDAY_BOOSTED_CATEGORIES: PlaceCategory[] = ['food', 'tourism', 'shopping'];
 
 /** Map from ISO weekday to its name in Arabic (used in contextLabel). */
 const ARABIC_DAY_NAMES: Record<number, string> = {
@@ -256,7 +255,7 @@ export class DiscoveryService {
     const interactions = await this._loadUserInteractions(userId);
     const visitedIds = new Set(interactions.filter((r) => r.visit_count > 0).map((r) => r.place_id));
     const savedIds = new Set(interactions.filter((r) => r.saved).map((r) => r.place_id));
-    const visitCountMap = new Map(interactions.map((r) => [r.place_id, r.visit_count]));
+    const _visitCountMap = new Map(interactions.map((r) => [r.place_id, r.visit_count]));
 
     // Determine category affinity from interactions.
     const affinityCategories = await this._computeCategoryAffinity(userId);
@@ -272,7 +271,7 @@ export class DiscoveryService {
     const isHot = typeof opts.temperatureC === 'number' && opts.temperatureC >= HOT_TEMP_THRESHOLD;
     const isFriday = opts.dayOfWeek === 5;
     const isMorning = typeof opts.hourOfDay === 'number' && opts.hourOfDay >= 5 && opts.hourOfDay < 11;
-    const isEvening = typeof opts.hourOfDay === 'number' && opts.hourOfDay >= 18 && opts.hourOfDay < 24;
+    const _isEvening = typeof opts.hourOfDay === 'number' && opts.hourOfDay >= 18 && opts.hourOfDay < 24;
 
     const seasonalExpr = isRamadan
       ? sql`CASE WHEN p.category IN ('food', 'tourism') THEN 0.12 ELSE 0 END`
@@ -449,7 +448,7 @@ export class DiscoveryService {
       tagBoost = 'suhur';
     } else if (isHot && hourOfDay >= 12 && hourOfDay < 20) {
       contextLabel = 'الجو حار جداً — أماكن بتكييف مركزي';
-      targetCategories = ['food', 'shopping', 'services'];
+      targetCategories = ['food', 'shopping', 'entertainment'];
       tagBoost = 'air_conditioning';
     } else if (isFriday && hourOfDay >= 10 && hourOfDay < 15) {
       contextLabel = 'جمعة مباركة! مطاعم عائلية مميزة بالقرب منك';
@@ -761,7 +760,7 @@ export class DiscoveryService {
         break;
       case 'summer':
         seasonLabel = 'أبرد ما في بغداد صيفاً — أماكن بتكييف';
-        categories = ['food', 'shopping', 'services'];
+        categories = ['food', 'shopping', 'entertainment'];
         tagFilter = 'air_conditioning';
         break;
       case 'autumn':
@@ -771,7 +770,7 @@ export class DiscoveryService {
       case 'winter':
       default:
         seasonLabel = 'أماكن دافئة لفصل الشتاء';
-        categories = ['food', 'services'];
+        categories = ['food', 'entertainment'];
         tagFilter = 'indoor';
         break;
     }

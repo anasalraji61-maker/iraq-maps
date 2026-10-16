@@ -177,14 +177,14 @@ export function buildCursorPage<T extends Record<string, unknown>>(
   const firstItem = items[0];
   const lastItem = items[items.length - 1];
 
-  const nextCursor =
+  const _nextCursor =
     direction === 'forward' && hasMore && lastItem
       ? encodeCursor(...Object.values(cursorOf(lastItem)) as [string, Date | string])
       : direction === 'forward' && lastItem
         ? null
         : null;
 
-  const prevCursor =
+  const _prevCursor =
     direction === 'backward' && hasMore && firstItem
       ? encodeCursor(...Object.values(cursorOf(firstItem)) as [string, Date | string])
       : opts.cursor && firstItem

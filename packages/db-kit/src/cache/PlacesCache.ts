@@ -67,10 +67,10 @@ export class PlacesCache {
 
   constructor(redis: RedisCacheClient, config: PlacesCacheConfig = {}) {
     this.qc = new QueryCache(redis);
-    this.detailTtl = ENV_DETAIL || config.detailTtlSeconds ?? 300;
-    this.searchTtl = ENV_SEARCH || config.searchTtlSeconds ?? 120;
-    this.nearbyTtl = ENV_NEARBY || config.nearbyTtlSeconds ?? 60;
-    this.popularTtl = ENV_POPULAR || config.popularTtlSeconds ?? 600;
+    this.detailTtl = ENV_DETAIL || (config.detailTtlSeconds ?? 300);
+    this.searchTtl = ENV_SEARCH || (config.searchTtlSeconds ?? 120);
+    this.nearbyTtl = ENV_NEARBY || (config.nearbyTtlSeconds ?? 60);
+    this.popularTtl = ENV_POPULAR || (config.popularTtlSeconds ?? 600);
     this.prewarmCities = config.prewarmCities ?? [];
   }
 

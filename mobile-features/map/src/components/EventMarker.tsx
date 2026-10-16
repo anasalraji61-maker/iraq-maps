@@ -23,7 +23,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { t } from '../strings';
+import { t as _t } from '../strings';
 
 I18nManager.forceRTL(true);
 

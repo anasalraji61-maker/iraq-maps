@@ -120,7 +120,7 @@ function PlaceCardSkeleton(): ReactElement {
   );
 }
 
-function SectionSkeleton(): ReactElement {
+function _SectionSkeleton(): ReactElement {
   return (
     <View style={{ paddingVertical: 12 }}>
       <SkeletonBlock width={160} height={16} style={{ marginHorizontal: 16, marginBottom: 12 }} />
@@ -139,11 +139,13 @@ function RatingStars({ rating, count }: { rating: number | null; count: number }
   const half = rating - full >= 0.5;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 4 }}>
+      {/* eslint-disable i18next/no-literal-string */}
       {Array.from({ length: 5 }).map((_, i) => (
         <Text key={i} style={{ fontSize: 11, color: i < full ? '#F5A623' : half && i === full ? '#F5A623' : '#DDD' }}>
           {i < full ? '★' : half && i === full ? '½' : '☆'}
         </Text>
       ))}
+      {/* eslint-enable i18next/no-literal-string */}
       <Text style={{ fontSize: 11, color: COLORS.textMuted, marginStart: 2 }}>({count})</Text>
     </View>
   );
@@ -230,7 +232,7 @@ function PlaceCard({
           {card.name}
         </Text>
         {card.category != null ? (
-          <Text style={cardStyles.cardCategory}>{t(`discovery.category.${card.category}`)}</Text>
+          <Text style={cardStyles.cardCategory}>{t(`discovery.category.${card.category}` as Parameters<typeof t>[0])}</Text>
         ) : null}
         <RatingStars rating={card.rating} count={card.reviewCount} />
         {card.distanceM != null ? (
@@ -421,7 +423,7 @@ function WeeklyHighlightsSection({
         ) : null}
         <Text style={weeklyStyles.placeName} numberOfLines={1}>{h.place.name}</Text>
         {h.place.category != null ? (
-          <Text style={weeklyStyles.placeCategory}>{t(`discovery.category.${h.place.category}`)}</Text>
+          <Text style={weeklyStyles.placeCategory}>{t(`discovery.category.${h.place.category}` as Parameters<typeof t>[0])}</Text>
         ) : null}
         <RatingStars rating={h.place.rating} count={h.place.reviewCount} />
       </View>
@@ -561,7 +563,7 @@ const MAIN_CATEGORIES: Array<{ cat: PlaceCategory; icon: string }> = [
   { cat: 'food', icon: '🍽️' },
   { cat: 'shopping', icon: '🛍️' },
   { cat: 'tourism', icon: '🏛️' },
-  { cat: 'services', icon: '🔧' },
+  { cat: 'office', icon: '🔧' },
   { cat: 'transport', icon: '🚌' },
 ];
 
@@ -576,10 +578,10 @@ function CategoryGrid({ onPress }: { onPress: (cat: PlaceCategory) => void }): R
             style={gridStyles.item}
             onPress={() => onPress(cat)}
             accessibilityRole="button"
-            accessibilityLabel={t(`discovery.category.${cat}`)}
+            accessibilityLabel={t(`discovery.category.${cat}` as Parameters<typeof t>[0])}
           >
             <Text style={gridStyles.icon}>{icon}</Text>
-            <Text style={gridStyles.label}>{t(`discovery.category.${cat}`)}</Text>
+            <Text style={gridStyles.label}>{t(`discovery.category.${cat}` as Parameters<typeof t>[0])}</Text>
           </Pressable>
         ))}
       </View>
@@ -653,7 +655,7 @@ export function DiscoverNearbyScreen(): ReactElement {
   const hourOfDay = now.getHours();
   const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); // ISO 1–7
   const isRamadan = isRamadanNow();
-  const month = currentMonth();
+  const _month = currentMonth();
 
   // Hard-coded city for MVP; in production this comes from the user's city context.
   const city = 'baghdad';
@@ -667,7 +669,7 @@ export function DiscoverNearbyScreen(): ReactElement {
       ).toString();
       try {
         const url = `${baseUrl}${path}?${qs}`;
-        const authHeader: Record<string, string> = session.state.status === 'signedIn' ? { Authorization: `Bearer ${session.state.accessToken}` } : {};
+        const authHeader: Record<string, string> = session.state.status === 'signedIn' ? { Authorization: `Bearer ${(session.state as Record<string, unknown>)['accessToken'] ?? ''}` } : {};
         const res = await fetch(url, { headers: authHeader });
         if (!res.ok) return null;
         return (await res.json()) as T;

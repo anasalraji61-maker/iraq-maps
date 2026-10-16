@@ -14,7 +14,6 @@
  */
 
 import { createGzip, createGunzip } from 'zlib';
-import { promisify } from 'util';
 import { Readable } from 'stream';
 
 // ── Types ──────────────────────────────────────────────────────────────────

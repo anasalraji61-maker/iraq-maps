@@ -8,7 +8,6 @@
 
 import { randomUUID } from 'node:crypto';
 import {
-  type AdminProviderView,
   type ProviderId,
   type UserId,
 } from '@iraq-maps/contracts';
@@ -20,12 +19,11 @@ import {
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { and, asc, count, desc, eq, isNull, lt, sql } from 'drizzle-orm';
+import { and, asc, count, eq, lt, sql } from 'drizzle-orm';
 import { auditLogTable, providerTable } from './schema';
 
 // ─── Verification step enum ────────────────────────────────────────────────────
@@ -272,7 +270,7 @@ export class VerificationService {
       .select()
       .from(auditLogTable)
       .where(eq(auditLogTable.providerId, providerId))
-      .orderBy(asc(auditLogTable.createdAt));
+      .orderBy(asc(auditLogTable.at));
 
     const currentStep = this.deriveCurrentStep(provider.status, currentAudit);
     const currentIdx = STEP_ORDER.indexOf(currentStep);
@@ -343,12 +341,7 @@ export class VerificationService {
       reason: reason.trim(),
     });
 
-    await writeAdminAuditLog(this.db, {
-      action: 'provider.rejected',
-      actorUserId: adminId,
-      targetId: providerId,
-      reason: reason.trim(),
-    });
+    await writeAdminAuditLog(this.db, adminId, 'provider.rejected', providerId, 'provider', { reason: reason.trim() });
 
     await this.outbox.publish({
       id: randomUUID(),
@@ -398,12 +391,7 @@ export class VerificationService {
       reason: null,
     });
 
-    await writeAdminAuditLog(this.db, {
-      action: 'provider.verified',
-      actorUserId: adminId,
-      targetId: providerId,
-      reason: null,
-    });
+    await writeAdminAuditLog(this.db, adminId, 'provider.verified', providerId, 'provider');
 
     await this.outbox.publish({
       id: randomUUID(),
@@ -535,7 +523,7 @@ export class VerificationService {
     const totalPending = pendingRow?.total ?? 0;
 
     // Average verification time: from submittedAt to the 'verified' audit entry
-    const [avgRow] = await this.db.execute<{ avg_days: string | null }>(
+    const avgResult = await this.db.execute<{ avg_days: string | null }>(
       sql`
         SELECT AVG(EXTRACT(EPOCH FROM (al.created_at - p.submitted_at)) / 86400)::numeric(6,2) AS avg_days
         FROM providers.provider p
@@ -543,10 +531,11 @@ export class VerificationService {
         WHERE p.submitted_at IS NOT NULL
       `,
     );
+    const avgRow = avgResult.rows[0];
     const avgDays = avgRow?.avg_days ? parseFloat(avgRow.avg_days) : null;
 
     // Approval rate
-    const [approvalRow] = await this.db.execute<{
+    const approvalResult = await this.db.execute<{
       total_decided: string;
       approved: string;
     }>(
@@ -558,6 +547,7 @@ export class VerificationService {
         WHERE action IN ('verified', 'rejected', 'suspended')
       `,
     );
+    const approvalRow = approvalResult.rows[0];
     const totalDecided = parseInt(approvalRow?.total_decided ?? '0', 10);
     const approved = parseInt(approvalRow?.approved ?? '0', 10);
     const approvalRate =

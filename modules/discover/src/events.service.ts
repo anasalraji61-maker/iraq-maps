@@ -176,7 +176,7 @@ function iraqStartOfDay(utcDate: Date): Date {
 }
 
 /** Get the end-of-day in Iraq time, returned as UTC. */
-function iraqEndOfDay(utcDate: Date): Date {
+function _iraqEndOfDay(utcDate: Date): Date {
   const local = toIraqTime(utcDate);
   const eod = new Date(
     Date.UTC(
@@ -221,7 +221,7 @@ function approximateHijriToGregorian(
 }
 
 /** Find the Gregorian year that contains Hijri year (approximation). */
-function hijriYearToGregorianYear(hijriYear: number): number {
+function _hijriYearToGregorianYear(hijriYear: number): number {
   // Hijri year 1444 ≈ Gregorian 2022
   return Math.round(622 + hijriYear * 0.9709);
 }
@@ -984,7 +984,7 @@ export class EventsService {
   async getEventsByMonth(
     year: number,
     month: number, // 1-based
-    city?: string,
+    _city?: string,
   ): Promise<Map<string, EventRecord[]>> {
     const firstDay = new Date(Date.UTC(year, month - 1, 1));
     const lastDay = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
@@ -1126,7 +1126,7 @@ export class EventsService {
   // ── Admin helpers ─────────────────────────────────────────────────────────
 
   /** Mark an event as featured (admin only – caller must verify role). */
-  async setFeatured(eventId: string, featured: boolean): Promise<void> {
+  async setFeatured(eventId: string, _featured: boolean): Promise<void> {
     const rows = await this.db
       .select({ id: eventTable.id })
       .from(eventTable)
