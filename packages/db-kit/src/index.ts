@@ -7,3 +7,7 @@ export { QueryBuilder, type PaginationResult, type NearbyResult, type BulkInsert
 export { ConnectionPool, type ConnectionPoolOptions, type PoolHealthResult } from './connection-pool';
 export { SchemaVersionManager, type MigrationRecord, type SchemaStatus } from './schema-version-manager';
 export { DatabaseMetrics, type QueryMetric, type QueryStats } from './database-metrics';
+export { RedisCache, FakeRedisClient, NAMESPACE, type RedisCacheClient, type CacheMetrics, type CacheEntry, type SetOptions } from './cache/RedisCache.js';
+export { QueryCache, CacheKeys, DEFAULT_TTL, ttlFromEnv, type EntityKind, type QueryCacheConfig } from './cache/QueryCache.js';
+export { PlacesCache, type PlaceSummaryLike, type PlaceDetailsLike, type NearbyQueryKey, type SearchQueryKey, type PlacesCacheConfig } from './cache/PlacesCache.js';
+export { encodeCursor, decodeCursor, applyCursorToQuery, cursorOrderBy, buildCursorPage, totalCountCacheKey, fetchCountWithTimeout, type CursorPayload, type CursorDirection, type CursorPage, type PaginateOptions } from './pagination/CursorPagination.js';

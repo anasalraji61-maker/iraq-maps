@@ -1,4 +1,5 @@
 export { PerformanceMonitor, type HttpSample, type CacheSample, type HttpStats, type CacheStats } from './performance-monitor';
+export { AppMetrics, appMetrics, type CacheHitMetric, type QueryDurationSample, type QueryDurationStats, type RateLimitBreach } from './metrics';
 export { AlertManager, type AlertThreshold, type AlertEvent, type AlertSeverity, type AlertWebhookConfig } from './alert-manager';
 export { TraceContext, type TraceData } from './trace-context';
 export {
