@@ -683,6 +683,161 @@ function StatusBadge({ status }: { status: ChallengeV2['status'] }) {
   );
 }
 
+// ─── A/B Test stub modal ──────────────────────────────────────────────────────
+
+function AbTestModal({
+  challenge,
+  onClose,
+}: {
+  challenge: ChallengeV2;
+  onClose: () => void;
+}) {
+  const [variantReward, setVariantReward] = useState(challenge.rewardPoints * 2);
+  const [split, setSplit] = useState(50);
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: 12, width: 500, boxShadow: '0 8px 40px rgba(0,0,0,.25)', padding: 28 }}>
+        <h3 style={{ marginTop: 0, color: '#6a1b9a' }}>🧪 A/B Test Reward Structure</h3>
+        <div style={{ fontSize: 13, color: '#555', marginBottom: 16 }}>
+          Challenge: <strong>{challenge.titleEn}</strong>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          <div style={{ background: '#f3e5f5', borderRadius: 8, padding: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#6a1b9a', marginBottom: 8 }}>Variant A (Control)</div>
+            <div style={{ fontSize: 13, color: '#555' }}>Reward: <strong>{challenge.rewardPoints} pts</strong></div>
+            <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>{split}% of users</div>
+          </div>
+          <div style={{ background: '#e8eaf6', borderRadius: 8, padding: 14 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#283593', marginBottom: 8 }}>Variant B (Test)</div>
+            <div style={{ fontSize: 13, color: '#555' }}>
+              Reward:
+              <input
+                type="number"
+                value={variantReward}
+                onChange={(e) => setVariantReward(Number(e.target.value))}
+                style={{ width: 70, marginLeft: 6, padding: '2px 6px', border: '1px solid #ccc', borderRadius: 4, fontSize: 13 }}
+              />
+              {' '}pts
+            </div>
+            <div style={{ fontSize: 11, color: '#aaa', marginTop: 4 }}>{100 - split}% of users</div>
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>
+            Traffic split: {split}% / {100 - split}%
+          </label>
+          <input type="range" min={10} max={90} step={10} value={split} onChange={(e) => setSplit(Number(e.target.value))} style={{ width: '100%' }} />
+        </div>
+        <div style={{ background: '#fff8e1', border: '1px solid #ffe082', borderRadius: 6, padding: '8px 12px', fontSize: 12, color: '#f57f17', marginBottom: 16 }}>
+          ⚠ A/B testing requires feature flag infrastructure. This creates a test configuration stub.
+        </div>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={btnStyle('#888')}>Cancel</button>
+          <button onClick={() => { alert('A/B test stub saved (feature flag infra required for activation)'); onClose(); }} style={btnStyle('#6a1b9a')}>
+            Save Test Config
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Bulk create from template modal ──────────────────────────────────────────
+
+const CHALLENGE_TEMPLATES = [
+  { id: 'tpl-monthly', label: 'Monthly Explorer Pack', count: 4, description: '4 challenges: visit/review/photo/streak' },
+  { id: 'tpl-onboarding', label: 'New User Onboarding', count: 3, description: '3 easy challenges to get started' },
+  { id: 'tpl-ramadan', label: 'Ramadan Special', count: 5, description: '5 seasonal challenges with bonus rewards' },
+  { id: 'tpl-city', label: 'City Discovery Pack', count: 6, description: '6 location-based city exploration challenges' },
+];
+
+function BulkCreateModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (count: number) => void;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [cityId, setCityId] = useState('baghdad');
+  const [busy, setBusy] = useState(false);
+
+  async function create() {
+    if (!selected) return;
+    setBusy(true);
+    await new Promise((r) => setTimeout(r, 700));
+    setBusy(false);
+    const tpl = CHALLENGE_TEMPLATES.find((t) => t.id === selected)!;
+    onCreated(tpl.count);
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: 12, width: 480, boxShadow: '0 8px 40px rgba(0,0,0,.25)', padding: 28 }}>
+        <h3 style={{ marginTop: 0, color: '#1a237e' }}>📋 Bulk Create from Template</h3>
+        <div style={{ marginBottom: 16 }}>
+          {CHALLENGE_TEMPLATES.map((tpl) => (
+            <label
+              key={tpl.id}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+                padding: '10px 12px',
+                border: `1px solid ${selected === tpl.id ? '#1565c0' : '#ddd'}`,
+                borderRadius: 8,
+                marginBottom: 8,
+                cursor: 'pointer',
+                background: selected === tpl.id ? '#e3f2fd' : '#fff',
+              }}
+            >
+              <input
+                type="radio"
+                name="template"
+                value={tpl.id}
+                checked={selected === tpl.id}
+                onChange={() => setSelected(tpl.id)}
+                style={{ marginTop: 2 }}
+              />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 13 }}>{tpl.label}</div>
+                <div style={{ fontSize: 11, color: '#888' }}>{tpl.description} · {tpl.count} challenges</div>
+              </div>
+            </label>
+          ))}
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Target City (blank = global)</label>
+          <input
+            type="text"
+            value={cityId}
+            onChange={(e) => setCityId(e.target.value)}
+            placeholder="baghdad"
+            style={{ width: '100%', padding: '7px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: 13, boxSizing: 'border-box' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={btnStyle('#888')}>Cancel</button>
+          <button
+            disabled={!selected || busy}
+            onClick={() => void create()}
+            style={{ ...btnStyle('#1565c0'), opacity: selected && !busy ? 1 : 0.5 }}
+          >
+            {busy ? '…' : `Create ${CHALLENGE_TEMPLATES.find((t) => t.id === selected)?.count ?? ''} Challenges`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 type View = 'list' | 'create' | 'edit';
@@ -693,6 +848,8 @@ export function AdminChallengesPage() {
   const [editTarget, setEditTarget] = useState<ChallengeV2 | null>(null);
   const [analyticsTarget, setAnalyticsTarget] = useState<ChallengeV2 | null>(null);
   const [forceTarget, setForceTarget] = useState<ChallengeV2 | null>(null);
+  const [abTestTarget, setAbTestTarget] = useState<ChallengeV2 | null>(null);
+  const [showBulkCreate, setShowBulkCreate] = useState(false);
   const [msg, setMsg] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
@@ -776,9 +933,14 @@ export function AdminChallengesPage() {
           {view === 'edit' && `← Edit: ${editTarget?.titleEn}`}
         </h2>
         {view === 'list' && (
-          <button onClick={() => setView('create')} style={btnStyle('#1565c0')}>
-            + New Challenge
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setShowBulkCreate(true)} style={btnStyle('#00838f')}>
+              📋 Bulk from Template
+            </button>
+            <button onClick={() => setView('create')} style={btnStyle('#1565c0')}>
+              + New Challenge
+            </button>
+          </div>
         )}
         {view !== 'list' && (
           <button
@@ -963,6 +1125,33 @@ export function AdminChallengesPage() {
                         >
                           Analytics
                         </button>
+                        <button
+                          onClick={() => {
+                            // Duplicate challenge
+                            const dup: ChallengeV2 = {
+                              ...c,
+                              id: `ch-dup-${Date.now()}`,
+                              titleEn: `${c.titleEn} (copy)`,
+                              titleAr: `${c.titleAr} (نسخة)`,
+                              status: 'upcoming',
+                              totalParticipants: 0,
+                              isActive: false,
+                              startsAt: future(7),
+                              endsAt: future(37),
+                            };
+                            setChallenges((prev) => [dup, ...prev]);
+                            flash('Challenge duplicated');
+                          }}
+                          style={{ ...btnStyle('#555'), fontSize: 11 }}
+                        >
+                          ⊕ Dup
+                        </button>
+                        <button
+                          onClick={() => setAbTestTarget(c)}
+                          style={{ ...btnStyle('#6a1b9a'), fontSize: 11 }}
+                        >
+                          🧪 A/B
+                        </button>
                         {c.status === 'active' && (
                           <button
                             onClick={() => setForceTarget(c)}
@@ -1003,6 +1192,23 @@ export function AdminChallengesPage() {
           onDone={() => {
             setForceTarget(null);
             flash(`Force-completed for user`);
+          }}
+        />
+      )}
+
+      {abTestTarget && (
+        <AbTestModal
+          challenge={abTestTarget}
+          onClose={() => setAbTestTarget(null)}
+        />
+      )}
+
+      {showBulkCreate && (
+        <BulkCreateModal
+          onClose={() => setShowBulkCreate(false)}
+          onCreated={(count) => {
+            setShowBulkCreate(false);
+            flash(`${count} challenges created from template`);
           }}
         />
       )}

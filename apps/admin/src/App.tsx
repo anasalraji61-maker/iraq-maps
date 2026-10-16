@@ -26,6 +26,9 @@ import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
 import { AdminMessagesPage } from './pages/AdminMessagesPage';
 import { AdminModerationQueue } from './pages/AdminModerationQueue';
+import { AdminSafetyPage } from './pages/AdminSafetyPage';
+import { AdminPushNotificationsPage } from './pages/AdminPushNotificationsPage';
+import { AdminOsmImportPage } from './pages/AdminOsmImportPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -133,6 +136,15 @@ function NavBar() {
       </NavLink>
       <NavLink to="/mod-queue" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         Mod Queue
+      </NavLink>
+      <NavLink to="/safety" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Safety
+      </NavLink>
+      <NavLink to="/push-notifications" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Push
+      </NavLink>
+      <NavLink to="/osm-import" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        OSM Import
       </NavLink>
       <button
         onClick={logout}
@@ -363,6 +375,30 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AdminModerationQueue /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/safety"
+            element={
+              <AuthGate>
+                <Layout><AdminSafetyPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/push-notifications"
+            element={
+              <AuthGate>
+                <Layout><AdminPushNotificationsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/osm-import"
+            element={
+              <AuthGate>
+                <Layout><AdminOsmImportPage /></Layout>
               </AuthGate>
             }
           />
