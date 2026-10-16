@@ -13,6 +13,9 @@ messaging engine selects the best channel for each recipient: in-app, WhatsApp, 
 - When a place uses WhatsApp and has granted `whatsapp_messages` consent, the message is sent as a
   WhatsApp Cloud API message. Otherwise a handoff link is shown (wa.me, Instagram, or phone).
 - Provider view: a separate inbox screen for providers to read and reply to received inquiries.
+- Drafts are auto-saved to `AsyncStorage` so a partial message survives app kills.
+- Unsent inquiries are queued offline and flushed when connectivity is restored (ADR-0012).
+- Idempotency: every send uses a stable UUID key to prevent duplicate inquiries on retry.
 
 ---
 
@@ -31,40 +34,81 @@ messaging engine selects the best channel for each recipient: in-app, WhatsApp, 
 
 | Component            | Description                                               |
 |----------------------|-----------------------------------------------------------|
-| `InquiryCard`        | Summary card showing message preview + status             |
-| `DeliveryTarget`     | Per-place status badge + handoff link button              |
+| `InquiryCard`        | Summary card showing message preview + status badge       |
+| `DeliveryTargetRow`  | Per-place status badge + handoff link button              |
 | `HandoffLinkButton`  | Opens the WhatsApp/Instagram/phone URL; shows copyable Arabic text |
-| `ComposeForm`        | Text area (max 500 chars) + char counter + send button    |
+| `ComposeForm`        | Text area (max 500 chars) + live char counter + send button |
 | `PlacePicker`        | Multi-select place picker: search + add up to 5 places    |
 | `ReplyForm`          | Provider reply input (max 1000 chars)                     |
+| `StatusBadge`        | Colour-coded chip per `MessageStatus`                     |
+| `QueuedBadge`        | «سيُرسل عند الاتصال» indicator for offline-queued inquiries |
+
+### Status Badge Colours
+
+| Status | Label AR | Color |
+|--------|----------|-------|
+| `queued` | في الانتظار | Grey |
+| `sent` | أُرسل | Blue |
+| `delivered` | وصل | Teal |
+| `read` | قُرئ | Green |
+| `replied` | تمّ الرد | Gold |
+| `handed_off` | تمّ التحويل | Purple |
+| `failed` | فشل | Red |
 
 ---
 
 ## Ports Consumed
 
-| Port                  | Package                | Used for                                       |
-|-----------------------|------------------------|------------------------------------------------|
-| `messagingContract`   | `@iraq-maps/contracts` | Create and list inquiries, provider reply      |
-| `placesContract`      | `@iraq-maps/contracts` | Place search in the compose place picker       |
-| `notificationsContract` | `@iraq-maps/contracts` | Badge count for unread inquiries             |
+| Port                    | Package                | Used for                                       |
+|-------------------------|------------------------|------------------------------------------------|
+| `messagingContract`     | `@iraq-maps/contracts` | Create and list inquiries, provider reply      |
+| `placesContract`        | `@iraq-maps/contracts` | Place search in the compose place picker       |
+| `notificationsContract` | `@iraq-maps/contracts` | Badge count for unread inquiries               |
+| `mobile-kit`            | `@iraq-maps/mobile-kit`| `OutgoingQueue` for offline send, `useAutosave` for drafts |
+
+---
+
+## Environment Variables
+
+None directly. All API calls go through `@iraq-maps/api-client`.
 
 ---
 
 ## Key Flows
 
-### User sending an inquiry
+### User Sending an Inquiry
 
 1. User taps «تواصل» on a place card → opens `ComposeScreen` with `placeIds` pre-filled.
 2. User types message text (1–500 chars) → taps «إرسال».
-3. `ComposeScreen` calls `POST /v1/inquiries` with `confirm: true` and an `Idempotency-Key`.
-4. On success, navigates to `InquiryDetailScreen` showing initial `queued` status.
-5. Delivery status updates arrive via push notifications (`messaging.inquiry.status_changed.v1`).
+3. If online: `ComposeScreen` calls `POST /v1/inquiries` with `confirm: true` and a stable `Idempotency-Key`.
+4. If offline: the inquiry is added to `OutgoingQueue`; a `QueuedBadge` is shown.
+5. On success, navigates to `InquiryDetailScreen` showing initial `queued` status.
+6. Delivery status updates arrive via push notifications (`messaging.inquiry.status_changed.v1`).
 
-### Provider replying
+### Provider Replying
 
 1. Provider opens `ProviderInboxScreen` → taps an inquiry.
 2. `InquiryDetailScreen` (provider view) shows the customer's message and a reply form.
-3. Provider submits reply → `POST /v1/provider/inquiries/:id/reply`.
+3. Provider submits reply → `POST /v1/provider/inbox/:id/reply`.
+
+### Handoff Flow
+
+When a place has no in-app messaging channel:
+
+1. `InquiryDetailScreen` shows a `HandoffLinkButton` per target.
+2. Button opens the `wa_me` / `ig_me` / `tel` URL.
+3. A copyable Arabic text (`copyText` from `HandoffLink`) is shown below the button.
+
+---
+
+## Idempotency
+
+The `ComposeScreen` generates a UUID once per compose session (`useRef(crypto.randomUUID())`). It is:
+- Included as `Idempotency-Key` header on `POST /v1/inquiries`.
+- Stored in the `OutgoingQueue` as the action `id` for offline sends.
+- Reset only when the user clears the compose form and starts a new compose session.
+
+Retrying a failed send (network error) reuses the same key — the server deduplicates safely.
 
 ---
 
@@ -80,12 +124,12 @@ Namespace: `feature-messages`
 
 Key string groups:
 
-- `inbox.*` — tab title, empty state
-- `compose.*` — placeholder, char counter, send, confirm dialog
-- `status.*` — delivery status labels (queued / sent / delivered / read / replied / failed / handed_off)
+- `inbox.*` — tab title, empty state, refresh
+- `compose.*` — placeholder, char counter, send, confirm dialog, offline queued notice
+- `status.*` — delivery status labels per `MessageStatus` value
 - `handoff.*` — handoff link labels and copy-text instructions
 - `provider.*` — provider inbox and reply UI
-- `error.*` — daily limit, network error
+- `error.*` — daily limit, network error, retry
 
 ---
 
@@ -98,9 +142,9 @@ pnpm test
 
 Key test files:
 
-- `ComposeForm.test.tsx` — char limit, empty state, idempotency key generation
-- `DeliveryTarget.test.tsx` — status badge rendering, handoff link action
-- `InquiryCard.test.tsx` — preview text truncation, unread indicator
+- `ComposeForm.test.tsx` — char limit, empty state, idempotency key generation, draft save/restore
+- `DeliveryTargetRow.test.tsx` — status badge rendering, handoff link action
+- `InquiryCard.test.tsx` — preview text truncation, unread indicator, queued badge
 
 E2E flows:
 

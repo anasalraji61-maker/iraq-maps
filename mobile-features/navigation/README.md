@@ -14,6 +14,8 @@ user with step-by-step maneuver instructions in Arabic, Kurdish Sorani, or Engli
 - Updates the active maneuver as the user's GPS position advances along the route.
 - Shows a summary panel (total distance, estimated time) before starting.
 - Supports up to 5 waypoints.
+- Works offline: a loaded route continues to navigate using device GPS even without network. Re-routing requires network.
+- Caches the last route in SQLite with a 2-hour TTL.
 
 ---
 
@@ -35,6 +37,8 @@ user with step-by-step maneuver instructions in Arabic, Kurdish Sorani, or Engli
 | `RouteSummaryCard`   | Pre-navigation summary: distance, ETA, mode picker               |
 | `TurnIcon`           | Directional arrow icon that mirrors in RTL for left/right turns  |
 | `WaypointList`       | Ordered list of waypoints with drag-to-reorder                   |
+| `EtaBar`             | Top bar during active navigation: ETA + remaining distance       |
+| `RerouteButton`      | Recalculates route when user leaves the planned path (needs network) |
 
 ---
 
@@ -45,6 +49,16 @@ user with step-by-step maneuver instructions in Arabic, Kurdish Sorani, or Engli
 | `routesContract`  | `@iraq-maps/contracts` | `POST /v1/routes` — get route + maneuvers    |
 | `placesContract`  | `@iraq-maps/contracts` | Reverse geocode destination when given coords|
 | `map-kit`         | `@iraq-maps/map-kit`   | `MapCanvas` + `useMapRef` for route overlay  |
+| `mobile-kit`      | `@iraq-maps/mobile-kit`| `SqliteCache` for offline route caching      |
+
+---
+
+## Environment Variables
+
+This package does not read environment variables directly. All API calls go through `@iraq-maps/api-client`,
+which reads `EXPO_PUBLIC_API_URL` from the app shell.
+
+The GPS location is provided by `expo-location` (permission: `ACCESS_FINE_LOCATION`).
 
 ---
 
@@ -61,13 +75,23 @@ Maneuver text is built locally from i18n templates — the API never returns loc
     "turn_left": "انعطف يساراً في {{street}}",
     "continue": "استمر على {{street}}",
     "roundabout_enter": "ادخل الدوار وخذ المخرج {{exit}}",
-    "arrive": "وصلت إلى وجهتك"
+    "arrive": "وصلت إلى وجهتك",
+    "depart": "انطلق على {{street}}"
   }
 }
 ```
 
-RTL note: distance values are always LTR numbers even in Arabic text. Use `<Text dir="ltr">` for the distance
-component inside the panel.
+Distance values in instruction strings use Western Arabic numerals even in Arabic locale (they are technical/
+directional values). Wrap in `<Text style={{ writingDirection: 'ltr' }}>` per ADR-0011 and ADR-0013.
+
+---
+
+## RTL Behaviour
+
+- `TurnIcon` mirrors horizontally (`scaleX(-1)`) in RTL for `left`, `sharp_left`, `slight_left`,
+  `right`, `sharp_right`, `slight_right` modifiers. `straight`, `depart`, and `arrive` icons are never mirrored.
+- `ManeuverPanel` text is right-aligned in Arabic/Kurdish, left-aligned in English.
+- Distance values in `EtaBar` and `ManeuverPanel` are always LTR regardless of locale.
 
 ---
 
@@ -86,7 +110,8 @@ Key string groups:
 - `maneuver.*` — turn-by-turn instruction templates per maneuver type and modifier
 - `mode.*` — travel mode labels (car / walk)
 - `summary.*` — distance, ETA, start button
-- `error.*` — no_route, routing_unavailable
+- `error.*` — no_route, routing_unavailable, reroute_unavailable_offline
+- `offline.*` — offline navigation notice, reroute blocked notice
 
 ---
 
@@ -102,6 +127,7 @@ Key test files:
 - `maneuver.test.ts` — maneuver text generation for all type/modifier combinations, RTL mirroring
 - `RouteSummaryCard.test.tsx` — distance formatting, ETA calculation
 - `RouteLayer.test.tsx` — polyline decoding, correct lat/lng order for MapLibre
+- `offlineCache.test.ts` — route caching and offline retrieval
 
 E2E:
 
