@@ -1,0 +1,256 @@
+# Enhanced search flow:
+# Login → open search → type Arabic text "مطعم" → see autocomplete →
+# select suggestion → see results → apply filter (rating > 4) →
+# sort by distance → tap result → see place detail.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture with several restaurants seeded.
+#   Search module + autocomplete endpoint running.
+# Env vars:
+#   PHONE     Default: random 077xxxxxxxx.
+#   OTP_CODE  Default: 123456.
+#   NAME      Default: مستخدم البحث.
+#   QUERY     Search query. Default: مطعم.
+appId: iq.iraqmaps.app
+name: search-enhanced-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم البحث'}
+  QUERY: ${QUERY || 'مطعم'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: search-01-logged-in
+
+# ── 3. Navigate to map tab ────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: search-02-map-loaded
+
+# ── 4. Open the search bar ───────────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- extendedWaitUntil:
+    visible:
+      id: search.screen
+    timeout: 10000
+- assertVisible:
+    id: search.screen
+- takeScreenshot: search-03-search-screen
+
+# ── 5. Verify search screen title ────────────────────────────────────────────
+- assertVisible:
+    text: بحث
+- takeScreenshot: search-04-search-title
+
+# ── 6. Verify recent searches section (may be empty) ─────────────────────────
+- assertVisible:
+    id: search.recentSection
+- takeScreenshot: search-05-recent-section
+
+# ── 7. Type Arabic query character by character to trigger autocomplete ───────
+- tapOn:
+    id: search.input
+- inputText: م
+- extendedWaitUntil:
+    visible:
+      id: search.autocomplete.list
+    timeout: 8000
+- takeScreenshot: search-06-autocomplete-1char
+
+- clearText
+- inputText: مط
+- extendedWaitUntil:
+    visible:
+      id: search.autocomplete.list
+    timeout: 8000
+- takeScreenshot: search-07-autocomplete-2chars
+
+- clearText
+- inputText: ${QUERY}
+- extendedWaitUntil:
+    visible:
+      id: search.autocomplete.list
+    timeout: 10000
+- assertVisible:
+    id: search.autocomplete.list
+- takeScreenshot: search-08-autocomplete-full-query
+
+# ── 8. Verify autocomplete list is populated ─────────────────────────────────
+- assertVisible:
+    id: search.autocomplete.item
+- takeScreenshot: search-09-autocomplete-items
+
+# ── 9. Autocomplete items contain Arabic text ─────────────────────────────────
+- assertVisible:
+    id: search.autocomplete.item.label
+- takeScreenshot: search-10-autocomplete-arabic
+
+# ── 10. Select the first autocomplete suggestion ──────────────────────────────
+- tapOn:
+    id: search.autocomplete.item
+- extendedWaitUntil:
+    visible:
+      id: search.results.list
+    timeout: 15000
+- assertVisible:
+    id: search.results.list
+- takeScreenshot: search-11-results-list
+
+# ── 11. Verify results count indicator ───────────────────────────────────────
+- assertVisible:
+    id: search.results.count
+- takeScreenshot: search-12-results-count
+
+# ── 12. At least one result item is shown ────────────────────────────────────
+- assertVisible:
+    id: search.result.item
+- takeScreenshot: search-13-result-items
+
+# ── 13. Each result item shows name and rating ────────────────────────────────
+- assertVisible:
+    id: search.result.item.name
+- assertVisible:
+    id: search.result.item.rating
+- takeScreenshot: search-14-result-fields
+
+# ── 14. Open filter panel ────────────────────────────────────────────────────
+- tapOn:
+    id: search.filter.button
+- extendedWaitUntil:
+    visible:
+      id: search.filter.panel
+    timeout: 10000
+- assertVisible:
+    id: search.filter.panel
+- takeScreenshot: search-15-filter-panel
+
+# ── 15. Verify filter panel title ────────────────────────────────────────────
+- assertVisible:
+    text: تصفية النتائج
+- takeScreenshot: search-16-filter-title
+
+# ── 16. Apply rating filter: minimum rating 4 ────────────────────────────────
+- assertVisible:
+    id: search.filter.rating
+- tapOn:
+    id: search.filter.rating.4
+- extendedWaitUntil:
+    visible:
+      id: search.filter.rating.4.selected
+    timeout: 8000
+- assertVisible:
+    id: search.filter.rating.4.selected
+- takeScreenshot: search-17-filter-rating-4
+
+# ── 17. Apply filter ─────────────────────────────────────────────────────────
+- tapOn:
+    id: search.filter.apply
+- extendedWaitUntil:
+    visible:
+      id: search.results.list
+    timeout: 15000
+- assertVisible:
+    id: search.results.list
+- takeScreenshot: search-18-filter-applied
+
+# ── 18. Active filter chip is shown ──────────────────────────────────────────
+- assertVisible:
+    id: search.filter.activeChip
+- takeScreenshot: search-19-active-chip
+
+# ── 19. Open sort options ────────────────────────────────────────────────────
+- tapOn:
+    id: search.sort.button
+- extendedWaitUntil:
+    visible:
+      id: search.sort.panel
+    timeout: 10000
+- assertVisible:
+    id: search.sort.panel
+- takeScreenshot: search-20-sort-panel
+
+# ── 20. Verify sort options ───────────────────────────────────────────────────
+- assertVisible:
+    text: ترتيب حسب
+- assertVisible:
+    id: search.sort.distance
+- assertVisible:
+    id: search.sort.rating
+- assertVisible:
+    id: search.sort.newest
+- takeScreenshot: search-21-sort-options
+
+# ── 21. Select "ترتيب حسب المسافة" ───────────────────────────────────────────
+- tapOn:
+    id: search.sort.distance
+- extendedWaitUntil:
+    visible:
+      id: search.sort.distance.selected
+    timeout: 8000
+- assertVisible:
+    id: search.sort.distance.selected
+- takeScreenshot: search-22-sort-distance-selected
+
+- tapOn:
+    id: search.sort.apply
+- extendedWaitUntil:
+    visible:
+      id: search.results.list
+    timeout: 15000
+- assertVisible:
+    id: search.results.list
+- takeScreenshot: search-23-sorted-by-distance
+
+# ── 22. Tap the first result to open place detail ────────────────────────────
+- tapOn:
+    id: search.result.item
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- takeScreenshot: search-24-place-card
+
+# ── 23. Verify place detail fields ───────────────────────────────────────────
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.rating
+- assertVisible:
+    id: place.source
+- assertVisible:
+    id: place.category
+- takeScreenshot: search-25-place-fields
+
+# ── 24. Distance is shown (since sorted by distance) ─────────────────────────
+- assertVisible:
+    id: place.distance
+- takeScreenshot: search-26-place-distance
+
+# ── 25. Regression: close place card, map is visible ─────────────────────────
+- tapOn:
+    id: place.card.close
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- assertVisible:
+    id: map.view
+- takeScreenshot: search-27-map-ok

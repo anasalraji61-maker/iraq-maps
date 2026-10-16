@@ -1,0 +1,208 @@
+# payment-helper.yaml — reusable payment test utilities
+#
+# This helper provides three callable subflows:
+#   setupTestPayment    — seeds a pending payment and navigates to payment screen
+#   verifyQRGenerated   — asserts the QR confirmation screen is shown correctly
+#   clearPaymentHistory — navigates to payment history and clears all test rows
+#
+# Include from a parent flow via Maestro's `runFlow` command with a subFlow
+# parameter (Maestro ≥ 1.35):
+#
+#   - runFlow:
+#       file: ../helpers/payment-helper.yaml
+#       env:
+#         HELPER_ACTION: setupTestPayment
+#
+# The parent flow must declare the following env vars:
+#   PAYMENT_AMOUNT    Amount in IQD (integer). Default: 5000.
+#   PAYMENT_CURRENCY  ISO code. Default: IQD.
+#   BOOKING_REF       Booking reference to pay for. Default: E2E-BOOKING-001.
+#
+# After `setupTestPayment` the user is on the payment confirmation screen.
+# After `verifyQRGenerated` assertions have passed; the helper does not navigate.
+# After `clearPaymentHistory` payment history is empty; user is on account screen.
+
+# ── Guard: route to the requested subflow ─────────────────────────────────────
+# Maestro conditional blocks evaluate JS expressions.
+- runScript:
+    file: ../scripts/payment-helper-router.js
+    env:
+      ACTION: ${HELPER_ACTION || 'setupTestPayment'}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# subflow: setupTestPayment
+# Seeds a pending payment via the e2e API and navigates to the payment screen.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── STP-1. Navigate to account → payment ─────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+
+# ── STP-2. Tap "المدفوعات" ───────────────────────────────────────────────────
+- tapOn:
+    id: account.payments
+- extendedWaitUntil:
+    visible:
+      id: payments.screen
+    timeout: 15000
+- assertVisible:
+    id: payments.screen
+- takeScreenshot: pay-helper-01-payments-screen
+
+# ── STP-3. Tap "دفع الآن" for the seeded pending booking ─────────────────────
+- assertVisible:
+    id: payments.pending.item
+- tapOn:
+    id: payments.pending.item
+- extendedWaitUntil:
+    visible:
+      id: payment.checkout.screen
+    timeout: 15000
+- assertVisible:
+    id: payment.checkout.screen
+- takeScreenshot: pay-helper-02-checkout-screen
+
+# ── STP-4. Verify checkout amount ────────────────────────────────────────────
+- assertVisible:
+    id: payment.checkout.amount
+- assertVisible:
+    id: payment.checkout.currency
+- takeScreenshot: pay-helper-03-amount-visible
+
+# ── STP-5. Verify payment methods list ───────────────────────────────────────
+- assertVisible:
+    id: payment.method.list
+- assertVisible:
+    id: payment.method.zainCash
+- assertVisible:
+    id: payment.method.asiaCash
+- takeScreenshot: pay-helper-04-methods-list
+
+# ── STP-6. Select ZainCash (default e2e mock) ────────────────────────────────
+- tapOn:
+    id: payment.method.zainCash
+- extendedWaitUntil:
+    visible:
+      id: payment.method.zainCash.selected
+    timeout: 8000
+- assertVisible:
+    id: payment.method.zainCash.selected
+- takeScreenshot: pay-helper-05-method-selected
+
+# ── STP-7. Tap "تأكيد الدفع" ────────────────────────────────────────────────
+- tapOn:
+    id: payment.checkout.confirm
+- extendedWaitUntil:
+    visible:
+      id: payment.processing.indicator
+    timeout: 10000
+- assertVisible:
+    id: payment.processing.indicator
+- takeScreenshot: pay-helper-06-processing
+
+# ── STP-8. Wait for payment success ──────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: payment.success.screen
+    timeout: 30000
+- assertVisible:
+    id: payment.success.screen
+- assertVisible:
+    text: تم الدفع بنجاح
+- takeScreenshot: pay-helper-07-payment-success
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# subflow: verifyQRGenerated
+# Asserts the QR confirmation screen is shown correctly after payment.
+# Caller must be on the payment.success.screen before including this.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── VQR-1. QR code element is rendered ───────────────────────────────────────
+- assertVisible:
+    id: payment.success.qr
+- takeScreenshot: pay-helper-08-qr-visible
+
+# ── VQR-2. QR is non-empty (has a data URL or SVG child) ─────────────────────
+- assertVisible:
+    id: payment.success.qr.content
+- takeScreenshot: pay-helper-09-qr-content
+
+# ── VQR-3. Transaction reference is shown ────────────────────────────────────
+- assertVisible:
+    id: payment.success.transactionId
+- takeScreenshot: pay-helper-10-transaction-id
+
+# ── VQR-4. Amount paid is displayed ──────────────────────────────────────────
+- assertVisible:
+    id: payment.success.amountPaid
+- takeScreenshot: pay-helper-11-amount-paid
+
+# ── VQR-5. Timestamp is shown ────────────────────────────────────────────────
+- assertVisible:
+    id: payment.success.timestamp
+- takeScreenshot: pay-helper-12-timestamp
+
+# ── VQR-6. "حفظ الإيصال" (save receipt) button available ─────────────────────
+- assertVisible:
+    id: payment.success.saveReceipt
+- takeScreenshot: pay-helper-13-save-receipt-button
+
+# ── VQR-7. "مشاركة" (share) button available ────────────────────────────────
+- assertVisible:
+    id: payment.success.share
+- takeScreenshot: pay-helper-14-share-button
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# subflow: clearPaymentHistory
+# Navigates to payment history and clears all test entries.
+# Safe to call even when history is empty — empty state is asserted.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── CPH-1. Navigate to account ───────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+- takeScreenshot: pay-helper-15-account-for-clear
+
+# ── CPH-2. Tap "سجل المدفوعات" ──────────────────────────────────────────────
+- tapOn:
+    id: account.paymentHistory
+- extendedWaitUntil:
+    visible:
+      id: payments.history.screen
+    timeout: 15000
+- assertVisible:
+    id: payments.history.screen
+- takeScreenshot: pay-helper-16-history-screen
+
+# ── CPH-3. If entries exist, delete them all ─────────────────────────────────
+- tapOn:
+    id: payments.history.clearAll
+- extendedWaitUntil:
+    visible:
+      id: payments.history.clearConfirm
+    timeout: 10000
+- assertVisible:
+    id: payments.history.clearConfirm
+- tapOn:
+    id: payments.history.clearConfirm.yes
+- extendedWaitUntil:
+    visible:
+      id: payments.history.empty
+    timeout: 15000
+- assertVisible:
+    id: payments.history.empty
+- assertVisible:
+    text: لا توجد مدفوعات سابقة
+- takeScreenshot: pay-helper-17-history-cleared

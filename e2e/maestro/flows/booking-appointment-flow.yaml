@@ -1,0 +1,342 @@
+# Booking appointment flow (extended):
+# Login → open restaurant detail → tap "احجز موعداً" → select service →
+# pick tomorrow's date → pick available time slot → add a note →
+# confirm booking → see confirmation with QR code →
+# navigate to My Appointments → verify booking is listed.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded (a restaurant with bookable services and
+#   available slots tomorrow).
+#   Appointment module running; QR generation enabled in e2e env.
+# Env vars:
+#   PHONE       Iraqi mobile number. Default: random 077xxxxxxxx.
+#   OTP_CODE    Default: 123456.
+#   NAME        Default: مستخدم الحجوزات.
+#   SEARCH_Q    Place to book at. Default: مطعم.
+#   BOOKING_NOTE  Note to attach. Default: طاولة بعيدة عن الضوضاء من فضلك.
+appId: iq.iraqmaps.app
+name: booking-appointment-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم الحجوزات'}
+  SEARCH_Q: ${SEARCH_Q || 'مطعم'}
+  BOOKING_NOTE: ${BOOKING_NOTE || 'طاولة بعيدة عن الضوضاء من فضلك'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: appt-01-logged-in
+
+# ── 3. Navigate to map ────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: appt-02-map-loaded
+
+# ── 4. Search for a restaurant ───────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: appt-03-search-results
+
+# ── 5. Tap first result to open place card ───────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.source
+- takeScreenshot: appt-04-place-card
+
+# ── 6. Scroll down to find the booking button ─────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: place.book
+    direction: DOWN
+- assertVisible:
+    id: place.book
+- assertVisible:
+    text: احجز موعداً
+- takeScreenshot: appt-05-book-button
+
+# ── 7. Tap "احجز موعداً" ─────────────────────────────────────────────────────
+- tapOn:
+    id: place.book
+- extendedWaitUntil:
+    visible:
+      id: booking.serviceSelect
+    timeout: 15000
+- assertVisible:
+    id: booking.serviceSelect
+- takeScreenshot: appt-06-service-selection
+
+# ── 8. Verify service list title in Arabic ───────────────────────────────────
+- assertVisible:
+    text: اختر الخدمة
+- assertVisible:
+    id: booking.service.item
+- takeScreenshot: appt-07-service-list
+
+# ── 9. Select the first available service ─────────────────────────────────────
+- tapOn:
+    id: booking.service.item
+- extendedWaitUntil:
+    visible:
+      id: booking.service.selected
+    timeout: 10000
+- assertVisible:
+    id: booking.service.selected
+- takeScreenshot: appt-08-service-selected
+
+# ── 10. Tap "التالي" to advance to date picker ────────────────────────────────
+- tapOn:
+    id: booking.service.next
+- extendedWaitUntil:
+    visible:
+      id: booking.datePicker
+    timeout: 15000
+- assertVisible:
+    id: booking.datePicker
+- takeScreenshot: appt-09-date-picker
+
+# ── 11. Verify date picker header ────────────────────────────────────────────
+- assertVisible:
+    text: اختر التاريخ
+- takeScreenshot: appt-10-date-picker-title
+
+# ── 12. Tap "tomorrow" (the second available date cell) ───────────────────────
+- tapOn:
+    id: booking.date.tomorrow
+- extendedWaitUntil:
+    visible:
+      id: booking.date.selected
+    timeout: 10000
+- assertVisible:
+    id: booking.date.selected
+- takeScreenshot: appt-11-date-selected
+
+# ── 13. Confirm date selection ────────────────────────────────────────────────
+- tapOn:
+    id: booking.date.confirm
+- extendedWaitUntil:
+    visible:
+      id: booking.timePicker
+    timeout: 15000
+- assertVisible:
+    id: booking.timePicker
+- takeScreenshot: appt-12-time-picker
+
+# ── 14. Verify time picker header ────────────────────────────────────────────
+- assertVisible:
+    text: اختر الوقت
+- takeScreenshot: appt-13-time-picker-title
+
+# ── 15. Verify available slots are listed ────────────────────────────────────
+- assertVisible:
+    id: booking.slot.available
+- takeScreenshot: appt-14-slots-available
+
+# ── 16. Tap the first available time slot ────────────────────────────────────
+- tapOn:
+    id: booking.slot.available
+- extendedWaitUntil:
+    visible:
+      id: booking.slot.selected
+    timeout: 10000
+- assertVisible:
+    id: booking.slot.selected
+- takeScreenshot: appt-15-slot-selected
+
+# ── 17. Advance to notes screen ───────────────────────────────────────────────
+- tapOn:
+    id: booking.slot.next
+- extendedWaitUntil:
+    visible:
+      id: booking.notes.input
+    timeout: 15000
+- assertVisible:
+    id: booking.notes.input
+- takeScreenshot: appt-16-notes-screen
+
+# ── 18. Verify notes screen title ────────────────────────────────────────────
+- assertVisible:
+    text: ملاحظات إضافية
+- takeScreenshot: appt-17-notes-title
+
+# ── 19. Type a note ───────────────────────────────────────────────────────────
+- tapOn:
+    id: booking.notes.input
+- inputText: ${BOOKING_NOTE}
+- hideKeyboard
+- takeScreenshot: appt-18-note-entered
+
+# ── 20. Advance to confirmation screen ───────────────────────────────────────
+- tapOn:
+    id: booking.notes.next
+- extendedWaitUntil:
+    visible:
+      id: booking.reviewScreen
+    timeout: 15000
+- assertVisible:
+    id: booking.reviewScreen
+- takeScreenshot: appt-19-review-screen
+
+# ── 21. Verify review screen shows all chosen values ─────────────────────────
+- assertVisible:
+    id: booking.review.place
+- assertVisible:
+    id: booking.review.service
+- assertVisible:
+    id: booking.review.date
+- assertVisible:
+    id: booking.review.time
+- assertVisible:
+    id: booking.review.note
+- takeScreenshot: appt-20-review-fields
+
+# ── 22. Confirm the booking ───────────────────────────────────────────────────
+- tapOn:
+    id: booking.confirm
+- extendedWaitUntil:
+    visible:
+      id: booking.success
+    timeout: 25000
+- assertVisible:
+    id: booking.success
+- takeScreenshot: appt-21-booking-confirmed
+
+# ── 23. Arabic confirmation text ─────────────────────────────────────────────
+- assertVisible:
+    text: تم الحجز بنجاح
+- takeScreenshot: appt-22-arabic-confirm
+
+# ── 24. QR code is visible ───────────────────────────────────────────────────
+- assertVisible:
+    id: booking.success.qr
+- takeScreenshot: appt-23-qr-code
+
+# ── 25. Booking reference number is visible ───────────────────────────────────
+- assertVisible:
+    id: booking.success.reference
+- takeScreenshot: appt-24-reference-number
+
+# ── 26. "Add to Calendar" button is visible ───────────────────────────────────
+- assertVisible:
+    id: booking.success.addCalendar
+- takeScreenshot: appt-25-add-calendar
+
+# ── 27. Dismiss confirmation ──────────────────────────────────────────────────
+- tapOn:
+    id: booking.success.done
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- takeScreenshot: appt-26-back-to-map
+
+# ── 28. Navigate to account → My Appointments ────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+- takeScreenshot: appt-27-account-menu
+
+# ── 29. Tap "مواعيدي" ────────────────────────────────────────────────────────
+- tapOn:
+    id: account.appointments
+- extendedWaitUntil:
+    visible:
+      id: appointments.list
+    timeout: 15000
+- assertVisible:
+    id: appointments.list
+- takeScreenshot: appt-28-appointments-list
+
+# ── 30. Verify title ──────────────────────────────────────────────────────────
+- assertVisible:
+    text: مواعيدي
+- takeScreenshot: appt-29-appointments-title
+
+# ── 31. Verify the new booking appears ───────────────────────────────────────
+- assertVisible:
+    id: appointments.item
+- takeScreenshot: appt-30-appointment-item
+
+# ── 32. Tap appointment item to see detail ────────────────────────────────────
+- tapOn:
+    id: appointments.item
+- extendedWaitUntil:
+    visible:
+      id: appointments.detail
+    timeout: 10000
+- assertVisible:
+    id: appointments.detail
+- takeScreenshot: appt-31-appointment-detail
+
+# ── 33. Verify detail fields ──────────────────────────────────────────────────
+- assertVisible:
+    id: appointments.detail.place
+- assertVisible:
+    id: appointments.detail.service
+- assertVisible:
+    id: appointments.detail.date
+- assertVisible:
+    id: appointments.detail.time
+- assertVisible:
+    id: appointments.detail.status
+- assertVisible:
+    id: appointments.detail.qr
+- takeScreenshot: appt-32-detail-fields
+
+# ── 34. Status says "مؤكد" ────────────────────────────────────────────────────
+- assertVisible:
+    text: مؤكد
+- takeScreenshot: appt-33-status-confirmed
+
+# ── 35. Cancel button is available ───────────────────────────────────────────
+- assertVisible:
+    id: appointments.detail.cancel
+- takeScreenshot: appt-34-cancel-available
+
+# ── 36. Regression: back to map ──────────────────────────────────────────────
+- tapOn:
+    id: appointments.detail.back
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 20000
+- assertVisible:
+    id: map.view
+- takeScreenshot: appt-35-map-ok

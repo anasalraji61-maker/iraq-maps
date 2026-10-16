@@ -1,0 +1,264 @@
+# New user onboarding flow (first-launch wizard):
+# Fresh install → language selection (Arabic) → city selection (Baghdad) →
+# purpose selection → notification permission (simulated grant) →
+# skip location permission → onboarding done screen →
+# verify tab bar visible.
+#
+# This flow uses `clearState: true` so the onboarding wizard always appears.
+# The wizard guards first-launch display behind a persisted flag; clearState
+# resets it so the flow always sees the wizard fresh.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   ONBOARDING_WIZARD feature flag enabled (default in e2e env).
+# Env vars:
+#   PHONE     Default: random 077xxxxxxxx (used after wizard, for auth).
+#   OTP_CODE  Default: 123456.
+#   NAME      Default: مستخدم جديد.
+appId: iq.iraqmaps.app
+name: onboarding-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم جديد'}
+---
+
+# ── 1. Fresh launch — wizard should appear ────────────────────────────────────
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: onboarding.wizard
+    timeout: 20000
+- assertVisible:
+    id: onboarding.wizard
+- takeScreenshot: onb-01-wizard-appeared
+
+# ── 2. Welcome screen ────────────────────────────────────────────────────────
+- assertVisible:
+    id: onboarding.welcome.screen
+- assertVisible:
+    text: أهلاً بك في خرائط العراق
+- takeScreenshot: onb-02-welcome-screen
+
+# ── 3. App logo is visible ────────────────────────────────────────────────────
+- assertVisible:
+    id: onboarding.welcome.logo
+- takeScreenshot: onb-03-logo-visible
+
+# ── 4. Tap "ابدأ" to enter language selection ────────────────────────────────
+- tapOn:
+    id: onboarding.welcome.start
+- extendedWaitUntil:
+    visible:
+      id: onboarding.language.screen
+    timeout: 10000
+- assertVisible:
+    id: onboarding.language.screen
+- takeScreenshot: onb-04-language-screen
+
+# ── 5. Verify language screen title ──────────────────────────────────────────
+- assertVisible:
+    text: اختر اللغة
+- takeScreenshot: onb-05-language-title
+
+# ── 6. Language options are listed ────────────────────────────────────────────
+- assertVisible:
+    id: onboarding.language.arabic
+- assertVisible:
+    id: onboarding.language.kurdish
+- assertVisible:
+    id: onboarding.language.english
+- takeScreenshot: onb-06-language-options
+
+# ── 7. Select Arabic ─────────────────────────────────────────────────────────
+- tapOn:
+    id: onboarding.language.arabic
+- extendedWaitUntil:
+    visible:
+      id: onboarding.language.arabic.selected
+    timeout: 8000
+- assertVisible:
+    id: onboarding.language.arabic.selected
+- takeScreenshot: onb-07-arabic-selected
+
+# ── 8. Confirm language and advance ──────────────────────────────────────────
+- tapOn:
+    id: onboarding.language.next
+- extendedWaitUntil:
+    visible:
+      id: onboarding.city.screen
+    timeout: 10000
+- assertVisible:
+    id: onboarding.city.screen
+- takeScreenshot: onb-08-city-screen
+
+# ── 9. Verify city screen title ──────────────────────────────────────────────
+- assertVisible:
+    text: اختر مدينتك
+- takeScreenshot: onb-09-city-title
+
+# ── 10. City list is shown ────────────────────────────────────────────────────
+- assertVisible:
+    id: onboarding.city.list
+- assertVisible:
+    id: onboarding.city.baghdad
+- takeScreenshot: onb-10-city-list
+
+# ── 11. Select Baghdad ───────────────────────────────────────────────────────
+- tapOn:
+    id: onboarding.city.baghdad
+- extendedWaitUntil:
+    visible:
+      id: onboarding.city.baghdad.selected
+    timeout: 8000
+- assertVisible:
+    id: onboarding.city.baghdad.selected
+- takeScreenshot: onb-11-baghdad-selected
+
+# ── 12. Confirm city and advance ─────────────────────────────────────────────
+- tapOn:
+    id: onboarding.city.next
+- extendedWaitUntil:
+    visible:
+      id: onboarding.purpose.screen
+    timeout: 10000
+- assertVisible:
+    id: onboarding.purpose.screen
+- takeScreenshot: onb-12-purpose-screen
+
+# ── 13. Verify purpose screen ────────────────────────────────────────────────
+- assertVisible:
+    text: كيف ستستخدم التطبيق؟
+- assertVisible:
+    id: onboarding.purpose.list
+- takeScreenshot: onb-13-purpose-title
+
+# ── 14. Purpose options are listed ───────────────────────────────────────────
+- assertVisible:
+    id: onboarding.purpose.explore
+- assertVisible:
+    id: onboarding.purpose.business
+- assertVisible:
+    id: onboarding.purpose.navigate
+- takeScreenshot: onb-14-purpose-options
+
+# ── 15. Select "الاستكشاف والسياحة" ──────────────────────────────────────────
+- tapOn:
+    id: onboarding.purpose.explore
+- extendedWaitUntil:
+    visible:
+      id: onboarding.purpose.explore.selected
+    timeout: 8000
+- assertVisible:
+    id: onboarding.purpose.explore.selected
+- takeScreenshot: onb-15-purpose-selected
+
+# ── 16. Advance to notifications permission step ─────────────────────────────
+- tapOn:
+    id: onboarding.purpose.next
+- extendedWaitUntil:
+    visible:
+      id: onboarding.notifications.screen
+    timeout: 10000
+- assertVisible:
+    id: onboarding.notifications.screen
+- takeScreenshot: onb-16-notifications-screen
+
+# ── 17. Verify notifications screen ──────────────────────────────────────────
+- assertVisible:
+    text: تفعيل الإشعارات
+- assertVisible:
+    id: onboarding.notifications.allow
+- assertVisible:
+    id: onboarding.notifications.skip
+- takeScreenshot: onb-17-notifications-title
+
+# ── 18. Tap "السماح" (allow notifications — e2e env auto-grants) ──────────────
+- tapOn:
+    id: onboarding.notifications.allow
+- extendedWaitUntil:
+    visible:
+      id: onboarding.location.screen
+    timeout: 15000
+- assertVisible:
+    id: onboarding.location.screen
+- takeScreenshot: onb-18-location-screen
+
+# ── 19. Verify location permission screen ────────────────────────────────────
+- assertVisible:
+    text: تحديد موقعك
+- assertVisible:
+    id: onboarding.location.allow
+- assertVisible:
+    id: onboarding.location.skip
+- takeScreenshot: onb-19-location-title
+
+# ── 20. Skip location permission ─────────────────────────────────────────────
+- tapOn:
+    id: onboarding.location.skip
+- extendedWaitUntil:
+    visible:
+      id: onboarding.done.screen
+    timeout: 10000
+- assertVisible:
+    id: onboarding.done.screen
+- takeScreenshot: onb-20-done-screen
+
+# ── 21. Verify done screen content ───────────────────────────────────────────
+- assertVisible:
+    text: أنت جاهز
+- assertVisible:
+    id: onboarding.done.illustration
+- assertVisible:
+    id: onboarding.done.start
+- takeScreenshot: onb-21-done-content
+
+# ── 22. Tap "استكشف الآن" ────────────────────────────────────────────────────
+- tapOn:
+    id: onboarding.done.start
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 20000
+- assertVisible:
+    id: tab.map
+- takeScreenshot: onb-22-tab-bar-visible
+
+# ── 23. Verify full tab bar ───────────────────────────────────────────────────
+- assertVisible:
+    id: tab.map
+- assertVisible:
+    id: tab.discover
+- assertVisible:
+    id: tab.messages
+- assertVisible:
+    id: tab.activity
+- assertVisible:
+    id: tab.account
+- takeScreenshot: onb-23-all-tabs
+
+# ── 24. Map view loads correctly ─────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: onb-24-map-loads
+
+# ── 25. Verify wizard does NOT appear on second launch ───────────────────────
+- stopApp
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 20000
+- assertNotVisible:
+    id: onboarding.wizard
+- assertVisible:
+    id: tab.map
+- takeScreenshot: onb-25-no-wizard-second-launch

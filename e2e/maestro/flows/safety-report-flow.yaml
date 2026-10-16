@@ -1,0 +1,204 @@
+# Safety report flow:
+# Login → open safety screen → tap "إبلاغ عن حادثة" → select incident type →
+# confirm location on map → add description → submit report →
+# see "تم الإرسال" confirmation.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture; safety module enabled.
+#   GPS stub at (33.3152, 44.3661) — central Baghdad.
+# Env vars:
+#   PHONE         Default: random 077xxxxxxxx.
+#   OTP_CODE      Default: 123456.
+#   NAME          Default: مستخدم السلامة.
+#   REPORT_DESC   Optional extra description. Default: حادثة مرور على التقاطع.
+appId: iq.iraqmaps.app
+name: safety-report-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم السلامة'}
+  REPORT_DESC: ${REPORT_DESC || 'حادثة مرور على التقاطع'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: safety-01-logged-in
+
+# ── 3. Navigate to map ────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- takeScreenshot: safety-02-map-loaded
+
+# ── 4. Open safety layer / screen ────────────────────────────────────────────
+- tapOn:
+    id: map.safety.button
+- extendedWaitUntil:
+    visible:
+      id: safety.screen
+    timeout: 15000
+- assertVisible:
+    id: safety.screen
+- takeScreenshot: safety-03-safety-screen
+
+# ── 5. Verify safety screen title ────────────────────────────────────────────
+- assertVisible:
+    text: السلامة العامة
+- takeScreenshot: safety-04-safety-title
+
+# ── 6. Verify the report button is present ───────────────────────────────────
+- assertVisible:
+    id: safety.report.button
+- assertVisible:
+    text: إبلاغ عن حادثة
+- takeScreenshot: safety-05-report-button
+
+# ── 7. Tap "إبلاغ عن حادثة" ──────────────────────────────────────────────────
+- tapOn:
+    id: safety.report.button
+- extendedWaitUntil:
+    visible:
+      id: safety.report.typeSelect
+    timeout: 15000
+- assertVisible:
+    id: safety.report.typeSelect
+- takeScreenshot: safety-06-type-select
+
+# ── 8. Verify incident type screen title ─────────────────────────────────────
+- assertVisible:
+    text: نوع الحادثة
+- takeScreenshot: safety-07-type-title
+
+# ── 9. Incident type list is populated ───────────────────────────────────────
+- assertVisible:
+    id: safety.report.type.item
+- takeScreenshot: safety-08-type-list
+
+# ── 10. Select "حادثة مرور" (traffic incident) ───────────────────────────────
+- tapOn:
+    id: safety.report.type.traffic
+- extendedWaitUntil:
+    visible:
+      id: safety.report.type.selected
+    timeout: 10000
+- assertVisible:
+    id: safety.report.type.selected
+- takeScreenshot: safety-09-type-selected
+
+# ── 11. Advance to location confirmation screen ───────────────────────────────
+- tapOn:
+    id: safety.report.type.next
+- extendedWaitUntil:
+    visible:
+      id: safety.report.locationMap
+    timeout: 15000
+- assertVisible:
+    id: safety.report.locationMap
+- takeScreenshot: safety-10-location-map
+
+# ── 12. Verify location confirmation title ────────────────────────────────────
+- assertVisible:
+    text: تأكيد الموقع
+- takeScreenshot: safety-11-location-title
+
+# ── 13. Location pin is visible on the map ───────────────────────────────────
+- assertVisible:
+    id: safety.report.location.pin
+- takeScreenshot: safety-12-location-pin
+
+# ── 14. Confirm current GPS location ─────────────────────────────────────────
+- tapOn:
+    id: safety.report.location.confirm
+- extendedWaitUntil:
+    visible:
+      id: safety.report.descriptionScreen
+    timeout: 15000
+- assertVisible:
+    id: safety.report.descriptionScreen
+- takeScreenshot: safety-13-description-screen
+
+# ── 15. Verify description screen title ──────────────────────────────────────
+- assertVisible:
+    text: وصف الحادثة
+- takeScreenshot: safety-14-description-title
+
+# ── 16. Enter description text ────────────────────────────────────────────────
+- tapOn:
+    id: safety.report.description.input
+- inputText: ${REPORT_DESC}
+- hideKeyboard
+- takeScreenshot: safety-15-description-entered
+
+# ── 17. Severity selector is available ───────────────────────────────────────
+- assertVisible:
+    id: safety.report.severity
+- takeScreenshot: safety-16-severity-selector
+
+# ── 18. Select "متوسطة" (medium) severity ────────────────────────────────────
+- tapOn:
+    id: safety.report.severity.medium
+- extendedWaitUntil:
+    visible:
+      id: safety.report.severity.selected
+    timeout: 10000
+- takeScreenshot: safety-17-severity-selected
+
+# ── 19. Verify submit button ─────────────────────────────────────────────────
+- assertVisible:
+    id: safety.report.submit
+- assertVisible:
+    text: إرسال البلاغ
+- takeScreenshot: safety-18-submit-button
+
+# ── 20. Tap "إرسال البلاغ" ───────────────────────────────────────────────────
+- tapOn:
+    id: safety.report.submit
+- extendedWaitUntil:
+    visible:
+      id: safety.report.success
+    timeout: 20000
+- assertVisible:
+    id: safety.report.success
+- takeScreenshot: safety-19-success-screen
+
+# ── 21. "تم الإرسال" confirmation text ───────────────────────────────────────
+- assertVisible:
+    text: تم الإرسال
+- takeScreenshot: safety-20-sent-confirmation
+
+# ── 22. Reference ID is displayed ────────────────────────────────────────────
+- assertVisible:
+    id: safety.report.success.referenceId
+- takeScreenshot: safety-21-reference-id
+
+# ── 23. Dismiss success screen ────────────────────────────────────────────────
+- tapOn:
+    id: safety.report.success.done
+- extendedWaitUntil:
+    visible:
+      id: safety.screen
+    timeout: 10000
+- assertVisible:
+    id: safety.screen
+- takeScreenshot: safety-22-back-to-safety
+
+# ── 24. Regression: map still loads ──────────────────────────────────────────
+- tapOn:
+    id: safety.screen.close
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- assertVisible:
+    id: map.view
+- takeScreenshot: safety-23-map-ok

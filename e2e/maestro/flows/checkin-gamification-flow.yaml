@@ -1,0 +1,236 @@
+# Check-in gamification flow:
+# Login → open map → find nearby place → tap "تسجيل حضور" → confirm →
+# see success animation → badge notification → streak counter →
+# navigate to badges screen → verify earned badge.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded; at least one place within 500 m of
+#   the e2e GPS stub coordinate (33.3152, 44.3661).
+#   At least one badge seeded that triggers on first check-in.
+# Env vars:
+#   PHONE      Iraqi mobile number. Default: random 077xxxxxxxx.
+#   OTP_CODE   Must match OTP_FIXED_CODE. Default: 123456.
+#   NAME       Display name. Default: مستخدم تسجيل الحضور.
+#   SEARCH_Q   Place to check in to. Default: مقهى.
+appId: iq.iraqmaps.app
+name: checkin-gamification-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم تسجيل الحضور'}
+  SEARCH_Q: ${SEARCH_Q || 'مقهى'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate via helper ───────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: checkin-01-logged-in
+
+# ── 3. Navigate to map tab ────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: checkin-02-map-loaded
+
+# ── 4. Open "Nearby Places" sheet ────────────────────────────────────────────
+- tapOn:
+    id: map.nearby.button
+- extendedWaitUntil:
+    visible:
+      id: nearby.sheet
+    timeout: 15000
+- assertVisible:
+    id: nearby.sheet
+- takeScreenshot: checkin-03-nearby-sheet
+
+# ── 5. Verify nearby list has at least one place ──────────────────────────────
+- assertVisible:
+    id: nearby.place.item
+- takeScreenshot: checkin-04-nearby-list
+
+# ── 6. Tap the first place in the nearby list ─────────────────────────────────
+- tapOn:
+    id: nearby.place.item
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.source
+- takeScreenshot: checkin-05-place-card
+
+# ── 7. Verify "تسجيل حضور" button is present ─────────────────────────────────
+- assertVisible:
+    id: place.checkIn
+- assertVisible:
+    text: تسجيل حضور
+- takeScreenshot: checkin-06-checkin-button-visible
+
+# ── 8. Tap "تسجيل حضور" ──────────────────────────────────────────────────────
+- tapOn:
+    id: place.checkIn
+- extendedWaitUntil:
+    visible:
+      id: checkin.confirm.dialog
+    timeout: 10000
+- assertVisible:
+    id: checkin.confirm.dialog
+- takeScreenshot: checkin-07-confirm-dialog
+
+# ── 9. Verify confirmation dialog text ───────────────────────────────────────
+- assertVisible:
+    text: تأكيد تسجيل الحضور
+- assertVisible:
+    id: checkin.confirm.submit
+- assertVisible:
+    id: checkin.confirm.cancel
+- takeScreenshot: checkin-08-dialog-text
+
+# ── 10. Tap confirm ───────────────────────────────────────────────────────────
+- tapOn:
+    id: checkin.confirm.submit
+
+# ── 11. Wait for and verify success animation ─────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: checkin.success.animation
+    timeout: 15000
+- assertVisible:
+    id: checkin.success.animation
+- takeScreenshot: checkin-09-success-animation
+
+# ── 12. Arabic success text is visible ───────────────────────────────────────
+- assertVisible:
+    text: تم تسجيل حضورك بنجاح
+- takeScreenshot: checkin-10-success-text
+
+# ── 13. Points earned toast or banner appears ─────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: checkin.points.earned
+    timeout: 10000
+- assertVisible:
+    id: checkin.points.earned
+- takeScreenshot: checkin-11-points-earned
+
+# ── 14. Wait for badge notification to appear ─────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: badge.notification.banner
+    timeout: 20000
+- assertVisible:
+    id: badge.notification.banner
+- takeScreenshot: checkin-12-badge-notification
+
+# ── 15. Verify badge notification content ────────────────────────────────────
+- assertVisible:
+    id: badge.notification.title
+- assertVisible:
+    id: badge.notification.icon
+- takeScreenshot: checkin-13-badge-content
+
+# ── 16. Dismiss success animation ────────────────────────────────────────────
+- tapOn:
+    id: checkin.success.done
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 10000
+- takeScreenshot: checkin-14-back-to-card
+
+# ── 17. Verify streak counter on the place card or activity tab ───────────────
+- tapOn:
+    id: tab.activity
+- extendedWaitUntil:
+    visible:
+      id: activity.streak.counter
+    timeout: 15000
+- assertVisible:
+    id: activity.streak.counter
+- takeScreenshot: checkin-15-streak-counter
+
+# ── 18. Streak counter shows at least 1 ──────────────────────────────────────
+- assertVisible:
+    id: activity.streak.value
+- takeScreenshot: checkin-16-streak-value
+
+# ── 19. Navigate to badges screen ────────────────────────────────────────────
+- tapOn:
+    id: activity.badges.button
+- extendedWaitUntil:
+    visible:
+      id: badges.screen
+    timeout: 15000
+- assertVisible:
+    id: badges.screen
+- takeScreenshot: checkin-17-badges-screen
+
+# ── 20. Verify badges screen title ───────────────────────────────────────────
+- assertVisible:
+    text: شاراتي
+- takeScreenshot: checkin-18-badges-title
+
+# ── 21. Verify at least one badge is earned (highlighted) ────────────────────
+- assertVisible:
+    id: badge.earned.item
+- takeScreenshot: checkin-19-earned-badge
+
+# ── 22. Tap the earned badge to see its detail ───────────────────────────────
+- tapOn:
+    id: badge.earned.item
+- extendedWaitUntil:
+    visible:
+      id: badge.detail.sheet
+    timeout: 10000
+- assertVisible:
+    id: badge.detail.sheet
+- takeScreenshot: checkin-20-badge-detail
+
+# ── 23. Verify badge detail fields ───────────────────────────────────────────
+- assertVisible:
+    id: badge.detail.name
+- assertVisible:
+    id: badge.detail.description
+- assertVisible:
+    id: badge.detail.earnedAt
+- takeScreenshot: checkin-21-badge-fields
+
+# ── 24. Verify badge name is in Arabic ───────────────────────────────────────
+- assertVisible:
+    id: badge.detail.name
+- takeScreenshot: checkin-22-badge-arabic-name
+
+# ── 25. Dismiss badge detail ─────────────────────────────────────────────────
+- tapOn:
+    id: badge.detail.close
+- extendedWaitUntil:
+    visible:
+      id: badges.screen
+    timeout: 10000
+- takeScreenshot: checkin-23-back-to-badges
+
+# ── 26. Regression: return to map ────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: checkin-24-map-ok

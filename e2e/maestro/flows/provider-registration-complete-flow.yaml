@@ -1,0 +1,377 @@
+# Full provider registration flow (8 steps):
+# Login → start registration → complete all 8 steps (business name, category,
+# location, hours, contact, description, photos, review & submit) →
+# see verification pending → check status screen.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   Provider module running; media upload mocked (returns fixture image URL).
+#   Test account must NOT already be a registered provider.
+# Env vars:
+#   PHONE            Default: random 077xxxxxxxx.
+#   OTP_CODE         Default: 123456.
+#   NAME             Default: صاحب العمل التجريبي.
+#   BUSINESS_NAME    Default: مطعم بغداد الكبير.
+#   BUSINESS_PHONE   Default: 07701234567.
+#   BUSINESS_WEBSITE Default: https://example-restaurant.iq.
+appId: iq.iraqmaps.app
+name: provider-registration-complete-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'صاحب العمل التجريبي'}
+  BUSINESS_NAME: ${BUSINESS_NAME || 'مطعم بغداد الكبير'}
+  BUSINESS_PHONE: ${BUSINESS_PHONE || '07701234567'}
+  BUSINESS_WEBSITE: ${BUSINESS_WEBSITE || 'https://example-restaurant.iq'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: reg-01-logged-in
+
+# ── 3. Navigate to account tab ───────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+- takeScreenshot: reg-02-account-menu
+
+# ── 4. Tap "سجّل نشاطك التجاري" (register your business) ────────────────────
+- tapOn:
+    id: account.registerBusiness
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.intro
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.intro
+- takeScreenshot: reg-03-registration-intro
+
+# ── 5. Verify intro screen title ─────────────────────────────────────────────
+- assertVisible:
+    text: تسجيل النشاط التجاري
+- takeScreenshot: reg-04-intro-title
+
+# ── 6. Tap "ابدأ الآن" to enter the wizard ───────────────────────────────────
+- tapOn:
+    id: provider.reg.start
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step1
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step1
+- takeScreenshot: reg-05-step1
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 1 — Business name
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: اسم النشاط التجاري
+- tapOn:
+    id: provider.reg.step1.name
+- inputText: ${BUSINESS_NAME}
+- hideKeyboard
+- takeScreenshot: reg-06-step1-name-entered
+
+- tapOn:
+    id: provider.reg.step1.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step2
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step2
+- takeScreenshot: reg-07-step2
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 2 — Category
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: فئة النشاط
+- assertVisible:
+    id: provider.reg.step2.categoryList
+- tapOn:
+    id: provider.reg.step2.category.restaurant
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step2.category.selected
+    timeout: 10000
+- assertVisible:
+    id: provider.reg.step2.category.selected
+- takeScreenshot: reg-08-step2-category-selected
+
+- tapOn:
+    id: provider.reg.step2.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step3
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step3
+- takeScreenshot: reg-09-step3
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 3 — Location on map
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: موقع النشاط
+- assertVisible:
+    id: provider.reg.step3.locationMap
+- assertVisible:
+    id: provider.reg.step3.pin
+- takeScreenshot: reg-10-step3-location-map
+
+# Use current GPS stub location
+- tapOn:
+    id: provider.reg.step3.useCurrentLocation
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step3.locationConfirmed
+    timeout: 10000
+- assertVisible:
+    id: provider.reg.step3.locationConfirmed
+- takeScreenshot: reg-11-step3-location-confirmed
+
+- tapOn:
+    id: provider.reg.step3.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step4
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step4
+- takeScreenshot: reg-12-step4
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 4 — Opening hours
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: أوقات العمل
+- assertVisible:
+    id: provider.reg.step4.hoursGrid
+- takeScreenshot: reg-13-step4-hours-grid
+
+# Toggle open all weekdays by selecting "كل أيام الأسبوع"
+- tapOn:
+    id: provider.reg.step4.allWeek
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step4.allWeek.selected
+    timeout: 10000
+- assertVisible:
+    id: provider.reg.step4.allWeek.selected
+- takeScreenshot: reg-14-step4-all-week-selected
+
+# Set opening time
+- tapOn:
+    id: provider.reg.step4.openTime
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step4.timePicker
+    timeout: 10000
+- tapOn:
+    id: provider.reg.step4.timePicker.confirm
+- takeScreenshot: reg-15-step4-open-time-set
+
+# Set closing time
+- tapOn:
+    id: provider.reg.step4.closeTime
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step4.timePicker
+    timeout: 10000
+- tapOn:
+    id: provider.reg.step4.timePicker.confirm
+- takeScreenshot: reg-16-step4-close-time-set
+
+- tapOn:
+    id: provider.reg.step4.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step5
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step5
+- takeScreenshot: reg-17-step5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 5 — Contact information
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: معلومات التواصل
+- tapOn:
+    id: provider.reg.step5.phone
+- inputText: ${BUSINESS_PHONE}
+- hideKeyboard
+- takeScreenshot: reg-18-step5-phone
+
+- tapOn:
+    id: provider.reg.step5.website
+- inputText: ${BUSINESS_WEBSITE}
+- hideKeyboard
+- takeScreenshot: reg-19-step5-website
+
+- tapOn:
+    id: provider.reg.step5.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step6
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step6
+- takeScreenshot: reg-20-step6
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 6 — Description
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: وصف النشاط
+- tapOn:
+    id: provider.reg.step6.description
+- inputText: مطعم راقٍ في قلب بغداد يقدم أشهى المأكولات العراقية والعربية بأجواء عائلية مميزة وأسعار مناسبة.
+- hideKeyboard
+- takeScreenshot: reg-21-step6-description-entered
+
+- tapOn:
+    id: provider.reg.step6.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step7
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step7
+- takeScreenshot: reg-22-step7
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 7 — Photos (upload simulated via mock driver)
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: صور النشاط
+- assertVisible:
+    id: provider.reg.step7.addPhoto
+- takeScreenshot: reg-23-step7-photos-screen
+
+# Tap "إضافة صورة" — mock driver returns fixture photo URL immediately
+- tapOn:
+    id: provider.reg.step7.addPhoto
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step7.photoAdded
+    timeout: 20000
+- assertVisible:
+    id: provider.reg.step7.photoAdded
+- takeScreenshot: reg-24-step7-photo-added
+
+# Add a second photo
+- tapOn:
+    id: provider.reg.step7.addPhoto
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step7.photoCount
+    timeout: 20000
+- takeScreenshot: reg-25-step7-second-photo
+
+- tapOn:
+    id: provider.reg.step7.next
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.step8
+    timeout: 15000
+- assertVisible:
+    id: provider.reg.step8
+- takeScreenshot: reg-26-step8
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STEP 8 — Review & submit
+# ═══════════════════════════════════════════════════════════════════════════════
+- assertVisible:
+    text: مراجعة وإرسال
+- assertVisible:
+    id: provider.reg.step8.summary
+- takeScreenshot: reg-27-step8-summary
+
+# Verify summary shows the entered values
+- assertVisible:
+    id: provider.reg.step8.summary.name
+- assertVisible:
+    id: provider.reg.step8.summary.category
+- assertVisible:
+    id: provider.reg.step8.summary.location
+- assertVisible:
+    id: provider.reg.step8.summary.hours
+- assertVisible:
+    id: provider.reg.step8.summary.contact
+- assertVisible:
+    id: provider.reg.step8.summary.photos
+- takeScreenshot: reg-28-step8-fields-verified
+
+# Accept terms checkbox
+- tapOn:
+    id: provider.reg.step8.terms
+- assertVisible:
+    id: provider.reg.step8.terms.checked
+- takeScreenshot: reg-29-step8-terms-checked
+
+# Submit registration
+- tapOn:
+    id: provider.reg.step8.submit
+- extendedWaitUntil:
+    visible:
+      id: provider.reg.submitted
+    timeout: 30000
+- assertVisible:
+    id: provider.reg.submitted
+- takeScreenshot: reg-30-submitted
+
+# ── Verify "قيد المراجعة" (verification pending) state ───────────────────────
+- assertVisible:
+    text: قيد المراجعة
+- takeScreenshot: reg-31-pending-text
+
+- assertVisible:
+    id: provider.reg.submitted.icon
+- assertVisible:
+    id: provider.reg.submitted.message
+- takeScreenshot: reg-32-pending-message
+
+# ── Navigate to status screen ─────────────────────────────────────────────────
+- tapOn:
+    id: provider.reg.submitted.viewStatus
+- extendedWaitUntil:
+    visible:
+      id: provider.status.screen
+    timeout: 15000
+- assertVisible:
+    id: provider.status.screen
+- takeScreenshot: reg-33-status-screen
+
+# ── Verify status screen shows pending ───────────────────────────────────────
+- assertVisible:
+    id: provider.status.badge
+- assertVisible:
+    text: قيد المراجعة
+- assertVisible:
+    id: provider.status.submittedAt
+- assertVisible:
+    id: provider.status.expectedDuration
+- takeScreenshot: reg-34-status-fields
+
+# ── Regression: tabs still work ──────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: reg-35-map-ok

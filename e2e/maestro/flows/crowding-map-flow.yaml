@@ -1,0 +1,166 @@
+# Crowding visualization flow:
+# Login → open map → tap crowding toggle → see heatmap appear →
+# slide the time slider → long-press on a busy area →
+# see crowding info card.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture with crowding data seeded (insights module).
+#   Heatmap renderer enabled in e2e env.
+# Env vars:
+#   PHONE     Default: random 077xxxxxxxx.
+#   OTP_CODE  Default: 123456.
+#   NAME      Default: مستخدم الازدحام.
+appId: iq.iraqmaps.app
+name: crowding-map-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم الازدحام'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- runFlow: ../helpers/auth-helper.yaml
+- takeScreenshot: crowd-01-logged-in
+
+# ── 3. Navigate to map tab ────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: crowd-02-map-loaded
+
+# ── 4. Verify crowding toggle is present in the map toolbar ──────────────────
+- assertVisible:
+    id: map.toolbar.crowding
+- takeScreenshot: crowd-03-crowding-toggle
+
+# ── 5. Tap the crowding toggle ────────────────────────────────────────────────
+- tapOn:
+    id: map.toolbar.crowding
+- extendedWaitUntil:
+    visible:
+      id: map.crowding.heatmap
+    timeout: 20000
+- assertVisible:
+    id: map.crowding.heatmap
+- takeScreenshot: crowd-04-heatmap-visible
+
+# ── 6. Heatmap layer is rendered on the map ───────────────────────────────────
+- assertVisible:
+    id: map.crowding.layer
+- takeScreenshot: crowd-05-heatmap-layer
+
+# ── 7. Crowding legend appears ───────────────────────────────────────────────
+- assertVisible:
+    id: map.crowding.legend
+- assertVisible:
+    text: مستوى الازدحام
+- takeScreenshot: crowd-06-legend
+
+# ── 8. Time slider appears ───────────────────────────────────────────────────
+- assertVisible:
+    id: map.crowding.timeSlider
+- takeScreenshot: crowd-07-time-slider
+
+# ── 9. Slide time slider to the right (later in the day) ─────────────────────
+- swipe:
+    start: map.crowding.timeSlider.thumb
+    end:
+      id: map.crowding.timeSlider.maxEnd
+    direction: RIGHT
+- extendedWaitUntil:
+    visible:
+      id: map.crowding.timeSlider.updated
+    timeout: 10000
+- takeScreenshot: crowd-08-slider-moved-right
+
+# ── 10. Heatmap updates after slider move ─────────────────────────────────────
+- assertVisible:
+    id: map.crowding.heatmap
+- takeScreenshot: crowd-09-heatmap-updated
+
+# ── 11. Time label shows updated hour ────────────────────────────────────────
+- assertVisible:
+    id: map.crowding.timeLabel
+- takeScreenshot: crowd-10-time-label
+
+# ── 12. Slide time slider back to left ───────────────────────────────────────
+- swipe:
+    start: map.crowding.timeSlider.thumb
+    end:
+      id: map.crowding.timeSlider.minEnd
+    direction: LEFT
+- extendedWaitUntil:
+    visible:
+      id: map.crowding.timeSlider.updated
+    timeout: 10000
+- takeScreenshot: crowd-11-slider-back-left
+
+# ── 13. Long-press on a busy/red area of the heatmap ─────────────────────────
+- longPressOn:
+    id: map.crowding.busyArea
+- extendedWaitUntil:
+    visible:
+      id: map.crowding.infoCard
+    timeout: 15000
+- assertVisible:
+    id: map.crowding.infoCard
+- takeScreenshot: crowd-12-info-card
+
+# ── 14. Info card shows crowding details ─────────────────────────────────────
+- assertVisible:
+    id: map.crowding.infoCard.level
+- assertVisible:
+    id: map.crowding.infoCard.placeName
+- assertVisible:
+    id: map.crowding.infoCard.source
+- assertVisible:
+    id: map.crowding.infoCard.observedAt
+- assertVisible:
+    id: map.crowding.infoCard.confidence
+- takeScreenshot: crowd-13-info-card-fields
+
+# ── 15. Info card text is in Arabic ──────────────────────────────────────────
+- assertVisible:
+    text: مستوى الازدحام
+- takeScreenshot: crowd-14-arabic-info
+
+# ── 16. Dismiss info card ────────────────────────────────────────────────────
+- tapOn:
+    id: map.crowding.infoCard.close
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 10000
+- assertNotVisible:
+    id: map.crowding.infoCard
+- takeScreenshot: crowd-15-card-dismissed
+
+# ── 17. Toggle crowding off ───────────────────────────────────────────────────
+- tapOn:
+    id: map.toolbar.crowding
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 10000
+- assertNotVisible:
+    id: map.crowding.heatmap
+- assertNotVisible:
+    id: map.crowding.timeSlider
+- takeScreenshot: crowd-16-heatmap-off
+
+# ── 18. Map still shows OSM attribution ──────────────────────────────────────
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: crowd-17-attribution-ok
