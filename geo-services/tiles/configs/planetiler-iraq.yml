@@ -1,0 +1,279 @@
+# Planetiler configuration for Iraq Smart Maps
+#
+# Generates PMTiles covering Iraq (bbox: 29.0–37.5 N, 38.5–48.8 E)
+# Data: OpenStreetMap (ODbL) via Geofabrik Iraq extract
+# Attribution: "Map data © OpenStreetMap contributors"
+#
+# Zoom levels:
+#   0–6:   country/region outlines
+#   7–10:  city names, major roads
+#   11–13: district names, secondary roads, neighbourhoods
+#   14–16: streets, POIs, building outlines
+#   z17+:  full detail (generated on-demand by Planetiler)
+#
+# Never use tile.openstreetmap.org as a source.
+# All tile data comes from the locally downloaded PBF file.
+
+schema_name: iraq-maps
+schema_description: Iraq Smart Maps tile schema — ODbL licensed
+attribution: "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a>"
+# Metadata embedded in the PMTiles file
+args:
+  area: Iraq
+  minzoom: 0
+  maxzoom: 14
+
+# ---------------------------------------------------------------------------
+# Layers
+# ---------------------------------------------------------------------------
+layers:
+
+  # ---- Water ---------------------------------------------------------------
+  - id: water
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 4
+        include_when:
+          natural: [water, wetland, bay, strait]
+          waterway: [riverbank]
+          landuse: [reservoir, basin]
+        attributes:
+          - key: class
+            value:
+              natural: water
+              waterway: river
+              landuse: reservoir
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+
+  # ---- Waterways -----------------------------------------------------------
+  - id: waterway
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 8
+        include_when:
+          waterway: [river, canal, stream, drain]
+        attributes:
+          - key: class
+            tag_value: waterway
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+
+  # ---- Land cover ----------------------------------------------------------
+  - id: landcover
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 4
+        include_when:
+          landuse: [farmland, farmyard, forest, grass, meadow, orchard, scrub, cemetery, industrial, residential, commercial, retail]
+          natural: [wood, scrub, heath, sand, bare_rock, beach, grassland]
+        attributes:
+          - key: class
+            value:
+              landuse: landuse
+              natural: natural
+
+  # ---- Administrative boundaries ------------------------------------------
+  - id: boundary
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 0
+        include_when:
+          boundary: administrative
+          admin_level: ["2", "4", "6", "7", "8"]
+        exclude_when:
+          maritime: "yes"
+        attributes:
+          - key: admin_level
+            tag_value: admin_level
+            type: integer
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+
+  # ---- Place names ---------------------------------------------------------
+  - id: place
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 2
+        include_when:
+          place: [country, state, city, town, village, suburb, neighbourhood, quarter]
+        attributes:
+          - key: class
+            tag_value: place
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+          - key: name_en
+            tag_value: name:en
+          - key: name_ckb
+            tag_value: name:ckb
+          - key: population
+            tag_value: population
+            type: integer
+          - key: capital
+            tag_value: capital
+
+  # ---- Transportation (roads) ----------------------------------------------
+  - id: transportation
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 4
+        include_when:
+          highway:
+            - motorway
+            - trunk
+            - primary
+            - secondary
+            - tertiary
+            - unclassified
+            - residential
+            - living_street
+            - road
+            - pedestrian
+            - footway
+            - cycleway
+            - path
+        attributes:
+          - key: class
+            value:
+              motorway: motorway
+              trunk: trunk
+              primary: primary
+              secondary: secondary
+              tertiary: tertiary
+              unclassified: minor
+              residential: minor
+              living_street: minor
+              road: minor
+              pedestrian: path
+              footway: path
+              cycleway: path
+              path: path
+          - key: surface
+            tag_value: surface
+          - key: oneway
+            tag_value: oneway
+          - key: bridge
+            tag_value: bridge
+          - key: tunnel
+            tag_value: tunnel
+          - key: layer
+            tag_value: layer
+            type: integer
+
+  # ---- Road names ----------------------------------------------------------
+  - id: transportation_name
+    features:
+      - source: osm
+        geometry: line
+        min_zoom: 12
+        include_when:
+          highway:
+            - motorway
+            - trunk
+            - primary
+            - secondary
+            - tertiary
+            - unclassified
+            - residential
+          name: __any__
+        attributes:
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+          - key: name_en
+            tag_value: name:en
+          - key: class
+            tag_value: highway
+
+  # ---- Points of interest --------------------------------------------------
+  - id: poi
+    features:
+      - source: osm
+        geometry: point
+        min_zoom: 13
+        include_when:
+          amenity:
+            - restaurant
+            - fast_food
+            - cafe
+            - hospital
+            - clinic
+            - pharmacy
+            - school
+            - university
+            - bank
+            - atm
+            - fuel
+            - mosque
+            - place_of_worship
+            - police
+            - fire_station
+            - post_office
+            - bus_station
+            - marketplace
+            - hotel
+            - cinema
+            - theatre
+          shop: __any__
+          tourism: [hotel, motel, museum, attraction, gallery]
+          historic: [monument, memorial, archaeological_site, castle]
+        attributes:
+          - key: class
+            value:
+              amenity: amenity
+              shop: shop
+              tourism: tourism
+              historic: historic
+          - key: subclass
+            value:
+              amenity:
+                restaurant: restaurant
+                fast_food: fast_food
+                cafe: cafe
+                hospital: hospital
+                pharmacy: pharmacy
+                school: school
+                bank: bank
+                fuel: fuel
+                mosque: mosque
+          - key: name
+            tag_value: name:ar
+            fallback:
+              tag_value: name
+          - key: name_en
+            tag_value: name:en
+          - key: opening_hours
+            tag_value: opening_hours
+
+  # ---- Buildings -----------------------------------------------------------
+  - id: building
+    features:
+      - source: osm
+        geometry: polygon
+        min_zoom: 14
+        include_when:
+          building: __any__
+        exclude_when:
+          building: ["no", "false"]
+        attributes:
+          - key: class
+            value:
+              building: building
+          - key: levels
+            tag_value: building:levels
+            type: integer
