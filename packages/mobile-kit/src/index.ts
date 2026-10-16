@@ -52,3 +52,6 @@ export { useWebSocket, type WsStatus, type WsIncomingEvent, type UseWebSocketOpt
 
 /** @public WebSocket connection status indicator dot */
 export { WsStatusIndicator, type WsStatusIndicatorProps } from './ws-status-indicator';
+
+/** @public unified accessibility hook (screen reader, font scale, contrast, reduce motion) */
+export { useAccessibility, type AccessibilityState } from './hooks/useAccessibility';
