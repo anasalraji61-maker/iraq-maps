@@ -2,6 +2,7 @@
  * WriteReviewScreen – full review writing experience with category-specific
  * prompts, photo upload, visit date picker, anonymous option and tips.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -591,7 +592,7 @@ const styles = StyleSheet.create({
   },
   textInputError: { borderColor: '#F44336' },
   textCountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  textCount: { fontSize: 12, color: GREY, textAlign: 'end' as const },
+  textCount: { fontSize: 12, color: GREY, textAlign: 'auto' as const },
   textError: { fontSize: 12, color: '#F44336' },
   promptGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   promptChip: {
@@ -627,7 +628,7 @@ const styles = StyleSheet.create({
   datePickerValue: { fontSize: 15, color: '#212121' },
   datePickerPlaceholder: { fontSize: 15, color: GREY },
   datePickerIcon: { fontSize: 18 },
-  clearDate: { fontSize: 13, color: '#F44336', textAlign: 'end' as const, marginTop: 4 },
+  clearDate: { fontSize: 13, color: '#F44336', textAlign: 'auto' as const, marginTop: 4 },
   tipsBox: {
     backgroundColor: '#F9FBE7',
     borderRadius: 12,

@@ -12,7 +12,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iraq-maps/config": "workspace:*",
     "@iraq-maps/contracts": "workspace:*",
     "@nestjs/common": "^11.2.7",
     "@ts-rest/nest": "3.52.1",

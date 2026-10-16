@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { PaymentsService, PaymentError, formatIqd, formatMoney, formatUsd } from '../payments.service';
+import { PaymentsService, formatIqd, formatMoney, formatUsd } from '../payments.service';
 
 // ─── Skip guard ───────────────────────────────────────────────────────────────
 
@@ -210,6 +210,7 @@ describe.skipIf(skip)('PaymentsService — createPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 25_000,
       currency: 'IQD',
+      metadata: {},
       description: 'طلب اختباري',
     });
 
@@ -228,6 +229,7 @@ describe.skipIf(skip)('PaymentsService — createPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 1_500_000,
       currency: 'IQD',
+      metadata: {},
       description: 'دفعة كبيرة للاختبار',
     });
 
@@ -239,6 +241,7 @@ describe.skipIf(skip)('PaymentsService — createPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 500_000,
       currency: 'IQD',
+      metadata: {},
       description: 'دفعة عادية',
     });
 
@@ -251,6 +254,7 @@ describe.skipIf(skip)('PaymentsService — createPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 1000, // $10.00 in USD cents — below threshold
       currency: 'USD',
+      metadata: {},
       description: 'دفعة صغيرة بالدولار',
     });
 
@@ -261,14 +265,14 @@ describe.skipIf(skip)('PaymentsService — createPaymentIntent', () => {
   it('throws invalid_amount for zero amount', async () => {
     const userId = uid(14);
     await expect(
-      svc.createPaymentIntent(userId, { amount: 0, currency: 'IQD', description: 'مبلغ صفر' }),
+      svc.createPaymentIntent(userId, { amount: 0, currency: 'IQD', description: 'مبلغ صفر', metadata: {} }),
     ).rejects.toMatchObject({ code: 'invalid_amount' });
   });
 
   it('throws invalid_amount for negative amount', async () => {
     const userId = uid(15);
     await expect(
-      svc.createPaymentIntent(userId, { amount: -500, currency: 'IQD', description: 'مبلغ سالب' }),
+      svc.createPaymentIntent(userId, { amount: -500, currency: 'IQD', description: 'مبلغ سالب', metadata: {} }),
     ).rejects.toMatchObject({ code: 'invalid_amount' });
   });
 
@@ -293,6 +297,7 @@ describe.skipIf(skip)('PaymentsService — getPaymentIntent', () => {
     const created = await svc.createPaymentIntent(userId, {
       amount: 5_000,
       currency: 'IQD',
+      metadata: {},
       description: 'استرجاع نية الدفع',
     });
 
@@ -314,6 +319,7 @@ describe.skipIf(skip)('PaymentsService — getPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(owner, {
       amount: 8_000,
       currency: 'IQD',
+      metadata: {},
       description: 'نية دفع لمستخدم آخر',
     });
 
@@ -326,7 +332,7 @@ describe.skipIf(skip)('PaymentsService — getPaymentIntent', () => {
 // ─── Confirm payment via wallet ───────────────────────────────────────────────
 
 describe.skipIf(skip)('PaymentsService — confirmPayment via wallet', () => {
-  async function setupWalletAndMethod(userId: string, balanceIqd: number) {
+  async function _setupWalletAndMethod(userId: string, balanceIqd: number) {
     await svc.addToWallet(userId, { amountIqd: balanceIqd, source: 'bank_transfer' });
     const method = await svc.addCard(userId, {
       last4: '0000',
@@ -354,6 +360,7 @@ describe.skipIf(skip)('PaymentsService — confirmPayment via wallet', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 15_000,
       currency: 'IQD',
+      metadata: {},
       description: 'دفع بالبطاقة',
     });
 
@@ -396,6 +403,7 @@ describe.skipIf(skip)('PaymentsService — confirmPayment via wallet', () => {
     const intent = await svc.createPaymentIntent(userA, {
       amount: 10_000,
       currency: 'IQD',
+      metadata: {},
       description: 'طريقة دفع لمستخدم آخر',
     });
 
@@ -417,6 +425,7 @@ describe.skipIf(skip)('PaymentsService — confirmPayment via wallet', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 20_000,
       currency: 'IQD',
+      metadata: {},
       description: 'نية دفع مؤكدة مرتين',
     });
 
@@ -444,6 +453,7 @@ describe.skipIf(skip)('PaymentsService — refundPayment', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 30_000,
       currency: 'IQD',
+      metadata: {},
       description: 'دفع للاسترداد الكامل',
     });
 
@@ -463,6 +473,7 @@ describe.skipIf(skip)('PaymentsService — refundPayment', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 5_000,
       currency: 'IQD',
+      metadata: {},
       description: 'لا يمكن استرداد نية معلقة',
     });
 
@@ -491,6 +502,7 @@ describe.skipIf(skip)('PaymentsService — refundPayment', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 10_000,
       currency: 'IQD',
+      metadata: {},
       description: 'دفع لاختبار استرداد الصفر',
     });
 
@@ -512,6 +524,7 @@ describe.skipIf(skip)('PaymentsService — cancelPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 7_500,
       currency: 'IQD',
+      metadata: {},
       description: 'نية دفع ستُلغى',
     });
 
@@ -532,6 +545,7 @@ describe.skipIf(skip)('PaymentsService — cancelPaymentIntent', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 12_000,
       currency: 'IQD',
+      metadata: {},
       description: 'نية ستُحال للمعالجة ثم تُلغى',
     });
 
@@ -637,6 +651,7 @@ describe.skipIf(skip)('PaymentsService — rate limiting', () => {
       const intent = await svc.createPaymentIntent(userId, {
         amount: 1_000 + i,
         currency: 'IQD',
+        metadata: {},
         description: `تأكيد الدفع رقم ${i + 1}`,
       });
       await svc.confirmPayment(userId, intent.id, { paymentMethodId: method.id });
@@ -661,6 +676,7 @@ describe.skipIf(skip)('PaymentsService — rate limiting', () => {
       const intent = await svc.createPaymentIntent(userId, {
         amount: 1_000 + i,
         currency: 'IQD',
+        metadata: {},
         description: `استنفاد الحد رقم ${i + 1}`,
       });
       try {
@@ -674,6 +690,7 @@ describe.skipIf(skip)('PaymentsService — rate limiting', () => {
     const overIntent = await svc.createPaymentIntent(userId, {
       amount: 9_999,
       currency: 'IQD',
+      metadata: {},
       description: 'تجاوز حد المعدل',
     });
 
@@ -692,6 +709,7 @@ describe.skipIf(skip)('PaymentsService — fraud detection threshold', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 1_000_001,
       currency: 'IQD',
+      metadata: {},
       description: 'مبلغ فوق الحد المطلوب للمراجعة',
     });
 
@@ -704,6 +722,7 @@ describe.skipIf(skip)('PaymentsService — fraud detection threshold', () => {
     const intent = await svc.createPaymentIntent(userId, {
       amount: 1_000_000,
       currency: 'IQD',
+      metadata: {},
       description: 'مبلغ عند الحد بالضبط',
     });
 
@@ -718,7 +737,7 @@ describe.skipIf(skip)('PaymentsService — transaction history', () => {
     const userId = uid(90);
     await svc.addToWallet(userId, { amountIqd: 75_000, source: 'bank_transfer', reference: 'REF001' });
 
-    const { items } = await svc.getTransactionHistory(userId, {});
+    const { items } = await svc.getTransactionHistory(userId, { limit: 50 });
     expect(items.length).toBeGreaterThanOrEqual(1);
     const credit = items.find((t) => t.type === 'credit');
     expect(credit).toBeDefined();
@@ -731,7 +750,7 @@ describe.skipIf(skip)('PaymentsService — transaction history', () => {
     await svc.addToWallet(userId, { amountIqd: 200_000, source: 'bank_transfer' });
     await svc.deductFromWallet(userId, 50_000, 'اختبار الخصم');
 
-    const { items } = await svc.getTransactionHistory(userId, {});
+    const { items } = await svc.getTransactionHistory(userId, { limit: 50 });
     const debit = items.find((t) => t.type === 'debit');
     expect(debit).toBeDefined();
     expect(debit?.amountIqd).toBe(50_000);
@@ -739,7 +758,7 @@ describe.skipIf(skip)('PaymentsService — transaction history', () => {
 
   it('returns empty items for a user with no transactions', async () => {
     const userId = uid(92);
-    const { items } = await svc.getTransactionHistory(userId, {});
+    const { items } = await svc.getTransactionHistory(userId, { limit: 50 });
     expect(items).toEqual([]);
   });
 
@@ -748,7 +767,7 @@ describe.skipIf(skip)('PaymentsService — transaction history', () => {
     await svc.addToWallet(userId, { amountIqd: 100_000, source: 'bank_transfer' });
     await svc.deductFromWallet(userId, 30_000, 'خصم جزئي');
 
-    const { items } = await svc.getTransactionHistory(userId, { type: 'credit' });
+    const { items } = await svc.getTransactionHistory(userId, { limit: 50, type: 'credit' });
     expect(items.every((t) => t.type === 'credit')).toBe(true);
   });
 
@@ -777,6 +796,7 @@ describe.skipIf(skip)('PaymentsService — listPaymentIntents', () => {
       await svc.createPaymentIntent(userId, {
         amount: 5_000 + i * 1_000,
         currency: 'IQD',
+        metadata: {},
         description: `نية رقم ${i + 1}`,
       });
     }
@@ -787,8 +807,8 @@ describe.skipIf(skip)('PaymentsService — listPaymentIntents', () => {
 
   it('filters by status', async () => {
     const userId = uid(101);
-    await svc.createPaymentIntent(userId, { amount: 3_000, currency: 'IQD', description: 'معلقة 1' });
-    await svc.createPaymentIntent(userId, { amount: 4_000, currency: 'IQD', description: 'معلقة 2' });
+    await svc.createPaymentIntent(userId, { amount: 3_000, currency: 'IQD', description: 'معلقة 1', metadata: {} });
+    await svc.createPaymentIntent(userId, { amount: 4_000, currency: 'IQD', description: 'معلقة 2', metadata: {} });
 
     const { items } = await svc.listPaymentIntents(userId, { status: 'pending' });
     expect(items.every((i) => i.status === 'pending')).toBe(true);

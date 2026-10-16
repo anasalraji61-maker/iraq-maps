@@ -2,22 +2,9 @@
  * HTTP layer for modules/geocoding — NestJS controller wired to geocodingContract.
  * Thin: validates via ts-rest, delegates to GeocodingService, never does domain logic.
  */
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-  BadRequestException,
-  ServiceUnavailableException,
-  Inject,
-} from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { tsRestHandler, TsRestHandler } from '@ts-rest/nest';
 import { geocodingContract } from '@iraq-maps/contracts';
-import type { IraqGovernorateId } from '@iraq-maps/contracts';
 import { GeocodingService } from './service';
 
 export const GEOCODING_SERVICE = 'GEOCODING_SERVICE';

@@ -13,7 +13,7 @@ const mockDiscoverClient = {
   getPost: mockGetPost,
   listComments: mockListComments,
   createComment: mockCreateComment,
-  listFeed: jest.fn(),
+  listFeed: jest.fn<() => Promise<unknown>>().mockResolvedValue({ status: 200, body: { items: [] } }),
   likePost: jest.fn(),
   unlikePost: jest.fn(),
   createPost: jest.fn(),
@@ -36,6 +36,11 @@ jest.mock('@iraq-maps/mobile-kit', () => ({
   }),
   useSession: () => ({ state: { status: 'signedIn', user: { id: 'user-session-id' } } }),
   useHaptics: () => ({ tap: jest.fn(), light: jest.fn() }),
+  shareManager: {
+    sharePost: jest.fn().mockReturnValue({ url: 'https://iraqmaps.app/post/test', text: 'test' }),
+    sharePostCard: jest.fn().mockReturnValue({ title: 'test', description: 'test', url: 'https://iraqmaps.app/post/test' }),
+  },
+  ShareCard: 'View',
 }));
 
 jest.mock('@iraq-maps/i18n', () => ({

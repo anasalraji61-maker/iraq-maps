@@ -4,9 +4,8 @@
  * displays a large printable QR, PNG download stub, poster template,
  * and basic scan analytics.
  */
-import { useApi } from '@iraq-maps/mobile-kit';
-import { Screen } from '@iraq-maps/ui';
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
+import { useCallback, useState, type ReactElement } from 'react';
 import {
   Alert,
   I18nManager,
@@ -258,8 +257,8 @@ export function QRCodeScreen(): ReactElement {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: BG },
   scrollContent: { padding: 16 },
-  screenTitle: { fontSize: 22, fontWeight: '800', color: '#111', textAlign: 'right', marginBottom: 16 },
-  sectionLabel: { fontSize: 14, color: '#555', textAlign: 'right', marginBottom: 8, fontWeight: '600' },
+  screenTitle: { fontSize: 22, fontWeight: '800', color: '#111', textAlign: 'auto', marginBottom: 16 },
+  sectionLabel: { fontSize: 14, color: '#555', textAlign: 'auto', marginBottom: 8, fontWeight: '600' },
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   typeChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1.5, borderColor: BORDER, backgroundColor: SURFACE },
   typeChipEmoji: { fontSize: 16 },

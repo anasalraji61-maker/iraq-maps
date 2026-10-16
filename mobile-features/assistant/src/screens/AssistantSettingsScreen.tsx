@@ -142,7 +142,7 @@ function MultiChips<T extends string>({
 export function AssistantSettingsScreen(): ReactElement {
   const router = useRouter();
   const [prefs, setPrefs] = useState<AssistantPreferences>(DEFAULT_PREFS);
-  const [saved, setSaved] = useState(false);
+  const [_saved, setSaved] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const savedAnim = useRef(new Animated.Value(0)).current;
 
@@ -227,7 +227,7 @@ export function AssistantSettingsScreen(): ReactElement {
         pointerEvents="none"
         accessibilityLiveRegion="polite"
       >
-        <Text style={styles.savedToastText}>✓ {t('settings.saved')}</Text>
+        <Text style={styles.savedToastText}>{`✓ ${t('settings.saved')}`}</Text>
       </Animated.View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -239,7 +239,7 @@ export function AssistantSettingsScreen(): ReactElement {
               options={langOptions}
               value={prefs.responseLanguage}
               onChange={v => update('responseLanguage', v)}
-              labelFn={v => ({ ar: 'عربي', ckb: 'كردي', en: 'EN' }[v])}
+              labelFn={v => ({ ar: t('settings.langAr'), ckb: t('settings.langCkb'), en: t('settings.langEn') }[v])}
             />
           </SettingsRow>
         </View>

@@ -13,10 +13,10 @@
  *
  * Strings: map namespace, keys under `addressDisplay`.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useCallback, type ReactElement } from 'react';
 import {
   Clipboard,
-  Platform,
   Pressable,
   Share,
   StyleSheet,

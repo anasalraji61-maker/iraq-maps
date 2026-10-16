@@ -5,6 +5,7 @@
  * RTL-safe (start/end), Arabic-first via t().
  * Data comes only from our own backend.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import type { PlaceCategory, PlaceSummary } from '@iraq-maps/contracts';
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
@@ -16,7 +17,6 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
 } from 'react';
 import {
   ActivityIndicator,
@@ -190,7 +190,7 @@ function PlaceCard({ place, travelMode, onPress }: PlaceCardProps) {
       <View style={nc.placeCardBody}>
         <View style={nc.placeCardLeft}>
           <RNText style={nc.placeName} numberOfLines={1}>
-            {place.nameAr ?? place.name}
+            {place.names.ar ?? place.names.name}
           </RNText>
           {place.category && (
             <RNText style={nc.placeCategory}>
@@ -344,7 +344,7 @@ export function NearbyScreen() {
   }, []);
 
   const displayed = useMemo(() => {
-    let list = state.openNowOnly ? state.places.filter((p) => p.isOpen === true) : state.places;
+    const list = state.openNowOnly ? state.places.filter((p) => p.isOpen === true) : state.places;
     return sortPlaces(list, state.sort);
   }, [state.places, state.sort, state.openNowOnly]);
 
@@ -413,7 +413,7 @@ export function NearbyScreen() {
 
       {/* Filter bar */}
       <View style={nc.filterBar}>
-        <RingSelector ring={state.ring} onChange={(r) => dispatch({ type: 'SET_RING', ring: r })} />
+        <RingSelector selected={state.ring} onChange={(r) => dispatch({ type: 'SET_RING', ring: r })} />
 
         {/* Travel mode toggle */}
         <View style={nc.travelRow}>
@@ -449,7 +449,7 @@ export function NearbyScreen() {
       </View>
 
       {/* Sort */}
-      <SortSelector sort={state.sort} onChange={(s) => dispatch({ type: 'SET_SORT', sort: s })} />
+      <SortSelector selected={state.sort} onChange={(s) => dispatch({ type: 'SET_SORT', sort: s })} />
 
       {/* Content */}
       {state.viewMode === 'list' ? (
@@ -462,7 +462,7 @@ export function NearbyScreen() {
           ListEmptyComponent={
             state.loading ? (
               <View style={nc.center}>
-                <ActivityIndicator size="large" color={tokens.colorActionPrimary} />
+                <ActivityIndicator size="large" color={tokens.color.primary} />
                 <RNText style={nc.loadingText}>{t('search.loadingLabel')}</RNText>
               </View>
             ) : state.error ? (
@@ -512,7 +512,7 @@ export function NearbyScreen() {
 // ---------------------------------------------------------------------------
 
 const nc = StyleSheet.create({
-  container: { flex: 1, backgroundColor: tokens.colorBgPage },
+  container: { flex: 1, backgroundColor: tokens.color.bg },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -520,24 +520,24 @@ const nc = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgSurface,
+    borderBottomColor: tokens.color.border,
+    backgroundColor: tokens.color.surface,
   },
   backBtn: { marginEnd: 10, padding: 4 },
-  backBtnText: { fontSize: 24, color: tokens.colorActionPrimary },
-  title: { flex: 1, fontSize: 18, fontWeight: '700', color: tokens.colorTextPrimary, writingDirection: 'rtl' },
+  backBtnText: { fontSize: 24, color: tokens.color.primary },
+  title: { flex: 1, fontSize: 18, fontWeight: '700', color: tokens.color.text, writingDirection: 'rtl' },
   viewToggle: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
     borderRadius: 8,
     overflow: 'hidden',
   },
-  viewBtn: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: tokens.colorBgPage },
-  viewBtnActive: { backgroundColor: tokens.colorActionPrimary },
-  viewBtnText: { fontSize: 12, color: tokens.colorTextSecondary },
+  viewBtn: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: tokens.color.bg },
+  viewBtnActive: { backgroundColor: tokens.color.primary },
+  viewBtnText: { fontSize: 12, color: tokens.color.textMuted },
   viewBtnTextActive: { color: '#fff', fontWeight: '600' },
-  catScrollContainer: { maxHeight: 52, backgroundColor: tokens.colorBgSurface },
+  catScrollContainer: { maxHeight: 52, backgroundColor: tokens.color.surface },
   catRow: { paddingHorizontal: 12, paddingVertical: 8, gap: 8, flexDirection: 'row' },
   catChip: {
     flexDirection: 'row',
@@ -545,36 +545,36 @@ const nc = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: tokens.colorBgPage,
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
     gap: 4,
   },
-  catChipActive: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
+  catChipActive: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
   catIcon: { fontSize: 14 },
-  catLabel: { fontSize: 13, color: tokens.colorTextSecondary },
+  catLabel: { fontSize: 13, color: tokens.color.textMuted },
   catLabelActive: { color: '#fff', fontWeight: '600' },
   filterBar: {
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgSurface,
+    borderBottomColor: tokens.color.border,
+    backgroundColor: tokens.color.surface,
     gap: 8,
   },
   ringRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  ringLabel: { fontSize: 13, color: tokens.colorTextSecondary, minWidth: 60 },
+  ringLabel: { fontSize: 13, color: tokens.color.textMuted, minWidth: 60 },
   ringOptions: { flexDirection: 'row', gap: 6 },
   ringChip: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgPage,
+    borderColor: tokens.color.border,
+    backgroundColor: tokens.color.bg,
   },
-  ringChipActive: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
-  ringChipText: { fontSize: 12, color: tokens.colorTextSecondary },
+  ringChipActive: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
+  ringChipText: { fontSize: 12, color: tokens.color.textMuted },
   ringChipTextActive: { color: '#fff', fontWeight: '600' },
   travelRow: { flexDirection: 'row', gap: 6 },
   travelBtn: {
@@ -582,11 +582,11 @@ const nc = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgPage,
+    borderColor: tokens.color.border,
+    backgroundColor: tokens.color.bg,
   },
-  travelBtnActive: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
-  travelBtnText: { fontSize: 12, color: tokens.colorTextSecondary },
+  travelBtnActive: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
+  travelBtnText: { fontSize: 12, color: tokens.color.textMuted },
   travelBtnTextActive: { color: '#fff', fontWeight: '600' },
   openNowBtn: {
     alignSelf: 'flex-start',
@@ -594,11 +594,11 @@ const nc = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgPage,
+    borderColor: tokens.color.border,
+    backgroundColor: tokens.color.bg,
   },
   openNowBtnActive: { backgroundColor: '#e8f5e9', borderColor: '#2e7d32' },
-  openNowText: { fontSize: 12, color: tokens.colorTextSecondary },
+  openNowText: { fontSize: 12, color: tokens.color.textMuted },
   openNowTextActive: { color: '#2e7d32', fontWeight: '600' },
   sortRow: {
     paddingHorizontal: 16,
@@ -606,29 +606,29 @@ const nc = StyleSheet.create({
     gap: 8,
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgSurface,
+    borderBottomColor: tokens.color.border,
+    backgroundColor: tokens.color.surface,
   },
   sortChip: {
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgPage,
+    borderColor: tokens.color.border,
+    backgroundColor: tokens.color.bg,
   },
-  sortChipActive: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
-  sortChipText: { fontSize: 12, color: tokens.colorTextSecondary },
+  sortChipActive: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
+  sortChipText: { fontSize: 12, color: tokens.color.textMuted },
   sortChipTextActive: { color: '#fff', fontWeight: '600' },
   listContent: { padding: 12 },
   emptyList: { flex: 1 },
   separator: { height: 10 },
   placeCard: {
-    backgroundColor: tokens.colorBgSurface,
+    backgroundColor: tokens.color.surface,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
   },
   placeCardBody: { flexDirection: 'row', alignItems: 'flex-start' },
   placeCardLeft: { flex: 1 },
@@ -636,15 +636,15 @@ const nc = StyleSheet.create({
   placeName: {
     fontSize: 15,
     fontWeight: '600',
-    color: tokens.colorTextPrimary,
+    color: tokens.color.text,
     writingDirection: 'rtl',
     marginBottom: 2,
   },
-  placeCategory: { fontSize: 12, color: tokens.colorTextSecondary, marginBottom: 4 },
+  placeCategory: { fontSize: 12, color: tokens.color.textMuted, marginBottom: 4 },
   placeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  placeDist: { fontSize: 13, color: tokens.colorActionPrimary, fontWeight: '600' },
-  placeSep: { fontSize: 13, color: tokens.colorTextSecondary },
-  placeMins: { fontSize: 13, color: tokens.colorTextSecondary },
+  placeDist: { fontSize: 13, color: tokens.color.primary, fontWeight: '600' },
+  placeSep: { fontSize: 13, color: tokens.color.textMuted },
+  placeMins: { fontSize: 13, color: tokens.color.textMuted },
   openBadge: { borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 },
   openBadgeOpen: { backgroundColor: '#e8f5e9' },
   openBadgeClosed: { backgroundColor: '#fce4ec' },
@@ -653,34 +653,34 @@ const nc = StyleSheet.create({
   openBadgeTextClosed: { color: '#c62828' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   ratingStar: { fontSize: 13, color: '#f9a825' },
-  ratingValue: { fontSize: 13, fontWeight: '700', color: tokens.colorTextPrimary },
-  ratingCount: { fontSize: 11, color: tokens.colorTextSecondary },
+  ratingValue: { fontSize: 13, fontWeight: '700', color: tokens.color.text },
+  ratingCount: { fontSize: 11, color: tokens.color.textMuted },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  loadingText: { marginTop: 12, fontSize: 14, color: tokens.colorTextSecondary },
-  errorText: { fontSize: 14, color: tokens.colorActionDestructive, textAlign: 'center', marginBottom: 12 },
+  loadingText: { marginTop: 12, fontSize: 14, color: tokens.color.textMuted },
+  errorText: { fontSize: 14, color: tokens.color.danger, textAlign: 'center', marginBottom: 12 },
   retryBtn: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: tokens.colorActionPrimary,
+    borderColor: tokens.color.primary,
   },
-  retryText: { fontSize: 14, color: tokens.colorActionPrimary },
-  emptyText: { fontSize: 14, color: tokens.colorTextSecondary, textAlign: 'center' },
+  retryText: { fontSize: 14, color: tokens.color.primary },
+  emptyText: { fontSize: 14, color: tokens.color.textMuted, textAlign: 'center' },
   mapPlaceholder: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: tokens.colorBgPage,
+    backgroundColor: tokens.color.bg,
   },
-  mapPlaceholderText: { fontSize: 16, color: tokens.colorTextSecondary },
-  mapPlaceholderCount: { fontSize: 13, color: tokens.colorTextSecondary, marginTop: 8 },
+  mapPlaceholderText: { fontSize: 16, color: tokens.color.textMuted },
+  mapPlaceholderCount: { fontSize: 13, color: tokens.color.textMuted, marginTop: 8 },
   footer: {
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgSurface,
+    borderTopColor: tokens.color.border,
+    backgroundColor: tokens.color.surface,
     alignItems: 'center',
   },
-  footerText: { fontSize: 13, color: tokens.colorTextSecondary },
+  footerText: { fontSize: 13, color: tokens.color.textMuted },
 });

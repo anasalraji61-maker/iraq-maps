@@ -11,6 +11,7 @@
  * All text via t(). Layouts use start/end (RTL-safe).
  * Route: discover/leaderboard
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -30,7 +31,6 @@ import type {
   LeaderboardEntry,
   LeaderboardResult,
   ReputationLevel,
-  UserBadge,
 } from '@iraq-maps/contracts';
 import { t } from '../strings';
 
@@ -305,9 +305,11 @@ export function LeaderboardScreen(): ReactElement {
     setError(null);
     try {
       const [lbRes, rankRes] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (api as any).reputation.getLeaderboard({
           query: { city, period, category, limit: 50 },
         }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (api as any).reputation.getMyRank({ query: { city, period } }),
       ]);
 

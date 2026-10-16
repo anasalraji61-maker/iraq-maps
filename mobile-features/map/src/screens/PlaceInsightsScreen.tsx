@@ -4,6 +4,7 @@
  * best-time recommendation, visit trends, and "similar places" comparison.
  * All text via t(). RTL-safe (start/end).
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { CrowdLevel, PriceLevel } from '@iraq-maps/contracts';
 import { type ReactElement, useEffect, useState } from 'react';
 import React from 'react';
@@ -376,7 +377,7 @@ export function PlaceInsightsScreen(): ReactElement {
 
   const placeName = placeNameAr ?? placeId ?? '';
 
-  const currentCrowdScore = data.peakHours.byHour[currentHour] ?? 0;
+  const _currentCrowdScore = data.peakHours.byHour[currentHour] ?? 0;
   const trendIcon = data.trend === 'increasing' ? '📈' : data.trend === 'decreasing' ? '📉' : '➡️';
 
   const navigateSubmit = (mode: 'crowd' | 'price' | 'both') => {

@@ -50,7 +50,9 @@
     "@iraq-maps/moderation": "workspace:*",
     "@iraq-maps/payments": "workspace:*",
     "@iraq-maps/social": "workspace:*",
-    "@iraq-maps/search": "workspace:*"
+    "@iraq-maps/search": "workspace:*",
+    "@iraq-maps/reviews": "workspace:*",
+    "@iraq-maps/geocoding": "workspace:*"
   },
   "devDependencies": {
     "@iraq-maps/testing": "workspace:*",

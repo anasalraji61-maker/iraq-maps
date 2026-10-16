@@ -61,6 +61,7 @@ export class ReputationController {
         const result = await this.svc.getLeaderboard(
           query.city,
           query.category ?? 'overall',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           query.period as any,
           { limit: query.limit },
         );
@@ -73,6 +74,7 @@ export class ReputationController {
         const rank = await this.svc.getMyRank(
           currentUserId,
           query.city,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           query.period as any,
         );
         if (!rank) return { status: 200, body: { rank: null, periodPoints: 0 } as never };

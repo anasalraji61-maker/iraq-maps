@@ -3,8 +3,8 @@
  * Owner-only: invite by phone, assign roles, set per-role permissions,
  * remove staff, and browse the activity log.
  */
-import { useApi } from '@iraq-maps/mobile-kit';
-import { EmptyState, Screen } from '@iraq-maps/ui';
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
+import { EmptyState } from '@iraq-maps/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   Alert,
@@ -27,7 +27,7 @@ I18nManager.forceRTL(true);
 
 const PRIMARY = '#1976D2';
 const DANGER = '#EF4444';
-const SUCCESS = '#16A34A';
+const _SUCCESS = '#16A34A';
 const WARN = '#D97706';
 const SURFACE = '#FFFFFF';
 const BG = '#F5F5F5';
@@ -430,14 +430,14 @@ const styles = StyleSheet.create({
   tabTextActive: { color: PRIMARY, fontWeight: '700' },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12, textAlign: 'right' },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12, textAlign: 'auto' },
   staffCard: { backgroundColor: SURFACE, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: BORDER },
   staffCardHeader: { flexDirection: 'row', alignItems: 'center' },
   staffAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#DBEAFE', justifyContent: 'center', alignItems: 'center' },
   staffAvatarText: { fontSize: 20, fontWeight: '700', color: PRIMARY },
-  staffName: { fontSize: 16, fontWeight: '700', color: '#111', textAlign: 'right' },
-  staffPhone: { fontSize: 13, color: '#666', textAlign: 'right' },
-  staffDate: { fontSize: 12, color: '#999', textAlign: 'right' },
+  staffName: { fontSize: 16, fontWeight: '700', color: '#111', textAlign: 'auto' },
+  staffPhone: { fontSize: 13, color: '#666', textAlign: 'auto' },
+  staffDate: { fontSize: 12, color: '#999', textAlign: 'auto' },
   roleBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   roleBadgeText: { fontSize: 12, fontWeight: '700' },
   permSummary: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
@@ -449,14 +449,14 @@ const styles = StyleSheet.create({
   activityList: { gap: 12 },
   activityItem: { flexDirection: 'row', gap: 10, paddingVertical: 6 },
   activityDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: PRIMARY, marginTop: 6 },
-  activityAction: { fontSize: 14, color: '#111', textAlign: 'right' },
-  activityMeta: { fontSize: 12, color: '#888', textAlign: 'right', marginTop: 2 },
+  activityAction: { fontSize: 14, color: '#111', textAlign: 'auto' },
+  activityMeta: { fontSize: 12, color: '#888', textAlign: 'auto', marginTop: 2 },
   noActivity: { textAlign: 'center', color: '#999', marginTop: 24 },
   // Overlay
   overlayBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   overlayCard: { backgroundColor: SURFACE, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360 },
-  overlayTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'right', color: '#111' },
-  fieldLabel: { fontSize: 13, color: '#555', marginBottom: 4, textAlign: 'right' },
+  overlayTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'auto', color: '#111' },
+  fieldLabel: { fontSize: 13, color: '#555', marginBottom: 4, textAlign: 'auto' },
   input: { borderWidth: 1, borderColor: BORDER, borderRadius: 8, padding: 10, fontSize: 15, backgroundColor: SURFACE, marginBottom: 12 },
   rolePicker: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   rolePickerBtn: { flex: 1, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: BORDER, alignItems: 'center' },

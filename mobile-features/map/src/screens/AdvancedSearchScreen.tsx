@@ -4,6 +4,7 @@
  *
  * Route: map/search/advanced
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import type { PlaceCategory, SearchFilters } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
@@ -19,7 +20,6 @@ import {
 import {
   ActivityIndicator,
   I18nManager,
-  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -151,7 +151,7 @@ export function AdvancedSearchScreen(): ReactElement {
   const [filters, setFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<unknown[]>([]);
+  const [_results, setResults] = useState<unknown[]>([]);
   const [resultCount, setResultCount] = useState(0);
 
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);

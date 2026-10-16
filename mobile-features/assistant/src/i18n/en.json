@@ -204,7 +204,10 @@
     "clearHistoryConfirm": "All past conversations will be deleted. This cannot be undone.",
     "clearHistoryAction": "Clear All Conversations",
     "clearHistoryHint": "This action cannot be undone",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "langAr": "Arabic",
+    "langCkb": "Kurdish",
+    "langEn": "English"
   },
   "voice": {
     "holdToRecord": "Hold to speak",

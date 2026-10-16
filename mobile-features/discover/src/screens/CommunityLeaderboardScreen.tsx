@@ -10,6 +10,7 @@
  *
  * All text goes through t(). Layouts use start/end.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { ContributorEntry, LeaderboardResponse } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';

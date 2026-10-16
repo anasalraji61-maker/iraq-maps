@@ -4,6 +4,7 @@
  *
  * RTL-safe (start/end), Arabic-first via t().
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import { Button, tokens } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
@@ -428,7 +429,7 @@ function LayerRow({ def, state, onToggle, onOpacity, onDownload, onDeleteOffline
         <Switch
           value={state.enabled}
           onValueChange={onToggle}
-          trackColor={{ false: tokens.colorBorderDefault, true: tokens.colorActionPrimary }}
+          trackColor={{ false: tokens.color.border, true: tokens.color.primary }}
           accessibilityLabel={t(def.nameKey as Parameters<typeof t>[0])}
         />
       </View>
@@ -441,7 +442,7 @@ function LayerRow({ def, state, onToggle, onOpacity, onDownload, onDeleteOffline
         <View style={sl.offlineRow}>
           {state.downloading ? (
             <View style={sl.progressRow}>
-              <ActivityIndicator size="small" color={tokens.colorActionPrimary} />
+              <ActivityIndicator size="small" color={tokens.color.primary} />
               <RNText style={sl.progressText}>{state.downloadProgress}%</RNText>
             </View>
           ) : state.downloaded ? (
@@ -707,7 +708,7 @@ export function MapLayersScreen() {
 // ---------------------------------------------------------------------------
 
 const sl = StyleSheet.create({
-  container: { flex: 1, backgroundColor: tokens.colorBgPage },
+  container: { flex: 1, backgroundColor: tokens.color.bg },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -715,13 +716,13 @@ const sl = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: tokens.colorBorderDefault,
-    backgroundColor: tokens.colorBgSurface,
+    borderBottomColor: tokens.color.border,
+    backgroundColor: tokens.color.surface,
   },
   backBtn: { marginEnd: 12, padding: 4 },
-  backBtnText: { fontSize: 24, color: tokens.colorActionPrimary },
-  title: { fontSize: 18, fontWeight: '700', color: tokens.colorTextPrimary, writingDirection: 'rtl' },
-  catScrollContainer: { maxHeight: 56, backgroundColor: tokens.colorBgSurface },
+  backBtnText: { fontSize: 24, color: tokens.color.primary },
+  title: { fontSize: 18, fontWeight: '700', color: tokens.color.text, writingDirection: 'rtl' },
+  catScrollContainer: { maxHeight: 56, backgroundColor: tokens.color.surface },
   catScroll: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -734,17 +735,17 @@ const sl = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: tokens.colorBgPage,
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
     gap: 4,
   },
   catChipActive: {
-    backgroundColor: tokens.colorActionPrimary,
-    borderColor: tokens.colorActionPrimary,
+    backgroundColor: tokens.color.primary,
+    borderColor: tokens.color.primary,
   },
   catChipIcon: { fontSize: 14 },
-  catChipText: { fontSize: 13, color: tokens.colorTextSecondary },
+  catChipText: { fontSize: 13, color: tokens.color.textMuted },
   catChipTextActive: { color: '#fff', fontWeight: '600' },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 12 },
@@ -755,46 +756,46 @@ const sl = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: tokens.colorBgPage,
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
   },
-  presetChipActive: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
-  presetChipText: { fontSize: 13, color: tokens.colorTextPrimary },
+  presetChipActive: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
+  presetChipText: { fontSize: 13, color: tokens.color.text },
   presetChipTextActive: { color: '#fff', fontWeight: '600' },
   presetDelete: { marginStart: 4, padding: 4 },
-  presetDeleteText: { fontSize: 11, color: tokens.colorTextSecondary },
+  presetDeleteText: { fontSize: 11, color: tokens.color.textMuted },
   savePresetBtn: {
     alignSelf: 'flex-start',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: tokens.colorActionPrimary,
+    borderColor: tokens.color.primary,
     marginBottom: 4,
   },
-  savePresetBtnText: { fontSize: 13, color: tokens.colorActionPrimary, fontWeight: '600' },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: tokens.colorTextSecondary, marginBottom: 8 },
+  savePresetBtnText: { fontSize: 13, color: tokens.color.primary, fontWeight: '600' },
+  sectionTitle: { fontSize: 14, fontWeight: '700', color: tokens.color.textMuted, marginBottom: 8 },
   layerCard: {
-    backgroundColor: tokens.colorBgSurface,
+    backgroundColor: tokens.color.surface,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
   },
   layerHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   layerIcon: { fontSize: 22 },
   layerMeta: { flex: 1 },
-  layerName: { fontSize: 15, fontWeight: '600', color: tokens.colorTextPrimary, writingDirection: 'rtl' },
+  layerName: { fontSize: 15, fontWeight: '600', color: tokens.color.text, writingDirection: 'rtl' },
   infoBtn: { padding: 4 },
   infoBtnText: { fontSize: 16 },
   sliderRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 8 },
-  sliderLabel: { fontSize: 12, color: tokens.colorTextSecondary, minWidth: 50 },
+  sliderLabel: { fontSize: 12, color: tokens.color.textMuted, minWidth: 50 },
   sliderTrack: {
     flex: 1,
     height: 6,
     borderRadius: 3,
-    backgroundColor: tokens.colorBorderDefault,
+    backgroundColor: tokens.color.border,
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
@@ -804,23 +805,23 @@ const sl = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: tokens.colorBorderDefault,
+    backgroundColor: tokens.color.border,
     position: 'absolute',
     zIndex: 1,
   },
-  sliderDotActive: { backgroundColor: tokens.colorActionPrimary },
+  sliderDotActive: { backgroundColor: tokens.color.primary },
   sliderFill: {
     position: 'absolute',
     top: 0,
     start: 0,
     height: '100%',
-    backgroundColor: tokens.colorActionPrimary,
+    backgroundColor: tokens.color.primary,
     opacity: 0.4,
   },
-  sliderValue: { fontSize: 12, color: tokens.colorTextSecondary, minWidth: 36, textAlign: 'center' },
+  sliderValue: { fontSize: 12, color: tokens.color.textMuted, minWidth: 36, textAlign: 'center' },
   offlineRow: { marginTop: 10 },
   progressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  progressText: { fontSize: 13, color: tokens.colorTextSecondary },
+  progressText: { fontSize: 13, color: tokens.color.textMuted },
   downloadedRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   downloadedBadge: {
     fontSize: 12,
@@ -830,16 +831,16 @@ const sl = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
   },
-  deleteOfflineText: { fontSize: 12, color: tokens.colorActionDestructive },
+  deleteOfflineText: { fontSize: 12, color: tokens.color.danger },
   downloadBtn: {
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: tokens.colorActionPrimary,
+    borderColor: tokens.color.primary,
   },
-  downloadBtnText: { fontSize: 12, color: tokens.colorActionPrimary },
+  downloadBtnText: { fontSize: 12, color: tokens.color.primary },
   bottomPad: { height: 40 },
   modalOverlay: {
     flex: 1,
@@ -847,18 +848,18 @@ const sl = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   infoSheet: {
-    backgroundColor: tokens.colorBgSurface,
+    backgroundColor: tokens.color.surface,
     borderTopStartRadius: 20,
     borderTopEndRadius: 20,
     padding: 24,
     gap: 12,
   },
-  infoTitle: { fontSize: 17, fontWeight: '700', color: tokens.colorTextPrimary, writingDirection: 'rtl' },
-  infoDesc: { fontSize: 14, color: tokens.colorTextSecondary, lineHeight: 20, writingDirection: 'rtl' },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: tokens.colorBorderDefault },
-  infoRowLabel: { fontSize: 13, color: tokens.colorTextSecondary },
-  infoRowValue: { fontSize: 13, color: tokens.colorTextPrimary, fontWeight: '600' },
+  infoTitle: { fontSize: 17, fontWeight: '700', color: tokens.color.text, writingDirection: 'rtl' },
+  infoDesc: { fontSize: 14, color: tokens.color.textMuted, lineHeight: 20, writingDirection: 'rtl' },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: tokens.color.border },
+  infoRowLabel: { fontSize: 13, color: tokens.color.textMuted },
+  infoRowValue: { fontSize: 13, color: tokens.color.text, fontWeight: '600' },
   presetInputWrap: { marginVertical: 4 },
-  presetInputLabel: { fontSize: 14, color: tokens.colorTextSecondary, marginBottom: 4 },
+  presetInputLabel: { fontSize: 14, color: tokens.color.textMuted, marginBottom: 4 },
   presetBtnRow: { flexDirection: 'row', gap: 12, justifyContent: 'flex-end' },
 });

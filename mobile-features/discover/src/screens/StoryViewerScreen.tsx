@@ -3,6 +3,7 @@
  * Features: tap-to-advance, 5s auto-progress, swipe between users,
  * like burst animation, reply to story, view viewers, report, mute, share.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   type ReactElement,

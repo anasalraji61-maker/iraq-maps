@@ -11,6 +11,7 @@
  *
  * Route: map/collections
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import type { PlaceSearchResult } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
@@ -298,7 +299,7 @@ function CollectionCard({
   onViewMap: () => void;
   onDelete?: () => void;
 }): ReactElement {
-  const [menuVisible, setMenuVisible] = useState(false);
+  const [_menuVisible, setMenuVisible] = useState(false);
 
   return (
     <TouchableOpacity

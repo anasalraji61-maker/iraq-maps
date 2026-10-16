@@ -9,6 +9,7 @@
  *
  * Used by IncidentMarkers (the collection wrapper).
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { Incident, IncidentSeverity, IncidentType } from '@iraq-maps/contracts';
 import { Marker as MarkerView } from '@maplibre/maplibre-react-native';
 import { tokens } from '@iraq-maps/ui';

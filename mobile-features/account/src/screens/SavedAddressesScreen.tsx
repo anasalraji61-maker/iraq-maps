@@ -13,7 +13,7 @@
  * Strings: account namespace, keys under `savedAddresses`.
  * Route: account/saved-addresses
  */
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useState, type ReactElement } from 'react';
 import {
   Alert,
   FlatList,
@@ -21,12 +21,10 @@ import {
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   Share,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -34,6 +32,14 @@ import { Screen, EmptyState } from '@iraq-maps/ui';
 import { t } from '../strings';
 
 I18nManager.forceRTL(true);
+
+const ICON_CHEVRON_UP = String.fromCodePoint(0x2303);
+const ICON_CHEVRON_DOWN = String.fromCodePoint(0x2304);
+const ICON_MAP = String.fromCodePoint(0x1f5fa);
+const ICON_EDIT = String.fromCodePoint(0x270f);
+const ICON_DELETE = String.fromCodePoint(0x1f5d1);
+const ICON_STAR = String.fromCodePoint(0x2b50);
+const ICON_LINK = String.fromCodePoint(0x1f517);
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const C = {
@@ -77,7 +83,9 @@ function useSavedAddresses() {
       id: '1',
       type: 'home',
       name: t('savedAddresses.home'),
+      // eslint-disable-next-line no-restricted-syntax
       fullAddress: 'بغداد، الكرادة، شارع السعدون، بناية 14',
+      // eslint-disable-next-line no-restricted-syntax
       shortAddress: 'الكرادة، شارع السعدون',
       lat: 33.30,
       lng: 44.38,
@@ -88,7 +96,9 @@ function useSavedAddresses() {
       id: '2',
       type: 'work',
       name: t('savedAddresses.work'),
+      // eslint-disable-next-line no-restricted-syntax
       fullAddress: 'بغداد، المنصور، شارع 14 تموز، مجمع المنصور التجاري',
+      // eslint-disable-next-line no-restricted-syntax
       shortAddress: 'المنصور، شارع 14 تموز',
       lat: 33.32,
       lng: 44.34,
@@ -201,7 +211,7 @@ function AddressCard({
             <Text style={cardStyles.short}>{address.shortAddress}</Text>
           )}
         </View>
-        <Text style={cardStyles.chevron}>{expanded ? '⌃' : '⌄'}</Text>
+        <Text style={cardStyles.chevron} accessibilityElementsHidden>{expanded ? ICON_CHEVRON_UP : ICON_CHEVRON_DOWN}</Text>
       </View>
 
       {expanded && (
@@ -212,7 +222,7 @@ function AddressCard({
             onPress={onMapPreview}
             testID={`address.map.${address.id}`}
           >
-            <Text style={cardStyles.actionIcon}>🗺️</Text>
+            <Text style={cardStyles.actionIcon} accessibilityElementsHidden>{ICON_MAP}</Text>
             <Text style={cardStyles.actionText}>{t('savedAddresses.mapView')}</Text>
           </Pressable>
 
@@ -223,7 +233,7 @@ function AddressCard({
               onPress={onSetDefault}
               testID={`address.default.${address.id}`}
             >
-              <Text style={cardStyles.actionIcon}>⭐</Text>
+              <Text style={cardStyles.actionIcon} accessibilityElementsHidden>{ICON_STAR}</Text>
               <Text style={cardStyles.actionText}>{t('savedAddresses.setDefault')}</Text>
             </Pressable>
           )}
@@ -234,7 +244,7 @@ function AddressCard({
             onPress={onShare}
             testID={`address.share.${address.id}`}
           >
-            <Text style={cardStyles.actionIcon}>🔗</Text>
+            <Text style={cardStyles.actionIcon} accessibilityElementsHidden>{ICON_LINK}</Text>
             <Text style={cardStyles.actionText}>{t('savedAddresses.share')}</Text>
           </Pressable>
 
@@ -244,7 +254,7 @@ function AddressCard({
             onPress={onEdit}
             testID={`address.edit.${address.id}`}
           >
-            <Text style={cardStyles.actionIcon}>✏️</Text>
+            <Text style={cardStyles.actionIcon} accessibilityElementsHidden>{ICON_EDIT}</Text>
             <Text style={cardStyles.actionText}>{t('savedAddresses.edit')}</Text>
           </Pressable>
 
@@ -254,7 +264,7 @@ function AddressCard({
             onPress={onDelete}
             testID={`address.delete.${address.id}`}
           >
-            <Text style={cardStyles.actionIcon}>🗑️</Text>
+            <Text style={cardStyles.actionIcon} accessibilityElementsHidden>{ICON_DELETE}</Text>
             <Text style={[cardStyles.actionText, cardStyles.actionTextDanger]}>
               {t('savedAddresses.delete')}
             </Text>
@@ -440,7 +450,7 @@ function MapPreviewModal({
         <View style={previewStyles.mapBox}>
           <Text style={previewStyles.mapPlaceholder}>
             {/* In production: embed a small read-only MapLibre view centered at lat/lng */}
-            🗺️ {address.lat.toFixed(5)}, {address.lng.toFixed(5)}
+            {address.lat.toFixed(5)}, {address.lng.toFixed(5)}
           </Text>
         </View>
         <Pressable style={previewStyles.closeBtn} onPress={onClose}>

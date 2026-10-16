@@ -7,6 +7,7 @@
  *
  * RTL-safe; Arabic-first via t().
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 // TransitRoute and TransitStop are not yet in contracts – defined locally until the backend module adds them.
 interface TransitRoute {
@@ -26,9 +27,9 @@ interface TransitStop {
   isMajor?: boolean;
 }
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
-import { tokens } from '@iraq-maps/ui';
+// import { tokens } from '@iraq-maps/ui'; // reserved for future use
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text as RNText, View } from 'react-native';
+import { StyleSheet, Text as RNText, View } from 'react-native';
 import { t } from '../../strings';
 
 // ---------------------------------------------------------------------------
@@ -171,7 +172,7 @@ function stopsToGeoJSON(stops: TransitStop[]): TransitGeoJSON['stops'] {
       geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
       properties: {
         stopId: s.stopId,
-        nameAr: s.nameAr ?? s.name,
+        nameAr: (s.nameAr ?? s.name) ?? '',
         routeIds: s.routeIds ?? [],
         isMajor: s.isMajor ?? false,
       },
@@ -234,7 +235,7 @@ export function useTransitLayer(
 // Component
 // ---------------------------------------------------------------------------
 
-export function TransitLayer({ bbox, opacity = 1, enabled, onData, onError }: TransitLayerProps) {
+export function TransitLayer({ bbox, opacity: _opacity = 1, enabled, onData, onError }: TransitLayerProps) {
   const apiBaseUrl = useApiBaseUrl();
   const abortRef = useRef<AbortController | null>(null);
 

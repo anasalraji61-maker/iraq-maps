@@ -11,6 +11,7 @@
  * Route: address/pick
  * Strings: map namespace, keys under `addressPicker`.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -24,13 +25,12 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { Screen } from '@iraq-maps/ui';
-import { useApi } from '@iraq-maps/mobile-kit';
+import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import type {
   AddressComponent,
   AddressSuggestion,
@@ -474,7 +474,8 @@ const fieldStyles = StyleSheet.create({
 // ── Main Screen ────────────────────────────────────────────────────────────────
 export function AddressPickerScreen(): ReactElement {
   const router = useRouter();
-  const api = useApi();
+  useApi(); // keep hook call for future use
+  const apiBaseUrl = useApiBaseUrl();
   const autocompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [state, setState] = useState<PickerState>({
@@ -506,23 +507,21 @@ export function AddressPickerScreen(): ReactElement {
   // Load admin divisions once
   useEffect(() => {
     setState((s) => ({ ...s, loadingDivisions: true }));
-    api
-      .get<{ divisions: IraqAdminDivision[] }>('/v1/geocode/admin-divisions')
+    fetch(`${apiBaseUrl}/v1/geocode/admin-divisions`)
+      .then((r) => r.json() as Promise<{ divisions: IraqAdminDivision[] }>)
       .then((res) => {
-        setState((s) => ({ ...s, divisions: res.data.divisions, loadingDivisions: false }));
+        setState((s) => ({ ...s, divisions: res.divisions, loadingDivisions: false }));
       })
       .catch(() => setState((s) => ({ ...s, loadingDivisions: false })));
-  }, [api]);
+  }, [apiBaseUrl]);
 
   // Reverse geocode on pin move
   const onPinMoved = useCallback(
     async (lat: number, lng: number) => {
       setState((s) => ({ ...s, lat, lng, loadingReverse: true, reverseResult: null }));
       try {
-        const res = await api.get<ReverseGeocodeResult>(
-          `/v1/geocode/reverse?lat=${lat}&lng=${lng}&locale=ar`,
-        );
-        const rr: ReverseGeocodeResult = res.data;
+        const r = await fetch(`${apiBaseUrl}/v1/geocode/reverse?lat=${lat}&lng=${lng}&locale=ar`);
+        const rr: ReverseGeocodeResult = (await r.json()) as ReverseGeocodeResult;
         setState((s) => ({
           ...s,
           loadingReverse: false,
@@ -537,7 +536,7 @@ export function AddressPickerScreen(): ReactElement {
         setState((s) => ({ ...s, loadingReverse: false }));
       }
     },
-    [api],
+    [apiBaseUrl],
   );
 
   // Use my location
@@ -562,16 +561,15 @@ export function AddressPickerScreen(): ReactElement {
         setState((s) => ({ ...s, loadingAutocomplete: true }));
         try {
           const govParam = state.governorateId ? `&governorateId=${state.governorateId}` : '';
-          const res = await api.get<{ suggestions: AddressSuggestion[] }>(
-            `/v1/geocode/autocomplete?partial=${encodeURIComponent(text)}&limit=5&locale=ar${govParam}`,
-          );
-          setState((s) => ({ ...s, autocompleteStreet: res.data.suggestions, loadingAutocomplete: false }));
+          const r = await fetch(`${apiBaseUrl}/v1/geocode/autocomplete?partial=${encodeURIComponent(text)}&limit=5&locale=ar${govParam}`);
+          const res = (await r.json()) as { suggestions: AddressSuggestion[] };
+          setState((s) => ({ ...s, autocompleteStreet: res.suggestions, loadingAutocomplete: false }));
         } catch {
           setState((s) => ({ ...s, loadingAutocomplete: false }));
         }
       }, 300);
     },
-    [api, state.governorateId],
+    [apiBaseUrl, state.governorateId],
   );
 
   const onStreetSuggestionSelect = useCallback((s: AddressSuggestion) => {

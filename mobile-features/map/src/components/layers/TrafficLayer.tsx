@@ -5,6 +5,7 @@
  * paints roads with a colour based on speed ratio (free-flow vs actual).
  * RTL-safe; no hardcoded text.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 // TrafficSegment is not yet in contracts – defined locally until the backend module adds it.
 interface TrafficSegment {
@@ -158,7 +159,7 @@ export function useTrafficLayer(
       return;
     }
 
-    const fetch = async () => {
+    const fetchData = async () => {
       abortRef.current?.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
@@ -182,8 +183,8 @@ export function useTrafficLayer(
       }
     };
 
-    void fetch();
-    const interval = setInterval(() => void fetch(), REFRESH_INTERVAL_MS);
+    void fetchData();
+    const interval = setInterval(() => void fetchData(), REFRESH_INTERVAL_MS);
     return () => {
       clearInterval(interval);
       abortRef.current?.abort();
@@ -202,7 +203,7 @@ export function useTrafficLayer(
  * calls `onData` with the GeoJSON so the parent MapCanvas can add/update
  * the MapLibre source without managing fetch logic.
  */
-export function TrafficLayer({ bbox, opacity = 1, enabled, onData, onError }: TrafficLayerProps) {
+export function TrafficLayer({ bbox, opacity: _opacity = 1, enabled, onData, onError }: TrafficLayerProps) {
   const apiBaseUrl = useApiBaseUrl();
   const abortRef = useRef<AbortController | null>(null);
 

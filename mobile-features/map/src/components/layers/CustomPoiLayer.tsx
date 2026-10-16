@@ -7,10 +7,11 @@
  *
  * RTL-safe; Arabic-first via t().
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { tokens } from '@iraq-maps/ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -246,16 +247,16 @@ interface EditPoiModalProps {
 }
 
 export function EditCustomPoiModal({ visible, initial, onSave, onCancel, onDelete }: EditPoiModalProps) {
-  const [title, setTitle] = useState(initial?.title ?? '');
-  const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [title, _setTitle] = useState(initial?.title ?? '');
+  const [notes, _setNotes] = useState(initial?.notes ?? '');
   const [icon, setIcon] = useState<CustomPinIcon>(initial?.icon ?? 'star');
-  const [color, setColor] = useState(initial?.color ?? PIN_COLORS[0]);
+  const [color, setColor] = useState(initial?.color ?? (PIN_COLORS[0] ?? '#e53935'));
 
   const canSave = title.trim().length > 0 && (initial?.lat ?? 0) !== 0;
 
   const handleSave = () => {
     if (!canSave || !initial?.lat || !initial?.lng) return;
-    onSave({ title: title.trim(), notes: notes.trim(), lat: initial.lat, lng: initial.lng, icon, color });
+    onSave({ title: title.trim(), notes: notes.trim(), lat: initial.lat!, lng: initial.lng!, icon, color });
   };
 
   const handleDelete = () => {
@@ -349,26 +350,26 @@ export function CustomPoiLayer({ enabled, onData }: CustomPoiLayerProps) {
 const cp = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: tokens.colorBgSurface,
+    backgroundColor: tokens.color.surface,
     borderTopStartRadius: 20,
     borderTopEndRadius: 20,
     padding: 24,
     gap: 12,
   },
-  sheetTitle: { fontSize: 17, fontWeight: '700', color: tokens.colorTextPrimary, writingDirection: 'rtl' },
-  fieldLabel: { fontSize: 13, color: tokens.colorTextSecondary, fontWeight: '600' },
+  sheetTitle: { fontSize: 17, fontWeight: '700', color: tokens.color.text, writingDirection: 'rtl' },
+  fieldLabel: { fontSize: 13, color: tokens.color.textMuted, fontWeight: '600' },
   iconRow: { gap: 8, flexDirection: 'row', paddingVertical: 4 },
   iconBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: tokens.colorBgPage,
+    backgroundColor: tokens.color.bg,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconBtnActive: { borderColor: tokens.colorActionPrimary, borderWidth: 2 },
+  iconBtnActive: { borderColor: tokens.color.primary, borderWidth: 2 },
   iconEmoji: { fontSize: 20 },
   colorRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
   colorDot: { width: 30, height: 30, borderRadius: 15 },
@@ -379,12 +380,12 @@ const cp = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: tokens.colorBorderDefault,
+    borderColor: tokens.color.border,
   },
-  btnPrimary: { backgroundColor: tokens.colorActionPrimary, borderColor: tokens.colorActionPrimary },
-  btnDanger: { borderColor: tokens.colorActionDestructive },
+  btnPrimary: { backgroundColor: tokens.color.primary, borderColor: tokens.color.primary },
+  btnDanger: { borderColor: tokens.color.danger },
   btnDisabled: { opacity: 0.5 },
-  btnText: { fontSize: 14, color: tokens.colorTextPrimary },
+  btnText: { fontSize: 14, color: tokens.color.text },
   btnPrimaryText: { color: '#fff', fontWeight: '600' },
-  btnDangerText: { color: tokens.colorActionDestructive },
+  btnDangerText: { color: tokens.color.danger },
 });

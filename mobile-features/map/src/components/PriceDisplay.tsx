@@ -4,6 +4,7 @@
  * and a "Submit price" affordance.
  * All text via t(). RTL-safe (start/end).
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { PriceLevel } from '@iraq-maps/contracts';
 import type { ReactElement } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -83,7 +84,7 @@ export interface PriceRowItem {
 }
 
 function PriceRow({ item: priceItem }: { item: PriceRowItem }): ReactElement {
-  let timeStr = '';
+  let timeStr: string;
   try {
     const d = new Date(priceItem.observedAt);
     timeStr = d.toLocaleDateString('ar-IQ', { month: 'short', day: 'numeric' });

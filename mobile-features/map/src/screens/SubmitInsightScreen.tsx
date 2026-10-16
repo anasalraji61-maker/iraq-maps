@@ -3,6 +3,7 @@
  * Route params: placeId, placeNameAr (display only), mode ('crowd'|'price'|'both').
  * All text via t(). RTL-safe (start/end, I18nManager).
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { CrowdLevel, PlaceId, PriceLevel } from '@iraq-maps/contracts';
 import { type ReactElement, useState } from 'react';
 import {

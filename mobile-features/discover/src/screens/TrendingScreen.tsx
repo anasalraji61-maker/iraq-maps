@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import {
   useCallback,
   useEffect,

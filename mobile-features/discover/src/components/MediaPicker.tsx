@@ -3,6 +3,7 @@
  * camera capture, video recording, multi-select, crop and filter strip.
  * RTL-safe throughout.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import {

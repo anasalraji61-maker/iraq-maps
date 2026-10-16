@@ -2,12 +2,11 @@
  * Unit tests for ReviewsService.
  * Runs against a local PostgreSQL schema — skips when DATABASE_URL is not set.
  */
-import { createTestDatabase, type TestDatabase } from '@iraq-maps/db-kit';
+import { createTestDatabase } from '@iraq-maps/db-kit';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { ReviewsService } from '../reviews.service';
-import { drizzle } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import type { ReviewIdType, CreateReviewDto } from '../types';
 import type { UserId, PlaceId } from '@iraq-maps/contracts';
@@ -15,9 +14,7 @@ type PlaceIdType = PlaceId;
 
 // ─── Module-level variable declarations ──────────────────────────────────────
 
-// eslint-disable-next-line prefer-const
 let tdb: Awaited<ReturnType<typeof createTestDatabase>>;
-// eslint-disable-next-line prefer-const
 let svc: ReviewsService;
 
 // ─── Skip guard ───────────────────────────────────────────────────────────────

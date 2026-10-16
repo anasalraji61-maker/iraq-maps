@@ -19,6 +19,7 @@ I18nManager.forceRTL(true);
 
 const PRIMARY = '#1976D2';
 const DANGER = '#C62828';
+const ICON_CLOSE = String.fromCharCode(0x2715);
 const GOLD = '#F9A825';
 
 export interface ConversationPreview {
@@ -321,7 +322,7 @@ export function AssistantHistoryScreen(): ReactElement {
         />
         {search.length > 0 ? (
           <Pressable onPress={() => setSearch('')} style={styles.clearSearch} accessibilityRole="button" accessibilityLabel={t('history.clearSearch')}>
-            <Text style={styles.clearSearchText}>✕</Text>
+            <Text style={styles.clearSearchText} accessibilityElementsHidden>{ICON_CLOSE}</Text>
           </Pressable>
         ) : null}
       </View>

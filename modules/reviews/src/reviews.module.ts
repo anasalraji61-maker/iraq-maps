@@ -2,6 +2,8 @@ import type { Db } from '@iraq-maps/db-kit';
 import type { EventBus } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';
 import { Module, type DynamicModule } from '@nestjs/common';
+
+export const reviewsMigrationsDir = new URL('../migrations', import.meta.url).pathname;
 import { ReviewsController } from './reviews.controller';
 import { ReviewsService } from './reviews.service';
 

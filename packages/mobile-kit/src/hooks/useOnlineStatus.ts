@@ -120,7 +120,6 @@ export function useOnlineStatus(
       setIsOnline(initialOnline);
       setLastSeen(initialLastSeen);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   return { isOnline, lastSeen, status };

@@ -465,7 +465,6 @@ export function ConversationScreen(): ReactElement {
   // ── Real-time messages ────────────────────────────────────────────────────
   const initialMessages = useMemo(
     () => makeMockMessages(PAGE_SIZE, MY_ID, OTHER_ID) as unknown as import('@iraq-maps/mobile-kit').Message[],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 

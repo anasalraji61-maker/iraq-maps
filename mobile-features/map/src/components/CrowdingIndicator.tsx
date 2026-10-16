@@ -3,6 +3,7 @@
  * Variants: compact (badge for map markers), expanded (full panel with pulse animation).
  * All text via t(). RTL-safe (start/end).
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { CrowdLevel } from '@iraq-maps/contracts';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';

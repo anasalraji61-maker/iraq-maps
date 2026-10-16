@@ -204,7 +204,10 @@
     "clearHistoryConfirm": "هەموو گفتوگۆکانی پێشوو دەسڕێتەوە.",
     "clearHistoryAction": "هەموو گفتوگۆکان بسڕەوە",
     "clearHistoryHint": "ناتوانرێت گەڕێتەوە",
-    "cancel": "پاشگەزبوونەوە"
+    "cancel": "پاشگەزبوونەوە",
+    "langAr": "عربی",
+    "langCkb": "کوردی",
+    "langEn": "EN"
   },
   "voice": {
     "holdToRecord": "داگرتن بۆ قسەکردن",

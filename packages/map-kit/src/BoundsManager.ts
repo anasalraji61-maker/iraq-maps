@@ -60,10 +60,12 @@ export interface FitBoundsOptions {
  */
 export function computeBBox(coords: LngLat[]): BBox | null {
   if (coords.length === 0) return null;
-  let west = coords[0][0];
-  let east = coords[0][0];
-  let south = coords[0][1];
-  let north = coords[0][1];
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const first = coords[0]!;
+  let west = first[0];
+  let east = first[0];
+  let south = first[1];
+  let north = first[1];
   for (const [lng, lat] of coords) {
     if (lng < west) west = lng;
     if (lng > east) east = lng;
@@ -105,7 +107,7 @@ export function zoomForBBox(
 ): number {
   const TILE_SIZE = 256;
   const lngDelta = Math.abs(bbox[2] - bbox[0]);
-  const latDelta = Math.abs(bbox[3] - bbox[1]);
+  const _latDelta = Math.abs(bbox[3] - bbox[1]);
   // Convert lat span to Mercator
   const latSpanMerc = Math.log(
     Math.tan((Math.PI / 4) + (bbox[3] * Math.PI) / 360) /
@@ -186,7 +188,8 @@ export function cameraForCluster(
 ): CameraPosition | null {
   if (points.length === 0) return null;
   if (points.length === 1) {
-    return { center: points[0], zoom: opts.maxZoom ?? 15 };
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return { center: points[0]!, zoom: opts.maxZoom ?? 15 };
   }
 
   const raw = computeBBox(points);

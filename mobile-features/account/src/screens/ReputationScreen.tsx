@@ -37,6 +37,9 @@ I18nManager.forceRTL(true);
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
+const ICON_UP = String.fromCharCode(0x25b2);
+const ICON_DOWN = String.fromCharCode(0x25bc);
+
 const C = {
   primary:       '#1565C0',
   primaryLight:  '#E3F2FD',
@@ -291,7 +294,7 @@ function LevelBenefits({ currentLevel }: BenefitsProps): ReactElement {
         accessibilityRole="button"
       >
         <Text style={styles.benefitsTitle}>{t('reputation.benefitsTitle')}</Text>
-        <Text style={styles.benefitsChevron} accessibilityElementsHidden>{open ? '▲' : '▼'}</Text>
+        <Text style={styles.benefitsChevron} accessibilityElementsHidden>{open ? ICON_UP : ICON_DOWN}</Text>
       </Pressable>
       {open && (
         <View style={styles.benefitsList}>
@@ -346,10 +349,12 @@ export function ReputationScreen(): ReactElement {
     setLoading(true);
     setError(null);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const reputationApi = (api as unknown as Record<string, any>).reputation;
       const [repRes, badgesRes, histRes] = await Promise.all([
-        (api as any).reputation.getMyReputation(),
-        (api as any).reputation.getUserBadges({ params: { userId: 'me' } }),
-        (api as any).reputation.getPointsHistory({
+        reputationApi.getMyReputation(),
+        reputationApi.getUserBadges({ params: { userId: 'me' } }),
+        reputationApi.getPointsHistory({
           params: { userId: 'me' },
           query: { limit: 20 },
         }),
@@ -390,7 +395,7 @@ export function ReputationScreen(): ReactElement {
         <View style={styles.center}>
           <Text style={styles.errorText}>{error ?? t('reputation.errors.loadFailed')}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={load}>
-            <Text style={styles.retryText}>إعادة</Text>
+            <Text style={styles.retryText}>{t('actions.retry')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -446,7 +451,7 @@ export function ReputationScreen(): ReactElement {
                     badgeFilter === f && styles.filterTabTextActive,
                   ]}
                 >
-                  {f === 'all' ? 'الكل' : f === 'earned' ? t('reputation.earned') : t('reputation.locked')}
+                  {f === 'all' ? t('actions.viewAll') : f === 'earned' ? t('reputation.earned') : t('reputation.locked')}
                 </Text>
               </Pressable>
             ))}

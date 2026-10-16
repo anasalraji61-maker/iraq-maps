@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { discoverTestIDs } from '@iraq-maps/contracts';
 import { useApi, useApiBaseUrl, useAppRating } from '@iraq-maps/mobile-kit';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -64,6 +66,310 @@ interface PollData {
 
 const DRAFT_KEY = '@iraq-maps/create-post/draft';
 
+type AudienceValue = 'everyone' | 'followers';
+const AUDIENCE_VALUES: AudienceValue[] = ['everyone', 'followers'];
+
+// ─── Photo layout preview ─────────────────────────────────────────────────────
+
+interface PhotoLayoutPreviewProps {
+  photos: UploadedPhoto[];
+}
+
+function PhotoLayoutPreview({ photos }: PhotoLayoutPreviewProps): ReactElement | null {
+  if (photos.length === 0) return null;
+
+  if (photos.length === 1) {
+    return (
+      <View style={previewStyles.singleContainer}>
+        <Image source={{ uri: photos[0]!.uri }} style={previewStyles.singleImage} resizeMode="cover" />
+        <View style={previewStyles.previewLabel}>
+          <Text style={previewStyles.previewLabelText}>{t('create.previewLabel')}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (photos.length === 2) {
+    return (
+      <View style={previewStyles.twoContainer}>
+        {photos.map((p) => (
+          <Image key={p.assetId} source={{ uri: p.uri }} style={previewStyles.halfImage} resizeMode="cover" />
+        ))}
+      </View>
+    );
+  }
+
+  if (photos.length === 3) {
+    return (
+      <View style={previewStyles.threeContainer}>
+        <Image source={{ uri: photos[0]!.uri }} style={previewStyles.threeMainImage} resizeMode="cover" />
+        <View style={previewStyles.threeRight}>
+          <Image source={{ uri: photos[1]!.uri }} style={previewStyles.threeSmallImage} resizeMode="cover" />
+          <Image source={{ uri: photos[2]!.uri }} style={previewStyles.threeSmallImage} resizeMode="cover" />
+        </View>
+      </View>
+    );
+  }
+
+  // 4+ photos: 2x2 grid with overflow counter
+  return (
+    <View style={previewStyles.gridContainer}>
+      {photos.slice(0, 4).map((p, idx) => (
+        <View key={p.assetId} style={previewStyles.gridCell}>
+          <Image source={{ uri: p.uri }} style={previewStyles.gridImage} resizeMode="cover" />
+          {idx === 3 && photos.length > 4 ? (
+            <View style={previewStyles.overflowOverlay}>
+              <Text style={previewStyles.overflowText}>+{photos.length - 4}</Text>
+            </View>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const previewStyles = StyleSheet.create({
+  singleContainer: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
+    position: 'relative',
+  },
+  singleImage: {
+    width: '100%',
+    height: 240,
+  },
+  previewLabel: {
+    position: 'absolute',
+    top: 8,
+    start: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  previewLabelText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  twoContainer: {
+    flexDirection: 'row',
+    gap: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  halfImage: {
+    flex: 1,
+    height: 180,
+  },
+  threeContainer: {
+    flexDirection: 'row',
+    gap: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
+    height: 180,
+  },
+  threeMainImage: {
+    flex: 2,
+    height: '100%',
+  },
+  threeRight: {
+    flex: 1,
+    gap: 2,
+  },
+  threeSmallImage: {
+    flex: 1,
+    width: '100%',
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  gridCell: {
+    width: '49.5%',
+    height: 120,
+    position: 'relative',
+  },
+  gridImage: {
+    width: '100%',
+    height: '100%',
+  },
+  overflowOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overflowText: {
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+});
+
+// ─── Schedule picker ──────────────────────────────────────────────────────────
+
+interface SchedulePickerProps {
+  visible: boolean;
+  onDismiss: () => void;
+  onConfirm: (date: Date) => void;
+  minDate?: Date;
+}
+
+function SchedulePicker({ visible, onDismiss, onConfirm, minDate }: SchedulePickerProps): ReactElement {
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1, 0, 0, 0);
+    return d;
+  });
+
+  const handleHourChange = useCallback((delta: number) => {
+    setSelectedDate((prev) => {
+      const next = new Date(prev);
+      next.setHours(next.getHours() + delta);
+      if (minDate && next < minDate) return prev;
+      return next;
+    });
+  }, [minDate]);
+
+  const handleDayChange = useCallback((delta: number) => {
+    setSelectedDate((prev) => {
+      const next = new Date(prev);
+      next.setDate(next.getDate() + delta);
+      if (minDate && next < minDate) return prev;
+      return next;
+    });
+  }, [minDate]);
+
+  const formatDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const formatTime = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:00`;
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+      <View style={schedStyles.overlay}>
+        <View style={schedStyles.panel}>
+          <Text style={schedStyles.title}>{t('create.scheduleTitle')}</Text>
+
+          <View style={schedStyles.row}>
+            <Pressable onPress={() => handleDayChange(-1)} style={schedStyles.arrowBtn} accessibilityRole="button" accessibilityLabel={t('common.previous')}>
+              <Text style={schedStyles.arrowText}>‹</Text>
+            </Pressable>
+            <Text style={schedStyles.dateValue}>{formatDate(selectedDate)}</Text>
+            <Pressable onPress={() => handleDayChange(1)} style={schedStyles.arrowBtn} accessibilityRole="button" accessibilityLabel={t('common.next')}>
+              <Text style={schedStyles.arrowText}>›</Text>
+            </Pressable>
+          </View>
+
+          <View style={schedStyles.row}>
+            <Pressable onPress={() => handleHourChange(-1)} style={schedStyles.arrowBtn} accessibilityRole="button" accessibilityLabel={t('common.previous')}>
+              <Text style={schedStyles.arrowText}>‹</Text>
+            </Pressable>
+            <Text style={schedStyles.dateValue}>{formatTime(selectedDate)}</Text>
+            <Pressable onPress={() => handleHourChange(1)} style={schedStyles.arrowBtn} accessibilityRole="button" accessibilityLabel={t('common.next')}>
+              <Text style={schedStyles.arrowText}>›</Text>
+            </Pressable>
+          </View>
+
+          <View style={schedStyles.btnRow}>
+            <Pressable style={schedStyles.cancelBtn} onPress={onDismiss} accessibilityRole="button">
+              <Text style={schedStyles.cancelBtnText}>{t('common.cancel')}</Text>
+            </Pressable>
+            <Pressable style={schedStyles.confirmBtn} onPress={() => onConfirm(selectedDate)} accessibilityRole="button">
+              <Text style={schedStyles.confirmBtnText}>{t('create.scheduleConfirm')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const schedStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  panel: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 24,
+    width: 300,
+    gap: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  arrowBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.primaryXLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrowText: {
+    fontSize: 22,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  dateValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    minWidth: 140,
+    textAlign: 'center',
+  },
+  btnRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontWeight: '600',
+  },
+  confirmBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+  },
+  confirmBtnText: {
+    fontSize: 14,
+    color: '#FFF',
+    fontWeight: '700',
+  },
+});
+
 export function CreatePostScreen(): ReactElement {
   const api = useDiscoverClient();
   const placesApi = useApi();
@@ -97,15 +403,24 @@ export function CreatePostScreen(): ReactElement {
   const [videoAssetId, setVideoAssetId] = useState<string | undefined>();
   const [videoUploading, setVideoUploading] = useState(false);
 
+  // Audience + scheduling
+  const [audience, setAudience] = useState<AudienceValue>('everyone');
+  const [scheduledAt, setScheduledAt] = useState<Date | undefined>();
+  const [showSchedulePicker, setShowSchedulePicker] = useState(false);
+
+  // Photo layout preview toggle
+  const [showPreview, setShowPreview] = useState(false);
+
   // Restore draft on mount
   useEffect(() => {
     AsyncStorage.getItem(DRAFT_KEY)
       .then((raw) => {
         if (!raw) return;
         try {
-          const draft = JSON.parse(raw) as { body: string; postType: PostTypeValue };
+          const draft = JSON.parse(raw) as { body: string; postType: PostTypeValue; audience?: AudienceValue };
           if (draft.body) setBody(draft.body);
           if (draft.postType) setPostType(draft.postType);
+          if (draft.audience) setAudience(draft.audience);
         } catch { /* ignore corrupt data */ }
       })
       .catch(() => undefined);
@@ -116,7 +431,7 @@ export function CreatePostScreen(): ReactElement {
     setBody(text.slice(0, 1000));
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ body: text.slice(0, 1000), postType })).catch(() => undefined);
+      AsyncStorage.setItem(DRAFT_KEY, JSON.stringify({ body: text.slice(0, 1000), postType, audience })).catch(() => undefined);
     }, 600);
     // Detect @mention at cursor end
     const atMatch = text.slice(0, 1000).match(/@([\p{L}\p{N}_]*)$/u);
@@ -349,6 +664,8 @@ export function CreatePostScreen(): ReactElement {
           ...(selectedPlace ? { placeId: selectedPlace.id } : {}),
           ...(postCategory ? { category: postCategory } : {}),
           ...(pollMetadata ? { metadata: pollMetadata } : {}),
+          ...(audience === 'followers' ? { audienceFollowersOnly: true } : {}),
+          ...(scheduledAt ? { scheduledAt: scheduledAt.toISOString() } : {}),
         },
       });
       if (res.status === 201) {
@@ -452,7 +769,24 @@ export function CreatePostScreen(): ReactElement {
           </View>
         ) : null}
 
-        <Text style={styles.label}>{t('create.photoLabelMulti')}</Text>
+        <View style={styles.photoLabelRow}>
+          <Text style={styles.label}>{t('create.photoLabelMulti')}</Text>
+          {photos.length > 0 ? (
+            <Pressable
+              onPress={() => setShowPreview((p) => !p)}
+              accessibilityRole="button"
+              accessibilityLabel={t('create.previewLabel')}
+            >
+              <Text style={styles.previewToggle}>{showPreview ? t('create.hidePreview') : t('create.showPreview')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+
+        {/* Photo layout preview */}
+        {showPreview && photos.length > 0 ? (
+          <PhotoLayoutPreview photos={photos} />
+        ) : null}
+
         <View style={styles.photoRow}>
           {photos.map((p) => (
             <View key={p.assetId} style={styles.photoThumbWrap}>
@@ -564,6 +898,62 @@ export function CreatePostScreen(): ReactElement {
             ) : null}
           </View>
         ) : null}
+
+        {/* Audience selector */}
+        <Text style={styles.label}>{t('create.audienceLabel')}</Text>
+        <View style={styles.typeRow}>
+          {(AUDIENCE_VALUES).map((val) => (
+            <Pressable
+              key={val}
+              style={[styles.typeChip, audience === val && styles.typeChipActive]}
+              onPress={() => setAudience(val)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: audience === val }}
+              accessibilityLabel={t(`create.audience.${val}` as Parameters<typeof t>[0])}
+            >
+              <Text style={[styles.typeChipText, audience === val && styles.typeChipTextActive]}>
+                {val === 'everyone' ? '🌍 ' : '👥 '}{t(`create.audience.${val}` as Parameters<typeof t>[0])}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Schedule post */}
+        <Text style={styles.label}>{t('create.scheduleLabel')}</Text>
+        {scheduledAt ? (
+          <View style={styles.scheduledRow}>
+            <Text style={styles.scheduledText}>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
+              {scheduledAt.toLocaleDateString()} {String(scheduledAt.getHours()).padStart(2, '0')}:00
+            </Text>
+            <Pressable
+              onPress={() => setScheduledAt(undefined)}
+              accessibilityRole="button"
+              accessibilityLabel={t('create.clearSchedule')}
+            >
+              <Text style={styles.clearPlaceText}>{t('create.clearPlace')}</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable
+            style={styles.scheduleBtn}
+            onPress={() => setShowSchedulePicker(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('create.scheduleBtn')}
+          >
+            <Text style={styles.scheduleBtnText}>🕐 {t('create.scheduleBtn')}</Text>
+          </Pressable>
+        )}
+
+        <SchedulePicker
+          visible={showSchedulePicker}
+          onDismiss={() => setShowSchedulePicker(false)}
+          onConfirm={(date) => {
+            setScheduledAt(date);
+            setShowSchedulePicker(false);
+          }}
+          minDate={new Date()}
+        />
 
         <Text style={styles.label}>{t('create.placeLabel')}</Text>
         {selectedPlace ? (
@@ -948,5 +1338,53 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primary,
     fontWeight: '600',
+  },
+  photoLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  previewToggle: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  scheduledRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.primaryXLight,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  scheduledText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '500',
+    flex: 1,
+    textAlign: 'auto',
+  },
+  scheduleBtn: {
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  scheduleBtnText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  clearScheduleText: {
+    fontSize: 16,
+    color: '#999',
+    paddingStart: 8,
   },
 });

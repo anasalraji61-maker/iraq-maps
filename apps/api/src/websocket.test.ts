@@ -81,8 +81,8 @@ describe('registerWebSocketRoute', () => {
     const socket = makeMockSocket();
     const req = { query: { token: 'valid' } };
     await fastify.routes[0]!.handler(socket, req);
-    expect(socket.sent[0]).toContain('connected');
     expect(socket.sent[0]).toContain('user-42');
+    expect(socket.sent[0]).toContain('online');
   });
 
   it('pushes post.liked events to the right user', async () => {

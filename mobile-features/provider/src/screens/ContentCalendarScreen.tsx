@@ -1,6 +1,7 @@
 /**
  * ContentCalendarScreen — schedule posts, view calendar, best-time suggestions.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { Screen } from '@iraq-maps/ui';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import {

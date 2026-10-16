@@ -72,7 +72,7 @@ function buildNightStyle(lang: Locale, source: StyleSource): StyleSpecification 
   const repaint = (id: string, paint: Record<string, unknown>): LayerSpecification | undefined => {
     const layer = base.layers.find((l) => l.id === id);
     if (!layer) return undefined;
-    return { ...layer, paint: { ...(layer as { paint?: unknown }).paint, ...paint } } as LayerSpecification;
+    return { ...layer, paint: { ...(layer as { paint?: Record<string, unknown> }).paint, ...paint } } as LayerSpecification;
   };
 
   const patchedLayers: LayerSpecification[] = base.layers.map((layer) => {
@@ -247,7 +247,7 @@ export class MapStyleManager {
     let { layers, sources } = spec;
 
     if (override.extraSources) {
-      sources = { ...sources, ...override.extraSources };
+      sources = { ...sources, ...(override.extraSources as typeof sources) };
     }
 
     if (override.layerOverrides) {
@@ -256,8 +256,8 @@ export class MapStyleManager {
         if (!ov) return layer;
         return {
           ...layer,
-          paint: { ...(layer as { paint?: unknown }).paint, ...ov.paint },
-          layout: { ...(layer as { layout?: unknown }).layout, ...ov.layout },
+          paint: { ...(layer as { paint?: Record<string, unknown> }).paint, ...ov.paint },
+          layout: { ...(layer as { layout?: Record<string, unknown> }).layout, ...ov.layout },
         } as LayerSpecification;
       });
     }

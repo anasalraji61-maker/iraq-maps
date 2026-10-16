@@ -541,6 +541,11 @@
     "nameLabel": "ناوی ناونیشان",
     "namePlaceholder": "وەک: ماڵی دایکوباوک"
   },
+  "actions": {
+    "retry": "دووبارە هەوڵدان",
+    "viewAll": "هەموو",
+    "close": "داخستن"
+  },
   "reputation": {
     "title": "باڵێوازی من",
     "points": "خاڵەکان",

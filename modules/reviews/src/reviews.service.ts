@@ -22,7 +22,6 @@ import {
   reviewTable,
   reviewVoteTable,
 } from './schema';
-import type { z } from 'zod';
 import type {
   ReviewIdType,
   CreateReviewDto,
@@ -330,24 +329,7 @@ export class ReviewsService {
     }
 
     // Fetch responses
-    const responseMap = new Map<string, ReviewResponseRow>();
-    if (items.length > 0) {
-      const reviewIds = items.map((r) => r.id);
-      const responses = await this.db
-        .select()
-        .from(reviewResponseTable)
-        .where(inArray(reviewResponseTable.reviewId, reviewIds));
-      for (const resp of responses) {
-        responseMap.set(resp.reviewId, {
-          id: resp.id,
-          reviewId: resp.reviewId as ReviewIdType,
-          providerId: resp.providerId,
-          text: resp.text,
-          createdAt: toIso(resp.createdAt),
-          updatedAt: toIso(resp.updatedAt),
-        });
-      }
-    }
+    const responseMap = await this.fetchResponseMap(items.map((r) => r.id));
 
     const mapped = items.map((r) =>
       mapReview(r, myVoteMap.get(r.id) ?? null, responseMap.get(r.id) ?? null),
@@ -398,24 +380,7 @@ export class ReviewsService {
     const items = hasMore ? rows.slice(0, limit) : rows;
 
     // Fetch responses
-    const responseMap = new Map<string, ReviewResponseRow>();
-    if (items.length > 0) {
-      const reviewIds = items.map((r) => r.id);
-      const responses = await this.db
-        .select()
-        .from(reviewResponseTable)
-        .where(inArray(reviewResponseTable.reviewId, reviewIds));
-      for (const resp of responses) {
-        responseMap.set(resp.reviewId, {
-          id: resp.id,
-          reviewId: resp.reviewId as ReviewIdType,
-          providerId: resp.providerId,
-          text: resp.text,
-          createdAt: toIso(resp.createdAt),
-          updatedAt: toIso(resp.updatedAt),
-        });
-      }
-    }
+    const responseMap = await this.fetchResponseMap(items.map((r) => r.id));
 
     const mapped = items.map((r) => mapReview(r, null, responseMap.get(r.id) ?? null));
 
@@ -476,7 +441,7 @@ export class ReviewsService {
       .where(and(eq(reviewVoteTable.reviewId, reviewId), eq(reviewVoteTable.userId, userId)))
       .limit(1);
 
-    let newVote: boolean | null = null;
+    let newVote: boolean | null;
 
     if (existing === undefined) {
       // New vote
@@ -716,24 +681,7 @@ export class ReviewsService {
     const items = hasMore ? rows.slice(0, limit) : rows;
 
     // Fetch responses
-    const responseMap = new Map<string, ReviewResponseRow>();
-    if (items.length > 0) {
-      const reviewIds = items.map((r) => r.id);
-      const responses = await this.db
-        .select()
-        .from(reviewResponseTable)
-        .where(inArray(reviewResponseTable.reviewId, reviewIds));
-      for (const resp of responses) {
-        responseMap.set(resp.reviewId, {
-          id: resp.id,
-          reviewId: resp.reviewId as ReviewIdType,
-          providerId: resp.providerId,
-          text: resp.text,
-          createdAt: toIso(resp.createdAt),
-          updatedAt: toIso(resp.updatedAt),
-        });
-      }
-    }
+    const responseMap = await this.fetchResponseMap(items.map((r) => r.id));
 
     // Optionally filter to only unresponded reviews
     let filtered = items;
@@ -753,6 +701,26 @@ export class ReviewsService {
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
+
+  private async fetchResponseMap(reviewIds: string[]): Promise<Map<string, ReviewResponseRow>> {
+    const map = new Map<string, ReviewResponseRow>();
+    if (reviewIds.length === 0) return map;
+    const responses = await this.db
+      .select()
+      .from(reviewResponseTable)
+      .where(inArray(reviewResponseTable.reviewId, reviewIds));
+    for (const resp of responses) {
+      map.set(resp.reviewId, {
+        id: resp.id,
+        reviewId: resp.reviewId as ReviewIdType,
+        providerId: resp.providerId,
+        text: resp.text,
+        createdAt: toIso(resp.createdAt),
+        updatedAt: toIso(resp.updatedAt),
+      });
+    }
+    return map;
+  }
 
   private async fetchResponse(reviewId: ReviewIdType): Promise<ReviewResponseRow | null> {
     const [resp] = await this.db

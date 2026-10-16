@@ -3,7 +3,7 @@
  * Covers follow/unfollow, block, suggestions, mutual followers.
  */
 
-export type UserId = string;
+type UserId = string;
 
 export interface FollowEdge {
   followerId: UserId;

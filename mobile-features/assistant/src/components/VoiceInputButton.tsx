@@ -18,6 +18,7 @@ import { t } from '../strings';
 I18nManager.forceRTL(true);
 
 const PRIMARY = '#1976D2';
+const ICON_CLOSE = String.fromCharCode(0x2715);
 const RECORD_COLOR = '#D32F2F';
 const MAX_DURATION_MS = 30_000;
 const WAVEFORM_BARS = 20;
@@ -156,7 +157,7 @@ function TimerText({ startMs }: { startMs: number | null }): ReactElement {
   const remaining = Math.max(0, Math.floor((MAX_DURATION_MS - elapsed) / 1000));
   return (
     <Text style={timerStyles.text} accessibilityLabel={t('voice.timerA11y', { seconds: String(seconds) })}>
-      {seconds}s / {t('voice.remainingSeconds', { remaining: String(remaining) })}
+      {`${seconds}s / ${remaining}s`}
     </Text>
   );
 }
@@ -282,7 +283,7 @@ export function VoiceInputButton({ onTranscript, disabled }: VoiceInputButtonPro
             accessibilityRole="button"
             accessibilityLabel={t('voice.dismissTranscript')}
           >
-            <Text style={styles.transcriptDismissText}>✕</Text>
+            <Text style={styles.transcriptDismissText} accessibilityElementsHidden>{ICON_CLOSE}</Text>
           </Pressable>
         </View>
       ) : null}

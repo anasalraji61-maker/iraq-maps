@@ -18,9 +18,9 @@ import { randomUUID } from 'node:crypto';
 
 // ─── Types (minimal; mirrors modules/reviews/src/types.ts) ───────────────────
 
-export type UserId = string & { readonly __brand: 'UserId' };
-export type PlaceIdType = string & { readonly __brand: 'PlaceId' };
-export type ReviewIdType = string & { readonly __brand: 'ReviewId' };
+type UserId = string & { readonly __brand: 'UserId' };
+type PlaceIdType = string & { readonly __brand: 'PlaceId' };
+type ReviewIdType = string & { readonly __brand: 'ReviewId' };
 
 export interface CreateReviewDto {
   placeId: PlaceIdType;
@@ -320,7 +320,7 @@ export class FakeReviewsService {
     const voteMap = this.votes.get(reviewId)!;
 
     const existing = voteMap.get(userId);
-    let newVote: boolean | null = null;
+    let newVote: boolean | null;
 
     if (existing === undefined) {
       voteMap.set(userId, dto.isHelpful);

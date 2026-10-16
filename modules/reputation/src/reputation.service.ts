@@ -27,8 +27,8 @@ import {
   PortTokens,
 } from '@iraq-maps/contracts';
 import { type Db } from '@iraq-maps/db-kit';
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { and, asc, desc, eq, gte, lt, sql, inArray, isNull } from 'drizzle-orm';
+import { Injectable, Inject } from '@nestjs/common';
+import { and, asc, desc, eq, gte, lt, sql, inArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import {
   userReputationTable,
@@ -106,7 +106,7 @@ function periodToDate(period: LeaderboardPeriod): Date | null {
 
 // ── Service ───────────────────────────────────────────────────────────────────
 
-const noopEventBus: EventBus = {
+const _noopEventBus: EventBus = {
   publish: async () => {},
   subscribe: () => () => {},
 };
@@ -288,6 +288,7 @@ export class ReputationService {
         city: city ?? null,
         meta,
       },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     // Async badge check (fire and forget – errors are non-fatal)
@@ -421,6 +422,7 @@ export class ReputationService {
         await this.bus.publish({
           name: 'reputation.badge.awarded.v1',
           payload: { userId, badgeId },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any);
       }
     }
@@ -439,7 +441,7 @@ export class ReputationService {
   ): Promise<{ items: PointsEntry[]; nextCursor: string | null }> {
     const limit = Math.min(opts.limit ?? 20, 100);
 
-    let query = this.db
+    const query = this.db
       .select()
       .from(pointsLedgerTable)
       .where(

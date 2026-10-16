@@ -12,9 +12,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   integer,
   pgSchema,
-  pgTable,
   real,
-  text,
   timestamp,
   uuid,
   varchar,
@@ -113,8 +111,8 @@ export interface SaveRouteInput {
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class UserRoutesService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(private readonly db: NodePgDatabase<any>) {}
 
   // ── Saved routes ────────────────────────────────────────────────────────────

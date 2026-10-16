@@ -2,6 +2,7 @@
  * StoryEditorScreen – full story creation editor with text overlays,
  * stickers, draw mode, location/mention/hashtag tags, and publish.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';

@@ -692,7 +692,7 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     if (!isValidOgId(id)) {
       return reply.status(400).send(problem(400, 'invalid_request', 'Invalid id'));
     }
-    let title = 'منشور على خرائط العراق';
+    const title = 'منشور على خرائط العراق';
     let description = 'اطّلع على هذا المنشور في تطبيق خرائط العراق الذكية';
     try {
       const row = await db.execute(

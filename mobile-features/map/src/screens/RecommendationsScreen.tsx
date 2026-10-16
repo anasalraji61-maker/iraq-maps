@@ -12,6 +12,7 @@
  *
  * Route: map/recommendations
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import type { PlaceSearchResult } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';

@@ -541,6 +541,11 @@
     "nameLabel": "Address Name",
     "namePlaceholder": "e.g. Parents Home"
   },
+  "actions": {
+    "retry": "Retry",
+    "viewAll": "View All",
+    "close": "Close"
+  },
   "reputation": {
     "title": "My Reputation",
     "points": "Points",

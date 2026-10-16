@@ -148,7 +148,7 @@ function pickName(names: Record<string, string>, lang = 'ar'): string {
 }
 
 /** Map DB price_level string to a category bucket. */
-function priceLevelToBucket(level: string | null): string {
+function _priceLevelToBucket(level: string | null): string {
   if (!level) return 'moderate';
   const n = parseInt(level, 10);
   if (isNaN(n)) return level;
@@ -725,7 +725,7 @@ export class SearchAdvancedService {
       }
     }
 
-    let rows: CollectionRow[] = [];
+    let rows: CollectionRow[];
 
     try {
       if (scope === 'mine') {

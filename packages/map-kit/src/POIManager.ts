@@ -249,14 +249,14 @@ export interface PoiFeature {
 export function buildPoiFeature(place: PlaceSummary): PoiFeature {
   return {
     type: 'Feature',
-    geometry: { type: 'Point', coordinates: [place.lng, place.lat] },
+    geometry: { type: 'Point', coordinates: place.location },
     properties: {
       id: place.id,
-      nameAr: place.nameAr,
-      name: place.name,
+      nameAr: place.names.ar ?? place.names.name,
+      name: place.names.name,
       category: place.category ?? 'unknown',
-      minZoom: poiMinZoom(place.category),
-      color: categoryColor(place.category),
+      minZoom: poiMinZoom(place.category ?? undefined),
+      color: categoryColor(place.category ?? undefined),
     },
   };
 }
@@ -294,7 +294,7 @@ export class POIManager {
 
   /** Return GeoJSON for POIs visible at a given zoom level. */
   filterByZoom(zoom: number) {
-    return buildPoiGeoJSON(this.places.filter((p) => poiMinZoom(p.category) <= zoom));
+    return buildPoiGeoJSON(this.places.filter((p) => poiMinZoom(p.category ?? undefined) <= zoom));
   }
 
   /** Find a POI by id. */
@@ -306,7 +306,7 @@ export class POIManager {
   markerSvg(place: PlaceSummary, selected = false): string {
     return buildMarkerSvg({
       category: place.category ?? 'unknown',
-      label: place.nameAr ?? place.name,
+      label: place.names.ar ?? place.names.name,
       selected,
     });
   }

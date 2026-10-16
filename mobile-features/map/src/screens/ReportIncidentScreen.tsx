@@ -7,10 +7,13 @@
  *
  * All text goes through t(). Layouts use start/end instead of left/right.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import type { Incident, IncidentSeverity, IncidentType, LngLat } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { tokens } from '@iraq-maps/ui';
-import { Camera, Map as MapView, ShapeSource, SymbolLayer } from '@maplibre/maplibre-react-native';
+import { Camera, GeoJSONSource, Layer, Map as MapView } from '@maplibre/maplibre-react-native';
+
+const TILES_URL = process.env['EXPO_PUBLIC_TILES_URL'] ?? 'https://demotiles.maplibre.org/style.json';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
@@ -76,7 +79,7 @@ const SEVERITY_COLOR: Record<IncidentSeverity, string> = {
   severe: '#EF4444',
 };
 
-const TYPE_EMOJI: Partial<Record<IncidentType, string>> = Object.fromEntries(
+const _TYPE_EMOJI: Partial<Record<IncidentType, string>> = Object.fromEntries(
   INCIDENT_TYPES.map(({ type, emoji }) => [type, emoji]),
 );
 
@@ -164,10 +167,12 @@ function ReportTab({
 
   const canSubmit = selectedType !== null && !submitting;
 
-  const handleMapPress = useCallback((event: { geometry?: { coordinates?: [number, number] } }) => {
-    const coords = event?.geometry?.coordinates;
-    if (coords && coords.length === 2) {
-      setPinLocation([coords[0], coords[1]]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleMapPress = useCallback((event: any) => {
+    const lngLat: [number, number] | undefined =
+      event?.nativeEvent?.lngLat ?? event?.geometry?.coordinates;
+    if (lngLat && lngLat.length === 2) {
+      setPinLocation([lngLat[0]!, lngLat[1]!]);
     }
   }, []);
 
@@ -205,26 +210,25 @@ function ReportTab({
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
+          mapStyle={TILES_URL}
           onPress={handleMapPress}
-          compassEnabled={false}
-          logoEnabled={false}
-          attributionEnabled={false}
         >
           <Camera
-            zoomLevel={14}
-            centerCoordinate={pinLocation}
-            animationMode="flyTo"
-            animationDuration={400}
+            zoom={14}
+            center={pinLocation}
+            easing="fly"
+            duration={400}
           />
-          <ShapeSource
+          <GeoJSONSource
             id="pin"
-            shape={{ type: 'Feature', geometry: { type: 'Point', coordinates: pinLocation }, properties: {} }}
+            data={{ type: 'Feature', geometry: { type: 'Point', coordinates: pinLocation }, properties: {} }}
           >
-            <SymbolLayer
+            <Layer
               id="pinSymbol"
+              type="symbol"
               style={{ iconSize: 1.5, iconAllowOverlap: true }}
             />
-          </ShapeSource>
+          </GeoJSONSource>
         </MapView>
         <View style={styles.mapOverlay} pointerEvents="none">
           <Text style={styles.mapOverlayText}>{t('incidents.tapToPin')}</Text>

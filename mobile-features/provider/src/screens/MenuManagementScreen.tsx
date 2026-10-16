@@ -4,15 +4,13 @@
  * out-of-stock toggle, seasonal/limited-time badges, drag-to-reorder,
  * bulk price update, photo import stub, customer preview, and PDF export stub.
  */
-import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
-import { Button, EmptyState, Screen } from '@iraq-maps/ui';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
+import { EmptyState } from '@iraq-maps/ui';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   Alert,
   I18nManager,
   Modal,
-  PanResponder,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
@@ -20,7 +18,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Animated,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -558,7 +555,7 @@ export function MenuManagementScreen(): ReactElement {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: BG },
   toolbar: { backgroundColor: SURFACE, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: BORDER },
-  screenTitle: { fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 8, textAlign: 'right' },
+  screenTitle: { fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 8, textAlign: 'auto' },
   toolbarActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   toolbarBtn: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: BG, borderRadius: 8, borderWidth: 1, borderColor: BORDER },
   toolbarBtnText: { fontSize: 12, color: '#333' },
@@ -566,8 +563,8 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 16, gap: 12 },
   sectionCard: { backgroundColor: SURFACE, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: BORDER },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  sectionName: { fontSize: 16, fontWeight: '700', color: '#111', textAlign: 'right' },
-  sectionNameEn: { fontSize: 12, color: '#888', textAlign: 'right' },
+  sectionName: { fontSize: 16, fontWeight: '700', color: '#111', textAlign: 'auto' },
+  sectionNameEn: { fontSize: 12, color: '#888', textAlign: 'auto' },
   sectionActions: { flexDirection: 'row', gap: 4, alignItems: 'center' },
   sectionActionBtn: { padding: 6 },
   sectionActionText: { fontSize: 16 },
@@ -579,9 +576,9 @@ const styles = StyleSheet.create({
   itemCard: { backgroundColor: '#FAFAFA', borderRadius: 8, padding: 10, borderWidth: 1, borderColor: BORDER },
   itemCardOOS: { opacity: 0.6 },
   itemCardHeader: { flexDirection: 'row', gap: 8 },
-  itemName: { fontSize: 15, fontWeight: '600', color: '#111', textAlign: 'right' },
-  itemNameEn: { fontSize: 12, color: '#666', textAlign: 'right' },
-  itemDesc: { fontSize: 13, color: '#555', marginTop: 2, textAlign: 'right' },
+  itemName: { fontSize: 15, fontWeight: '600', color: '#111', textAlign: 'auto' },
+  itemNameEn: { fontSize: 12, color: '#666', textAlign: 'auto' },
+  itemDesc: { fontSize: 13, color: '#555', marginTop: 2, textAlign: 'auto' },
   itemRight: { alignItems: 'flex-end', gap: 6, minWidth: 80 },
   itemPrice: { fontSize: 14, fontWeight: '700', color: PRIMARY },
   itemActions: { flexDirection: 'row', gap: 12, marginTop: 8, justifyContent: 'flex-end' },
@@ -598,7 +595,7 @@ const styles = StyleSheet.create({
   addSectionBtn: { borderRadius: 12, padding: 14, backgroundColor: SURFACE, borderWidth: 1.5, borderColor: PRIMARY, borderStyle: 'dashed', alignItems: 'center' },
   addSectionBtnText: { color: PRIMARY, fontSize: 15, fontWeight: '600' },
   saveBar: { backgroundColor: SURFACE, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: BORDER, gap: 12 },
-  saveBarInfo: { flex: 1, fontSize: 13, color: '#666', textAlign: 'right' },
+  saveBarInfo: { flex: 1, fontSize: 13, color: '#666', textAlign: 'auto' },
   saveBarBtn: { backgroundColor: PRIMARY, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, minWidth: 80, alignItems: 'center' },
   saveBarBtnText: { color: SURFACE, fontWeight: '700', fontSize: 14 },
   // Modal
@@ -607,7 +604,7 @@ const styles = StyleSheet.create({
   modalCancel: { fontSize: 15, color: DANGER },
   modalSave: { fontSize: 15, color: PRIMARY, fontWeight: '700' },
   modalBody: { padding: 16, gap: 4 },
-  fieldLabel: { fontSize: 13, color: '#555', marginBottom: 4, textAlign: 'right' },
+  fieldLabel: { fontSize: 13, color: '#555', marginBottom: 4, textAlign: 'auto' },
   input: { borderWidth: 1, borderColor: BORDER, borderRadius: 8, padding: 10, fontSize: 15, backgroundColor: SURFACE, marginBottom: 12 },
   textarea: { height: 80, textAlignVertical: 'top' },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
@@ -617,7 +614,7 @@ const styles = StyleSheet.create({
   // Overlay
   overlayBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   overlayCard: { backgroundColor: SURFACE, borderRadius: 16, padding: 20, width: '100%', maxWidth: 360 },
-  overlayTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'right', color: '#111' },
+  overlayTitle: { fontSize: 17, fontWeight: '700', marginBottom: 12, textAlign: 'auto', color: '#111' },
   overlayActions: { flexDirection: 'row', gap: 10, marginTop: 16, justifyContent: 'flex-end' },
   cancelBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: BORDER },
   cancelBtnText: { color: '#555', fontSize: 14 },
@@ -628,9 +625,9 @@ const styles = StyleSheet.create({
   previewTitle: { fontSize: 18, fontWeight: '700', color: '#111' },
   previewClose: { fontSize: 15, color: PRIMARY },
   previewSection: { marginBottom: 20 },
-  previewSectionName: { fontSize: 18, fontWeight: '800', color: '#111', marginBottom: 10, textAlign: 'right', borderStartWidth: 4, borderStartColor: PRIMARY, paddingStart: 10 },
+  previewSectionName: { fontSize: 18, fontWeight: '800', color: '#111', marginBottom: 10, textAlign: 'auto', borderStartWidth: 4, borderStartColor: PRIMARY, paddingStart: 10 },
   previewItem: { flexDirection: 'row', gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
-  previewItemName: { fontSize: 15, fontWeight: '600', color: '#111', textAlign: 'right' },
-  previewItemDesc: { fontSize: 13, color: '#666', textAlign: 'right', marginTop: 2 },
+  previewItemName: { fontSize: 15, fontWeight: '600', color: '#111', textAlign: 'auto' },
+  previewItemDesc: { fontSize: 13, color: '#666', textAlign: 'auto', marginTop: 2 },
   previewItemPrice: { fontSize: 15, fontWeight: '700', color: PRIMARY, minWidth: 70 },
 });

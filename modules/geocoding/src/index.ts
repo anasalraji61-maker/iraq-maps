@@ -4,9 +4,7 @@
  * Reads PHOTON_URL from env (optional; falls back to FakeGeocoderClient when absent).
  * Provides geocodingContract HTTP routes and exports GeocodingService.
  */
-import { defineModuleConfig } from '@iraq-maps/config';
 import { Module, type DynamicModule } from '@nestjs/common';
-import { z } from 'zod';
 import { FakeGeocoderClient } from './fake-geocoder';
 import { GEOCODING_SERVICE, GeocodingController } from './http';
 import { PhotonClient } from './photon';

@@ -36,7 +36,22 @@
     "mobile-features/discover/src/screens/FollowSuggestionsScreen.tsx",
     "mobile-features/discover/src/screens/ReportScreen.tsx",
     "mobile-features/discover/src/screens/StoryEditorScreen.tsx",
-    "mobile-features/discover/src/screens/UserProfileScreen.tsx"
+    "mobile-features/discover/src/screens/UserProfileScreen.tsx",
+    "mobile-features/account/src/screens/ReputationScreen.tsx",
+    "mobile-features/discover/src/screens/LeaderboardScreen.tsx",
+    "mobile-features/map/src/components/layers/CustomPoiLayer.tsx",
+    "mobile-features/map/src/components/layers/IncidentsLayer.tsx",
+    "mobile-features/map/src/components/layers/TrafficLayer.tsx",
+    "mobile-features/map/src/components/layers/TransitLayer.tsx",
+    "mobile-features/map/src/components/POICategoryFilter.tsx",
+    "mobile-features/map/src/components/SharePlaceSheet.tsx",
+    "mobile-features/map/src/screens/MapLayersScreen.tsx",
+    "mobile-features/map/src/screens/NearbyScreen.tsx",
+    "mobile-features/map/src/screens/WriteReviewScreen.tsx",
+    "mobile-features/provider/src/screens/ReviewResponseScreen.tsx",
+    "modules/notifications/src/__tests__/notification-templates.test.ts",
+    "modules/routing/src/user-routes.service.ts",
+    "packages/mobile-kit/src/websocket/index.ts"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",
@@ -58,6 +73,7 @@
     "@maplibre/maplibre-react-native",
     "@ts-rest/core",
     "drizzle-orm",
-    "expo-haptics"
+    "expo-haptics",
+    "@react-native-community/datetimepicker"
   ]
 }

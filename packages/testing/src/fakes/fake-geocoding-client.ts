@@ -94,18 +94,6 @@ export interface FakeLocation {
   osmRef?: string;
 }
 
-// ─── Error helpers ────────────────────────────────────────────────────────────
-
-class GeocodingError extends Error {
-  constructor(
-    public readonly status: number,
-    message: string,
-  ) {
-    super(message);
-    this.name = 'GeocodingError';
-  }
-}
-
 // ─── Default Baghdad seed data ────────────────────────────────────────────────
 
 function baghdadAddress(

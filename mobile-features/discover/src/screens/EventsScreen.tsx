@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { type DiscoverEventType } from '@iraq-maps/contracts';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';

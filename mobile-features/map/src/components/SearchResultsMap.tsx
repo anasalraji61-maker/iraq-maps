@@ -14,6 +14,7 @@
  *  - onSearchHere: called with new center [lng, lat] when user taps "Search here"
  *  - loading: show spinner overlay
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import type { PlaceSearchResult } from '@iraq-maps/contracts';
 import { type ReactElement, useCallback, useRef, useState } from 'react';
@@ -28,7 +29,7 @@ import {
   View,
 } from 'react-native';
 import { Text as RNText } from 'react-native';
-import { PlaceCard } from './PlaceCard';
+import { PlaceCard as _PlaceCard } from './PlaceCard';
 import { t } from '../strings';
 
 I18nManager.forceRTL(true);

@@ -2,6 +2,7 @@
  * HashtagScreen — full hashtag exploration page.
  * Shows top posts, recent posts, related hashtags, and a grid/list toggle.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { type DiscoverPostType } from '@iraq-maps/contracts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';

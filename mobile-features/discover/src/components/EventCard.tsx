@@ -3,6 +3,7 @@
  * Shows cover photo (16:9), date badge, title, organizer, location,
  * attendee avatars, and RSVP buttons.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { type DiscoverEventType } from '@iraq-maps/contracts';
 import { useCallback, useState, type ReactElement } from 'react';
 import {

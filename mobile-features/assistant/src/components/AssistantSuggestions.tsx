@@ -17,7 +17,8 @@ import { t } from '../strings';
 
 I18nManager.forceRTL(true);
 
-const PRIMARY = '#1976D2';
+const _PRIMARY = '#1976D2';
+const ICON_DISMISS = String.fromCharCode(0x2715);
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 export interface SuggestionChip {
@@ -277,7 +278,7 @@ export function AssistantSuggestions({
           accessibilityRole="button"
           accessibilityLabel={t('suggestions.dismiss')}
         >
-          <Text style={styles.dismissBtnText}>✕</Text>
+          <Text style={styles.dismissBtnText} accessibilityElementsHidden>{ICON_DISMISS}</Text>
         </Pressable>
       </View>
       <ScrollView

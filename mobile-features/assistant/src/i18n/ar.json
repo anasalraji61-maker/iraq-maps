@@ -204,7 +204,10 @@
     "clearHistoryConfirm": "سيتم حذف جميع المحادثات السابقة. هذا الإجراء لا يمكن التراجع عنه.",
     "clearHistoryAction": "مسح جميع المحادثات",
     "clearHistoryHint": "لا يمكن التراجع عن هذا الإجراء",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "langAr": "عربي",
+    "langCkb": "كردي",
+    "langEn": "EN"
   },
   "voice": {
     "holdToRecord": "اضغط مطولاً للتحدث",

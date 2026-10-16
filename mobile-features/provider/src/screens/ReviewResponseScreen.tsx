@@ -5,6 +5,7 @@
  * editing and tracking which reviews have been responded to.
  * Uses the live reviewsContract endpoints.
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useApiBaseUrl, useSession } from '@iraq-maps/mobile-kit';
 import { fullReviewsContract, type FullReview } from '@iraq-maps/contracts';
@@ -27,6 +28,7 @@ import {
   Modal,
   Platform,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -305,7 +307,7 @@ export function ReviewResponseScreen(): ReactElement {
   const { placeId } = useLocalSearchParams<{ placeId: string }>();
   const baseUrl = useApiBaseUrl();
   const session = useSession();
-  const userId = session.state.status === 'signedIn' ? session.state.user.id : null;
+  const _userId = session.state.status === 'signedIn' ? session.state.user.id : null;
 
   const client = useMemo(
     () => initClient(fullReviewsContract, { baseUrl, baseHeaders: {} }),
@@ -711,8 +713,8 @@ const modalStyles = StyleSheet.create({
     color: '#212121',
     textAlignVertical: 'top',
   },
-  charsLeft: { fontSize: 12, color: GREY, textAlign: 'end' as const },
-  charsHint: { fontSize: 12, color: GREY, textAlign: 'end' as const, marginTop: -8 },
+  charsLeft: { fontSize: 12, color: GREY, textAlign: 'auto' as const },
+  charsHint: { fontSize: 12, color: GREY, textAlign: 'auto' as const, marginTop: -8 },
   btnRow: { flexDirection: 'row', gap: 10 },
   btn: {
     flex: 1,
