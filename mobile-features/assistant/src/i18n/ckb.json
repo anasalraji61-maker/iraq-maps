@@ -22,7 +22,18 @@
     "clearChat": "گفتوگۆی نوێ",
     "clearChatA11y": "گفتوگۆی نوێ دەست پێ بکە",
     "charCount": "{count}/{max}",
-    "retry": "دووبارە هەوڵ بدەرەوە"
+    "retry": "دووبارە هەوڵ بدەرەوە",
+    "statusOnline": "ئامادەیە",
+    "shareConversation": "گفتوگۆ هاوبەشی بکە",
+    "clearChatConfirm": "گفتوگۆی نوێ دەست پێ بکەیت؟ ئەم گفتوگۆیە ناگەڕێتەوە.",
+    "cancel": "پاشگەزبوونەوە",
+    "voiceStubTitle": "تێکەڵکردنی دەنگ",
+    "voiceStubMessage": "تێکەڵکردنی دەنگ لە نوێکردنەوەی داهاتوودا پشتگیری دەکرێت.",
+    "routeTo": "ڕێگا بۆ",
+    "routeToA11y": "ڕێگا بۆ {name} دەست پێ بکە",
+    "startRoute": "بڕۆ",
+    "ratePlace": "{name} هەڵسەنگاندن",
+    "rateStars": "{count} ئەستێرە"
   },
   "tripPlanner": {
     "title": "پلانکەری گەشت",
@@ -100,5 +111,19 @@
   },
   "common": {
     "tellMeMoreMessage": "زیاتر بمڵێ دەربارەی \"{name}\": {reason}"
+  },
+  "contextual": {
+    "title": "یارمەتیدەری زیرەک",
+    "whatNearMe": "چی نزیکمە؟",
+    "nearbyFood": "ئەمکانەکانی خواردنی نزیک",
+    "planDay": "ڕۆژەکەم پلان بکە",
+    "routeTo": "ڕێگا بۆ {name}",
+    "reviewsOf": "هەڵسەنگاندنی {name}",
+    "placesVisible": "{count} شوێن دیارە",
+    "dismiss": "داخستن",
+    "expand": "یارمەتیدەری تەواو بکەرەوە",
+    "expandPrompt": "بۆ وەڵامی زیاتر، یارمەتیدەری تەواو بکەرەوە",
+    "placeholder": "دەربارەی ئەم ناوچەیە بپرسە...",
+    "fabA11y": "یارمەتیدەری زیرەک بکەرەوە"
   }
 }

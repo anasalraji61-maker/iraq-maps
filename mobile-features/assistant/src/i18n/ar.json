@@ -22,7 +22,18 @@
     "clearChat": "محادثة جديدة",
     "clearChatA11y": "بدء محادثة جديدة",
     "charCount": "{count}/{max}",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "statusOnline": "متصل",
+    "shareConversation": "مشاركة المحادثة",
+    "clearChatConfirm": "هل تريد بدء محادثة جديدة؟ لن تتمكن من استعادة هذه المحادثة.",
+    "cancel": "إلغاء",
+    "voiceStubTitle": "الإدخال الصوتي",
+    "voiceStubMessage": "سيتم دعم الإدخال الصوتي في نسخة قادمة.",
+    "routeTo": "الطريق إلى",
+    "routeToA11y": "ابدأ الطريق إلى {name}",
+    "startRoute": "ابدأ",
+    "ratePlace": "قيّم {name}",
+    "rateStars": "{count} نجوم"
   },
   "tripPlanner": {
     "title": "مخطط الرحلات",
@@ -100,5 +111,19 @@
   },
   "common": {
     "tellMeMoreMessage": "أخبرني أكثر عن \"{name}\": {reason}"
+  },
+  "contextual": {
+    "title": "المساعد الذكي",
+    "whatNearMe": "ما القريب مني؟",
+    "nearbyFood": "خيارات الطعام القريبة",
+    "planDay": "خطط ليومي",
+    "routeTo": "الطريق إلى {name}",
+    "reviewsOf": "تقييمات {name}",
+    "placesVisible": "{count} أماكن مرئية",
+    "dismiss": "إغلاق",
+    "expand": "فتح المساعد الكامل",
+    "expandPrompt": "للمزيد من الردود، افتح المساعد الكامل",
+    "placeholder": "اسأل عن هذه المنطقة...",
+    "fabA11y": "افتح المساعد الذكي"
   }
 }

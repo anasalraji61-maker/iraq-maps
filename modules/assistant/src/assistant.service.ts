@@ -679,4 +679,234 @@ ${resultsText}
       totalFound: finalResults.length,
     };
   }
+
+  // ─── Context-aware chat ────────────────────────────────────────────────────
+
+  /**
+   * Chat with optional location/place/route context injected into the system prompt.
+   */
+  async chatWithContext(
+    userId: string,
+    message: string,
+    context: {
+      lat?: number;
+      lng?: number;
+      currentPlaceId?: string;
+      currentPlaceNames?: string;
+      currentRouteId?: string;
+    },
+  ) {
+    const contextParts: string[] = [];
+    if (context.lat != null && context.lng != null) {
+      contextParts.push(`موقع المستخدم الحالي: ${context.lat.toFixed(4)}, ${context.lng.toFixed(4)}`);
+    }
+    if (context.currentPlaceId && context.currentPlaceNames) {
+      contextParts.push(`المكان المعروض: ${context.currentPlaceNames}`);
+    }
+    if (context.currentRouteId) {
+      contextParts.push(`معرّف المسار الحالي: ${context.currentRouteId}`);
+    }
+
+    const prefixedMessage =
+      contextParts.length > 0
+        ? `[${contextParts.join(' | ')}]\n${message}`
+        : message;
+
+    const sessionId = `ctx-${userId}-default` as `${string}-${string}-${string}-${string}-${string}`;
+
+    return this.chat(userId, {
+      sessionId,
+      messages: [{ role: 'user', content: prefixedMessage }],
+    });
+  }
+
+  // ─── Place summary (cached) ───────────────────────────────────────────────
+
+  private readonly placeSummaryCache = new Map<string, { summary: string; cachedAt: number }>();
+  private readonly PLACE_SUMMARY_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  async generatePlaceSummary(placeId: string): Promise<string> {
+    const cached = this.placeSummaryCache.get(placeId);
+    if (cached && Date.now() - cached.cachedAt < this.PLACE_SUMMARY_TTL_MS) {
+      return cached.summary;
+    }
+
+    const places = await this.placesSearch(placeId);
+    const place = places[0];
+    if (!place) return '';
+
+    const prompt = `اكتب ملخصاً موجزاً (3-4 جمل) عن "${place.name}" في العراق يساعد الزوار على فهم طبيعة المكان وأهميته.`;
+    const reply = await this.llm.chat({
+      systemPrompt: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 300,
+    });
+
+    const summary = reply.content.trim();
+    this.placeSummaryCache.set(placeId, { summary, cachedAt: Date.now() });
+    return summary;
+  }
+
+  // ─── Nearby food suggestions ──────────────────────────────────────────────
+
+  async suggestNearbyFoodOptions(
+    lat: number,
+    lng: number,
+    preferences: {
+      cuisineType?: string;
+      priceRange?: 'budget' | 'mid' | 'luxury';
+      dietaryNeeds?: string[];
+    } = {},
+  ) {
+    const priceLabels: Record<string, string> = { budget: 'رخيص', mid: 'متوسط', luxury: 'فاخر' };
+    const prefText = [
+      preferences.cuisineType ? `نوع المطبخ: ${preferences.cuisineType}` : null,
+      preferences.priceRange ? `النطاق السعري: ${priceLabels[preferences.priceRange]}` : null,
+      preferences.dietaryNeeds?.length ? `متطلبات غذائية: ${preferences.dietaryNeeds.join('، ')}` : null,
+    ].filter(Boolean).join('، ');
+
+    const query = `مطاعم${prefText ? ` (${prefText})` : ''}`;
+    const results = await this.placesSearch(query);
+
+    const systemPrompt = `أنت مرشد مطاعم خبير. أنشئ اقتراحات طعام موجزة ومشجعة.
+أجب بـ JSON فقط.`;
+
+    const locationHint = `الموقع: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    const resultsText = results.slice(0, 6).map((r, i) =>
+      `${i + 1}. ${r.name} - ${r.address}${r.distanceMeters != null ? ` (${r.distanceMeters < 1000 ? `${r.distanceMeters}م` : `${(r.distanceMeters / 1000).toFixed(1)}كم`})` : ''}`
+    ).join('\n');
+
+    let enriched: Array<{ index: number; suggestion: string; emoji: string }> = [];
+    try {
+      const reply = await this.llm.chat({
+        systemPrompt,
+        messages: [{
+          role: 'user',
+          content: `${locationHint}\n${prefText ? `التفضيلات: ${prefText}\n` : ''}الأماكن:\n${resultsText}\n\nأضف اقتراحاً مشجعاً وإيموجي لكل مكان. JSON فقط:\n{"items":[{"index":1,"suggestion":"...","emoji":"🍽️"}]}`,
+        }],
+        maxTokens: 600,
+      });
+      const match = reply.content.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(match?.[0] ?? '{}') as { items?: typeof enriched };
+      enriched = parsed.items ?? [];
+    } catch {
+      // non-critical
+    }
+
+    return results.slice(0, 6).map((r, i) => {
+      const e = enriched.find(x => x.index === i + 1);
+      return {
+        placeId: r.id,
+        name: r.name,
+        address: r.address,
+        distanceMeters: r.distanceMeters,
+        suggestion: e?.suggestion ?? `مطعم مميز بموقع ممتاز`,
+        emoji: e?.emoji ?? '🍽️',
+      };
+    });
+  }
+
+  // ─── Day trip planner ────────────────────────────────────────────────────
+
+  async planDayTrip(
+    startLat: number,
+    startLng: number,
+    interests: string[],
+    durationHours: number,
+  ) {
+    const interestMap: Record<string, string> = {
+      food: 'مطاعم', culture: 'مواقع ثقافية', shopping: 'تسوق',
+      history: 'مواقع تاريخية', religious: 'مواقع دينية', nature: 'حدائق وطبيعة',
+    };
+
+    const queries = interests.map(i => interestMap[i] ?? i);
+    const searchResults = await Promise.all(queries.slice(0, 3).map(q => this.placesSearch(q)));
+    const allPlaces = searchResults.flat().filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i).slice(0, 6);
+
+    const systemPrompt = `أنت مخطط رحلات ذكي. أنشئ برنامج يوم متكامل بتنسيق JSON.`;
+    const placesText = allPlaces.map((p, i) => `${i + 1}. ${p.name} - ${p.address}`).join('\n');
+    const userPrompt = `الموقع: ${startLat.toFixed(4)}, ${startLng.toFixed(4)}
+المدة: ${durationHours} ساعات
+الاهتمامات: ${interests.join('، ')}
+الأماكن المتاحة:
+${placesText}
+
+أنشئ برنامجاً يومياً منطقياً. JSON فقط:
+{"stops":[{"time":"09:00","placeIndex":1,"activity":"...","duration":"ساعة","notes":"..."}],"summary":"..."}`;
+
+    let plan: { stops: Array<{ time: string; placeIndex: number; activity: string; duration: string; notes?: string }>; summary: string } = { stops: [], summary: '' };
+    try {
+      const reply = await this.llm.chat({
+        systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+        maxTokens: 1024,
+      });
+      const match = reply.content.match(/\{[\s\S]*\}/);
+      plan = JSON.parse(match?.[0] ?? '{}') as typeof plan;
+    } catch {
+      plan = { stops: [], summary: `جولة يوم من الموقع ${startLat.toFixed(2)}, ${startLng.toFixed(2)}` };
+    }
+
+    return {
+      summary: plan.summary,
+      durationHours,
+      stops: (plan.stops ?? []).map(s => {
+        const place = allPlaces[s.placeIndex - 1];
+        return {
+          time: s.time,
+          placeId: place?.id,
+          placeName: place?.name ?? `مكان ${s.placeIndex}`,
+          placeAddress: place?.address,
+          activity: s.activity,
+          duration: s.duration,
+          notes: s.notes,
+        };
+      }),
+    };
+  }
+
+  // ─── City knowledge ───────────────────────────────────────────────────────
+
+  async answersAboutCity(city: string, question: string): Promise<string> {
+    const systemPrompt = `أنت خبير في المدن العراقية. أجب على أسئلة المسافرين والسكان المحليين باللغة العربية.
+تخصص في: ${city}. لا تخترع أرقاماً أو أسماء محلات محددة.`;
+
+    const reply = await this.llm.chat({
+      systemPrompt,
+      messages: [{ role: 'user', content: question }],
+      maxTokens: 512,
+    });
+
+    return reply.content;
+  }
+
+  // ─── Translation ──────────────────────────────────────────────────────────
+
+  private readonly translationCache = new Map<string, { result: string; cachedAt: number }>();
+  private readonly TRANSLATION_TTL_MS = 5 * 60 * 1000;
+
+  async translateText(text: string, from: string, to: string): Promise<string> {
+    const cacheKey = `${from}:${to}:${text.slice(0, 80)}`;
+    const cached = this.translationCache.get(cacheKey);
+    if (cached && Date.now() - cached.cachedAt < this.TRANSLATION_TTL_MS) {
+      return cached.result;
+    }
+
+    const langNames: Record<string, string> = {
+      ar: 'العربية', en: 'الإنجليزية', ckb: 'الكردية السورانية', ku: 'الكردية',
+      fa: 'الفارسية', tr: 'التركية',
+    };
+
+    const systemPrompt = `أنت مترجم محترف. ترجم النص المعطى من ${langNames[from] ?? from} إلى ${langNames[to] ?? to}. أجب بالترجمة فقط بدون شرح.`;
+
+    const reply = await this.llm.chat({
+      systemPrompt,
+      messages: [{ role: 'user', content: text }],
+      maxTokens: Math.min(text.length * 3, 1024),
+    });
+
+    const result = reply.content.trim();
+    this.translationCache.set(cacheKey, { result, cachedAt: Date.now() });
+    return result;
+  }
 }

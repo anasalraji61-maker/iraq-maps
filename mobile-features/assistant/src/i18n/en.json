@@ -22,7 +22,18 @@
     "clearChat": "New Chat",
     "clearChatA11y": "Start a new conversation",
     "charCount": "{count}/{max}",
-    "retry": "Retry"
+    "retry": "Retry",
+    "statusOnline": "Online",
+    "shareConversation": "Share conversation",
+    "clearChatConfirm": "Start a new conversation? This one cannot be recovered.",
+    "cancel": "Cancel",
+    "voiceStubTitle": "Voice Input",
+    "voiceStubMessage": "Voice input will be supported in a future update.",
+    "routeTo": "Route to",
+    "routeToA11y": "Start route to {name}",
+    "startRoute": "Go",
+    "ratePlace": "Rate {name}",
+    "rateStars": "{count} stars"
   },
   "tripPlanner": {
     "title": "Trip Planner",
@@ -100,5 +111,19 @@
   },
   "common": {
     "tellMeMoreMessage": "Tell me more about \"{name}\": {reason}"
+  },
+  "contextual": {
+    "title": "AI Assistant",
+    "whatNearMe": "What's near me?",
+    "nearbyFood": "Nearby food options",
+    "planDay": "Plan my day",
+    "routeTo": "Route to {name}",
+    "reviewsOf": "Reviews for {name}",
+    "placesVisible": "{count} places visible",
+    "dismiss": "Close",
+    "expand": "Open full assistant",
+    "expandPrompt": "For more responses, open the full assistant",
+    "placeholder": "Ask about this area...",
+    "fabA11y": "Open AI assistant"
   }
 }
