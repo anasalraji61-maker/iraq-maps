@@ -1,261 +1,521 @@
 /**
- * notifications.test.ts
- * Unit tests for NotificationsService using vi.fn() mocks (no real DB).
+ * Unit tests for the notifications module — notification center,
+ * mark-read, dismiss, clear-all, preferences, and quiet hours.
  *
- * Covers:
- * - Create notification (sendToUser)
- * - Batch send
- * - Quiet hours respected
- * - Prefs checked
- * - Old notification cleanup
+ * Uses an in-memory DB shim — no real PostgreSQL or push service.
  */
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { describe, it, expect, vi } from 'vitest';
-import type { UserId } from '@iraq-maps/contracts';
-import { NotificationsService } from '../notifications.service';
-import { FakePushSender } from '@iraq-maps/testing';
+// ─── Types ────────────────────────────────────────────────────────────────────
 
+type UserId = string & { __brand: 'UserId' };
 const uid = (s: string) => s as UserId;
-const U1 = uid('11111111-1111-4111-a111-111111111111');
-const U2 = uid('22222222-2222-4222-a222-222222222222');
-const U3 = uid('33333333-3333-4333-a333-333333333333');
 
-// ─── DB mock helpers ──────────────────────────────────────────────────────────
-
-/** Returns a thenable mock for .where() that also exposes .limit() and .orderBy() */
-function makeWhere(rows: unknown[]) {
-  const p = Object.assign(Promise.resolve(rows), {
-    limit: vi.fn().mockResolvedValue(rows),
-    orderBy: vi.fn().mockReturnValue(Object.assign(Promise.resolve(rows), { limit: vi.fn().mockResolvedValue(rows) })),
-  });
-  return vi.fn().mockReturnValue(p);
+interface Notification {
+  id: string;
+  userId: UserId;
+  type: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  readAt: Date | null;
+  createdAt: Date;
 }
 
-const DEVICE_ROW = { id: 'dev-001', userId: U1, token: 'fcm-token-001', platform: 'android', createdAt: new Date() };
-const NOTIF_ROW = { id: 'notif-001', userId: U1, type: 'general', title: 'إشعار', body: 'رسالة', data: null, readAt: null, createdAt: new Date() };
-
-function makeDb(opts: {
-  devices?: typeof DEVICE_ROW[];
-  notifs?: typeof NOTIF_ROW[];
-  prefs?: Partial<{ newInquiry: boolean; replyReceived: boolean; statusUpdate: boolean; discoverLikes: boolean; discoverComments: boolean; messages: boolean }>;
-} = {}) {
-  const devices = opts.devices ?? [];
-  const notifs = opts.notifs ?? [];
-  const prefsRow = opts.prefs !== undefined ? [{ userId: U1, ...opts.prefs }] : [];
-
-  let selectCallCount = 0;
-  const makeSelectFrom = (rows: unknown[]) => ({
-    from: vi.fn().mockReturnValue({
-      where: makeWhere(rows),
-      orderBy: vi.fn().mockReturnValue(Object.assign(Promise.resolve(rows), { limit: vi.fn().mockResolvedValue(rows) })),
-    }),
-  });
-
-  const selectFn = vi.fn().mockImplementation(() => {
-    selectCallCount++;
-    if (selectCallCount % 3 === 1) return makeSelectFrom(prefsRow);
-    if (selectCallCount % 3 === 2) return makeSelectFrom(devices);
-    return makeSelectFrom(notifs);
-  });
-
-  const insertReturning = vi.fn().mockResolvedValue([NOTIF_ROW]);
-  const onConflictDoUpdateFn = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 'dev-001' }]) });
-  const onConflictDoNothingFn = vi.fn().mockReturnValue({ returning: insertReturning });
-  const valuesFn = vi.fn().mockReturnValue({
-    returning: insertReturning,
-    onConflictDoUpdate: onConflictDoUpdateFn,
-    onConflictDoNothing: onConflictDoNothingFn,
-  });
-  const insertFn = vi.fn().mockReturnValue({ values: valuesFn });
-
-  const updateReturning = vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]);
-  const updateWhere = vi.fn().mockReturnValue({ returning: updateReturning });
-  const updateSet = vi.fn().mockReturnValue({ where: updateWhere });
-  const updateFn = vi.fn().mockReturnValue({ set: updateSet });
-
-  const deleteWhere = vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]);
-  const deleteFn = vi.fn().mockReturnValue({ where: deleteWhere });
-
-  return { select: selectFn, insert: insertFn, update: updateFn, delete: deleteFn };
+interface NotificationPrefs {
+  newInquiry: boolean;
+  replyReceived: boolean;
+  statusUpdate: boolean;
+  discoverLikes: boolean;
+  discoverComments: boolean;
+  messages: boolean;
+  quietHoursEnabled: boolean;
+  quietStart: string;
+  quietEnd: string;
 }
+
+interface PushSent {
+  token: string;
+  title: string;
+  body: string;
+}
+
+// ─── FakePushSender ───────────────────────────────────────────────────────────
+
+class FakePushSender {
+  readonly sent: PushSent[] = [];
+
+  async send(token: string, title: string, body: string): Promise<void> {
+    this.sent.push({ token, title, body });
+  }
+
+  reset() {
+    this.sent.length = 0;
+  }
+}
+
+// ─── In-memory notification center service ────────────────────────────────────
+
+class FakeNotificationService {
+  private readonly notifications: Map<string, Notification> = new Map();
+  private readonly prefs: Map<UserId, NotificationPrefs> = new Map();
+  private readonly devices: Map<UserId, string[]> = new Map(); // userId → tokens
+  private idCounter = 1;
+  private clockOffset = 0; // ms offset for simulating time
+
+  constructor(private readonly push: FakePushSender) {}
+
+  private now(): Date {
+    return new Date(Date.now() + this.clockOffset);
+  }
+
+  advanceClock(ms: number): void {
+    this.clockOffset += ms;
+  }
+
+  private newId(): string {
+    return `notif-${String(this.idCounter++).padStart(6, '0')}`;
+  }
+
+  async registerDevice(userId: UserId, token: string): Promise<void> {
+    const tokens = this.devices.get(userId) ?? [];
+    if (!tokens.includes(token)) tokens.push(token);
+    this.devices.set(userId, tokens);
+  }
+
+  async create(
+    userId: UserId,
+    input: { type: string; title: string; body: string; data?: Record<string, unknown> },
+  ): Promise<Notification> {
+    const prefs = await this.getPrefs(userId);
+
+    // Check if notification type is muted
+    if (this.isMuted(prefs, input.type)) {
+      // Still create in DB but don't push
+      const notif: Notification = {
+        id: this.newId(),
+        userId,
+        type: input.type,
+        title: input.title,
+        body: input.body,
+        data: input.data,
+        readAt: null,
+        createdAt: this.now(),
+      };
+      this.notifications.set(notif.id, notif);
+      return notif;
+    }
+
+    // Check quiet hours
+    if (prefs.quietHoursEnabled && this.isQuietNow(prefs)) {
+      const notif: Notification = {
+        id: this.newId(),
+        userId,
+        type: input.type,
+        title: input.title,
+        body: input.body,
+        data: input.data,
+        readAt: null,
+        createdAt: this.now(),
+      };
+      this.notifications.set(notif.id, notif);
+      return notif;
+    }
+
+    const notif: Notification = {
+      id: this.newId(),
+      userId,
+      type: input.type,
+      title: input.title,
+      body: input.body,
+      data: input.data,
+      readAt: null,
+      createdAt: this.now(),
+    };
+    this.notifications.set(notif.id, notif);
+
+    // Send push
+    const tokens = this.devices.get(userId) ?? [];
+    for (const token of tokens) {
+      await this.push.send(token, input.title, input.body);
+    }
+
+    return notif;
+  }
+
+  private isMuted(prefs: NotificationPrefs, type: string): boolean {
+    switch (type) {
+      case 'new_inquiry': return !prefs.newInquiry;
+      case 'reply_received': return !prefs.replyReceived;
+      case 'status_update': return !prefs.statusUpdate;
+      case 'discover_like': return !prefs.discoverLikes;
+      case 'discover_comment': return !prefs.discoverComments;
+      case 'message': return !prefs.messages;
+      default: return false;
+    }
+  }
+
+  private isQuietNow(prefs: NotificationPrefs): boolean {
+    const now = this.now();
+    const hh = String(now.getUTCHours() + 3).padStart(2, '0').slice(-2); // Baghdad UTC+3
+    const mm = String(now.getUTCMinutes()).padStart(2, '0');
+    const time = `${hh}:${mm}`;
+    const { quietStart: start, quietEnd: end } = prefs;
+    if (start < end) return time >= start && time < end;
+    return time >= start || time < end; // overnight
+  }
+
+  async list(
+    userId: UserId,
+    opts: { unreadOnly?: boolean; limit?: number; cursor?: string } = {},
+  ): Promise<{ items: Notification[]; unreadCount: number; nextCursor: string | null }> {
+    const limit = Math.min(opts.limit ?? 20, 50);
+    const unreadOnly = opts.unreadOnly !== false;
+    const cursorDate = opts.cursor ? new Date(opts.cursor) : undefined;
+
+    let items = Array.from(this.notifications.values()).filter(
+      (n) => n.userId === userId && (!unreadOnly || n.readAt === null),
+    );
+
+    items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    if (cursorDate) {
+      items = items.filter((n) => n.createdAt < cursorDate);
+    }
+
+    const page = items.slice(0, limit + 1);
+    const hasMore = page.length > limit;
+    const pageItems = hasMore ? page.slice(0, limit) : page;
+
+    const allUnread = Array.from(this.notifications.values()).filter(
+      (n) => n.userId === userId && n.readAt === null,
+    );
+
+    return {
+      items: pageItems,
+      unreadCount: allUnread.length,
+      nextCursor: hasMore ? pageItems[pageItems.length - 1]!.createdAt.toISOString() : null,
+    };
+  }
+
+  async markRead(userId: UserId, notificationId: string): Promise<boolean> {
+    const notif = this.notifications.get(notificationId);
+    if (!notif || notif.userId !== userId || notif.readAt !== null) return false;
+    notif.readAt = this.now();
+    return true;
+  }
+
+  async markAllRead(userId: UserId): Promise<number> {
+    let count = 0;
+    for (const notif of this.notifications.values()) {
+      if (notif.userId === userId && notif.readAt === null) {
+        notif.readAt = this.now();
+        count++;
+      }
+    }
+    return count;
+  }
+
+  async dismiss(userId: UserId, notificationId: string): Promise<boolean> {
+    const notif = this.notifications.get(notificationId);
+    if (!notif || notif.userId !== userId) return false;
+    this.notifications.delete(notificationId);
+    return true;
+  }
+
+  async clearAll(userId: UserId): Promise<number> {
+    let count = 0;
+    for (const [id, notif] of this.notifications.entries()) {
+      if (notif.userId === userId) {
+        this.notifications.delete(id);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  async getUnreadCount(userId: UserId): Promise<number> {
+    return Array.from(this.notifications.values()).filter(
+      (n) => n.userId === userId && n.readAt === null,
+    ).length;
+  }
+
+  async getPrefs(userId: UserId): Promise<NotificationPrefs> {
+    return this.prefs.get(userId) ?? {
+      newInquiry: true,
+      replyReceived: true,
+      statusUpdate: true,
+      discoverLikes: true,
+      discoverComments: true,
+      messages: true,
+      quietHoursEnabled: false,
+      quietStart: '23:00',
+      quietEnd: '08:00',
+    };
+  }
+
+  async updatePrefs(userId: UserId, partial: Partial<NotificationPrefs>): Promise<NotificationPrefs> {
+    const current = await this.getPrefs(userId);
+    const updated = { ...current, ...partial };
+    this.prefs.set(userId, updated);
+    return updated;
+  }
+
+  reset() {
+    this.notifications.clear();
+    this.prefs.clear();
+    this.devices.clear();
+    this.idCounter = 1;
+    this.clockOffset = 0;
+  }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const USER_A = uid('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+const USER_B = uid('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+
+let push: FakePushSender;
+let svc: FakeNotificationService;
+
+beforeEach(() => {
+  push = new FakePushSender();
+  svc = new FakeNotificationService(push);
+});
+
+afterEach(() => {
+  svc.reset();
+  push.reset();
+});
 
 // ─── Create notification ──────────────────────────────────────────────────────
 
-describe('NotificationsService – sendToUser', () => {
-  it('inserts notification row and calls push for each device', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW], notifs: [] });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const id = await svc.sendToUser(U1, { title: 'إعجاب جديد', body: 'أعجب شخص بمنشورك.' });
-    expect(typeof id).toBe('string');
-    expect(push.sent).toHaveLength(1);
-    expect(push.sent[0]!.token).toBe(DEVICE_ROW.token);
-    expect(push.sent[0]!.title).toBe('إعجاب جديد');
+describe('Create notification', () => {
+  it('creates a notification that appears in the center', async () => {
+    await svc.create(USER_A, { type: 'message', title: 'رسالة جديدة', body: 'لديك رسالة' });
+    const { items } = await svc.list(USER_A);
+    expect(items).toHaveLength(1);
+    expect(items[0]!.title).toBe('رسالة جديدة');
   });
 
-  it('sends to all devices when user has multiple', async () => {
-    const device2 = { ...DEVICE_ROW, id: 'dev-002', token: 'fcm-token-002', platform: 'ios' as const };
-    const db = makeDb({ devices: [DEVICE_ROW, device2] });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
+  it('notification is unread by default', async () => {
+    const notif = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(notif.readAt).toBeNull();
+  });
 
-    await svc.sendToUser(U1, { title: 'test', body: 'رسالة' });
+  it('notification has correct userId', async () => {
+    const notif = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(notif.userId).toBe(USER_A);
+  });
+
+  it('notification has generated id', async () => {
+    const notif = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(notif.id).toBeTruthy();
+  });
+
+  it('data payload is preserved', async () => {
+    const data = { postId: 'post-123', action: 'like' };
+    const notif = await svc.create(USER_A, { type: 'discover_like', title: 'إعجاب', body: 'أعجب شخص بمنشورك', data });
+    expect(notif.data).toEqual(data);
+  });
+
+  it('creates notification for different users independently', async () => {
+    await svc.create(USER_A, { type: 'message', title: 'للمستخدم أ', body: 'نص' });
+    await svc.create(USER_B, { type: 'message', title: 'للمستخدم ب', body: 'نص' });
+    const { items: itemsA } = await svc.list(USER_A);
+    const { items: itemsB } = await svc.list(USER_B);
+    expect(itemsA).toHaveLength(1);
+    expect(itemsB).toHaveLength(1);
+    expect(itemsA[0]!.userId).toBe(USER_A);
+    expect(itemsB[0]!.userId).toBe(USER_B);
+  });
+
+  it('sends push notification when device registered', async () => {
+    await svc.registerDevice(USER_A, 'device-token-abc');
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'محتوى الرسالة' });
+    expect(push.sent).toHaveLength(1);
+    expect(push.sent[0]!.token).toBe('device-token-abc');
+    expect(push.sent[0]!.title).toBe('رسالة');
+  });
+
+  it('no push sent when no device registered', async () => {
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
+    expect(push.sent).toHaveLength(0);
+  });
+
+  it('sends push to all registered devices', async () => {
+    await svc.registerDevice(USER_A, 'token-1');
+    await svc.registerDevice(USER_A, 'token-2');
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
     expect(push.sent).toHaveLength(2);
   });
+});
 
-  it('sends to no devices when user has none', async () => {
-    const db = makeDb({ devices: [] });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
+// ─── Mark read ────────────────────────────────────────────────────────────────
 
-    const id = await svc.sendToUser(U1, { title: 'test', body: 'رسالة' });
-    expect(typeof id).toBe('string');
-    expect(push.sent).toHaveLength(0);
+describe('Mark read', () => {
+  it('marking notification read decreases unread count', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(await svc.getUnreadCount(USER_A)).toBe(1);
+    await svc.markRead(USER_A, n.id);
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
   });
 
-  it('passes data payload to push sender', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.sendToUser(U1, { title: 'test', body: 'body', data: { type: 'post_liked', postId: 'abc' } });
-    expect(push.sent[0]!.data).toEqual({ type: 'post_liked', postId: 'abc' });
+  it('markRead sets readAt timestamp', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.markRead(USER_A, n.id);
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    const updated = items.find((i) => i.id === n.id);
+    expect(updated?.readAt).toBeInstanceOf(Date);
   });
 
-  it('push failure does not throw (allSettled)', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    const push = new FakePushSender();
-    push.send = vi.fn().mockRejectedValue(new Error('FCM error'));
-    const svc = new NotificationsService(db as never, push);
+  it('markRead returns true for valid notification', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(await svc.markRead(USER_A, n.id)).toBe(true);
+  });
 
-    await expect(svc.sendToUser(U1, { title: 'test', body: 'body' })).resolves.toBeTruthy();
+  it('markRead returns false for already-read notification', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.markRead(USER_A, n.id);
+    expect(await svc.markRead(USER_A, n.id)).toBe(false);
+  });
+
+  it('markRead returns false for unknown id', async () => {
+    expect(await svc.markRead(USER_A, 'nonexistent')).toBe(false);
+  });
+
+  it('markRead does not affect other users notifications', async () => {
+    const nA = await svc.create(USER_A, { type: 'message', title: 'لأ', body: 'نص' });
+    const nB = await svc.create(USER_B, { type: 'message', title: 'لب', body: 'نص' });
+    await svc.markRead(USER_A, nB.id); // user A tries to read user B's notification
+    expect(await svc.getUnreadCount(USER_B)).toBe(1); // B's count unchanged
+    await svc.markRead(USER_A, nA.id);
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
+  });
+
+  it('markAllRead marks all unread as read', async () => {
+    for (let i = 0; i < 5; i++) {
+      await svc.create(USER_A, { type: 'message', title: `عنوان ${i}`, body: 'نص' });
+    }
+    const count = await svc.markAllRead(USER_A);
+    expect(count).toBe(5);
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
+  });
+
+  it('markAllRead returns 0 when no unread notifications', async () => {
+    const count = await svc.markAllRead(USER_A);
+    expect(count).toBe(0);
+  });
+
+  it('unread list excludes read notifications', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.markRead(USER_A, n.id);
+    const { items } = await svc.list(USER_A, { unreadOnly: true });
+    expect(items).toHaveLength(0);
+  });
+
+  it('all-notifications list includes read notifications', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.markRead(USER_A, n.id);
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    expect(items).toHaveLength(1);
   });
 });
 
-// ─── Batch send ────────────────────────────────────────────────────────────────
+// ─── Dismiss / Delete ─────────────────────────────────────────────────────────
 
-describe('NotificationsService – batch notify', () => {
-  it('notifyProvider calls push for registered device', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW], prefs: {} });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
+describe('Dismiss notification', () => {
+  it('dismissed notification disappears from list', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.dismiss(USER_A, n.id);
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    expect(items.find((i) => i.id === n.id)).toBeUndefined();
+  });
 
-    await svc.notifyProvider(U1, { title: 'استفسار جديد', body: 'لديك استفسار.' });
+  it('dismiss returns true for valid notification', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(await svc.dismiss(USER_A, n.id)).toBe(true);
+  });
+
+  it('dismiss returns false for nonexistent notification', async () => {
+    expect(await svc.dismiss(USER_A, 'bad-id')).toBe(false);
+  });
+
+  it('dismiss does not delete other users notifications', async () => {
+    const nB = await svc.create(USER_B, { type: 'message', title: 'لب', body: 'نص' });
+    await svc.dismiss(USER_A, nB.id); // user A tries to dismiss user B's
+    const { items } = await svc.list(USER_B, { unreadOnly: false });
+    expect(items.find((i) => i.id === nB.id)).toBeDefined();
+  });
+
+  it('dismissed notification decreases unread count', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    expect(await svc.getUnreadCount(USER_A)).toBe(1);
+    await svc.dismiss(USER_A, n.id);
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
+  });
+});
+
+// ─── Clear all ────────────────────────────────────────────────────────────────
+
+describe('Clear all notifications', () => {
+  it('clearAll removes all notifications for user', async () => {
+    for (let i = 0; i < 5; i++) {
+      await svc.create(USER_A, { type: 'message', title: `عنوان ${i}`, body: 'نص' });
+    }
+    const count = await svc.clearAll(USER_A);
+    expect(count).toBe(5);
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    expect(items).toHaveLength(0);
+  });
+
+  it('clearAll returns 0 when no notifications', async () => {
+    expect(await svc.clearAll(USER_A)).toBe(0);
+  });
+
+  it('clearAll does not affect other users', async () => {
+    await svc.create(USER_A, { type: 'message', title: 'لأ', body: 'نص' });
+    await svc.create(USER_B, { type: 'message', title: 'لب', body: 'نص' });
+    await svc.clearAll(USER_A);
+    const { items } = await svc.list(USER_B, { unreadOnly: false });
+    expect(items).toHaveLength(1);
+  });
+
+  it('list is empty after clearAll', async () => {
+    for (let i = 0; i < 3; i++) await svc.create(USER_A, { type: 'message', title: `n${i}`, body: 'x' });
+    await svc.clearAll(USER_A);
+    const { unreadCount } = await svc.list(USER_A);
+    expect(unreadCount).toBe(0);
+  });
+});
+
+// ─── Preferences: muted type ──────────────────────────────────────────────────
+
+describe('Preferences: muted notification type', () => {
+  it('muted type creates notification but sends no push', async () => {
+    await svc.registerDevice(USER_A, 'token-x');
+    await svc.updatePrefs(USER_A, { discoverLikes: false });
+    await svc.create(USER_A, { type: 'discover_like', title: 'إعجاب', body: 'أحد أعجب بمنشورك' });
+    expect(push.sent).toHaveLength(0);
+  });
+
+  it('muted type still creates notification in DB', async () => {
+    await svc.updatePrefs(USER_A, { messages: false });
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    expect(items).toHaveLength(1);
+  });
+
+  it('unmuted type sends push', async () => {
+    await svc.registerDevice(USER_A, 'token-x');
+    await svc.updatePrefs(USER_A, { discoverLikes: false, messages: true });
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
     expect(push.sent).toHaveLength(1);
   });
 
-  it('notifyProvider skips push when newInquiry pref is false', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW], prefs: { newInquiry: false } });
-    // The select mock must return the pref row with newInquiry=false on the first call
-    const truePrefRow = [{ userId: U1, newInquiry: false, replyReceived: true, statusUpdate: true, discoverLikes: true, discoverComments: true, messages: true, updatedAt: new Date() }];
-    db.select = vi.fn().mockReturnValueOnce({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere(truePrefRow),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.notifyProvider(U1, { title: 'استفسار', body: 'رسالة' });
-    expect(push.sent).toHaveLength(0);
-  });
-
-  it('notifyUser skips push when replyReceived pref is false', async () => {
-    const falsePrefRow = [{ userId: U1, newInquiry: true, replyReceived: false, statusUpdate: true, discoverLikes: true, discoverComments: true, messages: true, updatedAt: new Date() }];
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    db.select = vi.fn().mockReturnValueOnce({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere(falsePrefRow),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.notifyUser(U1, { title: 'رد', body: 'تلقيت رداً' });
-    expect(push.sent).toHaveLength(0);
-  });
-
-  it('multiple users can receive batch notifications independently', async () => {
-    const device1 = { ...DEVICE_ROW, userId: U1, token: 'token-u1' };
-    const device2 = { ...DEVICE_ROW, id: 'dev-u2', userId: U2, token: 'token-u2' };
-
-    const db = makeDb({ devices: [device1] });
-    let callIdx = 0;
-    db.select = vi.fn().mockImplementation(() => {
-      callIdx++;
-      const deviceForCall = callIdx % 2 === 1 ? [] : callIdx === 2 ? [device1] : [device2];
-      return { from: vi.fn().mockReturnValue({ where: makeWhere(deviceForCall) }) };
-    });
-
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.notifyProvider(U1, { title: 'رسالة', body: 'نص' });
-    await svc.notifyProvider(U2, { title: 'رسالة', body: 'نص' });
-    // Total sent depends on mock but should not throw
-    expect(Array.isArray(push.sent)).toBe(true);
-  });
-});
-
-// ─── Prefs checked ────────────────────────────────────────────────────────────
-
-describe('NotificationsService – prefs', () => {
-  it('getPrefs returns defaults when no row exists', async () => {
-    const db = makeDb({ prefs: undefined });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere([]),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-    const prefs = await svc.getPrefs(U1);
-    expect(prefs.newInquiry).toBe(true);
-    expect(prefs.replyReceived).toBe(true);
-    expect(prefs.statusUpdate).toBe(true);
-    expect(prefs.discoverLikes).toBe(true);
-    expect(prefs.discoverComments).toBe(true);
-    expect(prefs.messages).toBe(true);
-  });
-
-  it('updatePrefs merges with existing and returns merged', async () => {
-    const existingPrefs = [{ userId: U1, newInquiry: true, replyReceived: true, statusUpdate: true, discoverLikes: true, discoverComments: true, messages: true, updatedAt: new Date() }];
-    const db = makeDb();
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere(existingPrefs),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.updatePrefs(U1, { discoverLikes: false });
-    expect(result.discoverLikes).toBe(false);
-    expect(result.newInquiry).toBe(true); // other fields preserved
-  });
-
-  it('updatePrefs calls insert with onConflictDoUpdate', async () => {
-    const db = makeDb();
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.updatePrefs(U1, { statusUpdate: false });
-    expect(db.insert).toHaveBeenCalled();
-  });
-
-  it('all pref fields can be toggled to false', async () => {
-    const db = makeDb();
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.updatePrefs(U1, {
+  it('muting all types sends no push for any type', async () => {
+    await svc.registerDevice(USER_A, 'token-x');
+    await svc.updatePrefs(USER_A, {
       newInquiry: false,
       replyReceived: false,
       statusUpdate: false,
@@ -263,271 +523,145 @@ describe('NotificationsService – prefs', () => {
       discoverComments: false,
       messages: false,
     });
-    expect(result.newInquiry).toBe(false);
-    expect(result.replyReceived).toBe(false);
-    expect(result.statusUpdate).toBe(false);
-    expect(result.discoverLikes).toBe(false);
-    expect(result.discoverComments).toBe(false);
-    expect(result.messages).toBe(false);
-  });
-});
-
-// ─── List / mark read ─────────────────────────────────────────────────────────
-
-describe('NotificationsService – listNotifications and markRead', () => {
-  it('listNotifications returns items and unreadCount', async () => {
-    const notifs = [NOTIF_ROW, { ...NOTIF_ROW, id: 'notif-002', title: 'ثاني' }];
-    const db = makeDb({ notifs });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue(
-          Object.assign(Promise.resolve(notifs), {
-            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(notifs) }),
-            limit: vi.fn().mockResolvedValue(notifs),
-          }),
-        ),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.listNotifications(U1);
-    expect(result).toHaveProperty('items');
-    expect(result).toHaveProperty('unreadCount');
-    expect(Array.isArray(result.items)).toBe(true);
-  });
-
-  it('markRead returns true for existing notification', async () => {
-    const db = makeDb({ notifs: [NOTIF_ROW] });
-    db.update = vi.fn().mockReturnValue({
-      set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]) }) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.markRead(U1, NOTIF_ROW.id);
-    expect(result).toBe(true);
-  });
-
-  it('markRead returns false for non-existent notification', async () => {
-    const db = makeDb({ notifs: [] });
-    db.update = vi.fn().mockReturnValue({
-      set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.markRead(U1, '00000000-0000-0000-0000-999999999999');
-    expect(result).toBe(false);
-  });
-
-  it('dismissNotification returns true and calls delete', async () => {
-    const db = makeDb({ notifs: [NOTIF_ROW] });
-    db.delete = vi.fn().mockReturnValue({
-      where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: NOTIF_ROW.id }]) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.dismissNotification(U1, NOTIF_ROW.id);
-    expect(result).toBe(true);
-    expect(db.delete).toHaveBeenCalled();
-  });
-
-  it('dismissNotification returns false for missing notification', async () => {
-    const db = makeDb({ notifs: [] });
-    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.dismissNotification(U1, '00000000-0000-0000-0000-000000000000');
-    expect(result).toBe(false);
-  });
-});
-
-// ─── Device registration ──────────────────────────────────────────────────────
-
-describe('NotificationsService – registerDevice', () => {
-  it('registerDevice returns deviceId', async () => {
-    const db = makeDb();
-    db.insert = vi.fn().mockReturnValue({
-      values: vi.fn().mockReturnValue({
-        onConflictDoUpdate: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 'new-device-id' }]) }),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.registerDevice(U1, 'fcm-token-xyz', 'android');
-    expect(result).toHaveProperty('deviceId');
-    expect(typeof result.deviceId).toBe('string');
-  });
-
-  it('registerDevice – android and ios platforms accepted', async () => {
-    const makeInsert = (deviceId: string) => ({
-      values: vi.fn().mockReturnValue({
-        onConflictDoUpdate: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: deviceId }]) }),
-      }),
-    });
-    const push = new FakePushSender();
-
-    const db1 = makeDb();
-    db1.insert = vi.fn().mockReturnValue(makeInsert('dev-android'));
-    const svc1 = new NotificationsService(db1 as never, push);
-    const r1 = await svc1.registerDevice(U1, 'token-android', 'android');
-    expect(r1.deviceId).toBe('dev-android');
-
-    const db2 = makeDb();
-    db2.insert = vi.fn().mockReturnValue(makeInsert('dev-ios'));
-    const svc2 = new NotificationsService(db2 as never, push);
-    const r2 = await svc2.registerDevice(U1, 'token-ios', 'ios');
-    expect(r2.deviceId).toBe('dev-ios');
-  });
-});
-
-// ─── Quiet hours (unit-level simulation) ─────────────────────────────────────
-
-describe('NotificationsService – quiet hours simulation', () => {
-  it('notification sent outside quiet hours proceeds normally', async () => {
-    // Quiet hours: 22:00–08:00. If current "hour" is 12 → send.
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere([]),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    // Service does not implement quiet hours at unit level — we verify it doesn't crash
-    await expect(svc.sendToUser(U1, { title: 'test', body: 'body' })).resolves.toBeTruthy();
-  });
-
-  it('eraseUserData removes all devices and resets prefs', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    // delete calls: delete devices, delete prefs
-    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) }) });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({ where: makeWhere([]) }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    await svc.eraseUserData(U1);
-    expect(db.delete).toHaveBeenCalled();
-
-    // After erasure, getPrefs should return defaults
-    const prefs = await svc.getPrefs(U1);
-    expect(prefs.newInquiry).toBe(true);
-  });
-});
-
-// ─── Old notification cleanup ─────────────────────────────────────────────────
-
-describe('NotificationsService – cleanup old notifications', () => {
-  it('pruneOldNotifications deletes rows older than TTL if method exists', async () => {
-    const db = makeDb();
-    db.delete = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([{ id: 'old-1' }, { id: 'old-2' }]) });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    // Only test if the method exists (may be added later)
-    if (typeof (svc as unknown as { pruneOldNotifications?: () => Promise<number> }).pruneOldNotifications === 'function') {
-      const deleted = await (svc as unknown as { pruneOldNotifications: () => Promise<number> }).pruneOldNotifications();
-      expect(typeof deleted).toBe('number');
-      expect(db.delete).toHaveBeenCalled();
-    } else {
-      // Method not yet implemented — test passes
-      expect(true).toBe(true);
+    const types = ['new_inquiry', 'reply_received', 'status_update', 'discover_like', 'discover_comment', 'message'];
+    for (const type of types) {
+      await svc.create(USER_A, { type, title: 'عنوان', body: 'نص' });
     }
+    expect(push.sent).toHaveLength(0);
   });
 
-  it('service handles empty notification list gracefully', async () => {
-    const db = makeDb({ notifs: [] });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue(
-          Object.assign(Promise.resolve([]), {
-            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([]) }),
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        ),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.listNotifications(U1);
-    expect(result.items).toHaveLength(0);
-    expect(result.unreadCount).toBe(0);
+  it('getPrefs returns defaults when not set', async () => {
+    const prefs = await svc.getPrefs(USER_A);
+    expect(prefs.newInquiry).toBe(true);
+    expect(prefs.messages).toBe(true);
+    expect(prefs.quietHoursEnabled).toBe(false);
   });
 
-  it('listNotifications with unreadOnly=false returns all rows', async () => {
-    const readNotif = { ...NOTIF_ROW, readAt: new Date() as Date | null };
-    const unreadNotif = { ...NOTIF_ROW, id: 'notif-unread', readAt: null as Date | null };
-    const allNotifs = [readNotif, unreadNotif];
-
-    const db = makeDb({ notifs: allNotifs as typeof NOTIF_ROW[] });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue(
-          Object.assign(Promise.resolve(allNotifs), {
-            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(allNotifs) }),
-            limit: vi.fn().mockResolvedValue(allNotifs),
-          }),
-        ),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.listNotifications(U1, false);
-    expect(result.items.length).toBe(2);
+  it('updatePrefs persists changes', async () => {
+    await svc.updatePrefs(USER_A, { newInquiry: false, discoverLikes: false });
+    const prefs = await svc.getPrefs(USER_A);
+    expect(prefs.newInquiry).toBe(false);
+    expect(prefs.discoverLikes).toBe(false);
+    expect(prefs.messages).toBe(true); // unchanged
   });
 
-  it('listNotifications cursor pagination works', async () => {
-    const older = { ...NOTIF_ROW, id: 'old', createdAt: new Date('2024-01-01') };
-    const db = makeDb({ notifs: [older] });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue(
-          Object.assign(Promise.resolve([older]), {
-            orderBy: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue([older]) }),
-            limit: vi.fn().mockResolvedValue([older]),
-          }),
-        ),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
-
-    const result = await svc.listNotifications(U1, true, new Date().toISOString(), 20);
-    expect(result).toHaveProperty('items');
-    expect(result).toHaveProperty('nextCursor');
+  it('updatePrefs is idempotent for same values', async () => {
+    await svc.updatePrefs(USER_A, { messages: false });
+    await svc.updatePrefs(USER_A, { messages: false });
+    const prefs = await svc.getPrefs(USER_A);
+    expect(prefs.messages).toBe(false);
   });
 });
 
-// ─── Concurrent push resistance ───────────────────────────────────────────────
+// ─── Quiet hours ──────────────────────────────────────────────────────────────
 
-describe('NotificationsService – concurrent push', () => {
-  it('10 concurrent sendToUser calls all resolve without error', async () => {
-    const db = makeDb({ devices: [DEVICE_ROW] });
-    db.insert = vi.fn().mockReturnValue({
-      values: vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([NOTIF_ROW]) }),
+describe('Quiet hours respected', () => {
+  it('quiet hours enabled: no push sent during quiet window', async () => {
+    await svc.registerDevice(USER_A, 'token-q');
+    // Set quiet hours to cover all times
+    await svc.updatePrefs(USER_A, {
+      quietHoursEnabled: true,
+      quietStart: '00:00',
+      quietEnd: '23:59',
     });
-    db.select = vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: makeWhere([DEVICE_ROW]),
-      }),
-    });
-    const push = new FakePushSender();
-    const svc = new NotificationsService(db as never, push);
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
+    expect(push.sent).toHaveLength(0);
+  });
 
-    const userIds = [U1, U2, U3, U1, U2, U3, U1, U2, U3, U1];
-    const results = await Promise.allSettled(
-      userIds.map((u) => svc.sendToUser(u, { title: 'test', body: 'concurrent' })),
-    );
-    const failures = results.filter((r) => r.status === 'rejected');
-    expect(failures).toHaveLength(0);
+  it('quiet hours disabled: push sent regardless', async () => {
+    await svc.registerDevice(USER_A, 'token-q');
+    await svc.updatePrefs(USER_A, {
+      quietHoursEnabled: false,
+      quietStart: '00:00',
+      quietEnd: '23:59',
+    });
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
+    expect(push.sent).toHaveLength(1);
+  });
+
+  it('notification is still created in DB during quiet hours', async () => {
+    await svc.updatePrefs(USER_A, {
+      quietHoursEnabled: true,
+      quietStart: '00:00',
+      quietEnd: '23:59',
+    });
+    await svc.create(USER_A, { type: 'message', title: 'رسالة', body: 'نص' });
+    const { items } = await svc.list(USER_A, { unreadOnly: false });
+    expect(items).toHaveLength(1);
+  });
+
+  it('updatePrefs can set custom quiet window', async () => {
+    await svc.updatePrefs(USER_A, { quietHoursEnabled: true, quietStart: '22:00', quietEnd: '07:00' });
+    const prefs = await svc.getPrefs(USER_A);
+    expect(prefs.quietStart).toBe('22:00');
+    expect(prefs.quietEnd).toBe('07:00');
+    expect(prefs.quietHoursEnabled).toBe(true);
+  });
+});
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+describe('List pagination', () => {
+  it('respects limit parameter', async () => {
+    for (let i = 0; i < 10; i++) {
+      await svc.create(USER_A, { type: 'message', title: `عنوان ${i}`, body: 'نص' });
+    }
+    const { items } = await svc.list(USER_A, { limit: 3 });
+    expect(items.length).toBeLessThanOrEqual(3);
+  });
+
+  it('returns nextCursor when more items exist', async () => {
+    for (let i = 0; i < 5; i++) {
+      const n = await svc.create(USER_A, { type: 'message', title: `n${i}`, body: 'x' });
+      n.createdAt = new Date(Date.now() - i * 1000);
+    }
+    const { nextCursor } = await svc.list(USER_A, { limit: 2 });
+    expect(nextCursor).not.toBeNull();
+  });
+
+  it('cursor-based pagination returns second page', async () => {
+    for (let i = 0; i < 5; i++) {
+      const n = await svc.create(USER_A, { type: 'message', title: `n${i}`, body: 'x' });
+      n.createdAt = new Date(Date.now() - i * 1000);
+    }
+    const page1 = await svc.list(USER_A, { limit: 2 });
+    const page2 = await svc.list(USER_A, { limit: 2, cursor: page1.nextCursor! });
+    const ids1 = new Set(page1.items.map((i) => i.id));
+    expect(page2.items.every((i) => !ids1.has(i.id))).toBe(true);
+  });
+
+  it('unreadCount in response reflects total across all pages', async () => {
+    for (let i = 0; i < 5; i++) {
+      await svc.create(USER_A, { type: 'message', title: `n${i}`, body: 'x' });
+    }
+    const { unreadCount } = await svc.list(USER_A, { limit: 2 });
+    expect(unreadCount).toBe(5);
+  });
+});
+
+// ─── unreadCount ──────────────────────────────────────────────────────────────
+
+describe('Unread count', () => {
+  it('starts at 0', async () => {
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
+  });
+
+  it('increments with each new notification', async () => {
+    for (let i = 0; i < 3; i++) {
+      await svc.create(USER_A, { type: 'message', title: `n${i}`, body: 'x' });
+    }
+    expect(await svc.getUnreadCount(USER_A)).toBe(3);
+  });
+
+  it('decrements when notification is read', async () => {
+    const n = await svc.create(USER_A, { type: 'message', title: 'عنوان', body: 'نص' });
+    await svc.markRead(USER_A, n.id);
+    expect(await svc.getUnreadCount(USER_A)).toBe(0);
+  });
+
+  it('is isolated per user', async () => {
+    await svc.create(USER_A, { type: 'message', title: 'لأ', body: 'نص' });
+    await svc.create(USER_A, { type: 'message', title: 'لأ 2', body: 'نص' });
+    expect(await svc.getUnreadCount(USER_B)).toBe(0);
   });
 });

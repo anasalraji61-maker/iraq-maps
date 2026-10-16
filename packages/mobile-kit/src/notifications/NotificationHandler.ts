@@ -259,6 +259,66 @@ export class NotificationHandler {
     this._setBadge(0);
   }
 
+  // ── Local scheduled notifications ─────────────────────────────────────────
+
+  /**
+   * Schedule a local notification to fire at a specific time.
+   *
+   * Returns the identifier assigned by Expo Notifications, which can be
+   * passed to cancelLocalNotification() to cancel before it fires.
+   *
+   * @param title  Notification title shown in the system tray.
+   * @param body   Notification body text.
+   * @param at     The Date (or ISO string) when the notification should appear.
+   */
+  async scheduleLocalNotification(
+    title: string,
+    body: string,
+    at: Date | string,
+  ): Promise<string> {
+    const fireDate = typeof at === 'string' ? new Date(at) : at;
+    const secondsFromNow = Math.max(
+      1,
+      Math.round((fireDate.getTime() - Date.now()) / 1_000),
+    );
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Notifications = require('expo-notifications') as {
+        scheduleNotificationAsync(req: {
+          content: { title: string; body: string };
+          trigger: { seconds: number };
+        }): Promise<string>;
+      };
+      const id = await Notifications.scheduleNotificationAsync({
+        content: { title, body },
+        trigger: { seconds: secondsFromNow },
+      });
+      return id;
+    } catch {
+      // Native module not available (web / test environment).
+      return `local_mock_${Date.now()}`;
+    }
+  }
+
+  /**
+   * Cancel a previously scheduled local notification by its identifier.
+   *
+   * Safe to call even if the notification has already fired or the id is
+   * unknown; in those cases it silently succeeds.
+   */
+  async cancelLocalNotification(id: string): Promise<void> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Notifications = require('expo-notifications') as {
+        cancelScheduledNotificationAsync(id: string): Promise<void>;
+      };
+      await Notifications.cancelScheduledNotificationAsync(id);
+    } catch {
+      /* best-effort; ignore errors in test / web environment */
+    }
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private _navigate(data: PushNotificationData): void {

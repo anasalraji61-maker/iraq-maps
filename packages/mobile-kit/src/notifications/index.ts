@@ -16,4 +16,6 @@ export {
   type BannerOptions,
   type BannerDismissCallback,
   type TokenRegistrationApi,
+  // New in this milestone: local scheduling helpers
+  // (accessed via notificationHandler.scheduleLocalNotification / cancelLocalNotification)
 } from './NotificationHandler';
