@@ -34,3 +34,5 @@ export { HeatmapGrid } from './components/charts/HeatmapGrid';
 export { AppointmentsScreen } from './screens/AppointmentsScreen';
 export { ListingsManagementScreen } from './screens/ListingsManagementScreen';
 export { ScoreBreakdownScreen } from './screens/ScoreBreakdownScreen';
+export { ProviderRegistrationWizardScreen } from './screens/ProviderRegistrationWizardScreen';
+export { VerificationStatusScreen } from './screens/VerificationStatusScreen';
