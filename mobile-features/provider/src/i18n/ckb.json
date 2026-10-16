@@ -805,5 +805,79 @@
       "errorPrice": "نرخێکی دروست بنووسە",
       "errorSave": "نەتوانرا پاشەکەوت بکرێت. دووبارە هەوڵ بدەرەوە."
     }
+  },
+  "ranking": {
+    "title": "نمرەی فرۆشگاکەت",
+    "overall": "نمرەی گشتی",
+    "outOf": "لە ١٠٠",
+    "computedAt": "بەرواری ژماردن: {{date}}",
+    "components": {
+      "rating": "هەڵسەنگاندنەکان",
+      "engagement": "بەشداربوون",
+      "completeness": "تەواوبوونی پرۆفایل",
+      "activity": "چالاکی"
+    },
+    "weights": {
+      "rating": "٤٠٪ لە نمرەی گشتی",
+      "engagement": "٣٠٪ لە نمرەی گشتی",
+      "completeness": "٢٠٪ لە نمرەی گشتی",
+      "activity": "١٠٪ لە نمرەی گشتی"
+    },
+    "detail": {
+      "reviewCount": "{{count}} هەڵسەنگاندن",
+      "avgStar": "{{value}} ئەستێرە",
+      "responseRate": "ڕێژەی وەڵام: {{pct}}٪",
+      "avgResponseTime": "کاتی وەڵام: {{h}} کاتژمێر",
+      "monthlyMessages": "{{count}} نامە ئەم مانگە",
+      "photoCount": "{{count}} وێنە",
+      "menuItems": "{{count}} بabet لە مینیو",
+      "lastUpdate": "دوایین نوێکردنەوە {{days}} ڕۆژ پێش",
+      "postsLastMonth": "{{count}} بڵاوکراوە ئەم مانگە"
+    },
+    "howRanked": {
+      "title": "چۆن ڕیزبەندی دەبیت؟",
+      "body": "ڕیزبەندیت بەپێی هەڵسەنگاندن و بەشداربوون و چالاکی دیاردەبێت.",
+      "verifiedBoost": "پشتڕاستکراوە +١٥٪",
+      "nearbyBoost": "نزیک +١٠٪",
+      "openNowBoost": "ئێستا کراوەیە +٥٪",
+      "newProviderBoost": "فرۆشگای نوێ +١٥٪",
+      "slowResponsePenalty": "وەڵامدانەوەی هێواش -١٠٪"
+    },
+    "history": {
+      "title": "مێژووی نمرە (٣٠ ڕۆژ)",
+      "noData": "هێشتا داتا نییە"
+    },
+    "comparison": {
+      "title": "بەراوردکردن لەگەڵ فرۆشگاکانی هاوشێوە",
+      "youAre": "تۆ جێگای #{{rank}} لە {{total}}",
+      "aboveAvg": "سەرووی مامناوەند",
+      "average": "مامناوەند",
+      "belowAvg": "خوارووی مامناوەند"
+    },
+    "tips": {
+      "title": "چۆن نمرەکەت باشتر بکەیت؟",
+      "askForReviews": "داواکاری هەڵسەنگاندن بکە.",
+      "improveService": "تجربەی مشتەری باشتر بکە.",
+      "respondToMessages": "وەڵامی نامەکان بدەرەوە.",
+      "respondFaster": "لە ماوەی ١ کاتژمێر وەڵام بدەیتەوە.",
+      "addPhone": "ژمارەی تەلەفۆن زیاد بکە.",
+      "addHours": "کاتی کارکردن زیاد بکە.",
+      "addLocation": "شوێنی جوگرافیت زیاد بکە.",
+      "addPhotos": "لانیکەم ٣ وێنە زیاد بکە.",
+      "addMenuItems": "بabet بۆ مینیو زیاد بکە.",
+      "updateProfile": "پرۆفایلت نوێ بکەرەوە.",
+      "postMore": "بە ڕێکوپێکی بڵاوکراوە بنووسە."
+    },
+    "badge": {
+      "topRated": "باشترین نمرە",
+      "featured": "تایبەت",
+      "bestMatch": "باشترین هاوتا"
+    },
+    "sort": {
+      "bestMatch": "باشترین هاوتا",
+      "distance": "نزیکترین",
+      "rating": "باشترین نمرە",
+      "popularity": "بەناوبانگترین"
+    }
   }
 }

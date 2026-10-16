@@ -313,7 +313,45 @@
     "footerHint": "Tap a region to view details",
     "storageUsed": "Storage used",
     "expiringBadge": "Expiring soon",
-    "estimatedSize": "Est. size"
+    "estimatedSize": "Est. size",
+    "presetErbil": "Erbil",
+    "presetBasra": "Basra",
+    "presetBaghdadDesc": "Baghdad city centre and surroundings",
+    "presetSulaymaniyahDesc": "Sulaymaniyah city centre",
+    "presetMosulDesc": "Mosul city",
+    "presetErbilDesc": "Erbil city centre",
+    "presetBasraDesc": "Basra city centre",
+    "wifiOnlyLabel": "Wi-Fi downloads only",
+    "wifiOnlySub": "Don't download over cellular",
+    "autoUpdateLabel": "Auto-update weekly",
+    "autoUpdateSub": "Refresh saved regions every week",
+    "wifiBadge": "Wi-Fi only",
+    "updateAvailableBadge": "Update available",
+    "updateLabel": "Update",
+    "completeLabelMb": "{mb} MB — {date}",
+    "etaLabel": "{secs}s remaining",
+    "detailTiles": "{n} tiles cached",
+    "detailExpiry": "Expires: {date}",
+    "notifTitle": "Download complete",
+    "notifBody": "\"{name}\" is ready for offline use"
+  },
+  "offlineBanner": {
+    "offlineTitle": "Offline — map & search only",
+    "staleTitle": "Data may be outdated",
+    "staleSubtitle": "Content may not reflect current conditions",
+    "lastSync": "Last sync: {time}",
+    "retry": "Retry",
+    "toggleDetails": "Toggle offline details",
+    "worksOfflineTitle": "Works offline",
+    "featureMap": "Map",
+    "featureSearch": "Search",
+    "featurePlaces": "Places",
+    "downloadAreaSuggestion": "Download this area for offline use",
+    "downloadAreaA11y": "Download the current map area",
+    "timeJustNow": "Just now",
+    "timeMinutesAgo": "{n}m ago",
+    "timeHoursAgo": "{n}h ago",
+    "timeDaysAgo": "{n}d ago"
   },
   "mapStyle": {
     "label": "Map style",
@@ -957,5 +995,60 @@
     "meetSub": "Share a meeting point with friends",
     "meetGenerate": "Create meet link",
     "meetShareText": "Let's meet here on Iraq Maps"
+  },
+  "contextMenu": {
+    "dismiss": "Close menu",
+    "directionsTo": "Directions to here",
+    "directionsFrom": "Directions from here",
+    "whatsHere": "What's here?",
+    "addPlace": "Add a place",
+    "share": "Share location",
+    "copyCoords": "Copy coordinates",
+    "shareMessageAddress": "{address}\n{coords}",
+    "shareMessageCoords": "{coords}"
+  },
+  "pin": {
+    "dropped": "Pin dropped",
+    "dismiss": "Remove pin"
+  },
+  "compass": {
+    "label": "Reset bearing"
+  },
+  "scalebar": {
+    "km": "{n} km",
+    "m": "{n} m"
+  },
+  "attribution": {
+    "osm": "© OpenStreetMap"
+  },
+  "locationFab": {
+    "label": "My location"
+  },
+  "ranking": {
+    "badge": {
+      "topRated": "Top Rated",
+      "featured": "Featured",
+      "bestMatch": "Best Match"
+    },
+    "sort": {
+      "bestMatch": "Best Match",
+      "distance": "Nearest",
+      "rating": "Top Rated",
+      "popularity": "Most Popular"
+    }
+  },
+  "promoBadge": {
+    "percentOff": "{n}% off",
+    "fixedOff": "{n} IQD off",
+    "discount": "Discount",
+    "bogo": "Buy 1 Get 1",
+    "freeItem": "Free item",
+    "happyHour": "Happy hour",
+    "firstVisit": "First visit",
+    "new": "New",
+    "expired": "Expired",
+    "expiresMinutes": "Expires in {n}m",
+    "expiresHours": "Expires in {n}h",
+    "expiresDays": "Expires in {n}d"
   }
 }

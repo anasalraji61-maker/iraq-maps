@@ -313,7 +313,45 @@
     "footerHint": "تووش بکە بۆ بینینی وردەکارییەکان",
     "storageUsed": "کارپێکراوی مێموری",
     "expiringBadge": "بەزووی بەسەرچووە",
-    "estimatedSize": "قەبارەی تاقمی"
+    "estimatedSize": "قەبارەی تاقمی",
+    "presetErbil": "هەولێر",
+    "presetBasra": "بەسرە",
+    "presetBaghdadDesc": "ناوەندی بەغدا و دەوروبەری",
+    "presetSulaymaniyahDesc": "ناوەندی شاری سلێمانی",
+    "presetMosulDesc": "شاری موسڵ",
+    "presetErbilDesc": "ناوەندی شاری هەولێر",
+    "presetBasraDesc": "ناوەندی شاری بەسرە",
+    "wifiOnlyLabel": "داونلۆد تەنها بە وای‌فای",
+    "wifiOnlySub": "بە کار مەھێنە شبکەی مۆبایل",
+    "autoUpdateLabel": "نوێکردنەوەی خودکار هەفتانە",
+    "autoUpdateSub": "ناوچەکانی پاشکەوتراو هەفتەیەکجار نوێبکەرەوە",
+    "wifiBadge": "وای‌فای",
+    "updateAvailableBadge": "نوێکردنەوە هەیە",
+    "updateLabel": "نوێکردنەوە",
+    "completeLabelMb": "{mb} MB — {date}",
+    "etaLabel": "{secs} چ ماوە",
+    "detailTiles": "{n} تایل پاشکەوتراوە",
+    "detailExpiry": "کۆتایی دێتەسەر: {date}",
+    "notifTitle": "داونلۆد تەواوبوو",
+    "notifBody": "ناوچەی «{name}» ئامادەیە بۆ بەکارهێنان بێ ئینتەرنێت"
+  },
+  "offlineBanner": {
+    "offlineTitle": "بێ ئینتەرنێت — خەریتە و گەڕان تەنها",
+    "staleTitle": "داتا کۆنە",
+    "staleSubtitle": "ئاگاداری نوێکردنەوە",
+    "lastSync": "دوایین هاوکێشان: {time}",
+    "retry": "دووبارە هەوڵدەدەین",
+    "toggleDetails": "وردەکارییەکانی بێ ئینتەرنێت",
+    "worksOfflineTitle": "بێ ئینتەرنێت کاردەکات",
+    "featureMap": "خەریتە",
+    "featureSearch": "گەڕان",
+    "featurePlaces": "شوێنەکان",
+    "downloadAreaSuggestion": "داونلۆدی ئەم ناوچەیە",
+    "downloadAreaA11y": "داونلۆدی ناوچەی خەریتە",
+    "timeJustNow": "ئێستا",
+    "timeMinutesAgo": "{n} خو پێش",
+    "timeHoursAgo": "{n} کت پێش",
+    "timeDaysAgo": "{n} ڕۆژ پێش"
   },
   "mapStyle": {
     "label": "شێوازی خەریتە",
@@ -957,5 +995,60 @@
     "meetSub": "شوێنی کۆبوونەوە بنێرە بۆ هاوڕێکانت",
     "meetGenerate": "دروستکردنی بەستەری کۆبوونەوە",
     "meetShareText": "ئێرە کۆدەبینەوە"
+  },
+  "contextMenu": {
+    "dismiss": "داخستنی مێنیو",
+    "directionsTo": "ئاراستەکان بۆ ئێرە",
+    "directionsFrom": "ئاراستەکان لە ئێرەوە",
+    "whatsHere": "ئێرە چییە؟",
+    "addPlace": "زیادکردنی شوێن",
+    "share": "هاوبەشکردنی شوێن",
+    "copyCoords": "کۆپیکردنی کۆردینات",
+    "shareMessageAddress": "{address}\n{coords}",
+    "shareMessageCoords": "{coords}"
+  },
+  "pin": {
+    "dropped": "پین دانرا",
+    "dismiss": "لابردنی پین"
+  },
+  "compass": {
+    "label": "ڕێکخستنەوەی ئاراستە"
+  },
+  "scalebar": {
+    "km": "{n} کیلۆ",
+    "m": "{n} م"
+  },
+  "attribution": {
+    "osm": "© OpenStreetMap"
+  },
+  "locationFab": {
+    "label": "شوێنی من"
+  },
+  "ranking": {
+    "badge": {
+      "topRated": "باشترین نمرە",
+      "featured": "تایبەت",
+      "bestMatch": "باشترین هاوتا"
+    },
+    "sort": {
+      "bestMatch": "باشترین هاوتا",
+      "distance": "نزیکترین",
+      "rating": "باشترین نمرە",
+      "popularity": "بەناوبانگترین"
+    }
+  },
+  "promoBadge": {
+    "percentOff": "{n}% داشکاندن",
+    "fixedOff": "{n} د.ع داشکاندن",
+    "discount": "داشکاندن",
+    "bogo": "یەک بکڕە یەک بەخۆر بگرە",
+    "freeItem": "شتی بەخۆر",
+    "happyHour": "کاتی خۆشی",
+    "firstVisit": "داشکاندنی سەرەتا",
+    "new": "نوێ",
+    "expired": "بەسەرچووە",
+    "expiresMinutes": "لە {n} خولەک دەبەسێت",
+    "expiresHours": "لە {n} کاتژمێر دەبەسێت",
+    "expiresDays": "لە {n} ڕۆژ دەبەسێت"
   }
 }

@@ -313,7 +313,45 @@
     "footerHint": "اضغط على منطقة لعرض التفاصيل",
     "storageUsed": "المساحة المستخدمة",
     "expiringBadge": "تنتهي قريباً",
-    "estimatedSize": "الحجم التقريبي"
+    "estimatedSize": "الحجم التقريبي",
+    "presetErbil": "أربيل",
+    "presetBasra": "البصرة",
+    "presetBaghdadDesc": "مركز بغداد والمناطق المجاورة",
+    "presetSulaymaniyahDesc": "مركز مدينة السليمانية",
+    "presetMosulDesc": "مدينة الموصل",
+    "presetErbilDesc": "مركز مدينة أربيل",
+    "presetBasraDesc": "مركز مدينة البصرة",
+    "wifiOnlyLabel": "التحميل عبر WiFi فقط",
+    "wifiOnlySub": "لا تحمّل البيانات عبر الشبكة الخلوية",
+    "autoUpdateLabel": "تحديث تلقائي أسبوعي",
+    "autoUpdateSub": "تحديث المناطق المحفوظة كل أسبوع تلقائياً",
+    "wifiBadge": "WiFi فقط",
+    "updateAvailableBadge": "تحديث متاح",
+    "updateLabel": "تحديث",
+    "completeLabelMb": "{mb} ميغابايت — {date}",
+    "etaLabel": "متبقٍ {secs} ث",
+    "detailTiles": "{n} بلاط محفوظ",
+    "detailExpiry": "تنتهي الصلاحية: {date}",
+    "notifTitle": "اكتمل التحميل",
+    "notifBody": "تم تحميل منطقة «{name}» بنجاح للاستخدام دون اتصال"
+  },
+  "offlineBanner": {
+    "offlineTitle": "غير متصل — خريطة وبحث فقط",
+    "staleTitle": "البيانات قديمة",
+    "staleSubtitle": "قد لا تعكس المعلومات الحالة الراهنة",
+    "lastSync": "آخر تحديث: {time}",
+    "retry": "إعادة المحاولة",
+    "toggleDetails": "تفاصيل وضع عدم الاتصال",
+    "worksOfflineTitle": "يعمل دون اتصال",
+    "featureMap": "الخريطة",
+    "featureSearch": "البحث",
+    "featurePlaces": "الأماكن",
+    "downloadAreaSuggestion": "تحميل هذه المنطقة للاستخدام دون اتصال",
+    "downloadAreaA11y": "تحميل المنطقة الحالية على الخريطة",
+    "timeJustNow": "الآن",
+    "timeMinutesAgo": "منذ {n} دقيقة",
+    "timeHoursAgo": "منذ {n} ساعة",
+    "timeDaysAgo": "منذ {n} يوم"
   },
   "mapStyle": {
     "label": "نمط الخريطة",
@@ -392,7 +430,7 @@
     "mapView": "عرض الخريطة"
   },
   "compass": {
-    "label": "إعادة الاتجاه شمالاً"
+    "label": "إعادة ضبط الاتجاه"
   },
   "geofence": {
     "entered": "دخلت منطقة {name}",
@@ -932,6 +970,31 @@
     "deleteError": "فشل الحذف",
     "cancel": "إلغاء"
   },
+  "contextMenu": {
+    "dismiss": "إغلاق القائمة",
+    "directionsTo": "الاتجاهات إلى هنا",
+    "directionsFrom": "الاتجاهات من هنا",
+    "whatsHere": "ما هذا المكان؟",
+    "addPlace": "إضافة مكان",
+    "share": "مشاركة الموقع",
+    "copyCoords": "نسخ الإحداثيات",
+    "shareMessageAddress": "{address}\n{coords}",
+    "shareMessageCoords": "{coords}"
+  },
+  "pin": {
+    "dropped": "تم تثبيت المكان",
+    "dismiss": "إزالة المكان"
+  },
+  "scalebar": {
+    "km": "{n} كم",
+    "m": "{n} م"
+  },
+  "attribution": {
+    "osm": "© OpenStreetMap"
+  },
+  "locationFab": {
+    "label": "موقعي الحالي"
+  },
   "directionsShare": {
     "title": "مشاركة الاتجاهات",
     "fromPlaceholder": "من أين؟",
@@ -957,5 +1020,32 @@
     "meetSub": "أرسل نقطة التقاء لأصدقائك",
     "meetGenerate": "إنشاء رابط الموعد",
     "meetShareText": "موعدنا هنا على خرائط العراق"
+  },
+  "ranking": {
+    "badge": {
+      "topRated": "الأعلى تقييماً",
+      "featured": "مميز",
+      "bestMatch": "الأنسب"
+    },
+    "sort": {
+      "bestMatch": "الأنسب",
+      "distance": "الأقرب",
+      "rating": "الأعلى تقييماً",
+      "popularity": "الأكثر شعبية"
+    }
+  },
+  "promoBadge": {
+    "percentOff": "خصم {n}%",
+    "fixedOff": "خصم {n} د.ع",
+    "discount": "خصم",
+    "bogo": "اشترِ واحد واحصل على آخر",
+    "freeItem": "عنصر مجاني",
+    "happyHour": "ساعة سعيدة",
+    "firstVisit": "خصم أول زيارة",
+    "new": "جديد",
+    "expired": "انتهى",
+    "expiresMinutes": "ينتهي خلال {n} دقيقة",
+    "expiresHours": "ينتهي خلال {n} س",
+    "expiresDays": "ينتهي خلال {n} يوم"
   }
 }

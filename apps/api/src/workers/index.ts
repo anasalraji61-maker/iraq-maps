@@ -7,16 +7,18 @@ import { processSendNotificationDigest } from './send-notification-digest.js';
 import { processRecalculateTrendingScores } from './recalculate-trending-scores.js';
 import { processCleanupOldNotifications } from './cleanup-old-notifications.js';
 import { processGenerateProviderInsights } from './generate-provider-insights.js';
+import { processRecalculateProviderScores } from './ranking-worker.js';
 
 export const BACKGROUND_QUEUE_NAME = 'background';
 
 /** CRON schedules for each recurring job. */
 const SCHEDULES: Record<string, string> = {
-  [JOB_NAMES.CLEANUP_EXPIRED_STORIES]: '0 * * * *',      // every hour
-  [JOB_NAMES.SEND_NOTIFICATION_DIGEST]: '*/15 * * * *',   // every 15 min
-  [JOB_NAMES.RECALCULATE_TRENDING_SCORES]: '*/30 * * * *', // every 30 min
-  [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: '0 2 * * *',     // daily at 2am
-  [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: '0 3 * * *',    // daily at 3am
+  [JOB_NAMES.CLEANUP_EXPIRED_STORIES]: '0 * * * *',           // every hour
+  [JOB_NAMES.SEND_NOTIFICATION_DIGEST]: '*/15 * * * *',        // every 15 min
+  [JOB_NAMES.RECALCULATE_TRENDING_SCORES]: '*/30 * * * *',     // every 30 min
+  [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: '0 2 * * *',          // daily at 2am
+  [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: '0 3 * * *',         // daily at 3am
+  [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: '0 4 * * *',        // daily at 4am
 };
 
 /** Creates the background job queue and registers all CRON schedules. */
@@ -27,6 +29,7 @@ export async function createJobQueue(redisUrl: string): Promise<JobQueue> {
   await queue.schedule(JOB_NAMES.RECALCULATE_TRENDING_SCORES, SCHEDULES[JOB_NAMES.RECALCULATE_TRENDING_SCORES]!, {});
   await queue.schedule(JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS, SCHEDULES[JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]!, {});
   await queue.schedule(JOB_NAMES.GENERATE_PROVIDER_INSIGHTS, SCHEDULES[JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]!, {});
+  await queue.schedule(JOB_NAMES.RECALCULATE_PROVIDER_SCORES, SCHEDULES[JOB_NAMES.RECALCULATE_PROVIDER_SCORES]!, {});
   return queue;
 }
 
@@ -45,6 +48,7 @@ export function createJobWorker(
       [JOB_NAMES.RECALCULATE_TRENDING_SCORES]: (job) => processRecalculateTrendingScores(job, db, log),
       [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: (job) => processCleanupOldNotifications(job, db, log),
       [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: (job) => processGenerateProviderInsights(job, db, log),
+      [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: (job) => processRecalculateProviderScores(job, db, log),
     },
     log,
   );
@@ -56,4 +60,5 @@ export {
   processRecalculateTrendingScores,
   processCleanupOldNotifications,
   processGenerateProviderInsights,
+  processRecalculateProviderScores,
 };

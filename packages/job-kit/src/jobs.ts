@@ -9,6 +9,7 @@ export const JOB_NAMES = {
   RECALCULATE_TRENDING_SCORES: 'RecalculateTrendingScores',
   CLEANUP_OLD_NOTIFICATIONS: 'CleanupOldNotifications',
   GENERATE_PROVIDER_INSIGHTS: 'GenerateProviderInsights',
+  RECALCULATE_PROVIDER_SCORES: 'RecalculateProviderScores',
 } as const;
 
 export type JobName = (typeof JOB_NAMES)[keyof typeof JOB_NAMES];
@@ -48,12 +49,23 @@ export interface GenerateProviderInsightsResult {
   generated: number;
 }
 
+export interface RecalculateProviderScoresData {
+  /** When set, only recalculate the score for this provider. */
+  providerId?: string;
+}
+export interface RecalculateProviderScoresResult {
+  processed:  number;
+  errors:     number;
+  durationMs: number;
+}
+
 export type JobDataMap = {
   [JOB_NAMES.CLEANUP_EXPIRED_STORIES]: CleanupExpiredStoriesData;
   [JOB_NAMES.SEND_NOTIFICATION_DIGEST]: SendNotificationDigestData;
   [JOB_NAMES.RECALCULATE_TRENDING_SCORES]: RecalculateTrendingScoresData;
   [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: CleanupOldNotificationsData;
   [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: GenerateProviderInsightsData;
+  [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: RecalculateProviderScoresData;
 };
 
 export type JobResultMap = {
@@ -62,4 +74,5 @@ export type JobResultMap = {
   [JOB_NAMES.RECALCULATE_TRENDING_SCORES]: RecalculateTrendingScoresResult;
   [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: CleanupOldNotificationsResult;
   [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: GenerateProviderInsightsResult;
+  [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: RecalculateProviderScoresResult;
 };

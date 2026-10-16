@@ -30,6 +30,9 @@ const STAR = '★';
 
 // ── Props ──────────────────────────────────────────────────────────────────────
 
+/** Ranking badge shown on high-scoring or featured providers. */
+export type RankingBadge = 'topRated' | 'featured' | 'bestMatch';
+
 export interface PlaceCardProps {
   place?: PlaceSummary;
   /** Localised display name. Required unless skeleton=true. */
@@ -49,6 +52,8 @@ export interface PlaceCardProps {
   variant?: 'compact' | 'expanded';
   /** Renders skeleton loading state. */
   skeleton?: boolean;
+  /** Optional ranking badge (top-rated / featured / best-match). */
+  rankingBadge?: RankingBadge;
   onPress?: () => void;
   testID?: string;
 }
@@ -66,6 +71,7 @@ export function PlaceCard({
   photoUri,
   variant = 'compact',
   skeleton = false,
+  rankingBadge,
   onPress,
   testID,
 }: PlaceCardProps): ReactElement {
@@ -88,6 +94,7 @@ export function PlaceCard({
         rating={rating}
         reviewCount={reviewCount}
         photoUri={photoUri}
+        rankingBadge={rankingBadge}
         onPress={onPress}
         testID={testID}
       />
@@ -103,6 +110,7 @@ export function PlaceCard({
       openStatus={openStatus}
       rating={rating}
       photoUri={photoUri}
+      rankingBadge={rankingBadge}
       onPress={onPress}
       testID={testID}
     />
@@ -119,6 +127,7 @@ interface CompactCardProps {
   openStatus: boolean | null;
   rating?: number;
   photoUri?: string | null;
+  rankingBadge?: RankingBadge;
   onPress?: () => void;
   testID?: string;
 }
@@ -131,6 +140,7 @@ function CompactCard({
   openStatus,
   rating,
   photoUri,
+  rankingBadge,
   onPress,
   testID,
 }: CompactCardProps): ReactElement {
@@ -159,7 +169,10 @@ function CompactCard({
 
       {/* Info */}
       <View style={compactStyles.info}>
-        <RNText style={compactStyles.name} numberOfLines={1}>{name}</RNText>
+        <View style={compactStyles.nameRow}>
+          <RNText style={compactStyles.name} numberOfLines={1}>{name}</RNText>
+          {rankingBadge ? <RankingBadgeChip badge={rankingBadge} /> : null}
+        </View>
         <View style={compactStyles.metaRow}>
           {category ? (
             <RNText style={compactStyles.category} numberOfLines={1}>{category}</RNText>
@@ -189,6 +202,7 @@ function CompactCard({
 }
 
 const compactStyles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -232,6 +246,39 @@ const compactStyles = StyleSheet.create({
 
 // ── Expanded variant ──────────────────────────────────────────────────────────
 
+// ── Ranking badge chip ────────────────────────────────────────────────────────
+
+const BADGE_CONFIG: Record<RankingBadge, { color: string; bg: string; labelKey: string }> = {
+  topRated:  { color: '#F5A623', bg: '#FFF3E0', labelKey: 'ranking.badge.topRated'  },
+  featured:  { color: '#9C27B0', bg: '#F3E5F5', labelKey: 'ranking.badge.featured'  },
+  bestMatch: { color: '#1976D2', bg: '#E3F2FD', labelKey: 'ranking.badge.bestMatch' },
+};
+
+function RankingBadgeChip({ badge }: { badge: RankingBadge }): ReactElement {
+  const cfg = BADGE_CONFIG[badge];
+  return (
+    <View style={[rankBadgeStyles.chip, { backgroundColor: cfg.bg }]}>
+      <RNText style={[rankBadgeStyles.text, { color: cfg.color }]}>
+        {t(cfg.labelKey as Parameters<typeof t>[0])}
+      </RNText>
+    </View>
+  );
+}
+
+const rankBadgeStyles = StyleSheet.create({
+  chip: {
+    borderRadius:     10,
+    paddingHorizontal: 7,
+    paddingVertical:   2,
+  },
+  text: {
+    fontSize:   10,
+    fontWeight: '700',
+  },
+});
+
+// ── Expanded variant ──────────────────────────────────────────────────────────
+
 interface ExpandedCardProps {
   place: PlaceSummary;
   name: string;
@@ -241,6 +288,7 @@ interface ExpandedCardProps {
   rating?: number;
   reviewCount?: number;
   photoUri?: string | null;
+  rankingBadge?: RankingBadge;
   onPress?: () => void;
   testID?: string;
 }
@@ -254,6 +302,7 @@ function ExpandedCard({
   rating,
   reviewCount,
   photoUri,
+  rankingBadge,
   onPress,
   testID,
 }: ExpandedCardProps): ReactElement {
@@ -291,7 +340,10 @@ function ExpandedCard({
 
       {/* Details */}
       <View style={expandedStyles.body}>
-        <RNText style={expandedStyles.name} numberOfLines={2}>{name}</RNText>
+        <View style={expandedStyles.nameRow}>
+          <RNText style={expandedStyles.name} numberOfLines={2}>{name}</RNText>
+          {rankingBadge ? <RankingBadgeChip badge={rankingBadge} /> : null}
+        </View>
         <View style={expandedStyles.metaRow}>
           {category ? (
             <RNText style={expandedStyles.category}>{category}</RNText>
@@ -344,6 +396,7 @@ const expandedStyles = StyleSheet.create({
   openBadgeClosed: { backgroundColor: 'rgba(229,57,53,0.9)' },
   openBadgeText: { fontSize: 11, fontWeight: '600', color: '#fff' },
   body: { padding: 10, gap: 3 },
+  nameRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 4, flexWrap: 'wrap' },
   name: { fontSize: 13, fontWeight: '600', color: '#111', lineHeight: 18 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
   category: { fontSize: 11, color: '#888' },

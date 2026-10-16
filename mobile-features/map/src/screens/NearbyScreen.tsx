@@ -34,7 +34,7 @@ import { formatDistance, t } from '../strings';
 // ---------------------------------------------------------------------------
 
 type DistanceRing = 500 | 1000 | 2000;
-type SortMode = 'distance' | 'rating' | 'popularity';
+type SortMode = 'distance' | 'rating' | 'popularity' | 'bestMatch';
 type TravelMode = 'walking' | 'driving';
 type ViewMode = 'list' | 'map';
 
@@ -96,7 +96,7 @@ const NEARBY_CATS: NearbyCategory[] = [
 ];
 
 const RING_OPTIONS: DistanceRing[] = [500, 1000, 2000];
-const SORT_OPTIONS: SortMode[] = ['distance', 'rating', 'popularity'];
+const SORT_OPTIONS: SortMode[] = ['bestMatch', 'distance', 'rating', 'popularity'];
 
 // ---------------------------------------------------------------------------
 // Reducer
@@ -150,12 +150,27 @@ const initialState: State = {
 function sortPlaces(places: NearbyPlace[], sort: SortMode): NearbyPlace[] {
   return [...places].sort((a, b) => {
     switch (sort) {
+      case 'bestMatch': {
+        // Composite: normalised rating (50%) + inverse distance (30%) + popularity (20%)
+        const maxDist = Math.max(...places.map((p) => p.distanceMetres), 1);
+        const scoreA =
+          ((a.rating ?? 0) / 5) * 50 +
+          (1 - a.distanceMetres / maxDist) * 30 +
+          ((a.popularity ?? 0) / 100) * 20;
+        const scoreB =
+          ((b.rating ?? 0) / 5) * 50 +
+          (1 - b.distanceMetres / maxDist) * 30 +
+          ((b.popularity ?? 0) / 100) * 20;
+        return scoreB - scoreA;
+      }
       case 'distance':
         return a.distanceMetres - b.distanceMetres;
       case 'rating':
         return (b.rating ?? 0) - (a.rating ?? 0);
       case 'popularity':
         return (b.popularity ?? 0) - (a.popularity ?? 0);
+      default:
+        return 0;
     }
   });
 }
@@ -275,6 +290,7 @@ function SortSelector({
   onChange: (s: SortMode) => void;
 }) {
   const SORT_LABELS: Record<SortMode, string> = {
+    bestMatch: 'ranking.sort.bestMatch',
     distance: 'nearby.sortDistance',
     rating: 'nearby.sortRating',
     popularity: 'nearby.sortPopularity',

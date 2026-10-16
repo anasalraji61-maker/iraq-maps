@@ -13,6 +13,8 @@ export type {
   CleanupOldNotificationsResult,
   GenerateProviderInsightsData,
   GenerateProviderInsightsResult,
+  RecalculateProviderScoresData,
+  RecalculateProviderScoresResult,
 } from './jobs.js';
 export { JobQueue } from './queue.js';
 export { JobWorker } from './worker.js';

@@ -805,5 +805,79 @@
       "errorPrice": "أدخل سعراً صحيحاً",
       "errorSave": "تعذّر الحفظ. حاول مرة أخرى."
     }
+  },
+  "ranking": {
+    "title": "تقييم متجرك",
+    "overall": "التقييم الكلي",
+    "outOf": "من 100",
+    "computedAt": "محسوب في {{date}}",
+    "components": {
+      "rating": "التقييمات",
+      "engagement": "التفاعل",
+      "completeness": "اكتمال الملف",
+      "activity": "النشاط"
+    },
+    "weights": {
+      "rating": "٤٠٪ من التقييم الكلي",
+      "engagement": "٣٠٪ من التقييم الكلي",
+      "completeness": "٢٠٪ من التقييم الكلي",
+      "activity": "١٠٪ من التقييم الكلي"
+    },
+    "detail": {
+      "reviewCount": "{{count}} تقييم",
+      "avgStar": "{{value}} نجمة",
+      "responseRate": "معدل الرد: {{pct}}٪",
+      "avgResponseTime": "متوسط وقت الرد: {{h}} ساعة",
+      "monthlyMessages": "{{count}} رسالة هذا الشهر",
+      "photoCount": "{{count}} صورة",
+      "menuItems": "{{count}} عنصر في القائمة",
+      "lastUpdate": "آخر تحديث منذ {{days}} أيام",
+      "postsLastMonth": "{{count}} منشور هذا الشهر"
+    },
+    "howRanked": {
+      "title": "كيف يتم ترتيبك؟",
+      "body": "يعتمد ترتيبك على التقييمات والتفاعل مع العملاء واكتمال ملفك ومستوى نشاطك.",
+      "verifiedBoost": "متحقق منه +١٥٪",
+      "nearbyBoost": "قريب منك +١٠٪",
+      "openNowBoost": "مفتوح الآن +٥٪",
+      "newProviderBoost": "متجر جديد +١٥٪",
+      "slowResponsePenalty": "تأخر الرد -١٠٪"
+    },
+    "history": {
+      "title": "سجل التقييم (٣٠ يوماً)",
+      "noData": "لا توجد بيانات بعد"
+    },
+    "comparison": {
+      "title": "مقارنة بمتاجر مماثلة (مجهولة الهوية)",
+      "youAre": "أنت في المرتبة {{rank}} من {{total}}",
+      "aboveAvg": "فوق المتوسط",
+      "average": "متوسط",
+      "belowAvg": "دون المتوسط"
+    },
+    "tips": {
+      "title": "كيف تحسّن تقييمك؟",
+      "askForReviews": "اطلب من عملائك كتابة تقييم لتعزيز نقاط التقييم.",
+      "improveService": "اعمل على تحسين تجربة العميل للحصول على تقييمات أعلى.",
+      "respondToMessages": "رُدّ على الرسائل لرفع معدل التفاعل.",
+      "respondFaster": "حاول الرد خلال ساعة واحدة لزيادة نقاط السرعة.",
+      "addPhone": "أضف رقم هاتف لإكمال ملفك التجاري.",
+      "addHours": "أضف ساعات العمل حتى يعرف العملاء متى تكون متاحاً.",
+      "addLocation": "أضف موقعك الجغرافي لتظهر في نتائج البحث القريبة.",
+      "addPhotos": "أضف على الأقل ٣ صور لمتجرك.",
+      "addMenuItems": "أضف عناصر للقائمة لإكمال ملفك.",
+      "updateProfile": "حدّث ملفك التجاري لزيادة نقاط النشاط.",
+      "postMore": "انشر بانتظام للحفاظ على نشاط عالٍ."
+    },
+    "badge": {
+      "topRated": "الأعلى تقييماً",
+      "featured": "مميز",
+      "bestMatch": "الأنسب"
+    },
+    "sort": {
+      "bestMatch": "الأنسب",
+      "distance": "الأقرب",
+      "rating": "الأعلى تقييماً",
+      "popularity": "الأكثر شعبية"
+    }
   }
 }

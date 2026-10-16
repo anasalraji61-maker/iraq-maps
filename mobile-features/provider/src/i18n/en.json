@@ -805,5 +805,79 @@
       "errorPrice": "Enter a valid price",
       "errorSave": "Could not save. Please try again."
     }
+  },
+  "ranking": {
+    "title": "Your Store Score",
+    "overall": "Overall Score",
+    "outOf": "out of 100",
+    "computedAt": "Computed on {{date}}",
+    "components": {
+      "rating": "Reviews",
+      "engagement": "Engagement",
+      "completeness": "Profile Completeness",
+      "activity": "Activity"
+    },
+    "weights": {
+      "rating": "40% of overall score",
+      "engagement": "30% of overall score",
+      "completeness": "20% of overall score",
+      "activity": "10% of overall score"
+    },
+    "detail": {
+      "reviewCount": "{{count}} reviews",
+      "avgStar": "{{value}} stars",
+      "responseRate": "Response rate: {{pct}}%",
+      "avgResponseTime": "Avg response time: {{h}}h",
+      "monthlyMessages": "{{count}} messages this month",
+      "photoCount": "{{count}} photos",
+      "menuItems": "{{count}} menu items",
+      "lastUpdate": "Last updated {{days}} days ago",
+      "postsLastMonth": "{{count}} posts this month"
+    },
+    "howRanked": {
+      "title": "How are you ranked?",
+      "body": "Your rank is based on reviews, customer engagement, profile completeness and activity. Verified providers get priority.",
+      "verifiedBoost": "Verified +15%",
+      "nearbyBoost": "Nearby +10%",
+      "openNowBoost": "Open now +5%",
+      "newProviderBoost": "New provider +15%",
+      "slowResponsePenalty": "Slow response -10%"
+    },
+    "history": {
+      "title": "Score History (30 days)",
+      "noData": "No data yet"
+    },
+    "comparison": {
+      "title": "Compare with similar providers (anonymous)",
+      "youAre": "You are #{{rank}} out of {{total}}",
+      "aboveAvg": "Above average",
+      "average": "Average",
+      "belowAvg": "Below average"
+    },
+    "tips": {
+      "title": "How to improve your score?",
+      "askForReviews": "Ask your customers to leave a review.",
+      "improveService": "Work on improving the customer experience.",
+      "respondToMessages": "Reply to messages to increase engagement.",
+      "respondFaster": "Try to respond within 1 hour.",
+      "addPhone": "Add a phone number to complete your profile.",
+      "addHours": "Add business hours.",
+      "addLocation": "Add your location.",
+      "addPhotos": "Add at least 3 photos.",
+      "addMenuItems": "Add items to your menu.",
+      "updateProfile": "Update your business profile.",
+      "postMore": "Post regularly."
+    },
+    "badge": {
+      "topRated": "Top Rated",
+      "featured": "Featured",
+      "bestMatch": "Best Match"
+    },
+    "sort": {
+      "bestMatch": "Best Match",
+      "distance": "Nearest",
+      "rating": "Top Rated",
+      "popularity": "Most Popular"
+    }
   }
 }
