@@ -1,9 +1,11 @@
 /**
  * MessageBubble – renders all message types with status icons,
- * reply preview, long-press context menu, link detection.
+ * reply preview, long-press context menu, link detection,
+ * reactions, read receipts, link previews, system messages,
+ * and report/forward/copy/delete/reply actions.
  */
 import * as Clipboard from 'expo-clipboard';
-import { useCallback, type ReactElement } from 'react';
+import { useCallback, useState, type ReactElement } from 'react';
 import {
   Alert,
   Image,
@@ -60,6 +62,29 @@ export interface ReplyRef {
   snippet: string;
 }
 
+export interface LinkPreview {
+  url: string;
+  title?: string;
+  description?: string;
+  imageUrl?: string;
+  siteName?: string;
+}
+
+export interface Reaction {
+  emoji: string;
+  count: number;
+  reactedByMe: boolean;
+}
+
+export type SystemEventKind = 'joined_group' | 'left_group' | 'renamed_group' | 'added_member';
+
+export interface SystemEvent {
+  kind: SystemEventKind;
+  actorName: string;
+  targetName?: string;
+  newValue?: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -77,15 +102,22 @@ export interface ChatMessage {
   deletedForMe?: boolean;
   deletedForEveryone?: boolean;
   isForwarded?: boolean;
+  reactions?: Reaction[];
+  linkPreview?: LinkPreview;
+  systemEvent?: SystemEvent;
+  isSystemMessage?: boolean;
 }
 
 export interface MessageBubbleCallbacks {
   onReply?: (msg: ChatMessage) => void;
   onForward?: (msg: ChatMessage) => void;
   onDelete?: (msg: ChatMessage, forEveryone: boolean) => void;
+  onReport?: (msg: ChatMessage) => void;
+  onReact?: (msg: ChatMessage, emoji: string) => void;
   onImagePress?: (url: string) => void;
   onLocationPress?: (loc: LocationPayload) => void;
   onPlacePress?: (placeId: string) => void;
+  onLinkPress?: (url: string) => void;
 }
 
 interface Props {
@@ -102,6 +134,10 @@ const URL_RE = /https?:\/\/[^\s<>"']+/g;
 function extractUrls(text: string): string[] {
   return text.match(URL_RE) ?? [];
 }
+
+// ─── Emoji picker ────────────────────────────────────────────────────────────
+
+const REACTION_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥', '👏', '🎉'];
 
 // ─── Status icons ───────────────────────────────────────────────────────────
 
@@ -359,21 +395,244 @@ function ForwardedTag(): ReactElement {
   );
 }
 
+// ─── EmojiPicker ─────────────────────────────────────────────────────────────
+
+import { Modal as RNModal } from 'react-native';
+
+function EmojiPicker({
+  visible,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  onSelect: (emoji: string) => void;
+  onClose: () => void;
+}): ReactElement {
+  return (
+    <RNModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={emojiStyles.overlay}>
+          <TouchableWithoutFeedback>
+            <View style={emojiStyles.picker}>
+              {REACTION_EMOJIS.map((emoji) => (
+                <TouchableOpacity
+                  key={emoji}
+                  style={emojiStyles.emojiBtn}
+                  onPress={() => { onSelect(emoji); onClose(); }}
+                  accessibilityRole="button"
+                  accessibilityLabel={emoji}
+                >
+                  <Text style={emojiStyles.emoji}>{emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </RNModal>
+  );
+}
+
+const emojiStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  picker: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    gap: 4,
+  },
+  emojiBtn: { padding: 6 },
+  emoji: { fontSize: 26 },
+});
+
+// ─── ReactionBar ──────────────────────────────────────────────────────────────
+
+function ReactionBar({
+  reactions,
+  isOwn,
+  onToggle,
+}: {
+  reactions: Reaction[];
+  isOwn: boolean;
+  onToggle: (emoji: string) => void;
+}): ReactElement | null {
+  if (reactions.length === 0) return null;
+
+  return (
+    <View style={[reactionStyles.bar, isOwn ? reactionStyles.barOwn : reactionStyles.barOther]}>
+      {reactions.map((r) => (
+        <TouchableOpacity
+          key={r.emoji}
+          style={[reactionStyles.chip, r.reactedByMe && reactionStyles.chipActive]}
+          onPress={() => onToggle(r.emoji)}
+          accessibilityRole="button"
+        >
+          <Text style={reactionStyles.emoji}>{r.emoji}</Text>
+          {r.count > 1 && <Text style={reactionStyles.count}>{r.count}</Text>}
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+const reactionStyles = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  barOwn: { justifyContent: 'flex-end' },
+  barOther: { justifyContent: 'flex-start' },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  chipActive: { backgroundColor: '#E3F2FD', borderWidth: 1, borderColor: '#1976D2' },
+  emoji: { fontSize: 14 },
+  count: { fontSize: 11, color: '#424242', fontWeight: '600' },
+});
+
+// ─── LinkPreviewCard ──────────────────────────────────────────────────────────
+
+function LinkPreviewCard({
+  preview,
+  isOwn,
+  onPress,
+}: {
+  preview: LinkPreview;
+  isOwn: boolean;
+  onPress: (url: string) => void;
+}): ReactElement {
+  return (
+    <TouchableOpacity
+      style={[linkPreviewStyles.card, isOwn && linkPreviewStyles.cardOwn]}
+      onPress={() => onPress(preview.url)}
+      accessibilityRole="link"
+      activeOpacity={0.85}
+    >
+      {preview.imageUrl ? (
+        <Image source={{ uri: preview.imageUrl }} style={linkPreviewStyles.thumb} resizeMode="cover" />
+      ) : null}
+      <View style={linkPreviewStyles.info}>
+        {preview.siteName ? (
+          <Text style={[linkPreviewStyles.siteName, isOwn && linkPreviewStyles.textOwn]}>
+            {preview.siteName}
+          </Text>
+        ) : null}
+        {preview.title ? (
+          <Text
+            style={[linkPreviewStyles.title, isOwn && linkPreviewStyles.textOwn]}
+            numberOfLines={2}
+          >
+            {preview.title}
+          </Text>
+        ) : null}
+        {preview.description ? (
+          <Text
+            style={[linkPreviewStyles.description, isOwn && linkPreviewStyles.textOwn]}
+            numberOfLines={2}
+          >
+            {preview.description}
+          </Text>
+        ) : null}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+const linkPreviewStyles = StyleSheet.create({
+  card: {
+    marginTop: 6,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.12)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+  },
+  cardOwn: { borderColor: 'rgba(255,255,255,0.25)', backgroundColor: 'rgba(255,255,255,0.12)' },
+  thumb: { width: '100%', height: 100 },
+  info: { padding: 8, gap: 2 },
+  siteName: { fontSize: 10, color: '#9E9E9E', textTransform: 'uppercase' },
+  title: { fontSize: 13, fontWeight: '700', color: '#212121' },
+  description: { fontSize: 12, color: '#616161', lineHeight: 17 },
+  textOwn: { color: 'rgba(255,255,255,0.85)' },
+});
+
+// ─── SystemMessageBubble ──────────────────────────────────────────────────────
+
+function SystemMessageBubble({ event }: { event: SystemEvent }): ReactElement {
+  const text = buildSystemText(event);
+  return (
+    <View style={sysStyles.row}>
+      <View style={sysStyles.pill}>
+        <Text style={sysStyles.text}>{text}</Text>
+      </View>
+    </View>
+  );
+}
+
+function buildSystemText(event: SystemEvent): string {
+  switch (event.kind) {
+    case 'joined_group':
+      return t('groups.userJoined', { name: event.actorName });
+    case 'left_group':
+      return t('groups.userLeft', { name: event.actorName });
+    case 'renamed_group':
+      return t('groups.groupRenamed', { name: event.actorName, newName: event.newValue ?? '' });
+    case 'added_member':
+      return t('groups.userAdded', { actor: event.actorName, name: event.targetName ?? '' });
+    default:
+      return '';
+  }
+}
+
+const sysStyles = StyleSheet.create({
+  row: { alignItems: 'center', paddingVertical: 6, paddingHorizontal: 16 },
+  pill: {
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  text: { fontSize: 12, color: '#757575', fontStyle: 'italic', textAlign: 'center' },
+});
+
 // ─── Context menu ───────────────────────────────────────────────────────────
 
 function showContextMenu(
   msg: ChatMessage,
   isOwn: boolean,
   callbacks: MessageBubbleCallbacks,
+  onOpenEmojiPicker: () => void,
 ) {
   const options: Array<{ label: string; handler: () => void }> = [];
 
-  if (msg.text) {
-    options.push({
-      label: t('conversation.copy'),
-      handler: () => { void Clipboard.setStringAsync(msg.text!); },
-    });
-  }
+  options.push({
+    label: '😊 ' + t('reaction.title'),
+    handler: onOpenEmojiPicker,
+  });
 
   options.push({
     label: t('conversation.reply'),
@@ -385,6 +644,13 @@ function showContextMenu(
     handler: () => callbacks.onForward?.(msg),
   });
 
+  if (msg.text) {
+    options.push({
+      label: t('conversation.copy'),
+      handler: () => { void Clipboard.setStringAsync(msg.text!); },
+    });
+  }
+
   options.push({
     label: t('conversation.deleteForMe'),
     handler: () => callbacks.onDelete?.(msg, false),
@@ -394,6 +660,13 @@ function showContextMenu(
     options.push({
       label: t('conversation.deleteForEveryone'),
       handler: () => callbacks.onDelete?.(msg, true),
+    });
+  }
+
+  if (!isOwn) {
+    options.push({
+      label: t('inbox.actions.resolve'),
+      handler: () => callbacks.onReport?.(msg),
     });
   }
 
@@ -415,9 +688,23 @@ export function MessageBubble({
   showReadReceipts,
   callbacks,
 }: Props): ReactElement {
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+
   const handleLongPress = useCallback(() => {
-    showContextMenu(message, isOwn, callbacks);
+    showContextMenu(message, isOwn, callbacks, () => setEmojiPickerOpen(true));
   }, [message, isOwn, callbacks]);
+
+  const handleReact = useCallback(
+    (emoji: string) => {
+      callbacks.onReact?.(message, emoji);
+    },
+    [message, callbacks],
+  );
+
+  // System event messages render differently
+  if (message.isSystemMessage && message.systemEvent) {
+    return <SystemMessageBubble event={message.systemEvent} />;
+  }
 
   if (message.deletedForEveryone) {
     return (
@@ -434,65 +721,100 @@ export function MessageBubble({
   }
 
   return (
-    <TouchableWithoutFeedback onLongPress={handleLongPress}>
-      <View style={[styles.row, isOwn ? styles.rowOwn : styles.rowOther]}>
-        <View
-          style={[
-            styles.bubble,
-            isOwn ? styles.bubbleOwn : styles.bubbleOther,
-          ]}
-        >
-          {message.isForwarded ? <ForwardedTag /> : null}
-          {message.replyTo ? <ReplyBar replyTo={message.replyTo} /> : null}
+    <>
+      <TouchableWithoutFeedback onLongPress={handleLongPress}>
+        <View style={[styles.row, isOwn ? styles.rowOwn : styles.rowOther]}>
+          <View
+            style={[
+              styles.bubble,
+              isOwn ? styles.bubbleOwn : styles.bubbleOther,
+            ]}
+          >
+            {message.isForwarded ? <ForwardedTag /> : null}
+            {message.replyTo ? <ReplyBar replyTo={message.replyTo} /> : null}
 
-          {message.type === 'text' && message.text !== undefined ? (
-            <TextContent text={message.text} isOwn={isOwn} />
-          ) : null}
+            {message.type === 'text' && message.text !== undefined ? (
+              <TextContent text={message.text} isOwn={isOwn} />
+            ) : null}
 
-          {message.type === 'image' && message.imageUrl ? (
-            <ImageContent
-              url={message.imageUrl}
-              onPress={callbacks.onImagePress ?? (() => undefined)}
-            />
-          ) : null}
-
-          {message.type === 'location' && message.location ? (
-            <LocationContent
-              loc={message.location}
-              onPress={callbacks.onLocationPress ?? (() => undefined)}
-            />
-          ) : null}
-
-          {message.type === 'document' && message.document ? (
-            <DocumentContent doc={message.document} />
-          ) : null}
-
-          {message.type === 'voice' && message.voice ? (
-            <VoiceNoteStub voice={message.voice} isOwn={isOwn} />
-          ) : null}
-
-          {message.type === 'place_share' && message.placeShare ? (
-            <PlaceShareContent
-              place={message.placeShare}
-              onPress={callbacks.onPlacePress ?? (() => undefined)}
-            />
-          ) : null}
-
-          {/* Footer: time + status */}
-          <View style={styles.bubbleFooter}>
-            <Text style={[styles.timeText, isOwn && styles.timeTextOwn]}>
-              {formatTime(message.createdAt)}
-            </Text>
-            {isOwn ? (
-              <StatusIcon
-                status={message.status}
-                showReadReceipts={showReadReceipts}
+            {message.type === 'image' && message.imageUrl ? (
+              <ImageContent
+                url={message.imageUrl}
+                onPress={callbacks.onImagePress ?? (() => undefined)}
               />
             ) : null}
+
+            {message.type === 'location' && message.location ? (
+              <LocationContent
+                loc={message.location}
+                onPress={callbacks.onLocationPress ?? (() => undefined)}
+              />
+            ) : null}
+
+            {message.type === 'document' && message.document ? (
+              <DocumentContent doc={message.document} />
+            ) : null}
+
+            {message.type === 'voice' && message.voice ? (
+              <VoiceNoteStub voice={message.voice} isOwn={isOwn} />
+            ) : null}
+
+            {message.type === 'place_share' && message.placeShare ? (
+              <PlaceShareContent
+                place={message.placeShare}
+                onPress={callbacks.onPlacePress ?? (() => undefined)}
+              />
+            ) : null}
+
+            {/* Link preview card */}
+            {message.linkPreview ? (
+              <LinkPreviewCard
+                preview={message.linkPreview}
+                isOwn={isOwn}
+                onPress={(url) => {
+                  if (callbacks.onLinkPress) {
+                    callbacks.onLinkPress(url);
+                  } else {
+                    void Linking.openURL(url);
+                  }
+                }}
+              />
+            ) : null}
+
+            {/* Footer: time + status */}
+            <View style={styles.bubbleFooter}>
+              <Text style={[styles.timeText, isOwn && styles.timeTextOwn]}>
+                {formatTime(message.createdAt)}
+              </Text>
+              {isOwn ? (
+                <StatusIcon
+                  status={message.status}
+                  showReadReceipts={showReadReceipts}
+                />
+              ) : null}
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+
+      {/* Reactions row (outside bubble, below it) */}
+      {message.reactions && message.reactions.length > 0 ? (
+        <View style={[styles.reactionsRow, isOwn ? styles.reactionsRowOwn : styles.reactionsRowOther]}>
+          <ReactionBar
+            reactions={message.reactions}
+            isOwn={isOwn}
+            onToggle={handleReact}
+          />
+        </View>
+      ) : null}
+
+      {/* Emoji picker modal */}
+      <EmojiPicker
+        visible={emojiPickerOpen}
+        onSelect={handleReact}
+        onClose={() => setEmojiPickerOpen(false)}
+      />
+    </>
   );
 }
 
@@ -680,4 +1002,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontStyle: 'italic',
   },
+
+  // Reactions
+  reactionsRow: {
+    paddingHorizontal: 12,
+    marginTop: -4,
+    marginBottom: 4,
+  },
+  reactionsRowOwn: { alignItems: 'flex-end' },
+  reactionsRowOther: { alignItems: 'flex-start' },
 });
