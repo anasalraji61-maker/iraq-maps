@@ -36,3 +36,7 @@ export { ListingsManagementScreen } from './screens/ListingsManagementScreen';
 export { ScoreBreakdownScreen } from './screens/ScoreBreakdownScreen';
 export { ProviderRegistrationWizardScreen } from './screens/ProviderRegistrationWizardScreen';
 export { VerificationStatusScreen } from './screens/VerificationStatusScreen';
+export { CustomerManagementScreen } from './screens/CustomerManagementScreen';
+export { PricingScreen } from './screens/PricingScreen';
+export { ProviderSettingsScreen } from './screens/ProviderSettingsScreen';
+export { GrowthTipsScreen } from './screens/GrowthTipsScreen';
