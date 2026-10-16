@@ -35,6 +35,12 @@ class PlacesModule {}
 
 export { registerProviderPlaceHandler } from './provider-place';
 export {
+  CollectionsService,
+  collectionTable,
+  collectionPlaceTable,
+  collectionFollowTable,
+} from './collections.service';
+export {
   importPlacesFromOSM,
   deduplicatePlaces,
   getOSMPlace,
