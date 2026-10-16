@@ -1,0 +1,261 @@
+# Reviews flow:
+# Login → find a place on map → tap "Write Review" → select star rating →
+# write text review → submit → see review in place detail.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded
+# Env vars:
+#   PHONE        Default: random.
+#   OTP_CODE     Default: 123456.
+#   SEARCH_Q     Place to review. Default: مطعم.
+#   REVIEW_TEXT  Review body. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: reviews-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم التقييمات'}
+  SEARCH_Q: ${SEARCH_Q || 'مطعم'}
+  REVIEW_TEXT: ${REVIEW_TEXT || 'مكان رائع وطعام لذيذ، الخدمة ممتازة والجو مريح جداً. أنصح بزيارته بشدة!'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: reviews-01-logged-in
+
+# ── 3. Open map tab ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: reviews-02-map-loaded
+
+# ── 4. Search for a place to review ──────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: reviews-03-search-results
+
+# ── 5. Open place card ───────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.source
+- takeScreenshot: reviews-04-place-card
+
+# ── 6. Scroll down in place card to find review section ──────────────────────
+- scrollUntilVisible:
+    element:
+      id: place.reviews.section
+    direction: DOWN
+- assertVisible:
+    id: place.reviews.section
+- takeScreenshot: reviews-05-reviews-section
+
+# ── 7. Tap "Write Review" ─────────────────────────────────────────────────────
+- tapOn:
+    id: place.reviews.write
+- extendedWaitUntil:
+    visible:
+      id: review.compose
+    timeout: 15000
+- assertVisible:
+    id: review.compose
+- takeScreenshot: reviews-06-review-compose
+
+# ── 8. Star rating widget is visible ─────────────────────────────────────────
+- assertVisible:
+    id: review.stars
+- takeScreenshot: reviews-07-star-widget
+
+# ── 9. Select 4 stars ────────────────────────────────────────────────────────
+- tapOn:
+    id: review.star.4
+- extendedWaitUntil:
+    visible:
+      id: review.star.4.selected
+    timeout: 5000
+- assertVisible:
+    id: review.star.4.selected
+- takeScreenshot: reviews-08-four-stars-selected
+
+# ── 10. Change to 5 stars ─────────────────────────────────────────────────────
+- tapOn:
+    id: review.star.5
+- extendedWaitUntil:
+    visible:
+      id: review.star.5.selected
+    timeout: 5000
+- assertVisible:
+    id: review.star.5.selected
+- takeScreenshot: reviews-09-five-stars-selected
+
+# ── 11. Enter review text ─────────────────────────────────────────────────────
+- tapOn:
+    id: review.text.input
+- inputText: ${REVIEW_TEXT}
+- hideKeyboard
+- assertVisible:
+    text: ${REVIEW_TEXT}
+- takeScreenshot: reviews-10-review-text-entered
+
+# ── 12. Character count is shown ─────────────────────────────────────────────
+- assertVisible:
+    id: review.text.charCount
+
+# ── 13. Optional: add a photo placeholder check ──────────────────────────────
+- assertVisible:
+    id: review.addPhoto
+
+# ── 14. Submit review ─────────────────────────────────────────────────────────
+- tapOn:
+    id: review.submit
+- extendedWaitUntil:
+    visible:
+      id: review.submitted
+    timeout: 25000
+- assertVisible:
+    id: review.submitted
+- takeScreenshot: reviews-11-review-submitted
+
+# ── 15. Arabic success message ────────────────────────────────────────────────
+- assertVisible:
+    text: تم نشر تقييمك
+
+# ── 16. Return to place detail ────────────────────────────────────────────────
+- tapOn:
+    id: review.submitted.done
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- takeScreenshot: reviews-12-back-to-place
+
+# ── 17. Scroll to reviews section to see the new review ──────────────────────
+- scrollUntilVisible:
+    element:
+      id: place.reviews.section
+    direction: DOWN
+- assertVisible:
+    id: place.reviews.section
+- takeScreenshot: reviews-13-reviews-section
+
+# ── 18. New review text is visible ───────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      text: ${REVIEW_TEXT}
+    timeout: 10000
+- assertVisible:
+    text: ${REVIEW_TEXT}
+- takeScreenshot: reviews-14-review-visible-in-place
+
+# ── 19. Reviewer name matches logged-in user ─────────────────────────────────
+- assertVisible:
+    text: ${NAME}
+- takeScreenshot: reviews-15-reviewer-name-visible
+
+# ── 20. Rating stars are shown in the review item ─────────────────────────────
+- assertVisible:
+    id: place.reviews.item.stars
+
+# ── 21. Aggregate rating updated ─────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: place.card.rating
+    direction: UP
+- assertVisible:
+    id: place.card.rating
+- takeScreenshot: reviews-16-aggregate-rating
+
+# ── 22. Navigate to activity tab to see review in own activity ───────────────
+- tapOn:
+    id: tab.activity
+- extendedWaitUntil:
+    visible:
+      id: activity.feed
+    timeout: 15000
+- assertVisible:
+    id: activity.feed
+- assertVisible:
+    id: activity.item.review
+- takeScreenshot: reviews-17-activity-shows-review
+
+# ── 23. Regression: map tab still works ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: reviews-18-map-ok

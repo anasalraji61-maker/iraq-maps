@@ -1,0 +1,343 @@
+# Collections flow:
+# Login → search for place → long-press → "Save to Collection" →
+# create new collection → add place → open Collections screen →
+# view collection detail → remove place from collection.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded
+# Env vars:
+#   PHONE           Default: random.
+#   OTP_CODE        Default: 123456.
+#   SEARCH_Q        Place to save. Default: مطعم.
+#   COLLECTION_NAME New collection name. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: collections-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم المجموعات'}
+  SEARCH_Q: ${SEARCH_Q || 'مطعم'}
+  COLLECTION_NAME: ${COLLECTION_NAME || 'أماكني المفضلة في بغداد'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: collections-01-logged-in
+
+# ── 3. Open map tab ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- takeScreenshot: collections-02-map-loaded
+
+# ── 4. Search for a place ─────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: collections-03-search-results
+
+# ── 5. Tap first result to open place card ────────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- takeScreenshot: collections-04-place-card
+
+# ── 6. Long-press on place card to open context menu ─────────────────────────
+- longPressOn:
+    id: place.card
+- extendedWaitUntil:
+    visible:
+      id: place.context.menu
+    timeout: 10000
+- assertVisible:
+    id: place.context.menu
+- takeScreenshot: collections-05-context-menu
+
+# ── 7. Tap "Save to Collection" ───────────────────────────────────────────────
+- tapOn:
+    id: place.context.saveToCollection
+- extendedWaitUntil:
+    visible:
+      id: collection.picker
+    timeout: 15000
+- assertVisible:
+    id: collection.picker
+- takeScreenshot: collections-06-collection-picker
+
+# ── 8. Tap "Create New Collection" ───────────────────────────────────────────
+- tapOn:
+    id: collection.picker.createNew
+- extendedWaitUntil:
+    visible:
+      id: collection.create.nameInput
+    timeout: 10000
+- assertVisible:
+    id: collection.create.nameInput
+- takeScreenshot: collections-07-create-collection-form
+
+# ── 9. Enter collection name in Arabic ────────────────────────────────────────
+- tapOn:
+    id: collection.create.nameInput
+- inputText: ${COLLECTION_NAME}
+- hideKeyboard
+- assertVisible:
+    text: ${COLLECTION_NAME}
+- takeScreenshot: collections-08-name-entered
+
+# ── 10. Optionally add emoji/icon ─────────────────────────────────────────────
+- assertVisible:
+    id: collection.create.icon
+- tapOn:
+    id: collection.create.icon
+- extendedWaitUntil:
+    visible:
+      id: collection.create.iconPicker
+    timeout: 10000
+- tapOn:
+    id: collection.create.iconPicker.first
+- extendedWaitUntil:
+    visible:
+      id: collection.create.nameInput
+    timeout: 10000
+- takeScreenshot: collections-09-icon-selected
+
+# ── 11. Confirm create ────────────────────────────────────────────────────────
+- tapOn:
+    id: collection.create.confirm
+- extendedWaitUntil:
+    visible:
+      id: collection.picker
+    timeout: 10000
+- assertVisible:
+    text: ${COLLECTION_NAME}
+- takeScreenshot: collections-10-new-collection-in-list
+
+# ── 12. Select the new collection ────────────────────────────────────────────
+- tapOn:
+    text: ${COLLECTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: collection.picker.saved
+    timeout: 10000
+- assertVisible:
+    id: collection.picker.saved
+- takeScreenshot: collections-11-place-saved
+
+# ── 13. Dismiss and return to map ────────────────────────────────────────────
+- tapOn:
+    id: collection.picker.done
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- assertVisible:
+    id: map.view
+- takeScreenshot: collections-12-back-to-map
+
+# ── 14. Add a second place to the same collection ────────────────────────────
+- tapOn:
+    id: map.search.input
+- clearText
+- inputText: قهوة
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- longPressOn:
+    id: place.card
+- extendedWaitUntil:
+    visible:
+      id: place.context.menu
+    timeout: 10000
+- tapOn:
+    id: place.context.saveToCollection
+- extendedWaitUntil:
+    visible:
+      id: collection.picker
+    timeout: 15000
+- tapOn:
+    text: ${COLLECTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: collection.picker.saved
+    timeout: 10000
+- tapOn:
+    id: collection.picker.done
+- takeScreenshot: collections-13-second-place-saved
+
+# ── 15. Navigate to My Collections in account tab ────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.collections
+- extendedWaitUntil:
+    visible:
+      id: collections.screen
+    timeout: 15000
+- assertVisible:
+    id: collections.screen
+- takeScreenshot: collections-14-collections-screen
+
+# ── 16. Verify the new collection is listed ───────────────────────────────────
+- assertVisible:
+    text: ${COLLECTION_NAME}
+- takeScreenshot: collections-15-collection-listed
+
+# ── 17. Tap collection to open detail ────────────────────────────────────────
+- tapOn:
+    text: ${COLLECTION_NAME}
+- extendedWaitUntil:
+    visible:
+      id: collection.detail
+    timeout: 15000
+- assertVisible:
+    id: collection.detail
+- takeScreenshot: collections-16-collection-detail
+
+# ── 18. Verify place count is 2 ──────────────────────────────────────────────
+- assertVisible:
+    id: collection.detail.placeCount
+- takeScreenshot: collections-17-place-count
+
+# ── 19. Tap a place in the collection to open it ─────────────────────────────
+- tapOn:
+    id: collection.detail.placeItem
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- takeScreenshot: collections-18-place-from-collection
+
+# ── 20. Back to collection detail ────────────────────────────────────────────
+- tapOn:
+    id: place.card.back
+- extendedWaitUntil:
+    visible:
+      id: collection.detail
+    timeout: 10000
+- assertVisible:
+    id: collection.detail
+
+# ── 21. Long-press a place item to remove it ─────────────────────────────────
+- longPressOn:
+    id: collection.detail.placeItem
+- extendedWaitUntil:
+    visible:
+      id: collection.detail.placeItem.actions
+    timeout: 10000
+- tapOn:
+    id: collection.detail.placeItem.remove
+- extendedWaitUntil:
+    visible:
+      id: collection.detail.placeItem.removeConfirm
+    timeout: 10000
+- tapOn:
+    id: collection.detail.placeItem.removeConfirm
+- extendedWaitUntil:
+    visible:
+      id: collection.detail
+    timeout: 10000
+- takeScreenshot: collections-19-place-removed
+
+# ── 22. Collection now has 1 place ───────────────────────────────────────────
+- assertVisible:
+    id: collection.detail.placeCount
+- takeScreenshot: collections-20-one-place-left
+
+# ── 23. Back to collections list ─────────────────────────────────────────────
+- tapOn:
+    id: collection.detail.back
+- extendedWaitUntil:
+    visible:
+      id: collections.screen
+    timeout: 10000
+- assertVisible:
+    id: collections.screen
+- takeScreenshot: collections-21-collections-list
+
+# ── 24. Regression: map tab still loads ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: collections-22-map-ok

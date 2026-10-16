@@ -1,0 +1,256 @@
+# Provider dashboard flow:
+# Login as an approved provider → view analytics dashboard →
+# check message inbox → reply to a message →
+# update business hours → verify update saved.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   A provider account seeded with PROVIDER_PHONE is already approved in the DB.
+#   The inbox has at least one seeded incoming message.
+# Env vars:
+#   PROVIDER_PHONE   Phone of pre-approved provider. Default: 07700000001.
+#   OTP_CODE         Default: 123456.
+#   REPLY_TEXT       Reply body. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: provider-dashboard
+env:
+  PROVIDER_PHONE: ${PROVIDER_PHONE || '07700000001'}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'صاحب النشاط التجاري'}
+  REPLY_TEXT: ${REPLY_TEXT || 'شكراً لتواصلك معنا، سنكون سعداء بخدمتك. يرجى التفضل بالزيارة في أي وقت.'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Sign in as provider ────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PROVIDER_PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: provider-dash-01-logged-in
+
+# ── 3. Navigate to account tab ────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+- takeScreenshot: provider-dash-02-account-menu
+
+# ── 4. Provider badge / status is shown as approved ──────────────────────────
+- assertVisible:
+    id: account.providerStatus.approved
+- takeScreenshot: provider-dash-03-provider-approved
+
+# ── 5. Tap "Provider Dashboard" / business panel ─────────────────────────────
+- tapOn:
+    id: account.providerDashboard
+- extendedWaitUntil:
+    visible:
+      id: provider.dashboard
+    timeout: 15000
+- assertVisible:
+    id: provider.dashboard
+- takeScreenshot: provider-dash-04-dashboard-loaded
+
+# ── 6. Analytics section is visible ──────────────────────────────────────────
+- assertVisible:
+    id: provider.dashboard.analytics
+- takeScreenshot: provider-dash-05-analytics-visible
+
+# ── 7. View count metric is shown ────────────────────────────────────────────
+- assertVisible:
+    id: provider.analytics.views
+- takeScreenshot: provider-dash-06-views-metric
+
+# ── 8. Message count metric is shown ─────────────────────────────────────────
+- assertVisible:
+    id: provider.analytics.messages
+- takeScreenshot: provider-dash-07-messages-metric
+
+# ── 9. Rating metric is shown ────────────────────────────────────────────────
+- assertVisible:
+    id: provider.analytics.rating
+- takeScreenshot: provider-dash-08-rating-metric
+
+# ── 10. Tap "Inbox" tab inside provider dashboard ────────────────────────────
+- tapOn:
+    id: provider.dashboard.inboxTab
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox
+    timeout: 15000
+- assertVisible:
+    id: provider.inbox
+- takeScreenshot: provider-dash-09-inbox-loaded
+
+# ── 11. Inbox has at least one message ───────────────────────────────────────
+- assertVisible:
+    id: provider.inbox.thread
+- takeScreenshot: provider-dash-10-inbox-thread
+
+# ── 12. Tap first thread to open it ──────────────────────────────────────────
+- tapOn:
+    id: provider.inbox.thread
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox.thread.messages
+    timeout: 15000
+- assertVisible:
+    id: provider.inbox.thread.messages
+- takeScreenshot: provider-dash-11-thread-open
+
+# ── 13. Verify incoming message is shown ─────────────────────────────────────
+- assertVisible:
+    id: provider.inbox.thread.incomingMessage
+- takeScreenshot: provider-dash-12-incoming-message
+
+# ── 14. Customer name / avatar is shown ──────────────────────────────────────
+- assertVisible:
+    id: provider.inbox.thread.customerName
+
+# ── 15. Type a reply ─────────────────────────────────────────────────────────
+- tapOn:
+    id: provider.inbox.thread.replyInput
+- inputText: ${REPLY_TEXT}
+- hideKeyboard
+- assertVisible:
+    text: ${REPLY_TEXT}
+- takeScreenshot: provider-dash-13-reply-typed
+
+# ── 16. Send reply ────────────────────────────────────────────────────────────
+- tapOn:
+    id: provider.inbox.thread.replySubmit
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox.thread.outgoingMessage
+    timeout: 15000
+- assertVisible:
+    id: provider.inbox.thread.outgoingMessage
+- takeScreenshot: provider-dash-14-reply-sent
+
+# ── 17. Reply text is visible in thread ──────────────────────────────────────
+- assertVisible:
+    text: ${REPLY_TEXT}
+- takeScreenshot: provider-dash-15-reply-in-thread
+
+# ── 18. Go back to provider dashboard ────────────────────────────────────────
+- tapOn:
+    id: provider.inbox.thread.back
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox
+    timeout: 10000
+- tapOn:
+    id: provider.dashboard.settingsTab
+- extendedWaitUntil:
+    visible:
+      id: provider.settings
+    timeout: 15000
+- assertVisible:
+    id: provider.settings
+- takeScreenshot: provider-dash-16-settings-tab
+
+# ── 19. Find business hours section ──────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: provider.settings.businessHours
+    direction: DOWN
+- assertVisible:
+    id: provider.settings.businessHours
+- takeScreenshot: provider-dash-17-business-hours
+
+# ── 20. Tap edit on Monday hours ──────────────────────────────────────────────
+- tapOn:
+    id: provider.settings.businessHours.monday.edit
+- extendedWaitUntil:
+    visible:
+      id: provider.settings.businessHours.timePicker
+    timeout: 10000
+- assertVisible:
+    id: provider.settings.businessHours.timePicker
+- takeScreenshot: provider-dash-18-time-picker
+
+# ── 21. Change opening time ───────────────────────────────────────────────────
+- tapOn:
+    id: provider.settings.businessHours.openTime
+- clearText
+- inputText: 09:00
+- hideKeyboard
+- takeScreenshot: provider-dash-19-open-time-set
+
+# ── 22. Change closing time ───────────────────────────────────────────────────
+- tapOn:
+    id: provider.settings.businessHours.closeTime
+- clearText
+- inputText: 22:00
+- hideKeyboard
+- takeScreenshot: provider-dash-20-close-time-set
+
+# ── 23. Save business hours ───────────────────────────────────────────────────
+- tapOn:
+    id: provider.settings.businessHours.save
+- extendedWaitUntil:
+    visible:
+      id: provider.settings.businessHours.saved
+    timeout: 15000
+- assertVisible:
+    id: provider.settings.businessHours.saved
+- takeScreenshot: provider-dash-21-hours-saved
+
+# ── 24. Arabic confirmation shown ────────────────────────────────────────────
+- assertVisible:
+    text: تم حفظ أوقات العمل
+
+# ── 25. Updated hours visible in settings ────────────────────────────────────
+- assertVisible:
+    text: 09:00
+- assertVisible:
+    text: 22:00
+- takeScreenshot: provider-dash-22-hours-updated
+
+# ── 26. Regression: map tab still loads ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: provider-dash-23-map-ok

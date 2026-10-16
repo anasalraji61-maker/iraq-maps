@@ -1,0 +1,229 @@
+# Stories flow:
+# Login → open Discover tab → view stories ring → tap to open story →
+# swipe through story frames → reply to story → verify reply sent.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   At least one story published by a test provider in the e2e seed data.
+# Env vars:
+#   PHONE      Default: random.
+#   OTP_CODE   Default: 123456.
+#   REPLY_TEXT Story reply text. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: stories-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم القصص'}
+  REPLY_TEXT: ${REPLY_TEXT || 'رائع جداً، شكراً على المشاركة!'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: stories-01-logged-in
+
+# ── 3. Navigate to Discover tab ──────────────────────────────────────────────
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 20000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: stories-02-discover-feed
+
+# ── 4. Verify stories ring row is present ────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: discover.stories.ring
+    timeout: 15000
+- assertVisible:
+    id: discover.stories.ring
+- takeScreenshot: stories-03-stories-ring
+
+# ── 5. Scroll horizontally to confirm more stories exist ─────────────────────
+- swipe:
+    direction: LEFT
+    element:
+      id: discover.stories.ring
+
+# ── 6. Tap the first story avatar ────────────────────────────────────────────
+- tapOn:
+    id: discover.stories.item
+- extendedWaitUntil:
+    visible:
+      id: story.viewer
+    timeout: 15000
+- assertVisible:
+    id: story.viewer
+- takeScreenshot: stories-04-story-open
+
+# ── 7. Progress bar is visible at top ────────────────────────────────────────
+- assertVisible:
+    id: story.viewer.progress
+
+# ── 8. Provider name is shown ─────────────────────────────────────────────────
+- assertVisible:
+    id: story.viewer.authorName
+
+# ── 9. Timestamp is shown ─────────────────────────────────────────────────────
+- assertVisible:
+    id: story.viewer.timestamp
+
+# ── 10. Swipe left to advance to next frame ───────────────────────────────────
+- swipe:
+    direction: LEFT
+    element:
+      id: story.viewer
+- extendedWaitUntil:
+    visible:
+      id: story.viewer
+    timeout: 10000
+- assertVisible:
+    id: story.viewer
+- takeScreenshot: stories-05-next-frame
+
+# ── 11. Swipe left again (third frame or loop) ───────────────────────────────
+- swipe:
+    direction: LEFT
+    element:
+      id: story.viewer
+- assertVisible:
+    id: story.viewer
+- takeScreenshot: stories-06-third-frame
+
+# ── 12. Swipe right to go back one frame ─────────────────────────────────────
+- swipe:
+    direction: RIGHT
+    element:
+      id: story.viewer
+- assertVisible:
+    id: story.viewer
+- takeScreenshot: stories-07-previous-frame
+
+# ── 13. Tap to pause auto-advance ────────────────────────────────────────────
+- tapOn:
+    id: story.viewer
+- assertVisible:
+    id: story.viewer.paused
+- takeScreenshot: stories-08-paused
+
+# ── 14. Tap again to resume ───────────────────────────────────────────────────
+- tapOn:
+    id: story.viewer
+- assertVisible:
+    id: story.viewer.progress
+
+# ── 15. Open reply input ─────────────────────────────────────────────────────
+- tapOn:
+    id: story.viewer.reply
+- extendedWaitUntil:
+    visible:
+      id: story.reply.input
+    timeout: 10000
+- assertVisible:
+    id: story.reply.input
+- takeScreenshot: stories-09-reply-input-open
+
+# ── 16. Type reply text ───────────────────────────────────────────────────────
+- tapOn:
+    id: story.reply.input
+- inputText: ${REPLY_TEXT}
+- hideKeyboard
+- assertVisible:
+    text: ${REPLY_TEXT}
+- takeScreenshot: stories-10-reply-typed
+
+# ── 17. Submit reply ──────────────────────────────────────────────────────────
+- tapOn:
+    id: story.reply.submit
+- extendedWaitUntil:
+    visible:
+      id: story.reply.sent
+    timeout: 15000
+- assertVisible:
+    id: story.reply.sent
+- takeScreenshot: stories-11-reply-sent
+
+# ── 18. Verify confirmation in Arabic ────────────────────────────────────────
+- assertVisible:
+    text: تم إرسال ردك
+
+# ── 19. Close story viewer ────────────────────────────────────────────────────
+- tapOn:
+    id: story.viewer.close
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 10000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: stories-12-back-to-feed
+
+# ── 20. Viewed story avatar shows watched state ───────────────────────────────
+- assertVisible:
+    id: discover.stories.item.viewed
+- takeScreenshot: stories-13-story-marked-viewed
+
+# ── 21. Feed still scrollable after story view ───────────────────────────────
+- scroll
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: stories-14-feed-scrollable
+
+# ── 22. Regression: map tab still loads ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: stories-15-map-ok

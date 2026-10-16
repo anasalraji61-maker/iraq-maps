@@ -1,0 +1,294 @@
+# Offline flow:
+# Login → open offline settings → download Baghdad region →
+# toggle airplane mode → verify map still shows cached tiles →
+# search works from local cache → toggle back online → verify sync.
+#
+# NOTE: Maestro cannot toggle airplane mode directly; this flow uses the
+# app's own "simulate offline" dev-settings toggle (APP_ENV=e2e exposes it).
+# On a real device with Maestro orchestrator, see README for network toggle.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini PMTiles bundle reachable in e2e tile server
+# Env vars:
+#   PHONE      Default: random.
+#   OTP_CODE   Default: 123456.
+#   SEARCH_Q   A place that is in the cached region. Default: قلعه.
+appId: iq.iraqmaps.app
+name: offline-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم بدون إنترنت'}
+  SEARCH_Q: ${SEARCH_Q || 'قلعه'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: offline-01-logged-in
+
+# ── 3. Navigate to account → offline maps settings ───────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.offlineMaps
+- extendedWaitUntil:
+    visible:
+      id: offline.screen
+    timeout: 15000
+- assertVisible:
+    id: offline.screen
+- takeScreenshot: offline-02-offline-screen
+
+# ── 4. Verify available regions list ─────────────────────────────────────────
+- assertVisible:
+    id: offline.regions.list
+- takeScreenshot: offline-03-regions-list
+
+# ── 5. Tap Baghdad region to start download ───────────────────────────────────
+- tapOn:
+    id: offline.region.baghdad
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad.detail
+    timeout: 10000
+- assertVisible:
+    id: offline.region.baghdad.detail
+- takeScreenshot: offline-04-baghdad-detail
+
+# ── 6. Verify file size is shown ─────────────────────────────────────────────
+- assertVisible:
+    id: offline.region.baghdad.detail.size
+- takeScreenshot: offline-05-size-shown
+
+# ── 7. Tap Download ───────────────────────────────────────────────────────────
+- tapOn:
+    id: offline.region.baghdad.detail.download
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad.downloading
+    timeout: 10000
+- assertVisible:
+    id: offline.region.baghdad.downloading
+- takeScreenshot: offline-06-download-started
+
+# ── 8. Wait for download to complete ─────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad.downloaded
+    timeout: 120000
+- assertVisible:
+    id: offline.region.baghdad.downloaded
+- takeScreenshot: offline-07-download-complete
+
+# ── 9. Arabic confirmation shown ─────────────────────────────────────────────
+- assertVisible:
+    text: تم تنزيل الخريطة
+
+# ── 10. Enable simulate-offline toggle (dev toggle exposed in APP_ENV=e2e) ───
+- tapOn:
+    id: offline.devToggle.simulateOffline
+- extendedWaitUntil:
+    visible:
+      id: offline.devToggle.simulateOffline.active
+    timeout: 10000
+- assertVisible:
+    id: offline.devToggle.simulateOffline.active
+- takeScreenshot: offline-08-offline-simulated
+
+# ── 11. Navigate to map tab ───────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- takeScreenshot: offline-09-map-loaded-offline
+
+# ── 12. Offline indicator is shown ───────────────────────────────────────────
+- assertVisible:
+    id: map.offlineBanner
+- takeScreenshot: offline-10-offline-banner
+
+# ── 13. OSM attribution still present ───────────────────────────────────────
+- assertVisible:
+    id: map.attribution
+
+# ── 14. Tiles are visible (not blank) ────────────────────────────────────────
+- assertVisible:
+    id: map.tiles
+
+# ── 15. Search for a cached place ────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 20000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: offline-11-search-results-offline
+
+# ── 16. Open place card ───────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- takeScreenshot: offline-12-place-card-offline
+
+# ── 17. AI assistant is disabled offline ─────────────────────────────────────
+- assertVisible:
+    id: place.assistant.offline
+
+# ── 18. Close place card ──────────────────────────────────────────────────────
+- tapOn:
+    id: place.card.close
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 10000
+
+# ── 19. Disable simulate-offline toggle ──────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.offlineMaps
+- extendedWaitUntil:
+    visible:
+      id: offline.screen
+    timeout: 15000
+- tapOn:
+    id: offline.devToggle.simulateOffline
+- extendedWaitUntil:
+    visible:
+      id: offline.devToggle.simulateOffline.inactive
+    timeout: 10000
+- assertVisible:
+    id: offline.devToggle.simulateOffline.inactive
+- takeScreenshot: offline-13-back-online
+
+# ── 20. Navigate back to map — online tiles load ──────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertNotVisible:
+    id: map.offlineBanner
+- takeScreenshot: offline-14-online-map
+
+# ── 21. Search works again online ────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: offline-15-search-online
+
+# ── 22. Delete downloaded region (cleanup) ───────────────────────────────────
+- tapOn:
+    id: map.search.clear
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.offlineMaps
+- extendedWaitUntil:
+    visible:
+      id: offline.screen
+    timeout: 15000
+- tapOn:
+    id: offline.region.baghdad.downloaded
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad.detail
+    timeout: 10000
+- tapOn:
+    id: offline.region.baghdad.detail.delete
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad.detail.deleteConfirm
+    timeout: 10000
+- tapOn:
+    id: offline.region.baghdad.detail.deleteConfirm
+- extendedWaitUntil:
+    visible:
+      id: offline.region.baghdad
+    timeout: 10000
+- assertNotVisible:
+    id: offline.region.baghdad.downloaded
+- takeScreenshot: offline-16-region-deleted

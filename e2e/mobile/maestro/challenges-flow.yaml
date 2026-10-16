@@ -1,0 +1,292 @@
+# Challenges flow:
+# Login → Discover → Challenges section → view challenge detail →
+# complete required action (visit a place / write a review) →
+# claim reward → verify points in reputation panel.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   At least one active challenge seeded in e2e data (a "visit 1 place" challenge).
+# Env vars:
+#   PHONE      Default: random.
+#   OTP_CODE   Default: 123456.
+#   SEARCH_Q   Place to visit for challenge. Default: مطعم.
+appId: iq.iraqmaps.app
+name: challenges-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم التحديات'}
+  SEARCH_Q: ${SEARCH_Q || 'مطعم'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: challenges-01-logged-in
+
+# ── 3. Go to Discover tab ─────────────────────────────────────────────────────
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 20000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: challenges-02-discover-feed
+
+# ── 4. Scroll to Challenges section ──────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: discover.challenges.section
+    direction: DOWN
+- assertVisible:
+    id: discover.challenges.section
+- takeScreenshot: challenges-03-challenges-section
+
+# ── 5. Tap "See All Challenges" ───────────────────────────────────────────────
+- tapOn:
+    id: discover.challenges.seeAll
+- extendedWaitUntil:
+    visible:
+      id: challenges.list
+    timeout: 15000
+- assertVisible:
+    id: challenges.list
+- takeScreenshot: challenges-04-challenges-list
+
+# ── 6. Verify challenges list has items ──────────────────────────────────────
+- assertVisible:
+    id: challenges.item
+
+# ── 7. Tap the first available challenge ──────────────────────────────────────
+- tapOn:
+    id: challenges.item
+- extendedWaitUntil:
+    visible:
+      id: challenges.detail
+    timeout: 15000
+- assertVisible:
+    id: challenges.detail
+- takeScreenshot: challenges-05-challenge-detail
+
+# ── 8. Verify challenge detail fields ────────────────────────────────────────
+- assertVisible:
+    id: challenges.detail.title
+- assertVisible:
+    id: challenges.detail.description
+- assertVisible:
+    id: challenges.detail.reward
+- assertVisible:
+    id: challenges.detail.progress
+- assertVisible:
+    id: challenges.detail.deadline
+- takeScreenshot: challenges-06-challenge-fields
+
+# ── 9. Tap "Start Challenge" ──────────────────────────────────────────────────
+- tapOn:
+    id: challenges.detail.start
+- extendedWaitUntil:
+    visible:
+      id: challenges.detail.started
+    timeout: 15000
+- assertVisible:
+    id: challenges.detail.started
+- takeScreenshot: challenges-07-challenge-started
+
+# ── 10. Navigate to map to complete the challenge (visit a place) ─────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- takeScreenshot: challenges-08-place-found
+
+# ── 11. Tap "Check In" to complete the visit action ──────────────────────────
+- tapOn:
+    id: place.checkIn
+- extendedWaitUntil:
+    visible:
+      id: place.checkIn.success
+    timeout: 15000
+- assertVisible:
+    id: place.checkIn.success
+- takeScreenshot: challenges-09-checked-in
+
+# ── 12. Challenge notification banner appears ─────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: challenge.progress.banner
+    timeout: 15000
+- assertVisible:
+    id: challenge.progress.banner
+- takeScreenshot: challenges-10-challenge-progress
+
+# ── 13. Dismiss banner and go back to Discover → Challenges ──────────────────
+- tapOn:
+    id: challenge.progress.banner.dismiss
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: discover.challenges.section
+    direction: DOWN
+- tapOn:
+    id: discover.challenges.seeAll
+- extendedWaitUntil:
+    visible:
+      id: challenges.list
+    timeout: 15000
+- tapOn:
+    id: challenges.item
+- extendedWaitUntil:
+    visible:
+      id: challenges.detail
+    timeout: 15000
+- assertVisible:
+    id: challenges.detail
+- takeScreenshot: challenges-11-challenge-updated
+
+# ── 14. Progress bar now shows completion ─────────────────────────────────────
+- assertVisible:
+    id: challenges.detail.progress.complete
+- takeScreenshot: challenges-12-progress-complete
+
+# ── 15. Claim reward button is now active ─────────────────────────────────────
+- assertVisible:
+    id: challenges.detail.claimReward
+- tapOn:
+    id: challenges.detail.claimReward
+- extendedWaitUntil:
+    visible:
+      id: challenges.reward.claimed
+    timeout: 15000
+- assertVisible:
+    id: challenges.reward.claimed
+- takeScreenshot: challenges-13-reward-claimed
+
+# ── 16. Arabic confirmation is shown ─────────────────────────────────────────
+- assertVisible:
+    text: تم الحصول على المكافأة
+
+# ── 17. Dismiss reward modal ─────────────────────────────────────────────────
+- tapOn:
+    id: challenges.reward.claimed.done
+- extendedWaitUntil:
+    visible:
+      id: challenges.list
+    timeout: 10000
+- takeScreenshot: challenges-14-back-to-list
+
+# ── 18. Navigate to account to check reputation points ───────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.reputation
+- extendedWaitUntil:
+    visible:
+      id: account.reputation.panel
+    timeout: 15000
+- assertVisible:
+    id: account.reputation.panel
+- takeScreenshot: challenges-15-reputation-panel
+
+# ── 19. Points balance is visible and non-zero ────────────────────────────────
+- assertVisible:
+    id: account.reputation.points
+- assertVisible:
+    id: account.reputation.level
+- takeScreenshot: challenges-16-points-visible
+
+# ── 20. Activity log shows the challenge reward ───────────────────────────────
+- tapOn:
+    id: account.reputation.activityLog
+- extendedWaitUntil:
+    visible:
+      id: account.reputation.activityLog.list
+    timeout: 15000
+- assertVisible:
+    id: account.reputation.activityLog.list
+- assertVisible:
+    id: account.reputation.activityLog.item
+- takeScreenshot: challenges-17-activity-log
+
+# ── 21. Regression: map tab still works ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: challenges-18-map-ok

@@ -1,0 +1,68 @@
+# auth-helper.yaml — reusable login flow
+# Include this in a flow via Maestro's `runFlow` command:
+#
+#   - runFlow: helpers/auth-helper.yaml
+#
+# The parent flow must declare these env vars before including:
+#   PHONE    Iraqi mobile number (07xxxxxxxxx). Default: random 077xxxxxxxx.
+#   OTP_CODE Must match OTP_FIXED_CODE on the server. Default: 123456.
+#   NAME     Display name for the account. Default: مستخدم جديد.
+#
+# After this helper completes the user is authenticated and the map tab is
+# visible. The helper does NOT navigate anywhere — caller decides next tab.
+
+# ── A. Open account tab ──────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- assertVisible:
+    id: account.signIn
+
+# ── B. Enter phone number ────────────────────────────────────────────────────
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+
+# ── C. Enter OTP ─────────────────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+
+# ── D. Enter display name ────────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+
+# ── E. Wait for authenticated state ─────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- assertVisible:
+    id: tab.map

@@ -1,0 +1,41 @@
+# place-helper.yaml — search for a place by name and open its place card.
+# Include via:
+#
+#   - runFlow: helpers/place-helper.yaml
+#
+# The parent flow must declare:
+#   SEARCH_Q  Text to search for. Default: مطعم (matches restaurants in fixture).
+#
+# Prerequisites: map tab is open and map.view is visible (run map-helper first).
+# After this helper the place card is on screen (id: place.card).
+
+# ── A. Tap search bar ────────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+
+# ── B. Wait for results ──────────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+
+# ── C. Tap first result ──────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.result
+
+# ── D. Wait for place card ───────────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+# Place source must be shown (data integrity requirement)
+- assertVisible:
+    id: place.source

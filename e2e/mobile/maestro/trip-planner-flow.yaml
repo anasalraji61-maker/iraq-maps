@@ -1,0 +1,316 @@
+# Trip planner flow:
+# Login → open Navigation tab → tap "Plan Trip" → add 3 stops →
+# tap "Optimize Route" → verify optimized order → save trip →
+# start navigation along trip → stop navigation.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded (Valhalla routing engine running)
+# Env vars:
+#   PHONE      Default: random.
+#   OTP_CODE   Default: 123456.
+#   STOP_1     First stop query. Default: قلعه.
+#   STOP_2     Second stop query. Default: مطعم.
+#   STOP_3     Third stop query. Default: فندق.
+#   TRIP_NAME  Saved trip name. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: trip-planner-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم التخطيط'}
+  STOP_1: ${STOP_1 || 'قلعه'}
+  STOP_2: ${STOP_2 || 'مطعم'}
+  STOP_3: ${STOP_3 || 'فندق'}
+  TRIP_NAME: ${TRIP_NAME || 'رحلتي في بغداد'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: trip-01-logged-in
+
+# ── 3. Open the Navigation tab ───────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: trip-02-map-loaded
+
+# ── 4. Tap "Plan Trip" button ─────────────────────────────────────────────────
+- tapOn:
+    id: map.planTrip
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.screen
+    timeout: 15000
+- assertVisible:
+    id: tripPlanner.screen
+- takeScreenshot: trip-03-planner-open
+
+# ── 5. Trip planner has an empty stops list ───────────────────────────────────
+- assertVisible:
+    id: tripPlanner.stops.empty
+- takeScreenshot: trip-04-empty-stops
+
+# ── 6. Tap "Add Stop" ─────────────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.addStop
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search
+    timeout: 10000
+- assertVisible:
+    id: tripPlanner.stop.search
+- takeScreenshot: trip-05-stop-search
+
+# ── 7. Search for first stop ─────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.stop.search.input
+- inputText: ${STOP_1}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search.result
+    timeout: 15000
+- tapOn:
+    id: tripPlanner.stop.search.result
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.screen
+    timeout: 10000
+- assertVisible:
+    id: tripPlanner.screen
+- takeScreenshot: trip-06-stop-1-added
+
+# ── 8. Verify first stop appears in list ─────────────────────────────────────
+- assertVisible:
+    id: tripPlanner.stop.item
+
+# ── 9. Add second stop ───────────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.addStop
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search
+    timeout: 10000
+- tapOn:
+    id: tripPlanner.stop.search.input
+- inputText: ${STOP_2}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search.result
+    timeout: 15000
+- tapOn:
+    id: tripPlanner.stop.search.result
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.screen
+    timeout: 10000
+- takeScreenshot: trip-07-stop-2-added
+
+# ── 10. Add third stop ───────────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.addStop
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search
+    timeout: 10000
+- tapOn:
+    id: tripPlanner.stop.search.input
+- inputText: ${STOP_3}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.stop.search.result
+    timeout: 15000
+- tapOn:
+    id: tripPlanner.stop.search.result
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.screen
+    timeout: 10000
+- takeScreenshot: trip-08-three-stops-added
+
+# ── 11. Route preview shown with 3 stops ─────────────────────────────────────
+- assertVisible:
+    id: tripPlanner.routePreview
+
+# ── 12. Total distance and duration shown ────────────────────────────────────
+- assertVisible:
+    id: tripPlanner.totalDistance
+- assertVisible:
+    id: tripPlanner.totalDuration
+- takeScreenshot: trip-09-route-metrics
+
+# ── 13. Tap "Optimize Route" ─────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.optimize
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.optimized
+    timeout: 25000
+- assertVisible:
+    id: tripPlanner.optimized
+- takeScreenshot: trip-10-route-optimized
+
+# ── 14. Optimized route has same 3 stops ─────────────────────────────────────
+- assertVisible:
+    id: tripPlanner.stop.item
+
+# ── 15. Optimized distance may differ — verify it's shown ────────────────────
+- assertVisible:
+    id: tripPlanner.totalDistance
+- takeScreenshot: trip-11-optimized-distance
+
+# ── 16. Save the trip ────────────────────────────────────────────────────────
+- tapOn:
+    id: tripPlanner.save
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.save.nameInput
+    timeout: 10000
+- assertVisible:
+    id: tripPlanner.save.nameInput
+- tapOn:
+    id: tripPlanner.save.nameInput
+- clearText
+- inputText: ${TRIP_NAME}
+- hideKeyboard
+- assertVisible:
+    text: ${TRIP_NAME}
+- tapOn:
+    id: tripPlanner.save.confirm
+- extendedWaitUntil:
+    visible:
+      id: tripPlanner.save.success
+    timeout: 15000
+- assertVisible:
+    id: tripPlanner.save.success
+- takeScreenshot: trip-12-trip-saved
+
+# ── 17. Arabic save confirmation ─────────────────────────────────────────────
+- assertVisible:
+    text: تم حفظ الرحلة
+
+# ── 18. Start navigation along the trip ──────────────────────────────────────
+- tapOn:
+    id: tripPlanner.startNavigation
+- extendedWaitUntil:
+    visible:
+      id: navigation.active
+    timeout: 25000
+- assertVisible:
+    id: navigation.active
+- takeScreenshot: trip-13-navigation-started
+
+# ── 19. Navigation HUD shows first leg destination ────────────────────────────
+- assertVisible:
+    id: navigation.nextManeuver
+- assertVisible:
+    id: navigation.distanceToNext
+- assertVisible:
+    id: navigation.stopButton
+
+# ── 20. Trip stop counter is shown ───────────────────────────────────────────
+- assertVisible:
+    id: navigation.tripStopCounter
+- takeScreenshot: trip-14-trip-stop-counter
+
+# ── 21. Stop navigation ──────────────────────────────────────────────────────
+- tapOn:
+    id: navigation.stopButton
+- extendedWaitUntil:
+    visible:
+      id: navigation.stopConfirm
+    timeout: 10000
+- tapOn:
+    id: navigation.stopConfirm
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 20000
+- assertVisible:
+    id: map.view
+- takeScreenshot: trip-15-navigation-stopped
+
+# ── 22. Verify saved trips accessible from account ───────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- tapOn:
+    id: account.savedTrips
+- extendedWaitUntil:
+    visible:
+      id: account.savedTrips.list
+    timeout: 15000
+- assertVisible:
+    id: account.savedTrips.list
+- assertVisible:
+    text: ${TRIP_NAME}
+- takeScreenshot: trip-16-saved-trip-in-account
+
+# ── 23. Regression: map tab still loads ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 25000
+- assertVisible:
+    id: map.view
+- takeScreenshot: trip-17-map-ok

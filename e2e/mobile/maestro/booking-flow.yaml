@@ -1,0 +1,251 @@
+# Booking flow:
+# Login → open map → find restaurant → view place card → tap "Book" →
+# select date → select time slot → confirm booking → verify in profile.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture loaded (includes a bookable restaurant)
+# Env vars:
+#   PHONE      Iraqi mobile number. Default: random.
+#   OTP_CODE   Default: 123456.
+#   SEARCH_Q   Place query. Default: مطعم (restaurant in fixture).
+appId: iq.iraqmaps.app
+name: booking-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم الحجز'}
+  SEARCH_Q: ${SEARCH_Q || 'مطعم'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Authenticate ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 25000
+- takeScreenshot: booking-01-logged-in
+
+# ── 3. Open map ───────────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- assertVisible:
+    id: map.attribution
+- takeScreenshot: booking-02-map-loaded
+
+# ── 4. Search for a restaurant ───────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: booking-03-search-results
+
+# ── 5. Open place card ───────────────────────────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- assertVisible:
+    id: place.source
+- takeScreenshot: booking-04-place-card
+
+# ── 6. Tap "Book" button ─────────────────────────────────────────────────────
+- assertVisible:
+    id: place.book
+- tapOn:
+    id: place.book
+- extendedWaitUntil:
+    visible:
+      id: booking.datePicker
+    timeout: 15000
+- assertVisible:
+    id: booking.datePicker
+- takeScreenshot: booking-05-date-picker
+
+# ── 7. Select first available date ───────────────────────────────────────────
+- tapOn:
+    id: booking.date.available
+- extendedWaitUntil:
+    visible:
+      id: booking.date.selected
+    timeout: 10000
+- assertVisible:
+    id: booking.date.selected
+- takeScreenshot: booking-06-date-selected
+
+# ── 8. Confirm date and move to time selection ────────────────────────────────
+- tapOn:
+    id: booking.date.confirm
+- extendedWaitUntil:
+    visible:
+      id: booking.timePicker
+    timeout: 15000
+- assertVisible:
+    id: booking.timePicker
+- takeScreenshot: booking-07-time-picker
+
+# ── 9. Select a time slot ─────────────────────────────────────────────────────
+- tapOn:
+    id: booking.slot.available
+- extendedWaitUntil:
+    visible:
+      id: booking.slot.selected
+    timeout: 10000
+- assertVisible:
+    id: booking.slot.selected
+- takeScreenshot: booking-08-time-selected
+
+# ── 10. Optional: select party size ──────────────────────────────────────────
+- assertVisible:
+    id: booking.partySize
+- tapOn:
+    id: booking.partySize.increase
+- tapOn:
+    id: booking.partySize.increase
+- assertVisible:
+    id: booking.partySize.value
+- takeScreenshot: booking-09-party-size
+
+# ── 11. Tap Confirm Booking ───────────────────────────────────────────────────
+- tapOn:
+    id: booking.confirm
+- extendedWaitUntil:
+    visible:
+      id: booking.success
+    timeout: 25000
+- assertVisible:
+    id: booking.success
+- takeScreenshot: booking-10-booking-confirmed
+
+# ── 12. Verify confirmation message in Arabic ─────────────────────────────────
+- assertVisible:
+    text: تم الحجز بنجاح
+
+# ── 13. Dismiss confirmation and navigate to account ─────────────────────────
+- tapOn:
+    id: booking.success.done
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- takeScreenshot: booking-11-account-menu
+
+# ── 14. Open My Bookings / Appointments section ───────────────────────────────
+- tapOn:
+    id: account.bookings
+- extendedWaitUntil:
+    visible:
+      id: account.bookings.list
+    timeout: 15000
+- assertVisible:
+    id: account.bookings.list
+- takeScreenshot: booking-12-bookings-list
+
+# ── 15. Verify the new booking appears ───────────────────────────────────────
+- assertVisible:
+    id: account.bookings.item
+- takeScreenshot: booking-13-booking-visible
+
+# ── 16. Tap booking item to see detail ───────────────────────────────────────
+- tapOn:
+    id: account.bookings.item
+- extendedWaitUntil:
+    visible:
+      id: account.bookings.detail
+    timeout: 10000
+- assertVisible:
+    id: account.bookings.detail
+- takeScreenshot: booking-14-booking-detail
+
+# ── 17. Verify booking detail has the right fields ───────────────────────────
+- assertVisible:
+    id: account.bookings.detail.place
+- assertVisible:
+    id: account.bookings.detail.date
+- assertVisible:
+    id: account.bookings.detail.time
+- assertVisible:
+    id: account.bookings.detail.status
+
+# ── 18. Cancel button is available ───────────────────────────────────────────
+- assertVisible:
+    id: account.bookings.detail.cancel
+- takeScreenshot: booking-15-cancel-available
+
+# ── 19. Back to map — regression check ───────────────────────────────────────
+- tapOn:
+    id: account.bookings.detail.back
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 20000
+- assertVisible:
+    id: map.view
+- takeScreenshot: booking-16-map-ok

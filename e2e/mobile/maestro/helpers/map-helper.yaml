@@ -1,0 +1,29 @@
+# map-helper.yaml — navigate to the map tab and confirm it is loaded.
+# Include via:
+#
+#   - runFlow: helpers/map-helper.yaml
+#
+# Prerequisites: user must already be authenticated (run auth-helper first).
+# After this helper the map is on screen and the search bar is visible.
+
+# ── A. Tap map tab ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+
+# ── B. Confirm OSM attribution is visible (required by data license) ─────────
+- assertVisible:
+    id: map.attribution
+
+# ── C. Confirm search bar is accessible ─────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: map.search.input
+    timeout: 10000
+- assertVisible:
+    id: map.search.input
