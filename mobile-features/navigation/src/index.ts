@@ -16,5 +16,19 @@ export { favoriteRoutes, type FavoriteRoute } from './favoriteRoutes';
 export { LiveTrafficScreen, type LiveTrafficScreenProps } from './screens/LiveTrafficScreen';
 export { SavedRoutesScreen, type SavedRoutesScreenProps } from './screens/SavedRoutesScreen';
 export { RouteHistoryScreen, type RouteHistoryScreenProps, type TripRecord } from './screens/RouteHistoryScreen';
+export {
+  TripPlannerScreen,
+  type TripPlannerScreenProps,
+  type TripStop,
+  type TripSegmentInfo,
+  type TripStats,
+} from './screens/TripPlannerScreen';
+export {
+  TripDetailScreen,
+  type TripDetailScreenProps,
+  type DetailStop,
+  type DetailSegment,
+  type DetailTripPlan,
+} from './screens/TripDetailScreen';
 export { LaneGuidance, ManeuverArrow, SpeedLimit, CurrentSpeed, RouteCompare, TripSummary } from './components';
 export type { Lane, LaneDirection, LaneGuidanceProps, ManeuverArrowProps, SpeedLimitProps, CurrentSpeedProps, RouteCompareProps, RouteOption, RouteTag, TripSummaryProps, TripSummaryTrip } from './components';

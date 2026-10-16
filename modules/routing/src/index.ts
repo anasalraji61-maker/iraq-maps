@@ -4,7 +4,21 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { z } from 'zod';
 import { ROUTING_SERVICE, RoutingController } from './http';
 import { RoutingService } from './service';
+import { ExtendedRoutingService, TripPlannerService } from './trip-planner.service';
 import { ValhallaClient } from './valhalla';
+
+export type {
+  TripPlan,
+  TripStop,
+  TripStopInput,
+  TripSegment,
+  TripStats,
+  PlanTripInput,
+  AlternativeRoute,
+  ElevationProfile,
+  ElevationPoint,
+} from './trip-planner.service';
+export { TripPlannerService, ExtendedRoutingService };
 
 export interface RoutingModuleOptions {
   /** Defaults to process.env. */
