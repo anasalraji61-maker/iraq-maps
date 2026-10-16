@@ -19,6 +19,7 @@ export { RequestAppointmentScreen } from './screens/RequestAppointmentScreen';
 export { MyAppointmentsScreen } from './screens/MyAppointmentsScreen';
 export { InsightsDashboardScreen } from './screens/InsightsDashboardScreen';
 export { AnalyticsDashboardScreen } from './screens/AnalyticsDashboardScreen';
+export { ReviewAnalyticsScreen } from './screens/ReviewAnalyticsScreen';
 export { CompetitorInsightsScreen } from './screens/CompetitorInsightsScreen';
 export { CustomerInsightsScreen } from './screens/CustomerInsightsScreen';
 export { ContentCalendarScreen } from './screens/ContentCalendarScreen';
