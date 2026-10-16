@@ -19,6 +19,11 @@ import { AdminSystemPage } from './pages/AdminSystemPage';
 import { AdminChallengesPage } from './pages/AdminChallengesPage';
 import { AdminProviderVerificationPage } from './pages/AdminProviderVerificationPage';
 import { AdminModerationPage } from './pages/AdminModerationPage';
+import { AdminReviewsPage } from './pages/AdminReviewsPage';
+import { AdminEventsPage } from './pages/AdminEventsPage';
+import { AdminIncidentsPage } from './pages/AdminIncidentsPage';
+import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
+import { AdminSettingsPage } from './pages/AdminSettingsPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -105,6 +110,21 @@ function NavBar() {
       </NavLink>
       <NavLink to="/moderation" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         المشرف
+      </NavLink>
+      <NavLink to="/reviews" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        التقييمات
+      </NavLink>
+      <NavLink to="/events" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        الفعاليات
+      </NavLink>
+      <NavLink to="/incidents" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        الحوادث
+      </NavLink>
+      <NavLink to="/admin-analytics" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Analytics+
+      </NavLink>
+      <NavLink to="/admin-settings" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Settings
       </NavLink>
       <button
         onClick={logout}
@@ -279,6 +299,46 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AdminProviderVerificationPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <AuthGate>
+                <Layout><AdminReviewsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <AuthGate>
+                <Layout><AdminEventsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/incidents"
+            element={
+              <AuthGate>
+                <Layout><AdminIncidentsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-analytics"
+            element={
+              <AuthGate>
+                <Layout><AdminAnalyticsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/admin-settings"
+            element={
+              <AuthGate>
+                <Layout><AdminSettingsPage /></Layout>
               </AuthGate>
             }
           />
