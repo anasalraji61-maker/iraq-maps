@@ -428,7 +428,7 @@ export function Accordion({ items, allowMultiple = false, testID }: AccordionPro
               <RNText style={ac.triggerText}>{item.title}</RNText>
               <RNText style={ac.chevron}>{expanded ? SYM_EXPAND : SYM_COLLAPSE}</RNText>
             </Pressable>
-            {expanded && <View style={ac.panel}>{item.content}</View>}
+            {expanded && <View style={ac.panel}>{typeof item.content === 'string' ? <RNText style={ac.panelText}>{item.content}</RNText> : item.content}</View>}
           </View>
         );
       })}
@@ -445,4 +445,5 @@ const ac = StyleSheet.create({
   triggerText: { flex: 1, fontFamily: 'NotoSansArabic_700Bold', fontSize: font.size.body, color: color.text },
   chevron: { fontSize: 10, color: color.textMuted, marginStart: space.s },
   panel: { padding: space.m, backgroundColor: color.bg },
+  panelText: { fontFamily: 'NotoSansArabic_400Regular', fontSize: font.size.body, color: color.text },
 });

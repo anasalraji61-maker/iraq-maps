@@ -4,7 +4,6 @@
  */
 import { type ReactElement, useState } from 'react';
 import {
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -184,7 +183,7 @@ export function DatePicker({ value, onChange, label, monthNames, dayNames, minDa
   return (
     <View testID={testID} style={dp.wrapper}>
       {label ? <RNText style={dp.label}>{label}</RNText> : null}
-      <Pressable onPress={() => setOpen((o) => !o)} style={dp.trigger} accessibilityRole="button">
+      <Pressable onPress={() => setOpen((o) => !o)} style={dp.trigger} accessibilityRole="button" testID={testID ? `${testID}-trigger` : undefined}>
         <RNText style={displayStr ? dp.value : dp.placeholder}>{displayStr || emptyPlaceholder}</RNText>
         <RNText style={dp.icon}>{'📅'}</RNText>
       </Pressable>
@@ -337,7 +336,7 @@ export function MultiSelect({ options, selected, onChangeSelected, label, placeh
   return (
     <View testID={testID} style={ms.wrapper}>
       {label ? <RNText style={ms.label}>{label}</RNText> : null}
-      <Pressable onPress={() => setOpen((o) => !o)} style={ms.trigger} accessibilityRole="button">
+      <Pressable onPress={() => setOpen((o) => !o)} style={ms.trigger} accessibilityRole="button" testID={testID ? `${testID}-trigger` : undefined}>
         <RNText style={[ms.value, !selectedLabels && ms.placeholder]} numberOfLines={1}>
           {selectedLabels || placeholder}
         </RNText>
@@ -354,22 +353,19 @@ export function MultiSelect({ options, selected, onChangeSelected, label, placeh
               placeholder={searchPlaceholder}
             />
           )}
-          <FlatList
-            data={filtered}
-            keyExtractor={(o) => o.value}
-            style={ms.list}
-            renderItem={({ item }) => {
+          <ScrollView style={ms.list}>
+            {filtered.map((item) => {
               const checked = selected.includes(item.value);
               return (
-                <Pressable onPress={() => toggle(item.value)} style={ms.item} accessibilityRole="checkbox" accessibilityState={{ checked }}>
+                <Pressable key={item.value} onPress={() => toggle(item.value)} style={ms.item} accessibilityRole="checkbox" accessibilityState={{ checked }}>
                   <View style={[ms.checkbox, checked && ms.checkboxChecked]}>
                     {checked && <RNText style={ms.checkmark}>{SYM_CHECK}</RNText>}
                   </View>
                   <RNText style={ms.itemLabel}>{item.label}</RNText>
                 </Pressable>
               );
-            }}
-          />
+            })}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -489,8 +485,12 @@ export function RatingStars({ value, onChange, readonly = false, size = 28, test
             style={rs.star}
             accessibilityRole={readonly ? undefined : 'button'}
             accessibilityLabel={String(i)}
+            testID={testID ? `${testID}-star-${i}` : undefined}
           >
-            <RNText style={{ fontSize: size, color: full || halfStar ? '#F5A623' : color.border }}>{sym}</RNText>
+            <RNText
+              testID={testID && full ? `${testID}-star-filled-${i}` : undefined}
+              style={{ fontSize: size, color: full || halfStar ? '#F5A623' : color.border }}
+            >{sym}</RNText>
           </Pressable>
         );
       })}
