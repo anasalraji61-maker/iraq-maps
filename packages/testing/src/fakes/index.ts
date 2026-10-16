@@ -4,3 +4,6 @@ export * from './fake-payments-service';
 export * from './fake-reviews-service';
 export * from './fake-geocoding-client';
 export * from './fake-moderation-service';
+export * from './fake-appointments-service';
+export * from './fake-reputation-service';
+export * from './fake-listings-service';

@@ -51,6 +51,51 @@ export const providerOptOutTable = messagingSchema.table('provider_opt_out', {
   optedOutAt: timestamp('opted_out_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// ─── Quick Reply Templates ────────────────────────────────────────────────────
+
+export const quickReplyTable = messagingSchema.table(
+  'quick_reply',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id').notNull(),
+    category: text('category').notNull().default('other'),
+    label: text('label').notNull(),
+    text: text('text').notNull(),
+    usageCount: text('usage_count').notNull().default('0'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('quick_reply_provider_id_idx').on(t.providerId)],
+);
+
+export const conversationAssignmentTable = messagingSchema.table(
+  'conversation_assignment',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    deliveryId: uuid('delivery_id').notNull().references(() => deliveryTable.id),
+    staffId: uuid('staff_id').notNull(),
+    staffName: text('staff_name').notNull(),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('conv_assignment_delivery_id_idx').on(t.deliveryId)],
+);
+
+export const conversationStatusTable = messagingSchema.table(
+  'conversation_status',
+  {
+    deliveryId: uuid('delivery_id').primaryKey().references(() => deliveryTable.id),
+    status: text('status').notNull().default('open'), // 'open' | 'resolved'
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+export const autoReplyTable = messagingSchema.table('auto_reply', {
+  providerId: uuid('provider_id').primaryKey(),
+  message: text('message').notNull().default(''),
+  enabled: boolean('enabled').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ─── Group Messaging ──────────────────────────────────────────────────────────
 
 export const groupTable = messagingSchema.table(

@@ -145,6 +145,142 @@
     "messageFailed": "Failed to send",
     "retryMessage": "Retry"
   },
+  "inbox": {
+    "title": "Business Inbox",
+    "settings": "Settings",
+    "loadError": "Error loading messages",
+    "empty": "No inquiries yet",
+    "emptyBody": "Customer inquiries will appear here",
+    "customerAvatar": "Avatar for {name}",
+    "unreadCount": "{count} unread messages",
+    "inquiryCardLabel": "Inquiry from {name}",
+    "assignedTo": "Assigned to {name}",
+    "status": {
+      "new": "New",
+      "open": "Open",
+      "replied": "Replied",
+      "resolved": "Resolved"
+    },
+    "filter": {
+      "all": "All",
+      "unread": "Unread",
+      "awaiting": "Awaiting reply"
+    },
+    "hours": {
+      "open": "Open · closes {closes}",
+      "closed": "Closed · opens {opens}"
+    },
+    "autoReply": {
+      "title": "Auto-reply",
+      "toggle": "Enable auto-reply",
+      "placeholder": "Write your auto-reply message...",
+      "inputLabel": "Auto-reply text"
+    },
+    "qr": {
+      "greeting": "Greeting",
+      "greetingText": "Welcome to {business_name}! How can we help you?",
+      "hours": "Opening hours",
+      "hoursText": "We are open daily from 9am to 10pm.",
+      "price": "Prices",
+      "priceText": "We will be happy to send you our updated price list.",
+      "thanks": "Thanks",
+      "thanksText": "Thank you for contacting us! We look forward to serving you."
+    },
+    "assign": {
+      "title": "Assign conversation"
+    },
+    "actions": {
+      "viewCustomer": "View customer info",
+      "assign": "Assign to staff",
+      "resolve": "Close conversation"
+    },
+    "ctx": {
+      "inquiries": "Inquiries",
+      "reviews": "Reviews",
+      "rating": "Avg rating",
+      "lastContact": "Last contact: {date}"
+    },
+    "blocked": "Blocked"
+  },
+  "quickReplies": {
+    "title": "Quick Replies",
+    "create": "Create template",
+    "edit": "Edit",
+    "use": "Use",
+    "delete": "Delete",
+    "save": "Save",
+    "editTitle": "Edit template",
+    "createTitle": "New template",
+    "filterAll": "All",
+    "empty": "No quick replies",
+    "emptyBody": "Create a template to save time when replying",
+    "category": {
+      "greeting": "Greeting",
+      "prices": "Prices",
+      "hours": "Hours",
+      "directions": "Directions",
+      "thanks": "Thanks",
+      "other": "Other"
+    },
+    "categoryLabel": "Category",
+    "labelField": "Template name",
+    "labelPlaceholder": "e.g. Welcome message",
+    "textField": "Template text",
+    "textPlaceholder": "Write your reply text here...",
+    "variablesLabel": "Insert variable",
+    "insertVariable": "Insert {variable}",
+    "showPreview": "Preview",
+    "hidePreview": "Hide preview",
+    "previewLabel": "Preview:",
+    "preview": {
+      "businessName": "Our Store",
+      "customerName": "Ali"
+    },
+    "sortBy": "Sort:",
+    "sort": {
+      "frequency": "Most used",
+      "recent": "Recent",
+      "alpha": "A-Z"
+    },
+    "deleteConfirmTitle": "Delete template",
+    "deleteConfirmBody": "Are you sure you want to delete this template?",
+    "defaults": {
+      "greetingLabel": "Welcome",
+      "greetingText": "Welcome to {business_name}! We are happy to help.",
+      "hoursLabel": "Opening hours",
+      "hoursText": "We are open daily from 9am to 10pm.",
+      "thanksLabel": "Thank you",
+      "thanksText": "Thank you {customer_name} for contacting us!",
+      "directionsLabel": "Location",
+      "directionsText": "You can find us on the map, or contact us for directions."
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "loading": "Loading...",
+    "loadError": "Error loading contacts",
+    "empty": "No contacts yet",
+    "emptyBody": "Start a conversation with a person or business",
+    "searchPlaceholder": "Search contacts...",
+    "searchResults": "Search results",
+    "recent": "Recent",
+    "allContacts": "All contacts",
+    "suggested": "Suggested",
+    "sendMessage": "Send message",
+    "message": "Message {name}",
+    "addContact": "Add {name}",
+    "block": "Block",
+    "unblock": "Unblock",
+    "blocked": "Blocked",
+    "blockConfirmTitle": "Block contact",
+    "blockConfirmBody": "You will not receive any messages from this person.",
+    "tab": {
+      "all": "All",
+      "users": "People",
+      "providers": "Businesses",
+      "blocked": "Blocked"
+    }
+  },
   "conversation": {
     "copy": "Copy",
     "deleteForEveryone": "Delete for everyone",

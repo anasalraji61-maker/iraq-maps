@@ -145,6 +145,142 @@
     "messageFailed": "نەیگەیشت",
     "retryMessage": "دووبارە هەوڵ بدە"
   },
+  "inbox": {
+    "title": "بوکسی کار",
+    "settings": "ڕێکخستن",
+    "loadError": "هەڵەی بارکردنی پەیامەکان",
+    "empty": "هیچ داواکاریەک نییە",
+    "emptyBody": "داواکاریەکانی کڕیار لێرە دەرکەوتێت",
+    "customerAvatar": "وێنەی {name}",
+    "unreadCount": "{count} پەیامی نەخوێندراوەتەوە",
+    "inquiryCardLabel": "داواکاری لە {name}",
+    "assignedTo": "دراوە بە {name}",
+    "status": {
+      "new": "نوێ",
+      "open": "کراوە",
+      "replied": "وەڵامی دراوەتەوە",
+      "resolved": "داخراوە"
+    },
+    "filter": {
+      "all": "هەموو",
+      "unread": "نەخوێندراوەتەوە",
+      "awaiting": "چاوەڕێی وەڵام"
+    },
+    "hours": {
+      "open": "کراوە · داخراو {closes}",
+      "closed": "داخراوە · کراوە {opens}"
+    },
+    "autoReply": {
+      "title": "وەڵامدانەوەی خودکار",
+      "toggle": "چالاک کردنی وەڵامدانەوەی خودکار",
+      "placeholder": "پەیامی وەڵامدانەوەی خودکار بنووسە...",
+      "inputLabel": "دەقی وەڵامدانەوەی خودکار"
+    },
+    "qr": {
+      "greeting": "بەخێرهاتن",
+      "greetingText": "بەخێرهاتیت بۆ {business_name}! چۆن دەتوانین یارمەتیت بدەین؟",
+      "hours": "کاتی کار",
+      "hoursText": "ڕۆژانە لە ٩ی بەیانی تا ١٠ی شەو کارمان دەکات.",
+      "price": "نرخ",
+      "priceText": "دەمانتوانێت لیستی نرخەکانمان بنێرین.",
+      "thanks": "سوپاس",
+      "thanksText": "زۆر سوپاس بۆ پەیوەندیت! چاوەڕێی خزمەتکردنت دەکەین."
+    },
+    "assign": {
+      "title": "دەستنیشانکردنی گفتوگۆ"
+    },
+    "actions": {
+      "viewCustomer": "زانیاری کڕیار ببینە",
+      "assign": "بسپارە بە کارمەند",
+      "resolve": "داخستنی گفتوگۆ"
+    },
+    "ctx": {
+      "inquiries": "داواکاری",
+      "reviews": "هەڵسەنگاندن",
+      "rating": "تێکڕای هەڵسەنگاندن",
+      "lastContact": "دوایین پەیوەندی: {date}"
+    },
+    "blocked": "بلۆکی کراوە"
+  },
+  "quickReplies": {
+    "title": "وەڵامی خێرا",
+    "create": "دروستکردنی قاڵب",
+    "edit": "دەستکاری",
+    "use": "بەکارهێنان",
+    "delete": "سڕینەوە",
+    "save": "پاشەکەوتکردن",
+    "editTitle": "دەستکاری قاڵب",
+    "createTitle": "قاڵبی نوێ",
+    "filterAll": "هەموو",
+    "empty": "هیچ وەڵامی خێرایەک نییە",
+    "emptyBody": "قاڵبێک دروست بکە بۆ ئەوەی کاتت بپارێزیت",
+    "category": {
+      "greeting": "بەخێرهاتن",
+      "prices": "نرخ",
+      "hours": "کاتەکان",
+      "directions": "ئاراستە",
+      "thanks": "سوپاس",
+      "other": "تر"
+    },
+    "categoryLabel": "پۆل",
+    "labelField": "ناوی قاڵب",
+    "labelPlaceholder": "نموونە: پەیامی بەخێرهاتن",
+    "textField": "دەقی قاڵب",
+    "textPlaceholder": "دەقی وەڵامەکەت لێرە بنووسە...",
+    "variablesLabel": "گۆڕاو داخڵ بکە",
+    "insertVariable": "{variable} داخڵ بکە",
+    "showPreview": "پێشبینی",
+    "hidePreview": "پێشبینی بشارەوە",
+    "previewLabel": "پێشبینی:",
+    "preview": {
+      "businessName": "فرۆشگاکەمان",
+      "customerName": "علی"
+    },
+    "sortBy": "ڕیزکردن:",
+    "sort": {
+      "frequency": "زۆرترین بەکارهێنان",
+      "recent": "نوێترین",
+      "alpha": "ئەلفبایی"
+    },
+    "deleteConfirmTitle": "سڕینەوەی قاڵب",
+    "deleteConfirmBody": "دڵنیای کە دەتەوێت ئەم قاڵبە بسڕیتەوە؟",
+    "defaults": {
+      "greetingLabel": "بەخێرهاتن",
+      "greetingText": "بەخێرهاتیت بۆ {business_name}! دەمانتوانێت یارمەتیت بدەین.",
+      "hoursLabel": "کاتی کار",
+      "hoursText": "ڕۆژانە لە ٩ی بەیانی تا ١٠ی شەو کارمان دەکات.",
+      "thanksLabel": "سوپاس",
+      "thanksText": "زۆر سوپاس {customer_name} بۆ پەیوەندیت!",
+      "directionsLabel": "شوێن",
+      "directionsText": "دەتوانیت لەسەر خەریتەکە بمدۆزیتەوە."
+    }
+  },
+  "contacts": {
+    "title": "پەیوەندیەکان",
+    "loading": "بارکردن...",
+    "loadError": "هەڵەی بارکردنی پەیوەندیەکان",
+    "empty": "هیچ پەیوەندییەک نییە",
+    "emptyBody": "گفتوگۆ دەستپێبکە لەگەڵ کەسێک یان کارگەیەک",
+    "searchPlaceholder": "گەڕان لە پەیوەندیەکاندا...",
+    "searchResults": "ئەنجامەکانی گەڕان",
+    "recent": "دوایین",
+    "allContacts": "هەموو پەیوەندیەکان",
+    "suggested": "پێشنیار",
+    "sendMessage": "پەیام بنێرە",
+    "message": "پەیام بنێرە بۆ {name}",
+    "addContact": "{name} زیاد بکە",
+    "block": "بلۆک بکە",
+    "unblock": "بلۆکەکە ڕابگرە",
+    "blocked": "بلۆکی کراوە",
+    "blockConfirmTitle": "بلۆک کردنی پەیوەندی",
+    "blockConfirmBody": "هیچ پەیامێک لەم کەسە وەرناگری.",
+    "tab": {
+      "all": "هەموو",
+      "users": "کەسەکان",
+      "providers": "کارگەکان",
+      "blocked": "بلۆکی کراوە"
+    }
+  },
   "conversation": {
     "copy": "کۆپی",
     "deleteForEveryone": "بۆ هەموو بسڕەوە",

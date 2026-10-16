@@ -9,9 +9,33 @@ import {
 import type { Db } from '@iraq-maps/db-kit';
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Queue } from 'bullmq';
-import { and, count, eq, gt, ilike, lt, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gt, ilike, lt, or, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import { deliveryTable, inquiryTable, providerOptOutTable, replyTable } from './schema';
+import {
+  autoReplyTable,
+  conversationAssignmentTable,
+  conversationStatusTable,
+  deliveryTable,
+  inquiryTable,
+  providerOptOutTable,
+  quickReplyTable,
+  replyTable,
+} from './schema';
+
+// ─── Extra types ──────────────────────────────────────────────────────────────
+
+export type BusinessInboxFilter = 'all' | 'unread' | 'awaiting';
+
+export interface QuickReplyInput {
+  category: string;
+  label: string;
+  text: string;
+}
+
+export interface AssignConversationInput {
+  staffId: string;
+  staffName: string;
+}
 
 const DAILY_LIMIT = Number(process.env['MESSAGING_DAILY_LIMIT_PER_USER'] ?? 10);
 
@@ -486,6 +510,266 @@ export class MessagingService implements UserDataEraser {
       creatorId,
       memberIds,
       createdAt: new Date().toISOString(),
+    };
+  }
+
+  // ─── Quick Replies ────────────────────────────────────────────────────────
+
+  /**
+   * Save a new quick-reply template for a provider.
+   */
+  async createQuickReply(
+    providerId: string,
+    template: QuickReplyInput,
+    variables: Record<string, string> = {},
+  ) {
+    if (!template.label.trim() || !template.text.trim()) {
+      throw new BadRequestException({ code: 'invalid_template' });
+    }
+
+    const [row] = await this.db
+      .insert(quickReplyTable)
+      .values({
+        providerId,
+        category: template.category || 'other',
+        label: template.label.trim(),
+        text: template.text.trim(),
+      })
+      .returning();
+
+    return {
+      id: row!.id,
+      providerId: row!.providerId,
+      category: row!.category,
+      label: row!.label,
+      text: row!.text,
+      usageCount: Number(row!.usageCount),
+      createdAt: row!.createdAt.toISOString(),
+    };
+  }
+
+  /**
+   * Get all quick-reply templates for a provider, sorted by usage count desc.
+   */
+  async getQuickReplies(providerId: string) {
+    const rows = await this.db
+      .select()
+      .from(quickReplyTable)
+      .where(eq(quickReplyTable.providerId, providerId))
+      .orderBy(desc(quickReplyTable.usageCount));
+
+    return rows.map((r) => ({
+      id: r.id,
+      providerId: r.providerId,
+      category: r.category,
+      label: r.label,
+      text: r.text,
+      usageCount: Number(r.usageCount),
+      createdAt: r.createdAt.toISOString(),
+    }));
+  }
+
+  /**
+   * Delete a quick-reply template owned by a provider.
+   */
+  async deleteQuickReply(providerId: string, templateId: string): Promise<void> {
+    const [existing] = await this.db
+      .select({ id: quickReplyTable.id })
+      .from(quickReplyTable)
+      .where(and(eq(quickReplyTable.id, templateId), eq(quickReplyTable.providerId, providerId)))
+      .limit(1);
+
+    if (!existing) throw new NotFoundException({ code: 'not_found' });
+
+    await this.db
+      .delete(quickReplyTable)
+      .where(eq(quickReplyTable.id, templateId));
+  }
+
+  // ─── Conversation Management ──────────────────────────────────────────────
+
+  /**
+   * Assign a conversation (delivery) to a staff member.
+   */
+  async assignConversation(
+    providerId: string,
+    deliveryId: string,
+    staffId: string,
+    staffName: string,
+  ): Promise<void> {
+    // Verify the delivery belongs to this provider
+    const [delivery] = await this.db
+      .select({ id: deliveryTable.id })
+      .from(deliveryTable)
+      .where(and(eq(deliveryTable.id, deliveryId), eq(deliveryTable.placeId, providerId)))
+      .limit(1);
+
+    if (!delivery) throw new NotFoundException({ code: 'not_found' });
+
+    await this.db.insert(conversationAssignmentTable).values({
+      deliveryId,
+      staffId,
+      staffName,
+    });
+  }
+
+  /**
+   * Mark a conversation as resolved.
+   */
+  async resolveConversation(providerId: string, deliveryId: string): Promise<void> {
+    const [delivery] = await this.db
+      .select({ id: deliveryTable.id })
+      .from(deliveryTable)
+      .where(and(eq(deliveryTable.id, deliveryId), eq(deliveryTable.placeId, providerId)))
+      .limit(1);
+
+    if (!delivery) throw new NotFoundException({ code: 'not_found' });
+
+    await this.db
+      .insert(conversationStatusTable)
+      .values({
+        deliveryId,
+        status: 'resolved',
+        resolvedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: conversationStatusTable.deliveryId,
+        set: { status: 'resolved', resolvedAt: new Date(), updatedAt: new Date() },
+      });
+  }
+
+  // ─── Auto-Reply ───────────────────────────────────────────────────────────
+
+  /**
+   * Set or update the auto-reply configuration for a provider.
+   */
+  async setAutoReply(
+    providerId: string,
+    message: string,
+    enabled: boolean,
+  ): Promise<void> {
+    if (enabled && !message.trim()) {
+      throw new BadRequestException({ code: 'message_required' });
+    }
+
+    await this.db
+      .insert(autoReplyTable)
+      .values({ providerId, message: message.trim(), enabled })
+      .onConflictDoUpdate({
+        target: autoReplyTable.providerId,
+        set: { message: message.trim(), enabled, updatedAt: new Date() },
+      });
+  }
+
+  /**
+   * Get the auto-reply config for a provider. Returns null if not configured.
+   */
+  async getAutoReply(providerId: string) {
+    const [row] = await this.db
+      .select()
+      .from(autoReplyTable)
+      .where(eq(autoReplyTable.providerId, providerId))
+      .limit(1);
+
+    if (!row) return null;
+    return { message: row.message, enabled: row.enabled, updatedAt: row.updatedAt.toISOString() };
+  }
+
+  // ─── Business Inbox ───────────────────────────────────────────────────────
+
+  /**
+   * Provider business-inbox view with filter and pagination.
+   *
+   * filter:
+   *   'all'     — every delivery for this provider
+   *   'unread'  — deliveries with unread customer messages (status != 'replied')
+   *   'awaiting'— deliveries with status 'queued' or 'sent' (needs action)
+   */
+  async getBusinessInbox(
+    providerId: string,
+    filter: BusinessInboxFilter = 'all',
+    cursor?: string,
+    limit = 20,
+  ) {
+    let statusFilter: string[] | undefined;
+    if (filter === 'awaiting') statusFilter = ['queued', 'sent', 'delivered'];
+
+    const baseWhere = and(
+      eq(deliveryTable.placeId, providerId),
+      cursor ? lt(deliveryTable.updatedAt, new Date(cursor)) : undefined,
+      statusFilter
+        ? or(...statusFilter.map((s) => eq(deliveryTable.status, s)))
+        : undefined,
+    );
+
+    const rows = await this.db
+      .select()
+      .from(deliveryTable)
+      .where(baseWhere)
+      .orderBy(desc(deliveryTable.updatedAt))
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    const results = await Promise.all(
+      items.map(async (d) => {
+        const [inq] = await this.db
+          .select()
+          .from(inquiryTable)
+          .where(eq(inquiryTable.id, d.inquiryId))
+          .limit(1);
+        if (!inq) return null;
+
+        // Check assignment
+        const [assignment] = await this.db
+          .select()
+          .from(conversationAssignmentTable)
+          .where(eq(conversationAssignmentTable.deliveryId, d.id))
+          .orderBy(desc(conversationAssignmentTable.assignedAt))
+          .limit(1);
+
+        // Check conversation status
+        const [convStatus] = await this.db
+          .select()
+          .from(conversationStatusTable)
+          .where(eq(conversationStatusTable.deliveryId, d.id))
+          .limit(1);
+
+        // Count replies from user (unread = provider has not replied)
+        const [replyCount] = await this.db
+          .select({ value: count() })
+          .from(replyTable)
+          .where(and(eq(replyTable.deliveryId, d.id), eq(replyTable.fromProvider, false)));
+
+        const customerMessageCount = replyCount?.value ?? 0;
+
+        return {
+          deliveryId: d.id,
+          inquiryId: inq.id,
+          userId: inq.userId,
+          text: inq.text,
+          channel: d.channel as MessagingChannelKind,
+          status: d.status,
+          conversationStatus: convStatus?.status ?? 'open',
+          resolvedAt: convStatus?.resolvedAt?.toISOString() ?? null,
+          lastMessageAt: d.updatedAt.toISOString(),
+          createdAt: inq.createdAt.toISOString(),
+          assignedTo: assignment
+            ? { staffId: assignment.staffId, staffName: assignment.staffName }
+            : null,
+          customerMessageCount,
+        };
+      }),
+    );
+
+    const filtered = filter === 'unread'
+      ? results.filter((r) => r !== null && r.customerMessageCount > 0)
+      : results.filter((r) => r !== null);
+
+    return {
+      items: filtered,
+      nextCursor: hasMore ? items[items.length - 1]?.updatedAt.toISOString() : undefined,
     };
   }
 

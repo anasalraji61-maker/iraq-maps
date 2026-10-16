@@ -145,6 +145,142 @@
     "messageFailed": "فشل الإرسال",
     "retryMessage": "إعادة المحاولة"
   },
+  "inbox": {
+    "title": "صندوق الأعمال",
+    "settings": "الإعدادات",
+    "loadError": "خطأ في تحميل الرسائل",
+    "empty": "لا توجد استفسارات بعد",
+    "emptyBody": "ستظهر هنا استفسارات العملاء",
+    "customerAvatar": "صورة {name}",
+    "unreadCount": "{count} رسائل غير مقروءة",
+    "inquiryCardLabel": "استفسار من {name}",
+    "assignedTo": "مُسند إلى {name}",
+    "status": {
+      "new": "جديد",
+      "open": "مفتوح",
+      "replied": "تمّ الرد",
+      "resolved": "مُغلق"
+    },
+    "filter": {
+      "all": "الكل",
+      "unread": "غير مقروء",
+      "awaiting": "ينتظر ردًا"
+    },
+    "hours": {
+      "open": "مفتوح · يُغلق {closes}",
+      "closed": "مغلق · يفتح {opens}"
+    },
+    "autoReply": {
+      "title": "الرد التلقائي",
+      "toggle": "تفعيل الرد التلقائي",
+      "placeholder": "اكتب رسالة الرد التلقائي...",
+      "inputLabel": "نص الرد التلقائي"
+    },
+    "qr": {
+      "greeting": "تحية",
+      "greetingText": "مرحباً بك في {business_name}، كيف يمكننا مساعدتك؟",
+      "hours": "أوقات العمل",
+      "hoursText": "نعمل من 9 صباحاً حتى 10 مساءً يومياً.",
+      "price": "السعر",
+      "priceText": "سيسعدنا إرسال قائمة الأسعار المحدّثة.",
+      "thanks": "شكر",
+      "thanksText": "شكراً جزيلاً لتواصلك معنا، نتطلع إلى خدمتك!"
+    },
+    "assign": {
+      "title": "إسناد المحادثة"
+    },
+    "actions": {
+      "viewCustomer": "عرض معلومات العميل",
+      "assign": "إسناد إلى موظف",
+      "resolve": "إغلاق المحادثة"
+    },
+    "ctx": {
+      "inquiries": "استفسار",
+      "reviews": "تقييم",
+      "rating": "متوسط التقييم",
+      "lastContact": "آخر تواصل: {date}"
+    },
+    "blocked": "محظور"
+  },
+  "quickReplies": {
+    "title": "الردود السريعة",
+    "create": "إنشاء قالب",
+    "edit": "تعديل",
+    "use": "استخدام",
+    "delete": "حذف",
+    "save": "حفظ",
+    "editTitle": "تعديل القالب",
+    "createTitle": "قالب جديد",
+    "filterAll": "الكل",
+    "empty": "لا توجد ردود سريعة",
+    "emptyBody": "أنشئ قالباً لتوفير الوقت عند الرد",
+    "category": {
+      "greeting": "تحية",
+      "prices": "أسعار",
+      "hours": "أوقات",
+      "directions": "اتجاهات",
+      "thanks": "شكر",
+      "other": "أخرى"
+    },
+    "categoryLabel": "الفئة",
+    "labelField": "اسم القالب",
+    "labelPlaceholder": "مثال: رسالة ترحيب",
+    "textField": "نص القالب",
+    "textPlaceholder": "اكتب نص الرد هنا...",
+    "variablesLabel": "إدراج متغير",
+    "insertVariable": "إدراج {variable}",
+    "showPreview": "معاينة",
+    "hidePreview": "إخفاء المعاينة",
+    "previewLabel": "معاينة:",
+    "preview": {
+      "businessName": "متجرنا",
+      "customerName": "علي"
+    },
+    "sortBy": "ترتيب:",
+    "sort": {
+      "frequency": "الأكثر استخداماً",
+      "recent": "الأحدث",
+      "alpha": "أبجدي"
+    },
+    "deleteConfirmTitle": "حذف القالب",
+    "deleteConfirmBody": "هل أنت متأكد من حذف هذا القالب؟",
+    "defaults": {
+      "greetingLabel": "ترحيب",
+      "greetingText": "مرحباً بك في {business_name}! يسعدنا مساعدتك.",
+      "hoursLabel": "أوقات العمل",
+      "hoursText": "نعمل يومياً من 9 صباحاً حتى 10 مساءً.",
+      "thanksLabel": "شكر",
+      "thanksText": "شكراً {customer_name} لتواصلك معنا، نتطلع إلى خدمتك!",
+      "directionsLabel": "الموقع",
+      "directionsText": "يمكنك إيجادنا على الخريطة، أو التواصل معنا للحصول على التوجيهات."
+    }
+  },
+  "contacts": {
+    "title": "جهات الاتصال",
+    "loading": "جاري التحميل...",
+    "loadError": "خطأ في تحميل جهات الاتصال",
+    "empty": "لا توجد جهات اتصال",
+    "emptyBody": "ابدأ محادثة مع شخص أو نشاط تجاري",
+    "searchPlaceholder": "بحث في جهات الاتصال...",
+    "searchResults": "نتائج البحث",
+    "recent": "الأخيرة",
+    "allContacts": "كل جهات الاتصال",
+    "suggested": "مقترح",
+    "sendMessage": "إرسال رسالة",
+    "message": "مراسلة {name}",
+    "addContact": "إضافة {name}",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+    "blocked": "محظور",
+    "blockConfirmTitle": "حظر جهة الاتصال",
+    "blockConfirmBody": "لن تتلقى أي رسائل من هذا الشخص.",
+    "tab": {
+      "all": "الكل",
+      "users": "أشخاص",
+      "providers": "أعمال",
+      "blocked": "محظور"
+    }
+  },
   "conversation": {
     "copy": "نسخ",
     "deleteForEveryone": "حذف للجميع",
