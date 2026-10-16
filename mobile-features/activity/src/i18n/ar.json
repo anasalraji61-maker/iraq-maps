@@ -108,5 +108,35 @@
   "prefsCancel": "إلغاء",
   "prefsSaveError": "فشل حفظ الإعدادات، حاول مجدداً",
   "bannerDismissIcon": "✕",
-  "prefsTimePlaceholder": "HH:MM"
+  "prefsTimePlaceholder": "HH:MM",
+
+  "notif_messageNew_title": "رسالة جديدة",
+  "notif_messageNew_body": "رسالة جديدة من {name}: {preview}",
+  "notif_reviewHelpful_title": "تقييمك مفيد",
+  "notif_reviewHelpful_body": "وجد {count} شخص تقييمك مفيداً",
+  "notif_followNew_title": "متابع جديد",
+  "notif_followNew_body": "بدأ {name} بمتابعتك",
+  "notif_placeNearby_title": "مكان مميز قريب منك",
+  "notif_placeNearby_body": "مكان مميز قريب منك: {placeName}",
+  "notif_incidentConfirmed_title": "تنبيه حادث",
+  "notif_incidentConfirmed_body": "تأكد حادث {type} قرب {street}",
+  "notif_eventReminder_title": "تذكير بحدث",
+  "notif_eventReminder_body": "تذكير: {eventName} غداً",
+  "notif_reviewResponse_title": "رد على تقييمك",
+  "notif_reviewResponse_body": "{businessName} رد على تقييمك",
+  "notif_achievementUnlocked_title": "شارة جديدة!",
+  "notif_achievementUnlocked_body": "حصلت على شارة {badgeName}!",
+  "notif_trendingPlace_title": "مكان رائج",
+  "notif_trendingPlace_body": "{placeName} يتصدر الترند في {city}",
+
+  "permissionTitle": "تفعيل الإشعارات",
+  "permissionBody": "فعّل الإشعارات لتتلقى تنبيهات الرسائل والأماكن القريبة والأحداث",
+  "permissionAllow": "السماح",
+  "permissionDeny": "لاحقاً",
+  "permissionOpenSettings": "فتح الإعدادات",
+  "permissionDeniedTitle": "الإشعارات معطلة",
+  "permissionDeniedBody": "يمكنك تفعيلها في إعدادات النظام",
+
+  "bannerMarkRead": "تعليم كمقروء",
+  "bannerViewAll": "عرض الكل"
 }

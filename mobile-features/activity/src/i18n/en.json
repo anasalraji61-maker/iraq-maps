@@ -108,5 +108,35 @@
   "prefsCancel": "Cancel",
   "prefsSaveError": "Failed to save settings, please try again",
   "bannerDismissIcon": "✕",
-  "prefsTimePlaceholder": "HH:MM"
+  "prefsTimePlaceholder": "HH:MM",
+
+  "notif_messageNew_title": "New message",
+  "notif_messageNew_body": "New message from {name}: {preview}",
+  "notif_reviewHelpful_title": "Your review was helpful",
+  "notif_reviewHelpful_body": "{count} people found your review helpful",
+  "notif_followNew_title": "New follower",
+  "notif_followNew_body": "{name} started following you",
+  "notif_placeNearby_title": "Featured place nearby",
+  "notif_placeNearby_body": "Featured place nearby: {placeName}",
+  "notif_incidentConfirmed_title": "Incident alert",
+  "notif_incidentConfirmed_body": "{type} incident confirmed near {street}",
+  "notif_eventReminder_title": "Event reminder",
+  "notif_eventReminder_body": "Reminder: {eventName} is tomorrow",
+  "notif_reviewResponse_title": "Response to your review",
+  "notif_reviewResponse_body": "{businessName} responded to your review",
+  "notif_achievementUnlocked_title": "New achievement!",
+  "notif_achievementUnlocked_body": "You unlocked the {badgeName} badge!",
+  "notif_trendingPlace_title": "Trending place",
+  "notif_trendingPlace_body": "{placeName} is trending in {city}",
+
+  "permissionTitle": "Enable notifications",
+  "permissionBody": "Get alerts for messages, nearby places and events",
+  "permissionAllow": "Allow",
+  "permissionDeny": "Later",
+  "permissionOpenSettings": "Open settings",
+  "permissionDeniedTitle": "Notifications disabled",
+  "permissionDeniedBody": "You can enable them in system settings",
+
+  "bannerMarkRead": "Mark as read",
+  "bannerViewAll": "View all"
 }

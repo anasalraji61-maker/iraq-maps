@@ -94,3 +94,66 @@ export {
   type UseOnlineStatusReturn,
   type UseOnlineStatusOptions,
 } from './hooks/useOnlineStatus';
+
+/** @public push notification permission manager and handler */
+export {
+  NotificationPermissionManager,
+  notificationPermissionManager,
+  type PermissionStatus,
+  type PermissionCheckResult,
+  type PermissionManagerOptions,
+  NotificationHandler,
+  notificationHandler,
+  type ReceivedNotification,
+  type NotificationResponse,
+  type PushNotificationData,
+  type BannerPayload,
+  type BannerOptions,
+  type BannerDismissCallback,
+  type TokenRegistrationApi,
+} from './notifications';
+
+/** @public deep link parsing, building and dispatch */
+export {
+  DeepLinkManager,
+  deepLinkManager,
+  DEEP_LINK_SCHEME,
+  DEEP_LINK_WEB_HOST,
+  DEEP_LINK_MAX_LENGTH,
+  DEEP_LINK_MAX_PARAM_LENGTH,
+  isValidId,
+  isValidQuery,
+  isValidLatLng,
+  isValidMode,
+  isValidPlaceTab,
+  isValidProviderSection,
+  DEEP_LINK_SCREEN_MAP,
+  type DeepLinkHandler,
+  type ParseResult,
+  type DeepLinkType,
+  type DeepLinkParams,
+  type PlaceDeepLinkParams,
+  type PostDeepLinkParams,
+  type UserDeepLinkParams,
+  type ProviderDeepLinkParams,
+  type RouteDeepLinkParams,
+  type SearchDeepLinkParams,
+  type EventDeepLinkParams,
+  type Tour3DDeepLinkParams,
+  type OgResourceType,
+} from './deeplink';
+
+/** @public share utilities and branded share card */
+export {
+  ShareManager,
+  shareManager,
+  ShareCard,
+  type SharePayload,
+  type SharePlaceInput,
+  type SharePostInput,
+  type ShareRouteInput,
+  type ShareEventInput,
+  type ShareProfileInput,
+  type ShareCardData,
+  type ShareCardProps,
+} from './sharing';

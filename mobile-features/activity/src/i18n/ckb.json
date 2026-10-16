@@ -108,5 +108,35 @@
   "prefsCancel": "هەڵوەشاندنەوە",
   "prefsSaveError": "هەڵەی پاشەکەوتکردنی ڕێکخستنەکان، دووبارە هەوڵ بدەرەوە",
   "bannerDismissIcon": "✕",
-  "prefsTimePlaceholder": "HH:MM"
+  "prefsTimePlaceholder": "HH:MM",
+
+  "notif_messageNew_title": "پەیامی نوێ",
+  "notif_messageNew_body": "پەیامی نوێ لە {name}: {preview}",
+  "notif_reviewHelpful_title": "هەڵسەنگاندنەکەت بەسوود بوو",
+  "notif_reviewHelpful_body": "{count} کەس هەڵسەنگاندنەکەت بەسوود دیتووە",
+  "notif_followNew_title": "شوێنکەوتنەوەی نوێ",
+  "notif_followNew_body": "{name} دەستی بە شوێنکەوتنەوەت کرد",
+  "notif_placeNearby_title": "شوێنی تایبەت نزیکتە",
+  "notif_placeNearby_body": "شوێنی تایبەت نزیکتە: {placeName}",
+  "notif_incidentConfirmed_title": "ئاگاداری ڕووداو",
+  "notif_incidentConfirmed_body": "ڕووداوی {type} لەنزیک {street} دروستبووە",
+  "notif_eventReminder_title": "بیرخستنەوەی ئیش",
+  "notif_eventReminder_body": "بیرخستنەوە: {eventName} بەیانی",
+  "notif_reviewResponse_title": "وەڵامی هەڵسەنگاندنەکەت",
+  "notif_reviewResponse_body": "{businessName} وەڵامی هەڵسەنگاندنەکەتی داوە",
+  "notif_achievementUnlocked_title": "نیشانەی نوێ!",
+  "notif_achievementUnlocked_body": "نیشانەی {badgeName}ت وەرگرت!",
+  "notif_trendingPlace_title": "شوێنی ترێند",
+  "notif_trendingPlace_body": "{placeName} لە {city} ترێندە",
+
+  "permissionTitle": "ئاگادارکردنەوەکان چالاک بکە",
+  "permissionBody": "ئاگاداریەکانی پەیام، شوێنە نزیکەکان و ئیشەکان وەربگرە",
+  "permissionAllow": "ڕەزامەندی",
+  "permissionDeny": "دواتر",
+  "permissionOpenSettings": "کردنەوەی ڕێکخستنەکان",
+  "permissionDeniedTitle": "ئاگادارکردنەوەکان ناچالاکە",
+  "permissionDeniedBody": "دەتوانیت لە ڕێکخستنەکانی سیستەم چالاکیان بکەیت",
+
+  "bannerMarkRead": "وەک خوێندراوەوە نیشانە بکە",
+  "bannerViewAll": "هەموو ببینە"
 }
