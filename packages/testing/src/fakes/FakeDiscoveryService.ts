@@ -12,7 +12,6 @@
  *  - getContextAware: morning / afternoon / evening / night
  *  - getRecommendations: combined signal feed
  */
-import { randomUUID } from 'node:crypto';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

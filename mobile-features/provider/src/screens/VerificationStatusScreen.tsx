@@ -523,8 +523,9 @@ function useVerificationWs(
 
   useEffect(() => {
     if (!providerId) return;
-    // In production: replace with real WS URL from env/config
-    const url = `wss://api.iraq-maps.app/v1/ws/providers/${providerId}/verification`;
+    const apiUrl = process.env['EXPO_PUBLIC_API_URL'] ?? 'https://api.iraq-maps.app';
+    const wsBase = apiUrl.replace(/^http/, 'ws');
+    const url = `${wsBase}/v1/ws/providers/${providerId}/verification`;
     try {
       const ws = new WebSocket(url);
       wsRef.current = ws;

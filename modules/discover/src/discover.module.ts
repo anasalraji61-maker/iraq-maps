@@ -5,6 +5,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { AdminDiscoverController, DiscoverController, StoriesController } from './discover.controller';
 import { DiscoverService } from './discover.service';
+import { EventsService } from './events.service';
 import { SocialController } from './social.controller';
 import { SocialService } from './social.service';
 import { SlidingWindowRateLimiter } from './rate-limiter';
@@ -49,7 +50,8 @@ export function discoverModule(opts: DiscoverModuleOptions): DynamicModule {
       { provide: 'DISCOVER_REDIS', useValue: opts.redis ?? null },
       DiscoverService,
       SocialService,
+      EventsService,
     ],
-    exports: [DiscoverService, SocialService],
+    exports: [DiscoverService, SocialService, EventsService],
   };
 }

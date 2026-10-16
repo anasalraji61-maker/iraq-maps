@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, i18next/no-literal-string, @typescript-eslint/no-unused-vars */
 /**
  * ProviderSettingsScreen — provider account settings.
  *

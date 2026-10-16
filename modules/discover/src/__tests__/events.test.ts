@@ -10,8 +10,8 @@
  *  - Iraqi holidays returned correctly
  *  - Recurring event creates recurring instances
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EventsService, type CreateEventInput, type EventRecord } from '../events.service';
+import { describe, it, expect, vi } from 'vitest';
+import { EventsService, type CreateEventInput } from '../events.service';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 // ─── Fixture IDs ──────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ const NOW = new Date('2026-06-15T10:00:00Z');
 const FUTURE = new Date('2026-06-20T18:00:00Z');
 const FUTURE_END = new Date('2026-06-20T22:00:00Z');
 const PAST = new Date('2026-01-01T10:00:00Z');
-const PAST_END = new Date('2026-01-01T12:00:00Z');
+const _PAST_END = new Date('2026-01-01T12:00:00Z');
 
 function makeEventRow(overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> {
   return {
@@ -107,7 +107,7 @@ function makeDb(opts: {
     execute: vi.fn().mockResolvedValue(eventRows),
   });
   const from = vi.fn().mockReturnValue({ where, orderBy, limit });
-  const selectFields = vi.fn().mockReturnValue({ from });
+  const _selectFields = vi.fn().mockReturnValue({ from });
   const select = vi.fn().mockReturnValue({ from });
 
   const insertValues = vi.fn().mockReturnValue({

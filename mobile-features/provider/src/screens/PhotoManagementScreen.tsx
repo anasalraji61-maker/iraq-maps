@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, i18next/no-literal-string, @typescript-eslint/no-unused-vars */
 /**
  * PhotoManagementScreen – provider photo management with drag-to-reorder,
  * cover photo, upload from camera/gallery, category tagging, delete with

@@ -12,12 +12,9 @@
  *  - Pin message → appears in pinned
  *  - Mute → no notifications
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   GroupMessagingService,
-  type GroupShape,
-  type GroupMemberShape,
-  type PinnedMessageShape,
 } from '../group-messaging.service';
 import {
   ForbiddenException,
@@ -28,7 +25,7 @@ import {
 // ─── Fixture IDs ──────────────────────────────────────────────────────────────
 
 const GROUP_1 = 'g0000000-0000-0000-0000-000000000001' as const;
-const GROUP_2 = 'g0000000-0000-0000-0000-000000000002' as const;
+const _GROUP_2 = 'g0000000-0000-0000-0000-000000000002' as const;
 const ADMIN_A = 'u0000000-0000-0000-0000-000000000001' as const;
 const MEMBER_B = 'u0000000-0000-0000-0000-000000000002' as const;
 const MEMBER_C = 'u0000000-0000-0000-0000-000000000003' as const;
@@ -582,8 +579,17 @@ describe('GroupMessagingService – pinMessage', () => {
         }),
       }),
     });
+    // check existing pin (none)
+    db.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([]),
+        }),
+      }),
+    });
     db.insert.mockReturnValueOnce({
       values: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([makePinRow()]),
         onConflictDoNothing: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([makePinRow()]),
         }),
@@ -612,12 +618,21 @@ describe('GroupMessagingService – pinMessage', () => {
 
   it('getPinnedMessages returns pinned messages', async () => {
     const db = makeDb({ pinRows: [makePinRow()] });
+    // pinned rows select
     db.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
           orderBy: vi.fn().mockReturnValue({
             limit: vi.fn().mockResolvedValue([makePinRow()]),
           }),
+        }),
+      }),
+    });
+    // messages select
+    db.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([makeMessageRow()]),
         }),
       }),
     });
@@ -757,6 +772,15 @@ describe('GroupMessagingService – muteConversation', () => {
   it('muted group has isMuted=true in group shape', async () => {
     const db = makeDb({ muteRows: [makeMuteRow()] });
     // getGroupConversations with mute
+    // 1. memberRows select
+    db.select.mockReturnValueOnce({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue([makeMemberRow({ userId: MEMBER_B })]),
+        }),
+      }),
+    });
+    // 2. groups select
     db.select.mockReturnValueOnce({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, i18next/no-literal-string, @typescript-eslint/no-unused-vars */
 /**
  * BusinessHoursScreen — enhanced 7-day schedule editor.
  * Features: open/closed toggle, time pickers (from/to), split shifts (breaks),

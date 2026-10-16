@@ -848,7 +848,16 @@
     "cuisine_asian": "آسيوي",
     "cuisine_western": "غربي",
     "cuisine_vegetarian": "نباتي",
-    "cuisine_desserts": "حلويات"
+    "cuisine_desserts": "حلويات",
+    "sort_price": "السعر",
+    "radiusKm": "{n} كم",
+    "radiusM": "{n} م",
+    "filterRemove": "✕",
+    "viewListIcon": "☰",
+    "saveAlertSave": "🔔 تنبيهي عند إضافة أماكن جديدة",
+    "saveAlertDone": "✓ تم حفظ التنبيه",
+    "categoryAll": "الكل",
+    "categoryNeighborhood": "أحياء"
   },
   "recommendations": {
     "title": "مقترح لك",

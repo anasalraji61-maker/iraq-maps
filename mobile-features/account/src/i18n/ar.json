@@ -804,6 +804,7 @@
     "historyAlertSent": "تم إرسال تنبيه طوارئ",
     "historyLocationShared": "تمت مشاركة الموقع",
     "ago": "منذ {time}",
+    "notifiedCount": "{count} جهة",
     "errorTitle": "خطأ",
     "errorMsg": "حدث خطأ غير متوقع. حاول مرة أخرى.",
     "retry": "إعادة المحاولة",

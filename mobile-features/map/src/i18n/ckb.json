@@ -848,7 +848,16 @@
     "cuisine_asian": "ئاسیایی",
     "cuisine_western": "ڕۆژاوایی",
     "cuisine_vegetarian": "ڕووەکخواردن",
-    "cuisine_desserts": "شیرینی"
+    "cuisine_desserts": "شیرینی",
+    "sort_price": "نرخ",
+    "radiusKm": "{n} کیلۆمەتر",
+    "radiusM": "{n} مەتر",
+    "filterRemove": "✕",
+    "viewListIcon": "☰",
+    "saveAlertSave": "🔔 ئاگاداری لە زیادکردنی شوێنی نوێ",
+    "saveAlertDone": "✓ ئاگاداری تۆمارکرا",
+    "categoryAll": "هەموو",
+    "categoryNeighborhood": "نەیخچەکان"
   },
   "recommendations": {
     "title": "بۆ تۆ",

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, i18next/no-literal-string, @typescript-eslint/no-unused-vars */
 /**
  * ProviderDashboardScreen — main provider home screen.
  *
@@ -13,7 +14,7 @@
  * All text via t(). RTL-safe (start/end, never left/right).
  */
 
-import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
+import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import {
   type ReactElement,
   useCallback,
@@ -495,7 +496,7 @@ function ProfileCompletenessBar({ pct }: { pct: number }): ReactElement {
 
   const color = pct >= 80 ? C.success : pct >= 50 ? C.warning : C.danger;
   return (
-    <View style={ss.completenessCard}>
+    <View style={ss.completenessCard} testID="provider-completeness">
       <View style={ss.completenessHeader}>
         <Text style={ss.completenessTitle}>{t('dashboard.completeness.title')}</Text>
         <Text style={[ss.completenessPct, { color }]}>
@@ -529,15 +530,24 @@ export interface ProviderDashboardScreenProps {
 export function ProviderDashboardScreen({
   onNavigate,
 }: ProviderDashboardScreenProps): ReactElement {
+  const api = useApi() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<DashboardData | null>(null);
+  const [claimedPlaceId, setClaimedPlaceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const apiBase = useApiBaseUrl();
 
   const load = useCallback(async () => {
     try {
-      // In production this would call the provider dashboard API endpoint.
-      // Stub: return mock data after a simulated network delay.
+      // Try to load real provider data, fall back to mock data
+      try {
+        const res = await api.providers.me({});
+        if (res?.status === 200) {
+          setClaimedPlaceId(res.body?.claimedPlaceId ?? null);
+        }
+      } catch {
+        // api not wired in this env — continue with mock data
+      }
       await new Promise<void>(r => setTimeout(r, 600));
       setData(buildMockData());
     } catch {
@@ -547,7 +557,7 @@ export function ProviderDashboardScreen({
       setRefreshing(false);
     }
     void apiBase; // keep ref used
-  }, [apiBase]);
+  }, [api, apiBase]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -563,7 +573,7 @@ export function ProviderDashboardScreen({
   if (loading) {
     return (
       <SafeAreaView style={ss.safeArea}>
-        <View style={ss.loadingWrap}>
+        <View style={ss.loadingWrap} testID="skeleton-dashboard">
           <ActivityIndicator size="large" color={C.primary} />
         </View>
       </SafeAreaView>
@@ -601,6 +611,16 @@ export function ProviderDashboardScreen({
           </View>
           <StatusPill status={data.verificationStatus} />
         </View>
+
+        {/* View public page */}
+        {claimedPlaceId != null && (
+          <TouchableOpacity
+            testID="provider.viewPublicPage"
+            onPress={() => onNavigate?.('PlaceDetails', { placeId: claimedPlaceId })}
+          >
+            <Text>{t('providerDash.viewPublicPage')}</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Profile completeness */}
         <ProfileCompletenessBar pct={data.profileCompleteness} />

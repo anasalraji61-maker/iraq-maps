@@ -181,7 +181,6 @@ export function RouteProgressBar({
           <Animated.View
             style={[
               styles.fill,
-              // eslint-disable-next-line react-native/no-inline-styles
               {
                 width: animatedWidth.interpolate({
                   inputRange: [0, 1],
@@ -196,7 +195,6 @@ export function RouteProgressBar({
           <Animated.View
             style={[
               styles.dot,
-              // eslint-disable-next-line react-native/no-inline-styles
               {
                 [isRTL ? 'right' : 'left']: animatedWidth.interpolate({
                   inputRange: [0, 1],

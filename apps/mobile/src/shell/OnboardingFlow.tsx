@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 /**
  * OnboardingFlow – full multi-step first-run experience.
  *

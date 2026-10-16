@@ -264,7 +264,7 @@ describe('Discovery – personalized feed', () => {
   });
 
   it('recently visited category boosts score more than saves', () => {
-    const history: UserHistory = {
+    const _history: UserHistory = {
       visitedCategories: { cafe: 5 },
       savedCategories: { cafe: 5 },
     };
@@ -468,7 +468,7 @@ describe('Discovery – combined personalized feed', () => {
 
   it('personalized + seasonal + trending works together', () => {
     const season: Season = 'ramadan';
-    const hour = 20; // evening
+    const _hour = 20; // evening
     const history: UserHistory = {
       visitedCategories: { restaurant: 15, mosque: 5 },
       savedCategories: { restaurant: 8 },

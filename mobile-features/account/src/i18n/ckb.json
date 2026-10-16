@@ -804,6 +804,7 @@
     "historyAlertSent": "ئاگادارکردنی ئامادەکاری نێردرا",
     "historyLocationShared": "شوێن هاوبەشکرا",
     "ago": "لەمەوپێش {time}",
+    "notifiedCount": "{count} لای",
     "errorTitle": "هەڵە",
     "errorMsg": "هەڵەیەکی مستەقیم ڕوویدا. دووبارە هەوڵبدەوە.",
     "retry": "دووبارە هەوڵدان",

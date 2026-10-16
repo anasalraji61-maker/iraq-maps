@@ -848,7 +848,16 @@
     "cuisine_asian": "Asian",
     "cuisine_western": "Western",
     "cuisine_vegetarian": "Vegetarian",
-    "cuisine_desserts": "Desserts"
+    "cuisine_desserts": "Desserts",
+    "sort_price": "Price",
+    "radiusKm": "{n} km",
+    "radiusM": "{n} m",
+    "filterRemove": "✕",
+    "viewListIcon": "☰",
+    "saveAlertSave": "🔔 Notify me when new places are added",
+    "saveAlertDone": "✓ Alert saved",
+    "categoryAll": "All",
+    "categoryNeighborhood": "Neighbourhoods"
   },
   "recommendations": {
     "title": "For You",

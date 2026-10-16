@@ -11,6 +11,7 @@ import { REVIEWS_SERVICE, ReviewsController } from './reviews.http';
 import { ReviewsService } from './reviews';
 import { PgPlaces } from './query';
 import { TileFiles } from './tiles';
+import { DiscoveryService } from './discovery.service';
 
 /** @public frozen stub (M1) */
 export interface PlacesModuleOptions {
@@ -69,7 +70,8 @@ export function placesModule(opts: PlacesModuleOptions): DynamicModule {
       { provide: INTERNALS, useValue: { places, tiles, limiter: new RateLimiter(SEARCH_PER_MINUTE), tileLimiter: new RateLimiter(TILES_PER_MINUTE) } },
       { provide: PortTokens.PlacesQueryPort, useValue: places },
       { provide: REVIEWS_SERVICE, useValue: new ReviewsService(opts.db) },
+      { provide: DiscoveryService, useValue: new DiscoveryService(opts.db) },
     ],
-    exports: [PortTokens.PlacesQueryPort],
+    exports: [PortTokens.PlacesQueryPort, DiscoveryService],
   };
 }

@@ -1066,7 +1066,8 @@
     "newsCalendarBody": "Schedule your posts in advance and pick the best time",
     "newsBlastTitle": "Customer Blast",
     "newsBlastBody": "Send special offers to opted-in customers",
-    "completenessHint": "Complete your profile to attract more customers"
+    "completenessHint": "Complete your profile to attract more customers",
+    "viewPublicPage": "View public page"
   },
   "customerMgmt": {
     "title": "Customer Management",

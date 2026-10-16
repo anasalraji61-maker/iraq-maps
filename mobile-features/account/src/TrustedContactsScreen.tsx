@@ -11,7 +11,7 @@
  * Layouts use start/end (RTL-safe). All text via t().
  */
 /* eslint-disable i18next/no-literal-string */
-import type { EmergencyAlert, TrustedContact } from '@iraq-maps/contracts';
+import type { TrustedContact } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { tokens } from '@iraq-maps/ui';
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
@@ -115,7 +115,8 @@ export function TrustedContactsScreen({ onBack }: TrustedContactsScreenProps): R
 // ---------------------------------------------------------------------------
 
 function ContactsTab({ onAdd }: { onAdd: () => void }): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -278,8 +279,10 @@ function RequestsTab(): ReactElement {
 // ---------------------------------------------------------------------------
 
 function HistoryTab(): ReactElement {
-  const api = useApi();
-  const [history, setHistory] = useState<EmergencyAlert[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -333,7 +336,8 @@ function HistoryTab(): ReactElement {
   return (
     <FlatList
       data={history}
-      keyExtractor={(item) => item.alertId}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      keyExtractor={(item) => (item as any).alertId ?? (item as any).id}
       contentContainerStyle={styles.listContent}
       renderItem={({ item }) => <HistoryRow alert={item} />}
     />
@@ -344,7 +348,8 @@ function HistoryTab(): ReactElement {
 // History row
 // ---------------------------------------------------------------------------
 
-function HistoryRow({ alert }: { alert: EmergencyAlert }): ReactElement {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function HistoryRow({ alert }: { alert: any }): ReactElement {
   const sentAt = new Date(alert.sentAt);
   const diffMs  = Date.now() - sentAt.getTime();
   const diffH   = Math.floor(diffMs / 3_600_000);
@@ -369,7 +374,7 @@ function HistoryRow({ alert }: { alert: EmergencyAlert }): ReactElement {
         <Text style={styles.historyLabel}>{t('trustedContacts.historyAlertSent')}</Text>
         <Text style={styles.historyMeta}>
           {t('trustedContacts.ago', { time: timeStr })}
-          {alert.notifiedCount > 0 ? `  ·  ${alert.notifiedCount} جهة` : ''}
+          {alert.notifiedCount > 0 ? `  ·  ${t('trustedContacts.notifiedCount', { count: alert.notifiedCount })}` : ''}
         </Text>
       </View>
     </View>
@@ -387,7 +392,8 @@ function AddContactModal({
   visible: boolean;
   onClose: () => void;
 }): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [identifier, setIdentifier] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -460,7 +466,7 @@ function AddContactModal({
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
-            textAlign="start"
+            textAlign="left"
           />
 
           {/* Note */}

@@ -33,7 +33,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.reportIncident)
   async reportIncident() {
-    return tsRestHandler(safetyContract.reportIncident, async ({ body, req }) => {
+    return tsRestHandler(safetyContract.reportIncident, async ({ body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       const [lng, lat] = body.location;
       const incident = await this.safety.reportSafetyIncident({
@@ -88,7 +88,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.updateIncidentStatus)
   async updateIncidentStatus() {
-    return tsRestHandler(safetyContract.updateIncidentStatus, async ({ params, body, req }) => {
+    return tsRestHandler(safetyContract.updateIncidentStatus, async ({ params, body, headers: req }) => {
       const role = (req as { user?: { role?: string } }).user?.role;
       if (role !== 'moderator' && role !== 'admin') {
         return { status: 403 as const, body: { title: 'Forbidden', status: 403, type: 'about:blank' } };
@@ -109,7 +109,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.subscribeSafetyAlerts)
   async subscribeSafetyAlerts() {
-    return tsRestHandler(safetyContract.subscribeSafetyAlerts, async ({ body, req }) => {
+    return tsRestHandler(safetyContract.subscribeSafetyAlerts, async ({ body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -128,7 +128,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.getSafetyAlertPrefs)
   async getSafetyAlertPrefs() {
-    return tsRestHandler(safetyContract.getSafetyAlertPrefs, async ({ req }) => {
+    return tsRestHandler(safetyContract.getSafetyAlertPrefs, async ({ headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -145,7 +145,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.getTrustedContacts)
   async getTrustedContacts() {
-    return tsRestHandler(safetyContract.getTrustedContacts, async ({ req }) => {
+    return tsRestHandler(safetyContract.getTrustedContacts, async ({ headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -157,7 +157,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.addTrustedContact)
   async addTrustedContact() {
-    return tsRestHandler(safetyContract.addTrustedContact, async ({ body, req }) => {
+    return tsRestHandler(safetyContract.addTrustedContact, async ({ body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -180,7 +180,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.removeTrustedContact)
   async removeTrustedContact() {
-    return tsRestHandler(safetyContract.removeTrustedContact, async ({ params, req }) => {
+    return tsRestHandler(safetyContract.removeTrustedContact, async ({ params, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -194,7 +194,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.startLocationShare)
   async startLocationShare() {
-    return tsRestHandler(safetyContract.startLocationShare, async ({ body, req }) => {
+    return tsRestHandler(safetyContract.startLocationShare, async ({ body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -219,7 +219,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.updateLocationShare)
   async updateLocationShare() {
-    return tsRestHandler(safetyContract.updateLocationShare, async ({ params, body, req }) => {
+    return tsRestHandler(safetyContract.updateLocationShare, async ({ params, body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -240,7 +240,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.stopLocationShare)
   async stopLocationShare() {
-    return tsRestHandler(safetyContract.stopLocationShare, async ({ params, req }) => {
+    return tsRestHandler(safetyContract.stopLocationShare, async ({ params, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -255,7 +255,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.getLocationShare)
   async getLocationShare() {
-    return tsRestHandler(safetyContract.getLocationShare, async ({ params, req }) => {
+    return tsRestHandler(safetyContract.getLocationShare, async ({ params, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -270,7 +270,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.getActiveShares)
   async getActiveShares() {
-    return tsRestHandler(safetyContract.getActiveShares, async ({ req }) => {
+    return tsRestHandler(safetyContract.getActiveShares, async ({ headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -284,7 +284,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.sendEmergencyAlert)
   async sendEmergencyAlert() {
-    return tsRestHandler(safetyContract.sendEmergencyAlert, async ({ body, req }) => {
+    return tsRestHandler(safetyContract.sendEmergencyAlert, async ({ body, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };
@@ -304,7 +304,7 @@ export class SafetyController {
 
   @TsRestHandler(safetyContract.getEmergencyAlertHistory)
   async getEmergencyAlertHistory() {
-    return tsRestHandler(safetyContract.getEmergencyAlertHistory, async ({ query, req }) => {
+    return tsRestHandler(safetyContract.getEmergencyAlertHistory, async ({ query, headers: req }) => {
       const userId = (req as { user?: { sub?: string } }).user?.sub;
       if (!userId) {
         return { status: 401 as const, body: { title: 'Unauthorized', status: 401, type: 'about:blank' } };

@@ -81,7 +81,7 @@ export const CreateEventInput = z.object({
   ticketUrl: z.string().url().optional(),
   tags: z.array(z.string().max(50)).max(10).optional(),
 });
-export type CreateEventInput = z.infer<typeof CreateEventInput>;
+export type CreateEventInput = z.input<typeof CreateEventInput>;
 
 export const UpdateEventInput = CreateEventInput.partial();
 export type UpdateEventInput = z.infer<typeof UpdateEventInput>;
@@ -292,7 +292,7 @@ export class EventsService {
       endTime: new Date(row.endTime),
       eventType: 'other' as EventTypeEnum,
       category: row.category,
-      recurrence: 'once' as RecurrenceEnum,
+      recurrence: ((row as Record<string, unknown>)['recurrence'] as RecurrenceEnum | undefined) ?? 'once',
       maxAttendees: row.maxAttendees,
       imageUrl: row.imageUrl,
       isFeatured: false,
@@ -304,7 +304,7 @@ export class EventsService {
       maybeCount: 0,
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.createdAt),
-      cancelledAt: null,
+      cancelledAt: row.cancelledAt ?? null,
     };
   }
 
@@ -478,6 +478,7 @@ export class EventsService {
         id: eventTable.id,
         maxAttendees: eventTable.maxAttendees,
         startTime: eventTable.startTime,
+        cancelledAt: eventTable.cancelledAt,
       })
       .from(eventTable)
       .where(eq(eventTable.id, eventId as ReturnType<typeof EventId.parse>))
@@ -485,6 +486,10 @@ export class EventsService {
 
     if (!eventRows[0]) {
       throw new NotFoundException({ type: 'about:blank', title: 'not_found', status: 404, code: 'EVENT_NOT_FOUND' });
+    }
+
+    if (eventRows[0].cancelledAt !== null) {
+      throw new UnprocessableEntityException({ type: 'about:blank', title: 'event_cancelled', status: 422, code: 'EVENT_CANCELLED' });
     }
 
     // Check capacity for 'going' status
@@ -802,7 +807,18 @@ export class EventsService {
    *
    * All dates are in the UTC+3 (Iraq) timezone expressed as yyyy-MM-dd strings.
    */
-  getIraqiHolidays(year: number): IraqiHoliday[] {
+  async getIraqiHolidays(year: number): Promise<IraqiHoliday[]> {
+    const cacheKey = `holidays:${year}`;
+    try {
+      const cached = await this.redis?.get(cacheKey);
+      if (cached) return JSON.parse(cached) as IraqiHoliday[];
+    } catch { /* non-fatal */ }
+    const result = this._computeIraqiHolidays(year);
+    try { await this.redis?.set(cacheKey, JSON.stringify(result), 'EX', 86400); } catch { /* non-fatal */ }
+    return result;
+  }
+
+  private _computeIraqiHolidays(year: number): IraqiHoliday[] {
     // ── Fixed Gregorian holidays ──────────────────────────────────────────────
     const fixed: IraqiHoliday[] = [
       {
@@ -1152,5 +1168,64 @@ export class EventsService {
   }> {
     const { going } = await this.getAttendeeCounts(eventId);
     return { goingCount: going, maybeCount: 0, viewCount: 0 };
+  }
+
+  // ── Convenience aliases ────────────────────────────────────────────────────
+
+  /** Alias for rsvpToEvent that returns the updated event with RSVP status. */
+  async rsvp(
+    userId: UserId,
+    eventId: string,
+    status: RsvpStatusEnum,
+  ): Promise<EventWithRsvp> {
+    await this.rsvpToEvent(userId, eventId, status);
+    const record = await this.getEventById(eventId);
+    if (!record) {
+      throw new NotFoundException({ type: 'about:blank', title: 'not_found', status: 404, code: 'EVENT_NOT_FOUND' });
+    }
+    return this.enrichWithRsvp(record, status);
+  }
+
+  /** Alias for getEventsByCity with optional userId parameter. */
+  async listByCity(
+    city: string,
+    _userId: UserId | null,
+    opts: EventQueryOptions = {},
+  ): Promise<{ items: EventRecord[]; nextCursor: string | undefined }> {
+    return this.getEventsByCity(city, opts);
+  }
+
+  /** Soft-cancel an event by setting cancelledAt. Only the organizer may cancel. */
+  async cancelEvent(
+    organizerId: UserId,
+    eventId: string,
+  ): Promise<EventRecord> {
+    const rows = await this.db
+      .select({ organizerId: eventTable.organizerId })
+      .from(eventTable)
+      .where(eq(eventTable.id, eventId as ReturnType<typeof EventId.parse>))
+      .limit(1);
+
+    if (!rows[0]) {
+      throw new NotFoundException({ type: 'about:blank', title: 'not_found', status: 404, code: 'EVENT_NOT_FOUND' });
+    }
+    if (rows[0].organizerId !== organizerId) {
+      throw new ForbiddenException({ type: 'about:blank', title: 'forbidden', status: 403, code: 'NOT_ORGANIZER' });
+    }
+
+    const now = new Date();
+    const updated = await this.db
+      .update(eventTable)
+      .set({ cancelledAt: now })
+      .where(eq(eventTable.id, eventId as ReturnType<typeof EventId.parse>))
+      .returning();
+
+    await this.cacheDel(`events:detail:${eventId}`);
+
+    const row = updated[0];
+    if (!row) {
+      throw new NotFoundException({ type: 'about:blank', title: 'not_found', status: 404, code: 'EVENT_NOT_FOUND' });
+    }
+    return this.rowToRecord(row);
   }
 }

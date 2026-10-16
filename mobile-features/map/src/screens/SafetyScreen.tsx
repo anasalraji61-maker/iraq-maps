@@ -181,7 +181,8 @@ function AlertsTab({
   location?: LngLat | null;
   onReport?: () => void;
 }): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [alerts, setAlerts] = useState<SafetyIncident[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -319,7 +320,8 @@ function SafetyAlertCard({ incident }: { incident: SafetyIncident }): ReactEleme
 // ---------------------------------------------------------------------------
 
 function ContactsTab(): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -460,7 +462,8 @@ function ContactCard({
 // ---------------------------------------------------------------------------
 
 function ShareTab(): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
   const [activeShares, setActiveShares] = useState<SafetyLocationShare[]>([]);
   const [selectedContactIds, setSelectedContactIds] = useState<Set<string>>(new Set());
@@ -477,7 +480,8 @@ function ShareTab(): ReactElement {
         api.safety.getTrustedContacts({}),
         api.safety.getActiveShares({}),
       ]);
-      if (contactsRes.status === 200) setContacts(contactsRes.body.filter((c) => c.accepted));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (contactsRes.status === 200) setContacts((contactsRes.body as any[]).filter((c: any) => c.accepted));
       if (sharesRes.status === 200) setActiveShares(sharesRes.body);
     } finally {
       setLoading(false);
@@ -663,13 +667,16 @@ function ShareTab(): ReactElement {
 // ---------------------------------------------------------------------------
 
 function EmergencyTab(): ReactElement {
-  const api = useApi();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
   const [sendingAlert, setSendingAlert] = useState(false);
 
   useEffect(() => {
-    api.safety.getTrustedContacts({}).then((res) => {
-      if (res.status === 200) setContacts(res.body.filter((c) => c.accepted));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    api.safety.getTrustedContacts({}).then((res: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (res.status === 200) setContacts(res.body.filter((c: any) => c.accepted));
     }).catch(() => undefined);
   }, [api]);
 

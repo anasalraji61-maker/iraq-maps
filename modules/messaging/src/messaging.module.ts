@@ -5,6 +5,7 @@ import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { FakeMessagingChannel } from './fake-channel';
+import { GroupMessagingService } from './group-messaging.service';
 import { MessagingController } from './messaging.controller';
 import { MessagingGroupsController } from './messaging-groups.controller';
 import { MessagingGroupsService } from './messaging-groups.service';
@@ -68,12 +69,13 @@ export function messagingModule(opts: MessagingModuleOptions): DynamicModule {
       { provide: PortTokens.EventBus, useValue: opts.eventBus ?? new InMemoryEventBus() },
       MessagingService,
       MessagingGroupsService,
+      GroupMessagingService,
       {
         provide: 'MESSAGING_WORKER',
         useFactory: (svc: MessagingService) => createMessagingWorker(svc, redisConn),
         inject: [MessagingService],
       },
     ],
-    exports: [MessagingService, 'MESSAGING_QUEUE'],
+    exports: [MessagingService, 'MESSAGING_QUEUE', GroupMessagingService],
   };
 }

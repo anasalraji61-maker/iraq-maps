@@ -804,6 +804,7 @@
     "historyAlertSent": "Emergency alert sent",
     "historyLocationShared": "Location shared",
     "ago": "{time} ago",
+    "notifiedCount": "{count} contacts",
     "errorTitle": "Error",
     "errorMsg": "An unexpected error occurred. Please try again.",
     "retry": "Retry",

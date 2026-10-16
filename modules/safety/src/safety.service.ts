@@ -11,7 +11,6 @@
  *  - only readable by explicitly-authorised viewer IDs
  */
 import type {
-  EmergencyAlertId,
   SafetyAlertPrefs,
   SafetyIncident,
   SafetyIncidentId,

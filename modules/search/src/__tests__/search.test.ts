@@ -494,7 +494,7 @@ describe('SearchService (DB mock) – history operations', () => {
   it('trending falls back to empty when cache miss and DB empty', async () => {
     const db = {
       ...stubHistoryRows([]),
-      execute: vi.fn().mockResolvedValue([]),
+      execute: vi.fn().mockResolvedValue({ rows: [] }),
     };
     const cache = stubCache(null);
     const svc = new SearchService(db as never, cache as never);

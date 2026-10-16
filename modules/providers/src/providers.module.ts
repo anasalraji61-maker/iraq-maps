@@ -6,6 +6,7 @@ import { AdminProvidersController, ProvidersController } from './providers.contr
 import { PromotionsController } from './promotions.controller';
 import { PromotionsService } from './promotions.service';
 import { ProvidersService } from './providers.service';
+import { VerificationService } from './verification.service';
 
 export interface ProvidersModuleOptions {
   db: Db;
@@ -32,7 +33,8 @@ export function providersModule(opts: ProvidersModuleOptions): DynamicModule {
       { provide: PortTokens.PhoneVerificationPort, useValue: opts.phoneVerification },
       ProvidersService,
       PromotionsService,
+      VerificationService,
     ],
-    exports: [ProvidersService, PromotionsService],
+    exports: [ProvidersService, PromotionsService, VerificationService],
   };
 }

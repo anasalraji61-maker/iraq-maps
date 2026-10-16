@@ -64,6 +64,8 @@ export class FakeSearchService {
     userHistory.unshift({ q: query.q, searchedAt: new Date() });
     this.history.set(userId, userHistory.slice(0, 50)); // keep last 50
 
+    if (!query.q.trim()) return { items: [], nextCursor: undefined };
+
     const key = query.q.toLowerCase();
     const all = this.seededResults.get(key) ?? [];
 
@@ -78,6 +80,7 @@ export class FakeSearchService {
   }
 
   async suggest(q: string, _city?: string, limit = 5): Promise<Array<{ id: string; name: string }>> {
+    if (!q.trim()) return [];
     const key = q.toLowerCase();
     const all = [...this.seededResults.values()].flat();
     return all

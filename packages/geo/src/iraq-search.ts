@@ -433,7 +433,8 @@ export const SEARCH_TYPO_CORRECTIONS: Readonly<Record<string, string>> = {
  * Characters to strip during Arabic search normalization.
  * Covers: tatweel, common diacritics.
  */
-const ARABIC_STRIP_RE = /[ـً-ٰٟ]/g;
+// eslint-disable-next-line no-misleading-character-class
+const ARABIC_STRIP_RE = /[ـً-ٰٟ]/g;
 
 /**
  * Alef forms to normalise to plain alef ا.

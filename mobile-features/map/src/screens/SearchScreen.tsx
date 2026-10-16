@@ -85,10 +85,10 @@ const RATING_OPTIONS = [1, 2, 3, 4, 5] as const;
 
 type SortOption = 'relevance' | 'distance' | 'rating' | 'price';
 const SORT_OPTIONS: Array<{ key: SortOption; label: string }> = [
-  { key: 'relevance', label: 'الأكثر صلة' },
-  { key: 'distance', label: 'الأقرب' },
-  { key: 'rating', label: 'الأعلى تقييماً' },
-  { key: 'price', label: 'السعر' },
+  { key: 'relevance', label: t('advancedSearch.sort_relevance') },
+  { key: 'distance', label: t('advancedSearch.sort_distance') },
+  { key: 'rating', label: t('advancedSearch.sort_rating') },
+  { key: 'price', label: t('advancedSearch.sort_price') },
 ];
 
 type ViewMode = 'list' | 'map';
@@ -428,7 +428,7 @@ export function SearchScreen(): ReactElement {
       });
     }
     if (filters.radiusM) {
-      const km = filters.radiusM >= 1000 ? `${filters.radiusM / 1000} كم` : `${filters.radiusM} م`;
+      const km = filters.radiusM >= 1000 ? t('advancedSearch.radiusKm', { n: filters.radiusM / 1000 }) : t('advancedSearch.radiusM', { n: filters.radiusM });
       chips.push({
         key: 'radius',
         label: km,
@@ -671,7 +671,7 @@ export function SearchScreen(): ReactElement {
                 accessibilityRole="button"
                 accessibilityLabel={t('advancedSearch.viewList')}
               >
-                <RNText style={styles.viewToggleIcon} allowFontScaling={false}>{'☰'}</RNText>
+                <RNText style={styles.viewToggleIcon} allowFontScaling={false}>{t('advancedSearch.viewListIcon')}</RNText>
               </Pressable>
               <Pressable
                 style={[styles.viewToggleBtn, viewMode === 'map' && styles.viewToggleBtnActive]}
@@ -701,7 +701,7 @@ export function SearchScreen(): ReactElement {
                 >
                   <RNText style={styles.activeFilterChipText}>{chip.label}</RNText>
                   <RNText style={styles.activeFilterChipRemove} allowFontScaling={false}>
-                    {' ✕'}
+                    {t('advancedSearch.filterRemove')}
                   </RNText>
                 </Pressable>
               ))}
@@ -720,7 +720,7 @@ export function SearchScreen(): ReactElement {
                 <ActivityIndicator size="small" color={tokens.color.primary} />
               ) : (
                 <RNText style={styles.saveAlertText}>
-                  {saveAlertDone ? '✓ تم حفظ التنبيه' : '🔔 تنبيهي عند إضافة أماكن جديدة'}
+                  {saveAlertDone ? t('advancedSearch.saveAlertDone') : t('advancedSearch.saveAlertSave')}
                 </RNText>
               )}
             </Pressable>

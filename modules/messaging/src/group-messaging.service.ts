@@ -307,7 +307,8 @@ export class GroupMessagingService {
     const memberRows = await this.db
       .select({ groupId: groupMemberTable.groupId, role: groupMemberTable.role })
       .from(groupMemberTable)
-      .where(eq(groupMemberTable.userId, userId));
+      .where(eq(groupMemberTable.userId, userId))
+      .limit(1000);
 
     if (memberRows.length === 0) return { items: [], nextCursor: undefined };
 
@@ -332,10 +333,12 @@ export class GroupMessagingService {
     const items = rows.slice(0, limit);
 
     // Fetch member counts
-    const counts = await this.db
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const counts: { groupId: string }[] = await (this.db as any)
       .select({ groupId: groupMemberTable.groupId })
       .from(groupMemberTable)
-      .where(inArray(groupMemberTable.groupId, items.map((g) => g.id)));
+      .where(inArray(groupMemberTable.groupId, items.map((g) => g.id)))
+      .execute();
     const countMap = new Map<string, number>();
     for (const row of counts) {
       countMap.set(row.groupId, (countMap.get(row.groupId) ?? 0) + 1);
@@ -350,7 +353,8 @@ export class GroupMessagingService {
           inArray(groupMuteTable.groupId, items.map((g) => g.id)),
           eq(groupMuteTable.userId, userId),
         ),
-      );
+      )
+      .limit(items.length + 1);
     const muteMap = new Map(muteRows.map((m) => [m.groupId, m]));
 
     return {
@@ -487,7 +491,8 @@ export class GroupMessagingService {
       .select()
       .from(pinnedMessageTable)
       .where(eq(pinnedMessageTable.groupId, conversationId))
-      .orderBy(desc(pinnedMessageTable.pinnedAt));
+      .orderBy(desc(pinnedMessageTable.pinnedAt))
+      .limit(100);
 
     if (pinnedRows.length === 0) return [];
 
@@ -495,7 +500,8 @@ export class GroupMessagingService {
     const messages = await this.db
       .select()
       .from(groupMessageTable)
-      .where(inArray(groupMessageTable.id, messageIds));
+      .where(inArray(groupMessageTable.id, messageIds))
+      .limit(messageIds.length + 1);
 
     const msgMap = new Map(messages.map((m) => [m.id, m]));
 
@@ -687,6 +693,42 @@ export class GroupMessagingService {
       role: row.role as 'admin' | 'member',
       joinedAt: row.joinedAt.toISOString(),
     };
+  }
+
+  // ── Convenience aliases ────────────────────────────────────────────────────
+
+  /** Unmute a conversation for a user. Alias for muteConversation(userId, groupId, null). */
+  async unmuteConversation(
+    userId: UserId,
+    conversationId: GroupIdType,
+  ): Promise<{ isMuted: false }> {
+    await this.muteConversation(userId, conversationId, null);
+    return { isMuted: false };
+  }
+
+  /** Get pinned messages without requiring a requesterId (open to any member when called server-side). */
+  async getPinnedMessagesList(
+    conversationId: GroupIdType,
+  ): Promise<{ items: PinnedMessageShape[] }> {
+    const pinnedRows = await this.db
+      .select()
+      .from(pinnedMessageTable)
+      .where(eq(pinnedMessageTable.groupId, conversationId))
+      .orderBy(desc(pinnedMessageTable.pinnedAt))
+      .limit(100);
+
+    if (pinnedRows.length === 0) return { items: [] };
+
+    const messageIds = pinnedRows.map((p) => p.messageId);
+    const messages = await this.db
+      .select()
+      .from(groupMessageTable)
+      .where(inArray(groupMessageTable.id, messageIds))
+      .limit(messageIds.length + 1);
+
+    const msgMap = new Map(messages.map((m) => [m.id, m]));
+    const items = pinnedRows.map((p) => this.toPinnedShape(p, msgMap.get(p.messageId)));
+    return { items };
   }
 
   private toPinnedShape(

@@ -122,9 +122,9 @@ const ANIMATION_DURATION = 200;
 const MAX_DROPDOWN_ITEMS = 12;
 
 const CATEGORY_TABS: Array<{ key: SearchCategory; label: string }> = [
-  { key: 'all', label: 'الكل' },
-  { key: 'place', label: 'أماكن' },
-  { key: 'neighborhood', label: 'أحياء' },
+  { key: 'all', label: t('advancedSearch.categoryAll') },
+  { key: 'place', label: t('search.typePlace') },
+  { key: 'neighborhood', label: t('advancedSearch.categoryNeighborhood') },
 ];
 
 const GROUP_ICONS: Record<AutocompleteItem['groupKey'], string> = {
@@ -239,7 +239,7 @@ export function SearchBar({
     [onQueryChange, onSuggestionSelect],
   );
 
-  const handleRecentPress = useCallback(
+  const _handleRecentPress = useCallback(
     (item: RecentItem) => {
       setLocalValue(item.query);
       onQueryChange(item.query);
@@ -248,7 +248,7 @@ export function SearchBar({
     [onQueryChange, onRecentSelect],
   );
 
-  const handleTrendingPress = useCallback(
+  const _handleTrendingPress = useCallback(
     (q: string) => {
       setLocalValue(q);
       onQueryChange(q);

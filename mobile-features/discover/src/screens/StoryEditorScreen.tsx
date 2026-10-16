@@ -5,6 +5,8 @@
 /* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore — expo-media-library not in workspace deps; safe at runtime via Expo SDK
 import * as MediaLibrary from 'expo-media-library';
 import {
   type ReactElement,

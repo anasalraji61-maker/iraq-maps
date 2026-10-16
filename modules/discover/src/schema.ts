@@ -211,6 +211,7 @@ export const eventTable = discoverSchema.table(
     maxAttendees: integer('max_attendees'),
     imageUrl: text('image_url'),
     category: text('category').notNull().default('other'),
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

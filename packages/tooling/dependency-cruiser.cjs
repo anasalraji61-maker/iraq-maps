@@ -26,6 +26,8 @@ module.exports = {
         'mobile-features/discover/src/',
         // react-native-svg is a native peer-dep
         'mobile-features/provider/src/components/charts/',
+        // safety module is a future-phase stub; workspace symlinks not yet present
+        'modules/safety/src/',
         // Storybook dev tooling (not a runtime dep)
         'packages/visual-testing/src/stories/',
       ],

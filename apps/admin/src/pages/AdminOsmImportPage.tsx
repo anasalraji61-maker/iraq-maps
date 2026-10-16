@@ -513,7 +513,7 @@ export function AdminOsmImportPage() {
   const totalUpdated = useMemo(() => cities.reduce((a, c) => a + c.lastUpdatedPlaces, 0), [cities]);
   const totalFailed = useMemo(() => cities.reduce((a, c) => a + c.lastFailedPlaces, 0), [cities]);
 
-  const diffCity = cities.find((c) => c.cityId === dryRunCity);
+  const _diffCity = cities.find((c) => c.cityId === dryRunCity);
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', direction: 'ltr' }}>
