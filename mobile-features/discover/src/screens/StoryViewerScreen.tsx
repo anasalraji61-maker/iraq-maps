@@ -50,6 +50,8 @@ interface HeartParticle {
   y: Animated.Value;
   opacity: Animated.Value;
   scale: Animated.Value;
+  startX: number;
+  startY: number;
 }
 
 // ─── Heart burst ──────────────────────────────────────────────────────────────
@@ -72,7 +74,7 @@ function HeartBurst({ particles }: { particles: HeartParticle[] }): ReactElement
           }}
         >
           {/* eslint-disable-next-line i18next/no-literal-string */}
-          ❤️
+          {'❤️'}
         </Animated.Text>
       ))}
     </View>
@@ -193,6 +195,8 @@ function StoryView({
         y: new Animated.Value(startY),
         opacity: new Animated.Value(1),
         scale: new Animated.Value(0.4),
+        startX,
+        startY,
       };
     });
 
@@ -200,8 +204,8 @@ function StoryView({
 
     burst.forEach((p) => {
       Animated.parallel([
-        Animated.timing(p.y, { toValue: p.y._value - 120 - Math.random() * 80, duration: 900, useNativeDriver: true }),
-        Animated.timing(p.x, { toValue: p.x._value + (Math.random() - 0.5) * 100, duration: 900, useNativeDriver: true }),
+        Animated.timing(p.y, { toValue: p.startY - 120 - Math.random() * 80, duration: 900, useNativeDriver: true }),
+        Animated.timing(p.x, { toValue: p.startX + (Math.random() - 0.5) * 100, duration: 900, useNativeDriver: true }),
         Animated.timing(p.opacity, { toValue: 0, duration: 900, useNativeDriver: true }),
         Animated.spring(p.scale, { toValue: 1.2, useNativeDriver: true }),
       ]).start(() => {
@@ -244,11 +248,11 @@ function StoryView({
 
   // Report / mute
   const handleMore = () => {
-    Alert.alert('', '', [
+    Alert.alert(t('stories.optionsTitle'), undefined, [
       {
         text: t('stories.report'),
         onPress: () =>
-          Alert.alert(t('post.reportTitle'), '', [
+          Alert.alert(t('post.reportTitle'), undefined, [
             { text: t('post.reportCancel'), style: 'cancel' },
             { text: t('post.reportReason.spam'), onPress: () => reportStory('spam') },
             { text: t('post.reportReason.inappropriate'), onPress: () => reportStory('inappropriate') },
@@ -257,7 +261,7 @@ function StoryView({
       {
         text: t('stories.mute'),
         onPress: () =>
-          Alert.alert(t('stories.muteConfirmTitle'), '', [
+          Alert.alert(t('stories.muteConfirmTitle'), undefined, [
             { text: t('common.cancel'), style: 'cancel' },
             { text: t('stories.mute'), style: 'destructive', onPress: () => { muteUser(); onNextAuthor(); } },
           ]),
@@ -587,8 +591,8 @@ export { MultiStoryViewer as StoryViewer };
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
 
-  topGradient: { ...StyleSheet.absoluteFillObject, top: 0, height: 160, backgroundColor: 'rgba(0,0,0,0.45)' },
-  bottomGradient: { ...StyleSheet.absoluteFillObject, bottom: 0, top: 'auto', height: 140, backgroundColor: 'rgba(0,0,0,0.45)' },
+  topGradient: { ...StyleSheet.absoluteFill, top: 0, height: 160, backgroundColor: 'rgba(0,0,0,0.45)' },
+  bottomGradient: { ...StyleSheet.absoluteFill, bottom: 0, top: 'auto', height: 140, backgroundColor: 'rgba(0,0,0,0.45)' },
 
   safeTop: { position: 'absolute', top: 0, start: 0, end: 0 },
   safeBottom: { position: 'absolute', bottom: 0, start: 0, end: 0 },
@@ -618,7 +622,7 @@ const styles = StyleSheet.create({
   actionBtnLiked: { backgroundColor: 'rgba(255,59,48,0.3)' },
   actionBtnIcon: { fontSize: 22 },
 
-  replyOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  replyOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
   replySheet: { backgroundColor: '#1C1C1E', borderTopStartRadius: 20, borderTopEndRadius: 20, padding: 20, gap: 12 },
   replyTextField: { backgroundColor: '#2C2C2E', color: '#FFF', borderRadius: 12, padding: 14, minHeight: 80, fontSize: 15, textAlignVertical: 'top' },
   replyActions: { flexDirection: 'row', gap: 12 },

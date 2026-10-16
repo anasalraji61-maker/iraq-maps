@@ -22,6 +22,8 @@ export {
   useOfflineQueueDrain,
   type QueuedAction,
 } from './offline-queue';
+/** @public composite offline state hook */
+export { useOffline, type UseOfflineReturn } from './hooks/useOffline';
 /** @public error boundary with optional ErrorReporter integration */
 export { ErrorBoundary } from './error-boundary';
 /** @public haptic feedback helpers */

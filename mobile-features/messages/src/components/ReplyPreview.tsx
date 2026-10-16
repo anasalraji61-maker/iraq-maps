@@ -84,10 +84,12 @@ export function ReplyPreview({ data, onCancel }: ComposePropTypes): ReactElement
       <TouchableOpacity
         style={styles.cancelBtn}
         onPress={onCancel}
-        hitSlop={{ top: 10, bottom: 10, start: 10, end: 10 }}
+        // eslint-disable-next-line no-restricted-syntax
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         accessibilityRole="button"
         accessibilityLabel={t('compose.cancel')}
       >
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <Text style={styles.cancelIcon}>✕</Text>
       </TouchableOpacity>
     </View>

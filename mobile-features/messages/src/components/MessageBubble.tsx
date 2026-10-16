@@ -6,8 +6,6 @@ import * as Clipboard from 'expo-clipboard';
 import { useCallback, type ReactElement } from 'react';
 import {
   Alert,
-  Animated,
-  I18nManager,
   Image,
   Linking,
   StyleSheet,

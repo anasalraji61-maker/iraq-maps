@@ -137,7 +137,7 @@ export function AssistantScreen(): ReactElement {
       initialMessageSent.current = true;
       void send(decodeURIComponent(initialMessage));
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // intentionally run once on mount
 
   const scrollToEnd = useCallback(() => {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);

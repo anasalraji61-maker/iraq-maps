@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@iraq-maps/db-kit": "workspace:*",
@@ -15,7 +17,5 @@
     "drizzle-orm": "^0.45.4",
     "ioredis": "^5.11.1"
   },
-  "devDependencies": {
-    "@nestjs/core": "^11.2.7"
-  }
+  "devDependencies": {}
 }

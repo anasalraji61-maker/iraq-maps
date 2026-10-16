@@ -106,6 +106,7 @@ function GroupInfoHeader({
             onPress={onEditPress}
             accessibilityRole="button"
           >
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={groupHeaderStyles.editAvatarIcon}>✏️</Text>
           </TouchableOpacity>
         ) : null}
@@ -115,7 +116,8 @@ function GroupInfoHeader({
         <View style={groupHeaderStyles.nameLine}>
           <Text style={groupHeaderStyles.name} numberOfLines={1}>{info.name}</Text>
           {isAdmin ? (
-            <TouchableOpacity onPress={onEditPress} hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}>
+            // eslint-disable-next-line no-restricted-syntax
+            <TouchableOpacity onPress={onEditPress} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Text style={groupHeaderStyles.editNameBtn}>✏</Text>
             </TouchableOpacity>
           ) : null}
@@ -223,9 +225,11 @@ function MembersModal({
           <Text style={membersStyles.title}>
             {t('groups.addMembers')} ({members.length})
           </Text>
-          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, start: 10, end: 10 }}>
+          {/* eslint-disable no-restricted-syntax, i18next/no-literal-string */}
+          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Text style={membersStyles.closeBtn}>✕</Text>
           </TouchableOpacity>
+          {/* eslint-enable no-restricted-syntax, i18next/no-literal-string */}
         </View>
 
         {/* Add member button (admin only) */}
@@ -250,27 +254,24 @@ function MembersModal({
               <View style={membersStyles.memberInfo}>
                 <Text style={membersStyles.memberName}>{item.displayName}</Text>
                 {item.role === 'admin' ? (
-                  <Text style={membersStyles.adminBadge}>{t('groups.notAdmin').includes('Admin') ? 'Admin' : 'مشرف'}</Text>
+                  <Text style={membersStyles.adminBadge}>{t('groups.adminBadge')}</Text>
                 ) : null}
               </View>
               {isAdmin && item.userId !== myId ? (
                 <TouchableOpacity
-                  hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+                  // eslint-disable-next-line no-restricted-syntax
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   onPress={() => {
                     Alert.alert(
                       t('groups.addMember'),
                       undefined,
                       [
                         {
-                          text: t('groups.notAdmin').includes('Admin')
-                            ? 'Make admin'
-                            : 'جعل مشرفاً',
+                          text: t('groups.makeAdmin'),
                           onPress: () => onMakeAdmin(item.userId),
                         },
                         {
-                          text: t('conversation.deleteForEveryone').includes('Delete')
-                            ? 'Remove'
-                            : 'إزالة',
+                          text: t('groups.removeMember'),
                           style: 'destructive',
                           onPress: () => onRemoveMember(item.userId),
                         },

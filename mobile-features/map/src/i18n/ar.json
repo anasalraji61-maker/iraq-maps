@@ -255,7 +255,11 @@
     "progressLabel": "{pct}٪ — {size}",
     "completeLabel": "مكتمل — {size}",
     "failedLabel": "فشل التحميل",
-    "offlineBadge": "غير متصل"
+    "offlineBadge": "غير متصل",
+    "footerHint": "اضغط على منطقة لعرض التفاصيل",
+    "storageUsed": "المساحة المستخدمة",
+    "expiringBadge": "تنتهي قريباً",
+    "estimatedSize": "الحجم التقريبي"
   },
   "mapStyle": {
     "label": "نمط الخريطة",
@@ -394,5 +398,14 @@
   },
   "cluster": {
     "label": "{count} مكان"
+  },
+  "offlineIndicator": {
+    "reconnectedA11y": "متصل",
+    "offlineA11y": "غير متصل",
+    "reconnected": "تمت إعادة الاتصال",
+    "syncing": "جارٍ المزامنة...",
+    "pendingBadge": "{count} في الانتظار",
+    "offline": "غير متصل",
+    "cachedWarning": "عرض البيانات المخزنة مؤقتاً"
   }
 }

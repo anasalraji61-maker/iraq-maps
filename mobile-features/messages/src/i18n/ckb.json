@@ -130,6 +130,32 @@
     "addMemberError": "زیادکردنی ئەندام سەرنەکەوت",
     "alreadyMember": "ئەم بەکارهێنەرە پێشتر ئەندامە",
     "notAdmin": "دەسەڵاتی بەڕێوەبەر پێویستە بۆ زیادکردنی ئەندام",
-    "messagesEmpty": "هیچ نامەیەک نییە. یەکەم بە!"
+    "messagesEmpty": "هیچ نامەیەک نییە. یەکەم بە!",
+    "adminBadge": "بەڕێوەبەر",
+    "makeAdmin": "بکە بەڕێوەبەر",
+    "removeMember": "لابردن"
+  },
+  "conversation": {
+    "copy": "کۆپی",
+    "deleteForEveryone": "بۆ هەموو بسڕەوە",
+    "deleteForMe": "بۆ من بسڕەوە",
+    "deletedForEveryone": "ئەم پەیامە سڕایەوە",
+    "forward": "پێشەکی بکە",
+    "forwarded": "پێشەکی کراوە",
+    "leaveGroup": "بەرەوە چوون",
+    "location": "شوێن",
+    "messageBusiness": "پەیامی ئەم کارگیرییە",
+    "messageBusinessSub": "گفتوگۆیەک بەدەست بهێنە",
+    "messageOptions": "هەڵبژاردنەکانی پەیام",
+    "online": "ئۆنلاین",
+    "pause": "وەستان",
+    "play": "لێدان",
+    "recent": "نوێ",
+    "reply": "وەڵام",
+    "replyingTo": "وەڵام دەدرێت بۆ",
+    "suggested": "پێشنیار کراو",
+    "tapToOpenMap": "تووش بکە بۆ کردنەوەی نەخشە",
+    "unknown": "نەناسراو",
+    "you": "تۆ"
   }
 }

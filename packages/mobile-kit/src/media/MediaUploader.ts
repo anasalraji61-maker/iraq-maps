@@ -203,7 +203,8 @@ export class MediaUploader {
     onProgress?.(0.1);
 
     const ticketRes = await this.api.media.createUpload({
-      body: { purpose, mime, size },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      body: { purpose, mime: mime as any, size },
     });
     if (ticketRes.status !== 201) {
       throw new Error(`Video upload ticket failed: ${ticketRes.status}`);
@@ -243,7 +244,8 @@ export class MediaUploader {
    * The backend removes it from object storage.
    */
   async deleteMedia(options: DeleteMediaOptions): Promise<void> {
-    const res = await this.api.media.deleteAsset?.({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await (this.api.media as any).deleteAsset?.({
       params: { assetId: options.assetId },
     });
     if (res && res.status !== 204) {

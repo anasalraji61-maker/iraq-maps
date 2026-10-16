@@ -596,7 +596,7 @@ export class DiscoverService {
 
     const rows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
       WITH words AS (
-        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        SELECT regexp_matches(body, '#([A-Za-z0-9_\u0600-\u06FF]+)', 'g') AS m
         FROM discover.post
         WHERE removed_at IS NULL
           AND created_at > NOW() - INTERVAL '24 hours'
@@ -696,12 +696,12 @@ export class DiscoverService {
 
   /** Autocomplete: top 5 matching hashtags and user IDs. @M-autocomplete */
   async searchSuggestions(query: string): Promise<{ hashtags: string[]; userIds: UserId[] }> {
-    const term = query.replace(/[^A-Za-z0-9_؀-ۿ]/g, '');
+    const term = query.replace(/[^A-Za-z0-9_\u0600-\u06FF]/g, '');
     if (!term) return { hashtags: [], userIds: [] };
 
     const hashtagRows = await this.db.execute<{ hashtag: string }>(sql`
       WITH words AS (
-        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        SELECT regexp_matches(body, '#([A-Za-z0-9_\u0600-\u06FF]+)', 'g') AS m
         FROM discover.post
         WHERE removed_at IS NULL
       )
@@ -806,7 +806,7 @@ export class DiscoverService {
    * NOTE: Since we don't have a user table in this module, we search post authors by handle patterns in body.
    * A real implementation would join an identity module's user table via a port. */
   async searchUsers(query: string, limit = 10): Promise<{ items: Array<{ userId: UserId; username: string; displayName: string }> }> {
-    const term = query.replace(/[^A-Za-z0-9_؀-ۿ]/g, '').toLowerCase();
+    const term = query.replace(/[^A-Za-z0-9_\u0600-\u06FF]/g, '').toLowerCase();
     if (!term) return { items: [] };
 
     // Best-effort: find distinct author_ids from posts whose body contains @<term>

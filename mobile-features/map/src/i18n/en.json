@@ -255,7 +255,11 @@
     "progressLabel": "{pct}% — {size}",
     "completeLabel": "Complete — {size}",
     "failedLabel": "Download failed",
-    "offlineBadge": "Offline"
+    "offlineBadge": "Offline",
+    "footerHint": "Tap a region to view details",
+    "storageUsed": "Storage used",
+    "expiringBadge": "Expiring soon",
+    "estimatedSize": "Est. size"
   },
   "mapStyle": {
     "label": "Map style",
@@ -394,5 +398,14 @@
   },
   "cluster": {
     "label": "{count} places"
+  },
+  "offlineIndicator": {
+    "reconnectedA11y": "Connected",
+    "offlineA11y": "Offline",
+    "reconnected": "Reconnected",
+    "syncing": "Syncing...",
+    "pendingBadge": "{count} pending",
+    "offline": "Offline",
+    "cachedWarning": "Showing cached data"
   }
 }

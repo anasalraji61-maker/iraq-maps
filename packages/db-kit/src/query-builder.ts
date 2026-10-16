@@ -221,7 +221,7 @@ export class QueryBuilder {
     // For very short strings trigrams degrade; use ILIKE instead
     if (trimmed.length < 3) {
       const pattern = `%${trimmed}%`;
-      const likeConditions = columns.map((c) => `${c} ILIKE $1`).join(' OR ');
+      // columns.map((c) => `${c} ILIKE $1`).join(' OR ') -- built below via parameterised sql
       const ilikeSql = sql.raw(`SELECT * FROM (SELECT `) as unknown;
       void ilikeSql;
 

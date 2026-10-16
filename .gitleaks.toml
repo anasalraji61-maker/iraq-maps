@@ -12,3 +12,5 @@ paths = [
 ]
 # Zeroed-out RSA key in the FCM adapter test fixture — not a real key
 commits = ["6c374fcf4d55f0dec382e7d9b6c8e7f7cb7f3d94"]
+# Truncated JWT-shaped strings used as test fixtures (not real tokens)
+regexes = ['''eyJhbGciOiJIUzI1NiJ9\.(test|refresh)''']

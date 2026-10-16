@@ -79,7 +79,8 @@
     "blockConfirmTitle": "ئایا ئەم بەکارهێنەرەت بلۆک بکەیت؟",
     "blockConfirmMsg": "پۆستەکانی دیار نابن لە فیدەکەتدا.",
     "blockConfirmOk": "بلۆک بکە",
-    "blockSuccess": "بلۆک کرا"
+    "blockSuccess": "بلۆک کرا",
+    "commentA11y": "کۆمێنت"
   },
   "create": {
     "title": "پۆستی نوێ",
@@ -297,7 +298,8 @@
     "shareTitle": "هاوبەشکردنی چیرۆک",
     "viewers": "کێ بینیوێتی",
     "viewersTitle": "بینەرەکان",
-    "viewersEmpty": "هێشتا کەس ئەم چیرۆکە نەبینیوە"
+    "viewersEmpty": "هێشتا کەس ئەم چیرۆکە نەبینیوە",
+    "optionsTitle": "هەڵبژاردەکان"
   },
   "events": {
     "title": "ڕووداوەکان",

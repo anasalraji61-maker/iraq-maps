@@ -9,13 +9,11 @@ import {
   type ReactElement,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -111,7 +109,7 @@ function FilterPreview({ uri, filter }: { uri: string; filter: FilterDef }): Rea
 
 const filterPreviewStyles = StyleSheet.create({
   wrap: { width: 60, height: 60, borderRadius: 8, overflow: 'hidden', position: 'relative' },
-  img: { ...StyleSheet.absoluteFillObject },
+  img: { ...StyleSheet.absoluteFill },
 });
 
 // ─── Grid thumbnail ───────────────────────────────────────────────────────────
@@ -145,11 +143,13 @@ function MediaThumb({
         <View style={styles.videoBadge}>
           {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.videoBadgeText}>▶</Text>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.videoDuration}>{Math.round(asset.duration ?? 0)}s</Text>
         </View>
       )}
       {selected && (
         <View style={styles.selectionBadge}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.selectionBadgeText}>{selectionOrder ?? '✓'}</Text>
         </View>
       )}
@@ -204,7 +204,7 @@ const cropStyles = StyleSheet.create({
   headerBtnText: { color: '#FFF', fontSize: 15 },
   headerTitle: { color: '#FFF', fontSize: 17, fontWeight: '600' },
   canvas: { flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  grid: { ...StyleSheet.absoluteFillObject },
+  grid: { ...StyleSheet.absoluteFill },
   gridLine: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.3)' },
 });
 
@@ -229,7 +229,7 @@ export function MediaPicker({
   const [activeFilter, setActiveFilter] = useState<FilterType>('none');
   const [cropUri, setCropUri] = useState<string | null>(null);
   const [showCrop, setShowCrop] = useState(false);
-  const [recordingVideo, setRecordingVideo] = useState(false);
+  const [_recordingVideo, _setRecordingVideo] = useState(false);
   const [endCursor, setEndCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
 
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
 
   previewArea: { height: 260, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' },
   previewWrap: { width: '100%', height: '100%', position: 'relative' },
-  previewImage: { ...StyleSheet.absoluteFillObject },
+  previewImage: { ...StyleSheet.absoluteFill },
 
   filterStrip: { height: 100, backgroundColor: '#111' },
   filterStripContent: { paddingHorizontal: 12, gap: 10, alignItems: 'center' },

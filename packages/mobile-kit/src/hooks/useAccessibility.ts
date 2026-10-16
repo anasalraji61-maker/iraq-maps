@@ -168,5 +168,3 @@ export function useAccessibility(): AccessibilityState {
     sp,
   };
 }
-
-export default useAccessibility;

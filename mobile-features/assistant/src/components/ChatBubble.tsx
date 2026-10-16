@@ -56,7 +56,7 @@ function formatTime(ts: number): string {
 }
 
 function SlimPlaceCard({
-  placeId,
+  placeId: _placeId,
   name,
   onPress,
 }: {
@@ -81,7 +81,7 @@ function SlimPlaceCard({
 }
 
 function RouteCard({
-  placeId,
+  placeId: _placeId,
   placeName,
   onPress,
 }: {
@@ -96,6 +96,7 @@ function RouteCard({
       accessibilityRole="button"
       accessibilityLabel={t('chat.routeToA11y', { name: placeName })}
     >
+      {/* eslint-disable-next-line i18next/no-literal-string */}
       <Text style={styles.routeCardIcon}>🗺️</Text>
       <View style={styles.routeCardBody}>
         <Text style={styles.routeCardLabel}>{t('chat.routeTo')}</Text>
@@ -109,7 +110,7 @@ function RouteCard({
 }
 
 function RatingCard({
-  placeId,
+  placeId: _placeId,
   placeName,
   onSubmit,
 }: {

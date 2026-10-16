@@ -112,7 +112,7 @@ export class ModerationController {
   ) {
     requireAdmin(key);
     return this.svc.getReports(
-      { status: status as any, contentType: contentType as any, reporterId },
+      { status: status as import('./schema').ReportStatus | undefined, contentType: contentType as import('./schema').ContentType | undefined, reporterId },
       { limit: limit ? Number(limit) : undefined, cursor },
     );
   }

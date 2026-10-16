@@ -1,4 +1,4 @@
-export { moderationModule, type ModerationModuleOptions } from './moderation.module';
+export { moderationModule, moderationMigrationsDir, type ModerationModuleOptions } from './moderation.module';
 export { ModerationService } from './moderation.service';
 export type {
   Action,

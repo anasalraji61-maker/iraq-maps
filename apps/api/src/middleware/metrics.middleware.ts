@@ -29,7 +29,7 @@ export function registerMetricsHooks(fastify: FastifyInstance, monitor: Performa
     const r = req as RequestWithTiming;
     r[TIMING_KEY] = {
       startMs: Date.now(),
-      route: req.routeOptions?.url ?? req.url.split('?')[0],
+      route: req.routeOptions?.url ?? req.url.split('?')[0] ?? req.url,
       method: req.method.toUpperCase(),
     };
   });

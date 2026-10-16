@@ -29,10 +29,10 @@ const t = tFn as (key: any, params?: Record<string, string | number>) => string;
 
 const PRIMARY = '#1976D2';
 const PRIMARY_DARK = '#1565C0';
-const PRIMARY_LIGHT = '#BBDEFB';
+const _PRIMARY_LIGHT = '#BBDEFB';
 const PRIMARY_XLIGHT = '#E3F2FD';
 const ERROR = '#C62828';
-const ERROR_BG = '#FFEBEE';
+const _ERROR_BG = '#FFEBEE';
 const SURFACE = '#FFF';
 const BG = '#F5F5F5';
 const TEXT = '#222';
@@ -41,8 +41,8 @@ const TEXT_MUTED = '#999';
 const BORDER = '#DDD';
 const SUCCESS = '#388E3C';
 const SUCCESS_BG = '#E8F5E9';
-const INPUT_BG = '#F0F0F0';
-const WARNING_BG = '#FFF8E1';
+const _INPUT_BG = '#F0F0F0';
+const _WARNING_BG = '#FFF8E1';
 const WARNING = '#F57C00';
 
 const STORAGE_KEY_SAFETY = '@iraq-maps/account/safety-settings';

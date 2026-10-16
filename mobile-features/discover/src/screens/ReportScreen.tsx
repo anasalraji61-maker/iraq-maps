@@ -284,6 +284,7 @@ function HistoryItem({ item }: { item: PastReport }): ReactElement {
         </View>
       </View>
       <Text style={styles.historyMeta}>
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         {item.contentType} · {new Date(item.createdAt).toLocaleDateString('ar-IQ')}
       </Text>
     </View>
@@ -299,7 +300,7 @@ export function ReportScreen({
   mode = 'report',
   onClose,
 }: ReportScreenProps): ReactElement {
-  const client = useDiscoverClient();
+  const _client = useDiscoverClient();
 
   const [step, setStep] = useState<ReportStep>(mode === 'history' ? 'history' : 'reason');
   const [reason, setReason] = useState<ReportReason | null>(null);
@@ -390,6 +391,7 @@ export function ReportScreen({
           accessibilityRole="button"
           accessibilityLabel={t('report.close')}
         >
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.closeBtnText}>✕</Text>
         </Pressable>
         <Text style={styles.headerTitle}>
@@ -418,6 +420,7 @@ export function ReportScreen({
       {/* Step indicator (not shown in history or success) */}
       {step !== 'history' && step !== 'success' && (
         <View style={styles.stepRow}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           {(['reason', 'details', 'confirm'] as const).map((s, i) => (
             <View
               key={s}

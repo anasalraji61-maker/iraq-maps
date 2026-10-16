@@ -12,14 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@iraq-maps/config": "workspace:*",
     "@iraq-maps/observability": "workspace:*",
-    "bullmq": "^5.56.0",
-    "ioredis": "^5.6.1",
-    "zod": "3.25.76"
+    "bullmq": "^5.56.0"
   },
   "devDependencies": {
-    "@iraq-maps/testing": "workspace:*",
     "vitest": "^3.2.4"
   }
 }

@@ -30,3 +30,5 @@ export class SearchModule {
     };
   }
 }
+
+export const searchMigrationsDir = new URL('../migrations', import.meta.url).pathname;

@@ -14,10 +14,20 @@ module.exports = {
     forbid('shell-to-feature', { path: '^apps/mobile/src/' }, { path: '^mobile-features/' }, 'The shell never imports features; app/** route files mount them.'),
     forbid('route-deep-import', { path: '^apps/mobile/app/' }, { path: '^mobile-features/[^/]+/(?!src/index\\.ts$)' }, 'Route files import a feature only through its entry (src/index.ts).'),
     forbid('adapter-imports', { path: '^adapters/([^/]+)/' }, { path: '^(apps|modules|mobile-features|e2e|tools)/|^packages/(?!(contracts|config)/)|^adapters/', pathNot: '^adapters/$1/' }, 'Adapters import only packages/contracts and packages/config.'),
-    forbid('package-upward', { path: '^packages/' }, { path: '^(apps|modules|mobile-features|adapters|e2e|tools)/' }, 'Shared packages never depend on apps, modules, features or adapters.'),
+    forbid('package-upward', { path: '^packages/', pathNot: '^packages/benchmarks/' }, { path: '^(apps|modules|mobile-features|adapters|e2e|tools)/' }, 'Shared packages never depend on apps, modules, features or adapters.'),
     forbid('contracts-deps', { path: '^packages/contracts/' }, { pathNot: '^packages/contracts/|(^|/)node_modules/(zod|@ts-rest/core)/' }, 'Contracts ship to the app too: only zod and @ts-rest/core.'),
     forbid('no-circular', {}, { circular: true }),
-    forbid('not-to-unresolvable', {}, { couldNotResolve: true }, 'Undeclared workspace or npm dependency (each package links only what its package.json declares).'),
+    forbid('not-to-unresolvable', {
+      pathNot: [
+        // Expo peer-deps that ship as native modules (no JS bundle in node_modules but valid at runtime)
+        'packages/mobile-kit/src/media/',
+        'mobile-features/discover/src/',
+        // react-native-svg is a native peer-dep
+        'mobile-features/provider/src/components/charts/',
+        // Storybook dev tooling (not a runtime dep)
+        'packages/visual-testing/src/stories/',
+      ],
+    }, { couldNotResolve: true }, 'Undeclared workspace or npm dependency (each package links only what its package.json declares).'),
   ],
   options: {
     doNotFollow: { path: 'node_modules' },

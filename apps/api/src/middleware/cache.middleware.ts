@@ -61,7 +61,7 @@ function resolveTtl(req: FastifyRequest, opts: CacheOptions): number {
 
 function shouldSkip(req: FastifyRequest, opts: CacheOptions): boolean {
   if (req.method.toUpperCase() !== 'GET') return true;
-  const route = req.routeOptions?.url ?? req.url.split('?')[0];
+  const route = req.routeOptions?.url ?? req.url.split('?')[0] ?? req.url;
   if (opts.skipRoutes?.some((r) => route.startsWith(r))) return true;
   if (!opts.cacheAuthenticated && isAuthenticated(req)) return true;
   return false;
@@ -88,6 +88,7 @@ export class ResponseCache {
     onRequest: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
     onSend: (req: FastifyRequest, reply: FastifyReply, payload: string) => Promise<string>;
   } {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const cache = this;
 
     return {
@@ -95,29 +96,29 @@ export class ResponseCache {
         if (shouldSkip(req, cache.opts)) return;
 
         const key = buildCacheKey(cache.prefix, req);
-        let cached: string | null = null;
+        let cachedRaw: string | null;
         try {
-          cached = await cache.opts.redis.get(key);
+          cachedRaw = await cache.opts.redis.get(key);
         } catch {
           // Redis unavailable — serve uncached
           return;
         }
 
-        if (cached === null) return;
+        if (cachedRaw === null) return;
 
-        let parsed: { status: number; body: string; contentType: string } | null = null;
+        let parsedEntry: { status: number; body: string; contentType: string } | null;
         try {
-          parsed = JSON.parse(cached) as { status: number; body: string; contentType: string };
+          parsedEntry = JSON.parse(cachedRaw) as { status: number; body: string; contentType: string };
         } catch {
           // Corrupted cache entry — ignore
           return;
         }
 
         void reply
-          .status(parsed.status)
-          .header('content-type', parsed.contentType)
+          .status(parsedEntry.status)
+          .header('content-type', parsedEntry.contentType)
           .header('X-Cache', 'HIT')
-          .send(parsed.body);
+          .send(parsedEntry.body);
       },
 
       async onSend(req, _reply, payload) {

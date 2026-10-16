@@ -255,7 +255,11 @@
     "progressLabel": "{pct}٪ — {size}",
     "completeLabel": "تەواو بوو — {size}",
     "failedLabel": "داگرتن سەرنەکەوت",
-    "offlineBadge": "بێ ئینتەرنێت"
+    "offlineBadge": "بێ ئینتەرنێت",
+    "footerHint": "تووش بکە بۆ بینینی وردەکارییەکان",
+    "storageUsed": "کارپێکراوی مێموری",
+    "expiringBadge": "بەزووی بەسەرچووە",
+    "estimatedSize": "قەبارەی تاقمی"
   },
   "mapStyle": {
     "label": "شێوازی خەریتە",
@@ -394,5 +398,14 @@
   },
   "cluster": {
     "label": "{count} شوێن"
+  },
+  "offlineIndicator": {
+    "reconnectedA11y": "پەیوەندی کراوە",
+    "offlineA11y": "ئۆفلاین",
+    "reconnected": "پەیوەندی دووبارە کرایەوە",
+    "syncing": "هاوکاری دەکرێت...",
+    "pendingBadge": "{count} چاوەڕوانە",
+    "offline": "ئۆفلاین",
+    "cachedWarning": "داتاکانی کاشێ پیشان دەدرێت"
   }
 }

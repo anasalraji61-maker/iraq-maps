@@ -79,7 +79,8 @@
     "blockConfirmTitle": "حظر هذا المستخدم؟",
     "blockConfirmMsg": "لن تظهر منشوراته في تغذيتك بعد الآن.",
     "blockConfirmOk": "حظر",
-    "blockSuccess": "تم الحظر"
+    "blockSuccess": "تم الحظر",
+    "commentA11y": "تعليق"
   },
   "create": {
     "title": "منشور جديد",
@@ -297,7 +298,8 @@
     "shareTitle": "مشاركة القصة",
     "viewers": "من شاهد",
     "viewersTitle": "المشاهدون",
-    "viewersEmpty": "لم يشاهد أحد هذه القصة بعد"
+    "viewersEmpty": "لم يشاهد أحد هذه القصة بعد",
+    "optionsTitle": "الخيارات"
   },
   "events": {
     "title": "الفعاليات",

@@ -33,7 +33,8 @@
     "routeToA11y": "ابدأ الطريق إلى {name}",
     "startRoute": "ابدأ",
     "ratePlace": "قيّم {name}",
-    "rateStars": "{count} نجوم"
+    "rateStars": "{count} نجوم",
+    "thinking": "جارٍ التفكير..."
   },
   "tripPlanner": {
     "title": "مخطط الرحلات",

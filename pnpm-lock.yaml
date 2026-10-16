@@ -173,12 +173,18 @@ importers:
       '@iraq-maps/messaging':
         specifier: workspace:*
         version: link:../../modules/messaging
+      '@iraq-maps/moderation':
+        specifier: workspace:*
+        version: link:../../modules/moderation
       '@iraq-maps/notifications':
         specifier: workspace:*
         version: link:../../modules/notifications
       '@iraq-maps/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@iraq-maps/payments':
+        specifier: workspace:*
+        version: link:../../modules/payments
       '@iraq-maps/places':
         specifier: workspace:*
         version: link:../../modules/places
@@ -188,6 +194,12 @@ importers:
       '@iraq-maps/routing':
         specifier: workspace:*
         version: link:../../modules/routing
+      '@iraq-maps/search':
+        specifier: workspace:*
+        version: link:../../modules/search
+      '@iraq-maps/social':
+        specifier: workspace:*
+        version: link:../../modules/social
       '@iraq-maps/tour3d':
         specifier: workspace:*
         version: link:../../modules/tour3d
@@ -1125,6 +1137,25 @@ importers:
       zod:
         specifier: 3.25.76
         version: 3.25.76
+    devDependencies:
+      '@nestjs/core':
+        specifier: ^11.2.7
+        version: 11.2.7(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
+
+  modules/moderation:
+    dependencies:
+      '@iraq-maps/db-kit':
+        specifier: workspace:*
+        version: link:../../packages/db-kit
+      '@nestjs/common':
+        specifier: ^11.2.7
+        version: 11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@types/pg@8.23.1)(pg@8.23.1)
+      ioredis:
+        specifier: ^5.11.1
+        version: 5.11.1
     devDependencies:
       '@nestjs/core':
         specifier: ^11.2.7
@@ -12805,11 +12836,11 @@ snapshots:
 
   expo-image-loader@5.1.0(expo@57.0.27):
     dependencies:
-      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@57.0.25)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@4.0.22)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
 
   expo-image-picker@16.1.4(expo@57.0.27):
     dependencies:
-      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@57.0.25)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      expo: 57.0.27(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@4.0.22)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@react-native/jest-preset@0.86.3(@babel/core@7.29.7)(react@19.2.3))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-image-loader: 5.1.0(expo@57.0.27)
 
   expo-keep-awake@57.0.2(expo@57.0.27)(react@19.0.9):

@@ -272,5 +272,3 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 });
-
-export default AccessibleButton;

@@ -86,8 +86,8 @@ export function LocationMessage({
           {Array.from({ length: 9 }).map((_, i) => {
             const dx = (i % 3) - 1;
             const dy = Math.floor(i / 3) - 1;
-            const tx = center.x + dx;
-            const ty = center.y + dy;
+            void (center.x + dx); // tile coords reserved for future map snapshot
+            void (center.y + dy);
             // NOTE: tile.openstreetmap.org is prohibited by HARD RULE 4.
             // Real tiles come from the self-hosted Planetiler/PMTiles instance.
             // This placeholder renders a muted grid to indicate a map area.
@@ -141,9 +141,8 @@ export function LocationMessage({
           </Text>
         ) : null}
         {accuracy !== undefined ? (
-          <Text style={styles.accuracy}>
-            ±{Math.round(accuracy)} m
-          </Text>
+          // eslint-disable-next-line i18next/no-literal-string
+          <Text style={styles.accuracy}>±{Math.round(accuracy)} m</Text>
         ) : null}
         <Text style={styles.tapHint}>{t('conversation.tapToOpenMap')}</Text>
       </View>

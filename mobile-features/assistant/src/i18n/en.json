@@ -33,7 +33,8 @@
     "routeToA11y": "Start route to {name}",
     "startRoute": "Go",
     "ratePlace": "Rate {name}",
-    "rateStars": "{count} stars"
+    "rateStars": "{count} stars",
+    "thinking": "Thinking..."
   },
   "tripPlanner": {
     "title": "Trip Planner",

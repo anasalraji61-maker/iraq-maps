@@ -79,7 +79,8 @@
     "blockConfirmTitle": "Block this user?",
     "blockConfirmMsg": "Their posts will no longer appear in your feed.",
     "blockConfirmOk": "Block",
-    "blockSuccess": "User blocked"
+    "blockSuccess": "User blocked",
+    "commentA11y": "Comment"
   },
   "create": {
     "title": "New Post",
@@ -297,7 +298,8 @@
     "shareTitle": "Share story",
     "viewers": "Viewers",
     "viewersTitle": "Story viewers",
-    "viewersEmpty": "No one has viewed this story yet"
+    "viewersEmpty": "No one has viewed this story yet",
+    "optionsTitle": "Options"
   },
   "events": {
     "title": "Events",

@@ -8,7 +8,14 @@ import { fileURLToPath } from 'node:url';
 import picomatch from 'picomatch';
 
 const isChecked = picomatch(['**/*.{ts,tsx,js,cjs,mjs,py,sql,yml,yaml,json,java,sh,toml,xml,gradle,kts,properties}', '**/.env.example'], { dot: true });
-const isExempt = picomatch(['**/i18n/*.json', '**/locales/*.json'], { dot: true });
+const isExempt = picomatch([
+  '**/i18n/*.json',
+  '**/locales/*.json',
+  // Test fixtures that intentionally embed bidi control characters as test data
+  'mobile-features/provider/src/phone.test.ts',
+  'mobile-features/provider/src/__tests__/phone.test.ts',
+  'mobile-features/account/src/phone.test.ts',
+], { dot: true });
 
 export const checkedPath = (path: string) => isChecked(path) && !isExempt(path);
 

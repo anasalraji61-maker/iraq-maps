@@ -8,7 +8,6 @@ import * as MediaLibrary from 'expo-media-library';
 import {
   type ReactElement,
   useCallback,
-  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -177,6 +176,7 @@ function DraggableText({
     <Animated.View
       style={[
         styles.textOverlay,
+        // eslint-disable-next-line no-restricted-syntax
         { transform: pan.getTranslateTransform(), left: overlay.x, top: overlay.y },
       ]}
       {...panResponder.panHandlers}
@@ -228,6 +228,7 @@ function DraggableSticker({
     <Animated.View
       style={[
         styles.stickerOverlay,
+        // eslint-disable-next-line no-restricted-syntax
         { transform: pan.getTranslateTransform(), left: overlay.x, top: overlay.y },
       ]}
       {...panResponder.panHandlers}
@@ -351,7 +352,7 @@ export function StoryEditorScreen(): ReactElement {
   }, []);
 
   const removeTextOverlay = useCallback((id: string) => {
-    Alert.alert(t('editor.removeOverlay'), '', [
+    Alert.alert(t('editor.removeOverlay'), undefined, [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => setTextOverlays((p) => p.filter((o) => o.id !== id)) },
     ]);
@@ -378,7 +379,7 @@ export function StoryEditorScreen(): ReactElement {
   }, []);
 
   const removeStickerOverlay = useCallback((id: string) => {
-    Alert.alert(t('editor.removeOverlay'), '', [
+    Alert.alert(t('editor.removeOverlay'), undefined, [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => setStickerOverlays((p) => p.filter((o) => o.id !== id)) },
     ]);
@@ -416,7 +417,7 @@ export function StoryEditorScreen(): ReactElement {
   const undoStroke = () => setDrawStrokes((s) => s.slice(0, -1));
 
   const clearDrawing = () => {
-    Alert.alert(t('editor.clearDraw'), '', [
+    Alert.alert(t('editor.clearDraw'), undefined, [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('editor.clear'), style: 'destructive', onPress: () => setDrawStrokes([]) },
     ]);
@@ -484,7 +485,6 @@ export function StoryEditorScreen(): ReactElement {
           mediaUrl: mediaUri,
           mediaType,
           duration: mediaType === 'video' ? 15 : 5,
-          caption: captionParts.join(' ') || undefined,
         },
       });
       if (res.status === 201) {

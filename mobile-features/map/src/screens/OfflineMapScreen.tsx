@@ -14,7 +14,6 @@
 
 import { Button, IconButton, Screen, Text, tokens } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import * as FileSystem from 'expo-file-system/legacy';
 import {
   useCallback,
   useEffect,

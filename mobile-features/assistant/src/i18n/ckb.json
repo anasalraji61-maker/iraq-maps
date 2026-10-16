@@ -33,7 +33,8 @@
     "routeToA11y": "ڕێگا بۆ {name} دەست پێ بکە",
     "startRoute": "بڕۆ",
     "ratePlace": "{name} هەڵسەنگاندن",
-    "rateStars": "{count} ئەستێرە"
+    "rateStars": "{count} ئەستێرە",
+    "thinking": "بیرکردنەوە..."
   },
   "tripPlanner": {
     "title": "پلانکەری گەشت",

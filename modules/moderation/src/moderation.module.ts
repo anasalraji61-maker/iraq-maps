@@ -27,3 +27,5 @@ export function moderationModule(opts: ModerationModuleOptions): DynamicModule {
     exports: [ModerationService],
   };
 }
+
+export const moderationMigrationsDir = new URL('../migrations', import.meta.url).pathname;

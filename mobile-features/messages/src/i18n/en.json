@@ -130,6 +130,32 @@
     "addMemberError": "Failed to add member",
     "alreadyMember": "User is already a member",
     "notAdmin": "Admin role required to add members",
-    "messagesEmpty": "No messages yet. Be the first to write!"
+    "messagesEmpty": "No messages yet. Be the first to write!",
+    "adminBadge": "Admin",
+    "makeAdmin": "Make admin",
+    "removeMember": "Remove"
+  },
+  "conversation": {
+    "copy": "Copy",
+    "deleteForEveryone": "Delete for everyone",
+    "deleteForMe": "Delete for me",
+    "deletedForEveryone": "This message was deleted",
+    "forward": "Forward",
+    "forwarded": "Forwarded",
+    "leaveGroup": "Leave group",
+    "location": "Location",
+    "messageBusiness": "Message this business",
+    "messageBusinessSub": "Start a conversation",
+    "messageOptions": "Message options",
+    "online": "Online",
+    "pause": "Pause",
+    "play": "Play",
+    "recent": "Recent",
+    "reply": "Reply",
+    "replyingTo": "Replying to",
+    "suggested": "Suggested",
+    "tapToOpenMap": "Tap to open map",
+    "unknown": "Unknown",
+    "you": "You"
   }
 }

@@ -1,6 +1,14 @@
-import type { Logger } from './index';
-
 // ── Types ──────────────────────────────────────────────────────────────────
+
+/** Minimal logger interface (mirrors observability Logger; avoid circular import). */
+type LogFn = (objOrMsg: Record<string, unknown> | string, msg?: string) => void;
+interface Logger {
+  debug: LogFn;
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+  child(bindings: Record<string, unknown>): Logger;
+}
 
 export type AlertSeverity = 'info' | 'warning' | 'critical';
 

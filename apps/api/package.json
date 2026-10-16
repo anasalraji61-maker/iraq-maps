@@ -35,6 +35,7 @@
     "@iraq-maps/routing": "workspace:*",
     "@iraq-maps/job-kit": "workspace:*",
     "bullmq": "^5.56.0",
+    "ioredis": "^5.6.1",
     "drizzle-orm": "^0.45.4",
     "@nestjs/common": "^11.2.7",
     "@nestjs/core": "^11.2.7",
@@ -45,7 +46,11 @@
     "fastify": "^5.11.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "@iraq-maps/moderation": "workspace:*",
+    "@iraq-maps/payments": "workspace:*",
+    "@iraq-maps/social": "workspace:*",
+    "@iraq-maps/search": "workspace:*"
   },
   "devDependencies": {
     "@iraq-maps/testing": "workspace:*",

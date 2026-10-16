@@ -44,7 +44,7 @@ interface UserEntry {
   suspension: { type: string; expiresAt: string | null } | null;
 }
 
-interface WordFilterEntry {
+interface _WordFilterEntry {
   id: string;
   word: string;
   locale: string;

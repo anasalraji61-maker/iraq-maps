@@ -130,6 +130,32 @@
     "addMemberError": "فشل إضافة العضو",
     "alreadyMember": "هذا المستخدم عضو بالفعل",
     "notAdmin": "يجب أن تكون مشرفاً لإضافة أعضاء",
-    "messagesEmpty": "لا توجد رسائل بعد. كن أول من يكتب!"
+    "messagesEmpty": "لا توجد رسائل بعد. كن أول من يكتب!",
+    "adminBadge": "مشرف",
+    "makeAdmin": "جعل مشرفاً",
+    "removeMember": "إزالة"
+  },
+  "conversation": {
+    "copy": "نسخ",
+    "deleteForEveryone": "حذف للجميع",
+    "deleteForMe": "حذف لي",
+    "deletedForEveryone": "تم حذف هذه الرسالة",
+    "forward": "إعادة توجيه",
+    "forwarded": "تمت إعادة التوجيه",
+    "leaveGroup": "مغادرة المجموعة",
+    "location": "الموقع",
+    "messageBusiness": "مراسلة هذا النشاط التجاري",
+    "messageBusinessSub": "ابدأ محادثة",
+    "messageOptions": "خيارات الرسالة",
+    "online": "متصل",
+    "pause": "إيقاف مؤقت",
+    "play": "تشغيل",
+    "recent": "حديث",
+    "reply": "رد",
+    "replyingTo": "ردًّا على",
+    "suggested": "مقترح",
+    "tapToOpenMap": "اضغط لفتح الخريطة",
+    "unknown": "غير معروف",
+    "you": "أنت"
   }
 }

@@ -1,5 +1,6 @@
 import { useRef, useEffect, type ReactElement } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
+import { t } from '../strings';
 
 const DOT_SIZE = 8;
 const BUBBLE_BG = '#F5F5F5';
@@ -62,7 +63,7 @@ export function AssistantTyping(): ReactElement {
   }, [dot1, dot2, dot3]);
 
   return (
-    <View style={styles.row} accessibilityLabel="جارٍ التفكير..." accessibilityLiveRegion="polite">
+    <View style={styles.row} accessibilityLabel={t('chat.thinking')} accessibilityLiveRegion="polite">
       <View style={styles.avatarPlaceholder} />
       <View style={styles.bubble}>
         <Dot anim={dot1} />

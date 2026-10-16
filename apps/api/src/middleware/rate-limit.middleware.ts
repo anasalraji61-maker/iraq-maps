@@ -96,7 +96,7 @@ function resolveConfig(route: string, opts: RateLimiterOptions): RateLimitConfig
 function isWhitelisted(req: FastifyRequest, opts: RateLimiterOptions): boolean {
   const ip = req.ip;
   if (opts.whitelistIps?.includes(ip)) return true;
-  const route = req.routeOptions?.url ?? req.url.split('?')[0];
+  const route = req.routeOptions?.url ?? req.url.split('?')[0] ?? req.url;
   if (opts.whitelistRoutes?.some((prefix) => route.startsWith(prefix))) return true;
   return false;
 }

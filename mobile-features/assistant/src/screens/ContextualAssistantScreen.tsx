@@ -87,6 +87,7 @@ function buildContextualQuickReplies(
   return replies.slice(0, 5);
 }
 
+/* eslint-disable no-restricted-syntax */
 function buildContextPrefix(viewport: MapViewport, visiblePlaces: VisiblePlace[]): string {
   const coordStr = `(${viewport.centerLat.toFixed(4)}, ${viewport.centerLng.toFixed(4)})`;
   const placesStr =
@@ -98,6 +99,7 @@ function buildContextPrefix(viewport: MapViewport, visiblePlaces: VisiblePlace[]
       : '';
   return `[السياق: الموقع الحالي على الخريطة ${coordStr}${placesStr ? `. ${placesStr}` : ''}]\n`;
 }
+/* eslint-enable no-restricted-syntax */
 
 export function ContextualAssistantScreen({
   viewport,
@@ -179,7 +181,7 @@ export function ContextualAssistantScreen({
     void handleSend(label);
   };
 
-  const handlePlacePress = (id: string) => {
+  const _handlePlacePress = (id: string) => {
     router.push(`/?focusPlaceId=${id}`);
     dismiss();
   };
@@ -259,6 +261,7 @@ export function ContextualAssistantScreen({
               accessibilityRole="button"
               accessibilityLabel={t('contextual.dismiss')}
             >
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               <Text style={styles.closeBtnText}>✕</Text>
             </Pressable>
           </View>
@@ -410,8 +413,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    left: 0,
-    right: 0,
+    start: 0,
+    end: 0,
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
   panel: {

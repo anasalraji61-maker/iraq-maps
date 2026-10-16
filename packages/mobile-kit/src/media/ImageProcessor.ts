@@ -90,7 +90,18 @@ function formatFromExt(uri: string): ImageManipulator.SaveFormat {
 
 // ─── ImageProcessor ───────────────────────────────────────────────────────────
 
-export const ImageProcessor = {
+interface ImageProcessorType {
+  resize(uri: string, options: ResizeOptions): Promise<ProcessedImage>;
+  compress(uri: string, options: CompressOptions): Promise<ProcessedImage>;
+  crop(uri: string, region: CropRegion): Promise<ProcessedImage>;
+  applyFilter(uri: string, filterType: FilterType): Promise<ProcessedImage>;
+  generateThumbnail(uri: string, size?: number, quality?: number): Promise<ProcessedImage>;
+  prepareForStory(uri: string): Promise<ProcessedImage>;
+  prepareForPost(uri: string): Promise<ProcessedImage>;
+  prepareBatch(uris: string[], prepFn?: (uri: string) => Promise<ProcessedImage>, concurrency?: number): Promise<ProcessedImage[]>;
+}
+
+export const ImageProcessor: ImageProcessorType = {
   /**
    * Resize an image so it fits within maxWidth × maxHeight,
    * preserving aspect ratio.

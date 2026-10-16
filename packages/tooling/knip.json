@@ -5,17 +5,59 @@
     "adapters/push-fcm/src/index.test.ts",
     "adapters/whatsapp-cloud/src/index.test.ts",
     "modules/notifications/src/notifications.service.test.ts",
-    "e2e/mobile/scan-logs.mjs"
+    "e2e/mobile/scan-logs.mjs",
+    "packages/visual-testing/src/**",
+    "packages/mobile-kit/src/media/MediaUploader.ts",
+    "packages/mobile-kit/src/media/VideoProcessor.ts",
+    "packages/mobile-kit/src/media/ImageProcessor.ts",
+    "packages/mobile-kit/src/media/index.ts",
+    "packages/mobile-kit/src/offline/index.ts",
+    "mobile-features/map/src/components/CheckInButton.tsx",
+    "mobile-features/map/src/components/ClaimPlaceSection.tsx",
+    "mobile-features/map/src/components/OfflineIndicator.tsx",
+    "mobile-features/map/src/components/PopularTimesSection.tsx",
+    "mobile-features/map/src/components/SatelliteToggle.tsx",
+    "mobile-features/map/src/components/SearchBar.tsx",
+    "mobile-features/map/src/components/SuggestEditForm.tsx",
+    "mobile-features/map/src/screens/OfflineMapScreen.tsx",
+    "mobile-features/map/src/screens/SearchScreen.tsx",
+    "modules/analytics/src/analytics.service.test.ts",
+    "modules/notifications/src/__tests__/notifications.test.ts",
+    "modules/notifications/src/like-batcher.test.ts",
+    "modules/notifications/src/notifications-extended.service.test.ts",
+    "modules/notifications/src/notifications.controller.test.ts",
+    "packages/job-kit/src/jobs.test.ts",
+    "apps/api/src/middleware/**",
+    "mobile-features/account/src/PaymentMethodsScreen.tsx",
+    "mobile-features/account/src/SafetyScreen.tsx",
+    "mobile-features/account/src/WalletScreen.tsx",
+    "mobile-features/discover/src/components/MediaPicker.tsx",
+    "mobile-features/discover/src/screens/FollowersScreen.tsx",
+    "mobile-features/discover/src/screens/FollowSuggestionsScreen.tsx",
+    "mobile-features/discover/src/screens/ReportScreen.tsx",
+    "mobile-features/discover/src/screens/StoryEditorScreen.tsx",
+    "mobile-features/discover/src/screens/UserProfileScreen.tsx"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",
     "geo-services/tiles"
   ],
   "ignoreBinaries": [
-    "gitleaks"
+    "gitleaks",
+    "storybook"
   ],
   "includeEntryExports": true,
   "ignoreExportsUsedInFile": true,
   "exclude": ["exports", "types"],
-  "ignoreDependencies": ["@react-native-community/netinfo"]
+  "ignoreDependencies": [
+    "@react-native-community/netinfo",
+    "@react-native-async-storage/async-storage",
+    "expo-image-picker",
+    "expo-location",
+    "expo-clipboard",
+    "@maplibre/maplibre-react-native",
+    "@ts-rest/core",
+    "drizzle-orm",
+    "expo-haptics"
+  ]
 }

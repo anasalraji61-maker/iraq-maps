@@ -24,3 +24,5 @@ export function paymentsModule(opts: PaymentsModuleOptions): DynamicModule {
     exports: [PaymentsService],
   };
 }
+
+export const paymentsMigrationsDir = new URL('../migrations', import.meta.url).pathname;

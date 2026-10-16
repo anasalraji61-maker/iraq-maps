@@ -43,3 +43,5 @@ export function socialModule(opts: SocialModuleOptions): DynamicModule {
     exports: [SocialGraphService],
   };
 }
+
+export const socialMigrationsDir = new URL('../migrations', import.meta.url).pathname;

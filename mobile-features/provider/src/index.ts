@@ -4,6 +4,8 @@ export { ProviderDashboardScreen } from './screens/ProviderDashboardScreen';
 export { ProviderInboxDetailScreen } from './screens/ProviderInboxDetailScreen';
 export { ProviderInboxScreen } from './screens/ProviderInboxScreen';
 export { ProviderRegistrationScreen } from './screens/ProviderRegistrationScreen';
+export { ProviderVerificationScreen } from './screens/ProviderVerificationScreen';
+export { ProviderOnboardingScreen } from './screens/ProviderOnboardingScreen';
 export { ProviderConsentScreen } from './screens/ProviderConsentScreen';
 export { ProviderCreatePostScreen } from './screens/ProviderCreatePostScreen';
 export { ProviderPhotoGalleryScreen } from './screens/ProviderPhotoGalleryScreen';

@@ -167,7 +167,8 @@ export function VoiceNotePlayer({
         onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={playState === 'playing' ? t('conversation.pause') : t('conversation.play')}
-        hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+        // eslint-disable-next-line no-restricted-syntax
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
         <Text style={[styles.playIcon, { color: accentColor }]}>{playIcon}</Text>
       </TouchableOpacity>
@@ -264,6 +265,6 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: 11,
     minWidth: 34,
-    textAlign: 'right',
+    textAlign: 'auto',
   },
 });
