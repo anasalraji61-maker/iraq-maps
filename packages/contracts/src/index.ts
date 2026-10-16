@@ -33,3 +33,5 @@ export * from './business-analytics';
 export * from './stories';
 export * from './discovery'; // M-discovery
 export * from './safety'; // safety incidents, trusted contacts, emergency
+export * from './checkins'; // check-in gamification, badges, streaks
+export * from './crowding'; // heatmap, per-place history, user reports
