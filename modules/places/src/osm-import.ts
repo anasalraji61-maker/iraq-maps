@@ -18,7 +18,7 @@
 import { sql } from 'drizzle-orm';
 import type { Db } from '@iraq-maps/db-kit';
 import { normalizeArabic } from '@iraq-maps/i18n';
-import { OSM_ATTRIBUTION, type PlaceDetails, type PlaceSummary } from '@iraq-maps/contracts';
+import { OSM_ATTRIBUTION, type PlaceDetails } from '@iraq-maps/contracts';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -339,7 +339,6 @@ export async function getOSMPlace(db: Db, osmId: string): Promise<PlaceDetails |
     category: row.category as PlaceDetails['category'],
     area: row.area as PlaceDetails['area'],
     location: [row.lng, row.lat],
-    distanceM: null,
     hoursRaw: row.opening_hours,
     osmContacts: {
       phone: row.phone ?? undefined,
@@ -395,7 +394,7 @@ export async function updateFromOSM(
 
   if (rows.length === 0) return { updated: false, reason: 'not found' };
 
-  const existing = rows[0];
+  const existing = rows[0]!;
 
   // Build partial update
   const setClauses: ReturnType<typeof sql>[] = [];

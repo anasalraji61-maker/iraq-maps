@@ -231,7 +231,6 @@ export function useAccessibilityLayer(
       setSettings({ ...persisted, ...initialOverrides });
       setLoaded(true);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateSettings = useCallback(

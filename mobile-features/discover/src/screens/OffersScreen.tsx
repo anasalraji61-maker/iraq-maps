@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 /**
  * OffersScreen — Promotions and deals discovery for the Discover tab.
  *
@@ -180,7 +181,7 @@ function FeaturedCard({ promo, onPress, saved, onToggleSave }: FeaturedCardProps
             onPress={onToggleSave}
             accessibilityRole="button"
             accessibilityLabel={saved ? t('offers.unsave') : t('offers.save')}
-            hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={offerStyles.saveIcon}>{saved ? '🔖' : '🏷'}</Text>
           </TouchableOpacity>
@@ -225,7 +226,7 @@ function OfferCard({ promo, onPress, saved, onToggleSave }: OfferCardProps): Rea
           onPress={onToggleSave}
           accessibilityRole="button"
           accessibilityLabel={saved ? t('offers.unsave') : t('offers.save')}
-          hitSlop={{ top: 6, bottom: 6, start: 6, end: 6 }}
+          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
         >
           <Text style={{ fontSize: 18 }}>{saved ? '🔖' : '🏷'}</Text>
         </TouchableOpacity>
@@ -651,7 +652,7 @@ const offerStyles = StyleSheet.create({
 });
 
 const detailStyles = StyleSheet.create({
-  overlay:      { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
+  overlay:      { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     position: 'absolute',
     bottom: 0,

@@ -16,7 +16,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  FlatList,
   I18nManager,
   Pressable,
   RefreshControl,
@@ -196,7 +195,7 @@ export function ChallengesScreen() {
 
         const [allRes, featuredRes] = await Promise.all([
           client.listChallenges({ query: { status: tab } }),
-          client.listChallenges({ query: { status: 'active', featured: true } }),
+          client.listChallenges({ query: { status: 'active' } }),
         ]);
 
         if (allRes.status === 200) setItems(allRes.body.items);

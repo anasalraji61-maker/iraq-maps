@@ -12,7 +12,6 @@
 import { tokens } from '@iraq-maps/ui';
 import { useOffline } from '@iraq-maps/mobile-kit';
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -141,7 +140,7 @@ export function OfflineBanner({
   if (isOnline && !isStale) return null;
 
   const bannerColor = isOnline && isStale
-    ? tokens.color.warning ?? '#f59e0b'
+    ? '#f59e0b'
     : tokens.color.danger;
 
   return (
@@ -183,6 +182,7 @@ export function OfflineBanner({
             </Pressable>
           )}
 
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={styles.chevron}>{expanded ? '▲' : '▼'}</Text>
         </View>
 
@@ -208,9 +208,8 @@ export function OfflineBanner({
         <View style={styles.featureRow}>
           {FEATURE_WORKS.map((feature) => (
             <View key={feature} style={styles.featureChip}>
-              <Text style={styles.featureChipText}>
-                ✓ {t(FEATURE_LABELS[feature] as Parameters<typeof t>[0])}
-              </Text>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
+              <Text style={styles.featureChipText}>✓ {t(FEATURE_LABELS[feature] as Parameters<typeof t>[0])}</Text>
             </View>
           ))}
         </View>

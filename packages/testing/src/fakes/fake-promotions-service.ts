@@ -166,7 +166,7 @@ export class FakePromotionsService {
       throw Object.assign(new Error('Promotion has not started yet'), { code: 'NOT_STARTED' });
     }
     // Block paused, cancelled, and expired (set explicitly via expirePromotion).
-    if (promotion.status === 'paused' || promotion.status === 'cancelled' || promotion.status === 'expired') {
+    if (promotion.status === 'paused' || promotion.status === 'expired') {
       throw Object.assign(
         new Error(`Promotion is not active: ${promotion.status}`),
         { code: 'PROMOTION_NOT_ACTIVE' },

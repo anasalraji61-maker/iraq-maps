@@ -23,7 +23,6 @@ import { type Db } from '@iraq-maps/db-kit';
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -33,20 +32,15 @@ import {
   asc,
   desc,
   eq,
-  gt,
   isNotNull,
-  isNull,
   lt,
   sql,
 } from 'drizzle-orm';
-import { randomUUID } from 'node:crypto';
 import { challengeTable, userChallengeTable } from './schema';
-import type { z } from 'zod';
 
 // ─── Internal types ───────────────────────────────────────────────────────────
 
 type ChallengeRow = typeof challengeTable.$inferSelect;
-type UserChallengeRow = typeof userChallengeTable.$inferSelect;
 
 type ChallengeDto = {
   id: ChallengeV2Id;

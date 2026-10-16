@@ -12,7 +12,7 @@
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { tokens } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
-import { type ReactElement, useEffect, useMemo, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -155,7 +155,7 @@ export function ScoreBreakdownScreen({
       <View style={styles.center}>
         <RNText style={styles.errorText}>{error ?? t('errors.generic')}</RNText>
         <TouchableOpacity style={styles.retryBtn} onPress={() => router.back()}>
-          <RNText style={styles.retryText}>{t('common.back')}</RNText>
+          <RNText style={styles.retryText}>{t('actions.back')}</RNText>
         </TouchableOpacity>
       </View>
     );
@@ -348,7 +348,7 @@ function ComponentBar({ label, weight, score, color }: ComponentBarProps): React
     <View style={barStyles.row}>
       <View style={barStyles.labelRow}>
         <RNText style={barStyles.label}>{label}</RNText>
-        <View style={barStyles.right}>
+        <View style={barStyles.endGroup}>
           <RNText style={barStyles.weight}>{weight}</RNText>
           <RNText style={[barStyles.scoreNum, { color }]}>{Math.round(pct)}</RNText>
         </View>
@@ -376,7 +376,7 @@ const barStyles = StyleSheet.create({
     alignItems:     'center',
     marginBottom:   6,
   },
-  right: {
+  endGroup: {
     flexDirection: 'row',
     alignItems:    'center',
     gap:           8,
@@ -394,7 +394,7 @@ const barStyles = StyleSheet.create({
     fontSize:   15,
     fontWeight: '700',
     minWidth:   28,
-    textAlign:  'end',
+    textAlign:  'auto',
   },
   track: {
     height:          8,
@@ -807,7 +807,7 @@ const howStyles = StyleSheet.create({
     fontSize:   14,
     fontWeight: '700',
     minWidth:   40,
-    textAlign:  'end',
+    textAlign:  'auto',
   },
   modLabel: {
     fontSize: 13,
@@ -914,5 +914,3 @@ const styles = StyleSheet.create({
   bottomSpacer: { height: 40 },
 });
 
-// ─── Named re-export for barrel ───────────────────────────────────────────────
-export default ScoreBreakdownScreen;

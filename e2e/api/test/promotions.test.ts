@@ -44,7 +44,7 @@ async function login(): Promise<Session> {
 }
 
 /** Create a provider profile; returns providerId or null */
-async function createProvider(session: Session): Promise<string | null> {
+async function _createProvider(session: Session): Promise<string | null> {
   const res = await call('POST', '/v1/providers', {
     token: session.accessToken,
     payload: {

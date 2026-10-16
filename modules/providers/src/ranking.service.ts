@@ -22,7 +22,7 @@
  */
 
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { and, eq, gte, lt, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { Logger } from '@iraq-maps/observability';
 import {
   providerTable,

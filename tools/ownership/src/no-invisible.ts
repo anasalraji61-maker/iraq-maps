@@ -15,6 +15,10 @@ const isExempt = picomatch([
   'mobile-features/provider/src/phone.test.ts',
   'mobile-features/provider/src/__tests__/phone.test.ts',
   'mobile-features/account/src/phone.test.ts',
+  // FSI/PDI bidi isolate characters for RTL address formatting
+  'modules/geocoding/src/address-format.ts',
+  // RTL test data
+  'packages/i18n/src/__tests__/rtl.test.ts',
 ], { dot: true });
 
 export const checkedPath = (path: string) => isChecked(path) && !isExempt(path);

@@ -85,7 +85,7 @@ export function isValidOsmId(id: string): boolean {
 // ---------------------------------------------------------------------------
 
 /** Whitespace characters stripped by our trimmer (mirrors the Python pipeline). */
-const WS_RE = /^[\s﻿]+|[\s﻿]+$/g;
+const WS_RE = /^[\s\uFEFF]+|[\s\uFEFF]+$/g;
 
 /** Trims and caps at 255 UTF-16 code units (mirrors zod max(255) + trim). */
 export function trimText(value: string | undefined | null): string | null {

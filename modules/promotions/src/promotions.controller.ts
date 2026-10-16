@@ -10,7 +10,7 @@ import {
   UpdatePromotionBody,
   promotionsContract,
 } from '@iraq-maps/contracts';
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import type { PromotionsService } from './promotions.service';
 
@@ -68,14 +68,14 @@ export class PromotionsController {
   }
 
   @TsRestHandler(promotionsContract.redeem)
-  async redeem() {
-    return tsRestHandler(promotionsContract.redeem, async ({ params, body, req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.userId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
+  async redeem(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.userId) {
+      return tsRestHandler(promotionsContract.redeem, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const userId = req.principal.userId;
+    return tsRestHandler(promotionsContract.redeem, async ({ params, body }) => {
       try {
-        const result = await this.svc.redeemPromotion(request.principal.userId, params.id, body.code);
+        const result = await this.svc.redeemPromotion(userId, params.id, body.code);
         return { status: 200 as const, body: { redemptionId: result.redemptionId as unknown as ReturnType<typeof PromotionId.parse>, message: result.message } };
       } catch (err: unknown) {
         const e = err as { code?: string; status?: number; message: string };
@@ -88,30 +88,30 @@ export class PromotionsController {
   // ── Provider-scoped ──────────────────────────────────────────────────────────
 
   @TsRestHandler(promotionsContract.listActive)
-  async listActive() {
-    return tsRestHandler(promotionsContract.listActive, async ({ req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.providerId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
-      const promotions = await this.svc.getProviderPromotions(request.principal.providerId);
+  async listActive(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.providerId) {
+      return tsRestHandler(promotionsContract.listActive, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const providerId = req.principal.providerId;
+    return tsRestHandler(promotionsContract.listActive, async () => {
+      const promotions = await this.svc.getProviderPromotions(providerId);
       return { status: 200 as const, body: promotions };
     });
   }
 
   @TsRestHandler(promotionsContract.create)
-  async create() {
-    return tsRestHandler(promotionsContract.create, async ({ body, req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.providerId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
+  async create(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.providerId) {
+      return tsRestHandler(promotionsContract.create, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const providerId = req.principal.providerId;
+    return tsRestHandler(promotionsContract.create, async ({ body }) => {
       const parsed = CreatePromotionBody.safeParse(body);
       if (!parsed.success) {
         return { status: 400 as const, body: problem(400, 'Invalid body') };
       }
       try {
-        const promo = await this.svc.createPromotion(request.principal.providerId, parsed.data);
+        const promo = await this.svc.createPromotion(providerId, parsed.data);
         return { status: 201 as const, body: promo };
       } catch (err: unknown) {
         const e = err as { code?: string; status?: number; message: string };
@@ -122,18 +122,18 @@ export class PromotionsController {
   }
 
   @TsRestHandler(promotionsContract.update)
-  async update() {
-    return tsRestHandler(promotionsContract.update, async ({ params, body, req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.providerId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
+  async update(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.providerId) {
+      return tsRestHandler(promotionsContract.update, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const providerId = req.principal.providerId;
+    return tsRestHandler(promotionsContract.update, async ({ params, body }) => {
       const parsed = UpdatePromotionBody.safeParse(body);
       if (!parsed.success) {
         return { status: 400 as const, body: problem(400, 'Invalid body') };
       }
       try {
-        const promo = await this.svc.updatePromotion(request.principal.providerId, params.id, parsed.data);
+        const promo = await this.svc.updatePromotion(providerId, params.id, parsed.data);
         return { status: 200 as const, body: promo };
       } catch (err: unknown) {
         const e = err as { code?: string; status?: number; message: string };
@@ -144,14 +144,14 @@ export class PromotionsController {
   }
 
   @TsRestHandler(promotionsContract.delete)
-  async deletePromo() {
-    return tsRestHandler(promotionsContract.delete, async ({ params, req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.providerId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
+  async deletePromo(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.providerId) {
+      return tsRestHandler(promotionsContract.delete, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const providerId = req.principal.providerId;
+    return tsRestHandler(promotionsContract.delete, async ({ params }) => {
       try {
-        await this.svc.deletePromotion(request.principal.providerId, params.id);
+        await this.svc.deletePromotion(providerId, params.id);
         return { status: 204 as const, body: undefined };
       } catch (err: unknown) {
         const e = err as { code?: string; status?: number; message: string };
@@ -162,14 +162,14 @@ export class PromotionsController {
   }
 
   @TsRestHandler(promotionsContract.stats)
-  async stats() {
-    return tsRestHandler(promotionsContract.stats, async ({ params, req }) => {
-      const request = req as AuthenticatedRequest;
-      if (!request.principal?.providerId) {
-        return { status: 401 as const, body: problem(401, 'Unauthenticated') };
-      }
+  async stats(@Req() req: AuthenticatedRequest) {
+    if (!req.principal?.providerId) {
+      return tsRestHandler(promotionsContract.stats, async () => ({ status: 401 as const, body: problem(401, 'Unauthenticated') }));
+    }
+    const providerId = req.principal.providerId;
+    return tsRestHandler(promotionsContract.stats, async ({ params }) => {
       try {
-        const statsResult = await this.svc.getRedemptionStats(params.id, request.principal.providerId);
+        const statsResult = await this.svc.getRedemptionStats(params.id, providerId);
         return { status: 200 as const, body: statsResult };
       } catch (err: unknown) {
         const e = err as { code?: string; status?: number; message: string };

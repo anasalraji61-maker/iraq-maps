@@ -1109,7 +1109,7 @@ export class DiscoverService {
 
     const rows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
       WITH words AS (
-        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        SELECT regexp_matches(body, '#([A-Za-z0-9_\u0600-\u06FF]+)', 'g') AS m
         FROM discover.post
         WHERE removed_at IS NULL
           AND created_at > NOW() - INTERVAL '24 hours'

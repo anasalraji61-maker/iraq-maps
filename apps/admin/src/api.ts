@@ -365,6 +365,10 @@ export const api = {
   async rejectSubmission(id: string): Promise<void> {
     await request<void>(`/v1/admin/challenges/submissions/${id}/reject`, { method: 'PUT', body: JSON.stringify({}) });
   },
+
+  async forceCompleteChallenge(challengeId: string, userId: string): Promise<void> {
+    await request<void>(`/v1/admin/challenges/${challengeId}/force-complete`, { method: 'POST', body: JSON.stringify({ userId }) });
+  },
 };
 
 // ─── Additional types ─────────────────────────────────────────────────────────

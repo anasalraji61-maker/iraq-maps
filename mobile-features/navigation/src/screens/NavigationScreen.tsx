@@ -125,7 +125,7 @@ interface SpeedCameraAlertProps {
   onDismiss: () => void;
 }
 
-function SpeedCameraAlertBanner({ alert, palette, onDismiss }: SpeedCameraAlertProps): ReactElement {
+function SpeedCameraAlertBanner({ alert, palette: _palette, onDismiss }: SpeedCameraAlertProps): ReactElement {
   const flashAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -594,7 +594,7 @@ export function NavigationScreen({
   onSearchAlong,
   speedCameraAlert: speedCameraAlertProp = null,
   policeCheckpointAlert: policeCheckpointAlertProp = null,
-  currentHeadingDeg,
+  currentHeadingDeg: _currentHeadingDeg,
   sunsetTime,
 }: NavigationScreenProps): ReactElement {
   const [showSavedRoutes, setShowSavedRoutes] = useState(false);

@@ -14,7 +14,7 @@
  *   - Share to Discover button
  */
 
-import { promotionsContract, type Promotion } from '@iraq-maps/contracts';
+import { providerPromotionsContract, type ProviderPromotion as Promotion } from '@iraq-maps/contracts';
 import { useApi, useApiBaseUrl } from '@iraq-maps/mobile-kit';
 import { Button, EmptyState, Screen } from '@iraq-maps/ui';
 import { initClient } from '@ts-rest/core';
@@ -65,7 +65,7 @@ const C = {
 function usePromotionsApi() {
   const baseUrl = useApiBaseUrl();
   useApi();
-  return useMemo(() => initClient(promotionsContract, { baseUrl, baseHeaders: {} }), [baseUrl]);
+  return useMemo(() => initClient(providerPromotionsContract, { baseUrl, baseHeaders: {} }), [baseUrl]);
 }
 
 // ── Tab type ──────────────────────────────────────────────────────────────────
@@ -172,6 +172,7 @@ function QrSheet({ visible, promo, onClose }: { visible: boolean; promo: Promoti
         <Text style={qrStyles.title}>{t('promotions.qrTitle')}</Text>
         <View style={qrStyles.qrBox}>
           {/* QR generation requires a native library; shown as a stub placeholder */}
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <Text style={qrStyles.qrIcon}>⬛⬛⬛{'\n'}⬛ ⬛{'\n'}⬛⬛⬛</Text>
           <Text style={qrStyles.qrStub}>{t('promotions.qrStub')}</Text>
         </View>
@@ -191,7 +192,7 @@ function QrSheet({ visible, promo, onClose }: { visible: boolean; promo: Promoti
 }
 
 const qrStyles = StyleSheet.create({
-  overlay:     { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
+  overlay:     { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet:       { position: 'absolute', bottom: 0, start: 0, end: 0, backgroundColor: C.surface, borderTopStartRadius: 20, borderTopEndRadius: 20, padding: 24, paddingBottom: 36 },
   handle:      { width: 36, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
   title:       { fontSize: 18, fontWeight: '700', color: C.text, textAlign: 'center', marginBottom: 16 },
@@ -231,7 +232,7 @@ function PromoCard({ item, tab, onDelete, onQr, onBoost }: PromoCardProps): Reac
         </View>
         {item.discountPct ? (
           <View style={cardStyles.badge}>
-            <Text style={cardStyles.badgeText}>خصم {item.discountPct}%</Text>
+            <Text style={cardStyles.badgeText}>{t('promotions.badge', { pct: item.discountPct })}</Text>
           </View>
         ) : null}
       </View>
@@ -357,16 +358,13 @@ function CreateWizard({
     try {
       const res = await api.create({
         body: {
-          titleAr: form.title.trim(),
-          descriptionAr: form.description.trim() || undefined,
-          type: form.discountPct ? 'percentage_discount' : 'fixed_discount',
-          category: 'other',
-          discountValue: form.discountPct ? parseFloat(form.discountPct) : null,
-          code: form.code.trim() || null,
+          title: form.title.trim(),
+          description: form.description.trim() || form.title.trim(),
+          discountPct: form.discountPct ? parseInt(form.discountPct, 10) : undefined,
+          code: form.code.trim() || undefined,
           validFrom: new Date(form.validFrom + 'T00:00:00Z').toISOString(),
           validTo:   new Date(form.validTo   + 'T23:59:59Z').toISOString(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          cityId: 'baghdad' as any,
+          conditions: undefined,
         },
       });
       if (res.status === 201) {
@@ -422,7 +420,7 @@ function CreateWizard({
                 onChangeText={(v) => set('discountPct', v)}
                 keyboardType="numeric"
                 maxLength={3}
-                placeholder="0–100"
+                placeholder={t('promotions.discountRange')}
               />
 
               <Text style={wizardStyles.label}>{t('promotions.code')}</Text>
@@ -471,7 +469,7 @@ function CreateWizard({
               {/* Summary */}
               <View style={wizardStyles.summary}>
                 <Text style={wizardStyles.summaryTitle}>{form.title}</Text>
-                {form.discountPct ? <Text style={wizardStyles.summaryDiscount}>خصم {form.discountPct}%</Text> : null}
+                {form.discountPct ? <Text style={wizardStyles.summaryDiscount}>{t('promotions.badge', { pct: form.discountPct })}</Text> : null}
                 <Text style={wizardStyles.summaryDates}>{form.validFrom} → {form.validTo}</Text>
               </View>
 
@@ -490,7 +488,7 @@ function CreateWizard({
 }
 
 const wizardStyles = StyleSheet.create({
-  overlay:         { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
+  overlay:         { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet:           { position: 'absolute', bottom: 0, start: 0, end: 0, backgroundColor: C.surface, borderTopStartRadius: 20, borderTopEndRadius: 20, padding: 20, paddingBottom: 36, maxHeight: '90%' },
   handle:          { width: 36, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 12 },
   progress:        { height: 4, backgroundColor: C.border, borderRadius: 2, marginBottom: 4 },
@@ -529,6 +527,7 @@ function BoostSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
             t('promotions.boostF3'),
           ].map((f, i) => (
             <View key={i} style={boostStyles.featureRow}>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               <Text style={boostStyles.featureDot}>✓</Text>
               <Text style={boostStyles.featureText}>{f}</Text>
             </View>
@@ -553,7 +552,7 @@ function BoostSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
 }
 
 const boostStyles = StyleSheet.create({
-  overlay:     { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  overlay:     { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)' },
   sheet:       { position: 'absolute', bottom: 0, start: 0, end: 0, backgroundColor: C.surface, borderTopStartRadius: 20, borderTopEndRadius: 20, padding: 24, paddingBottom: 36 },
   handle:      { width: 36, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   icon:        { fontSize: 44, textAlign: 'center', marginBottom: 8 },
@@ -725,7 +724,7 @@ export function PromotionBadge({ discountPct }: { discountPct: number | null }):
   if (!discountPct) return null;
   return (
     <View style={{ backgroundColor: C.offerBg, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
-      <Text style={{ color: C.offer, fontWeight: '700', fontSize: 13 }}>خصم {discountPct}%</Text>
+      <Text style={{ color: C.offer, fontWeight: '700', fontSize: 13 }}>{t('promotions.badge', { pct: discountPct })}</Text>
     </View>
   );
 }

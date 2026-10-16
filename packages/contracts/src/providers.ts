@@ -334,17 +334,18 @@ export const providerTestIDs = {
   place: { section: 'place.provider', verified: 'place.provider.verified', photos: 'place.provider.photos', phone: 'place.provider.phone', claim: 'place.claim' },
 } as const;
 
-// ─── Promotions ──────────────────────────────────────────────────────────────
+// ─── Provider Promotions (simple CRUD, scoped to provider) ───────────────────
+// The richer marketplace promotions contract (browse, redeem, etc.) lives in
+// packages/contracts/src/promotions.ts as `promotionsContract`.
 
-/** @public M31 */
-export const PromotionId = z.string().uuid().brand<'PromotionId'>();
-export type PromotionId = z.infer<typeof PromotionId>;
+export const ProviderPromotionId = z.string().uuid().brand<'ProviderPromotionId'>();
+export type ProviderPromotionId = z.infer<typeof ProviderPromotionId>;
 
-export const PromotionStatus = z.enum(['active', 'expired', 'deleted']);
-export type PromotionStatus = z.infer<typeof PromotionStatus>;
+export const ProviderPromotionStatus = z.enum(['active', 'expired', 'deleted']);
+export type ProviderPromotionStatus = z.infer<typeof ProviderPromotionStatus>;
 
-export const Promotion = z.object({
-  id: PromotionId,
+export const ProviderPromotion = z.object({
+  id: ProviderPromotionId,
   providerId: ProviderId,
   title: z.string().min(1).max(120),
   description: z.string().min(1).max(500),
@@ -352,44 +353,47 @@ export const Promotion = z.object({
   validFrom: z.string().datetime(),
   validTo: z.string().datetime(),
   conditions: z.string().max(300).nullable(),
-  status: PromotionStatus,
+  code: z.string().max(40).nullable().optional(),
+  redeemedCount: z.number().int().nonnegative().optional(),
+  status: ProviderPromotionStatus,
   createdAt: z.string().datetime(),
 });
-export type Promotion = z.infer<typeof Promotion>;
+export type ProviderPromotion = z.infer<typeof ProviderPromotion>;
 
-export const CreatePromotionBody = z.object({
+export const CreateProviderPromotionBody = z.object({
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().min(1).max(500),
   discountPct: z.number().int().min(1).max(100).optional(),
   validFrom: z.string().datetime(),
   validTo: z.string().datetime(),
   conditions: z.string().max(300).optional(),
+  code: z.string().max(40).optional(),
 });
-export type CreatePromotionBody = z.infer<typeof CreatePromotionBody>;
+export type CreateProviderPromotionBody = z.infer<typeof CreateProviderPromotionBody>;
 
-export const promotionsContract = c.router(
+export const providerPromotionsContract = c.router(
   {
     create: {
       method: 'POST',
       path: '/providers/promotions',
-      body: CreatePromotionBody,
-      responses: { 201: Promotion, 400: Problem, 401: Problem, 404: Problem },
+      body: CreateProviderPromotionBody,
+      responses: { 201: ProviderPromotion, 400: Problem, 401: Problem, 404: Problem },
     },
     listActive: {
       method: 'GET',
       path: '/providers/promotions',
-      responses: { 200: z.array(Promotion), 401: Problem },
+      responses: { 200: z.array(ProviderPromotion), 401: Problem },
     },
     listByProvider: {
       method: 'GET',
       path: '/providers/:providerId/promotions',
       pathParams: z.object({ providerId: ProviderId }),
-      responses: { 200: z.array(Promotion), 404: Problem },
+      responses: { 200: z.array(ProviderPromotion), 404: Problem },
     },
     delete: {
       method: 'DELETE',
       path: '/providers/promotions/:id',
-      pathParams: z.object({ id: PromotionId }),
+      pathParams: z.object({ id: ProviderPromotionId }),
       body: c.noBody(),
       responses: { 204: c.noBody(), 401: Problem, 403: Problem, 404: Problem },
     },

@@ -21,6 +21,8 @@ module.exports = {
       pathNot: [
         // Expo peer-deps that ship as native modules (no JS bundle in node_modules but valid at runtime)
         'packages/mobile-kit/src/media/',
+        // expo-sqlite/legacy loaded dynamically with try/catch for optional SQLite FTS
+        'packages/mobile-kit/src/offline/',
         'mobile-features/discover/src/',
         // react-native-svg is a native peer-dep
         'mobile-features/provider/src/components/charts/',

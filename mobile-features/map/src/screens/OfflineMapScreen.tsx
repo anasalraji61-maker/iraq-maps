@@ -121,8 +121,8 @@ type LiveProgress = Record<string, DownloadProgress & { etaSecs?: number }>;
 
 async function requestNotificationPermission(): Promise<boolean> {
   try {
-    const { status } = await Notifications.requestPermissionsAsync();
-    return status === 'granted';
+    const perm = await Notifications.requestPermissionsAsync();
+    return (perm as { granted?: boolean }).granted === true || (perm as { status?: string }).status === 'granted';
   } catch {
     return false;
   }
@@ -204,7 +204,6 @@ export function OfflineMapScreen(): ReactElement {
       }
     };
     void resumeInterrupted();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Download ──────────────────────────────────────────────────────────────

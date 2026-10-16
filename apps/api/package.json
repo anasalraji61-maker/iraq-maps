@@ -53,7 +53,9 @@
     "@iraq-maps/search": "workspace:*",
     "@iraq-maps/reviews": "workspace:*",
     "@iraq-maps/reputation": "workspace:*",
-    "@iraq-maps/geocoding": "workspace:*"
+    "@iraq-maps/geocoding": "workspace:*",
+    "@iraq-maps/appointments": "workspace:*",
+    "@iraq-maps/listings": "workspace:*"
   },
   "devDependencies": {
     "@iraq-maps/testing": "workspace:*",

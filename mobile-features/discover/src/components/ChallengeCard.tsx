@@ -29,7 +29,7 @@ I18nManager.forceRTL(true);
 const RING_SIZE = 64;
 const RING_STROKE = 6;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+const _RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 /** Map ChallengeType to a single emoji icon. */
 const KIND_ICON: Record<string, string> = {
@@ -85,7 +85,7 @@ function ProgressRing({ value, max, accent, size = RING_SIZE, stroke = RING_STRO
     }).start();
   }, [pct, animPct]);
 
-  const strokeDashoffset = animPct.interpolate({
+  const _strokeDashoffset = animPct.interpolate({
     inputRange: [0, 1],
     outputRange: [circumference, 0],
   });
@@ -171,7 +171,7 @@ export function ChallengeCard({ challenge, onPress, onClaim, compact = false }: 
   if (compact) {
     return (
       <Pressable
-        style={[compactStyles.card, { backgroundColor: COLORS.surface, borderLeftColor: accent }]}
+        style={[compactStyles.card, { backgroundColor: COLORS.surface, borderStartColor: accent }]}
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={challenge.title}

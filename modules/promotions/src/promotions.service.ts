@@ -33,7 +33,7 @@ import {
   type UpdatePromotionBody,
   type UserId,
 } from '@iraq-maps/contracts';
-import { and, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { promotionTable, redemptionTable, type PromotionRow } from './schema';
 
 // ── Optional ports ─────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ function toCityId(raw: string): CityId {
   return raw as unknown as CityId;
 }
 
-function toUserId(raw: string): UserId {
+function _toUserId(raw: string): UserId {
   return raw as unknown as UserId;
 }
 

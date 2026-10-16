@@ -2,7 +2,7 @@
  * Drizzle schema for the `promotions` Postgres schema.
  * Mirrors 0001_promotions_init.sql — keep in sync.
  */
-import { boolean, index, integer, numeric, pgEnum, pgSchema, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, numeric, pgSchema, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const promotionsSchema = pgSchema('promotions');
 

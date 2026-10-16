@@ -117,12 +117,12 @@ export class ChallengesController {
   @TsRestHandler(adminChallengesV2Contract)
   handleAdmin(@Req() req: AuthedRequest) {
     const userId = req.principal?.userId as UserId | undefined;
-    const role = req.principal?.role;
+    const roles = req.principal?.roles ?? [];
     const loc = locale(req);
 
     const requireAdmin = () => {
       if (!userId) return problem(401, 'unauthorized', 'Authentication required');
-      if (role !== 'admin' && role !== 'moderator') return problem(403, 'forbidden', 'Admin only');
+      if (!roles.includes('admin') && !roles.includes('moderator')) return problem(403, 'forbidden', 'Admin only');
       return null;
     };
 

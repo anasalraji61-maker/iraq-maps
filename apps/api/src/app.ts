@@ -25,6 +25,8 @@ import { SearchModule, searchMigrationsDir } from '@iraq-maps/search';
 import { reviewsModule, reviewsMigrationsDir } from '@iraq-maps/reviews';
 import { reputationModule, reputationMigrationsDir } from '@iraq-maps/reputation';
 import { geocodingModule } from '@iraq-maps/geocoding';
+import { appointmentsModule, appointmentsMigrationsDir } from '@iraq-maps/appointments';
+import { listingsModule, listingsMigrationsDir } from '@iraq-maps/listings';
 import { AnalyticsController } from './analytics/analytics.controller';
 import { AnalyticsService } from './analytics/analytics.service';
 import { MetricsDashboardService } from './analytics/metrics-dashboard';
@@ -72,6 +74,8 @@ export const moduleMigrations = [
   { schema: 'search', migrationsDir: searchMigrationsDir },
   { schema: 'reviews', migrationsDir: reviewsMigrationsDir },
   { schema: 'reputation', migrationsDir: reputationMigrationsDir },
+  { schema: 'appointments', migrationsDir: appointmentsMigrationsDir },
+  { schema: 'listings', migrationsDir: listingsMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -306,6 +310,8 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         reviewsModule({ db }),
         reputationModule({ db, eventBus: bus }),
         geocodingModule(),
+        appointmentsModule({ db }),
+        listingsModule({ db }),
       ],
       controllers: [HealthController, AnalyticsController, ...(opts.controllers ?? [])],
       providers: [

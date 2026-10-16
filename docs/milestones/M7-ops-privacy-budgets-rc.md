@@ -57,6 +57,8 @@ owners:
     - "modules/places/**"
     - "modules/routing/**"
     - "modules/providers/**"
+    - "modules/promotions/**"
+    - "modules/challenges/**"
     - "modules/messaging/**"
     - "modules/insights/**"
     - "modules/media/**"

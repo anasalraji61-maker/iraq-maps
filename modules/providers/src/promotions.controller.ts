@@ -3,11 +3,11 @@ import {
   type AuthPrincipal,
   appointmentsContract,
   type ProviderId,
-  type PromotionId,
-  promotionsContract,
+  providerPromotionsContract,
   providerInsightsContract,
   type ProviderInsightsDateRange,
 } from '@iraq-maps/contracts';
+import type { ProviderPromotionId } from '@iraq-maps/contracts';
 import { Controller, Req } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { PromotionsService } from './promotions.service';
@@ -27,11 +27,11 @@ export class PromotionsController {
     private readonly providersSvc: ProvidersService,
   ) {}
 
-  @TsRestHandler(promotionsContract)
+  @TsRestHandler(providerPromotionsContract)
   promotions(@Req() req: AuthedRequest) {
     const userId = req.principal?.userId;
 
-    return tsRestHandler(promotionsContract, {
+    return tsRestHandler(providerPromotionsContract, {
       create: async ({ body }) => {
         if (!userId) return problem(401, 'unauthorized', 'Authentication required');
         const provider = await this.providersSvc.getByUserId(userId);
@@ -55,7 +55,7 @@ export class PromotionsController {
         const provider = await this.providersSvc.getByUserId(userId);
         if (!provider) return problem(401, 'unauthorized', 'Provider not found');
         try {
-          await this.svc.deletePromotion(provider.id as ProviderId, params.id as PromotionId);
+          await this.svc.deletePromotion(provider.id as ProviderId, params.id as unknown as ProviderPromotionId);
           return { status: 204, body: undefined };
         } catch {
           return problem(404, 'not_found', 'Promotion not found');

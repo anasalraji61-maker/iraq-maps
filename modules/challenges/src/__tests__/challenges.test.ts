@@ -19,7 +19,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   FakeChallengesService,
   type Challenge,
-  type ChallengeParticipant,
 } from '@iraq-maps/testing';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

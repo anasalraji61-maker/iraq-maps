@@ -1,7 +1,7 @@
 /**
  * Unit tests for Provider Promotions, Appointments, and Insights screens.
  */
-import { type Promotion, type Appointment, type ProviderInsights } from '@iraq-maps/contracts';
+import { type ProviderPromotion as Promotion, type Appointment, type ProviderInsights } from '@iraq-maps/contracts';
 import { renderWithProviders } from '@iraq-maps/mobile-kit/testing';
 
 import { screen, waitFor } from '@testing-library/react-native';
@@ -46,8 +46,8 @@ const PROVIDER_ID = '44444444-4444-4444-4444-444444444444';
 
 function makePromotion(overrides?: Partial<Promotion>): Promotion {
   return {
-    id: PROMO_ID as never,
-    providerId: PROVIDER_ID as never,
+    id: PROMO_ID as Promotion['id'],
+    providerId: PROVIDER_ID as Promotion['providerId'],
     title: 'خصم 20%',
     description: 'تخفيض على كل الوجبات',
     discountPct: 20,

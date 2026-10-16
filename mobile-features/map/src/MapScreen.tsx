@@ -394,7 +394,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
         <Pressable
           style={StyleSheet.absoluteFill}
           onPress={() => setSearchPanelOpen(false)}
-          onLongPress={(e) => {
+          onLongPress={(_e) => {
             // Long-press drops a pin at the approximate map center; precise coords require
             // a MapLibre hitTest which is not yet exposed via MapCanvasProps. Use near as
             // the best available coordinate until a hitTest port is added.
@@ -447,6 +447,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           accessibilityRole="button"
           accessibilityLabel={t('pin.dismiss')}
         >
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <RNText style={styles.droppedPinDismissText}>✕ {t('pin.dismiss')}</RNText>
         </Pressable>
       ) : null}

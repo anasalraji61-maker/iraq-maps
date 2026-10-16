@@ -1,12 +1,12 @@
 import {
   type AppointmentId,
-  type CreatePromotionBody,
-  type PromotionId,
   type ProviderId,
   type RequestAppointmentBody,
   type UpdateAppointmentBody,
   type UserId,
 } from '@iraq-maps/contracts';
+
+import type { CreateProviderPromotionBody, ProviderPromotionId } from '@iraq-maps/contracts';
 import { type Db } from '@iraq-maps/db-kit';
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { and, eq, gt, lt } from 'drizzle-orm';
@@ -16,7 +16,7 @@ import { appointmentTable, promotionTable } from './schema';
 export class PromotionsService {
   constructor(@Inject('PROVIDERS_DB') private readonly db: Db) {}
 
-  async createPromotion(providerId: ProviderId, body: CreatePromotionBody) {
+  async createPromotion(providerId: ProviderId, body: CreateProviderPromotionBody) {
     const [row] = await this.db
       .insert(promotionTable)
       .values({
@@ -62,7 +62,7 @@ export class PromotionsService {
     return rows.map((r) => this.toPromotion(r));
   }
 
-  async deletePromotion(providerId: ProviderId, id: PromotionId) {
+  async deletePromotion(providerId: ProviderId, id: ProviderPromotionId) {
     const [row] = await this.db
       .select()
       .from(promotionTable)
@@ -76,7 +76,7 @@ export class PromotionsService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private toPromotion(row: any) {
     return {
-      id: row.id as PromotionId,
+      id: row.id as ProviderPromotionId,
       providerId: row.providerId as ProviderId,
       title: row.title as string,
       description: row.description as string,
