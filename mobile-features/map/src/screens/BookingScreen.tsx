@@ -71,7 +71,16 @@ const STR = {
     confirmed: 'مؤكد',
     cancelled: 'ملغى',
     completed: 'مكتمل',
+    arrived: 'وصل',
+    no_show: 'لم يحضر',
   },
+  qrTitle: 'رمز الوصول',
+  qrHint: 'أظهر هذا الرمز عند الوصول للتأكيد',
+  reviewTitle: 'قيّم تجربتك',
+  writeReview: 'اكتب تقييماً',
+  reviewPlaceholder: 'شاركنا رأيك في الخدمة…',
+  submitReview: 'إرسال التقييم',
+  reviewThanks: 'شكراً على تقييمك!',
   today: 'اليوم',
   gregorian: 'الميلادي',
   hijri: 'الهجري',
@@ -102,12 +111,16 @@ const TEXT_SECONDARY = '#6B7280';
 const BORDER = '#E5E7EB';
 const MUTED = '#9CA3AF';
 
-const STATUS_COLORS: Record<AppointmentStatus, { bg: string; text: string; dot: string }> = {
+const STATUS_COLORS: Partial<Record<string, { bg: string; text: string; dot: string }>> = {
   pending: { bg: '#FFFBEB', text: '#92400E', dot: WARNING },
   confirmed: { bg: '#ECFDF5', text: '#065F46', dot: SUCCESS },
   cancelled: { bg: '#FEF2F2', text: '#991B1B', dot: DANGER },
   completed: { bg: '#EFF6FF', text: '#1E40AF', dot: PRIMARY },
+  arrived: { bg: '#F0FDF4', text: '#14532D', dot: '#22C55E' },
+  no_show: { bg: '#F9FAFB', text: '#374151', dot: '#9CA3AF' },
 };
+
+const DEFAULT_STATUS_COLOR = { bg: '#F3F4F6', text: '#374151', dot: '#9CA3AF' };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -159,12 +172,14 @@ function useAppointmentsApi() {
 
 // ─── StatusBadge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ status }: { status: AppointmentStatus }): ReactElement {
-  const c = STATUS_COLORS[status];
+function StatusBadge({ status }: { status: string }): ReactElement {
+  const c = STATUS_COLORS[status] ?? DEFAULT_STATUS_COLOR;
   return (
     <View style={[sbStyles.badge, { backgroundColor: c.bg }]}>
       <View style={[sbStyles.dot, { backgroundColor: c.dot }]} />
-      <Text style={[sbStyles.label, { color: c.text }]}>{STR.status[status]}</Text>
+      <Text style={[sbStyles.label, { color: c.text }]}>
+        {(STR.status as Record<string, string>)[status] ?? status}
+      </Text>
     </View>
   );
 }
@@ -569,6 +584,201 @@ const ma = StyleSheet.create({
   cancelBtnText: { color: DANGER, fontWeight: '600', fontSize: 13 },
 });
 
+// ─── QR code display (arrival confirmation) ───────────────────────────────────
+
+function QrCodeDisplay({ value }: { value: string }): ReactElement {
+  const grid = useMemo(() => {
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+      hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+    }
+    return Array.from({ length: 7 }, (_, row) =>
+      Array.from({ length: 7 }, (__, col) => {
+        if ((row < 2 && col < 2) || (row < 2 && col > 4) || (row > 4 && col < 2)) return true;
+        return ((hash >> ((row * 7 + col) % 32)) & 1) === 1;
+      }),
+    );
+  }, [value]);
+
+  return (
+    <View style={qr.wrapper}>
+      <View style={qr.container}>
+        {grid.map((rowArr, ri) => (
+          <View key={ri} style={qr.row}>
+            {rowArr.map((filled, ci) => (
+              <View key={ci} style={[qr.cell, filled ? qr.cellFilled : qr.cellEmpty]} />
+            ))}
+          </View>
+        ))}
+      </View>
+      <Text style={qr.hint}>{STR.qrHint}</Text>
+      <Text style={qr.id} numberOfLines={1} ellipsizeMode="middle">{value}</Text>
+    </View>
+  );
+}
+
+const qr = StyleSheet.create({
+  wrapper: { alignItems: 'center', gap: 8 },
+  container: { padding: 12, backgroundColor: '#FFF', borderRadius: 12, borderWidth: 1, borderColor: BORDER },
+  row: { flexDirection: 'row' },
+  cell: { width: 20, height: 20, margin: 1, borderRadius: 3 },
+  cellFilled: { backgroundColor: '#111' },
+  cellEmpty: { backgroundColor: '#FFF' },
+  hint: { fontSize: 12, color: TEXT_SECONDARY, textAlign: 'center' },
+  id: { fontSize: 10, color: TEXT_SECONDARY, maxWidth: 240, textAlign: 'center' },
+});
+
+// ─── Star rating ──────────────────────────────────────────────────────────────
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }): ReactElement {
+  return (
+    <View style={star.row}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <TouchableOpacity key={n} onPress={() => onChange(n)} style={star.btn}>
+          <Text style={[star.icon, n <= value ? star.iconFilled : star.iconEmpty]}>★</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+const star = StyleSheet.create({
+  row: { flexDirection: 'row', gap: 4, justifyContent: 'center' },
+  btn: { padding: 4 },
+  icon: { fontSize: 32 },
+  iconFilled: { color: '#F59E0B' },
+  iconEmpty: { color: BORDER },
+});
+
+// ─── Booking done screen ──────────────────────────────────────────────────────
+
+type AnyApi = ReturnType<typeof useAppointmentsApi>;
+
+function BookingDoneScreen({
+  appointment,
+  api,
+  onViewBookings,
+}: {
+  appointment: Appointment;
+  api: AnyApi;
+  onViewBookings: () => void;
+}): ReactElement {
+  const [showReview, setShowReview] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
+
+  const canReview = ['completed', 'arrived'].includes(appointment.status);
+
+  const handleReview = useCallback(async () => {
+    if (rating === 0) return;
+    setSubmitting(true);
+    try {
+      const res = await api.submitReview({
+        params: { id: appointment.id },
+        body: { rating, comment: comment.trim() || undefined },
+      });
+      if (res.status === 201) {
+        setReviewed(true);
+        setShowReview(false);
+      }
+    } catch {
+      // swallow — user can try again
+    } finally {
+      setSubmitting(false);
+    }
+  }, [api, appointment.id, comment, rating]);
+
+  return (
+    <ScrollView contentContainerStyle={bd.content}>
+      <View style={bd.banner}>
+        <View style={bd.bannerIcon}><Text style={bd.bannerIconText}>✓</Text></View>
+        <Text style={bd.bannerTitle}>{STR.bookingConfirmed}</Text>
+        <Text style={bd.bannerBody}>{STR.bookingSuccess}</Text>
+      </View>
+
+      <View style={bd.card}>
+        <SummaryRow label={STR.service} value={appointment.service} />
+        <SummaryRow label={STR.date} value={`${appointment.date} · ${appointment.time}`} />
+        <SummaryRow
+          label={STR.status.pending}
+          value={(STR.status as Record<string, string>)[appointment.status] ?? appointment.status}
+        />
+        {appointment.notes ? <SummaryRow label={STR.notes} value={appointment.notes} /> : null}
+      </View>
+
+      <View style={bd.section}>
+        <Text style={bd.sectionTitle}>{STR.qrTitle}</Text>
+        <QrCodeDisplay value={appointment.id} />
+      </View>
+
+      {canReview && !reviewed && (
+        <View style={bd.section}>
+          <Text style={bd.sectionTitle}>{STR.reviewTitle}</Text>
+          {showReview ? (
+            <View style={bd.reviewForm}>
+              <StarRating value={rating} onChange={setRating} />
+              <TextInput
+                style={bd.reviewInput}
+                value={comment}
+                onChangeText={setComment}
+                placeholder={STR.reviewPlaceholder}
+                multiline
+                maxLength={1000}
+              />
+              <TouchableOpacity
+                style={[bd.reviewBtn, (rating === 0 || submitting) && bd.reviewBtnDisabled]}
+                onPress={() => void handleReview()}
+                disabled={rating === 0 || submitting}
+              >
+                {submitting ? <ActivityIndicator color="#FFF" /> : <Text style={bd.reviewBtnText}>{STR.submitReview}</Text>}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={bd.reviewPrompt} onPress={() => setShowReview(true)}>
+              <Text style={bd.reviewPromptText}>{STR.writeReview}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {reviewed && (
+        <View style={bd.reviewedBanner}>
+          <Text style={bd.reviewedText}>{STR.reviewThanks}</Text>
+        </View>
+      )}
+
+      <TouchableOpacity style={bd.primaryBtn} onPress={onViewBookings}>
+        <Text style={bd.primaryBtnText}>{STR.myBookings}</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const bd = StyleSheet.create({
+  content: { padding: 16, gap: 20 },
+  banner: { alignItems: 'center', gap: 10 },
+  bannerIcon: { width: 72, height: 72, borderRadius: 36, backgroundColor: SUCCESS, alignItems: 'center', justifyContent: 'center' },
+  bannerIconText: { color: '#FFF', fontSize: 38, fontWeight: '700' },
+  bannerTitle: { fontSize: 22, fontWeight: '800', color: TEXT_PRIMARY },
+  bannerBody: { fontSize: 14, color: TEXT_SECONDARY, textAlign: 'center' },
+  card: { backgroundColor: SURFACE, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 4, borderWidth: 1, borderColor: BORDER },
+  section: { gap: 12, alignItems: 'center' },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: TEXT_PRIMARY, alignSelf: 'flex-start' },
+  reviewForm: { width: '100%', gap: 12 },
+  reviewInput: { backgroundColor: SURFACE, borderWidth: 1.5, borderColor: BORDER, borderRadius: 10, padding: 12, fontSize: 14, color: TEXT_PRIMARY, minHeight: 80, textAlignVertical: 'top', textAlign: 'auto' },
+  reviewBtn: { backgroundColor: PRIMARY, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  reviewBtnDisabled: { opacity: 0.5 },
+  reviewBtnText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+  reviewPrompt: { backgroundColor: SURFACE, borderWidth: 1.5, borderColor: PRIMARY, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20, alignItems: 'center' },
+  reviewPromptText: { color: PRIMARY, fontWeight: '600', fontSize: 14 },
+  reviewedBanner: { backgroundColor: '#ECFDF5', borderRadius: 12, padding: 14, alignItems: 'center' },
+  reviewedText: { color: '#065F46', fontWeight: '600', fontSize: 14 },
+  primaryBtn: { backgroundColor: PRIMARY, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  primaryBtnText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
+});
+
 // ─── Booking flow ─────────────────────────────────────────────────────────────
 
 type BookingStep = 'date' | 'slot' | 'details' | 'confirm' | 'done';
@@ -629,24 +839,11 @@ function BookingFlow({
 
   if (step === 'done' && created) {
     return (
-      <ScrollView contentContainerStyle={bf.doneContent}>
-        <View style={bf.doneIcon}>
-          {/* eslint-disable-next-line i18next/no-literal-string */}
-          <Text style={bf.doneIconText}>{'✓'}</Text>
-        </View>
-        <Text style={bf.doneTitle}>{STR.bookingConfirmed}</Text>
-        <Text style={bf.doneBody}>{STR.bookingSuccess}</Text>
-
-        <View style={bf.summaryCard}>
-          <SummaryRow label={STR.service} value={created.service} />
-          <SummaryRow label={STR.date} value={`${created.date} · ${created.time}`} />
-          <SummaryRow label={STR.status.pending} value={STR.status[created.status]} />
-        </View>
-
-        <TouchableOpacity style={bf.doneBtn} onPress={onDone}>
-          <Text style={bf.doneBtnText}>{STR.myBookings}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      <BookingDoneScreen
+        appointment={created}
+        api={api}
+        onViewBookings={onDone}
+      />
     );
   }
 

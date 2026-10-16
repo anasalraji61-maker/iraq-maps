@@ -19,12 +19,15 @@ import { t } from '../strings';
 
 I18nManager.forceRTL(true);
 
-const STATUS_COLORS: Record<AppointmentStatus, { bg: string; text: string }> = {
+const STATUS_COLORS: Partial<Record<string, { bg: string; text: string }>> = {
   pending: { bg: '#FFF8E1', text: '#F57F17' },
   confirmed: { bg: '#E8F5E9', text: '#1B5E20' },
   cancelled: { bg: '#FFEBEE', text: '#B71C1C' },
   completed: { bg: '#E3F2FD', text: '#0D47A1' },
+  arrived: { bg: '#F0FDF4', text: '#14532D' },
+  no_show: { bg: '#F9FAFB', text: '#374151' },
 };
+const DEFAULT_STATUS_COLOR = { bg: '#F3F4F6', text: '#374151' };
 
 function useAppointmentsApi() {
   const baseUrl = useApiBaseUrl();
@@ -33,7 +36,7 @@ function useAppointmentsApi() {
 }
 
 function AppointmentRow({ item }: { item: Appointment }): ReactElement {
-  const colors = STATUS_COLORS[item.status];
+  const colors = STATUS_COLORS[item.status] ?? DEFAULT_STATUS_COLOR;
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>

@@ -8,3 +8,4 @@ export type {
   ProviderAppointmentStats,
   AppointmentPage,
 } from './appointments.service';
+export { AvailabilityService, buildDefaultWeeklySchedule } from './availability.service';

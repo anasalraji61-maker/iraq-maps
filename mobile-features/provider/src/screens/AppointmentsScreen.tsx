@@ -54,12 +54,15 @@ const TEXT_PRIMARY = '#1A1A2E';
 const TEXT_SECONDARY = '#6B7280';
 const BORDER = '#E5E7EB';
 
-const STATUS_COLORS: Record<AppointmentStatus, { bg: string; text: string; dot: string }> = {
+const STATUS_COLORS: Partial<Record<string, { bg: string; text: string; dot: string }>> = {
   pending: { bg: '#FFFBEB', text: '#92400E', dot: WARNING },
   confirmed: { bg: '#ECFDF5', text: '#065F46', dot: SUCCESS },
   cancelled: { bg: '#FEF2F2', text: '#991B1B', dot: DANGER },
   completed: { bg: '#EFF6FF', text: '#1E40AF', dot: PRIMARY },
+  arrived: { bg: '#F0FDF4', text: '#14532D', dot: SUCCESS },
+  no_show: { bg: '#F9FAFB', text: '#374151', dot: '#9CA3AF' },
 };
+const DEFAULT_STATUS_COLOR = { bg: '#F3F4F6', text: '#374151', dot: '#9CA3AF' };
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6] as const;
 const SLOT_DURATION_OPTIONS = [15, 30, 45, 60, 90, 120] as const;
@@ -102,8 +105,8 @@ function useAppointmentsApi() {
 
 // ─── StatusBadge ─────────────────────────────────────────────────────────────
 
-function StatusBadge({ status }: { status: AppointmentStatus }): ReactElement {
-  const c = STATUS_COLORS[status];
+function StatusBadge({ status }: { status: string }): ReactElement {
+  const c = STATUS_COLORS[status] ?? DEFAULT_STATUS_COLOR;
   return (
     <View style={[sb.badge, { backgroundColor: c.bg }]}>
       <View style={[sb.dot, { backgroundColor: c.dot }]} />
@@ -335,7 +338,7 @@ function TodayTimeline({
                 <Text style={tl.timeText}>{a.time}</Text>
               </View>
               <View style={tl.line}>
-                <View style={[tl.dot, { backgroundColor: STATUS_COLORS[a.status].dot }]} />
+                <View style={[tl.dot, { backgroundColor: (STATUS_COLORS[a.status] ?? DEFAULT_STATUS_COLOR).dot }]} />
                 <View style={tl.connector} />
               </View>
               <View style={{ flex: 1 }}>

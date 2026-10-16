@@ -29,6 +29,7 @@ import type {
 import {
   appointmentTable,
   appointmentSlotTable,
+  appointmentReviewTable,
   providerAvailabilityTable,
   providerTimeOffTable,
   appointmentsOutboxTable,
@@ -1002,6 +1003,161 @@ export class AppointmentsService {
       endTime: iso(row.endTime),
       isAvailable: row.isAvailable,
     };
+  }
+
+  // ─── Arrival / no-show / review ─────────────────────────────────────────────
+
+  /**
+   * confirmArrival — called when the user scans the QR code at the provider.
+   * Transitions status: confirmed → arrived.
+   */
+  async confirmArrival(userId: string, appointmentId: string): Promise<Appointment> {
+    return this.db.transaction(async (tx) => {
+      const rows = await tx
+        .select()
+        .from(appointmentTable)
+        .where(and(eq(appointmentTable.id, appointmentId), eq(appointmentTable.userId, userId)))
+        .limit(1);
+
+      if (rows.length === 0) {
+        throw new AppointmentError('not_found', 'Appointment not found', 404);
+      }
+
+      const appt = rows[0]!;
+
+      if (appt.status !== 'confirmed') {
+        throw new AppointmentError(
+          'invalid_status',
+          `Cannot confirm arrival for appointment in status '${appt.status}'`,
+          422,
+        );
+      }
+
+      const updated = await tx
+        .update(appointmentTable)
+        .set({ status: 'arrived', updatedAt: new Date() })
+        .where(eq(appointmentTable.id, appointmentId))
+        .returning();
+
+      await tx.insert(appointmentsOutboxTable).values({
+        eventType: 'appointments.arrived.v1',
+        payload: { appointmentId, userId, providerId: appt.providerId, scheduledAt: iso(appt.scheduledAt) },
+      });
+
+      this.logger.log(`Appointment ${appointmentId} — user ${userId} arrived`);
+      return mapAppointment(updated[0]!);
+    });
+  }
+
+  /**
+   * noShow — provider marks a confirmed/arrived appointment as no-show.
+   */
+  async noShow(providerId: string, appointmentId: string): Promise<Appointment> {
+    return this.db.transaction(async (tx) => {
+      const rows = await tx
+        .select()
+        .from(appointmentTable)
+        .where(
+          and(
+            eq(appointmentTable.id, appointmentId),
+            eq(appointmentTable.providerId, providerId),
+          ),
+        )
+        .limit(1);
+
+      if (rows.length === 0) {
+        throw new AppointmentError('not_found', 'Appointment not found', 404);
+      }
+
+      const appt = rows[0]!;
+
+      if (!['confirmed', 'arrived'].includes(appt.status)) {
+        throw new AppointmentError(
+          'invalid_status',
+          `Cannot mark no-show for appointment in status '${appt.status}'`,
+          422,
+        );
+      }
+
+      if (appt.slotId) {
+        await tx
+          .update(appointmentSlotTable)
+          .set({ isAvailable: true })
+          .where(eq(appointmentSlotTable.id, appt.slotId));
+      }
+
+      const updated = await tx
+        .update(appointmentTable)
+        .set({ status: 'no_show', updatedAt: new Date() })
+        .where(eq(appointmentTable.id, appointmentId))
+        .returning();
+
+      await tx.insert(appointmentsOutboxTable).values({
+        eventType: 'appointments.no_show.v1',
+        payload: { appointmentId, userId: appt.userId, providerId, scheduledAt: iso(appt.scheduledAt), service: appt.service },
+      });
+
+      this.logger.log(`Appointment ${appointmentId} marked no-show by provider ${providerId}`);
+      return mapAppointment(updated[0]!);
+    });
+  }
+
+  /**
+   * submitReview — user submits a rating+comment after a completed/arrived appointment.
+   */
+  async submitReview(
+    userId: string,
+    appointmentId: string,
+    rating: number,
+    comment?: string,
+  ): Promise<{ appointmentId: string; rating: number; comment: string | null; createdAt: string }> {
+    if (rating < 1 || rating > 5 || !Number.isInteger(rating)) {
+      throw new AppointmentError('invalid_rating', 'Rating must be an integer from 1 to 5', 400);
+    }
+
+    const rows = await this.db
+      .select()
+      .from(appointmentTable)
+      .where(and(eq(appointmentTable.id, appointmentId), eq(appointmentTable.userId, userId)))
+      .limit(1);
+
+    if (rows.length === 0) {
+      throw new AppointmentError('not_found', 'Appointment not found', 404);
+    }
+
+    const appt = rows[0]!;
+
+    if (!['completed', 'arrived'].includes(appt.status)) {
+      throw new AppointmentError(
+        'invalid_status',
+        'Reviews can only be submitted for completed appointments',
+        422,
+      );
+    }
+
+    let inserted: (typeof appointmentReviewTable.$inferSelect)[];
+    try {
+      inserted = await this.db
+        .insert(appointmentReviewTable)
+        .values({ appointmentId, userId, providerId: appt.providerId, rating, comment: comment ?? null })
+        .returning();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('appointment_review_appointment_unique')) {
+        throw new AppointmentError('already_reviewed', 'This appointment already has a review', 409);
+      }
+      throw err;
+    }
+
+    const row = inserted[0]!;
+
+    await this.db.insert(appointmentsOutboxTable).values({
+      eventType: 'appointments.review.submitted.v1',
+      payload: { appointmentId, userId, providerId: appt.providerId, rating, comment: comment ?? null },
+    });
+
+    this.logger.log(`Review submitted for appointment ${appointmentId} — rating ${rating}`);
+    return { appointmentId: row.appointmentId, rating: row.rating, comment: row.comment, createdAt: iso(row.createdAt) };
   }
 
   // ─── Reminder job ───────────────────────────────────────────────────────────

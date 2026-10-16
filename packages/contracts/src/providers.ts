@@ -411,7 +411,7 @@ export const providerPromotionsContract = c.router(
 export const AppointmentId = z.string().uuid().brand<'AppointmentId'>();
 export type AppointmentId = z.infer<typeof AppointmentId>;
 
-export const AppointmentStatus = z.enum(['pending', 'confirmed', 'cancelled', 'completed']);
+export const AppointmentStatus = z.enum(['pending', 'confirmed', 'cancelled', 'completed', 'arrived', 'no_show']);
 export type AppointmentStatus = z.infer<typeof AppointmentStatus>;
 
 export const Appointment = z.object({
@@ -441,6 +441,91 @@ export const UpdateAppointmentBody = z.object({
 });
 export type UpdateAppointmentBody = z.infer<typeof UpdateAppointmentBody>;
 
+export const CancelAppointmentBody = z.object({
+  reason: z.string().max(500).optional(),
+});
+export type CancelAppointmentBody = z.infer<typeof CancelAppointmentBody>;
+
+export const RescheduleAppointmentBody = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+});
+export type RescheduleAppointmentBody = z.infer<typeof RescheduleAppointmentBody>;
+
+export const SubmitReviewBody = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(1000).optional(),
+});
+export type SubmitReviewBody = z.infer<typeof SubmitReviewBody>;
+
+export const AppointmentReview = z.object({
+  appointmentId: AppointmentId,
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type AppointmentReview = z.infer<typeof AppointmentReview>;
+
+export const WeekdaySchedule = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  openTime: z.string().regex(/^\d{2}:\d{2}$/),
+  closeTime: z.string().regex(/^\d{2}:\d{2}$/),
+  slotDurationMinutes: z.number().int().refine((n) => [15, 30, 45, 60, 90, 120].includes(n)),
+  maxCapacity: z.number().int().min(1).max(100).default(1),
+  isActive: z.boolean(),
+});
+export type WeekdaySchedule = z.infer<typeof WeekdaySchedule>;
+
+export const SetScheduleBody = z.object({
+  schedule: z.array(WeekdaySchedule).min(1).max(7),
+});
+export type SetScheduleBody = z.infer<typeof SetScheduleBody>;
+
+export const ScheduleException = z.object({
+  id: z.string().uuid(),
+  providerId: ProviderId,
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  isClosed: z.boolean(),
+  openTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  closeTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+  createdAt: z.string().datetime(),
+});
+export type ScheduleException = z.infer<typeof ScheduleException>;
+
+export const AddExceptionBody = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  isClosed: z.boolean(),
+  openTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  closeTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+});
+export type AddExceptionBody = z.infer<typeof AddExceptionBody>;
+
+export const BlockSlotBody = z.object({
+  startTime: z.string().datetime(),
+  endTime: z.string().datetime(),
+  reason: z.string().max(200).optional(),
+});
+export type BlockSlotBody = z.infer<typeof BlockSlotBody>;
+
+export const BlockedSlot = z.object({
+  id: z.string().uuid(),
+  providerId: ProviderId,
+  startTime: z.string().datetime(),
+  endTime: z.string().datetime(),
+  reason: z.string().nullable(),
+  createdAt: z.string().datetime(),
+});
+export type BlockedSlot = z.infer<typeof BlockedSlot>;
+
+export const AvailableSlotItem = z.object({
+  id: z.string().uuid(),
+  startTime: z.string().datetime(),
+  endTime: z.string().datetime(),
+  isAvailable: z.boolean(),
+  remainingCapacity: z.number().int(),
+});
+export type AvailableSlotItem = z.infer<typeof AvailableSlotItem>;
+
 export const appointmentsContract = c.router(
   {
     request: {
@@ -454,6 +539,7 @@ export const appointmentsContract = c.router(
       method: 'GET',
       path: '/providers/:providerId/appointments',
       pathParams: z.object({ providerId: ProviderId }),
+      query: z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }),
       responses: { 200: z.array(Appointment), 401: Problem, 403: Problem, 404: Problem },
     },
     update: {
@@ -463,10 +549,103 @@ export const appointmentsContract = c.router(
       body: UpdateAppointmentBody,
       responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
     },
+    cancel: {
+      method: 'POST',
+      path: '/appointments/:id/cancel',
+      pathParams: z.object({ id: AppointmentId }),
+      body: CancelAppointmentBody,
+      responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
+    },
+    reschedule: {
+      method: 'POST',
+      path: '/appointments/:id/reschedule',
+      pathParams: z.object({ id: AppointmentId }),
+      body: RescheduleAppointmentBody,
+      responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
+    },
+    confirmArrival: {
+      method: 'POST',
+      path: '/appointments/:id/arrive',
+      pathParams: z.object({ id: AppointmentId }),
+      body: c.noBody(),
+      responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
+    },
+    markNoShow: {
+      method: 'POST',
+      path: '/providers/:providerId/appointments/:id/no-show',
+      pathParams: z.object({ providerId: ProviderId, id: AppointmentId }),
+      body: c.noBody(),
+      responses: { 200: Appointment, 400: Problem, 401: Problem, 403: Problem, 404: Problem },
+    },
+    submitReview: {
+      method: 'POST',
+      path: '/appointments/:id/review',
+      pathParams: z.object({ id: AppointmentId }),
+      body: SubmitReviewBody,
+      responses: { 201: AppointmentReview, 400: Problem, 401: Problem, 403: Problem, 404: Problem, 409: Problem },
+    },
     myAppointments: {
       method: 'GET',
       path: '/appointments',
+      query: z.object({
+        status: AppointmentStatus.optional(),
+        cursor: z.string().optional(),
+      }),
       responses: { 200: z.array(Appointment), 401: Problem },
+    },
+    availableSlots: {
+      method: 'GET',
+      path: '/providers/:providerId/appointments/slots',
+      pathParams: z.object({ providerId: ProviderId }),
+      query: z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }),
+      responses: { 200: z.array(AvailableSlotItem), 400: Problem, 404: Problem },
+    },
+    getSchedule: {
+      method: 'GET',
+      path: '/providers/:providerId/schedule',
+      pathParams: z.object({ providerId: ProviderId }),
+      responses: { 200: z.array(WeekdaySchedule), 401: Problem, 403: Problem, 404: Problem },
+    },
+    setSchedule: {
+      method: 'PUT',
+      path: '/providers/:providerId/schedule',
+      pathParams: z.object({ providerId: ProviderId }),
+      body: SetScheduleBody,
+      responses: { 200: z.array(WeekdaySchedule), 400: Problem, 401: Problem, 403: Problem },
+    },
+    listExceptions: {
+      method: 'GET',
+      path: '/providers/:providerId/schedule/exceptions',
+      pathParams: z.object({ providerId: ProviderId }),
+      responses: { 200: z.array(ScheduleException), 401: Problem, 403: Problem },
+    },
+    addException: {
+      method: 'POST',
+      path: '/providers/:providerId/schedule/exceptions',
+      pathParams: z.object({ providerId: ProviderId }),
+      body: AddExceptionBody,
+      responses: { 201: ScheduleException, 400: Problem, 401: Problem, 403: Problem },
+    },
+    deleteException: {
+      method: 'DELETE',
+      path: '/providers/:providerId/schedule/exceptions/:exceptionId',
+      pathParams: z.object({ providerId: ProviderId, exceptionId: z.string().uuid() }),
+      body: c.noBody(),
+      responses: { 204: c.noBody(), 401: Problem, 403: Problem, 404: Problem },
+    },
+    blockSlot: {
+      method: 'POST',
+      path: '/providers/:providerId/schedule/blocked-slots',
+      pathParams: z.object({ providerId: ProviderId }),
+      body: BlockSlotBody,
+      responses: { 201: BlockedSlot, 400: Problem, 401: Problem, 403: Problem },
+    },
+    unblockSlot: {
+      method: 'DELETE',
+      path: '/providers/:providerId/schedule/blocked-slots/:slotId',
+      pathParams: z.object({ providerId: ProviderId, slotId: z.string().uuid() }),
+      body: c.noBody(),
+      responses: { 204: c.noBody(), 401: Problem, 403: Problem, 404: Problem },
     },
   },
   { pathPrefix: '/v1', strictStatusCodes: true },
