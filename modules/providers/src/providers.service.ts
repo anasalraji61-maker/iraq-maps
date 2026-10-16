@@ -16,7 +16,7 @@ import {
 import { createOutboxPublisher, writeAdminAuditLog, type Db } from '@iraq-maps/db-kit';
 import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { and, eq, isNull, sql } from 'drizzle-orm';
-import { auditLogTable, consentTable, providerTable } from './schema';
+import { auditLogTable, consentTable, menuItemTable, menuSectionTable, providerTable, staffTable } from './schema';
 
 export interface RegisterProviderInput {
   name: string;
@@ -424,7 +424,210 @@ export class ProvidersService {
   private assertOwner(userId: UserId, provider: ProviderRow): void {
     if (provider.userId !== userId) throw new ForbiddenException({ code: 'not_owner', title: 'Access denied' });
   }
+
+  // ─── Menu ──────────────────────────────────────────────────────────────────
+
+  async getMenu(providerId: ProviderId): Promise<MenuSectionWithItems[]> {
+    const sections = await this.db
+      .select()
+      .from(menuSectionTable)
+      .where(eq(menuSectionTable.providerId, providerId))
+      .orderBy(menuSectionTable.sortOrder);
+
+    const sectionIds = sections.map((s) => s.id);
+    if (sectionIds.length === 0) return [];
+
+    const items = await this.db
+      .select()
+      .from(menuItemTable)
+      .where(sql`${menuItemTable.sectionId} = ANY(ARRAY[${sql.join(sectionIds.map((id) => sql`${id}::uuid`), sql`, `)}])`)
+      .orderBy(menuItemTable.sortOrder);
+
+    return sections.map((s) => ({
+      ...s,
+      items: items.filter((i) => i.sectionId === s.id),
+    }));
+  }
+
+  async updateMenu(userId: UserId, providerId: ProviderId, sections: MenuSectionInput[]): Promise<void> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(userId, provider);
+
+    // Delete all existing sections (cascades to items) then re-insert
+    await this.db.delete(menuSectionTable).where(eq(menuSectionTable.providerId, providerId));
+
+    for (let si = 0; si < sections.length; si++) {
+      const sec = sections[si]!;
+      const [inserted] = await this.db
+        .insert(menuSectionTable)
+        .values({ providerId, nameAr: sec.nameAr, nameEn: sec.nameEn ?? '', sortOrder: si })
+        .returning();
+      if (!inserted) continue;
+
+      for (let ii = 0; ii < (sec.items ?? []).length; ii++) {
+        const item = sec.items![ii]!;
+        await this.db.insert(menuItemTable).values({
+          sectionId: inserted.id,
+          nameAr: item.nameAr,
+          nameEn: item.nameEn ?? '',
+          descAr: item.descAr ?? '',
+          descEn: item.descEn ?? '',
+          priceIqd: item.priceIqd,
+          photoAssetId: item.photoAssetId ?? null,
+          outOfStock: item.outOfStock ? 1 : 0,
+          seasonal: item.seasonal ? 1 : 0,
+          limitedTime: item.limitedTime ? 1 : 0,
+          sortOrder: ii,
+        });
+      }
+    }
+  }
+
+  async addMenuItem(userId: UserId, providerId: ProviderId, sectionId: string, item: MenuItemInput): Promise<MenuItemRow> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(userId, provider);
+
+    const [section] = await this.db.select().from(menuSectionTable).where(and(eq(menuSectionTable.id, sectionId), eq(menuSectionTable.providerId, providerId))).limit(1);
+    if (!section) throw new NotFoundException({ code: 'section_not_found', title: 'Menu section not found' });
+
+    const [inserted] = await this.db.insert(menuItemTable).values({
+      sectionId,
+      nameAr: item.nameAr,
+      nameEn: item.nameEn ?? '',
+      descAr: item.descAr ?? '',
+      descEn: item.descEn ?? '',
+      priceIqd: item.priceIqd,
+      photoAssetId: item.photoAssetId ?? null,
+      outOfStock: item.outOfStock ? 1 : 0,
+      seasonal: item.seasonal ? 1 : 0,
+      limitedTime: item.limitedTime ? 1 : 0,
+      sortOrder: 9999,
+    }).returning();
+    return inserted!;
+  }
+
+  async removeMenuItem(userId: UserId, providerId: ProviderId, itemId: string): Promise<void> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(userId, provider);
+    await this.db.delete(menuItemTable).where(eq(menuItemTable.id, itemId));
+  }
+
+  async toggleItemAvailability(userId: UserId, providerId: ProviderId, itemId: string): Promise<MenuItemRow> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(userId, provider);
+
+    const [item] = await this.db.select().from(menuItemTable).where(eq(menuItemTable.id, itemId)).limit(1);
+    if (!item) throw new NotFoundException({ code: 'item_not_found', title: 'Menu item not found' });
+
+    const [updated] = await this.db
+      .update(menuItemTable)
+      .set({ outOfStock: item.outOfStock ? 0 : 1, updatedAt: new Date() })
+      .where(eq(menuItemTable.id, itemId))
+      .returning();
+    return updated!;
+  }
+
+  // ─── Staff ─────────────────────────────────────────────────────────────────
+
+  async getStaff(providerId: ProviderId): Promise<StaffRow[]> {
+    return this.db.select().from(staffTable).where(eq(staffTable.providerId, providerId)).orderBy(staffTable.createdAt);
+  }
+
+  async inviteStaff(ownerId: UserId, providerId: ProviderId, phone: string, role: 'manager' | 'staff'): Promise<StaffRow> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(ownerId, provider);
+
+    // Resolve userId from phone — in production this goes through identity module.
+    // For now we insert with a placeholder UUID derived from the phone.
+    const placeholderUserId = randomUUID();
+
+    const [inserted] = await this.db.insert(staffTable).values({
+      providerId,
+      userId: placeholderUserId,
+      phone,
+      role,
+      permissions: JSON.stringify(this.defaultPermissions(role)),
+    }).returning();
+
+    await this.db.insert(auditLogTable).values({ providerId, action: `staff_invited:${phone}:${role}`, actorUserId: ownerId, reason: null });
+    return inserted!;
+  }
+
+  async removeStaff(ownerId: UserId, providerId: ProviderId, staffId: string): Promise<void> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(ownerId, provider);
+
+    await this.db.delete(staffTable).where(and(eq(staffTable.id, staffId), eq(staffTable.providerId, providerId)));
+    await this.db.insert(auditLogTable).values({ providerId, action: `staff_removed:${staffId}`, actorUserId: ownerId, reason: null });
+  }
+
+  private defaultPermissions(role: 'owner' | 'manager' | 'staff'): Record<string, boolean> {
+    if (role === 'owner' || role === 'manager') {
+      return { replyMessages: true, managePosts: true, viewAnalytics: true, manageAppointments: true };
+    }
+    return { replyMessages: true, managePosts: false, viewAnalytics: false, manageAppointments: false };
+  }
+
+  // ─── Business hours ────────────────────────────────────────────────────────
+
+  async updateBusinessHours(userId: UserId, providerId: ProviderId, hoursJson: string): Promise<ProviderRow> {
+    const provider = await this.getById(providerId);
+    if (!provider) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    this.assertOwner(userId, provider);
+
+    const [updated] = await this.db
+      .update(providerTable)
+      .set({ hoursRaw: hoursJson, updatedAt: new Date() })
+      .where(eq(providerTable.id, providerId))
+      .returning();
+    if (!updated) throw new NotFoundException({ code: 'provider_not_found', title: 'Provider not found' });
+    await this.publishProfileUpdated(updated);
+    return updated;
+  }
+
+  // ─── QR code ───────────────────────────────────────────────────────────────
+
+  generateQRCode(providerId: ProviderId, type: 'profile' | 'menu' | 'booking' | 'messages' | 'review'): { url: string; data: string } {
+    const appUrl = process.env['APP_BASE_URL'] ?? 'https://iraq-maps.app';
+    const url = `${appUrl}/biz/${providerId}?type=${type}`;
+    return { url, data: url };
+  }
 }
+
+// ─── Additional types ──────────────────────────────────────────────────────────
+
+export interface MenuItemInput {
+  nameAr: string;
+  nameEn?: string;
+  descAr?: string;
+  descEn?: string;
+  priceIqd: number;
+  photoAssetId?: string;
+  outOfStock?: boolean;
+  seasonal?: boolean;
+  limitedTime?: boolean;
+}
+
+export interface MenuSectionInput {
+  nameAr: string;
+  nameEn?: string;
+  items?: MenuItemInput[];
+}
+
+export type MenuSectionRow = typeof menuSectionTable.$inferSelect;
+
+export interface MenuSectionWithItems extends MenuSectionRow {
+  items: MenuItemRow[];
+}
+
+export type MenuItemRow = typeof menuItemTable.$inferSelect;
+export type StaffRow = typeof staffTable.$inferSelect;
 
 export type ProviderRow = typeof providerTable.$inferSelect;
 export type AuditRow = typeof auditLogTable.$inferSelect;

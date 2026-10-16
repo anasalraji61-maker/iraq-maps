@@ -113,3 +113,67 @@ export const auditLogTable = providersSchema.table(
   },
   (t) => [index('audit_log_provider_id_idx').on(t.providerId)],
 );
+
+// ─── Staff ────────────────────────────────────────────────────────────────────
+
+export const staffRoleEnum = providersSchema.enum('staff_role', ['owner', 'manager', 'staff']);
+
+export const staffTable = providersSchema.table(
+  'staff',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => providerTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    phone: text('phone').notNull(),
+    role: staffRoleEnum('role').notNull().default('staff'),
+    /** JSON: { replyMessages, managePosts, viewAnalytics, manageAppointments } */
+    permissions: text('permissions').notNull().default('{}'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('staff_provider_id_idx').on(t.providerId),
+    index('staff_user_id_idx').on(t.userId),
+  ],
+);
+
+// ─── Menu ─────────────────────────────────────────────────────────────────────
+
+export const menuSectionTable = providersSchema.table(
+  'menu_section',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => providerTable.id, { onDelete: 'cascade' }),
+    nameAr: text('name_ar').notNull(),
+    nameEn: text('name_en').notNull().default(''),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('menu_section_provider_idx').on(t.providerId)],
+);
+
+export const menuItemTable = providersSchema.table(
+  'menu_item',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sectionId: uuid('section_id')
+      .notNull()
+      .references(() => menuSectionTable.id, { onDelete: 'cascade' }),
+    nameAr: text('name_ar').notNull(),
+    nameEn: text('name_en').notNull().default(''),
+    descAr: text('desc_ar').notNull().default(''),
+    descEn: text('desc_en').notNull().default(''),
+    priceIqd: integer('price_iqd').notNull().default(0),
+    photoAssetId: text('photo_asset_id'),
+    outOfStock: integer('out_of_stock').notNull().default(0), // 0/1 boolean
+    seasonal: integer('seasonal').notNull().default(0),
+    limitedTime: integer('limited_time').notNull().default(0),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('menu_item_section_idx').on(t.sectionId)],
+);
