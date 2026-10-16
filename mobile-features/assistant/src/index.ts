@@ -5,6 +5,10 @@ export type { MapViewport, VisiblePlace, ContextualAssistantScreenProps } from '
 export { TripPlannerScreen } from './screens/TripPlannerScreen';
 export { RecommendationsScreen } from './screens/RecommendationsScreen';
 export { SmartSearchScreen, SmartSearchBar } from './screens/SmartSearchScreen';
+export { AssistantHistoryScreen } from './screens/AssistantHistoryScreen';
+export type { ConversationPreview } from './screens/AssistantHistoryScreen';
+export { AssistantSettingsScreen } from './screens/AssistantSettingsScreen';
+export type { AssistantPreferences } from './screens/AssistantSettingsScreen';
 export { ChatBubble } from './components/ChatBubble';
 export type { ChatMessage as RichChatMessage, ChatBubbleProps, PlaceRef, RouteRef } from './components/ChatBubble';
 export { AssistantTyping } from './components/AssistantTyping';
@@ -12,3 +16,7 @@ export { PlaceRecommendationCard } from './components/PlaceRecommendationCard';
 export type { PlaceRecommendationData, PlaceRecommendationCardProps } from './components/PlaceRecommendationCard';
 export { QuickReplies } from './components/QuickReplies';
 export type { QuickReply, QuickRepliesProps } from './components/QuickReplies';
+export { VoiceInputButton } from './components/VoiceInputButton';
+export type { VoiceInputButtonProps } from './components/VoiceInputButton';
+export { AssistantSuggestions } from './components/AssistantSuggestions';
+export type { SuggestionChip, AssistantSuggestionsProps } from './components/AssistantSuggestions';

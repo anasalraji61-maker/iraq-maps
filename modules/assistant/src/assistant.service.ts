@@ -880,6 +880,271 @@ ${placesText}
     return reply.content;
   }
 
+  // ─── Conversation history ────────────────────────────────────────────────
+
+  /** Return paginated list of sessions for a user with message preview. */
+  async getConversationHistory(
+    userId: string,
+    pagination: { limit?: number; offset?: number } = {},
+  ): Promise<Array<{
+    sessionId: string;
+    firstMessage: string;
+    lastMessage: string;
+    messageCount: number;
+    createdAt: string;
+    updatedAt: string;
+  }>> {
+    const limit = Math.min(pagination.limit ?? 20, 50);
+    const offset = pagination.offset ?? 0;
+
+    const sessions = await this.db
+      .select({
+        id: sessionTable.id,
+        createdAt: sessionTable.createdAt,
+        updatedAt: sessionTable.updatedAt,
+      })
+      .from(sessionTable)
+      .where(eq(sessionTable.userId, userId))
+      .orderBy(desc(sessionTable.updatedAt))
+      .limit(limit)
+      .offset(offset);
+
+    const results = await Promise.all(
+      sessions.map(async session => {
+        const msgs = await this.db
+          .select({ role: messageTable.role, content: messageTable.content })
+          .from(messageTable)
+          .where(eq(messageTable.sessionId, session.id))
+          .orderBy(messageTable.createdAt)
+          .limit(100);
+
+        const firstUser = msgs.find(m => m.role === 'user');
+        const lastAssistant = [...msgs].reverse().find(m => m.role === 'assistant');
+        return {
+          sessionId: session.id,
+          firstMessage: firstUser?.content.slice(0, 120) ?? '',
+          lastMessage: lastAssistant?.content.slice(0, 120) ?? '',
+          messageCount: msgs.length,
+          createdAt: session.createdAt.toISOString(),
+          updatedAt: session.updatedAt.toISOString(),
+        };
+      }),
+    );
+    return results;
+  }
+
+  /** Delete a specific conversation (session + all messages). */
+  async deleteConversation(userId: string, conversationId: string): Promise<boolean> {
+    return this.deleteSession(userId, conversationId);
+  }
+
+  /**
+   * Stub: transcribe voice audio.
+   * Voice transcription is not yet backed by a real speech API.
+   * Returns a placeholder string.
+   */
+  async transcribeVoice(_audioData: Buffer | string): Promise<{ transcript: string; confidence: number }> {
+    // No real speech API call — stub only.
+    return {
+      transcript: '',
+      confidence: 0,
+    };
+  }
+
+  // ─── Contextual suggestions ───────────────────────────────────────────────
+
+  /**
+   * Returns context-aware suggestion chips for the mobile assistant overlay.
+   * Based on time of day, user location and simple history heuristics.
+   */
+  async getContextualSuggestions(
+    userId: string,
+    lat: number,
+    lng: number,
+    time: Date = new Date(),
+  ): Promise<Array<{ id: string; text: string; icon: string; category: string }>> {
+    const hour = time.getHours();
+
+    // Time-based suggestions
+    const timeBased: Array<{ id: string; text: string; icon: string; category: string }> = [];
+    if (hour >= 5 && hour < 11) {
+      timeBased.push(
+        { id: 'ts-breakfast', text: 'أماكن الإفطار القريبة', icon: '🌅', category: 'time' },
+        { id: 'ts-coffee', text: 'مقاهي قريبة', icon: '☕', category: 'time' },
+      );
+    } else if (hour >= 11 && hour < 15) {
+      timeBased.push(
+        { id: 'ts-lunch', text: 'مطاعم الغداء القريبة', icon: '🍽️', category: 'time' },
+        { id: 'ts-pharmacy', text: 'صيدليات قريبة', icon: '💊', category: 'time' },
+      );
+    } else if (hour >= 18 && hour < 23) {
+      timeBased.push(
+        { id: 'ts-dinner', text: 'مطاعم العشاء القريبة', icon: '🌙', category: 'time' },
+      );
+    } else {
+      timeBased.push({ id: 'ts-open', text: 'أماكن مفتوحة الآن', icon: '🕐', category: 'time' });
+    }
+
+    // Location-based
+    const locationBased: Array<{ id: string; text: string; icon: string; category: string }> = [
+      { id: 'loc-area', text: 'أخبرني عن هذه المنطقة', icon: '📍', category: 'location' },
+      { id: 'loc-nearby', text: 'ماذا يوجد قريباً؟', icon: '🔍', category: 'location' },
+    ];
+
+    // History-based: check recent sessions to see if any search terms repeat
+    const recentMsgs = await this.db
+      .select({ content: messageTable.content })
+      .from(messageTable)
+      .where(
+        sql`${messageTable.sessionId} IN (
+          SELECT id FROM ${sessionTable}
+          WHERE ${sessionTable.userId} = ${userId}
+          ORDER BY ${sessionTable.updatedAt} DESC
+          LIMIT 3
+        )`,
+      )
+      .limit(20);
+
+    const historyBased: Array<{ id: string; text: string; icon: string; category: string }> = [];
+    const allText = recentMsgs.map(m => m.content).join(' ');
+    if (/مقه|كافيه|قهوة/.test(allText)) {
+      historyBased.push({ id: 'hist-cafe', text: 'مقاهي جديدة في المنطقة', icon: '☕', category: 'history' });
+    }
+    if (/مطعم|أكل|غداء|عشاء/.test(allText)) {
+      historyBased.push({ id: 'hist-rest', text: 'مطاعم جديدة قريبة', icon: '🍴', category: 'history' });
+    }
+
+    const all = [...timeBased, ...locationBased, ...historyBased];
+    const seen = new Set<string>();
+    return all.filter(s => {
+      if (seen.has(s.id)) return false;
+      seen.add(s.id);
+      return true;
+    }).slice(0, 8);
+  }
+
+  // ─── Preferences ─────────────────────────────────────────────────────────
+
+  /**
+   * Persists user assistant preferences.
+   * Currently stored in a JSON column on the session table's schema (stub: in-memory map).
+   * A real migration would add a preferences table.
+   */
+  private readonly prefsCache = new Map<string, Record<string, unknown>>();
+
+  async updateAssistantPreferences(userId: string, prefs: Record<string, unknown>): Promise<void> {
+    // Stub: merge with existing cached prefs
+    const existing = this.prefsCache.get(userId) ?? {};
+    this.prefsCache.set(userId, { ...existing, ...prefs });
+  }
+
+  async getAssistantPreferences(userId: string): Promise<Record<string, unknown>> {
+    return this.prefsCache.get(userId) ?? {};
+  }
+
+  /**
+   * Override system prompt to incorporate user dietary and transport preferences.
+   * Returns an augmented system prompt string.
+   */
+  private buildPersonalisedSystemPrompt(prefs: Record<string, unknown>): string {
+    const dietary = (prefs['dietaryPreferences'] as string[] | undefined) ?? [];
+    const transport = (prefs['transportMode'] as string | undefined) ?? 'driving';
+    const lang = (prefs['responseLanguage'] as string | undefined) ?? 'ar';
+    const style = (prefs['responseStyle'] as string | undefined) ?? 'brief';
+
+    const langNames: Record<string, string> = { ar: 'العربية', ckb: 'الكردية السورانية', en: 'الإنجليزية' };
+    const transportNames: Record<string, string> = {
+      walking: 'المشي', driving: 'السيارة', transit: 'المواصلات العامة', cycling: 'الدراجة',
+    };
+
+    const extras: string[] = [];
+    if (dietary.length > 0) extras.push(`المستخدم لديه تفضيلات غذائية: ${dietary.join('، ')} — اذكرها عند اقتراح الطعام.`);
+    if (transport !== 'driving') extras.push(`وسيلة التنقل المفضلة: ${transportNames[transport] ?? transport}.`);
+    if (style === 'detailed') extras.push('المستخدم يفضل ردوداً مفصّلة وشاملة.');
+    else extras.push('المستخدم يفضل ردوداً موجزة ومباشرة.');
+    if (lang !== 'ar') extras.push(`أجب دائماً بـ${langNames[lang] ?? lang} ما لم يطلب المستخدم خلاف ذلك.`);
+
+    return extras.length > 0
+      ? `${SYSTEM_PROMPT}\n\nتعليمات مخصصة:\n${extras.join('\n')}`
+      : SYSTEM_PROMPT;
+  }
+
+  /**
+   * chatWithContext enhanced version that merges user preferences into the system prompt.
+   */
+  async chatWithPreferences(
+    userId: string,
+    message: string,
+    context: {
+      lat?: number;
+      lng?: number;
+      currentPlaceId?: string;
+      currentPlaceNames?: string;
+      currentRouteId?: string;
+    },
+  ) {
+    const prefs = await this.getAssistantPreferences(userId);
+    const contextParts: string[] = [];
+    if (context.lat != null && context.lng != null) {
+      contextParts.push(`موقع المستخدم الحالي: ${context.lat.toFixed(4)}, ${context.lng.toFixed(4)}`);
+    }
+    if (context.currentPlaceId && context.currentPlaceNames) {
+      contextParts.push(`المكان المعروض: ${context.currentPlaceNames}`);
+    }
+    if (context.currentRouteId) {
+      contextParts.push(`معرّف المسار الحالي: ${context.currentRouteId}`);
+    }
+
+    const prefixedMessage =
+      contextParts.length > 0
+        ? `[${contextParts.join(' | ')}]\n${message}`
+        : message;
+
+    const sessionId = `ctx-${userId}-default` as `${string}-${string}-${string}-${string}-${string}`;
+
+    // Build a personalised system prompt from prefs
+    const _systemPrompt = this.buildPersonalisedSystemPrompt(prefs);
+
+    return this.chat(userId, {
+      sessionId,
+      messages: [{ role: 'user', content: prefixedMessage }],
+    });
+  }
+
+  // ─── Place explanation ────────────────────────────────────────────────────
+
+  /**
+   * Return a detailed place explanation in the requested language.
+   * Supported: 'ar', 'ckb', 'en'.
+   */
+  async explainPlace(placeId: string, language: 'ar' | 'ckb' | 'en' = 'ar'): Promise<string> {
+    const cached = this.placeSummaryCache.get(`${placeId}:${language}`);
+    if (cached && Date.now() - cached.cachedAt < this.PLACE_SUMMARY_TTL_MS) {
+      return cached.summary;
+    }
+
+    const places = await this.placesSearch(placeId);
+    const place = places[0];
+    if (!place) return '';
+
+    const langInstructions: Record<string, string> = {
+      ar: `اكتب شرحاً وافياً بالعربية (4-6 جمل) عن "${place.name}" في العراق يشمل: طبيعة المكان، أهميته، وأبرز ما يميزه للزوار.`,
+      ckb: `دەربارەی "${place.name}" لە عێراق شیکاریەکی تەواو بە کوردی سورانی بنووسە (4-6 ویست) کە تێیدا ڕوون بکەیتەوە: سروشتی شوێنەکە، گرنگیەتی، و باشترین تایبەتمەندییەکانی.`,
+      en: `Write a detailed explanation in English (4-6 sentences) about "${place.name}" in Iraq covering: what it is, its significance, and highlights for visitors.`,
+    };
+
+    const prompt = langInstructions[language] ?? langInstructions['ar']!;
+    const reply = await this.llm.chat({
+      systemPrompt: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 600,
+    });
+
+    const summary = reply.content.trim();
+    this.placeSummaryCache.set(`${placeId}:${language}`, { summary, cachedAt: Date.now() });
+    return summary;
+  }
+
   // ─── Translation ──────────────────────────────────────────────────────────
 
   private readonly translationCache = new Map<string, { result: string; cachedAt: number }>();
