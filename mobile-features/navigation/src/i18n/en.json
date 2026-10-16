@@ -65,6 +65,36 @@
     "dirSharpLeft": "Turn sharp left",
     "dirStraight": "Continue",
     "car": "Car",
-    "to": "To: "
+    "to": "To: ",
+    "altRoute": "Route {n}",
+    "altFastest": "Fastest",
+    "altShortest": "Shortest",
+    "altRecommended": "Recommended",
+    "shareRoute": "Share Route",
+    "addWaypoint": "Add Stop",
+    "battery": "Battery usage: {pct}%",
+    "motorway": "Motorway",
+    "highway": "Highway",
+    "residential": "Residential streets",
+    "toll": "Toll road",
+    "tollWarning": "This route includes toll roads",
+    "traffic": "Traffic conditions",
+    "trafficLight": "Light traffic",
+    "trafficModerate": "Moderate traffic",
+    "trafficHeavy": "Heavy traffic",
+    "compareRoutes": "Compare routes",
+    "selectRoute": "Select this route"
+  },
+  "searchAlong": {
+    "title": "Search Along Route",
+    "fuel": "Fuel stations",
+    "food": "Restaurants",
+    "atm": "ATMs",
+    "detour": "+{min} min detour",
+    "addToRoute": "Add to route",
+    "noResults": "No results near your route",
+    "searching": "Searching…",
+    "km": "{n} km",
+    "m": "{n} m"
   }
 }

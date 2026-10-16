@@ -65,6 +65,36 @@
     "dirSharpLeft": "تحول يساراً",
     "dirStraight": "استمر",
     "car": "سيارة",
-    "to": "إلى: "
+    "to": "إلى: ",
+    "altRoute": "مسار {n}",
+    "altFastest": "الأسرع",
+    "altShortest": "الأقصر",
+    "altRecommended": "موصى به",
+    "shareRoute": "مشاركة المسار",
+    "addWaypoint": "إضافة محطة",
+    "battery": "استهلاك البطارية: {pct}٪",
+    "motorway": "طريق سريع",
+    "highway": "طريق رئيسي",
+    "residential": "شوارع سكنية",
+    "toll": "رسوم مرور",
+    "tollWarning": "هذا المسار يشمل رسوم مرور",
+    "traffic": "حالة المرور",
+    "trafficLight": "مرور سلس",
+    "trafficModerate": "مرور متوسط",
+    "trafficHeavy": "مرور كثيف",
+    "compareRoutes": "مقارنة المسارات",
+    "selectRoute": "اختر هذا المسار"
+  },
+  "searchAlong": {
+    "title": "البحث على طول المسار",
+    "fuel": "محطات الوقود",
+    "food": "مطاعم",
+    "atm": "صرافات",
+    "detour": "+{min} دقيقة انحراف",
+    "addToRoute": "إضافة للمسار",
+    "noResults": "لا توجد نتائج قريبة من مسارك",
+    "searching": "جارٍ البحث…",
+    "km": "{n} كم",
+    "m": "{n} م"
   }
 }

@@ -65,6 +65,36 @@
     "dirSharpLeft": "بپێچ چەپی تیژ",
     "dirStraight": "بەردەوام بە",
     "car": "ئۆتۆمبێل",
-    "to": "بۆ: "
+    "to": "بۆ: ",
+    "altRoute": "ڕێگا {n}",
+    "altFastest": "خێراترین",
+    "altShortest": "کورتترین",
+    "altRecommended": "پێشنیارکراو",
+    "shareRoute": "هاوبەشکردنی ڕێگا",
+    "addWaypoint": "زیادکردنی وەستگە",
+    "battery": "خەرجکردنی بەتری: {pct}٪",
+    "motorway": "ئۆتۆستراد",
+    "highway": "شەقامی سەرەکی",
+    "residential": "شەقامی نیشتەجێبوون",
+    "toll": "شەقامی کرێدار",
+    "tollWarning": "ئەم ڕێگایە شەقامی کرێدار تێدایە",
+    "traffic": "دۆخی ترافیک",
+    "trafficLight": "ترافیکی سووک",
+    "trafficModerate": "ترافیکی مامناوەند",
+    "trafficHeavy": "ترافیکی قورس",
+    "compareRoutes": "بەراوردکردنی ڕێگاکان",
+    "selectRoute": "ئەم ڕێگایە هەڵبژێرە"
+  },
+  "searchAlong": {
+    "title": "گەڕان لەسەر ڕێگا",
+    "fuel": "پمپی بەنزین",
+    "food": "چێشتخانەکان",
+    "atm": "دەستگای پارە",
+    "detour": "+{min} خ ئەوتار",
+    "addToRoute": "زیادکردن بۆ ڕێگا",
+    "noResults": "هیچ ئەنجامێک نزیک ڕێگاکەت نییە",
+    "searching": "گەڕان…",
+    "km": "{n} کم",
+    "m": "{n} م"
   }
 }
