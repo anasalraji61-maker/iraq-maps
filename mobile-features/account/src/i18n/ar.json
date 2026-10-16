@@ -585,5 +585,30 @@
     "retry": "إعادة المحاولة",
     "viewAll": "الكل",
     "close": "إغلاق"
+  },
+  "personalAnalytics": {
+    "title": "إحصاءاتي",
+    "sectionMonth": "هذا الشهر",
+    "sectionAllTime": "إجمالي النشاط",
+    "sectionTopPlaces": "أكثر الأماكن زيارةً",
+    "sectionTime": "الوقت في التطبيق",
+    "placesVisited": "أماكن مُزارة",
+    "distanceTraveled": "المسافة المقطوعة",
+    "distanceKm": "{km} كم",
+    "reviewsWritten": "مراجعات مكتوبة",
+    "postsCreated": "منشورات أُنشئت",
+    "messagesSent": "رسائل أُرسلت",
+    "timeInApp": "الوقت في التطبيق",
+    "timeMinutes": "{min} دقيقة",
+    "timeHours": "{h} س {min} د",
+    "contributionScore": "نقاط المساهمة",
+    "mostVisited": "الأكثر زيارةً",
+    "visits": "{count} زيارة",
+    "noVisits": "لم تزر أي مكان بعد",
+    "noTopPlaces": "لا توجد بيانات بعد",
+    "loading": "جارٍ التحميل…",
+    "error": "تعذّر تحميل الإحصاءات",
+    "shareStats": "مشاركة إحصاءاتي",
+    "shareText": "لدي {placesVisited} مكانًا مُزارًا و{reviewsWritten} مراجعةً على خرائط العراق الذكية!"
   }
 }

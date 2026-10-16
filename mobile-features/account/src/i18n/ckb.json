@@ -585,5 +585,30 @@
     "errors": {
       "loadFailed": "نەتوانرا داتای باڵێوازی بارکرێت"
     }
+  },
+  "personalAnalytics": {
+    "title": "ئامارەکانم",
+    "sectionMonth": "ئەم مانگە",
+    "sectionAllTime": "چالاکیی گشتی",
+    "sectionTopPlaces": "شوێنە زیارەتکراوەکان",
+    "sectionTime": "کاتی لە ئەپ",
+    "placesVisited": "شوێنی سەردانکراو",
+    "distanceTraveled": "مسافەی پێچووانەو",
+    "distanceKm": "{km} کم",
+    "reviewsWritten": "پێداچوونەوە نووسراو",
+    "postsCreated": "پۆستی دروستکراو",
+    "messagesSent": "نامەی نێردراو",
+    "timeInApp": "کاتی لە ئەپ",
+    "timeMinutes": "{min} خولەک",
+    "timeHours": "{h} کاتژمێر {min} خولەک",
+    "contributionScore": "خاڵی بەشداری",
+    "mostVisited": "زیاتر سەردانکراو",
+    "visits": "{count} سەردان",
+    "noVisits": "هێشتا شوێنێک سەردان نەکراوە",
+    "noTopPlaces": "هێشتا داتایەک نییە",
+    "loading": "بارکردن…",
+    "error": "نەتوانرا ئامارەکان بارکرێت",
+    "shareStats": "ئامارەکانم هاوبەش بکە",
+    "shareText": "من {placesVisited} شوێنم سەردان کردووە و {reviewsWritten} پێداچوونەوەم نووسیوە لە نەخشەی زیرەکی عێراق!"
   }
 }

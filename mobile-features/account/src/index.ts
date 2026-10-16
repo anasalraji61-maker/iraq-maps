@@ -15,6 +15,7 @@ export { ThemeScreen } from './ThemeScreen';
 export { SavedPlacesScreen } from './SavedPlacesScreen';
 export { OnboardingScreen } from './OnboardingScreen';
 export { SavedAddressesScreen } from './screens/SavedAddressesScreen';
+export { PersonalAnalyticsScreen } from './screens/PersonalAnalyticsScreen';
 export { PhoneVerificationScreen } from './PhoneVerificationScreen';
 export { ProfileSetupScreen } from './ProfileSetupScreen';
 export { ChangePasswordScreen } from './ChangePasswordScreen';

@@ -1,6 +1,32 @@
 export { PerformanceMonitor, type HttpSample, type CacheSample, type HttpStats, type CacheStats } from './performance-monitor';
 export { AlertManager, type AlertThreshold, type AlertEvent, type AlertSeverity, type AlertWebhookConfig } from './alert-manager';
 export { TraceContext, type TraceData } from './trace-context';
+export {
+  AnalyticsTracker,
+  createAnalyticsTracker,
+  AnalyticsEvents,
+  type AnalyticsEvent,
+  type AnalyticsBatch,
+  type PageEvent,
+  type DeviceInfo,
+  type EventProperties,
+  type AnalyticsTrackerOptions,
+  type AnalyticsStorage,
+  type AnalyticsEventName,
+} from './analytics';
+export {
+  CrashReporter,
+  createCrashReporter,
+  parseStackTrace,
+  type CrashReport,
+  type CrashContext,
+  type Breadcrumb,
+  type StackFrame,
+  type ParsedStackTrace,
+  type NetworkState,
+  type CrashReporterOptions,
+  type CrashStorage,
+} from './crash-reporter';
 
 import { pino } from 'pino';
 
