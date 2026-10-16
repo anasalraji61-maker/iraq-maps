@@ -42,6 +42,47 @@ export {
   type ActionHandler,
 } from './OfflineQueue';
 
+// TileCache
+export {
+  initTileCache,
+  getCachedTile,
+  cacheTile,
+  evictTile,
+  verifyTile,
+  verifyAll,
+  expireOldTiles,
+  estimateDownloadSize,
+  batchDownload,
+  abortBatchDownload,
+  clearTileCache,
+  getCacheTotalBytes,
+  getCachedTileCount,
+  formatBytes as formatTileBytes,
+  type TileCacheOptions,
+  type TileKey,
+  type TileEntry,
+  type BatchDownloadOptions,
+  type BatchProgress,
+  type BatchResult,
+  type EstimateResult,
+} from './TileCache';
+
+// OfflineSearch
+export {
+  initOfflineSearch,
+  indexPlaces,
+  removeFromIndex,
+  searchOffline,
+  nearbyPlaces,
+  autocomplete,
+  getIndexStats,
+  clearSearchIndex,
+  type SearchOptions,
+  type OfflineSearchResult,
+  type AutocompleteResult,
+  type IndexStats,
+} from './OfflineSearch';
+
 // SyncManager
 export {
   startSync,

@@ -9,6 +9,8 @@ export { IncidentReportButton } from './incidents/IncidentReportButton';
 export { useIncidents } from './incidents/useIncidents';
 /** Offline maps */
 export { OfflineRegionsScreen } from './offline/OfflineRegionsScreen';
+export { OfflineMapScreen } from './screens/OfflineMapScreen';
+export { OfflineBanner, type OfflineBannerProps } from './components/OfflineBanner';
 export {
   downloadOfflineRegion,
   deleteOfflineRegion,

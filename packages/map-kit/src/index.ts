@@ -6,3 +6,7 @@ export * from './satellite-disclaimer';
 export * from './MapStyleManager';
 export * from './POIManager';
 export * from './BoundsManager';
+export * from './AccessibilityLayer';
+export * from './HighContrastMapStyle';
+export * from './navigation/RouteRenderer';
+export * from './navigation/TurnArrow';
