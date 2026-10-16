@@ -410,10 +410,28 @@
     "leaderboard": "Leaderboard",
     "progressError": "Failed to record progress",
     "completedBanner": "🎉 Challenge completed!",
+    "daysLeft": "{days} days left",
+    "claimReward": "Claim Reward",
+    "completed": "Completed",
+    "featured": "Featured",
+    "categories": {
+      "reviews": "Reviews",
+      "navigation": "Navigation",
+      "photos": "Photos",
+      "community": "Community"
+    },
     "types": {
       "photo": "Photo",
       "checkin": "Check-in",
-      "review": "Review"
+      "review": "Review",
+      "review_count": "Write Reviews",
+      "place_visit": "Visit Places",
+      "photo_upload": "Upload Photos",
+      "incident_report": "Report Incidents",
+      "consecutive_login": "Daily Login",
+      "category_explorer": "Category Explorer",
+      "neighborhood_mapper": "Map Neighborhoods",
+      "first_review": "First Review"
     }
   },
   "profile": {
@@ -744,5 +762,33 @@
     "cancel": "Cancel",
     "emptyTitle": "No mentions yet",
     "emptyBody": "You will appear here when someone tags you"
+  },
+  "offers": {
+    "title": "Offers & Deals",
+    "featuredTitle": "Featured Deals",
+    "allOffersTitle": "All Offers",
+    "catAll": "All",
+    "catFood": "Food",
+    "catShopping": "Shopping",
+    "catServices": "Services",
+    "catEntertainment": "Entertainment",
+    "filterActiveNow": "Active Now",
+    "filterEndingSoon": "Ending Soon",
+    "empty": "No offers in this category right now",
+    "save": "Save offer",
+    "unsave": "Unsave offer",
+    "openPromo": "Open offer {title}",
+    "code": "Promo code",
+    "valid": "Valid",
+    "hours": "Offer hours",
+    "redemptions": "Used {count} of {max} times",
+    "redemptionsUnlimited": "Used {count} times",
+    "redeem": "Redeem Now",
+    "redeemSuccess": "Redeemed",
+    "redeemSuccessBody": "Offer applied successfully",
+    "close": "Close",
+    "expired": "Expired",
+    "expiresInHours": "Expires in {h}h {m}m",
+    "expiresInDays": "Expires in {d} days"
   }
 }

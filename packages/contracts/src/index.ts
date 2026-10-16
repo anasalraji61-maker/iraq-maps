@@ -26,3 +26,5 @@ export * from './geocoding';
 export * from './reviews';
 export * from './reputation';
 export * from './listings';
+export * from './challenges';
+export * from './promotions';

@@ -410,10 +410,28 @@
     "leaderboard": "لیستی پێشەوەکان",
     "progressError": "هەڵەی تۆمارکردنی پێشکەوتن",
     "completedBanner": "🎉 ئەرکت تەواو کرد!",
+    "daysLeft": "{days} ڕۆژ ماوەتەوە",
+    "claimReward": "وەرگرتنی خەڵات",
+    "completed": "تەواوبووە",
+    "featured": "تایبەت",
+    "categories": {
+      "reviews": "هەڵسەنگاندن",
+      "navigation": "ڕێنماییکردن",
+      "photos": "وێنەکان",
+      "community": "کۆمەڵگا"
+    },
     "types": {
       "photo": "وێنە",
       "checkin": "تۆمارکردن",
-      "review": "هەڵسەنگاندن"
+      "review": "هەڵسەنگاندن",
+      "review_count": "نووسینی هەڵسەنگاندن",
+      "place_visit": "سەردانی شوێنەکان",
+      "photo_upload": "بارکردنی وێنە",
+      "incident_report": "ڕاپۆرتکردنی ڕووداو",
+      "consecutive_login": "چوونەژوورەوەی بەردەوام",
+      "category_explorer": "گەڕانی کتێبە",
+      "neighborhood_mapper": "نەخشەکێشی گوندەکان",
+      "first_review": "یەکەم هەڵسەنگاندن"
     }
   },
   "profile": {
@@ -744,5 +762,33 @@
     "cancel": "هەڵوەشاندنەوە",
     "emptyTitle": "ئاماژە نیە",
     "emptyBody": "کاتێک کەسێک ئاماژەت پێدات ئێرە دەرکەوێت"
+  },
+  "offers": {
+    "title": "پێشکەش و داشکاندن",
+    "featuredTitle": "پێشکەشی تایبەت",
+    "allOffersTitle": "هەموو پێشکەشەکان",
+    "catAll": "هەموو",
+    "catFood": "خواردن",
+    "catShopping": "کڕین",
+    "catServices": "خزمەتگوزاری",
+    "catEntertainment": "شادی",
+    "filterActiveNow": "ئێستا بەردەستە",
+    "filterEndingSoon": "بەمزووانە دەبەسێت",
+    "empty": "ئێستا پێشکەش نیە",
+    "save": "پاشەکەوتکردن",
+    "unsave": "لابردنی پاشەکەوت",
+    "openPromo": "کردنەوەی {title}",
+    "code": "کۆدی پێشکەش",
+    "valid": "مەعتەبەر",
+    "hours": "کاتەکانی پێشکەش",
+    "redemptions": "{count} لە {max} جار بەکارهات",
+    "redemptionsUnlimited": "{count} جار بەکارهات",
+    "redeem": "ئێستا بەکاربهێنە",
+    "redeemSuccess": "بەکارهات",
+    "redeemSuccessBody": "پێشکەش سەرکەوتووانە جێبەجێکرا",
+    "close": "داخستن",
+    "expired": "بەسەرچووە",
+    "expiresInHours": "لە {h} کاتژمێر {m} خولەک دەبەسێت",
+    "expiresInDays": "لە {d} ڕۆژ دەبەسێت"
   }
 }

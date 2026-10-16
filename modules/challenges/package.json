@@ -1,0 +1,23 @@
+{
+  "name": "@iraq-maps/challenges",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@iraq-maps/contracts": "workspace:*",
+    "@iraq-maps/db-kit": "workspace:*",
+    "@nestjs/common": "^11.2.7",
+    "@ts-rest/nest": "3.52.1",
+    "drizzle-orm": "^0.45.4",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@nestjs/core": "^11.2.7"
+  }
+}

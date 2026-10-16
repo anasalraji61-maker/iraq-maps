@@ -410,10 +410,28 @@
     "leaderboard": "لوحة المتصدرين",
     "progressError": "فشل تسجيل التقدم",
     "completedBanner": "🎉 أتممت التحدي!",
+    "daysLeft": "{days} يوم متبقي",
+    "claimReward": "استلام المكافأة",
+    "completed": "مكتمل",
+    "featured": "مميز",
+    "categories": {
+      "reviews": "تقييمات",
+      "navigation": "ملاحة",
+      "photos": "صور",
+      "community": "مجتمع"
+    },
     "types": {
       "photo": "صور",
       "checkin": "تسجيل حضور",
-      "review": "تقييم"
+      "review": "تقييم",
+      "review_count": "كتابة تقييمات",
+      "place_visit": "زيارة أماكن",
+      "photo_upload": "رفع صور",
+      "incident_report": "الإبلاغ عن حوادث",
+      "consecutive_login": "تسجيل دخول متواصل",
+      "category_explorer": "استكشاف الفئات",
+      "neighborhood_mapper": "رسم الأحياء",
+      "first_review": "أول تقييم"
     }
   },
   "profile": {
@@ -744,6 +762,34 @@
     "cancel": "إلغاء",
     "emptyTitle": "لا توجد إشارات",
     "emptyBody": "ستظهر هنا عندما يُشير إليك أحد في منشور أو تعليق أو مراجعة"
+  },
+  "offers": {
+    "title": "العروض والخصومات",
+    "featuredTitle": "عروض مميزة",
+    "allOffersTitle": "جميع العروض",
+    "catAll": "الكل",
+    "catFood": "طعام",
+    "catShopping": "تسوق",
+    "catServices": "خدمات",
+    "catEntertainment": "ترفيه",
+    "filterActiveNow": "متاح الآن",
+    "filterEndingSoon": "ينتهي قريباً",
+    "empty": "لا توجد عروض في هذه الفئة حالياً",
+    "save": "حفظ العرض",
+    "unsave": "إلغاء الحفظ",
+    "openPromo": "فتح عرض {title}",
+    "code": "رمز العرض",
+    "valid": "صالح",
+    "hours": "أوقات العرض",
+    "redemptions": "تم استخدامه {count} من {max} مرة",
+    "redemptionsUnlimited": "تم استخدامه {count} مرة",
+    "redeem": "استخدم العرض الآن",
+    "redeemSuccess": "تم الاسترداد",
+    "redeemSuccessBody": "تم تطبيق العرض بنجاح",
+    "close": "إغلاق",
+    "expired": "انتهى",
+    "expiresInHours": "ينتهي خلال {h} س {m} د",
+    "expiresInDays": "ينتهي خلال {d} يوم"
   }
 
 }
