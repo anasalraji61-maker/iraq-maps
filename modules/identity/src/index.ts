@@ -5,10 +5,12 @@ import { createLogger } from '@iraq-maps/observability';
 import { Inject, Module, type DynamicModule, type OnModuleDestroy } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { identityConfig } from './config';
-import { AuthController, INTERNALS, MeController } from './http';
+import { AuthController, INTERNALS, MeController, PreferencesController } from './http';
+import { UserPreferencesService } from './preferences';
 
 export { IdentityAuthGuard, type AuthenticatedRequest } from './http';
 export { writeAdminAudit, type AdminAction, type TargetType } from './audit';
+export { UserPreferencesService, UserPrefsSchema, type UserPrefs } from './preferences';
 import { Otp, phoneVerification } from './otp';
 import { otpDelivery } from './senders';
 import { Sessions } from './sessions';
@@ -50,14 +52,15 @@ export function identityModule(opts: IdentityModuleOptions): DynamicModule {
   const otp = new Otp(redis, delivery, config.PHONE_HASH_KEY, clock, log);
   const sessions = new Sessions(opts.db, config, clock, log);
   const users = new Users(opts.db, config, clock, opts.outbox, opts.erasers, log);
+  const userPreferences = new UserPreferencesService(opts.db);
   const identityPort: IdentityPort = { verifyAccessToken: (token) => sessions.verify(token), getUser: (id) => users.get(id) };
   return {
     module: IdentityModule,
     global: true,
-    controllers: [AuthController, MeController],
+    controllers: [AuthController, MeController, PreferencesController],
     providers: [
       { provide: Redis, useValue: redis },
-      { provide: INTERNALS, useValue: { otp, sessions, users, phoneHashKey: config.PHONE_HASH_KEY } },
+      { provide: INTERNALS, useValue: { otp, sessions, users, phoneHashKey: config.PHONE_HASH_KEY, userPreferences } },
       { provide: PortTokens.IdentityPort, useValue: identityPort },
       { provide: PortTokens.PhoneVerificationPort, useValue: phoneVerification(otp, config.PHONE_ENCRYPTION_KEY) },
     ],

@@ -20,6 +20,13 @@ export const sessions = identity.table('sessions', {
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
 });
 
+/** Per-user app preferences (theme, map, navigation, etc.). One row per user. */
+export const userPreferences = identity.table('user_preferences', {
+  userId: uuid('user_id').$type<UserId>().primaryKey(),
+  prefs: jsonb('prefs').notNull().default('{}'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Immutable log of every admin / moderator action. */
 export const adminAuditLog = identity.table('admin_audit_log', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),

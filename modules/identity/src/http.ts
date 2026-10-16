@@ -1,10 +1,11 @@
 import { authContract, meContract, PortTokens, type AuthPrincipal, type IdentityPort, type Locale } from '@iraq-maps/contracts';
-import { Controller, HttpException, Inject, Injectable, Req, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Inject, Injectable, Patch, Req, type CanActivate, type ExecutionContext } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { mac } from './crypto';
 import { RESEND_AFTER_SEC, type Otp } from './otp';
 import type { Sessions } from './sessions';
 import { toMe, type Profile, type Users } from './users';
+import type { UserPreferencesService } from './preferences';
 
 export const INTERNALS = Symbol('identity internals');
 export interface Internals {
@@ -12,6 +13,7 @@ export interface Internals {
   sessions: Sessions;
   users: Users;
   phoneHashKey: string;
+  userPreferences: UserPreferencesService;
 }
 
 const problem = <S extends number>(status: S, code: string, title: string) => ({ status, body: { type: 'about:blank', title, status, code } });
@@ -97,5 +99,29 @@ export class MeController {
         return { status: 204, body: undefined };
       },
     });
+  }
+}
+
+/**
+ * Preferences endpoint — not yet in the shared meContract (see docs/contract-requests/M8-preferences.md).
+ * GET  /v1/me/preferences  → UserPrefs JSON
+ * PATCH /v1/me/preferences → merged UserPrefs JSON
+ */
+@Controller('v1/me/preferences')
+export class PreferencesController {
+  constructor(@Inject(INTERNALS) private readonly internals: Internals) {}
+
+  @Get()
+  async get(@Req() { principal: { userId } }: AuthenticatedRequest) {
+    return this.internals.userPreferences.get(userId);
+  }
+
+  @Patch()
+  @HttpCode(200)
+  async update(@Req() { principal: { userId } }: AuthenticatedRequest, @Body() body: unknown) {
+    const { UserPrefsSchema } = await import('./preferences');
+    const patch = UserPrefsSchema.safeParse(body);
+    if (!patch.success) throw new HttpException({ type: 'about:blank', title: 'Invalid preferences', status: 400, code: 'invalid_prefs' }, 400);
+    return this.internals.userPreferences.update(userId, patch.data);
   }
 }
