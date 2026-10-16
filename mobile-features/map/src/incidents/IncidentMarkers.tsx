@@ -19,6 +19,14 @@ const INCIDENT_CONFIG: Record<
   { emoji: string; color: string; labelKey: string }
 > = {
   accident:     { emoji: '🚨', color: '#EF4444', labelKey: 'incidents.typeAccident' },
+  road_closure: { emoji: '🚫', color: '#EF4444', labelKey: 'incidents.typeRoadClosure' },
+  pothole:      { emoji: '🕳️', color: '#8B5CF6', labelKey: 'incidents.typePothole' },
+  flooding:     { emoji: '🌊', color: '#3B82F6', labelKey: 'incidents.typeFlooding' },
+  traffic_jam:  { emoji: '🚗', color: '#F59E0B', labelKey: 'incidents.typeTrafficJam' },
+  wrong_way:    { emoji: '⛔', color: '#EF4444', labelKey: 'incidents.typeWrongWay' },
+  hazard:       { emoji: '⚠️', color: '#F97316', labelKey: 'incidents.typeHazard' },
+  police:       { emoji: '👮', color: '#3B82F6', labelKey: 'incidents.typePolice' },
+  speed_camera: { emoji: '📷', color: '#6B7280', labelKey: 'incidents.typeSpeedCamera' },
   roadblock:    { emoji: '🚧', color: '#F59E0B', labelKey: 'incidents.typeRoadblock' },
   flood:        { emoji: '🌊', color: '#3B82F6', labelKey: 'incidents.typeFlood' },
   construction: { emoji: '🏗️', color: '#F97316', labelKey: 'incidents.typeConstruction' },

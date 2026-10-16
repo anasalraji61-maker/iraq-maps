@@ -14,8 +14,11 @@ import { t } from '../strings';
 // ---------------------------------------------------------------------------
 const REPORT_TYPES: Array<{ type: IncidentType; emoji: string; labelKey: string }> = [
   { type: 'accident',     emoji: '🚨', labelKey: 'incidents.typeAccident' },
+  { type: 'road_closure', emoji: '🚫', labelKey: 'incidents.typeRoadClosure' },
+  { type: 'traffic_jam',  emoji: '🚗', labelKey: 'incidents.typeTrafficJam' },
+  { type: 'pothole',      emoji: '🕳️', labelKey: 'incidents.typePothole' },
+  { type: 'flooding',     emoji: '🌊', labelKey: 'incidents.typeFlooding' },
   { type: 'roadblock',    emoji: '🚧', labelKey: 'incidents.typeRoadblock' },
-  { type: 'flood',        emoji: '🌊', labelKey: 'incidents.typeFlood' },
   { type: 'construction', emoji: '🏗️', labelKey: 'incidents.typeConstruction' },
   { type: 'other',        emoji: '⚠️', labelKey: 'incidents.typeOther' },
 ];
@@ -52,8 +55,10 @@ export function IncidentReportButton({
       const res = await api.incidents.create({
         body: {
           type,
+          severity: 'moderate',
           location: userLocation,
           ttlHours: 2,
+          anonymous: false,
         },
       });
       if (res.status === 201) {
