@@ -1,4 +1,7 @@
 // Pure functions, usable from Node and React Native. Coordinates are [lng, lat] (WGS84), no antimeridian handling.
+export * from './iraq-data';
+export * from './iraq-routing';
+export * from './iraq-search';
 import type { BBox, LngLat } from '@iraq-maps/contracts';
 
 const EARTH_RADIUS_M = 6_371_008.8;
