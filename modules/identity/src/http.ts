@@ -1,11 +1,14 @@
 import { authContract, meContract, PortTokens, type AuthPrincipal, type IdentityPort, type Locale } from '@iraq-maps/contracts';
-import { Body, Controller, Get, HttpCode, HttpException, Inject, Injectable, Patch, Req, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpException, Inject, Injectable, Patch, Req, SetMetadata, type CanActivate, type ExecutionContext } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { mac } from './crypto';
 import { RESEND_AFTER_SEC, type Otp } from './otp';
 import type { Sessions } from './sessions';
 import { toMe, type Profile, type Users } from './users';
 import type { UserPreferencesService } from './preferences';
+
+/** Decorator that marks a route as publicly accessible (no auth required). */
+export const Public = () => SetMetadata('isPublic', true);
 
 export const INTERNALS = Symbol('identity internals');
 export interface Internals {

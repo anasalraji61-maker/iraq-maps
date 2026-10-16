@@ -8,7 +8,7 @@ import { identityConfig } from './config';
 import { AuthController, INTERNALS, MeController, PreferencesController } from './http';
 import { UserPreferencesService } from './preferences';
 
-export { IdentityAuthGuard, type AuthenticatedRequest } from './http';
+export { IdentityAuthGuard, Public, type AuthenticatedRequest } from './http';
 export { writeAdminAudit, type AdminAction, type TargetType } from './audit';
 export { UserPreferencesService, UserPrefsSchema, type UserPrefs } from './preferences';
 export {

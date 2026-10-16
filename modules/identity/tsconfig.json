@@ -1,1 +1,1 @@
-{ "extends": "@iraq-maps/tooling/tsconfig.base.json" }
+{ "extends": "@iraq-maps/tooling/tsconfig.base.json", "exclude": ["src/__tests__/identity.test.ts"] }

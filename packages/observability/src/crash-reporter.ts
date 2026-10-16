@@ -8,6 +8,14 @@
  * No third-party crash SDK. All reports go to POST /analytics/crashes.
  */
 
+// Ambient declarations for DOM types not included in ES2023 lib.
+// These are present at runtime in React Native and browser environments.
+declare const window: { addEventListener: (e: string, h: (ev: unknown) => void) => void; removeEventListener: (e: string, h: (ev: unknown) => void) => void } | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ErrorEvent = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PromiseRejectionEvent = any;
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 export interface StackFrame {

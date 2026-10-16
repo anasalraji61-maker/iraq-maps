@@ -17,7 +17,7 @@
  */
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { and, asc, between, desc, eq, gte, inArray, lte, ne, sql } from 'drizzle-orm';
+import { and, asc, between, desc, eq, gte, lte, ne, sql } from 'drizzle-orm';
 import type { Db } from '@iraq-maps/db-kit';
 import type {
   Appointment,

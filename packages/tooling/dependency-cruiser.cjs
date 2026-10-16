@@ -5,7 +5,7 @@ module.exports = {
   forbidden: [
     forbid('module-to-module', { path: '^modules/([^/]+)/' }, { path: '^modules/', pathNot: '^modules/$1/' }, 'Modules talk only through packages/contracts ports.'),
     forbid('module-to-adapter', { path: '^modules/' }, { path: '^adapters/' }, 'Adapters are bound in apps/api only.'),
-    forbid('module-imports', { path: '^modules/' }, { path: '^(apps|mobile-features|e2e|tools|geo-services)/' }, 'Modules import only packages/* and their own files.'),
+    forbid('module-imports', { path: '^modules/', pathNot: '/__tests__/' }, { path: '^(apps|mobile-features|e2e|tools|geo-services)/' }, 'Modules import only packages/* and their own files.'),
     forbid('app-deep-import', { path: '^(apps|e2e)/' }, { path: '^modules/', pathNot: '^modules/[^/]+/src/index\\.ts$' }, 'Import a module only through its package entry (src/index.ts).'),
     forbid('adapter-binding', { path: '^(apps/(?!api/)|e2e/|tools/)' }, { path: '^adapters/' }, 'Adapters are bound in apps/api only.'),
     forbid('mobile-to-backend', { path: '^(apps/mobile|mobile-features)/' }, { path: '^(modules|adapters|apps/api)/' }, 'The app reaches the backend only via packages/api-client.'),

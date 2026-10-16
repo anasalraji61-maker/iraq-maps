@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@iraq-maps/contracts": "workspace:*",
-    "@iraq-maps/config": "workspace:*",
     "@iraq-maps/db-kit": "workspace:*",
     "@nestjs/common": "^11.2.7",
     "@ts-rest/nest": "3.52.1",

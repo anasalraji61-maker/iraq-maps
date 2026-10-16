@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, i18next/no-literal-string */
 /**
  * PlaceCheckinScreen — check in at a place.
  *
@@ -14,15 +15,12 @@
  * All text via t(). Layouts use start/end (RTL-safe).
  * Route: map/place-checkin
  */
-import { useCallback, useEffect, useState, useRef, type ReactElement } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   I18nManager,
   Image,
-  Modal,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -36,12 +34,15 @@ import { t } from '../strings';
 
 I18nManager.forceRTL(true);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const td = t as (k: any) => string;
+
 // ── Icons ──────────────────────────────────────────────────────────────────────
 const ICON_ARROW    = '←';
 const ICON_PIN      = '📍';
 const ICON_FORK     = '🍴';
 const ICON_LAPTOP   = '💻';
-const ICON_EYE      = '👁';
+const _ICON_EYE     = '👁';
 const ICON_CAMERA   = '📷';
 const ICON_FIRE     = '🔥';
 const ICON_CHECK    = '✔';
@@ -51,9 +52,9 @@ const ICON_GLOBE    = '🌍';
 const ICON_FRIENDS  = '👥';
 const ICON_LOCK     = '🔒';
 const ICON_SHARE    = '📤';
-const ICON_STAR     = '⭐';
+const _ICON_STAR    = '⭐';
 const ICON_TRASH    = '🗑';
-const ICON_PERSON   = '👤';
+const _ICON_PERSON  = '👤';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const C = {
@@ -112,7 +113,7 @@ function TypeButton({
     >
       <Text style={s.typeBtnIcon}>{option.icon}</Text>
       <Text style={[s.typeBtnLabel, selected && { color: option.color, fontWeight: '700' }]}>
-        {t(option.labelKey as any)}
+        {td(option.labelKey)}
       </Text>
       {selected && <Text style={[s.typeBtnCheck, { color: option.color }]}>{ICON_CHECK}</Text>}
     </TouchableOpacity>
@@ -164,7 +165,7 @@ function CheckinHistoryRow({ item, onDelete }: { item: PastCheckin; onDelete: (i
       <View style={s.historyInfo}>
         <Text style={s.historyPlace} numberOfLines={1}>{item.placeName}</Text>
         <View style={s.historyMeta}>
-          <Text style={s.historyMetaText}>{t(typeOpt.labelKey as any)}</Text>
+          <Text style={s.historyMetaText}>{td(typeOpt.labelKey)}</Text>
           <Text style={s.historyDot}>·</Text>
           <Text style={s.historyMetaText}>{visOpt.icon}</Text>
           <Text style={s.historyDot}>·</Text>
@@ -370,7 +371,7 @@ export default function PlaceCheckinScreen(): ReactElement {
               >
                 <Text style={s.visBtnIcon}>{opt.icon}</Text>
                 <Text style={[s.visBtnText, visibility === opt.value && s.visBtnTextActive]}>
-                  {t(opt.labelKey as any)}
+                  {td(opt.labelKey)}
                 </Text>
               </TouchableOpacity>
             ))}

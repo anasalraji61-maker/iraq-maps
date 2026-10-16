@@ -17,10 +17,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Clipboard,
-  FlatList,
   I18nManager,
   Linking,
   Modal,
@@ -34,7 +32,6 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSession } from '@iraq-maps/mobile-kit';
 import { t } from '../strings';
 
 I18nManager.forceRTL(true);

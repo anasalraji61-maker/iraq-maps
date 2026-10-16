@@ -40,3 +40,4 @@ export type { HashtagTrendData } from './components/HashtagTrend';
 export { FeaturedPost, FeaturedSection } from './components/FeaturedPost';
 export type { FeaturedPostData } from './components/FeaturedPost';
 export { PostStats } from './components/PostStats';
+export { default as MentionsScreen } from './screens/MentionsScreen';

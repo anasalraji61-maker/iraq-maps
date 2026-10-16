@@ -521,7 +521,7 @@ export class MessagingService implements UserDataEraser {
   async createQuickReply(
     providerId: string,
     template: QuickReplyInput,
-    variables: Record<string, string> = {},
+    _variables: Record<string, string> = {},
   ) {
     if (!template.label.trim() || !template.text.trim()) {
       throw new BadRequestException({ code: 'invalid_template' });

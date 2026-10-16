@@ -114,7 +114,7 @@ export class AnalyticsController {
           userId: (report.context?.userId as string | undefined) ?? undefined,
         },
       ],
-      device: (report.deviceInfo as AnalyticsBatch['device']) ?? {
+      device: (report.deviceInfo as unknown as AnalyticsBatch['device']) ?? {
         platform: 'unknown',
         osVersion: 'unknown',
         appVersion: report.appVersion ?? 'unknown',

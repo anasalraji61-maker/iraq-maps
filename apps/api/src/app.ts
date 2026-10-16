@@ -23,7 +23,11 @@ import { paymentsModule, paymentsMigrationsDir } from '@iraq-maps/payments';
 import { socialModule, socialMigrationsDir } from '@iraq-maps/social';
 import { SearchModule, searchMigrationsDir } from '@iraq-maps/search';
 import { reviewsModule, reviewsMigrationsDir } from '@iraq-maps/reviews';
+import { reputationModule, reputationMigrationsDir } from '@iraq-maps/reputation';
 import { geocodingModule } from '@iraq-maps/geocoding';
+import { AnalyticsController } from './analytics/analytics.controller';
+import { AnalyticsService } from './analytics/analytics.service';
+import { MetricsDashboardService } from './analytics/metrics-dashboard';
 import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
 import { sql } from 'drizzle-orm';
 import {
@@ -67,6 +71,7 @@ export const moduleMigrations = [
   { schema: 'social', migrationsDir: socialMigrationsDir },
   { schema: 'search', migrationsDir: searchMigrationsDir },
   { schema: 'reviews', migrationsDir: reviewsMigrationsDir },
+  { schema: 'reputation', migrationsDir: reputationMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -299,15 +304,19 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         socialModule({ db, eventBus: bus }),
         SearchModule.register({ db, cache: redis }),
         reviewsModule({ db }),
+        reputationModule({ db, eventBus: bus }),
         geocodingModule(),
       ],
-      controllers: [HealthController, ...(opts.controllers ?? [])],
+      controllers: [HealthController, AnalyticsController, ...(opts.controllers ?? [])],
       providers: [
         { provide: APP_GUARD, useClass: IdentityAuthGuard },
         { provide: PortTokens.EventBus, useValue: bus },
         { provide: 'HEALTH_DB', useValue: db },
         { provide: 'HEALTH_QUEUES', useValue: [messagingQueue] },
         { provide: 'HEALTH_REDIS', useValue: redis },
+        AnalyticsService,
+        MetricsDashboardService,
+        { provide: 'ADMIN_KEY_REF', useValue: { value: process.env['ADMIN_API_KEY'] } },
       ],
       exports: [PortTokens.EventBus],
     },

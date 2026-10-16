@@ -44,7 +44,7 @@ async function login(): Promise<Session> {
 }
 
 /** Creates a provider profile and returns provider id */
-async function createProvider(session: Session): Promise<string> {
+async function _createProvider(session: Session): Promise<string> {
   const res = await call('POST', '/v1/providers', {
     token: session.accessToken,
     payload: {
@@ -63,7 +63,7 @@ async function createProvider(session: Session): Promise<string> {
 }
 
 /** Build a future date string offset by hours from now */
-function futureDate(hoursFromNow: number): string {
+function _futureDate(hoursFromNow: number): string {
   const d = new Date(Date.now() + hoursFromNow * 3600_000);
   return d.toISOString();
 }
@@ -348,7 +348,7 @@ describe.skipIf(skip)('Appointments – booking a slot', () => {
     const slot = slotRes.json() as { id?: string };
     if (!slot.id) return;
 
-    const first = await call('POST', '/v1/appointments/bookings', {
+    const _first = await call('POST', '/v1/appointments/bookings', {
       token: customer.accessToken,
       payload: { slotId: slot.id },
     });

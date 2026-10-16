@@ -15,10 +15,10 @@
  */
 /* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
-import { type ListingCategory, type ListingSummary, type ListingType, type CreateListingBody } from '@iraq-maps/contracts';
+import { type ProvListingCategory as ListingCategory, type ListingSummary, type ProvListingType as ListingType, type CreateListingBody } from '@iraq-maps/contracts';
 import { formatNumber } from '@iraq-maps/i18n';
 import { useApi, useSession } from '@iraq-maps/mobile-kit';
-import { useCallback, useEffect, useReducer, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useReducer, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -27,7 +27,6 @@ import {
   I18nManager,
   Image,
   Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -282,7 +281,7 @@ function ListingFormModal({
   // Sync when opening a different listing
   useEffect(() => {
     setForm({ ...FORM_INIT, ...initialForm });
-  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   const set = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value, errors: { ...prev.errors, [key]: '' } }));
@@ -400,7 +399,7 @@ function ListingFormModal({
             onChangeText={(v) => set('priceIqd', v.replace(/[^0-9]/g, ''))}
             placeholder={t('listings.form.pricePlaceholder')}
             keyboardType="numeric"
-            textAlign="start"
+            textAlign="right"
             maxLength={12}
           />
           {!!form.errors.priceIqd && <RNText style={styles.fieldError}>{form.errors.priceIqd}</RNText>}
@@ -475,8 +474,9 @@ function ListingFormModal({
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export function ListingsManagementScreen(): ReactElement {
-  const api = useApi();
-  const session = useSession();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = useApi() as any;
+  const _session = useSession();
   const [state, dispatch] = useReducer(reducer, {
     listings: [],
     nextCursor: null,

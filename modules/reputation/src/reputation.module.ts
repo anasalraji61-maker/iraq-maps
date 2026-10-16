@@ -1,3 +1,5 @@
+export const reputationMigrationsDir = new URL('../migrations', import.meta.url).pathname;
+
 import type { Db } from '@iraq-maps/db-kit';
 import type { EventBus } from '@iraq-maps/contracts';
 import { PortTokens } from '@iraq-maps/contracts';

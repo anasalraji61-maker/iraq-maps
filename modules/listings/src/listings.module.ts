@@ -11,8 +11,6 @@
  */
 
 import type { Db } from '@iraq-maps/db-kit';
-import { PortTokens } from '@iraq-maps/contracts';
-import type { IdentityPort } from '@iraq-maps/contracts';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { ListingsController, LISTINGS_SERVICE } from './listings.controller';
 import { ListingsService, type MediaSigningPort, type ProviderSummaryPort } from './listings.service';

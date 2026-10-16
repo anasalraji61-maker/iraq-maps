@@ -6,12 +6,11 @@
 import {
   listingsContract,
   type AuthPrincipal,
-  type ProvListingId,
   type ListingCategoryId,
   PortTokens,
 } from '@iraq-maps/contracts';
 import type { IdentityPort } from '@iraq-maps/contracts';
-import { NestRequestShapes, TsRestHandler, tsRestHandler } from '@ts-rest/nest';
+import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import {
   Controller,
   ForbiddenException,
@@ -20,8 +19,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ListingsService } from './listings.service';
-
-type Req = NestRequestShapes<typeof listingsContract>;
 
 // ── Token for injection ───────────────────────────────────────────────────────
 

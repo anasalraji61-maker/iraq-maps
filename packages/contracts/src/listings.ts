@@ -8,7 +8,7 @@
  */
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
-import { CityId, LngLat, paginated, Problem, UserId } from './common';
+import { CityId, LngLat, paginated, Problem } from './common';
 import { ProviderId } from './providers';
 
 const c = initContract();

@@ -26,3 +26,5 @@ export { NavigationSettingsScreen } from './NavigationSettingsScreen';
 export type { AppearancePrefs, FontSize, NumberFormat, MapLanguage, DateFormat } from './AppearanceScreen';
 export type { MapSettings, MapStyle, DefaultCity, DistanceUnit, DefaultZoom } from './MapSettingsScreen';
 export type { NavigationSettings, TransportMode, NavNightMode, VoiceLocale, VoiceVolume } from './NavigationSettingsScreen';
+export { default as ActivityFeedScreen } from './screens/ActivityFeedScreen';
+export { default as ReferralScreen } from './screens/ReferralScreen';

@@ -66,7 +66,7 @@ export class AppointmentsController {
   }
 
   @TsRestHandler(appointmentsContract.listForProvider)
-  listForProvider(@CurrentUser() userId: string) {
+  listForProvider(@CurrentUser() _userId: string) {
     return tsRestHandler(appointmentsContract.listForProvider, async ({ params }) => {
       try {
         const result = await this.svc.getProviderAppointments(params.providerId, undefined, {});
@@ -78,7 +78,7 @@ export class AppointmentsController {
   }
 
   @TsRestHandler(appointmentsContract.update)
-  update(@CurrentUser() userId: string) {
+  update(@CurrentUser() _userId: string) {
     return tsRestHandler(appointmentsContract.update, async ({ params, body }) => {
       try {
         let appt;

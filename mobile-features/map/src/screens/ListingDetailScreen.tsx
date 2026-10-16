@@ -31,10 +31,8 @@ import {
 import {
   ActivityIndicator,
   Dimensions,
-  FlatList,
   I18nManager,
   Image,
-  Linking,
   Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -251,7 +249,7 @@ export function ListingDetailScreen(): ReactElement {
 
     void load();
     return () => { cancelled = true; };
-  }, [listingId, baseUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [listingId, baseUrl]);
 
   async function fetchRelated(detail: ListingDetail) {
     try {

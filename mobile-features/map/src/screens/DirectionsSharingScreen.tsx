@@ -12,7 +12,7 @@
  * All text via t(). Layouts use start/end (RTL-safe).
  * Route: map/directions-sharing
  */
-import { useCallback, useEffect, useState, type ReactElement } from 'react';
+import { useCallback, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -30,6 +30,9 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { t } from '../strings';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const td = t as (k: any) => string;
 
 I18nManager.forceRTL(true);
 
@@ -69,7 +72,7 @@ const C = {
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type TransportMode = 'car' | 'walk' | 'bike' | 'transit';
-type ShareMethod   = 'whatsapp' | 'sms' | 'copy' | 'more';
+type _ShareMethod   = 'whatsapp' | 'sms' | 'copy' | 'more';
 
 type GeneratedRoute = {
   shareLink: string;
@@ -129,7 +132,7 @@ export default function DirectionsSharingScreen(): ReactElement {
   const [generating, setGenerating]   = useState(false);
   const [route, setRoute]             = useState<GeneratedRoute | null>(null);
   const [sendEta, setSendEta]         = useState(false);
-  const [meetHere, setMeetHere]       = useState(false);
+  const [_meetHere, _setMeetHere]     = useState(false);
   const [meetLink, setMeetLink]       = useState<string | null>(null);
   const [copiedLink, setCopiedLink]   = useState(false);
   const [copiedMeet, setCopiedMeet]   = useState(false);
@@ -262,7 +265,7 @@ export default function DirectionsSharingScreen(): ReactElement {
             >
               <Text style={s.modeBtnIcon}>{m.icon}</Text>
               <Text style={[s.modeBtnText, mode === m.value && s.modeBtnTextActive]}>
-                {t(m.labelKey as any)}
+                {td(m.labelKey)}
               </Text>
             </TouchableOpacity>
           ))}

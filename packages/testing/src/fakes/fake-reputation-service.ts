@@ -174,11 +174,6 @@ export class FakeReputationService {
   }
 
   getTotalLikesForUser(userId: UserId): number {
-    const userReviewIds = new Set(
-      this.reviewLikes.map((l) => l.reviewId),
-      // We don't track which reviews belong to which user in this fake,
-      // so we use the ledger to infer
-    );
     return this.ledger
       .filter((e) => e.userId === userId && e.reason === 'review_liked')
       .length;
@@ -255,7 +250,7 @@ export class FakeReputationService {
       { slug: 'first_review', met: reviews >= 1 },
       { slug: 'reviewer_5', met: reviews >= 5 },
       { slug: 'reviewer_25', met: reviews >= 25 },
-      { slug: 'incident_reporter', met: this.getUserIncidents(userId).length >= 1 },
+      { slug: 'incident_reporter', met: incidents >= 1 },
       { slug: 'helpful_10', met: totalLikes >= 10 },
       { slug: 'points_100', met: points >= 100 },
       { slug: 'points_500', met: points >= 500 },

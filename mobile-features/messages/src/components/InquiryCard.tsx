@@ -2,7 +2,6 @@
  * InquiryCard — business-inbox card showing a customer inquiry with
  * status badge, unread count, assigned staff, and customer avatar.
  */
-import { Card, Text } from '@iraq-maps/ui';
 import { type ReactElement } from 'react';
 import { Pressable, StyleSheet, View, Text as RNText } from 'react-native';
 import { t } from '../strings';
@@ -63,7 +62,7 @@ function initials(name: string): string {
 
 function CustomerAvatar({
   name,
-  avatarUrl,
+  avatarUrl: _avatarUrl,
   size = 44,
 }: {
   name: string;

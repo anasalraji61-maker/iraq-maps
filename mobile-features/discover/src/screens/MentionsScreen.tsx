@@ -31,6 +31,9 @@ import {
 import { useRouter } from 'expo-router';
 import { t } from '../strings';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const td = t as (k: any) => string;
+
 I18nManager.forceRTL(true);
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -41,8 +44,8 @@ const ICON_REVIEW   = '⭐';
 const ICON_COMMENT  = '💬';
 const ICON_REPLY    = '↪';
 const ICON_TRASH    = '🗑';
-const ICON_FILTER   = '🔍';
-const ICON_CHECK    = '✔';
+const _ICON_FILTER   = '🔍';
+const _ICON_CHECK    = '✔';
 const ICON_BELL     = '🔔';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
@@ -310,7 +313,7 @@ export default function MentionsScreen(): ReactElement {
             onPress={() => setFilter(opt.value)}
           >
             <Text style={[s.filterBtnText, filter === opt.value && s.filterBtnTextActive]}>
-              {t(opt.labelKey as any)}
+              {td(opt.labelKey)}
             </Text>
           </TouchableOpacity>
         ))}

@@ -164,7 +164,7 @@ export class AnalyticsService {
             ${JSON.stringify(cleanProps)}::jsonb,
             ${deviceJson}::jsonb,
             ${event.sequence ?? 0},
-            ${(batch.device as Record<string, unknown> | undefined)?.['appVersion'] ?? null},
+            ${(batch.device as unknown as Record<string, unknown> | undefined)?.['appVersion'] ?? null},
             ${event.timestamp}::timestamptz,
             now()
           )

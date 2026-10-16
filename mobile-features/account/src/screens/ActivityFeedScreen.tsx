@@ -12,7 +12,7 @@
  * All text via t(). Layouts use start/end (RTL-safe).
  * Route: account/activity-feed
  */
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +31,9 @@ import {
 import { useRouter } from 'expo-router';
 import { t } from '../strings';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const td = t as (k: any) => string;
+
 I18nManager.forceRTL(true);
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -44,11 +47,11 @@ const ICON_COMMENT  = '💬';
 const ICON_SAVE     = '🔖';
 const ICON_TRASH    = '🗑';
 const ICON_FILTER   = '🔬';
-const ICON_CALENDAR = '📅';
+const _ICON_CALENDAR = '📅';
 const ICON_GLOBE    = '🌍';
 const ICON_FRIENDS  = '👥';
 const ICON_LOCK     = '🔒';
-const ICON_EDIT     = '✏';
+const _ICON_EDIT     = '✏';
 const ICON_STATS    = '📊';
 const ICON_CLOCK    = '⏳';
 
@@ -152,7 +155,7 @@ function PrivacyPicker({
               >
                 <Text style={s.privacyOptionIcon}>{cfg.icon}</Text>
                 <Text style={[s.privacyOptionLabel, current === level && s.privacyOptionLabelActive]}>
-                  {t(cfg.labelKey as any)}
+                  {td(cfg.labelKey)}
                 </Text>
                 {current === level && <Text style={s.privacyCheck}>{'✔'}</Text>}
               </TouchableOpacity>
@@ -229,7 +232,7 @@ function DateRangePicker({
           style={s.datePresetBtn}
           onPress={() => setPreset(preset.days)}
         >
-          <Text style={s.datePresetText}>{t(preset.labelKey as any)}</Text>
+          <Text style={s.datePresetText}>{td(preset.labelKey)}</Text>
         </TouchableOpacity>
       ))}
       <View style={s.dateRangeDisplay}>
@@ -278,7 +281,7 @@ function ActivityRow({
             onPress={() => onChangePrivacy(item.id, item.privacy)}
           >
             <Text style={s.privacyBtnIcon}>{privCfg.icon}</Text>
-            <Text style={s.privacyBtnText}>{t(privCfg.labelKey as any)}</Text>
+            <Text style={s.privacyBtnText}>{td(privCfg.labelKey)}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.deleteActivityBtn} onPress={() => onDelete(item.id)}>
             <Text style={{ fontSize: 14, color: C.red }}>{ICON_TRASH}</Text>
@@ -378,6 +381,7 @@ export default function ActivityFeedScreen(): ReactElement {
       <TouchableOpacity style={s.filterToggle} onPress={() => setShowFilters((v) => !v)}>
         <Text style={s.filterToggleIcon}>{ICON_FILTER}</Text>
         <Text style={s.filterToggleText}>{t('activity.filterTitle')}</Text>
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <Text style={s.filterToggleArrow}>{showFilters ? '▲' : '▼'}</Text>
       </TouchableOpacity>
 
@@ -393,7 +397,7 @@ export default function ActivityFeedScreen(): ReactElement {
               >
                 <Text style={[s.typeFilterText, filter === opt.value && s.typeFilterTextActive]}>
                   {opt.value !== 'all' && ACTIVITY_CONFIG[opt.value as ActivityType].icon + ' '}
-                  {t(opt.labelKey as any)}
+                  {td(opt.labelKey)}
                 </Text>
               </TouchableOpacity>
             ))}

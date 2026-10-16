@@ -11,7 +11,7 @@
  * - Business-hours indicator
  * - Auto-reply toggle
  */
-import { Banner, Card, EmptyState, Screen, Text } from '@iraq-maps/ui';
+import { Banner, EmptyState, Screen, Text } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import {
   useCallback,
@@ -32,7 +32,6 @@ import {
   View,
   Text as RNText,
   TextInput,
-  ActivityIndicator,
 } from 'react-native';
 import { InquiryCard, type CustomerInquiry, type InquiryStatus } from '../components/InquiryCard';
 import { t } from '../strings';
@@ -76,6 +75,7 @@ interface CustomerContext {
 }
 
 // ─── Mock data (replaced by real API calls in integration) ────────────────────
+/* eslint-disable no-restricted-syntax */
 
 const MOCK_STAFF: StaffMember[] = [
   { id: 'staff-1', name: 'أحمد محمد', role: 'مدير', isOnline: true },
@@ -109,6 +109,7 @@ function makeMockInquiries(): CustomerInquiry[] {
     assignedTo: i % 3 === 0 ? MOCK_STAFF[0] : undefined,
   }));
 }
+/* eslint-enable no-restricted-syntax */
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -233,7 +234,8 @@ function AssignModal({
                 <RNText style={modalStyles.staffName}>{s.name}</RNText>
                 <RNText style={modalStyles.staffRole}>{s.role}</RNText>
               </View>
-              {s.id === current ? <RNText style={modalStyles.checkmark}>✓</RNText> : null}
+              {/* eslint-disable-next-line i18next/no-literal-string */}
+              {s.id === current ? <RNText style={modalStyles.checkmark}>{'✓'}</RNText> : null}
             </Pressable>
           ))}
           <Pressable style={modalStyles.cancelBtn} onPress={onClose}>
@@ -269,7 +271,8 @@ function CustomerContextPanel({
               <RNText style={ctxStyles.statLabel}>{t('inbox.ctx.reviews')}</RNText>
             </View>
             <View style={ctxStyles.stat}>
-              <RNText style={ctxStyles.statValue}>{ctx.avgRating.toFixed(1)} ★</RNText>
+              {/* eslint-disable-next-line i18next/no-literal-string */}
+              <RNText style={ctxStyles.statValue}>{ctx.avgRating.toFixed(1)} {'★'}</RNText>
               <RNText style={ctxStyles.statLabel}>{t('inbox.ctx.rating')}</RNText>
             </View>
           </View>
@@ -646,7 +649,8 @@ export function BusinessInboxScreen(): ReactElement {
           accessibilityRole="button"
           accessibilityLabel={t('inbox.settings')}
         >
-          <RNText style={styles.settingsIcon}>⚙️</RNText>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <RNText style={styles.settingsIcon}>{'⚙️'}</RNText>
         </Pressable>
       </View>
 

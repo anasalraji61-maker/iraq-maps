@@ -58,6 +58,7 @@ interface ContactSection {
 type ActiveTab = 'all' | 'users' | 'providers' | 'blocked';
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
+/* eslint-disable no-restricted-syntax */
 
 const MOCK_CONTACTS: Contact[] = [
   {
@@ -100,6 +101,8 @@ const MOCK_SUGGESTED: Contact[] = [
     placeId: 'place-sug-2', isBlocked: false,
   },
 ];
+
+/* eslint-enable no-restricted-syntax */
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -14,10 +14,9 @@
  */
 /* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
-import { type ListingCategory, type ListingFilters, type ListingSortMode, type ListingSummary } from '@iraq-maps/contracts';
+import { type ProvListingCategory as ListingCategory, type ListingSortMode, type ListingSummary } from '@iraq-maps/contracts';
 import { formatNumber } from '@iraq-maps/i18n';
 import { useApiBaseUrl } from '@iraq-maps/mobile-kit';
-import { tokens } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import {
   useCallback,
@@ -25,7 +24,6 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
   type ReactElement,
 } from 'react';
 import {
@@ -35,7 +33,6 @@ import {
   I18nManager,
   Image,
   Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -340,7 +337,6 @@ function FilterModal({
               onChangeText={(v) => dispatch({ type: 'SET_PRICE_MIN', value: v })}
               placeholder={t('listings.filterPriceMin')}
               keyboardType="numeric"
-              textAlign="start"
             />
             <RNText style={styles.filterPriceSep}>—</RNText>
             <TextInput
@@ -349,7 +345,6 @@ function FilterModal({
               onChangeText={(v) => dispatch({ type: 'SET_PRICE_MAX', value: v })}
               placeholder={t('listings.filterPriceMax')}
               keyboardType="numeric"
-              textAlign="start"
             />
           </View>
 
@@ -483,7 +478,7 @@ export function ListingsScreen(): ReactElement {
     return () => {
       if (searchTimer.current) clearTimeout(searchTimer.current);
     };
-  }, [state.query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state.query]);
 
   const handleListingPress = useCallback(
     (id: string) => {
@@ -540,7 +535,6 @@ export function ListingsScreen(): ReactElement {
           onChangeText={(v) => dispatch({ type: 'SET_QUERY', query: v })}
           placeholder={t('listings.searchPlaceholder')}
           returnKeyType="search"
-          textAlign="start"
           accessibilityLabel={t('listings.searchPlaceholder')}
         />
         {state.query.length > 0 && (

@@ -100,6 +100,14 @@ owners:
     - "modules/location-share/**"
     - "modules/incidents/**"
     - "modules/analytics/**"
+    - "modules/geocoding/**"
+    - "modules/reputation/**"
+    - "modules/reviews/**"
+    - "modules/listings/**"
+    - "modules/appointments/**"
+    - "docs/API_COMPLETE.md"
+    - "docs/CONTRIBUTING.md"
+    - "docs/MOBILE_FEATURES.md"
 auditors:
   auditor-security-final: security-privacy
   auditor-licensing-final: licensing-data

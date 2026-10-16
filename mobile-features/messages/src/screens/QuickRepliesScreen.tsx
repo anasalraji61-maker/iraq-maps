@@ -10,10 +10,9 @@
  * - Delete unused templates
  */
 import { Banner, EmptyState, Screen, Text } from '@iraq-maps/ui';
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import {
   Alert,
-  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -192,6 +191,7 @@ function TemplateCard({
               <RNText style={tcStyles.usageText}>{template.usageCount}×</RNText>
             </View>
           ) : null}
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           <RNText style={tcStyles.chevron}>{expanded ? '▲' : '▼'}</RNText>
         </View>
       </Pressable>
@@ -452,7 +452,7 @@ const emStyles = StyleSheet.create({
     color: '#212121',
   },
   textarea: { minHeight: 100 },
-  charCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'right', marginTop: 2 },
+  charCount: { fontSize: 11, color: '#BDBDBD', textAlign: 'auto' as const, marginTop: 2 },
   varRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   varChip: {
     borderRadius: 8,
@@ -536,7 +536,7 @@ export function QuickRepliesScreen(): ReactElement {
   const [sortMode, setSortMode] = useState<SortMode>('frequency');
   const [editTarget, setEditTarget] = useState<Partial<QuickReplyTemplate> | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [error, setError] = useState<string | undefined>();
+  const [error, _setError] = useState<string | undefined>();
 
   const categoryCounts = useCallback(
     (cat: TemplateCategory | 'all') =>
