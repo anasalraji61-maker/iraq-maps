@@ -25,3 +25,4 @@ export * from './payments';
 export * from './geocoding';
 export * from './reviews';
 export * from './reputation';
+export * from './listings';
