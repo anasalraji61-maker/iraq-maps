@@ -22,3 +22,5 @@ export * from './routing';
 export * from './test-ids';
 export * from './tour3d';
 export * from './payments';
+export * from './geocoding';
+export * from './reviews';
