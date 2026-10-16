@@ -4,6 +4,7 @@ export { EventCard } from './components/EventCard';
 export type { EventCardProps, RsvpStatus } from './components/EventCard';
 // Social features
 export { EventsScreen } from './screens/EventsScreen';
+export { EventCalendarScreen } from './screens/EventCalendarScreen';
 export { EventDetailScreen } from './screens/EventDetailScreen';
 export { CreateEventScreen } from './screens/CreateEventScreen';
 export { ChallengesScreen } from './screens/ChallengesScreen';

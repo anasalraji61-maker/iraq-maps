@@ -51,3 +51,4 @@ export { default as DirectionsSharingScreen } from './screens/DirectionsSharingS
 export { ListingDetailScreen } from './screens/ListingDetailScreen';
 export { ListingsScreen } from './screens/ListingsScreen';
 export { default as PlaceCheckinScreen } from './screens/PlaceCheckinScreen';
+export { EventMarker, type EventMarkerItem, type EventMarkerProps } from './components/EventMarker';
