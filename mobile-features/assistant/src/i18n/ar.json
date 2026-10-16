@@ -248,6 +248,22 @@
     "hotelDeals": "عروض الفنادق",
     "moreLike": "المزيد من {category}"
   },
+  "itinerary": {
+    "title": "خطة اليوم",
+    "dayTripIn": "جولة في {city}",
+    "hours": "ساعة",
+    "stopNumber": "المحطة {n}",
+    "showAllOnMap": "عرض {count} أماكن على الخريطة",
+    "saveCollection": "حفظ كمجموعة",
+    "saveCollectionHint": "سيتم حفظ هذه الجولة في مجموعاتك.",
+    "share": "مشاركة",
+    "viewOnMap": "خريطة",
+    "navigate": "ملاحة",
+    "navigateTo": "الملاحة إلى {name}",
+    "startNavigation": "ابدأ الملاحة من المحطة الأولى",
+    "noStops": "لا توجد محطات في هذه الجولة.",
+    "tips": "نصائح مفيدة"
+  },
   "contextual": {
     "title": "المساعد الذكي",
     "whatNearMe": "ما القريب مني؟",

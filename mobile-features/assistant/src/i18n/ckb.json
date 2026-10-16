@@ -248,6 +248,22 @@
     "hotelDeals": "ئۆتێلی تایبەت",
     "moreLike": "زیاتر لە {category}"
   },
+  "itinerary": {
+    "title": "پلانی ڕۆژ",
+    "dayTripIn": "گەشت لە {city}",
+    "hours": "کات‌ژمێر",
+    "stopNumber": "وەستگە {n}",
+    "showAllOnMap": "نیشاندانی {count} شوێن لە نەخشەدا",
+    "saveCollection": "پاشەکەوتکردن وەک کۆمەڵە",
+    "saveCollectionHint": "ئەم گەشتە دەکرێتە پاشەکەوت لە کۆمەڵەکانت.",
+    "share": "هاوبەشکردن",
+    "viewOnMap": "نەخشە",
+    "navigate": "ڕێنماییکردن",
+    "navigateTo": "ڕێنماییکردن بۆ {name}",
+    "startNavigation": "دەست‌پێکردنی ڕێنماییکردن لە یەکەم وەستگە",
+    "noStops": "هیچ وەستگەیەک نییە لەم گەشتەدا.",
+    "tips": "ئامۆژگاری سوودمەند"
+  },
   "contextual": {
     "title": "یارمەتیدەری زیرەک",
     "whatNearMe": "چی نزیکمە؟",

@@ -1,6 +1,12 @@
 /**
- * AssistantScreen — full-featured AI chat with rich message types,
- * context-awareness, voice stub, sharing, and RTL Arabic UI.
+ * AssistantScreen — full-featured AI chat with:
+ * - Context chips (near me / currently viewing place)
+ * - Itinerary request quick action
+ * - "Summarize reviews" quick action when viewing a place
+ * - Voice input waveform visual
+ * - Suggested follow-up questions after each reply
+ * - Copy and share per-message buttons
+ * - RTL Arabic-first UI
  */
 import { assistantTestIDs } from '@iraq-maps/contracts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -8,11 +14,13 @@ import { useState, useRef, useEffect, useCallback, type ReactElement } from 'rea
 import {
   Alert,
   Animated,
+  Clipboard,
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -30,6 +38,135 @@ import { t } from '../strings';
 import { ChatBubble, type ChatMessage as RichChatMessage } from '../components/ChatBubble';
 import { AssistantTyping } from '../components/AssistantTyping';
 import { QuickReplies, type QuickReply } from '../components/QuickReplies';
+
+// ─── Follow-up question suggestions ──────────────────────────────────────────
+// Heuristic: detect intent keywords in the last assistant reply and
+// surface 2–3 follow-up chips the user can tap to continue the conversation.
+
+function inferFollowUps(assistantReply: string, currentPlaceName?: string): string[] {
+  const suggestions: string[] = [];
+  if (/مطعم|أكل|غداء|عشاء|إفطار/.test(assistantReply)) {
+    suggestions.push('ما هي أوقات العمل؟', 'أرني على الخريطة', 'كيف أصل إليه؟');
+  } else if (/فندق|إقامة|حجز/.test(assistantReply)) {
+    suggestions.push('ما السعر التقريبي؟', 'أرني على الخريطة', 'هل يوجد بديل أرخص؟');
+  } else if (/طريق|اتجاهات|كيف أصل/.test(assistantReply)) {
+    suggestions.push('هل يوجد موقف سيارات؟', 'كم يستغرق الطريق؟', 'طريق بديل؟');
+  } else if (/معلم|سياحي|تاريخ/.test(assistantReply)) {
+    suggestions.push('متى يُفضّل الزيارة؟', 'ما مجاور هذا المكان؟', 'خطط لي يوماً هناك');
+  } else if (currentPlaceName) {
+    suggestions.push(`ما تقييمات ${currentPlaceName}؟`, `كيف أصل إلى ${currentPlaceName}؟`);
+  }
+  return suggestions.slice(0, 3);
+}
+
+// ─── Waveform visual (voice recording indicator) ─────────────────────────────
+
+function VoiceWaveform({ active }: { active: boolean }): ReactElement | null {
+  if (!active) return null;
+  const bars = [0.4, 0.7, 1.0, 0.6, 0.8, 0.5, 0.9, 0.4];
+  return (
+    <View style={waveStyles.container} accessibilityLabel={t('voice.waveformA11y')}>
+      {bars.map((h, i) => (
+        <View
+          key={i}
+          style={[waveStyles.bar, { height: 24 * h, opacity: 0.7 + 0.3 * h }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+const waveStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+  },
+  bar: {
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: '#1565C0',
+  },
+});
+
+// ─── Context chip row ─────────────────────────────────────────────────────────
+
+interface ContextChipRowProps {
+  currentPlaceName?: string;
+  onChipPress: (text: string) => void;
+}
+
+function ContextChipRow({ currentPlaceName, onChipPress }: ContextChipRowProps): ReactElement {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={chipStyles.scroll}
+      contentContainerStyle={chipStyles.content}
+    >
+      <Pressable
+        style={chipStyles.chip}
+        onPress={() => onChipPress('ماذا يوجد قريباً مني؟')}
+        accessibilityRole="button"
+      >
+        <Text style={chipStyles.chipText}>📍 قريباً مني</Text>
+      </Pressable>
+      {currentPlaceName ? (
+        <>
+          <Pressable
+            style={[chipStyles.chip, chipStyles.chipActive]}
+            onPress={() => onChipPress(`أخبرني أكثر عن ${currentPlaceName}`)}
+            accessibilityRole="button"
+          >
+            <Text style={[chipStyles.chipText, chipStyles.chipTextActive]}>
+              📌 {currentPlaceName}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={chipStyles.chip}
+            onPress={() => onChipPress(`لخّص تقييمات ${currentPlaceName}`)}
+            accessibilityRole="button"
+          >
+            <Text style={chipStyles.chipText}>⭐ تقييمات {currentPlaceName}</Text>
+          </Pressable>
+        </>
+      ) : null}
+      <Pressable
+        style={chipStyles.chip}
+        onPress={() => onChipPress('خطط لي جولة اليوم')}
+        accessibilityRole="button"
+      >
+        <Text style={chipStyles.chipText}>🗓️ خطط ليومي</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+const chipStyles = StyleSheet.create({
+  scroll: { flexGrow: 0 },
+  content: { paddingHorizontal: 12, paddingVertical: 6, gap: 8, flexDirection: 'row' },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F0F4FF',
+    borderWidth: 1,
+    borderColor: '#B3C3F0',
+  },
+  chipActive: {
+    backgroundColor: '#1565C0',
+    borderColor: '#1565C0',
+  },
+  chipText: {
+    fontSize: 13,
+    color: '#1565C0',
+    fontWeight: '500',
+  },
+  chipTextActive: {
+    color: '#FFF',
+  },
+});
 
 // Force RTL for Arabic
 I18nManager.forceRTL(true);
@@ -93,6 +230,8 @@ export function AssistantScreen(): ReactElement {
   const [inputText, setInputText] = useState('');
   const [lastSentText, setLastSentText] = useState('');
   const [voiceActive, setVoiceActive] = useState(false);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   const {
     messages,
@@ -143,20 +282,44 @@ export function AssistantScreen(): ReactElement {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   }, []);
 
+  // Derive current place context from router params
+  const { viewingPlaceId, viewingPlaceName } = useLocalSearchParams<{
+    viewingPlaceId?: string;
+    viewingPlaceName?: string;
+  }>();
+
   const handleSend = async () => {
     const text = inputText.trim();
     if (!text || isLoading) return;
     setInputText('');
     setLastSentText(text);
+    setFollowUpSuggestions([]);
     await send(text);
     scrollToEnd();
   };
 
   const handleRetry = async () => {
     if (!lastSentText || isLoading) return;
+    setFollowUpSuggestions([]);
     await send(lastSentText);
     scrollToEnd();
   };
+
+  // Copy a message to clipboard
+  const handleCopyMessage = useCallback((content: string, idx: number) => {
+    Clipboard.setString(content);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  }, []);
+
+  // Share a single message
+  const handleShareMessage = useCallback(async (content: string) => {
+    try {
+      await Share.share({ message: content });
+    } catch {
+      // cancelled
+    }
+  }, []);
 
   const handleQuickReply = (label: string) => {
     setInputText(label);
@@ -239,6 +402,16 @@ export function AssistantScreen(): ReactElement {
     return m as RichChatMessage;
   });
 
+  // Derive follow-up suggestions from last assistant reply (not on loading)
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      const lastMsg = [...messages].reverse().find(m => m.role === 'assistant');
+      if (lastMsg) {
+        setFollowUpSuggestions(inferFollowUps(lastMsg.content, viewingPlaceName));
+      }
+    }
+  }, [isLoading, messages, viewingPlaceName]);
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -292,14 +465,38 @@ export function AssistantScreen(): ReactElement {
         accessibilityLiveRegion="polite"
         onContentSizeChange={scrollToEnd}
         renderItem={({ item, index }) => (
-          <ChatBubble
-            message={item}
-            index={index}
-            onPlacePress={handlePlacePress}
-            onRoutePress={handleRoutePress}
-            onQuickReply={handleBubbleQuickReply}
-            onRatingSubmit={handleRatingSubmit}
-          />
+          <View>
+            <ChatBubble
+              message={item}
+              index={index}
+              onPlacePress={handlePlacePress}
+              onRoutePress={handleRoutePress}
+              onQuickReply={handleBubbleQuickReply}
+              onRatingSubmit={handleRatingSubmit}
+            />
+            {item.role === 'assistant' ? (
+              <View style={styles.msgActions}>
+                <Pressable
+                  style={styles.msgActionBtn}
+                  onPress={() => handleCopyMessage(item.content, index)}
+                  accessibilityRole="button"
+                  accessibilityLabel="نسخ"
+                >
+                  <Text style={styles.msgActionText}>
+                    {copiedIdx === index ? '✓ تم النسخ' : '📋 نسخ'}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={styles.msgActionBtn}
+                  onPress={() => { void handleShareMessage(item.content); }}
+                  accessibilityRole="button"
+                  accessibilityLabel="مشاركة"
+                >
+                  <Text style={styles.msgActionText}>↑ مشاركة</Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
         )}
         ListHeaderComponent={
           showQuickReplies ? (
@@ -371,6 +568,43 @@ export function AssistantScreen(): ReactElement {
         </Pressable>
       ) : null}
 
+      {/* Context chips (shown once there are messages) */}
+      {messages.length > 0 && !isLoading ? (
+        <ContextChipRow
+          currentPlaceName={viewingPlaceName}
+          onChipPress={(text) => {
+            setInputText(text);
+            inputRef.current?.focus();
+          }}
+        />
+      ) : null}
+
+      {/* Follow-up suggestions after last assistant reply */}
+      {followUpSuggestions.length > 0 && !isLoading ? (
+        <View style={styles.followUpRow}>
+          <Text style={styles.followUpLabel}>اقتراحات:</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.followUpScroll}
+          >
+            {followUpSuggestions.map((s, i) => (
+              <Pressable
+                key={i}
+                style={styles.followUpChip}
+                onPress={() => {
+                  setInputText(s);
+                  inputRef.current?.focus();
+                }}
+                accessibilityRole="button"
+              >
+                <Text style={styles.followUpChipText}>{s}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
+
       {/* Quick replies (shown on empty chat) */}
       {showQuickReplies ? (
         <QuickReplies
@@ -381,14 +615,18 @@ export function AssistantScreen(): ReactElement {
 
       {/* Input row */}
       <View style={styles.inputRow}>
-        {/* Voice button */}
+        {/* Voice button with waveform */}
         <Pressable
           style={[styles.voiceBtn, voiceActive && styles.voiceBtnActive]}
           onPress={handleVoicePress}
           accessibilityRole="button"
           accessibilityLabel={t('search.micA11y')}
         >
-          <Text style={styles.voiceBtnIcon}>{t('search.micIcon')}</Text>
+          {voiceActive ? (
+            <VoiceWaveform active={voiceActive} />
+          ) : (
+            <Text style={styles.voiceBtnIcon}>{t('search.micIcon')}</Text>
+          )}
         </Pressable>
 
         <TextInput
@@ -648,5 +886,51 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  // Per-message copy/share actions
+  msgActions: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingBottom: 6,
+    justifyContent: 'flex-end',
+  },
+  msgActionBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: '#F0F0F0',
+  },
+  msgActionText: {
+    color: '#666',
+    fontSize: 12,
+  },
+  // Follow-up suggestions
+  followUpRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    gap: 6,
+  },
+  followUpLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 2,
+  },
+  followUpScroll: {
+    gap: 8,
+    flexDirection: 'row',
+  },
+  followUpChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  followUpChipText: {
+    color: '#3730A3',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

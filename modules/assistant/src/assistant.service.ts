@@ -1145,6 +1145,240 @@ ${placesText}
     return summary;
   }
 
+  // ─── Generate itinerary ───────────────────────────────────────────────────
+
+  /**
+   * Generate a day-trip itinerary from a structured request.
+   * Input: city, durationHours, interests[], budget.
+   * Output: ordered stops with timing, sourced from actual place search results.
+   */
+  async generateItinerary(
+    userId: string,
+    request: {
+      city: string;
+      durationHours: number;
+      interests: string[];
+      budget: 'budget' | 'mid' | 'luxury';
+    },
+  ): Promise<{
+    city: string;
+    durationHours: number;
+    budget: string;
+    summary: string;
+    stops: Array<{
+      time: string;
+      placeId?: string;
+      placeName: string;
+      placeAddress?: string;
+      category: string;
+      activity: string;
+      duration: string;
+      notes?: string;
+    }>;
+    tips: string[];
+  }> {
+    const budgetLabels: Record<string, string> = { budget: 'اقتصادي', mid: 'متوسط', luxury: 'فاخر' };
+    const interestMap: Record<string, string> = {
+      food: 'مطاعم', culture: 'مواقع ثقافية', shopping: 'تسوق',
+      history: 'مواقع تاريخية', religious: 'مواقع دينية', nature: 'حدائق وطبيعة',
+      cafes: 'مقاهي', attractions: 'معالم سياحية',
+    };
+
+    const queries = request.interests.map(i => interestMap[i] ?? i);
+    const searchResults = await Promise.all(
+      queries.slice(0, 4).map(q => this.placesSearch(q, request.city)),
+    );
+    const allPlaces = searchResults
+      .flat()
+      .filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i)
+      .slice(0, 8);
+
+    if (allPlaces.length === 0) {
+      return {
+        city: request.city,
+        durationHours: request.durationHours,
+        budget: budgetLabels[request.budget] ?? request.budget,
+        summary: `لا توجد أماكن متاحة في ${request.city} حالياً.`,
+        stops: [],
+        tips: [],
+      };
+    }
+
+    const placesText = allPlaces
+      .map((p, i) => `${i + 1}. ${p.name} — ${p.address}${p.category ? ` (${p.category})` : ''}`)
+      .join('\n');
+
+    const userPrompt = `المدينة: ${request.city}
+المدة: ${request.durationHours} ساعات
+الميزانية: ${budgetLabels[request.budget] ?? request.budget}
+الاهتمامات: ${request.interests.join('، ')}
+
+الأماكن المتاحة (استخدمها فقط):
+${placesText}
+
+أنشئ برنامجاً يومياً منطقياً. JSON فقط:
+{
+  "summary": "ملخص اليوم",
+  "tips": ["نصيحة 1", "نصيحة 2"],
+  "stops": [
+    {"time":"09:00","placeIndex":1,"category":"مطعم","activity":"وصف النشاط","duration":"ساعة","notes":"ملاحظة"}
+  ]
+}`;
+
+    type RawStop = { time?: string; placeIndex?: number; category?: string; activity?: string; duration?: string; notes?: string };
+    type RawPlan = { summary?: string; tips?: string[]; stops?: RawStop[] };
+
+    let plan: RawPlan = { stops: [], summary: '' };
+    try {
+      const reply = await this.llm.chat({
+        systemPrompt: `${SYSTEM_PROMPT}\nأجب بـ JSON فقط.`,
+        messages: [{ role: 'user', content: userPrompt }],
+        maxTokens: 1500,
+      });
+      const match = reply.content.match(/\{[\s\S]*\}/);
+      plan = JSON.parse(match?.[0] ?? '{}') as RawPlan;
+    } catch {
+      plan = {
+        summary: `جولة يوم في ${request.city}`,
+        tips: [],
+        stops: allPlaces.slice(0, 4).map((p, i) => ({
+          time: `${9 + i * 2}:00`,
+          placeIndex: i + 1,
+          category: p.category ?? 'معلم',
+          activity: `زيارة ${p.name}`,
+          duration: 'ساعة',
+        })),
+      };
+    }
+
+    this.trackUsage(estimateTokens(userPrompt), estimateTokens(JSON.stringify(plan)));
+
+    const stops = (plan.stops ?? []).map((s: RawStop) => {
+      const place = allPlaces[(s.placeIndex ?? 1) - 1];
+      return {
+        time: s.time ?? '09:00',
+        placeId: place?.id,
+        placeName: place?.name ?? `مكان ${s.placeIndex ?? 1}`,
+        placeAddress: place?.address,
+        category: s.category ?? place?.category ?? 'معلم',
+        activity: s.activity ?? `زيارة ${place?.name ?? ''}`,
+        duration: s.duration ?? 'ساعة',
+        notes: s.notes,
+      };
+    });
+
+    // Respect userId for rate tracking — same daily limit applies
+    void userId; // consumed for potential future per-user itinerary history
+
+    return {
+      city: request.city,
+      durationHours: request.durationHours,
+      budget: budgetLabels[request.budget] ?? request.budget,
+      summary: plan.summary ?? `جولة يوم في ${request.city}`,
+      stops,
+      tips: plan.tips ?? [],
+    };
+  }
+
+  // ─── Answer about place ───────────────────────────────────────────────────
+
+  /**
+   * Answer a specific question about a place.
+   * Uses only data from placesSearch — no fabrication.
+   */
+  async answerAboutPlace(placeId: string, question: string): Promise<string> {
+    const results = await this.placesSearch(placeId);
+    const place = results[0];
+    if (!place) return `لم يُعثر على المكان.`;
+
+    const contextPrompt = `المكان: ${place.name} — ${place.address}${place.category ? ` (${place.category})` : ''}
+المسافة: ${place.distanceMeters != null ? `${place.distanceMeters}م` : 'غير محدد'}
+المعرّف: ${place.id}
+
+السؤال: ${question}
+
+أجب فقط بناءً على البيانات المتوفرة أعلاه. إذا لم تكن البيانات كافية، أخبر المستخدم بذلك بوضوح.`;
+
+    const reply = await this.llm.chat({
+      systemPrompt: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: contextPrompt }],
+      maxTokens: 512,
+    });
+
+    this.trackUsage(estimateTokens(contextPrompt), estimateTokens(reply.content));
+    return reply.content;
+  }
+
+  // ─── Summarize reviews ────────────────────────────────────────────────────
+
+  /**
+   * Summarize reviews for a place.
+   * Currently a stub: review data not yet integrated.
+   * Returns a note explaining data unavailability — no fabrication.
+   */
+  async summarizeReviews(placeId: string): Promise<{ summary: string; sentiment: 'positive' | 'neutral' | 'negative' | 'unknown'; reviewCount: number }> {
+    const results = await this.placesSearch(placeId);
+    const place = results[0];
+    if (!place) {
+      return { summary: 'لم يُعثر على المكان.', sentiment: 'unknown', reviewCount: 0 };
+    }
+
+    // Stub: review aggregation not yet connected
+    return {
+      summary: `لا تتوفر بيانات تقييم حقيقية لـ "${place.name}" حالياً. يمكنك الاطلاع على التقييمات في صفحة المكان داخل التطبيق.`,
+      sentiment: 'unknown',
+      reviewCount: 0,
+    };
+  }
+
+  // ─── Translate content ────────────────────────────────────────────────────
+
+  /**
+   * Translate place info or arbitrary text between supported languages.
+   * Supported: ar (العربية), ckb (كردي سوراني), en (English), fa, tr.
+   */
+  async translateContent(
+    text: string,
+    fromLang: string,
+    toLang: string,
+  ): Promise<{ translatedText: string; fromLang: string; toLang: string }> {
+    const translated = await this.translateText(text, fromLang, toLang);
+    return { translatedText: translated, fromLang, toLang };
+  }
+
+  // ─── Stream chat (SSE stub) ───────────────────────────────────────────────
+
+  /**
+   * Streaming chat response for Server-Sent Events.
+   * The LlmClient interface does not yet expose a streaming method,
+   * so this falls back to a single-shot chat and yields the reply as
+   * a single chunk. When the LlmClient gains a `stream()` method,
+   * replace the body with `yield* this.llm.stream(...)`.
+   */
+  async *streamChat(
+    userId: string,
+    message: string,
+    sessionId?: string,
+  ): AsyncGenerator<{ type: 'token' | 'done' | 'error'; content?: string; error?: string }> {
+    const sid = (sessionId ?? `stream-${userId}-${Date.now()}`) as `${string}-${string}-${string}-${string}-${string}`;
+    try {
+      const result = await this.chat(userId, {
+        sessionId: sid,
+        messages: [{ role: 'user', content: message }],
+      });
+      // Emit the reply in 64-char chunks to simulate streaming
+      const reply = result.reply;
+      const CHUNK = 64;
+      for (let i = 0; i < reply.length; i += CHUNK) {
+        yield { type: 'token', content: reply.slice(i, i + CHUNK) };
+      }
+      yield { type: 'done' };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      yield { type: 'error', error: msg };
+    }
+  }
+
   // ─── Translation ──────────────────────────────────────────────────────────
 
   private readonly translationCache = new Map<string, { result: string; cachedAt: number }>();

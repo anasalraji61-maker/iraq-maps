@@ -248,6 +248,22 @@
     "hotelDeals": "Hotel deals",
     "moreLike": "More {category}"
   },
+  "itinerary": {
+    "title": "Day Trip",
+    "dayTripIn": "Trip in {city}",
+    "hours": "hr",
+    "stopNumber": "Stop {n}",
+    "showAllOnMap": "Show {count} places on map",
+    "saveCollection": "Save as Collection",
+    "saveCollectionHint": "This trip will be saved to your collections.",
+    "share": "Share",
+    "viewOnMap": "Map",
+    "navigate": "Navigate",
+    "navigateTo": "Navigate to {name}",
+    "startNavigation": "Start navigation from first stop",
+    "noStops": "No stops in this itinerary.",
+    "tips": "Helpful Tips"
+  },
   "contextual": {
     "title": "AI Assistant",
     "whatNearMe": "What's near me?",
