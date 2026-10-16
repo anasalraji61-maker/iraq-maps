@@ -48,12 +48,14 @@ interface PlacePhoto {
 
 const PRIMARY = '#1976D2';
 
+/* eslint-disable no-restricted-syntax */
 const FILTER_LABELS: Record<string, string> = {
   interior:   'الداخل',
   exterior:   'الخارج',
   food:       'الطعام',
   atmosphere: 'الأجواء',
 };
+/* eslint-enable no-restricted-syntax */
 const COLS    = 3;
 const THUMB_SIZE = 110;
 
@@ -287,6 +289,7 @@ export function PhotoGalleryScreen(): ReactElement {
             accessibilityRole="button"
             accessibilityLabel={t('photoGallery.grid')}
           >
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.toggleIcon}>⊞</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -295,6 +298,7 @@ export function PhotoGalleryScreen(): ReactElement {
             accessibilityRole="button"
             accessibilityLabel={t('photoGallery.list')}
           >
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.toggleIcon}>☰</Text>
           </TouchableOpacity>
         </View>
@@ -388,6 +392,7 @@ export function PhotoGalleryScreen(): ReactElement {
       >
         {uploading
           ? <ActivityIndicator color="#fff" size="small" />
+          /* eslint-disable-next-line i18next/no-literal-string */
           : <Text style={styles.fabIcon}>＋</Text>
         }
       </TouchableOpacity>

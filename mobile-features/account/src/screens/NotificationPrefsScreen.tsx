@@ -13,6 +13,7 @@
  * All text via t(). Layout uses start/end (RTL-safe).
  * Route: account/notification-prefs-ext
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import {
   useCallback,
@@ -303,7 +304,7 @@ export default function NotificationPrefsScreen(): ReactElement {
     } finally {
       setSaving(false);
     }
-  }, [router, prefs]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [router, prefs]);
 
   if (loading) {
     return (

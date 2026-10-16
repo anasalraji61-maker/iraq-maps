@@ -349,7 +349,20 @@
     "viewers": "من شاهد",
     "viewersTitle": "المشاهدون",
     "viewersEmpty": "لم يشاهد أحد هذه القصة بعد",
-    "optionsTitle": "الخيارات"
+    "optionsTitle": "الخيارات",
+    "cameraPermissionTitle": "إذن الكاميرا",
+    "cameraPermissionMsg": "يحتاج التطبيق إذن الكاميرا لالتقاط الصور",
+    "overlayPlaceholder": "أضف نصاً...",
+    "textPlaceholder": "اكتب شيئاً...",
+    "tagPlace": "وسّم مكاناً",
+    "searchPlace": "ابحث عن مكان",
+    "privacyTitle": "من يمكنه الرؤية؟",
+    "routeDistance": "المسافة: {{value}}",
+    "routeDuration": "المدة: {{value}}",
+    "camera": "كاميرا",
+    "preview": "معاينة",
+    "atPlace": "في {{place}}",
+    "textTool": "نص"
   },
   "events": {
     "title": "الفعاليات",
@@ -397,7 +410,7 @@
     "title": "التحديات",
     "active": "نشطة",
     "upcoming": "قادمة",
-    "completed": "منتهية",
+    "completed": "مكتمل",
     "empty": "لا توجد تحديات حالياً",
     "loadError": "فشل تحميل التحديات",
     "progress": "التقدم: {current} / {total}",
@@ -412,7 +425,6 @@
     "completedBanner": "🎉 أتممت التحدي!",
     "daysLeft": "{days} يوم متبقي",
     "claimReward": "استلام المكافأة",
-    "completed": "مكتمل",
     "featured": "مميز",
     "categories": {
       "reviews": "تقييمات",
@@ -791,5 +803,4 @@
     "expiresInHours": "ينتهي خلال {h} س {m} د",
     "expiresInDays": "ينتهي خلال {d} يوم"
   }
-
 }

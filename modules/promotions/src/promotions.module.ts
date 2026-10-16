@@ -12,6 +12,8 @@
  */
 import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
+
+export const promotionsMigrationsDir = new URL('../migrations', import.meta.url).pathname;
 import { PromotionsController, PROMOTIONS_SERVICE } from './promotions.controller';
 import { PromotionsService, type ProviderSummaryPort } from './promotions.service';
 

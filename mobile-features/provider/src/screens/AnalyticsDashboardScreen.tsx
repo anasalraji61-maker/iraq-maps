@@ -37,7 +37,6 @@ import {
   Dimensions,
   I18nManager,
   Platform,
-  Pressable,
   RefreshControl,
   ScrollView,
   Share,
@@ -207,7 +206,7 @@ function ConversionFunnel({ data }: { data: ConversionFunnelResponse }): ReactEl
               </Text>
             ) : null}
             <View style={[styles.funnelBar, { width: `${widthPct}%` as `${number}%`, backgroundColor: step.color }]}>
-              <Text style={styles.funnelBarText}>{step.value.toLocaleString('ar-IQ')}</Text>
+              <Text style={styles.funnelBarText}>{step.value.toLocaleString('ar-IQ') /* eslint-disable-line i18next/no-literal-string */}</Text>
             </View>
             <Text style={styles.funnelLabel}>{step.label}</Text>
           </View>
@@ -449,6 +448,7 @@ function ReviewScoreSummary({ data }: { data: ReviewSummaryResponse }): ReactEle
           {avgRating !== null ? avgRating.toFixed(1) : '—'}
         </Text>
         <Text style={styles.reviewScoreStars}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
           {avgRating !== null ? '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating)) : '☆☆☆☆☆'}
         </Text>
         <Text style={styles.reviewScoreCount}>
@@ -460,6 +460,7 @@ function ReviewScoreSummary({ data }: { data: ReviewSummaryResponse }): ReactEle
       <View style={styles.reviewDistWrap}>
         {data.distribution.map((d) => (
           <View key={d.star} style={styles.reviewDistRow}>
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.reviewDistStar}>{d.star}★</Text>
             <View style={styles.reviewDistTrack}>
               <View

@@ -521,11 +521,12 @@ export class NotificationCenterService {
 
     // ── 4. Engagement nudge — user has not posted in 7 days ──────────────────
     try {
-      const [lastPost] = await this.db.execute<{ last_at: Date }>(sql`
+      const lastPostResult = await this.db.execute<{ last_at: Date }>(sql`
         SELECT max(created_at) AS last_at
         FROM   discover.post
         WHERE  user_id = ${userId}
       `);
+      const lastPost = lastPostResult.rows[0];
       const lastAt = lastPost?.last_at ? new Date(lastPost.last_at) : null;
       const daysSince = lastAt
         ? Math.floor((Date.now() - lastAt.getTime()) / 86_400_000)
@@ -700,7 +701,7 @@ export async function processBatchSmartAlerts(
 
     for (const alert of alerts) {
       // Deduplicate: skip if an identical alert was already inserted today.
-      const [existing] = await db.execute<{ id: string }>(sql`
+      const existingResult = await db.execute<{ id: string }>(sql`
         SELECT id FROM notifications.notification
         WHERE  user_id = ${user_id}
           AND  type    = ${'smart_alert'}
@@ -708,6 +709,7 @@ export async function processBatchSmartAlerts(
           AND  created_at >= now() - interval '24 hours'
         LIMIT  1
       `);
+      const existing = existingResult.rows[0];
 
       if (existing) continue;
 

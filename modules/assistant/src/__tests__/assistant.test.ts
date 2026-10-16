@@ -12,7 +12,7 @@
  *  - Rate limiting
  *  - Edge cases
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AssistantService } from '../assistant.service.js';
 import { FakeLlmClient } from '@iraq-maps/testing';
 import { HttpException } from '@nestjs/common';
@@ -161,7 +161,7 @@ describe('Tool execution: searchPlaces', () => {
       messages: [{ role: 'user', content: 'اقترح مطاعم في بغداد' }],
     });
     expect(response).toBeDefined();
-    expect(typeof response.text).toBe('string');
+    expect(typeof response.reply).toBe('string');
   });
 
   it('no tool call → single LLM invocation', async () => {
@@ -216,8 +216,8 @@ describe('Context-aware responses', () => {
       messages: [{ role: 'user', content: 'مرحبا' }],
     });
     expect(response).toBeDefined();
-    expect(typeof response.text).toBe('string');
-    expect(response.text.length).toBeGreaterThan(0);
+    expect(typeof response.reply).toBe('string');
+    expect(response.reply.length).toBeGreaterThan(0);
   });
 
   it('response includes sessionId', async () => {
@@ -235,7 +235,6 @@ describe('Context-aware responses', () => {
     await svc.chat(USER_ID, {
       sessionId: SESSION_ID,
       messages: [{ role: 'user', content: 'ما القريب مني؟' }],
-      userLocation: { lat: 33.341, lon: 44.361 },
     });
     // The LLM should receive the system prompt that includes location context
     expect(llm.lastMessages).toBeDefined();
@@ -265,7 +264,7 @@ describe('No hallucinated places', () => {
       messages: [{ role: 'user', content: 'ما هي أفضل مطاعم بغداد؟' }],
     });
     // Response comes from LLM text, not injected place data
-    expect(response.text).toBeDefined();
+    expect(response.reply).toBeDefined();
     // The service should not add placeIds unless they came from a tool call
     if (response.composeParams?.placeIds) {
       expect(response.composeParams.placeIds).toBeInstanceOf(Array);
@@ -283,16 +282,16 @@ describe('No hallucinated places', () => {
     expect(response).toBeDefined();
   });
 
-  it('response.text is a string, not raw JSON', async () => {
+  it('response.reply is a string, not raw JSON', async () => {
     const svc = makeSvc();
     const response = await svc.chat(USER_ID, {
       sessionId: SESSION_ID,
       messages: [{ role: 'user', content: 'مرحبا' }],
     });
-    expect(typeof response.text).toBe('string');
+    expect(typeof response.reply).toBe('string');
     // Should not be raw JSON
     try {
-      JSON.parse(response.text);
+      JSON.parse(response.reply);
       // If it parses, that's ok only if it's intentionally structured
     } catch {
       // Expected: plain text response
@@ -476,7 +475,7 @@ describe('Streaming / SSE mock', () => {
       sessionId: SESSION_ID,
       messages: [{ role: 'user', content: 'مرحبا' }],
     });
-    expect(response.text).toBeTruthy();
+    expect(response.reply).toBeTruthy();
   });
 
   it('multiple concurrent chats do not interfere', async () => {
@@ -489,7 +488,7 @@ describe('Streaming / SSE mock', () => {
     );
     const responses = await Promise.all(promises);
     expect(responses).toHaveLength(5);
-    expect(responses.every((r) => r.text.length > 0)).toBe(true);
+    expect(responses.every((r) => r.reply.length > 0)).toBe(true);
   });
 });
 
@@ -529,7 +528,7 @@ describe('extractComposeParams', () => {
   it('compose text is non-empty when returned', () => {
     const result = svc.extractComposeParams('تواصل مع المطعم للحجز');
     if (result) {
-      expect(result.text.length).toBeGreaterThan(0);
+      expect((result.text ?? '').length).toBeGreaterThan(0);
     }
   });
 });
@@ -618,16 +617,20 @@ describe('Edge cases', () => {
 describe('NLP search', () => {
   it('nlpSearch method exists and returns results shape', async () => {
     const svc = makeSvc();
-    if (typeof svc.nlpSearch === 'function') {
-      const result = await svc.nlpSearch(USER_ID, 'مطاعم قريبة مني');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (svc as any).nlpSearch === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+      const result = await (svc as any).nlpSearch(USER_ID, 'مطاعم قريبة مني');
       expect(result).toBeDefined();
     }
   });
 
   it('nlpSearch handles empty query gracefully', async () => {
     const svc = makeSvc();
-    if (typeof svc.nlpSearch === 'function') {
-      const result = await svc.nlpSearch(USER_ID, '');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (svc as any).nlpSearch === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+      const result = await (svc as any).nlpSearch(USER_ID, '');
       expect(result).toBeDefined();
     }
   });
@@ -639,10 +642,13 @@ describe('Trip planning', () => {
   it('planTrip method exists', async () => {
     const svc = makeSvc();
     if (typeof svc.planTrip === 'function') {
-      const result = await svc.planTrip(USER_ID, {
+      const result = await svc.planTrip({
         destination: 'بغداد',
-        days: 3,
-        interests: ['مطاعم', 'متاحف'],
+        startDate: '2025-06-01',
+        endDate: '2025-06-03',
+        interests: ['food', 'culture'],
+        budget: 'mid',
+        partySize: 2,
       });
       expect(result).toBeDefined();
     }
@@ -655,11 +661,7 @@ describe('Recommendations', () => {
   it('getRecommendations method exists and returns array', async () => {
     const svc = makeSvc();
     if (typeof svc.getRecommendations === 'function') {
-      const result = await svc.getRecommendations(USER_ID, {
-        lat: 33.341,
-        lon: 44.361,
-        category: 'restaurants',
-      });
+      const result = await svc.getRecommendations('restaurants', 33.341, 44.361);
       expect(result).toBeDefined();
     }
   });

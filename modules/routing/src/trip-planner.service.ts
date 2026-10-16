@@ -8,7 +8,7 @@
  */
 import type { RouteRequest, RouteResult, TravelMode } from '@iraq-maps/contracts';
 import type { RoutingEngine } from '@iraq-maps/contracts';
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   integer,
@@ -187,8 +187,8 @@ function randomToken(len = 24): string {
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export class TripPlannerService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly db: NodePgDatabase<any>,
     private readonly engine: RoutingEngine,
   ) {}
@@ -880,7 +880,7 @@ export class ExtendedRoutingService {
     avoidBbox: [number, number, number, number],
     mode: TravelMode = 'car',
   ): Promise<RouteResult | null> {
-    const [minLon, minLat, maxLon, maxLat] = avoidBbox;
+    const [_minLon, _minLat, _maxLon, maxLat] = avoidBbox;
     // Push waypoint to the north of the avoidance box
     const midLon = (from[0] + to[0]) / 2;
     const safeWaypoint: [number, number] = [midLon, maxLat + 0.01];

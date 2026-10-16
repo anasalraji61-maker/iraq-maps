@@ -51,6 +51,7 @@ interface ItineraryResultProps {
 
 // ─── Category icons ───────────────────────────────────────────────────────────
 
+/* eslint-disable no-restricted-syntax */
 const CATEGORY_ICONS: Record<string, string> = {
   'مطعم': '🍽️',
   'مطاعم': '🍽️',
@@ -71,6 +72,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   'فندق': '🏨',
   'صيدلية': '💊',
 };
+/* eslint-enable no-restricted-syntax */
 
 function iconForCategory(cat: string): string {
   for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
@@ -148,6 +150,7 @@ function StopCard({ stop, index, isLast, onPress, onNavigate }: StopCardProps): 
               accessibilityRole="button"
               accessibilityLabel={t('itinerary.viewOnMap')}
             >
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               <Text style={styles.stopActionText}>🗺️ {t('itinerary.viewOnMap')}</Text>
             </Pressable>
             <Pressable
@@ -182,6 +185,7 @@ function TipsSection({ tips }: { tips: string[] }): ReactElement | null {
         accessibilityLabel={t('itinerary.tips')}
       >
         <Text style={styles.tipsTitle}>💡 {t('itinerary.tips')}</Text>
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <Text style={styles.tipsChevron}>{expanded ? '▲' : '▼'}</Text>
       </Pressable>
       {expanded ? (
@@ -278,6 +282,7 @@ export function ItineraryResult({
               accessibilityRole="button"
               accessibilityLabel={t('itinerary.showAllOnMap', { count: String(allPlaceIds.length) })}
             >
+              {/* eslint-disable-next-line i18next/no-literal-string */}
               <Text style={styles.actionBtnTextPrimary}>
                 🗺️ {t('itinerary.showAllOnMap', { count: String(allPlaceIds.length) })}
               </Text>

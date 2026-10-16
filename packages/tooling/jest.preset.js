@@ -23,6 +23,8 @@ export default {
     // expo-haptics imports expo which isn't installed at workspace root (lives in apps/mobile).
     // It's a native module anyway; jest tests mock it explicitly where needed.
     'expo-haptics': emptyMock,
+    'expo-image-manipulator': emptyMock,
+    'expo-av': emptyMock,
     // react-native-svg is a native module; stub it in the jest environment.
     'react-native-svg': emptyMock,
     // expo-location (and other expo-* packages) transitively import 'expo' core which

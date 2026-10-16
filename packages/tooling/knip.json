@@ -68,7 +68,22 @@
     "geo-services/osm-pipeline/src/import-places.ts",
     "geo-services/osm-pipeline/src/run-import.ts",
     "geo-services/osm-pipeline/src/tag-mapper.ts",
-    "geo-services/osm-pipeline/src/validators.ts"
+    "geo-services/osm-pipeline/src/validators.ts",
+    "mobile-features/account/src/screens/NotificationCenterScreen.tsx",
+    "mobile-features/account/src/screens/NotificationPrefsScreen.tsx",
+    "mobile-features/assistant/src/components/ItineraryResult.tsx",
+    "mobile-features/discover/src/components/StoryCreator.tsx",
+    "mobile-features/discover/src/screens/StoriesScreen.tsx",
+    "mobile-features/map/src/components/SaveToCollectionSheet.tsx",
+    "mobile-features/map/src/screens/CollectionDetailScreen.tsx",
+    "mobile-features/map/src/screens/PhotoGalleryScreen.tsx",
+    "mobile-features/provider/src/screens/PhotoManagementScreen.tsx",
+    "modules/assistant/src/tools/business-tools.ts",
+    "modules/assistant/src/tools/index.ts",
+    "modules/assistant/src/tools/navigation-tools.ts",
+    "modules/assistant/src/tools/place-tools.ts",
+    "modules/assistant/src/tools/recommendation-tools.ts",
+    "modules/discover/src/stories.service.ts"
   ],
   "ignoreWorkspaces": [
     "geo-services/pipeline",
@@ -80,7 +95,10 @@
   ],
   "includeEntryExports": true,
   "ignoreExportsUsedInFile": true,
-  "exclude": ["exports", "types"],
+  "exclude": [
+    "exports",
+    "types"
+  ],
   "ignoreDependencies": [
     "@iraq-maps/contracts",
     "@iraq-maps/db-kit",

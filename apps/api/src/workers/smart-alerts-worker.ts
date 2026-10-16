@@ -24,19 +24,9 @@ import type { Logger } from '@iraq-maps/observability';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = import('drizzle-orm/node-postgres').NodePgDatabase<any>;
 
-export interface SmartAlertsJobData {
-  /** If provided, resume pagination from this user id (exclusive). */
-  offsetUserId?: string;
-  /** Number of users to process per call. Default 1000. */
-  batchSize?: number;
-}
-
-export interface SmartAlertsJobResult {
-  processed: number;
-  inserted: number;
-  skippedDedupe: number;
-  errors: number;
-}
+import type { SmartAlertsData, SmartAlertsResult } from '@iraq-maps/job-kit';
+export type SmartAlertsJobData = SmartAlertsData;
+export type SmartAlertsJobResult = SmartAlertsResult;
 
 const BATCH_SIZE = 1_000;
 

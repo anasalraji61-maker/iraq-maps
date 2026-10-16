@@ -139,7 +139,7 @@ async function getFileSize(uri: string): Promise<number> {
 async function compress(
   uri: string,
   width: number,
-  height: number,
+  _height: number,
 ): Promise<{ uri: string; width: number; height: number; size: number }> {
   const qualities = [0.85, 0.70, 0.55];
 

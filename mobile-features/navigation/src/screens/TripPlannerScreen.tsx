@@ -26,7 +26,6 @@ import {
   Clipboard,
   Modal,
   PanResponder,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text as RNText,
@@ -318,7 +317,6 @@ function AddStopModal({ visible, dark, onClose, onAdd }: AddStopModalProps): Rea
     }
     const lower = query.toLowerCase();
     setResults(MOCK_PLACES.filter((p) => p.name.includes(lower) || p.name.includes(query)).slice(0, 6));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   const handleSelect = useCallback(
@@ -461,7 +459,6 @@ export function TripPlannerScreen({
     } else {
       setStats(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stops.length, optimized, mode]);
 
   // ── Stop mutations ───────────────────────────────────────────────────────────

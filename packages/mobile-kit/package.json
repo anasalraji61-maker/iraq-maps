@@ -18,6 +18,8 @@
     "@iraq-maps/i18n": "workspace:*",
     "@iraq-maps/observability": "workspace:*",
     "@react-native-community/netinfo": "^11.4.1",
+    "expo-image-manipulator": "~13.1.5",
+    "expo-image-picker": "~16.1.4",
     "expo-secure-store": "~57.0.4",
     "expo-haptics": "~14.0.1",
     "expo-store-review": "~57.0.3",

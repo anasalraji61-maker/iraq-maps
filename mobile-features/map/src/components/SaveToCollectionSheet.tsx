@@ -21,7 +21,7 @@
  */
 /* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
-import type { CollectionId, CollectionSummary, PlaceId } from '@iraq-maps/contracts';
+import type { CollectionId, CollectionSummary } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
 import { Sheet } from '@iraq-maps/ui';
 import {
@@ -49,7 +49,6 @@ import { t } from '../strings';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PRIMARY = '#1976D2';
-const SURFACE = '#FFFFFF';
 const DIVIDER = '#E0E0E0';
 const MUTED = '#888';
 const SUCCESS = '#2E7D32';
@@ -275,10 +274,6 @@ export function SaveToCollectionSheet({
   placeId,
   placeName,
   placeNameAr,
-  placeCategory,
-  location,
-  coverImageUrl,
-  rating,
   onSaved,
 }: SaveToCollectionSheetProps): ReactElement | null {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

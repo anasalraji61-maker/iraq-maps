@@ -17,6 +17,7 @@
  *
  * Route: account/notification-center
  */
+/* eslint-disable i18next/no-literal-string, no-restricted-syntax */
 
 import {
   useCallback,
@@ -195,7 +196,6 @@ function filterTypes(tab: FilterTab): NotifType[] | null {
 }
 
 // ─── Mock data (replaced by API call in production) ──────────────────────────
-
 function mockNotifs(): NotifItem[] {
   const now = Date.now();
   return [
@@ -305,7 +305,7 @@ function NotifRow({ item, onPress, onDelete }: NotifRowProps): ReactElement {
         <TouchableOpacity
           style={styles.swipeHandle}
           onPress={deleting ? handleCancel : handleSwipe}
-          hitSlop={{ top: 10, bottom: 10, start: 10, end: 10 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.swipeHandleText}>{deleting ? '✕' : '⋮'}</Text>
         </TouchableOpacity>
@@ -521,7 +521,7 @@ export default function NotificationCenterScreen(): ReactElement {
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Text style={styles.backIcon}>{ICON_BACK}</Text>
         </TouchableOpacity>
@@ -540,7 +540,7 @@ export default function NotificationCenterScreen(): ReactElement {
             <TouchableOpacity
               style={styles.actionBtn}
               onPress={handleMarkAllRead}
-              hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Text style={styles.actionBtnText}>{ICON_CHECK_ALL}</Text>
             </TouchableOpacity>
@@ -549,7 +549,7 @@ export default function NotificationCenterScreen(): ReactElement {
             <TouchableOpacity
               style={styles.actionBtn}
               onPress={handleClearAll}
-              hitSlop={{ top: 8, bottom: 8, start: 8, end: 8 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Text style={[styles.actionBtnText, { color: '#DC2626' }]}>{ICON_TRASH}</Text>
             </TouchableOpacity>

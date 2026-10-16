@@ -465,7 +465,6 @@ export class BusinessAnalyticsService {
   // ─── Competitor Comparison ───────────────────────────────────────────────────
 
   getCompetitorComparison(providerId: string): CompetitorComparisonResponse {
-    const now = this.clock.now();
     const m = stubMultiplier(providerId);
     const totalInCategory = 18 + Math.round(m * 12);
     const rank = Math.max(1, Math.round(totalInCategory * (1 - m)));
@@ -491,7 +490,6 @@ export class BusinessAnalyticsService {
       yourViewsRank: rank,
       position,
     };
-    void now;
   }
 
   // ─── Search Keywords ─────────────────────────────────────────────────────────

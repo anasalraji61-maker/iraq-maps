@@ -10,6 +10,7 @@ export const JOB_NAMES = {
   CLEANUP_OLD_NOTIFICATIONS: 'CleanupOldNotifications',
   GENERATE_PROVIDER_INSIGHTS: 'GenerateProviderInsights',
   RECALCULATE_PROVIDER_SCORES: 'RecalculateProviderScores',
+  SMART_ALERTS: 'SmartAlerts',
 } as const;
 
 export type JobName = (typeof JOB_NAMES)[keyof typeof JOB_NAMES];
@@ -59,6 +60,17 @@ export interface RecalculateProviderScoresResult {
   durationMs: number;
 }
 
+export interface SmartAlertsData {
+  offsetUserId?: string;
+  batchSize?: number;
+}
+export interface SmartAlertsResult {
+  processed: number;
+  inserted: number;
+  skippedDedupe: number;
+  errors: number;
+}
+
 export type JobDataMap = {
   [JOB_NAMES.CLEANUP_EXPIRED_STORIES]: CleanupExpiredStoriesData;
   [JOB_NAMES.SEND_NOTIFICATION_DIGEST]: SendNotificationDigestData;
@@ -66,6 +78,7 @@ export type JobDataMap = {
   [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: CleanupOldNotificationsData;
   [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: GenerateProviderInsightsData;
   [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: RecalculateProviderScoresData;
+  [JOB_NAMES.SMART_ALERTS]: SmartAlertsData;
 };
 
 export type JobResultMap = {
@@ -75,4 +88,5 @@ export type JobResultMap = {
   [JOB_NAMES.CLEANUP_OLD_NOTIFICATIONS]: CleanupOldNotificationsResult;
   [JOB_NAMES.GENERATE_PROVIDER_INSIGHTS]: GenerateProviderInsightsResult;
   [JOB_NAMES.RECALCULATE_PROVIDER_SCORES]: RecalculateProviderScoresResult;
+  [JOB_NAMES.SMART_ALERTS]: SmartAlertsResult;
 };

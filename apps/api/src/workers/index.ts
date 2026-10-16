@@ -10,8 +10,7 @@ import { processGenerateProviderInsights } from './generate-provider-insights.js
 import { processRecalculateProviderScores } from './ranking-worker.js';
 import { processSmartAlerts } from './smart-alerts-worker.js';
 
-/** Job name constant for smart alerts (pending job-kit contract addition in docs/contract-requests). */
-const SMART_ALERTS_JOB = 'SmartAlerts' as const;
+const SMART_ALERTS_JOB = JOB_NAMES.SMART_ALERTS;
 
 export const BACKGROUND_QUEUE_NAME = 'background';
 

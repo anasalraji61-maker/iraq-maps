@@ -15,6 +15,8 @@ export type {
   GenerateProviderInsightsResult,
   RecalculateProviderScoresData,
   RecalculateProviderScoresResult,
+  SmartAlertsData,
+  SmartAlertsResult,
 } from './jobs.js';
 export { JobQueue } from './queue.js';
 export { JobWorker } from './worker.js';

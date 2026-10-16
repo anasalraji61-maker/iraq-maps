@@ -23,6 +23,7 @@ interface AVPlaybackStatusSuccess {
   rate: number;
   didJustFinish?: boolean;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface AudioModule {
   setAudioModeAsync(options: Record<string, unknown>): Promise<void>;
 }

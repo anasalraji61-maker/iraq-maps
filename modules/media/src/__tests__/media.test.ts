@@ -182,28 +182,24 @@ class FakeMediaService {
     opts: { limit?: number; cursor?: string } = {},
   ): Promise<{ items: Asset[]; nextCursor: string | null }> {
     const limit = Math.min(opts.limit ?? 20, 50);
-    const cursorDate = opts.cursor ? new Date(opts.cursor) : undefined;
 
-    let items = Array.from(this.assets.values()).filter(
+    const all = Array.from(this.assets.values()).filter(
       (a) =>
         a.ownerId === ownerId &&
         a.status === 'ready' &&
         (!purpose || a.purpose === purpose),
     );
 
-    items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    all.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime() || a.id.localeCompare(b.id));
 
-    if (cursorDate) {
-      items = items.filter((a) => a.createdAt < cursorDate);
-    }
-
-    const page = items.slice(0, limit + 1);
+    const startIdx = opts.cursor ? all.findIndex((a) => a.id === opts.cursor) + 1 : 0;
+    const page = all.slice(startIdx, startIdx + limit + 1);
     const hasMore = page.length > limit;
     const pageItems = hasMore ? page.slice(0, limit) : page;
 
     return {
       items: pageItems,
-      nextCursor: hasMore ? pageItems[pageItems.length - 1]!.createdAt.toISOString() : null,
+      nextCursor: hasMore ? (pageItems[pageItems.length - 1]?.id ?? null) : null,
     };
   }
 
@@ -245,7 +241,7 @@ class FakeMediaService {
 const OWNER = asUid('11111111-1111-1111-1111-111111111111');
 const OTHER = asUid('22222222-2222-2222-2222-222222222222');
 const SMALL_IMG = Buffer.from('fake-jpeg-data-small');
-const LARGE_IMG = Buffer.alloc(MAX_UPLOAD_BYTES + 1);
+const _LARGE_IMG = Buffer.alloc(MAX_UPLOAD_BYTES + 1);
 
 let storage: FakeObjectStorage;
 let svc: FakeMediaService;

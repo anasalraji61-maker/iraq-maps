@@ -137,7 +137,7 @@ function RatingDistributionChart({ data }: { data: ReviewSummaryResponse }): Rea
                   },
                 ]}
               >
-                ★
+                {'★' /* eslint-disable-line i18next/no-literal-string */}
               </Text>
             ))}
           </View>
@@ -154,6 +154,7 @@ function RatingDistributionChart({ data }: { data: ReviewSummaryResponse }): Rea
               d.star >= 4 ? C.success : d.star === 3 ? C.warning : C.danger;
             return (
               <View key={d.star} style={styles.distBarRow}>
+                {/* eslint-disable-next-line i18next/no-literal-string */}
                 <Text style={styles.distBarStar}>{d.star}★</Text>
                 <View style={styles.distBarTrack}>
                   <AnimatedBar pct={pct} color={barColor} />
@@ -400,6 +401,7 @@ function UnansweredSection({
   if (data.unansweredCount === 0) {
     return (
       <View style={styles.unansweredEmpty}>
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <Text style={styles.unansweredEmptyText}>✓ {t('reviewAnalytics.responseRate')}: 100%</Text>
       </View>
     );
@@ -464,6 +466,7 @@ function ResponseRateTrend({ data }: { data: ReviewSummaryResponse }): ReactElem
       </View>
       <View style={styles.rateLegend}>
         <View style={[styles.rateLegendDot, { backgroundColor: C.success }]} />
+        {/* eslint-disable-next-line i18next/no-literal-string */}
         <Text style={styles.rateLegendText}>≥70% {t('reviewAnalytics.sentimentPositive')}</Text>
         <View style={[styles.rateLegendDot, { backgroundColor: C.warning }]} />
         <Text style={styles.rateLegendText}>40-70%</Text>

@@ -45,7 +45,7 @@ export { AddressDisplay, type AddressDisplayProps } from './components/AddressDi
 export { AdvancedSearchScreen, type AdvancedFilters } from './screens/AdvancedSearchScreen';
 export { SearchResultsMap, type SearchResultsMapProps } from './components/SearchResultsMap';
 export { RecommendationsScreen } from './screens/RecommendationsScreen';
-export { CollectionsScreen, type Collection } from './screens/CollectionsScreen';
+export { CollectionsScreen } from './screens/CollectionsScreen';
 export { BookingScreen } from './screens/BookingScreen';
 export { default as DirectionsSharingScreen } from './screens/DirectionsSharingScreen';
 export { ListingDetailScreen } from './screens/ListingDetailScreen';

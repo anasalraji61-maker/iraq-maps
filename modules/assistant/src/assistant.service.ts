@@ -388,7 +388,7 @@ export class AssistantService {
 
   extractComposeParams(reply: string): { text?: string; placeIds?: string[] } | undefined {
     // Simple heuristic: if reply contains "راسل" (message) suggest compose
-    if (reply.includes('راسل') || reply.includes('تواصل')) {
+    if (reply.includes('راسل') || reply.includes('تواصل') || reply.includes('أرسل رسالة')) {
       return { text: reply.slice(0, 200) };
     }
     return undefined;
@@ -1228,7 +1228,7 @@ ${placesText}
     type RawStop = { time?: string; placeIndex?: number; category?: string; activity?: string; duration?: string; notes?: string };
     type RawPlan = { summary?: string; tips?: string[]; stops?: RawStop[] };
 
-    let plan: RawPlan = { stops: [], summary: '' };
+    let plan: RawPlan;
     try {
       const reply = await this.llm.chat({
         systemPrompt: `${SYSTEM_PROMPT}\nأجب بـ JSON فقط.`,

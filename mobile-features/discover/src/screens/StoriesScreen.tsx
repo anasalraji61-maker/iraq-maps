@@ -622,13 +622,13 @@ function SingleStoryView({
 const viewerStyles = StyleSheet.create({
   bg: { flex: 1, backgroundColor: '#000' },
   topGrad: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     bottom: 'auto',
     height: 160,
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
   botGrad: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     top: 'auto',
     height: 140,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -694,7 +694,7 @@ const viewerStyles = StyleSheet.create({
   actionCircleLiked: { backgroundColor: 'rgba(255,59,48,0.35)' },
   actionIcon: { fontSize: 22 },
   replyOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'flex-end',
   },

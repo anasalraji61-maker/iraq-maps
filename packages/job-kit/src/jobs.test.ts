@@ -11,7 +11,7 @@ describe('JOB_NAMES', () => {
     expect(JOB_NAMES.RECALCULATE_PROVIDER_SCORES).toBe('RecalculateProviderScores');
   });
 
-  it('has exactly six entries', () => {
-    expect(Object.keys(JOB_NAMES)).toHaveLength(6);
+  it('has exactly seven entries', () => {
+    expect(Object.keys(JOB_NAMES)).toHaveLength(7);
   });
 });

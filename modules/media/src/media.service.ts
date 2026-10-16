@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
-import { and, eq, lt, sql as drizzleSql, notInArray } from 'drizzle-orm';
+import { and, desc, eq, lt, sql as drizzleSql, notInArray } from 'drizzle-orm';
 import sharp from 'sharp';
 import type { Queue } from 'bullmq';
 import {
@@ -561,6 +561,54 @@ export class MediaService implements MediaPort {
     )).filter((x): x is GalleryPhoto => x !== null);
 
     return { photos, total: assetIds.length, nextCursor };
+  }
+
+  /**
+   * Return a paginated gallery of ready assets owned by a user, optionally filtered by purpose.
+   */
+  async getGallery(
+    ownerId: UserId,
+    purpose?: MediaPurpose,
+    opts: GalleryOptions = {},
+  ): Promise<GalleryPage> {
+    const { limit = 20, cursor, sort = 'newest' } = opts;
+
+    const conditions = [
+      eq(assetTable.ownerId, ownerId),
+      eq(assetTable.status, 'ready' as const),
+      ...(purpose ? [eq(assetTable.purpose, purpose)] : []),
+    ];
+
+    const rows = await this.db
+      .select()
+      .from(assetTable)
+      .where(and(...conditions))
+      .orderBy(sort === 'oldest' ? assetTable.createdAt : desc(assetTable.createdAt));
+
+    const ordered = rows.map((r) => r.id as AssetId);
+    const cursorIdx = cursor ? ordered.indexOf(cursor as AssetId) + 1 : 0;
+    const page = ordered.slice(cursorIdx, cursorIdx + limit);
+    const nextCursor = cursorIdx + limit < ordered.length ? ordered[cursorIdx + limit] ?? null : null;
+
+    const photos: GalleryPhoto[] = (await Promise.all(
+      page.map(async (id): Promise<GalleryPhoto | null> => {
+        const row = rows.find((r) => r.id === id);
+        if (!row?.storageKey) return null;
+        const [urlResult] = await Promise.all([
+          this.storage.signRead(row.storageKey, READ_URL_TTL_S),
+        ]);
+        return {
+          assetId: row.id as AssetId,
+          ownerId: row.ownerId as UserId,
+          purpose: row.purpose as MediaPurpose,
+          status: row.status,
+          url: urlResult.url,
+          thumbUrl: urlResult.url,
+        } satisfies GalleryPhoto;
+      }),
+    )).filter((x): x is GalleryPhoto => x !== null);
+
+    return { photos, total: ordered.length, nextCursor };
   }
 
   // ─── Photo ordering & cover ────────────────────────────────────────────────────

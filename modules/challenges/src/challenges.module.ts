@@ -1,5 +1,7 @@
 import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
+
+export const challengesMigrationsDir = new URL('../migrations', import.meta.url).pathname;
 import { ChallengesController } from './challenges.controller';
 import { ChallengesService } from './challenges.service';
 

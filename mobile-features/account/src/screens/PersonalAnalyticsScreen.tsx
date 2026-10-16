@@ -95,7 +95,6 @@ async function fetchPersonalAnalytics(
   api: any,
 ): Promise<PersonalAnalyticsData> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     const res = await api.analytics?.getMyStats?.();
     if (res?.status === 200) {
       return res.body as PersonalAnalyticsData;

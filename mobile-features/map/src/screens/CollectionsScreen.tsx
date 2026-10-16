@@ -34,7 +34,6 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Switch,
   TextInput,
   TouchableOpacity,
   View,
@@ -608,15 +607,6 @@ export function CollectionsScreen(): ReactElement {
 
   const handleShare = useCallback(async (collection: CollectionSummary) => {
     await Share.share({ message: `${collection.nameAr}${collection.nameEn ? ` / ${collection.nameEn}` : ''}` }).catch(() => null);
-  }, []);
-
-  // Stub actions
-  const handleExportPDF = useCallback((_id: string) => {
-    // TODO: generate PDF guide via backend
-  }, []);
-
-  const handleInviteCollaborator = useCallback((_id: string) => {
-    // TODO: collaboration invite flow
   }, []);
 
   // ── Rendered list ─────────────────────────────────────────────────────────

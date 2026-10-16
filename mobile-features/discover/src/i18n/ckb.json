@@ -349,7 +349,20 @@
     "viewers": "کێ بینیوێتی",
     "viewersTitle": "بینەرەکان",
     "viewersEmpty": "هێشتا کەس ئەم چیرۆکە نەبینیوە",
-    "optionsTitle": "هەڵبژاردەکان"
+    "optionsTitle": "هەڵبژاردەکان",
+    "cameraPermissionTitle": "مۆڵەتی کامێرا",
+    "cameraPermissionMsg": "ئەپەکە پێویستی بە مۆڵەتی کامێراتە",
+    "overlayPlaceholder": "دەقێک زیاد بکە...",
+    "textPlaceholder": "شتێک بنووسە...",
+    "tagPlace": "شوێنێک نیشان بکە",
+    "searchPlace": "بگەڕێ بەدوای شوێنێک",
+    "privacyTitle": "کێ دەیبینێت؟",
+    "routeDistance": "دووری: {{value}}",
+    "routeDuration": "ماوە: {{value}}",
+    "camera": "کامێرا",
+    "preview": "پێشبینی",
+    "atPlace": "لە {{place}}",
+    "textTool": "دەق"
   },
   "events": {
     "title": "ڕووداوەکان",
@@ -397,7 +410,7 @@
     "title": "ئەرکەکان",
     "active": "چالاک",
     "upcoming": "داهاتوو",
-    "completed": "تەواوبوو",
+    "completed": "تەواوبووە",
     "empty": "هیچ ئەرکێک نییە",
     "loadError": "هەڵەی بارکردنی ئەرکەکان",
     "progress": "پێشکەوتن: {current} / {total}",
@@ -412,7 +425,6 @@
     "completedBanner": "🎉 ئەرکت تەواو کرد!",
     "daysLeft": "{days} ڕۆژ ماوەتەوە",
     "claimReward": "وەرگرتنی خەڵات",
-    "completed": "تەواوبووە",
     "featured": "تایبەت",
     "categories": {
       "reviews": "هەڵسەنگاندن",

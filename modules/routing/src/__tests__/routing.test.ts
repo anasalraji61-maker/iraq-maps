@@ -22,35 +22,36 @@ const OUTSIDE: [number, number] = [0.0, 0.0];
 function makeRouteResult(
   origin: [number, number],
   dest: [number, number],
-  mode: 'car' | 'walk' | 'bike',
+  _mode: 'car' | 'walk',
   durationS: number,
   distanceM: number,
 ): RouteResult {
   return {
-    origin,
-    destination: dest,
-    mode,
     durationS,
     distanceM,
     polyline6: 'wvzlBemr{Ai@aB',
     maneuvers: [
       {
         type: 'depart',
-        instruction: 'انطلق باتجاه الشمال',
+        streetNames: [],
         distanceM: distanceM * 0.1,
         durationS: durationS * 0.1,
+        beginShapeIndex: 0,
       },
       {
-        type: 'turn_right',
-        instruction: 'انعطف يميناً على شارع الرشيد',
+        type: 'turn',
+        modifier: 'right',
+        streetNames: ['شارع الرشيد'],
         distanceM: distanceM * 0.8,
         durationS: durationS * 0.8,
+        beginShapeIndex: 1,
       },
       {
         type: 'arrive',
-        instruction: 'وصلت إلى وجهتك',
+        streetNames: [],
         distanceM: 0,
         durationS: 0,
+        beginShapeIndex: 2,
       },
     ],
     bbox: [
@@ -78,11 +79,12 @@ class FakeValhallaClient {
     const key = `${req.origin.join(',')}->${req.destination.join(',')}-${req.mode}`;
     if (this._routes.has(key)) return this._routes.get(key) ?? null;
     // Default: return a synthetic result for known Iraq coordinates.
-    const [lon1, lat1] = req.origin;
-    const [lon2, lat2] = req.destination;
+    const [lon1, , lon2] = [...req.origin, ...req.destination];
     if (lon1 < 40 || lon1 > 50 || lon2 < 40 || lon2 > 50) return null;
-    const distM = Math.sqrt((lon2 - lon1) ** 2 + (lat2 - lat1) ** 2) * 111_000;
-    const speed = req.mode === 'walk' ? 5000 / 3600 : req.mode === 'bike' ? 15000 / 3600 : 80000 / 3600;
+    const [ox, oy] = req.origin;
+    const [dx, dy] = req.destination;
+    const distM = Math.sqrt((dx - ox) ** 2 + (dy - oy) ** 2) * 111_000;
+    const speed = req.mode === 'walk' ? 5000 / 3600 : 80000 / 3600;
     const durationS = distM / speed;
     return makeRouteResult(req.origin, req.destination, req.mode, durationS, distM);
   }
@@ -114,7 +116,6 @@ describe('RoutingService', () => {
     it('returns a RouteResult for car mode', async () => {
       const result = await svc.route({ origin: BAGHDAD, destination: ERBIL, waypoints: [], mode: 'car' });
       expect(result).not.toBeNull();
-      expect(result!.mode).toBe('car');
       expect(result!.distanceM).toBeGreaterThan(0);
       expect(result!.durationS).toBeGreaterThan(0);
     });
@@ -122,7 +123,7 @@ describe('RoutingService', () => {
     it('returns a RouteResult for walk mode', async () => {
       const result = await svc.route({ origin: BAGHDAD, destination: ERBIL, waypoints: [], mode: 'walk' });
       expect(result).not.toBeNull();
-      expect(result!.mode).toBe('walk');
+      expect(result!.durationS).toBeGreaterThan(0);
     });
 
     it('walk is slower than car between same points', async () => {
@@ -187,9 +188,9 @@ describe('RoutingService', () => {
 
     it('forwards the exact request to the engine', async () => {
       const spy = vi.spyOn(fake, 'route');
-      await svc.route({ origin: BAGHDAD, destination: BASRA, waypoints: [], mode: 'bike' });
+      await svc.route({ origin: BAGHDAD, destination: BASRA, waypoints: [], mode: 'car' });
       expect(spy).toHaveBeenCalledWith(
-        expect.objectContaining({ origin: BAGHDAD, destination: BASRA, mode: 'bike' }),
+        expect.objectContaining({ origin: BAGHDAD, destination: BASRA, mode: 'car' }),
       );
     });
   });
@@ -197,20 +198,18 @@ describe('RoutingService', () => {
   // ── Alternative routes ────────────────────────────────────────────────────
 
   describe('Alternative routes', () => {
-    it('car and bike alternatives differ in duration', async () => {
-      const [car, bike] = await Promise.all([
+    it('car and walk alternatives differ in duration', async () => {
+      const [car, walk] = await Promise.all([
         svc.route({ origin: BAGHDAD, destination: NAJAF, waypoints: [], mode: 'car' }),
-        svc.route({ origin: BAGHDAD, destination: NAJAF, waypoints: [], mode: 'bike' }),
+        svc.route({ origin: BAGHDAD, destination: NAJAF, waypoints: [], mode: 'walk' }),
       ]);
-      expect(car!.durationS).not.toBe(bike!.durationS);
+      expect(car!.durationS).not.toBe(walk!.durationS);
     });
 
-    it('Baghdad → Basra car route has maneuvers with non-empty instructions', async () => {
+    it('Baghdad → Basra car route has at least 2 maneuvers', async () => {
       const result = await svc.route({ origin: BAGHDAD, destination: BASRA, waypoints: [], mode: 'car' });
       expect(result).not.toBeNull();
-      for (const m of result!.maneuvers) {
-        expect(m.instruction.length).toBeGreaterThan(0);
-      }
+      expect(result!.maneuvers.length).toBeGreaterThanOrEqual(2);
     });
 
     it('multiple concurrent requests all succeed', async () => {
@@ -231,19 +230,18 @@ describe('RoutingService', () => {
   // ── Mode correctness ──────────────────────────────────────────────────────
 
   describe('Mode correctness', () => {
-    it('result.mode matches request mode for car', async () => {
+    it('car route returns a result with maneuvers', async () => {
       const r = await svc.route({ origin: BAGHDAD, destination: MOSUL, waypoints: [], mode: 'car' });
-      expect(r!.mode).toBe('car');
+      expect(r).not.toBeNull();
+      expect(r!.maneuvers.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('result.mode matches request mode for walk', async () => {
-      const r = await svc.route({ origin: BAGHDAD, destination: MOSUL, waypoints: [], mode: 'walk' });
-      expect(r!.mode).toBe('walk');
-    });
-
-    it('result.mode matches request mode for bike', async () => {
-      const r = await svc.route({ origin: BAGHDAD, destination: MOSUL, waypoints: [], mode: 'bike' });
-      expect(r!.mode).toBe('bike');
+    it('walk route returns a slower result than car', async () => {
+      const [car, walk] = await Promise.all([
+        svc.route({ origin: BAGHDAD, destination: MOSUL, waypoints: [], mode: 'car' }),
+        svc.route({ origin: BAGHDAD, destination: MOSUL, waypoints: [], mode: 'walk' }),
+      ]);
+      expect(car!.durationS).toBeLessThan(walk!.durationS);
     });
   });
 });

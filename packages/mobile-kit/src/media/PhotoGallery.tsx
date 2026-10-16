@@ -216,10 +216,10 @@ export function PhotoGallery({
   visible,
   onClose,
   onDownload,
-  photoLabel = 'صورة',
-  shareLabel = 'مشاركة',
-  closeLabel = 'إغلاق',
-  downloadLabel = 'تحميل',
+  photoLabel = 'صورة', // eslint-disable-line no-restricted-syntax
+  shareLabel = 'مشاركة', // eslint-disable-line no-restricted-syntax
+  closeLabel = 'إغلاق', // eslint-disable-line no-restricted-syntax
+  downloadLabel = 'تحميل', // eslint-disable-line no-restricted-syntax
   onIndexChange,
 }: PhotoGalleryProps): ReactElement {
   const [index, setIndex] = useState(initialIndex);
@@ -289,6 +289,7 @@ export function PhotoGallery({
             accessibilityRole="button"
             accessibilityLabel={closeLabel}
           >
+            {/* eslint-disable-next-line i18next/no-literal-string */}
             <Text style={styles.iconText}>✕</Text>
           </TouchableOpacity>
 
@@ -451,4 +452,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PhotoGallery;

@@ -38,7 +38,6 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -138,7 +137,7 @@ export function StoryCreator({
   // ── Media ──────────────────────────────────────────────────────────────────
 
   const [mediaUri, setMediaUri] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+  const [_mediaType, setMediaType] = useState<'image' | 'video'>('image');
 
   // ── Text overlay (photo / video stories) ──────────────────────────────────
 
@@ -152,7 +151,7 @@ export function StoryCreator({
   const [textBody, setTextBody] = useState('');
   const [textBg, setTextBg] = useState(BG_PRESETS[0]!);
   const [textFontIndex, setTextFontIndex] = useState(0);
-  const [textColor, setTextColor] = useState('#FFFFFF');
+  const [textColor, _setTextColor] = useState('#FFFFFF');
 
   // ── Place tag ──────────────────────────────────────────────────────────────
 
@@ -228,10 +227,12 @@ export function StoryCreator({
       try {
         // Stub: real implementation calls the places search API.
         // Keeping a mock list so the UI renders in dev without a running backend.
+        /* eslint-disable no-restricted-syntax */
         setPlaceSuggestions([
           { placeId: 'mock-1', placeName: q + ' — مكان أول', lat: 33.34, lng: 44.40 },
           { placeId: 'mock-2', placeName: q + ' — مكان ثانٍ', lat: 33.35, lng: 44.41 },
         ]);
+        /* eslint-enable no-restricted-syntax */
       } catch { /* ignore */ }
     }, 350);
   }, []);

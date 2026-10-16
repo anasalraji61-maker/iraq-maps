@@ -349,7 +349,20 @@
     "viewers": "Viewers",
     "viewersTitle": "Story viewers",
     "viewersEmpty": "No one has viewed this story yet",
-    "optionsTitle": "Options"
+    "optionsTitle": "Options",
+    "cameraPermissionTitle": "Camera Permission",
+    "cameraPermissionMsg": "The app needs camera access to take photos",
+    "overlayPlaceholder": "Add text...",
+    "textPlaceholder": "Write something...",
+    "tagPlace": "Tag a place",
+    "searchPlace": "Search for a place",
+    "privacyTitle": "Who can see this?",
+    "routeDistance": "Distance: {{value}}",
+    "routeDuration": "Duration: {{value}}",
+    "camera": "Camera",
+    "preview": "Preview",
+    "atPlace": "At {{place}}",
+    "textTool": "Text"
   },
   "events": {
     "title": "Events",
@@ -412,7 +425,6 @@
     "completedBanner": "🎉 Challenge completed!",
     "daysLeft": "{days} days left",
     "claimReward": "Claim Reward",
-    "completed": "Completed",
     "featured": "Featured",
     "categories": {
       "reviews": "Reviews",

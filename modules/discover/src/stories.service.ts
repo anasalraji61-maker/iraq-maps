@@ -264,7 +264,7 @@ export class StoriesService {
                 : undefined,
             ),
           )
-          .orderBy(desc((storyTable as { viewCount?: unknown }).viewCount ?? storyTable.createdAt))
+          .orderBy(desc(storyTable.createdAt))
           .limit(200)
       : [];
 
