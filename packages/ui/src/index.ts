@@ -55,6 +55,10 @@ export type {
   TimePickerProps,
 } from './form-components';
 
+// Accessible Button
+export { AccessibleButton } from './components/AccessibleButton';
+export type { AccessibleButtonProps, ButtonVariant, ButtonSize } from './components/AccessibleButton';
+
 // Layout Components
 export {
   ActionBar,

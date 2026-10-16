@@ -84,3 +84,6 @@ export function formatNumber(value: number, options?: Intl.NumberFormatOptions):
 }
 
 registerNamespace('common', { ar, ckb, en });
+
+/** @public validate that all locale JSON files have the same keys and {param} sets */
+export { validateLocales, missingInLocale, exportFlatTable, type ValidationResult } from './validate';

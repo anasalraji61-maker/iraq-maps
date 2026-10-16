@@ -16,15 +16,570 @@
     "confirm": "Confirm",
     "save": "Save",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "submit": "Submit",
+    "edit": "Edit",
+    "delete": "Delete",
+    "share": "Share",
+    "send": "Send",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "clear": "Clear",
+    "select": "Select",
+    "done": "Done",
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip",
+    "continue": "Continue",
+    "viewAll": "View all",
+    "viewMore": "View more",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "refresh": "Refresh",
+    "copy": "Copy",
+    "open": "Open",
+    "report": "Report",
+    "block": "Block",
+    "unblock": "Unblock",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "like": "Like",
+    "unlike": "Unlike",
+    "add": "Add",
+    "remove": "Remove",
+    "upload": "Upload",
+    "download": "Download"
   },
   "status": {
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "uploading": "Uploading…",
+    "processing": "Processing…",
+    "success": "Success",
+    "failed": "Failed",
+    "pending": "Pending",
+    "active": "Active",
+    "inactive": "Inactive",
+    "online": "Online",
+    "offline": "Offline",
+    "verified": "Verified",
+    "unverified": "Unverified"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "network": "Couldn't reach the server. Check your internet connection and try again.",
     "rateLimited": "Too many attempts. Wait a moment and try again.",
-    "sessionExpired": "Your session has ended. Please sign in again."
+    "sessionExpired": "Your session has ended. Please sign in again.",
+    "notFound": "Content not found.",
+    "forbidden": "You don't have permission to do this.",
+    "validation": "Invalid data. Please review the fields and try again."
+  },
+  "navigation": {
+    "startNavigation": "Start navigation",
+    "stopNavigation": "Stop navigation",
+    "recalculating": "Recalculating…",
+    "arrived": "You have arrived at your destination",
+    "arrivedAt": "You have arrived at {destination}",
+    "distanceRemaining": "{distance} remaining",
+    "timeRemaining": "{time} remaining",
+    "eta": "ETA {time}",
+    "turnLeft": "Turn left",
+    "turnRight": "Turn right",
+    "turnSlightLeft": "Turn slight left",
+    "turnSlightRight": "Turn slight right",
+    "turnSharpLeft": "Turn sharp left",
+    "turnSharpRight": "Turn sharp right",
+    "continueStr": "Continue straight",
+    "keepLeft": "Keep left",
+    "keepRight": "Keep right",
+    "uTurn": "Make a U-turn",
+    "enterRoundabout": "Enter the roundabout",
+    "exitRoundabout": "Exit the roundabout",
+    "routeOptions": "Route options",
+    "fastest": "Fastest",
+    "shortest": "Shortest",
+    "avoidTolls": "Avoid tolls",
+    "avoidHighways": "Avoid highways",
+    "walkingMode": "Walking",
+    "drivingMode": "Driving",
+    "bicyclingMode": "Cycling",
+    "searchDestination": "Search destination",
+    "currentLocation": "My current location",
+    "savedPlaces": "Saved places",
+    "recentDestinations": "Recent destinations",
+    "noRoute": "No route found",
+    "offRoute": "Off route",
+    "gpsSignalLost": "GPS signal lost",
+    "gpsSignalRestored": "GPS signal restored",
+    "followingRoute": "Following route",
+    "via": "Via {waypoint}",
+    "steps": "{count} steps",
+    "step": "Step {number} of {total}",
+    "laneGuidance": "Correct lane: {lane}",
+    "speedLimit": "Speed limit: {speed} km/h",
+    "trafficDelay": "Traffic delay: {minutes} min",
+    "alternativeRoute": "Alternative route",
+    "shareTrip": "Share trip"
+  },
+  "moderation": {
+    "report": {
+      "title": "Report content",
+      "subtitle": "Why are you reporting this?",
+      "spam": "Spam or advertisement",
+      "misinformation": "Misleading information",
+      "harassment": "Harassment or abuse",
+      "hateSpeech": "Hate speech",
+      "violence": "Violence or offensive content",
+      "falseInfo": "Inaccurate business information",
+      "inappropriatePhoto": "Inappropriate photo",
+      "other": "Other reason",
+      "descriptionPlaceholder": "Tell us more (optional)",
+      "submit": "Submit report",
+      "submitted": "Thank you for your report. We'll review it soon.",
+      "confirmTitle": "Report submitted",
+      "confirmBody": "Our team will review this report and take appropriate action.",
+      "cancel": "Cancel"
+    },
+    "block": {
+      "title": "Block user",
+      "confirmTitle": "Block {name}?",
+      "confirmBody": "You won't see their posts or be able to message them. You can unblock later.",
+      "success": "{name} has been blocked",
+      "undo": "Unblock",
+      "undone": "{name} has been unblocked",
+      "blocked": "Blocked"
+    },
+    "mute": {
+      "title": "Mute user",
+      "confirmTitle": "Mute {name}?",
+      "confirmBody": "Their posts won't appear in your feed. They won't know you muted them.",
+      "success": "{name} has been muted",
+      "undo": "Unmute",
+      "undone": "{name} has been unmuted",
+      "muted": "Muted",
+      "duration": {
+        "day": "For one day",
+        "week": "For one week",
+        "month": "For one month",
+        "forever": "Permanently"
+      }
+    },
+    "flagged": "Flagged for review",
+    "underReview": "This content is under review",
+    "removed": "This content has been removed"
+  },
+  "assistant": {
+    "title": "AI Assistant",
+    "placeholder": "Ask about any place or activity…",
+    "thinking": "Thinking…",
+    "typing": "Typing…",
+    "errorMessage": "Couldn't get a response. Try again.",
+    "newChat": "New chat",
+    "clearHistory": "Clear chat",
+    "clearConfirm": "Clear this chat? This can't be undone.",
+    "suggestions": {
+      "title": "Suggestions",
+      "nearbyRestaurants": "Restaurants near me",
+      "popularAttractions": "Most visited attractions",
+      "openNow": "What's open right now?",
+      "topRated": "Top-rated places",
+      "budget": "Budget-friendly places",
+      "family": "Family-friendly places"
+    },
+    "sources": "Sources",
+    "noSources": "No sources available",
+    "viewOnMap": "View on map",
+    "navigate": "Navigate",
+    "disclaimer": "The assistant relies on user and provider data. Always verify important information.",
+    "feedbackPositive": "Helpful response",
+    "feedbackNegative": "Unhelpful response",
+    "feedbackThanks": "Thanks for your feedback",
+    "characterLimit": "Limit: {max} characters",
+    "attachImage": "Attach image",
+    "voiceInput": "Voice input",
+    "stopRecording": "Stop recording",
+    "recordingIndicator": "Recording…"
+  },
+  "provider": {
+    "registration": {
+      "title": "Register your business",
+      "subtitle": "Add your business to the Iraq Maps",
+      "step": "Step {current} of {total}",
+      "steps": {
+        "basicInfo": "Basic info",
+        "location": "Location",
+        "contact": "Contact details",
+        "photos": "Photos",
+        "hours": "Business hours",
+        "review": "Review and submit"
+      },
+      "fields": {
+        "name": "Business name",
+        "namePlaceholder": "e.g. Baghdad Restaurant",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe your services and products…",
+        "phone": "Phone number",
+        "phonePlaceholder": "+964 7XX XXX XXXX",
+        "whatsapp": "WhatsApp number",
+        "website": "Website",
+        "address": "Address",
+        "addressPlaceholder": "Neighborhood, street, building number",
+        "city": "City",
+        "neighborhood": "Neighborhood",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "priceRange": "Price range",
+        "instagram": "Instagram handle",
+        "facebook": "Facebook page"
+      },
+      "location": {
+        "title": "Set location",
+        "instruction": "Drag the pin to mark your exact location",
+        "useCurrentLocation": "Use my current location",
+        "searchAddress": "Search for address",
+        "pinPlaced": "Location set"
+      },
+      "hours": {
+        "title": "Business hours",
+        "open": "Open",
+        "closed": "Closed",
+        "open24h": "Open 24 hours",
+        "from": "From",
+        "to": "To",
+        "days": {
+          "saturday": "Saturday",
+          "sunday": "Sunday",
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday"
+        }
+      },
+      "photos": {
+        "title": "Business photos",
+        "addPhoto": "Add photo",
+        "coverPhoto": "Cover photo",
+        "minRequired": "At least one photo is required",
+        "maxAllowed": "Maximum {max} photos",
+        "uploadHint": "Tap to add photos from gallery or camera"
+      },
+      "review": {
+        "title": "Review your info",
+        "subtitle": "Make sure everything is correct before submitting",
+        "editSection": "Edit"
+      },
+      "submit": "Submit registration",
+      "submitting": "Submitting…",
+      "submitted": "Request submitted",
+      "submittedBody": "Our team will review your request within 24-48 hours and notify you of the outcome.",
+      "draft": {
+        "saved": "Draft saved",
+        "restore": "Continue registration",
+        "discard": "Discard draft"
+      },
+      "validation": {
+        "nameRequired": "Please enter a business name",
+        "categoryRequired": "Please select a category",
+        "phoneRequired": "Please enter a phone number",
+        "locationRequired": "Please set a location on the map",
+        "photoRequired": "Please add at least one photo"
+      }
+    },
+    "verification": {
+      "title": "Verification status",
+      "pending": {
+        "title": "Your request is under review",
+        "body": "Our team is reviewing your information. You'll receive a notification within 24-48 hours.",
+        "estimatedTime": "Estimated time: {hours} hours"
+      },
+      "approved": {
+        "title": "Your business is verified",
+        "body": "Your business is now visible on the map. You can manage your profile.",
+        "badge": "Verified"
+      },
+      "rejected": {
+        "title": "Not approved",
+        "body": "We couldn't verify your business. Reason: {reason}",
+        "resubmit": "Resubmit",
+        "reasons": {
+          "duplicateListing": "Duplicate listing",
+          "invalidPhone": "Invalid phone number",
+          "locationMismatch": "Location doesn't match address",
+          "insufficientPhotos": "Insufficient or low-quality photos",
+          "inappropriateContent": "Inappropriate content",
+          "other": "Other reason"
+        }
+      },
+      "suspended": {
+        "title": "Business suspended",
+        "body": "Your business has been suspended due to: {reason}",
+        "appeal": "Submit appeal"
+      },
+      "badge": {
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "pending": "Under review",
+        "premium": "Premium"
+      }
+    }
+  },
+  "offline": {
+    "title": "No internet connection",
+    "body": "You're currently offline. Some features are limited.",
+    "banner": "No internet connection",
+    "reconnected": "Back online",
+    "queue": {
+      "title": "Pending actions",
+      "count": "{count} actions pending",
+      "syncing": "Syncing…",
+      "synced": "Synced",
+      "failed": "Sync failed",
+      "retry": "Retry",
+      "clear": "Clear pending actions"
+    },
+    "map": {
+      "cachedData": "Map is showing cached data",
+      "outdated": "Data may be outdated",
+      "lastUpdated": "Last updated: {time}"
+    },
+    "features": {
+      "available": "Available offline",
+      "unavailable": "Requires internet",
+      "partiallyAvailable": "Partially available"
+    }
+  },
+  "media": {
+    "upload": {
+      "title": "Upload media",
+      "selectPhoto": "Choose photo",
+      "takePhoto": "Take photo",
+      "selectVideo": "Choose video",
+      "recordVideo": "Record video",
+      "fromGallery": "From gallery",
+      "fromCamera": "From camera",
+      "uploading": "Uploading {progress}%",
+      "uploaded": "Uploaded",
+      "failed": "Upload failed",
+      "retry": "Retry upload",
+      "cancel": "Cancel upload",
+      "sizeLimitError": "File size exceeds limit ({maxMb} MB)",
+      "typeError": "Unsupported file type",
+      "maxFiles": "Maximum {max} files",
+      "compressionHint": "Compressing image…"
+    },
+    "edit": {
+      "title": "Edit photo",
+      "crop": "Crop",
+      "rotate": "Rotate",
+      "brightness": "Brightness",
+      "contrast": "Contrast",
+      "filter": "Filter",
+      "reset": "Reset",
+      "apply": "Apply",
+      "done": "Done",
+      "original": "Original"
+    },
+    "story": {
+      "add": "Add story",
+      "view": "View story",
+      "viewed": "Viewed by {count}",
+      "expired": "This story has expired",
+      "expiresIn": "Expires in {time}",
+      "delete": "Delete story",
+      "deleteConfirm": "Delete this story?",
+      "noStories": "No stories yet"
+    },
+    "permissions": {
+      "camera": "The app needs camera access",
+      "gallery": "The app needs gallery access",
+      "openSettings": "Open settings"
+    }
+  },
+  "search": {
+    "placeholder": "Search for a place or business…",
+    "recentSearches": "Recent searches",
+    "clearRecent": "Clear recent",
+    "noResults": "No results for \"{query}\"",
+    "results": "{count} results",
+    "categories": {
+      "all": "All",
+      "restaurants": "Restaurants",
+      "cafes": "Cafes",
+      "hotels": "Hotels",
+      "hospitals": "Hospitals",
+      "schools": "Schools",
+      "mosques": "Mosques",
+      "parks": "Parks",
+      "shops": "Shops",
+      "banks": "Banks",
+      "pharmacies": "Pharmacies",
+      "gas": "Gas stations"
+    },
+    "filters": {
+      "openNow": "Open now",
+      "topRated": "Top rated",
+      "nearMe": "Near me",
+      "priceRange": "Price range",
+      "distance": "Distance",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "suggestions": "Suggestions",
+    "trending": "Trending searches",
+    "searchingNearby": "Searching nearby…"
+  },
+  "tour3d": {
+    "title": "3D Tour",
+    "start": "Start tour",
+    "stop": "Stop tour",
+    "loading": "Loading tour…",
+    "unavailable": "3D tour not available for this place",
+    "controls": {
+      "rotate": "Rotate",
+      "zoom": "Zoom",
+      "reset": "Reset",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen"
+    },
+    "hotspot": {
+      "tap": "Tap to learn more",
+      "info": "Info"
+    },
+    "screenshot": "Take screenshot",
+    "share": "Share tour"
+  },
+  "payments": {
+    "title": "Payment",
+    "selectMethod": "Select payment method",
+    "methods": {
+      "cash": "Cash",
+      "card": "Credit card",
+      "wallet": "Digital wallet",
+      "transfer": "Bank transfer"
+    },
+    "summary": {
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
+      "total": "Total",
+      "currency": "IQD"
+    },
+    "confirm": "Confirm payment",
+    "processing": "Processing payment…",
+    "success": "Payment successful",
+    "failed": "Payment failed",
+    "retry": "Try again",
+    "receipt": "Receipt",
+    "viewReceipt": "View receipt",
+    "refund": {
+      "title": "Refund",
+      "requested": "Refund request submitted",
+      "processed": "Refund processed"
+    }
+  },
+  "social": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "following": "Following",
+    "followers": "{count} followers",
+    "following_count": "{count} following",
+    "likes": "{count} likes",
+    "comments": "{count} comments",
+    "shares": "{count} shares",
+    "saves": "{count} saves",
+    "confirmUnfollow": "Unfollow {name}?",
+    "followedBy": "Followed by {count} people you follow",
+    "noFollowers": "No followers yet",
+    "noFollowing": "Not following anyone yet",
+    "suggestedFollows": "Suggested to follow",
+    "mutualFollowers": "{count} mutual followers",
+    "post": {
+      "create": "Create post",
+      "placeholder": "Share your experience…",
+      "addLocation": "Add location",
+      "addPhoto": "Add photo",
+      "publish": "Publish",
+      "draft": "Save as draft",
+      "delete": "Delete post",
+      "edit": "Edit post",
+      "report": "Report post",
+      "share": "Share",
+      "save": "Save"
+    },
+    "comment": {
+      "placeholder": "Add a comment…",
+      "reply": "Reply",
+      "delete": "Delete",
+      "report": "Report",
+      "viewReplies": "View {count} replies",
+      "hideReplies": "Hide replies"
+    },
+    "feed": {
+      "empty": "No posts yet",
+      "loadMore": "Load more",
+      "refresh": "Refresh",
+      "newPosts": "{count} new posts"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markAllRead": "Mark all as read",
+    "settings": "Notification settings",
+    "types": {
+      "follow": "{name} started following you",
+      "like": "{name} liked your post",
+      "comment": "{name} commented on your post",
+      "mention": "{name} mentioned you",
+      "message": "New message from {name}",
+      "providerApproved": "Your business has been verified",
+      "providerRejected": "Business registration not approved",
+      "nearbyEvent": "Event nearby",
+      "systemUpdate": "System update",
+      "promotionalOffer": "Special offer",
+      "reviewReply": "Reply to your review"
+    },
+    "preferences": {
+      "push": "Push notifications",
+      "email": "Email notifications",
+      "social": "Social activity",
+      "messages": "Messages",
+      "providers": "Business updates",
+      "system": "System notifications",
+      "marketing": "Offers and promotions"
+    },
+    "permission": {
+      "title": "Enable notifications",
+      "body": "Enable notifications to stay up to date with the latest news and offers.",
+      "allow": "Allow",
+      "later": "Later"
+    }
+  },
+  "accessibility": {
+    "screenReader": {
+      "tabBar": "Tab bar",
+      "backButton": "Go back",
+      "closeButton": "Close",
+      "menu": "Menu",
+      "search": "Search",
+      "filter": "Filter",
+      "sort": "Sort",
+      "map": "Interactive map",
+      "loading": "Loading",
+      "refreshing": "Refreshing",
+      "moreOptions": "More options",
+      "selected": "Selected",
+      "notSelected": "Not selected",
+      "required": "Required",
+      "optional": "Optional",
+      "error": "Error",
+      "success": "Success"
+    }
   }
 }

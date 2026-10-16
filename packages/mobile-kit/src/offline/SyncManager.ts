@@ -38,7 +38,7 @@ export interface SyncManagerOptions {
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 let networkUnsubscribe: (() => void) | null = null;
 let syncing = false;
-let statusCallbacks = new Set<SyncStatusCallback>();
+const statusCallbacks = new Set<SyncStatusCallback>();
 let currentStatus: SyncStatus = 'idle';
 let latestNotificationsCount = 0;
 let opts: Required<SyncManagerOptions> = {

@@ -359,12 +359,18 @@ const PostItem = memo(function PostItem({
           style={[styles.actionBtn, { backgroundColor: COLORS.border }]}
           onPress={() => { haptics.tap(); onComment(post); }}
           accessibilityRole="button"
+          accessibilityLabel={t('post.commentA11y', { count: String(post.commentCount) })}
         >
           <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>
             {t('post.comment')} {formatCount(post.commentCount)}
           </Text>
         </Pressable>
-        <Pressable style={[styles.actionBtn, { backgroundColor: COLORS.border }]} onPress={handleShare} accessibilityRole="button">
+        <Pressable
+          style={[styles.actionBtn, { backgroundColor: COLORS.border }]}
+          onPress={handleShare}
+          accessibilityRole="button"
+          accessibilityLabel={t('post.share')}
+        >
           <Text style={[styles.actionBtnText, { color: COLORS.textSecondary }]}>{t('post.share')}</Text>
         </Pressable>
         <Pressable

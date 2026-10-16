@@ -16,15 +16,570 @@
     "confirm": "تأكيد",
     "save": "حفظ",
     "close": "إغلاق",
-    "back": "رجوع"
+    "back": "رجوع",
+    "submit": "إرسال",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "share": "مشاركة",
+    "send": "إرسال",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "clear": "مسح",
+    "select": "اختيار",
+    "done": "تم",
+    "next": "التالي",
+    "previous": "السابق",
+    "skip": "تخطي",
+    "continue": "متابعة",
+    "viewAll": "عرض الكل",
+    "viewMore": "عرض المزيد",
+    "collapse": "طي",
+    "expand": "توسيع",
+    "refresh": "تحديث",
+    "copy": "نسخ",
+    "open": "فتح",
+    "report": "إبلاغ",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+    "mute": "كتم",
+    "unmute": "إلغاء الكتم",
+    "follow": "متابعة",
+    "unfollow": "إلغاء المتابعة",
+    "like": "إعجاب",
+    "unlike": "إلغاء الإعجاب",
+    "add": "إضافة",
+    "remove": "إزالة",
+    "upload": "رفع",
+    "download": "تنزيل"
   },
   "status": {
-    "loading": "جارٍ التحميل…"
+    "loading": "جارٍ التحميل…",
+    "saving": "جارٍ الحفظ…",
+    "uploading": "جارٍ الرفع…",
+    "processing": "جارٍ المعالجة…",
+    "success": "تم بنجاح",
+    "failed": "فشلت العملية",
+    "pending": "قيد الانتظار",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "online": "متصل",
+    "offline": "غير متصل",
+    "verified": "موثّق",
+    "unverified": "غير موثّق"
   },
   "errors": {
     "generic": "حدث خطأ غير متوقع. حاول مرة أخرى.",
     "network": "تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت ثم حاول مرة أخرى.",
     "rateLimited": "محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.",
-    "sessionExpired": "انتهت جلستك. سجّل الدخول مرة أخرى."
+    "sessionExpired": "انتهت جلستك. سجّل الدخول مرة أخرى.",
+    "notFound": "المحتوى غير موجود.",
+    "forbidden": "ليس لديك صلاحية للقيام بهذا الإجراء.",
+    "validation": "بيانات غير صالحة. يرجى مراجعة الحقول والمحاولة مرة أخرى."
+  },
+  "navigation": {
+    "startNavigation": "بدء الملاحة",
+    "stopNavigation": "إيقاف الملاحة",
+    "recalculating": "جارٍ إعادة الحساب…",
+    "arrived": "وصلت إلى وجهتك",
+    "arrivedAt": "وصلت إلى {destination}",
+    "distanceRemaining": "{distance} متبقية",
+    "timeRemaining": "{time} متبقية",
+    "eta": "الوصول المتوقع {time}",
+    "turnLeft": "انعطف يساراً",
+    "turnRight": "انعطف يميناً",
+    "turnSlightLeft": "انعطف قليلاً يساراً",
+    "turnSlightRight": "انعطف قليلاً يميناً",
+    "turnSharpLeft": "انعطف بحدة يساراً",
+    "turnSharpRight": "انعطف بحدة يميناً",
+    "continueStr": "واصل السير",
+    "keepLeft": "ابقَ في اليسار",
+    "keepRight": "ابقَ في اليمين",
+    "uTurn": "اقلب الاتجاه",
+    "enterRoundabout": "ادخل الدوار",
+    "exitRoundabout": "اخرج من الدوار",
+    "routeOptions": "خيارات المسار",
+    "fastest": "الأسرع",
+    "shortest": "الأقصر",
+    "avoidTolls": "تجنب نقاط الدفع",
+    "avoidHighways": "تجنب الطرق السريعة",
+    "walkingMode": "مشياً",
+    "drivingMode": "بالسيارة",
+    "bicyclingMode": "بالدراجة",
+    "searchDestination": "ابحث عن وجهة",
+    "currentLocation": "موقعي الحالي",
+    "savedPlaces": "الأماكن المحفوظة",
+    "recentDestinations": "الوجهات الأخيرة",
+    "noRoute": "لم يُعثر على مسار",
+    "offRoute": "خرجت عن المسار",
+    "gpsSignalLost": "ضعف إشارة GPS",
+    "gpsSignalRestored": "استُعيدت إشارة GPS",
+    "followingRoute": "تتبع المسار",
+    "via": "عبر {waypoint}",
+    "steps": "{count} خطوة",
+    "step": "الخطوة {number} من {total}",
+    "laneGuidance": "المسار الصحيح: {lane}",
+    "speedLimit": "الحد الأقصى للسرعة: {speed} كم/ساعة",
+    "trafficDelay": "تأخير مروري: {minutes} دقيقة",
+    "alternativeRoute": "مسار بديل",
+    "shareTrip": "مشاركة الرحلة"
+  },
+  "moderation": {
+    "report": {
+      "title": "الإبلاغ عن المحتوى",
+      "subtitle": "لماذا تُبلّغ عن هذا المحتوى؟",
+      "spam": "محتوى مزعج أو إعلان",
+      "misinformation": "معلومات مضللة",
+      "harassment": "تحرش أو إساءة",
+      "hateSpeech": "خطاب كراهية",
+      "violence": "عنف أو محتوى مسيء",
+      "falseInfo": "معلومات خاطئة عن نشاط تجاري",
+      "inappropriatePhoto": "صورة غير ملائمة",
+      "other": "سبب آخر",
+      "descriptionPlaceholder": "أخبرنا بمزيد من التفاصيل (اختياري)",
+      "submit": "إرسال البلاغ",
+      "submitted": "شكراً على بلاغك. سنراجعه في أقرب وقت.",
+      "confirmTitle": "تم إرسال البلاغ",
+      "confirmBody": "سيراجع فريقنا هذا البلاغ ويتخذ الإجراء المناسب.",
+      "cancel": "إلغاء"
+    },
+    "block": {
+      "title": "حظر المستخدم",
+      "confirmTitle": "حظر {name}؟",
+      "confirmBody": "لن تتمكن من رؤية منشوراته أو إرسال رسائل إليه. يمكنك إلغاء الحظر لاحقاً.",
+      "success": "تم حظر {name}",
+      "undo": "إلغاء الحظر",
+      "undone": "تم إلغاء حظر {name}",
+      "blocked": "محظور"
+    },
+    "mute": {
+      "title": "كتم المستخدم",
+      "confirmTitle": "كتم {name}؟",
+      "confirmBody": "لن تظهر منشوراته في خلاصتك. لن يعلم بذلك.",
+      "success": "تم كتم {name}",
+      "undo": "إلغاء الكتم",
+      "undone": "تم إلغاء كتم {name}",
+      "muted": "مكتوم",
+      "duration": {
+        "day": "لمدة يوم",
+        "week": "لمدة أسبوع",
+        "month": "لمدة شهر",
+        "forever": "إلى الأبد"
+      }
+    },
+    "flagged": "تم وضع علامة للمراجعة",
+    "underReview": "هذا المحتوى قيد المراجعة",
+    "removed": "تم إزالة هذا المحتوى"
+  },
+  "assistant": {
+    "title": "المساعد الذكي",
+    "placeholder": "اسأل عن أي مكان أو نشاط…",
+    "thinking": "جارٍ التفكير…",
+    "typing": "يكتب…",
+    "errorMessage": "تعذّر الرد. حاول مرة أخرى.",
+    "newChat": "محادثة جديدة",
+    "clearHistory": "مسح المحادثة",
+    "clearConfirm": "هل تريد مسح المحادثة؟ لا يمكن التراجع.",
+    "suggestions": {
+      "title": "مقترحات",
+      "nearbyRestaurants": "مطاعم قريبة مني",
+      "popularAttractions": "المعالم الأكثر زيارة",
+      "openNow": "ما الأماكن المفتوحة الآن؟",
+      "topRated": "الأماكن الأعلى تقييماً",
+      "budget": "أماكن بأسعار مناسبة",
+      "family": "مناسب للعائلات"
+    },
+    "sources": "المصادر",
+    "noSources": "لا توجد مصادر متاحة",
+    "viewOnMap": "عرض على الخريطة",
+    "navigate": "توجيه",
+    "disclaimer": "المساعد يعتمد على بيانات المستخدمين والمزوّدين. تحقق دائماً من المعلومات المهمة.",
+    "feedbackPositive": "إجابة مفيدة",
+    "feedbackNegative": "إجابة غير مفيدة",
+    "feedbackThanks": "شكراً على ملاحظاتك",
+    "characterLimit": "الحد الأقصى {max} حرف",
+    "attachImage": "إرفاق صورة",
+    "voiceInput": "إدخال صوتي",
+    "stopRecording": "إيقاف التسجيل",
+    "recordingIndicator": "جارٍ التسجيل…"
+  },
+  "provider": {
+    "registration": {
+      "title": "تسجيل النشاط التجاري",
+      "subtitle": "أضف نشاطك التجاري على خريطة العراق",
+      "step": "الخطوة {current} من {total}",
+      "steps": {
+        "basicInfo": "المعلومات الأساسية",
+        "location": "الموقع",
+        "contact": "بيانات التواصل",
+        "photos": "الصور",
+        "hours": "أوقات العمل",
+        "review": "المراجعة والإرسال"
+      },
+      "fields": {
+        "name": "اسم النشاط التجاري",
+        "namePlaceholder": "مثال: مطعم بغداد",
+        "category": "التصنيف",
+        "categoryPlaceholder": "اختر تصنيفاً",
+        "description": "وصف النشاط",
+        "descriptionPlaceholder": "صف خدماتك ومنتجاتك…",
+        "phone": "رقم الهاتف",
+        "phonePlaceholder": "+964 7XX XXX XXXX",
+        "whatsapp": "رقم الواتساب",
+        "website": "الموقع الإلكتروني",
+        "address": "العنوان التفصيلي",
+        "addressPlaceholder": "الحي، الشارع، رقم المبنى",
+        "city": "المدينة",
+        "neighborhood": "الحي",
+        "latitude": "خط العرض",
+        "longitude": "خط الطول",
+        "priceRange": "نطاق الأسعار",
+        "instagram": "حساب إنستغرام",
+        "facebook": "صفحة فيسبوك"
+      },
+      "location": {
+        "title": "تحديد الموقع",
+        "instruction": "اسحب الدبوس لتحديد موقع نشاطك التجاري بدقة",
+        "useCurrentLocation": "استخدم موقعي الحالي",
+        "searchAddress": "ابحث عن العنوان",
+        "pinPlaced": "تم تحديد الموقع"
+      },
+      "hours": {
+        "title": "أوقات العمل",
+        "open": "مفتوح",
+        "closed": "مغلق",
+        "open24h": "مفتوح 24 ساعة",
+        "from": "من",
+        "to": "إلى",
+        "days": {
+          "saturday": "السبت",
+          "sunday": "الأحد",
+          "monday": "الاثنين",
+          "tuesday": "الثلاثاء",
+          "wednesday": "الأربعاء",
+          "thursday": "الخميس",
+          "friday": "الجمعة"
+        }
+      },
+      "photos": {
+        "title": "صور النشاط التجاري",
+        "addPhoto": "إضافة صورة",
+        "coverPhoto": "صورة الغلاف",
+        "minRequired": "مطلوب صورة واحدة على الأقل",
+        "maxAllowed": "الحد الأقصى {max} صور",
+        "uploadHint": "اضغط لإضافة صور من معرض الصور أو الكاميرا"
+      },
+      "review": {
+        "title": "مراجعة المعلومات",
+        "subtitle": "تأكد من صحة المعلومات قبل الإرسال",
+        "editSection": "تعديل"
+      },
+      "submit": "إرسال طلب التسجيل",
+      "submitting": "جارٍ الإرسال…",
+      "submitted": "تم إرسال طلبك",
+      "submittedBody": "سيراجع فريقنا طلبك خلال 24-48 ساعة وسيتم إشعارك بالنتيجة.",
+      "draft": {
+        "saved": "تم حفظ المسودة",
+        "restore": "استمرار التسجيل",
+        "discard": "تجاهل المسودة"
+      },
+      "validation": {
+        "nameRequired": "يرجى إدخال اسم النشاط التجاري",
+        "categoryRequired": "يرجى اختيار التصنيف",
+        "phoneRequired": "يرجى إدخال رقم الهاتف",
+        "locationRequired": "يرجى تحديد الموقع على الخريطة",
+        "photoRequired": "يرجى إضافة صورة واحدة على الأقل"
+      }
+    },
+    "verification": {
+      "title": "حالة التوثيق",
+      "pending": {
+        "title": "طلبك قيد المراجعة",
+        "body": "يراجع فريقنا معلوماتك. ستتلقى إشعاراً خلال 24-48 ساعة.",
+        "estimatedTime": "الوقت المقدر: {hours} ساعة"
+      },
+      "approved": {
+        "title": "تم توثيق نشاطك التجاري",
+        "body": "أصبح نشاطك التجاري ظاهراً على الخريطة. يمكنك الآن إدارة ملفك.",
+        "badge": "موثّق"
+      },
+      "rejected": {
+        "title": "لم يتم القبول",
+        "body": "لم نتمكن من توثيق نشاطك التجاري. السبب: {reason}",
+        "resubmit": "إعادة التقديم",
+        "reasons": {
+          "duplicateListing": "نشاط تجاري مكرر",
+          "invalidPhone": "رقم هاتف غير صالح",
+          "locationMismatch": "الموقع لا يتطابق مع العنوان",
+          "insufficientPhotos": "الصور غير كافية أو منخفضة الجودة",
+          "inappropriateContent": "محتوى غير ملائم",
+          "other": "سبب آخر"
+        }
+      },
+      "suspended": {
+        "title": "تم تعليق النشاط التجاري",
+        "body": "تم تعليق نشاطك التجاري بسبب: {reason}",
+        "appeal": "تقديم اعتراض"
+      },
+      "badge": {
+        "verified": "موثّق",
+        "unverified": "غير موثّق",
+        "pending": "قيد المراجعة",
+        "premium": "مميّز"
+      }
+    }
+  },
+  "offline": {
+    "title": "غير متصل بالإنترنت",
+    "body": "أنت غير متصل حالياً. بعض الميزات محدودة.",
+    "banner": "لا يوجد اتصال بالإنترنت",
+    "reconnected": "عاد الاتصال بالإنترنت",
+    "queue": {
+      "title": "إجراءات معلّقة",
+      "count": "{count} إجراء في الانتظار",
+      "syncing": "جارٍ المزامنة…",
+      "synced": "تمت المزامنة",
+      "failed": "فشلت المزامنة",
+      "retry": "إعادة المحاولة",
+      "clear": "مسح الإجراءات المعلّقة"
+    },
+    "map": {
+      "cachedData": "تعرض الخريطة بيانات مخزّنة محلياً",
+      "outdated": "قد تكون البيانات غير محدّثة",
+      "lastUpdated": "آخر تحديث: {time}"
+    },
+    "features": {
+      "available": "متاح بدون إنترنت",
+      "unavailable": "يتطلب اتصالاً بالإنترنت",
+      "partiallyAvailable": "متاح جزئياً"
+    }
+  },
+  "media": {
+    "upload": {
+      "title": "رفع وسائط",
+      "selectPhoto": "اختر صورة",
+      "takePhoto": "التقط صورة",
+      "selectVideo": "اختر فيديو",
+      "recordVideo": "سجّل فيديو",
+      "fromGallery": "من المعرض",
+      "fromCamera": "من الكاميرا",
+      "uploading": "جارٍ الرفع {progress}%",
+      "uploaded": "تم الرفع",
+      "failed": "فشل الرفع",
+      "retry": "إعادة الرفع",
+      "cancel": "إلغاء الرفع",
+      "sizeLimitError": "حجم الملف يتجاوز الحد الأقصى ({maxMb} ميغابايت)",
+      "typeError": "نوع الملف غير مدعوم",
+      "maxFiles": "الحد الأقصى {max} ملفات",
+      "compressionHint": "جارٍ ضغط الصورة…"
+    },
+    "edit": {
+      "title": "تعديل الصورة",
+      "crop": "قص",
+      "rotate": "تدوير",
+      "brightness": "السطوع",
+      "contrast": "التباين",
+      "filter": "فلتر",
+      "reset": "إعادة الضبط",
+      "apply": "تطبيق",
+      "done": "تم",
+      "original": "الأصلية"
+    },
+    "story": {
+      "add": "إضافة قصة",
+      "view": "مشاهدة القصة",
+      "viewed": "شاهد {count} شخص",
+      "expired": "انتهت صلاحية هذه القصة",
+      "expiresIn": "تنتهي خلال {time}",
+      "delete": "حذف القصة",
+      "deleteConfirm": "هل تريد حذف هذه القصة؟",
+      "noStories": "لا توجد قصص حالياً"
+    },
+    "permissions": {
+      "camera": "يحتاج التطبيق إلى إذن الوصول للكاميرا",
+      "gallery": "يحتاج التطبيق إلى إذن الوصول للمعرض",
+      "openSettings": "فتح الإعدادات"
+    }
+  },
+  "search": {
+    "placeholder": "ابحث عن مكان أو نشاط تجاري…",
+    "recentSearches": "عمليات البحث الأخيرة",
+    "clearRecent": "مسح الأخيرة",
+    "noResults": "لا توجد نتائج لـ «{query}»",
+    "results": "{count} نتيجة",
+    "categories": {
+      "all": "الكل",
+      "restaurants": "مطاعم",
+      "cafes": "مقاهي",
+      "hotels": "فنادق",
+      "hospitals": "مستشفيات",
+      "schools": "مدارس",
+      "mosques": "مساجد",
+      "parks": "حدائق",
+      "shops": "محلات",
+      "banks": "بنوك",
+      "pharmacies": "صيدليات",
+      "gas": "محطات وقود"
+    },
+    "filters": {
+      "openNow": "مفتوح الآن",
+      "topRated": "الأعلى تقييماً",
+      "nearMe": "بالقرب مني",
+      "priceRange": "نطاق السعر",
+      "distance": "المسافة",
+      "apply": "تطبيق الفلاتر",
+      "reset": "إعادة الضبط"
+    },
+    "suggestions": "اقتراحات",
+    "trending": "الأكثر بحثاً",
+    "searchingNearby": "البحث في المنطقة المجاورة…"
+  },
+  "tour3d": {
+    "title": "جولة ثلاثية الأبعاد",
+    "start": "بدء الجولة",
+    "stop": "إيقاف الجولة",
+    "loading": "جارٍ تحميل الجولة…",
+    "unavailable": "الجولة الثلاثية الأبعاد غير متاحة لهذا المكان",
+    "controls": {
+      "rotate": "تدوير",
+      "zoom": "تكبير/تصغير",
+      "reset": "إعادة الضبط",
+      "fullscreen": "ملء الشاشة",
+      "exitFullscreen": "الخروج من ملء الشاشة"
+    },
+    "hotspot": {
+      "tap": "اضغط لمعرفة المزيد",
+      "info": "معلومات"
+    },
+    "screenshot": "التقط صورة",
+    "share": "مشاركة الجولة"
+  },
+  "payments": {
+    "title": "الدفع",
+    "selectMethod": "اختر طريقة الدفع",
+    "methods": {
+      "cash": "نقداً",
+      "card": "بطاقة ائتمانية",
+      "wallet": "محفظة إلكترونية",
+      "transfer": "تحويل بنكي"
+    },
+    "summary": {
+      "subtotal": "المجموع الجزئي",
+      "discount": "الخصم",
+      "tax": "الضريبة",
+      "total": "الإجمالي",
+      "currency": "د.ع."
+    },
+    "confirm": "تأكيد الدفع",
+    "processing": "جارٍ معالجة الدفع…",
+    "success": "تمت عملية الدفع بنجاح",
+    "failed": "فشلت عملية الدفع",
+    "retry": "إعادة المحاولة",
+    "receipt": "إيصال الدفع",
+    "viewReceipt": "عرض الإيصال",
+    "refund": {
+      "title": "استرداد المبلغ",
+      "requested": "تم تقديم طلب الاسترداد",
+      "processed": "تم استرداد المبلغ"
+    }
+  },
+  "social": {
+    "follow": "متابعة",
+    "unfollow": "إلغاء المتابعة",
+    "following": "تتابعه",
+    "followers": "{count} متابع",
+    "following_count": "{count} متابَع",
+    "likes": "{count} إعجاب",
+    "comments": "{count} تعليق",
+    "shares": "{count} مشاركة",
+    "saves": "{count} حفظ",
+    "confirmUnfollow": "إلغاء متابعة {name}؟",
+    "followedBy": "يتابعه {count} شخص تتابعهم",
+    "noFollowers": "لا يوجد متابعون بعد",
+    "noFollowing": "لا تتابع أحداً بعد",
+    "suggestedFollows": "مقترحون للمتابعة",
+    "mutualFollowers": "{count} متابع مشترك",
+    "post": {
+      "create": "إنشاء منشور",
+      "placeholder": "شارك تجربتك…",
+      "addLocation": "إضافة موقع",
+      "addPhoto": "إضافة صورة",
+      "publish": "نشر",
+      "draft": "حفظ كمسودة",
+      "delete": "حذف المنشور",
+      "edit": "تعديل المنشور",
+      "report": "الإبلاغ عن المنشور",
+      "share": "مشاركة",
+      "save": "حفظ"
+    },
+    "comment": {
+      "placeholder": "أضف تعليقاً…",
+      "reply": "رد",
+      "delete": "حذف",
+      "report": "إبلاغ",
+      "viewReplies": "عرض {count} رد",
+      "hideReplies": "إخفاء الردود"
+    },
+    "feed": {
+      "empty": "لا توجد منشورات بعد",
+      "loadMore": "تحميل المزيد",
+      "refresh": "تحديث",
+      "newPosts": "{count} منشور جديد"
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "settings": "إعدادات الإشعارات",
+    "types": {
+      "follow": "بدأ {name} متابعتك",
+      "like": "أعجب {name} بمنشورك",
+      "comment": "علّق {name} على منشورك",
+      "mention": "أشار إليك {name}",
+      "message": "رسالة جديدة من {name}",
+      "providerApproved": "تم توثيق نشاطك التجاري",
+      "providerRejected": "لم يتم قبول طلب التسجيل",
+      "nearbyEvent": "حدث قريب منك",
+      "systemUpdate": "تحديث من النظام",
+      "promotionalOffer": "عرض مميز",
+      "reviewReply": "رد على تقييمك"
+    },
+    "preferences": {
+      "push": "إشعارات الهاتف",
+      "email": "إشعارات البريد الإلكتروني",
+      "social": "النشاط الاجتماعي",
+      "messages": "الرسائل",
+      "providers": "تحديثات النشاط التجاري",
+      "system": "إشعارات النظام",
+      "marketing": "العروض والإعلانات"
+    },
+    "permission": {
+      "title": "تفعيل الإشعارات",
+      "body": "فعّل الإشعارات لتبقى على اطلاع بأحدث الأخبار والعروض.",
+      "allow": "السماح",
+      "later": "لاحقاً"
+    }
+  },
+  "accessibility": {
+    "screenReader": {
+      "tabBar": "شريط التبويبات",
+      "backButton": "الرجوع للخلف",
+      "closeButton": "إغلاق",
+      "menu": "القائمة",
+      "search": "البحث",
+      "filter": "التصفية",
+      "sort": "الترتيب",
+      "map": "الخريطة التفاعلية",
+      "loading": "جارٍ التحميل",
+      "refreshing": "جارٍ التحديث",
+      "moreOptions": "خيارات إضافية",
+      "selected": "محدد",
+      "notSelected": "غير محدد",
+      "required": "مطلوب",
+      "optional": "اختياري",
+      "error": "خطأ",
+      "success": "نجاح"
+    }
   }
 }
