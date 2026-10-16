@@ -263,4 +263,133 @@ export const searchContract = c.router({
     },
     summary: "Clear the authenticated user's search history",
   },
+
+  // ── NLP search ──────────────────────────────────────────────────────────────
+
+  nlpSearch: {
+    method: 'POST',
+    path: '/v1/search/nlp',
+    headers: z.object({ authorization: z.string().optional() }),
+    body: z.object({
+      query: z.string().trim().min(1).max(300),
+      /** lng,lat of the user */
+      near: z
+        .string()
+        .regex(/^-?\d{1,3}(\.\d{1,15})?,-?\d{1,2}(\.\d{1,15})?$/)
+        .optional(),
+      city: CityId.optional(),
+      lang: Locale.default('ar'),
+      limit: z.coerce.number().int().min(1).max(50).default(20),
+    }),
+    responses: {
+      200: z.object({
+        parsedIntent: z.object({
+          category: PlaceCategory.nullable(),
+          nearLabel: z.string().nullable(),
+          attributes: z.array(z.string()),
+          confidence: z.number().min(0).max(1),
+        }),
+        items: z.array(SearchResultItem),
+        total: z.number().int().nonnegative(),
+        durationMs: z.number().int().nonnegative(),
+      }),
+      400: Problem,
+      429: Problem,
+    },
+    summary: 'NLP-enhanced search — parses intent from Iraqi Arabic dialect',
+  },
+
+  // ── Personalised suggestions ─────────────────────────────────────────────
+
+  suggestedSearches: {
+    method: 'GET',
+    path: '/v1/search/suggested',
+    headers: z.object({ authorization: z.string() }),
+    query: z.object({
+      lat: z.coerce.number().optional(),
+      lng: z.coerce.number().optional(),
+      limit: z.coerce.number().int().min(1).max(20).default(10),
+    }),
+    responses: {
+      200: z.object({
+        suggestions: z.array(
+          z.object({
+            query: z.string(),
+            reason: z.enum(['history', 'location', 'trending', 'category']),
+          }),
+        ),
+      }),
+      401: Problem,
+    },
+    summary: 'Personalised search suggestions based on history + location',
+  },
+
+  // ── Autocomplete (multi-source) ──────────────────────────────────────────
+
+  autocomplete: {
+    method: 'GET',
+    path: '/v1/search/autocomplete',
+    query: z.object({
+      q: z.string().trim().min(1).max(100),
+      lat: z.coerce.number().optional(),
+      lng: z.coerce.number().optional(),
+      city: CityId.optional(),
+      lang: Locale.default('ar'),
+      limit: z.coerce.number().int().min(1).max(15).default(8),
+    }),
+    responses: {
+      200: z.object({
+        groups: z.array(
+          z.object({
+            groupKey: z.enum(['places', 'neighborhoods', 'categories', 'recent', 'trending']),
+            items: z.array(
+              z.object({
+                text: z.string(),
+                secondaryText: z.string().optional(),
+                placeId: PlaceId.optional(),
+                category: PlaceCategory.nullable().optional(),
+                city: CityId.optional(),
+                score: z.number().min(0).max(1),
+              }),
+            ),
+          }),
+        ),
+        durationMs: z.number().int().nonnegative(),
+      }),
+      429: Problem,
+    },
+    summary: 'Multi-source autocomplete: places + neighborhoods + categories + history. Target <100ms.',
+  },
+
+  // ── Save search alert (notify on new matching places) ────────────────────
+
+  saveAlert: {
+    method: 'POST',
+    path: '/v1/search/alerts',
+    headers: z.object({ authorization: z.string() }),
+    body: z.object({
+      query: z.string().trim().min(1).max(200),
+      filters: SearchFilters.partial().optional(),
+    }),
+    responses: {
+      201: z.object({ alertId: z.string().uuid() }),
+      400: Problem,
+      401: Problem,
+    },
+    summary: 'Save a search as an alert — notifies user when new places match',
+  },
+
+  deleteAlert: {
+    method: 'DELETE',
+    path: '/v1/search/alerts/:alertId',
+    headers: z.object({ authorization: z.string() }),
+    pathParams: z.object({ alertId: z.string().uuid() }),
+    body: z.object({}),
+    responses: {
+      204: z.undefined(),
+      401: Problem,
+      404: Problem,
+    },
+    summary: 'Delete a saved search alert',
+  },
 });

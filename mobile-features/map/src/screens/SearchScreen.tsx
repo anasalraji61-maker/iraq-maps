@@ -2,9 +2,9 @@
  * SearchScreen: full-featured unified search UI.
  *
  * States:
- *  1. Idle      — recent searches list + trending chips
- *  2. Typing    — autocomplete suggestions
- *  3. Results   — unified result cards (place / post / user / event / listing / tour)
+ *  1. Idle      — recent searches + trending chips + category shortcuts
+ *  2. Typing    — multi-source autocomplete dropdown (via SearchBar)
+ *  3. Results   — result cards with sort, active-filter chips, map/list toggle, save-alert
  *  4. Filtered  — filter sheet applied
  *
  * RTL-safe, Arabic-first text via t().
@@ -16,7 +16,6 @@ import type {
   SearchFilters,
   SearchHistoryEntry,
   SearchResultItem,
-  SearchSuggestion,
   TrendingSearch,
 } from '@iraq-maps/contracts';
 import { useApi } from '@iraq-maps/mobile-kit';
@@ -41,15 +40,22 @@ import {
   Text as RNText,
   View,
 } from 'react-native';
+import type {
+  AutocompleteItem,
+  RecentItem,
+  SearchCategory,
+  TrendingItem,
+} from '../components/SearchBar';
 import { SearchBar } from '../components/SearchBar';
+import { SearchResultsMap } from '../components/SearchResultsMap';
 import { t } from '../strings';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const SUGGESTION_MIN_LEN = 2;
-const FULL_SEARCH_MIN_LEN = 3;
+const AUTOCOMPLETE_DEBOUNCE_MS = 200;
+const FULL_SEARCH_MIN_LEN = 2;
 const RESULT_TYPE_ICONS: Record<SearchResultItem['type'], string> = {
   place: '📍',
   post: '📝',
@@ -76,6 +82,16 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 const CATEGORY_KEYS = Object.keys(CATEGORY_ICONS) as PlaceCategory[];
 const RATING_OPTIONS = [1, 2, 3, 4, 5] as const;
+
+type SortOption = 'relevance' | 'distance' | 'rating' | 'price';
+const SORT_OPTIONS: Array<{ key: SortOption; label: string }> = [
+  { key: 'relevance', label: 'الأكثر صلة' },
+  { key: 'distance', label: 'الأقرب' },
+  { key: 'rating', label: 'الأعلى تقييماً' },
+  { key: 'price', label: 'السعر' },
+];
+
+type ViewMode = 'list' | 'map';
 
 // ---------------------------------------------------------------------------
 // State
@@ -113,13 +129,19 @@ type Action =
   | { type: 'SET_PHASE'; state: ScreenState }
   | { type: 'SET_FILTERS'; filters: Partial<FilterState> }
   | { type: 'RESET_FILTERS' }
-  | { type: 'SET_FILTER_SHEET'; open: boolean };
+  | { type: 'SET_FILTER_SHEET'; open: boolean }
+  | { type: 'SET_SORT'; sort: SortOption }
+  | { type: 'SET_VIEW_MODE'; mode: ViewMode }
+  | { type: 'SET_CATEGORY'; category: SearchCategory };
 
 interface State {
   query: string;
   screen: ScreenState;
   filters: FilterState;
   filterSheetOpen: boolean;
+  sort: SortOption;
+  viewMode: ViewMode;
+  searchCategory: SearchCategory;
 }
 
 function reducer(state: State, action: Action): State {
@@ -134,6 +156,12 @@ function reducer(state: State, action: Action): State {
       return { ...state, filters: emptyFilters };
     case 'SET_FILTER_SHEET':
       return { ...state, filterSheetOpen: action.open };
+    case 'SET_SORT':
+      return { ...state, sort: action.sort };
+    case 'SET_VIEW_MODE':
+      return { ...state, viewMode: action.mode };
+    case 'SET_CATEGORY':
+      return { ...state, searchCategory: action.category };
     default:
       return state;
   }
@@ -144,6 +172,9 @@ const initial: State = {
   screen: { phase: 'idle' },
   filters: emptyFilters,
   filterSheetOpen: false,
+  sort: 'relevance',
+  viewMode: 'list',
+  searchCategory: 'all',
 };
 
 // ---------------------------------------------------------------------------
@@ -155,12 +186,15 @@ export function SearchScreen(): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const api = useApi() as any;
   const [state, dispatch] = useReducer(reducer, initial);
-  const { query, screen, filters, filterSheetOpen } = state;
+  const { query, screen, filters, filterSheetOpen, sort, viewMode, searchCategory } = state;
 
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [autocompleteItems, setAutocompleteItems] = useState<AutocompleteItem[]>([]);
   const [history, setHistory] = useState<SearchHistoryEntry[]>([]);
   const [trending, setTrending] = useState<TrendingSearch[]>([]);
+  const [saveAlertLoading, setSaveAlertLoading] = useState(false);
+  const [saveAlertDone, setSaveAlertDone] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const autocompleteAbortRef = useRef<AbortController | null>(null);
 
   // Load history and trending on mount.
   useEffect(() => {
@@ -177,37 +211,58 @@ export function SearchScreen(): ReactElement {
   // Query handling
   // ---------------------------------------------------------------------------
 
+  /** Fetch multi-source autocomplete groups. Debounced to 200 ms. */
+  const fetchAutocomplete = useCallback(
+    async (q: string) => {
+      autocompleteAbortRef.current?.abort();
+      autocompleteAbortRef.current = new AbortController();
+
+      try {
+        const res = await api.search.autocomplete({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          query: { q, limit: 8 } as any,
+        });
+        if (res.status === 200) {
+          // Flatten groups into a single list for SearchBar
+          const flat: AutocompleteItem[] = [];
+          for (const group of res.body.groups) {
+            for (const item of group.items) {
+              flat.push({ ...item, groupKey: group.groupKey });
+            }
+          }
+          setAutocompleteItems(flat);
+        }
+      } catch {
+        // Non-fatal — show no suggestions
+      }
+    },
+    [api],
+  );
+
   const handleQueryChange = useCallback(
     async (q: string) => {
       dispatch({ type: 'SET_QUERY', query: q });
+      setSaveAlertDone(false);
 
       if (!q.trim()) {
         dispatch({ type: 'SET_PHASE', state: { phase: 'idle' } });
-        setSuggestions([]);
+        setAutocompleteItems([]);
         return;
       }
 
-      if (q.length < SUGGESTION_MIN_LEN) return;
+      // Autocomplete at any length
+      if (q.length >= 1) {
+        dispatch({ type: 'SET_PHASE', state: { phase: 'suggesting', query: q } });
+        void fetchAutocomplete(q);
+      }
+
+      if (q.length < FULL_SEARCH_MIN_LEN) return;
 
       abortRef.current?.abort();
       abortRef.current = new AbortController();
 
-      if (q.length < FULL_SEARCH_MIN_LEN) {
-        // Autocomplete only
-        dispatch({ type: 'SET_PHASE', state: { phase: 'suggesting', query: q } });
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const res = await api.search.suggestions({ query: { q, limit: 6 } as any });
-          if (res.status === 200) setSuggestions(res.body.suggestions);
-        } catch {
-          // Ignore
-        }
-        return;
-      }
-
       // Full search
       dispatch({ type: 'SET_PHASE', state: { phase: 'searching', query: q } });
-      setSuggestions([]);
 
       const searchFilters: Partial<SearchFilters> = {
         ...(filters.type ? { type: filters.type } : {}),
@@ -248,7 +303,7 @@ export function SearchScreen(): ReactElement {
         });
       }
     },
-    [api, filters],
+    [api, fetchAutocomplete, filters],
   );
 
   // Re-run search when filters change.
@@ -292,6 +347,22 @@ export function SearchScreen(): ReactElement {
     [api, query, router],
   );
 
+  const handleSaveAlert = useCallback(async () => {
+    if (saveAlertDone || screen.phase !== 'results') return;
+    setSaveAlertLoading(true);
+    try {
+      await api.search.saveAlert({
+        headers: { authorization: 'Bearer' },
+        body: { query },
+      });
+      setSaveAlertDone(true);
+    } catch {
+      // Ignore
+    } finally {
+      setSaveAlertLoading(false);
+    }
+  }, [api, query, saveAlertDone, screen.phase]);
+
   // ---------------------------------------------------------------------------
   // Active filter count badge
   // ---------------------------------------------------------------------------
@@ -307,6 +378,81 @@ export function SearchScreen(): ReactElement {
   }, [filters]);
 
   // ---------------------------------------------------------------------------
+  // Sorted items
+  // ---------------------------------------------------------------------------
+  const sortedItems = useMemo(() => {
+    if (screen.phase !== 'results') return [];
+    const items = [...screen.items];
+    switch (sort) {
+      case 'distance':
+        return items.sort((a, b) => {
+          const da = a.type === 'place' ? (a.distanceM ?? Infinity) : Infinity;
+          const db = b.type === 'place' ? (b.distanceM ?? Infinity) : Infinity;
+          return da - db;
+        });
+      case 'rating':
+        return items.sort((a, b) => {
+          const ra = a.type === 'place' ? (a.rating ?? 0) : 0;
+          const rb = b.type === 'place' ? (b.rating ?? 0) : 0;
+          return rb - ra;
+        });
+      case 'price':
+        return items.sort((a, b) => {
+          const pa = a.type === 'listing' ? (a.priceIqd ?? Infinity) : Infinity;
+          const pb = b.type === 'listing' ? (b.priceIqd ?? Infinity) : Infinity;
+          return pa - pb;
+        });
+      default:
+        return items; // server-side relevance
+    }
+  }, [screen, sort]);
+
+  // ---------------------------------------------------------------------------
+  // Active filter chips
+  // ---------------------------------------------------------------------------
+  const activeFilterChips = useMemo(() => {
+    const chips: Array<{ key: string; label: string; onRemove: () => void }> = [];
+    if (filters.type) {
+      chips.push({
+        key: 'type',
+        label: t(`search.type${filters.type.charAt(0).toUpperCase() + filters.type.slice(1)}` as Parameters<typeof t>[0]),
+        onRemove: () => dispatch({ type: 'SET_FILTERS', filters: { type: null } }),
+      });
+    }
+    if (filters.category) {
+      chips.push({
+        key: 'category',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        label: t(`categories.${filters.category}` as any),
+        onRemove: () => dispatch({ type: 'SET_FILTERS', filters: { category: null } }),
+      });
+    }
+    if (filters.radiusM) {
+      const km = filters.radiusM >= 1000 ? `${filters.radiusM / 1000} كم` : `${filters.radiusM} م`;
+      chips.push({
+        key: 'radius',
+        label: km,
+        onRemove: () => dispatch({ type: 'SET_FILTERS', filters: { radiusM: null } }),
+      });
+    }
+    if (filters.ratingMin != null) {
+      chips.push({
+        key: 'rating',
+        label: `${'★'.repeat(filters.ratingMin)}+`,
+        onRemove: () => dispatch({ type: 'SET_FILTERS', filters: { ratingMin: null } }),
+      });
+    }
+    if (filters.openNow) {
+      chips.push({
+        key: 'openNow',
+        label: t('search.filterOpenNow'),
+        onRemove: () => dispatch({ type: 'SET_FILTERS', filters: { openNow: false } }),
+      });
+    }
+    return chips;
+  }, [filters]);
+
+  // ---------------------------------------------------------------------------
   // Render helpers
   // ---------------------------------------------------------------------------
 
@@ -314,37 +460,19 @@ export function SearchScreen(): ReactElement {
     return <ResultCard item={item} onPress={handleResultPress} />;
   }
 
-  function renderSuggestion({ item }: { item: SearchSuggestion }): ReactElement {
-    return (
-      <Pressable
-        style={styles.suggestionRow}
-        onPress={() => {
-          dispatch({ type: 'SET_QUERY', query: item.text });
-          void handleQueryChange(item.text);
-        }}
-        accessibilityRole="button"
-      >
-        <RNText style={styles.suggestionIcon} allowFontScaling={false}>
-          {RESULT_TYPE_ICONS[item.type]}
-        </RNText>
-        <RNText style={styles.suggestionText} numberOfLines={1}>
-          {item.text}
-        </RNText>
-        {item.category && (
-          <RNText style={styles.suggestionCategory}>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {t(`categories.${item.category}` as any)}
-          </RNText>
-        )}
-      </Pressable>
-    );
-  }
-
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
   const isLoading = screen.phase === 'searching';
+
+  // Convert history to RecentItem[] for SearchBar
+  const recentItems: RecentItem[] = history.map((h) => ({ id: h.id, query: h.query }));
+  // Convert trending to TrendingItem[] for SearchBar
+  const trendingItems: TrendingItem[] = trending.map((tr) => ({
+    query: tr.query,
+    trend: tr.trend,
+  }));
 
   return (
     <View style={styles.root}>
@@ -354,11 +482,30 @@ export function SearchScreen(): ReactElement {
           value={query}
           onQueryChange={handleQueryChange}
           onRawChange={(q) => dispatch({ type: 'SET_QUERY', query: q })}
+          suggestions={autocompleteItems}
+          recentSearches={recentItems}
+          trendingSearches={trendingItems}
+          onSuggestionSelect={(item) => {
+            dispatch({ type: 'SET_QUERY', query: item.text });
+            void handleQueryChange(item.text);
+          }}
+          onRecentSelect={(item) => {
+            dispatch({ type: 'SET_QUERY', query: item.query });
+            void handleQueryChange(item.query);
+          }}
+          onTrendingSelect={(q) => {
+            dispatch({ type: 'SET_QUERY', query: q });
+            void handleQueryChange(q);
+          }}
+          activeCategory={searchCategory}
+          onCategoryChange={(cat) => dispatch({ type: 'SET_CATEGORY', category: cat })}
           showBack
           onBack={() => router.back()}
           loading={isLoading}
           expanded
-          style={styles.searchBar}
+          debounceMs={AUTOCOMPLETE_DEBOUNCE_MS}
+          hideDropdown={screen.phase === 'results' || screen.phase === 'error'}
+          style={styles.searchBarWrap}
         />
         {/* Filter button */}
         <Pressable
@@ -472,19 +619,6 @@ export function SearchScreen(): ReactElement {
         </ScrollView>
       )}
 
-      {/* Suggestions */}
-      {screen.phase === 'suggesting' && (
-        <FlatList
-          data={suggestions}
-          keyExtractor={(s) => `${s.type}-${s.text}`}
-          renderItem={renderSuggestion}
-          keyboardShouldPersistTaps="handled"
-          ListEmptyComponent={
-            <RNText style={styles.emptyText}>{t('search.suggestionsHint')}</RNText>
-          }
-        />
-      )}
-
       {/* Loading */}
       {screen.phase === 'searching' && (
         <View style={styles.centerContent}>
@@ -492,28 +626,152 @@ export function SearchScreen(): ReactElement {
         </View>
       )}
 
+      {/* Suggesting — autocomplete is now shown in the SearchBar dropdown, but keep body blank */}
+      {screen.phase === 'suggesting' && (
+        <View style={styles.centerContent}>
+          <RNText style={styles.emptyText}>{t('search.suggestionsHint')}</RNText>
+        </View>
+      )}
+
       {/* Results */}
       {screen.phase === 'results' && (
-        <FlatList
-          data={screen.items}
-          keyExtractor={(item, i) => `${item.type}-${i}`}
-          renderItem={renderResultItem}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.resultsList}
-          ListHeaderComponent={
+        <View style={styles.resultsContainer}>
+          {/* Result controls row: count + sort + view toggle */}
+          <View style={styles.resultsControls}>
             <RNText style={styles.resultCount}>
               {t('search.resultCount', { count: screen.total })}
             </RNText>
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <RNText style={styles.emptyText}>
-                {t('search.empty', { query: screen.query })}
-              </RNText>
-              <RNText style={styles.emptySubText}>{t('search.noResultsSuggest')}</RNText>
+            {/* Sort chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.sortRow}
+              keyboardShouldPersistTaps="handled"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt.key}
+                  style={[styles.sortChip, sort === opt.key && styles.sortChipActive]}
+                  onPress={() => dispatch({ type: 'SET_SORT', sort: opt.key })}
+                  accessibilityRole="button"
+                >
+                  <RNText
+                    style={[styles.sortChipLabel, sort === opt.key && styles.sortChipLabelActive]}
+                  >
+                    {opt.label}
+                  </RNText>
+                </Pressable>
+              ))}
+            </ScrollView>
+            {/* Map / list toggle */}
+            <View style={styles.viewToggle}>
+              <Pressable
+                style={[styles.viewToggleBtn, viewMode === 'list' && styles.viewToggleBtnActive]}
+                onPress={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'list' })}
+                accessibilityRole="button"
+                accessibilityLabel={t('advancedSearch.viewList')}
+              >
+                <RNText style={styles.viewToggleIcon} allowFontScaling={false}>{'☰'}</RNText>
+              </Pressable>
+              <Pressable
+                style={[styles.viewToggleBtn, viewMode === 'map' && styles.viewToggleBtnActive]}
+                onPress={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'map' })}
+                accessibilityRole="button"
+                accessibilityLabel={t('advancedSearch.viewMap')}
+              >
+                <RNText style={styles.viewToggleIcon} allowFontScaling={false}>{'🗺'}</RNText>
+              </Pressable>
             </View>
-          }
-        />
+          </View>
+
+          {/* Active filter chips */}
+          {activeFilterChips.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.activeFilterRow}
+              keyboardShouldPersistTaps="handled"
+            >
+              {activeFilterChips.map((chip) => (
+                <Pressable
+                  key={chip.key}
+                  style={styles.activeFilterChip}
+                  onPress={chip.onRemove}
+                  accessibilityRole="button"
+                >
+                  <RNText style={styles.activeFilterChipText}>{chip.label}</RNText>
+                  <RNText style={styles.activeFilterChipRemove} allowFontScaling={false}>
+                    {' ✕'}
+                  </RNText>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* Save search as alert */}
+          <View style={styles.saveAlertRow}>
+            <Pressable
+              style={[styles.saveAlertBtn, saveAlertDone && styles.saveAlertBtnDone]}
+              onPress={handleSaveAlert}
+              disabled={saveAlertLoading || saveAlertDone}
+              accessibilityRole="button"
+            >
+              {saveAlertLoading ? (
+                <ActivityIndicator size="small" color={tokens.color.primary} />
+              ) : (
+                <RNText style={styles.saveAlertText}>
+                  {saveAlertDone ? '✓ تم حفظ التنبيه' : '🔔 تنبيهي عند إضافة أماكن جديدة'}
+                </RNText>
+              )}
+            </Pressable>
+          </View>
+
+          {/* List view */}
+          {viewMode === 'list' && (
+            <FlatList
+              data={sortedItems}
+              keyExtractor={(item, i) => `${item.type}-${i}`}
+              renderItem={renderResultItem}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.resultsList}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <RNText style={styles.emptyText}>
+                    {t('search.empty', { query: screen.query })}
+                  </RNText>
+                  <RNText style={styles.emptySubText}>{t('search.noResultsSuggest')}</RNText>
+                  {trending.length > 0 && (
+                    <View style={styles.emptyTrending}>
+                      <RNText style={styles.emptySubText}>{t('search.trendingTitle')}</RNText>
+                      <View style={styles.trendingRow}>
+                        {trending.slice(0, 4).map((tr) => (
+                          <Pressable
+                            key={tr.query}
+                            style={styles.trendingChip}
+                            onPress={() => void handleQueryChange(tr.query)}
+                            accessibilityRole="button"
+                          >
+                            <RNText style={styles.trendingText}>{tr.query}</RNText>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </View>
+              }
+            />
+          )}
+
+          {/* Map view */}
+          {viewMode === 'map' && (
+            <SearchResultsMap
+              results={sortedItems.filter(
+                (i): i is (typeof sortedItems)[number] & { type: 'place' } => i.type === 'place',
+              )}
+              onResultPress={handleResultPress}
+            />
+          )}
+        </View>
       )}
 
       {/* Error */}
@@ -838,7 +1096,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: tokens.color.border,
   },
-  searchBar: {
+  searchBarWrap: {
     flex: 1,
     marginEnd: 8,
   },
@@ -1220,5 +1478,122 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#fff',
+  },
+  // Results view
+  resultsContainer: {
+    flex: 1,
+  },
+  resultsControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 8,
+    backgroundColor: tokens.color.surface,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.color.border,
+  },
+  sortRow: {
+    flexDirection: 'row',
+    gap: 6,
+    flex: 1,
+  },
+  sortChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: tokens.color.border,
+    backgroundColor: tokens.color.bg,
+  },
+  sortChipActive: {
+    borderColor: tokens.color.primary,
+    backgroundColor: `${tokens.color.primary}18`,
+  },
+  sortChipLabel: {
+    fontSize: 12,
+    color: tokens.color.textMuted,
+  },
+  sortChipLabelActive: {
+    color: tokens.color.primary,
+    fontWeight: '700',
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: tokens.color.border,
+  },
+  viewToggleBtn: {
+    width: 32,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: tokens.color.bg,
+  },
+  viewToggleBtnActive: {
+    backgroundColor: tokens.color.primary,
+  },
+  viewToggleIcon: {
+    fontSize: 14,
+  },
+  activeFilterRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
+    backgroundColor: tokens.color.surface,
+  },
+  activeFilterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: `${tokens.color.primary}18`,
+    borderWidth: 1,
+    borderColor: tokens.color.primary,
+  },
+  activeFilterChipText: {
+    fontSize: 12,
+    color: tokens.color.primary,
+    fontWeight: '600',
+  },
+  activeFilterChipRemove: {
+    fontSize: 11,
+    color: tokens.color.primary,
+  },
+  saveAlertRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: tokens.color.surface,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: tokens.color.border,
+  },
+  saveAlertBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: tokens.color.primary,
+    alignSelf: 'flex-start',
+  },
+  saveAlertBtnDone: {
+    borderColor: '#10B981',
+    backgroundColor: '#D1FAE5',
+  },
+  saveAlertText: {
+    fontSize: 13,
+    color: tokens.color.primary,
+    fontWeight: '600',
+  },
+  emptyTrending: {
+    marginTop: 16,
+    alignItems: 'center',
+    gap: 10,
   },
 });
