@@ -1130,5 +1130,87 @@
     "uploadSuccess": "وێنەکە بە سەرکەوتوویی بارکرا",
     "uploadFailed": "بارکردنی وێنەکە سەرنەکەوت",
     "uploadTooLarge": "قەبارەی وێنەکە زیاترە لە ئەوەی ڕێپێدراو (١٠ میغابایت)"
-  }
+  },
+  "discovery": {
+    "screen": { "title": "دۆزینەوەی نزیک" },
+    "retry": "دووبارە هەوڵدان",
+    "loadMore": "زیاتر بارکردن",
+    "ramadan": { "label": "رەمەزانی پیرۆز" },
+    "badge": { "new": "نوێ", "gem": "گەوهەری نهێنی", "trending": "ترێند" },
+    "section": {
+      "contextual": "ئێستا",
+      "forYou": "بۆ تۆ",
+      "forYouEmpty": "داخڵبووبە بۆ پێشنیارە تایبەتەکان",
+      "weeklyHighlights": "باشترینی ئەم هەفتەیە",
+      "categories": "گەڕان بەپێی جۆر",
+      "recentlyOpened": "نوێ کراوە",
+      "recentlyOpenedEmpty": "هیچ شوێنێکی نوێ ئەم هەفتەیە نییە",
+      "hiddenGems": "گەوهەرە نهێنیەکان",
+      "hiddenGemsEmpty": "ئێستا گەوهەری نهێنی بەردەست نییە",
+      "trending": "ترێندی ئەم هەفتەیە",
+      "trendingEmpty": "ئێستا شوێنی ترێند نییە"
+    },
+    "weeklyKind": {
+      "featured": "تایبەت",
+      "new_this_week": "نوێی ئەم هەفتەیە",
+      "hidden_gem": "گەوهەری نهێنی",
+      "trending": "ترێند"
+    },
+    "category": {
+      "food": "خواردن", "transport": "گواستنەوە", "tourism": "گەشتیاری",
+      "shopping": "کڕین", "services": "خزمەتگوزاری", "health": "تەندروستی",
+      "education": "پەروەردە", "finance": "دارایی", "accommodation": "نیشتەجێبوون",
+      "entertainment": "شادمانی", "sport": "وەرزش", "religion": "ئایینی",
+      "nature": "سروشت"
+    },
+    "distance": { "m": "{n} م", "km": "{n} کم" },
+    "placeCard": { "a11y": "شوێن بینین: {name}" }
+  },
+  "detail": {
+    "address": "ناونیشان", "copy": "کۆپیکردن", "copied": "کۆپیکرا", "copyAddress": "کۆپیکردنی ناونیشان",
+    "phoneTapHint": "دەستبنێ بۆ پەیوەندی", "about": "دەربارەی", "menuPreview": "مینیو",
+    "promotions": "پێشکەشکردن و داشکاندن", "promoActive": "پێشکەشکردنی چالاک", "promoUntil": "تا {date}",
+    "events": "چالاکییە داهاتووەکان", "eventTicket": "بلیت وەرگرە",
+    "nearbyTransport": "گەیاندنی نزیک", "nearbyTransportComingSoon": "وەستگەی بەس — بەمزوانە دێت",
+    "priceRange": "{min} – {max} دینار"
+  },
+  "amenities": {
+    "title": "ئامێر و خزمەتگوزاری", "subtitle": "لەلایەن کۆمەڵگەوە",
+    "communityNote": "لەسەر ڕاپۆرتی کۆمەڵگە. لەوانەیە تەواو راست نەبێت.",
+    "present": "بەردەستە", "absent": "بەردەست نییە", "unknown": "نادیار",
+    "votePresent": "دڵنیابوون لە بوونی", "voteAbsent": "لە ئەزموونەکەمدا نەبووە",
+    "groups": { "services": "خزمەتگوزاری", "food": "خواردن", "facilities": "ئامێرەکان", "payment": "پارەدان", "atmosphere": "ئاوەزگا" },
+    "keys": {
+      "wifi": "وایفای", "parking": "پارکینگ", "delivery": "گەیاندن", "takeaway": "ببەرەوە", "reservation": "حجز",
+      "menu": "مینیو", "vegetarian": "خواردنی سەوزەیی", "halal": "حەلاڵ", "kids_menu": "مینیوی منداڵان",
+      "ac": "ئایەرکۆندیشن", "smoking_area": "شوێنی جگەرەکێشان", "prayer_room": "ژووری نوێژ", "wheelchair": "چوونی بە ویلچێر",
+      "cash": "نەقد", "card": "کارتی کرێدیت", "e_payment": "پارەدانی ئەلیکترۆنی", "crypto": "دراوی سایبەری",
+      "family_friendly": "گونجاوی خێزان", "romantic": "ئەوینانە", "group_friendly": "گونجاوی گرووپ"
+    }
+  },
+  "suggestEdit": {
+    "title": "پێشنیارکردنی دەستکاری", "selectFieldTitle": "چی دەتەوێت ڕاستبکەیتەوە؟",
+    "selectFieldSub": "خانەکە هەڵبژێرە", "changeField": "گۆڕانکاری",
+    "currentValue": "بەهای ئێستا", "currentValuePlaceholder": "زانیاری ئێستا",
+    "newValue": "بەهای پێشنیارکراو", "reason": "هۆکار (ئارەزوومەندانە)",
+    "reasonPlaceholder": "بۆچی دەتبینیت ئەمە هەڵەیە؟",
+    "photoEvidence": "وێنەی بەڵگەنامە", "addPhoto": "وێنەی بەڵگەنامە زیادبکە",
+    "removePhoto": "وێنەکە لاببە", "photoPicker": "وێنەیەک هەڵبژێرە", "photoPickerMsg": "بەمزوانە دێت",
+    "reviewNote": "پێشنیارەکەت پێش جێبەجێکردن پشکنین دەکرێت.",
+    "submit": "پێشنیاری بنێرە", "submitError": "نەتوانرا بنێردرێت. دووبارە هەوڵبدەوە.",
+    "validationTitle": "زانیاری کەم", "validationMsg": "تکایە بەهای پێشنیارکراو بنووسە.",
+    "successTitle": "سوپاس!", "successBody": "پێشنیارەکەت بەمزوانە پشکنین دەکرێت.",
+    "fields": {
+      "name": "ناو", "address": "ناونیشان", "phone": "تەلەفۆن", "hours": "کاتەکان",
+      "category": "جۆر", "amenities": "ئامێرەکان", "description": "وەسف",
+      "website": "مەلپەر", "photos": "وێنەکان"
+    },
+    "placeholders": {
+      "name": "ناوی ڕاست", "address": "ناونیشانی تەواو", "phone": "+964 7XX XXX XXXX",
+      "hours": "نموونە: شەممە–پێنجشەممە ٠٩:٠٠–٢٢:٠٠", "category": "جۆری ڕاست",
+      "amenities": "ئامێرە بەردەستەکان", "description": "وەسفی کورت",
+      "website": "https://example.com", "photos": "لینکی وێنە"
+    }
+  },
+  "errors": { "generic": "هەڵەیەک ڕوویدا. دووبارە هەوڵبدەوە." }
 }

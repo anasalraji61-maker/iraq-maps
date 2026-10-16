@@ -1130,5 +1130,161 @@
     "uploadSuccess": "تم رفع الصورة بنجاح",
     "uploadFailed": "فشل رفع الصورة",
     "uploadTooLarge": "حجم الصورة أكبر من المسموح به (10 ميغابايت)"
+  },
+  "discovery": {
+    "screen": { "title": "اكتشف قريباً" },
+    "retry": "إعادة المحاولة",
+    "loadMore": "تحميل المزيد",
+    "ramadan": { "label": "رمضان كريم" },
+    "badge": {
+      "new": "جديد",
+      "gem": "جوهرة خفية",
+      "trending": "رائج"
+    },
+    "section": {
+      "contextual": "مقترحات الآن",
+      "forYou": "مخصص لك",
+      "forYouEmpty": "سجّل دخولك لتحصل على توصيات مخصصة",
+      "weeklyHighlights": "أبرز هذا الأسبوع",
+      "categories": "تصفح حسب الفئة",
+      "recentlyOpened": "فتح مؤخراً",
+      "recentlyOpenedEmpty": "لا توجد أماكن جديدة هذا الأسبوع",
+      "hiddenGems": "جواهر خفية",
+      "hiddenGemsEmpty": "لا توجد جواهر خفية متاحة حالياً",
+      "trending": "رائج هذا الأسبوع",
+      "trendingEmpty": "لا توجد أماكن رائجة حالياً"
+    },
+    "weeklyKind": {
+      "featured": "مميز",
+      "new_this_week": "جديد هذا الأسبوع",
+      "hidden_gem": "جوهرة خفية",
+      "trending": "رائج"
+    },
+    "category": {
+      "food": "طعام",
+      "transport": "مواصلات",
+      "tourism": "سياحة",
+      "shopping": "تسوق",
+      "services": "خدمات",
+      "health": "صحة",
+      "education": "تعليم",
+      "finance": "مصارف",
+      "accommodation": "إقامة",
+      "entertainment": "ترفيه",
+      "sport": "رياضة",
+      "religion": "ديني",
+      "nature": "طبيعة"
+    },
+    "distance": {
+      "m": "{n} م",
+      "km": "{n} كم"
+    },
+    "placeCard": {
+      "a11y": "عرض مكان: {name}"
+    }
+  },
+  "detail": {
+    "address": "العنوان",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "copyAddress": "نسخ العنوان",
+    "phoneTapHint": "انقر للاتصال",
+    "about": "حول المكان",
+    "menuPreview": "قائمة الطعام",
+    "promotions": "العروض والخصومات",
+    "promoActive": "عرض نشط",
+    "promoUntil": "حتى {date}",
+    "events": "الفعاليات القادمة",
+    "eventTicket": "احجز تذكرة",
+    "nearbyTransport": "وسائل النقل القريبة",
+    "nearbyTransportComingSoon": "قريباً: محطات الباصات وخطوط النقل",
+    "priceRange": "{min} – {max} د.ع"
+  },
+  "amenities": {
+    "title": "المرافق والخدمات",
+    "subtitle": "مقدَّمة من المجتمع — ساعدنا بتأكيد الأماكن",
+    "communityNote": "تعتمد هذه المعلومات على بلاغات المجتمع. قد لا تكون دقيقة تماماً.",
+    "present": "متاح",
+    "absent": "غير متاح",
+    "unknown": "غير محدد",
+    "votePresent": "أؤكد أنه متاح",
+    "voteAbsent": "غير متاح في تجربتي",
+    "groups": {
+      "services": "الخدمات",
+      "food": "الطعام",
+      "facilities": "المرافق",
+      "payment": "الدفع",
+      "atmosphere": "الأجواء"
+    },
+    "keys": {
+      "wifi": "واي فاي",
+      "parking": "مواقف سيارات",
+      "delivery": "توصيل",
+      "takeaway": "وجبات للمنزل",
+      "reservation": "حجز مسبق",
+      "menu": "قائمة طعام",
+      "vegetarian": "خيارات نباتية",
+      "halal": "حلال",
+      "kids_menu": "قائمة أطفال",
+      "ac": "تكييف",
+      "smoking_area": "منطقة تدخين",
+      "prayer_room": "مصلى",
+      "wheelchair": "وصول للكراسي المتحركة",
+      "cash": "نقد",
+      "card": "بطاقة ائتمان",
+      "e_payment": "دفع إلكتروني",
+      "crypto": "عملات رقمية",
+      "family_friendly": "مناسب للعائلات",
+      "romantic": "أجواء رومانسية",
+      "group_friendly": "مناسب للمجموعات"
+    }
+  },
+  "suggestEdit": {
+    "title": "اقتراح تعديل",
+    "selectFieldTitle": "ما المعلومة التي تريد تصحيحها؟",
+    "selectFieldSub": "اختر الحقل الذي تريد تعديله",
+    "changeField": "تغيير",
+    "currentValue": "القيمة الحالية",
+    "currentValuePlaceholder": "المعلومة الموجودة حالياً",
+    "newValue": "القيمة المقترحة",
+    "reason": "سبب التعديل (اختياري)",
+    "reasonPlaceholder": "لماذا تعتقد أن هذه المعلومة خاطئة؟",
+    "photoEvidence": "صورة دليل (اختياري)",
+    "addPhoto": "إرفاق صورة دليل",
+    "removePhoto": "إزالة الصورة",
+    "photoPicker": "اختر صورة",
+    "photoPickerMsg": "ستتوفر هذه الميزة قريباً",
+    "reviewNote": "ستُراجع اقتراحاتك من قِبل فريقنا قبل تطبيقها. شكراً لمساهمتك!",
+    "submit": "إرسال الاقتراح",
+    "submitError": "فشل إرسال الاقتراح. حاول مرة أخرى.",
+    "validationTitle": "بيانات ناقصة",
+    "validationMsg": "يرجى إدخال القيمة المقترحة.",
+    "successTitle": "شكراً لمساهمتك!",
+    "successBody": "سنراجع اقتراحك قريباً وسنطبقه إذا كان دقيقاً.",
+    "fields": {
+      "name": "الاسم",
+      "address": "العنوان",
+      "phone": "رقم الهاتف",
+      "hours": "ساعات العمل",
+      "category": "التصنيف",
+      "amenities": "المرافق",
+      "description": "الوصف",
+      "website": "الموقع الإلكتروني",
+      "photos": "الصور"
+    },
+    "placeholders": {
+      "name": "الاسم الصحيح للمكان",
+      "address": "العنوان التفصيلي الصحيح",
+      "phone": "+964 7XX XXX XXXX",
+      "hours": "مثال: السبت–الخميس 09:00–22:00",
+      "category": "التصنيف الصحيح",
+      "amenities": "المرافق المتاحة",
+      "description": "وصف مختصر للمكان",
+      "website": "https://example.com",
+      "photos": "رابط الصورة أو وصفها"
+    }
+  },
+  "errors": {
+    "generic": "حدث خطأ. حاول مرة أخرى."
   }
 }

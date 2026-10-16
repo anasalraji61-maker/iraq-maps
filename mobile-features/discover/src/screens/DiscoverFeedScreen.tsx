@@ -1,5 +1,5 @@
-import { discoverTestIDs, type DiscoverPostType } from '@iraq-maps/contracts';
-import { href, useApi, useHaptics, useSession } from '@iraq-maps/mobile-kit';
+import { discoverTestIDs, type DiscoverPostType, type DiscoveryPlaceCard } from '@iraq-maps/contracts';
+import { href, useApi, useApiBaseUrl, useHaptics, useSession } from '@iraq-maps/mobile-kit';
 import { ZoomableImage } from '@iraq-maps/ui';
 import { useRouter } from 'expo-router';
 import { memo, useState, useCallback, useEffect, useRef, useMemo, type ReactElement } from 'react';
@@ -32,6 +32,99 @@ import { t } from '../strings';
 import { getTypeBadgeColors, sharedStyles, COLORS, formatRelativeTime, formatCount, HashtagText } from './shared';
 
 I18nManager.forceRTL(true);
+
+// ─── Personalized place sections ─────────────────────────────────────────────
+
+/** Compact horizontal place card for social feed sections. */
+function FeedPlaceChip({ card, onPress }: { card: DiscoveryPlaceCard; onPress: (id: string) => void }): ReactElement {
+  return (
+    <Pressable
+      style={chipStyles.chip}
+      onPress={() => onPress(card.placeId)}
+      accessibilityRole="button"
+      accessibilityLabel={card.name}
+    >
+      <Text style={chipStyles.chipIcon}>📍</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={chipStyles.chipName} numberOfLines={1}>{card.name}</Text>
+        {card.reason != null ? (
+          <Text style={chipStyles.chipReason} numberOfLines={1}>{card.reason}</Text>
+        ) : null}
+      </View>
+      {card.isNew ? (
+        <View style={chipStyles.newDot} accessibilityRole="text" accessibilityLabel={t('personalizedSections.forYou')}>
+          <Text style={chipStyles.newDotText}>جديد</Text>
+        </View>
+      ) : null}
+    </Pressable>
+  );
+}
+
+const chipStyles = StyleSheet.create({
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    width: 190,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  chipIcon: { fontSize: 22 },
+  chipName: { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary, textAlign: 'auto' },
+  chipReason: { fontSize: 11, color: COLORS.textSecondary, textAlign: 'auto', marginTop: 1 },
+  newDot: { backgroundColor: '#E8F5E9', borderRadius: 6, paddingHorizontal: 5, paddingVertical: 2 },
+  newDotText: { fontSize: 9, fontWeight: '700', color: '#2E7D32' },
+});
+
+function PersonalizedPlaceSection({
+  titleKey,
+  items,
+  loading,
+  emptyKey,
+  onPlacePress,
+}: {
+  titleKey: 'personalizedSections.forYou' | 'personalizedSections.savedLike' | 'personalizedSections.newInCity' | 'personalizedSections.trendingLike';
+  items: DiscoveryPlaceCard[];
+  loading: boolean;
+  emptyKey: 'personalizedSections.forYouEmpty' | 'personalizedSections.savedLikeEmpty' | 'personalizedSections.newInCityEmpty' | 'personalizedSections.trendingLikeEmpty';
+  onPlacePress: (id: string) => void;
+}): ReactElement | null {
+  if (!loading && items.length === 0) return null;
+  return (
+    <View style={personStyles.section}>
+      <Text style={personStyles.sectionTitle}>{t(titleKey)}</Text>
+      {loading ? (
+        <View style={{ paddingHorizontal: 12, opacity: 0.5 }}>
+          <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>…</Text>
+        </View>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, gap: 10 }}>
+          {items.map((card) => (
+            <FeedPlaceChip key={card.placeId} card={card} onPress={onPlacePress} />
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
+}
+
+const personStyles = StyleSheet.create({
+  section: { paddingVertical: 10 },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    textAlign: 'auto',
+  },
+});
 
 // ─── Skeleton loader ─────────────────────────────────────────────────────────
 
@@ -478,6 +571,7 @@ const hashtagStripStyles = StyleSheet.create({
 export function DiscoverFeedScreen(): ReactElement {
   const api = useDiscoverClient();
   const extApi = useApi();
+  const baseUrl = useApiBaseUrl();
   const router = useRouter();
   const session = useSession();
   const currentUserId = session.state.status === 'signedIn' ? session.state.user.id : undefined;
@@ -534,6 +628,16 @@ export function DiscoverFeedScreen(): ReactElement {
   const [trendingLoaded, setTrendingLoaded] = useState(false);
   // Derive top hashtags from loaded feed posts (client-side, no extra API call)
   const trendingHashtags = useMemo(() => topHashtags(posts, 8), [posts]);
+
+  // ─── Personalized place sections ─────────────────────────────────────────
+  const [forYouPlaces, setForYouPlaces] = useState<DiscoveryPlaceCard[]>([]);
+  const [forYouLoading, setForYouLoading] = useState(false);
+  const [savedLikePlaces, setSavedLikePlaces] = useState<DiscoveryPlaceCard[]>([]);
+  const [savedLikeLoading, setSavedLikeLoading] = useState(false);
+  const [newInCityPlaces, setNewInCityPlaces] = useState<DiscoveryPlaceCard[]>([]);
+  const [newInCityLoading, setNewInCityLoading] = useState(false);
+  const [trendingLikePlaces, setTrendingLikePlaces] = useState<DiscoveryPlaceCard[]>([]);
+  const [trendingLikeLoading, setTrendingLikeLoading] = useState(false);
 
   const showNewPostsToast = useCallback(() => {
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -655,6 +759,56 @@ export function DiscoverFeedScreen(): ReactElement {
   // mount-only — api ref is stable
   }, []); // mount-only: api ref is stable
 
+  // Load personalized place sections (best-effort, silent on failure)
+  useEffect(() => {
+    const city = 'baghdad';
+    const now = new Date();
+    const hourOfDay = now.getHours();
+    const dow = now.getDay() === 0 ? 7 : now.getDay();
+    const accessToken = session.state.status === 'signedIn' ? session.state.accessToken : null;
+    const headers: Record<string, string> = accessToken != null ? { Authorization: `Bearer ${accessToken}` } : {};
+
+    // Shared safe fetch helper
+    const safeFetch = async <T,>(path: string, params: Record<string, string | number>): Promise<T | null> => {
+      try {
+        const qs = new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString();
+        const res = await fetch(`${baseUrl}${path}?${qs}`, { headers });
+        if (!res.ok) return null;
+        return (await res.json()) as T;
+      } catch { return null; }
+    };
+
+    // "For You" personalized feed
+    if (accessToken != null) {
+      setForYouLoading(true);
+      void safeFetch<{ items: DiscoveryPlaceCard[]; nextCursor: string | null }>('/v1/discovery/feed', {
+        city, hourOfDay, dayOfWeek: dow, limit: 8,
+      }).then((r) => { if (r) setForYouPlaces(r.items); }).finally(() => setForYouLoading(false));
+    }
+
+    // "Places like ones you saved" — collaborative filtering
+    if (accessToken != null) {
+      setSavedLikeLoading(true);
+      void safeFetch<{ items: DiscoveryPlaceCard[] }>('/v1/discovery/similar-users', {
+        city, limit: 8,
+      }).then((r) => { if (r) setSavedLikePlaces(r.items); }).finally(() => setSavedLikeLoading(false));
+    }
+
+    // "New in city"
+    setNewInCityLoading(true);
+    void safeFetch<{ items: DiscoveryPlaceCard[] }>('/v1/discovery/recently-opened', {
+      city, days: 14, limit: 8,
+    }).then((r) => { if (r) setNewInCityPlaces(r.items); }).finally(() => setNewInCityLoading(false));
+
+    // "Trending with people like you"
+    setTrendingLikeLoading(true);
+    void safeFetch<{ items: DiscoveryPlaceCard[] }>('/v1/discovery/trending', {
+      city, windowDays: 7, limit: 8,
+    }).then((r) => { if (r) setTrendingLikePlaces(r.items); }).finally(() => setTrendingLikeLoading(false));
+  // mount-only
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleRefresh = useCallback(() => { void loadFeed(true); }, [loadFeed]);
   const handleEndReached = useCallback(() => { void loadFeed(false); }, [loadFeed]);
 
@@ -763,6 +917,10 @@ export function DiscoverFeedScreen(): ReactElement {
   }, [router]);
 
   const handlePlacePress = useCallback((placeId: string) => {
+    router.push({ pathname: '/', params: { focusPlaceId: placeId } });
+  }, [router]);
+
+  const handleDiscoveryPlacePress = useCallback((placeId: string) => {
     router.push({ pathname: '/', params: { focusPlaceId: placeId } });
   }, [router]);
 
@@ -950,6 +1108,36 @@ export function DiscoverFeedScreen(): ReactElement {
         ListHeaderComponent={
           !isSearchActive ? (
             <>
+              {/* Personalized place sections — shown above the post feed */}
+              <PersonalizedPlaceSection
+                titleKey="personalizedSections.forYou"
+                items={forYouPlaces}
+                loading={forYouLoading}
+                emptyKey="personalizedSections.forYouEmpty"
+                onPlacePress={handleDiscoveryPlacePress}
+              />
+              <PersonalizedPlaceSection
+                titleKey="personalizedSections.savedLike"
+                items={savedLikePlaces}
+                loading={savedLikeLoading}
+                emptyKey="personalizedSections.savedLikeEmpty"
+                onPlacePress={handleDiscoveryPlacePress}
+              />
+              <PersonalizedPlaceSection
+                titleKey="personalizedSections.newInCity"
+                items={newInCityPlaces}
+                loading={newInCityLoading}
+                emptyKey="personalizedSections.newInCityEmpty"
+                onPlacePress={handleDiscoveryPlacePress}
+              />
+              <PersonalizedPlaceSection
+                titleKey="personalizedSections.trendingLike"
+                items={trendingLikePlaces}
+                loading={trendingLikeLoading}
+                emptyKey="personalizedSections.trendingLikeEmpty"
+                onPlacePress={handleDiscoveryPlacePress}
+              />
+              {/* Existing: hashtag strip + trending posts */}
               {trendingHashtags.length > 0 ? (
                 <HashtagStrip tags={trendingHashtags} onPress={handleHashtagPress} />
               ) : null}

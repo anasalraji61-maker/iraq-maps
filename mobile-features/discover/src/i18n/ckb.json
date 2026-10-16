@@ -802,5 +802,17 @@
     "expired": "بەسەرچووە",
     "expiresInHours": "لە {h} کاتژمێر {m} خولەک دەبەسێت",
     "expiresInDays": "لە {d} ڕۆژ دەبەسێت"
+  },
+  "personalizedSections": {
+    "forYou": "بۆ تۆ",
+    "savedLike": "شوێنە هاوشێوەکانی ئەوانەی پاراستوویتە",
+    "newInCity": "نوێی بەغدا",
+    "trendingLike": "ترێندی نزیکانت",
+    "forYouEmpty": "داخڵبووبە بۆ پێشنیارە تایبەتەکان",
+    "savedLikeEmpty": "شوێن پاراستە بۆ بینینی پێشنیارە هاوشێوەکان",
+    "newInCityEmpty": "هیچ شوێنێکی نوێ ئەم هەفتەیە نییە",
+    "trendingLikeEmpty": "ئێستا پێشنیاری هاوشێوە نییە",
+    "loadMore": "زیاتر بارکردن",
+    "loadError": "نەتوانرا پێشنیارەکان بارکرێن"
   }
 }

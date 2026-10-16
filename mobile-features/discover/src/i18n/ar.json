@@ -802,5 +802,17 @@
     "expired": "انتهى",
     "expiresInHours": "ينتهي خلال {h} س {m} د",
     "expiresInDays": "ينتهي خلال {d} يوم"
+  },
+  "personalizedSections": {
+    "forYou": "مخصص لك",
+    "savedLike": "أماكن مشابهة لما حفظته",
+    "newInCity": "جديد في بغداد",
+    "trendingLike": "رائج بين أشخاص مثلك",
+    "forYouEmpty": "سجّل دخولك لتحصل على توصيات مخصصة",
+    "savedLikeEmpty": "احفظ أماكن لترى توصيات مشابهة",
+    "newInCityEmpty": "لا توجد أماكن جديدة هذا الأسبوع",
+    "trendingLikeEmpty": "لا توجد توصيات مشابهة حالياً",
+    "loadMore": "تحميل المزيد",
+    "loadError": "تعذر تحميل التوصيات"
   }
 }

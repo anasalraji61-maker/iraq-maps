@@ -1130,5 +1130,87 @@
     "uploadSuccess": "Photo uploaded successfully",
     "uploadFailed": "Failed to upload photo",
     "uploadTooLarge": "Photo exceeds the 10 MB limit"
-  }
+  },
+  "discovery": {
+    "screen": { "title": "Discover Nearby" },
+    "retry": "Retry",
+    "loadMore": "Load more",
+    "ramadan": { "label": "Ramadan Kareem" },
+    "badge": { "new": "New", "gem": "Hidden Gem", "trending": "Trending" },
+    "section": {
+      "contextual": "Right Now",
+      "forYou": "For You",
+      "forYouEmpty": "Sign in to get personalised recommendations",
+      "weeklyHighlights": "Highlights This Week",
+      "categories": "Browse by Category",
+      "recentlyOpened": "Recently Opened",
+      "recentlyOpenedEmpty": "No new places this week",
+      "hiddenGems": "Hidden Gems",
+      "hiddenGemsEmpty": "No hidden gems available right now",
+      "trending": "Trending This Week",
+      "trendingEmpty": "No trending places right now"
+    },
+    "weeklyKind": {
+      "featured": "Featured",
+      "new_this_week": "New This Week",
+      "hidden_gem": "Hidden Gem",
+      "trending": "Trending"
+    },
+    "category": {
+      "food": "Food", "transport": "Transport", "tourism": "Tourism",
+      "shopping": "Shopping", "services": "Services", "health": "Health",
+      "education": "Education", "finance": "Finance", "accommodation": "Accommodation",
+      "entertainment": "Entertainment", "sport": "Sport", "religion": "Religious",
+      "nature": "Nature"
+    },
+    "distance": { "m": "{n} m", "km": "{n} km" },
+    "placeCard": { "a11y": "View place: {name}" }
+  },
+  "detail": {
+    "address": "Address", "copy": "Copy", "copied": "Copied", "copyAddress": "Copy address",
+    "phoneTapHint": "Tap to call", "about": "About", "menuPreview": "Menu",
+    "promotions": "Offers & Promotions", "promoActive": "Active offer", "promoUntil": "Until {date}",
+    "events": "Upcoming Events", "eventTicket": "Get tickets",
+    "nearbyTransport": "Nearby Transport", "nearbyTransportComingSoon": "Bus stops & transit lines — coming soon",
+    "priceRange": "{min} – {max} IQD"
+  },
+  "amenities": {
+    "title": "Amenities & Services", "subtitle": "Community-sourced — help us confirm",
+    "communityNote": "Based on community reports. May not be 100% accurate.",
+    "present": "Available", "absent": "Not available", "unknown": "Unknown",
+    "votePresent": "Confirm present", "voteAbsent": "Not in my experience",
+    "groups": { "services": "Services", "food": "Food", "facilities": "Facilities", "payment": "Payment", "atmosphere": "Atmosphere" },
+    "keys": {
+      "wifi": "Wi-Fi", "parking": "Parking", "delivery": "Delivery", "takeaway": "Takeaway", "reservation": "Reservation",
+      "menu": "Menu", "vegetarian": "Vegetarian options", "halal": "Halal", "kids_menu": "Kids menu",
+      "ac": "Air conditioning", "smoking_area": "Smoking area", "prayer_room": "Prayer room", "wheelchair": "Wheelchair access",
+      "cash": "Cash", "card": "Credit/debit card", "e_payment": "E-payment", "crypto": "Cryptocurrency",
+      "family_friendly": "Family-friendly", "romantic": "Romantic", "group_friendly": "Group-friendly"
+    }
+  },
+  "suggestEdit": {
+    "title": "Suggest an Edit", "selectFieldTitle": "What would you like to correct?",
+    "selectFieldSub": "Choose a field to edit", "changeField": "Change",
+    "currentValue": "Current value", "currentValuePlaceholder": "The current info",
+    "newValue": "Suggested value", "reason": "Reason (optional)",
+    "reasonPlaceholder": "Why do you think this is incorrect?",
+    "photoEvidence": "Photo evidence (optional)", "addPhoto": "Attach photo evidence",
+    "removePhoto": "Remove photo", "photoPicker": "Choose photo", "photoPickerMsg": "Coming soon",
+    "reviewNote": "Your suggestion will be reviewed before being applied. Thank you!",
+    "submit": "Submit suggestion", "submitError": "Failed to submit. Try again.",
+    "validationTitle": "Missing info", "validationMsg": "Please enter the suggested value.",
+    "successTitle": "Thanks for your contribution!", "successBody": "We'll review your suggestion soon.",
+    "fields": {
+      "name": "Name", "address": "Address", "phone": "Phone", "hours": "Hours",
+      "category": "Category", "amenities": "Amenities", "description": "Description",
+      "website": "Website", "photos": "Photos"
+    },
+    "placeholders": {
+      "name": "Correct place name", "address": "Full address", "phone": "+964 7XX XXX XXXX",
+      "hours": "e.g. Sat–Thu 09:00–22:00", "category": "Correct category",
+      "amenities": "Available amenities", "description": "Brief description",
+      "website": "https://example.com", "photos": "Photo URL or description"
+    }
+  },
+  "errors": { "generic": "An error occurred. Please try again." }
 }

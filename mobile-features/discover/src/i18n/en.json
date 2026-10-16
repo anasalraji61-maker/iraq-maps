@@ -802,5 +802,17 @@
     "expired": "Expired",
     "expiresInHours": "Expires in {h}h {m}m",
     "expiresInDays": "Expires in {d} days"
+  },
+  "personalizedSections": {
+    "forYou": "For You",
+    "savedLike": "Places Like Ones You Saved",
+    "newInCity": "New in Baghdad",
+    "trendingLike": "Trending With People Like You",
+    "forYouEmpty": "Sign in to get personalised recommendations",
+    "savedLikeEmpty": "Save places to see similar recommendations",
+    "newInCityEmpty": "No new places this week",
+    "trendingLikeEmpty": "No similar recommendations right now",
+    "loadMore": "Load more",
+    "loadError": "Could not load recommendations"
   }
 }

@@ -31,3 +31,4 @@ export * from './challenges';
 export * from './promotions';
 export * from './business-analytics';
 export * from './stories';
+export * from './discovery'; // M-discovery
