@@ -1,50 +1,109 @@
 # @iraq-maps/feature-account
 
-The «حسابي» (account) feature: phone sign-in with OTP, the profile name, the app language, sign-out and account deletion.
+The «حسابي» (Account) tab — user profile, settings, auth flow (OTP login/logout), and notification
+preferences.
 
-## Screens
+---
 
-The package exports five screens, each re-exported by one route file in `apps/mobile/app`:
+## What This Package Does
 
-- `PhoneScreen` (`/auth/phone`): takes an Iraqi mobile number, normalizes it and requests a code.
-  - Accepts `07xxxxxxxxx`, `+9647xxxxxxxxx` or `009647…`, in ASCII or Arabic-Indic digits.
-  - Sends `+9647…` to the server.
-  - Calls `POST /v1/auth/otp/request`.
-- `OtpScreen` (`/auth/otp?phone=…&resendAfterSec=…`): takes the 6-digit code.
-  - Resend waits for the server's `resendAfterSec` (60s).
-  - Calls `POST /v1/auth/otp/verify`, then `session.signIn`.
-  - A new user goes on to NameScreen; anyone else goes back to the account tab.
-- `NameScreen` (`/auth/name`): sets or edits the name with `PATCH /v1/me`.
-- `AccountScreen` (`/account`, a tab):
-  - Signed in: shows the name and the language, with sign-out and account deletion. Deletion needs an explicit
-    confirmation sheet, then calls `DELETE /v1/me` and `session.signOut`.
-  - Signed out: shows a sign-in entry and the language picker.
-- `LanguageScreen` (`/account/language`): chooses ar, ckb or en.
-  - When signed in, saves the choice with `PATCH /v1/me` first.
-  - Then calls `setLocale`. The shell persists the locale and handles the RTL reload.
+- OTP login flow: phone entry → 6-digit code verification → account created or resumed.
+- Displays the current user's name, locale, and roles.
+- Lets users update their display name and preferred language.
+- Notification preferences: toggle each notification category on or off.
+- Account deletion with confirmation dialog.
+- Dev settings overlay (visible only when `APP_ENV=development`): API URL, mock toggles.
 
-Server Problem codes are shown as localized messages under `errors.*`: `otp_invalid`, `otp_expired`,
-`otp_too_many_attempts`, `otp_locked`, `otp_rate_limited`, `otp_resend_too_soon` and `invalid_request`.
-`unauthorized`, an unreachable server and any other failure use the shared `common:errors.sessionExpired`, `network`
-and `generic` messages.
+---
 
-## Ports and dependencies
+## Key Screens and Components
 
-- Consumes `useApi`, `useSession`, `href` and `renderWithProviders` from `@iraq-maps/mobile-kit`.
-- Consumes the UI components from `@iraq-maps/ui`, and `t`, `setLocale`, `getLocale` and `formatNumber` from
-  `@iraq-maps/i18n`.
-- Calls the `auth` and `me` routes of the API contract through `useApi`, and uses `testIDs` and `Locale` from
-  `@iraq-maps/contracts`.
-- Navigates with `expo-router`, which is a peer dependency.
-- Provides no ports and needs no env vars.
+### Screens
 
-## Strings
+| Export                      | Route                    | Description                                              |
+|-----------------------------|--------------------------|----------------------------------------------------------|
+| `AccountScreen`             | `/account`               | Profile summary + settings menu                          |
+| `AuthScreen`                | `/auth`                  | Phone input → OTP entry → logged in                     |
+| `EditProfileScreen`         | `/account/edit`          | Edit name and locale                                     |
+| `NotificationPrefsScreen`   | `/account/notifications` | Toggle notification categories                           |
+| `DeleteAccountScreen`       | `/account/delete`        | Confirmation and account deletion                        |
 
-All strings are in the `account` namespace, in `src/i18n/{ar,ckb,en}.json`. `test/i18n.test.ts` checks that the three
-locales have the same keys and placeholders.
+### Components
 
-## Tests
+| Component              | Description                                                     |
+|------------------------|-----------------------------------------------------------------|
+| `PhoneInput`           | Iraqi phone input with `+964` prefix, normalises 07XX format   |
+| `OtpInput`             | 6-box digit entry with auto-advance and paste support           |
+| `ResendTimer`          | Countdown until the «أعد الإرسال» button is enabled            |
+| `LocalePicker`         | Select language (Arabic / Kurdish / English)                    |
+| `NotificationToggle`   | Toggle row with label + switch                                  |
+| `RoleChip`             | Visual badge for provider / moderator / admin roles             |
 
-- `pnpm --filter @iraq-maps/feature-account test` runs jest-expo and RNTL. expo-router is mocked in `test/setup.ts`.
-- `maestro/login.yaml` is the end-to-end login flow. It needs a server with `OTP_SENDER=fixed`, and the flow file
-  documents its env vars `PHONE`, `OTP_CODE` and `NAME`.
+---
+
+## Ports Consumed
+
+| Port                     | Package                | Used for                                              |
+|--------------------------|------------------------|-------------------------------------------------------|
+| `authContract`           | `@iraq-maps/contracts` | OTP request, verify, refresh, logout                  |
+| `meContract`             | `@iraq-maps/contracts` | Get and update profile, delete account                |
+| `notificationsContract`  | `@iraq-maps/contracts` | Get and update notification preferences               |
+| `useSession`             | `@iraq-maps/mobile-kit`| Read and write tokens + user object                   |
+
+---
+
+## Auth Flow
+
+```
+/auth
+  ├─ PhoneInputStep     → POST /v1/auth/otp/request
+  └─ OtpVerifyStep      → POST /v1/auth/otp/verify
+                             ├─ success → login() → navigate to / (map tab)
+                             └─ error   → show error, allow retry
+```
+
+On successful login, `useSession().login(tokens, user)` stores tokens in `expo-secure-store` and sets the
+session in memory. The `AuthGate` in `apps/mobile/src/shell/` immediately lifts and shows the tabs.
+
+---
+
+## i18n Namespaces
+
+Namespace: `feature-account`
+
+| File        | Language       |
+|-------------|----------------|
+| `ar.json`   | Arabic         |
+| `ckb.json`  | Kurdish Sorani |
+| `en.json`   | English        |
+
+Key string groups:
+
+- `auth.*` — phone label, send code, verify, resend, errors
+- `profile.*` — name, locale, roles, edit
+- `notifications.*` — preference category labels
+- `delete.*` — confirmation dialog
+- `error.*` — OTP expired, invalid, rate limited
+
+---
+
+## How to Test
+
+```bash
+cd mobile-features/account
+pnpm test
+```
+
+Key test files:
+
+- `PhoneInput.test.tsx` — normalises 07XX, validates format, rejects non-Iraqi numbers
+- `OtpInput.test.tsx` — auto-advance, paste handling, backspace
+- `AuthScreen.test.tsx` — full OTP flow with mocked API client
+- `NotificationPrefsScreen.test.tsx` — toggle state, optimistic update, error rollback
+
+E2E:
+
+```bash
+maestro test mobile-features/account/maestro/login.yaml
+maestro test mobile-features/account/maestro/edit-profile.yaml
+```

@@ -46,6 +46,19 @@ The package exports two screens, mounted by route files in `apps/mobile/app`:
 Values that may run left to right (the search query, phone, URL and raw opening hours) are wrapped in a first-strong
 isolate (`isolate()` in `src/strings.ts`), so they keep their order inside Arabic text.
 
+## Key Components
+
+| Component           | Description                                                          |
+|---------------------|----------------------------------------------------------------------|
+| `MapScreen`         | Main map tab: city tiles, search, locate-me, language picker         |
+| `PlaceScreen`       | Place detail card: name, hours, contacts, action buttons             |
+| `PlaceSummaryCard`  | Search result row: name, category, distance, OSM badge               |
+| `SearchPanel`       | Debounced search input with abort-on-change                          |
+| `LocateMeButton`    | Requests foreground location permission; centres camera              |
+| `PlaceDetailCard`   | Full place info: hours open/closed, phone, website, share            |
+| `IncidentLayer`     | Map overlay for community-reported incidents (M7)                    |
+| `LocationShareLayer`| Real-time dots for shared location sessions (M7)                     |
+
 ## Ports and dependencies
 
 - Consumes `MapCanvas` and `MapCamera` from `@iraq-maps/map-kit` (and its Jest mock in tests).

@@ -1,52 +1,126 @@
 # @iraq-maps/feature-provider
 
-The «مزودو الخدمات» (provider) feature: business registration, dashboard, inbox management, and place ownership.
+Provider mode — lets businesses claim a place, upload photos, set prices and hours, manage consent scopes,
+and receive inquiries from users.
 
-## Screens
+---
 
-- `ProviderRegistrationScreen` (`/provider/register`): multi-step registration (with step-progress dots) — business name, category, location, phone, photos, hours. Submits to `POST /v1/providers`.
-- `ProviderDashboardScreen` (`/provider/dashboard`): overview of active listings, recent inquiries, unread messages, and a verified badge when the account is verified.
-- `ProviderInboxScreen` (`/provider/inbox`): list of received user inquiries with status badges. Supports skeleton loading and pull-to-refresh.
-- `InquiryDetailScreen` (`/provider/inbox/[id]`): full inquiry thread; provider can reply, mark resolved, or close.
-- `EarningsScreen` (`/provider/earnings`): earnings tracker (reserved for a later phase; currently shows a placeholder).
-- `ReviewResponseScreen` (`/provider/reviews`): allows providers to post a public response to user reviews.
+## What This Package Does
 
-## Components (in `src/components/`)
+- Provider registration flow: select a place → enter business details → submit for admin verification.
+- Provider dashboard: profile status, photos, prices, social links, hours.
+- Consent management: grant or revoke each data scope (photos, phone, WhatsApp, social links, prices).
+- Provider inbox: view received user inquiries and reply.
+- Status display: draft / pending / verified / suspended with next-action guidance.
 
-- `VerifiedBadge` — a blue tick shown on verified provider profiles.
-- `Skeleton` (`src/skeleton.tsx`) — shared skeleton loader for all provider screens.
+---
 
-## Hooks / utilities
+## Key Screens and Components
 
-- `src/request.ts` — wraps the provider API calls with session-aware error handling.
-- `src/phone.ts` — phone number normalizer used during registration (same rules as `feature-account`).
-- `src/messaging-api.ts` — wrapper for provider-side messaging endpoints.
+### Screens
 
-## API endpoints consumed
+| Export                        | Route                       | Description                                          |
+|-------------------------------|-----------------------------|------------------------------------------------------|
+| `ProviderRegisterScreen`      | `/provider/register`        | Multi-step registration: place → details → submit    |
+| `ProviderDashboardScreen`     | `/provider/dashboard`       | Overview: status, quick stats, shortcuts             |
+| `ProviderProfileEditScreen`   | `/provider/profile`         | Edit name, description, hours, social, prices        |
+| `ProviderPhotosScreen`        | `/provider/photos`          | Upload, reorder and delete photos                    |
+| `ProviderConsentsScreen`      | `/provider/consents`        | Toggle consent scopes                                |
+| `ProviderInboxScreen`         | `/provider/inbox`           | Received inquiries (also in feature-messages)        |
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | `/v1/providers` | register a new provider |
-| GET | `/v1/providers/me` | fetch own dashboard |
-| GET | `/v1/providers/me/inquiries` | list received inquiries |
-| GET | `/v1/providers/me/inquiries/:id` | inquiry detail |
-| POST | `/v1/providers/me/inquiries/:id/reply` | send a reply |
-| PATCH | `/v1/providers/me/inquiries/:id` | update status |
-| GET | `/v1/providers/me/reviews` | list reviews |
-| POST | `/v1/providers/me/reviews/:id/response` | post a review response |
+### Components
 
-## Ports and dependencies
+| Component              | Description                                              |
+|------------------------|----------------------------------------------------------|
+| `StatusBanner`         | Coloured banner: pending / verified / suspended + action |
+| `PhotoGrid`            | Draggable photo grid with add/delete                     |
+| `PriceRangeRow`        | Price range input (label, min, max, currency)            |
+| `SocialLinkRow`        | Platform picker + URL input                              |
+| `ConsentToggle`        | Toggle row with scope description and consequences       |
+| `PlaceSearchStep`      | Registration step 1: search and select the place to claim|
+| `BusinessDetailsForm`  | Registration step 2: name, category, description         |
 
-- Consumes `useApi`, `useSession`, asset upload from `@iraq-maps/mobile-kit`.
-- Consumes `@iraq-maps/ui`, `@iraq-maps/i18n`.
-- Uses `Provider`, `ProviderRegistration`, `Inquiry` schemas from `@iraq-maps/contracts`.
+---
 
-## Strings
+## Ports Consumed
 
-All strings are in the `provider` namespace, in `src/i18n/{ar,ckb,en}.json`. `src/strings.test.ts` checks locale parity.
+| Port                    | Package                | Used for                                         |
+|-------------------------|------------------------|--------------------------------------------------|
+| `providersContract`     | `@iraq-maps/contracts` | CRUD provider profile, consents, photos, submit  |
+| `mediaContract`         | `@iraq-maps/contracts` | Upload provider photos                           |
+| `placesContract`        | `@iraq-maps/contracts` | Place search in registration step 1              |
+| `messagingContract`     | `@iraq-maps/contracts` | Provider inbox and reply                         |
 
-## Tests
+---
 
-`pnpm --filter @iraq-maps/feature-provider test`
+## Registration Flow
 
-Maestro: `maestro/provider-register.yaml` tests the registration flow end-to-end.
+```
+ProviderRegisterScreen
+  Step 1: PlaceSearchStep     → search and select a place
+  Step 2: BusinessDetailsForm → name, category, description
+  Step 3: Review & Submit     → POST /v1/providers
+                               → POST /v1/providers/me/submit
+                               → Status: pending
+```
+
+After submission the profile status becomes `pending`. An admin verifies it (via `apps/admin`). When
+`verified`, the provider appears in `PlaceDetails.provider` responses with their consented data.
+
+---
+
+## Consent Scopes
+
+| Scope               | What it shows publicly                                        |
+|---------------------|---------------------------------------------------------------|
+| `photos`            | Provider's photos on the place card                           |
+| `social_links`      | Instagram, Facebook, etc. links on the place card             |
+| `show_phone`        | Business phone number on the place card                       |
+| `show_prices`       | Price ranges on the place card                                |
+| `whatsapp_messages` | Enables direct WhatsApp delivery for user inquiries           |
+
+Revoking a scope hides that data from the next API response immediately; no cache clearing needed.
+
+---
+
+## i18n Namespaces
+
+Namespace: `feature-provider`
+
+| File        | Language       |
+|-------------|----------------|
+| `ar.json`   | Arabic         |
+| `ckb.json`  | Kurdish Sorani |
+| `en.json`   | English        |
+
+Key string groups:
+
+- `register.*` — step labels, validation, submit
+- `status.*` — draft / pending / verified / suspended messages
+- `profile.*` — edit fields
+- `consent.*` — scope names, descriptions, consequences of revoking
+- `photo.*` — upload, limit, reorder
+- `price.*` — currency labels, range validation
+
+---
+
+## How to Test
+
+```bash
+cd mobile-features/provider
+pnpm test
+```
+
+Key test files:
+
+- `ConsentToggle.test.tsx` — grant/revoke, optimistic update, error rollback
+- `PhotoGrid.test.tsx` — upload flow, max 10 photos limit, delete
+- `ProviderRegisterScreen.test.tsx` — step navigation, validation, submit
+- `PriceRangeRow.test.tsx` — min ≤ max validation, currency selection
+
+E2E:
+
+```bash
+maestro test mobile-features/provider/maestro/register.yaml
+maestro test mobile-features/provider/maestro/manage-consents.yaml
+```

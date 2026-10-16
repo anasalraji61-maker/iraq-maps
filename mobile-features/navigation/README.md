@@ -1,50 +1,111 @@
 # @iraq-maps/feature-navigation
 
-Turn-by-turn navigation with voice guidance, speed limit display, ETA tracking, geofencing, and favorite route saving.
+Turn-by-turn navigation within the map tab. Calculates routes via the backend Valhalla engine and guides the
+user with step-by-step maneuver instructions in Arabic, Kurdish Sorani, or English.
 
-## Screens
+---
 
-- `NavigationScreen` (`/navigation`): full-screen turn-by-turn navigation overlay. Shows:
-  - Next-turn arrow with street name and distance
-  - Speed limit badge (pulled from OSM `maxspeed` tags)
-  - Current speed (color-coded: green/amber/red)
-  - ETA and remaining distance, updated on re-route
-  - Voice guidance banner (enabled/disabled toggle)
-  - Compass rose (tracks device orientation)
-  - Geofence arrival alert when the user nears the destination
+## What This Package Does
 
-- `FavoriteRoutesScreen` (`/navigation/favorites`): saved A→B pairs for quick re-navigation.
+- Accepts an origin and destination (coordinates or place IDs) and mode (car / walk).
+- Calls `POST /v1/routes` and decodes the polyline6 response.
+- Renders the route on the map as a line layer.
+- Displays a maneuver panel (next turn instruction, distance, street name).
+- Updates the active maneuver as the user's GPS position advances along the route.
+- Shows a summary panel (total distance, estimated time) before starting.
+- Supports up to 5 waypoints.
 
-## Hooks (in `src/hooks/`)
+---
 
-- `useNavigation(origin, destination)` — fetches the route from the routing engine, tracks location, advances maneuvers, triggers voice.
-- `useSpeedLimit(location)` — queries the PostGIS layer for the nearest way's `maxspeed`.
-- `useGeofence(destination, radiusMeters)` — fires an arrival event when the device enters the radius.
-- `useFavoriteRoutes()` — CRUD for saved routes stored in the server via `POST /v1/routes/favorites`.
+## Key Screens and Components
 
-## Engine (in `src/engine/`)
+### Screens
 
-Thin wrapper around the Valhalla JSON turn-by-turn API: request, response parsing, maneuver sequencing.
+| Export                  | Route                 | Description                                           |
+|-------------------------|-----------------------|-------------------------------------------------------|
+| `RoutePlannerScreen`    | `/navigate/plan`      | Summary: pick mode, see distance/time, start          |
+| `ActiveNavigationScreen`| `/navigate/active`    | Live turn-by-turn with maneuver panel                 |
 
-## Ports and dependencies
+### Components
 
-- Consumes `useApi`, location hooks from `@iraq-maps/mobile-kit`.
-- Consumes `@iraq-maps/map-kit` for the map view layer.
-- Consumes `@iraq-maps/ui`, `@iraq-maps/i18n`.
-- Uses `Route`, `Maneuver`, `FavoriteRoute` schemas from `@iraq-maps/contracts`.
-- `expo-speech` for voice guidance (peer dep).
-- `expo-sensors` for compass (peer dep).
+| Component            | Description                                                      |
+|----------------------|------------------------------------------------------------------|
+| `RouteLayer`         | MapLibre line layer that draws the route polyline                |
+| `ManeuverPanel`      | Sticky bottom panel: turn icon + street name + distance          |
+| `RouteSummaryCard`   | Pre-navigation summary: distance, ETA, mode picker               |
+| `TurnIcon`           | Directional arrow icon that mirrors in RTL for left/right turns  |
+| `WaypointList`       | Ordered list of waypoints with drag-to-reorder                   |
 
-## Strings
+---
 
-All strings are in the `navigation` namespace. Locale files are in `src/locales/{ar,ckb,en}.json`. `src/strings.test.ts` checks locale parity.
+## Ports Consumed
 
-## Tests
+| Port              | Package                | Used for                                     |
+|-------------------|------------------------|----------------------------------------------|
+| `routesContract`  | `@iraq-maps/contracts` | `POST /v1/routes` — get route + maneuvers    |
+| `placesContract`  | `@iraq-maps/contracts` | Reverse geocode destination when given coords|
+| `map-kit`         | `@iraq-maps/map-kit`   | `MapCanvas` + `useMapRef` for route overlay  |
 
-`pnpm --filter @iraq-maps/feature-navigation test`
+---
 
-Maestro: `maestro/navigation.yaml` runs a basic A→B route on a seeded map.
+## Maneuver Localisation
 
-## Env vars
+Maneuver text is built locally from i18n templates — the API never returns localised instruction strings
+(ADR-0006). Each `ManeuverType` × `ManeuverModifier` combination has a template:
 
-None (routing engine URL is configured in `packages/config` under `ROUTING_ENGINE_URL`).
+```json
+// ar.json
+{
+  "maneuver": {
+    "turn_right": "انعطف يميناً في {{street}}",
+    "turn_left": "انعطف يساراً في {{street}}",
+    "continue": "استمر على {{street}}",
+    "roundabout_enter": "ادخل الدوار وخذ المخرج {{exit}}",
+    "arrive": "وصلت إلى وجهتك"
+  }
+}
+```
+
+RTL note: distance values are always LTR numbers even in Arabic text. Use `<Text dir="ltr">` for the distance
+component inside the panel.
+
+---
+
+## i18n Namespaces
+
+Namespace: `feature-navigation`
+
+| File        | Language       |
+|-------------|----------------|
+| `ar.json`   | Arabic         |
+| `ckb.json`  | Kurdish Sorani |
+| `en.json`   | English        |
+
+Key string groups:
+
+- `maneuver.*` — turn-by-turn instruction templates per maneuver type and modifier
+- `mode.*` — travel mode labels (car / walk)
+- `summary.*` — distance, ETA, start button
+- `error.*` — no_route, routing_unavailable
+
+---
+
+## How to Test
+
+```bash
+cd mobile-features/navigation
+pnpm test
+```
+
+Key test files:
+
+- `maneuver.test.ts` — maneuver text generation for all type/modifier combinations, RTL mirroring
+- `RouteSummaryCard.test.tsx` — distance formatting, ETA calculation
+- `RouteLayer.test.tsx` — polyline decoding, correct lat/lng order for MapLibre
+
+E2E:
+
+```bash
+maestro test mobile-features/navigation/maestro/car-route.yaml
+maestro test mobile-features/navigation/maestro/walk-route.yaml
+```

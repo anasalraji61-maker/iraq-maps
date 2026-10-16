@@ -1,53 +1,98 @@
 # @iraq-maps/feature-discover
 
-The «اكتشف» (discover) tab: a social feed where users and providers post about places, events, prices and tips in Iraq.
+The «اكتشف» (Discover) tab — a social feed where users and verified providers share photos, tips, events,
+and offers about places in Iraq.
 
-## Screens
+---
 
-- `DiscoverScreen` (`/discover`, a tab): the main feed with infinite scroll. Posts include text, images (multi-photo lightbox), video, GIFs, and polls.
-- `PostDetailScreen` (`/discover/[id]`): a single post with threaded comments, reactions, pinned comment, and a report button.
-- `ComposeScreen` (`/discover/compose`): rich post composer with character count, media picker (images/video/GIF), mention autocomplete (`@user`), hashtag suggestions, and category selector.
-- `HashtagScreen` (`/discover/hashtag/[tag]`): posts filtered by hashtag.
-- `SavedPostsScreen` (`/discover/saved`): bookmarked posts.
-- `UserPostsScreen` (`/discover/user/[id]`): posts by a specific user.
-- `CollectionScreen` (`/discover/collection/[id]`): a user-curated post collection.
+## What This Package Does
 
-## Hooks
+- Displays a scrollable feed of posts filtered by category (food, transport, tourism, shopping, services).
+- Lets authenticated users create posts with up to 4 photos, a caption, an optional place tag, and @mentions.
+- Supports like, comment, and bookmark actions.
+- Shows a verified badge next to provider authors.
+- Lets users report inappropriate content.
 
-- `useFollows()` — follow/unfollow users; drives the "following" feed filter.
-- `useSavedPosts()` — bookmark and unbookmark posts.
-- `useCollections()` — create and manage post collections.
-- `useBlockedUsers()` — block/unblock users; blocked users' posts are hidden client-side.
+---
 
-## Features
+## Key Screens and Components
 
-- **Polls**: create timed polls; vote is recorded server-side.
-- **Translations**: any post can be translated in-place via the assistant.
-- **Mentions**: `@username` in a post body links to that user's profile and triggers a follow notification.
-- **Hashtags**: trending hashtags shown in the explore bar; tapping filters the feed.
-- **Post pinning**: providers can pin one post to the top of their profile.
-- **Collections**: save thematic sets of posts.
-- **Edit history**: edits are logged; original text is accessible from the "edited" badge.
-- **Moderation**: report a post or comment; moderators review in the admin panel.
-- **Skeleton loaders**: all list and detail screens show animated skeletons while loading.
+### Screens
 
-## Client
+| Export             | Route               | Description                                      |
+|--------------------|---------------------|--------------------------------------------------|
+| `DiscoverScreen`   | `/discover`         | The main tab: feed + category filter strip       |
+| `PostDetailScreen` | `/discover/[id]`    | Full post with comments thread                   |
+| `CreatePostScreen` | `/discover/create`  | Compose a new post with media picker             |
 
-`src/client.ts` wraps the discover API contract routes under `/v1/discover`.
+### Components
 
-## Ports and dependencies
+| Component           | Description                                              |
+|---------------------|----------------------------------------------------------|
+| `PostCard`          | Feed card: author, photos carousel, body, action bar     |
+| `CategoryFilter`    | Horizontal pill strip: all / food / transport / etc.     |
+| `CommentThread`     | Nested list of comments for a post                       |
+| `CreatePostForm`    | Text input + media picker + place tag picker             |
+| `AuthorBadge`       | Name + verified tick for provider authors                |
+| `ReportSheet`       | Bottom sheet for reporting a post                        |
 
-- Consumes `useApi`, `useSession` from `@iraq-maps/mobile-kit`.
-- Consumes `@iraq-maps/ui`, `@iraq-maps/i18n`.
-- Uses `Post`, `Comment`, `Poll`, `Collection` schemas from `@iraq-maps/contracts`.
-- `expo-av` is used for video playback (type declarations in `src/expo-av.d.ts`).
+---
 
-## Strings
+## Ports Consumed
 
-All strings are in the `discover` namespace, in `src/i18n/{ar,ckb,en}.json`. `src/strings.test.ts` checks locale parity.
+| Port                | Package            | Used for                                    |
+|---------------------|--------------------|---------------------------------------------|
+| `discoverContract`  | `@iraq-maps/contracts` | `GET /discover/feed`, `POST /discover/posts`, likes, comments |
+| `mediaContract`     | `@iraq-maps/contracts` | Upload photos before attaching to a post    |
+| `placesContract`    | `@iraq-maps/contracts` | Place picker when tagging a place           |
 
-## Tests
+All API calls go through `@iraq-maps/mobile-kit`'s `apiClient`. This package never imports from `modules/*`.
 
-`pnpm --filter @iraq-maps/feature-discover test` runs jest-expo and RNTL tests.
+---
 
-Maestro: `maestro/discover.yaml` tests the compose–post–comment E2E flow.
+## i18n Namespaces
+
+Namespace: `feature-discover`
+
+Key files:
+
+| File        | Language     |
+|-------------|--------------|
+| `ar.json`   | Arabic (primary, required) |
+| `ckb.json`  | Kurdish Sorani |
+| `en.json`   | English       |
+
+Key string groups:
+
+- `feed.*` — feed header, empty state, loading
+- `post.*` — like, comment, bookmark, share, report actions
+- `create.*` — compose screen labels and validation messages
+- `comment.*` — comment input, reply, delete
+- `category.*` — category filter labels
+- `report.*` — report reasons
+
+---
+
+## How to Test
+
+### Unit tests
+
+```bash
+cd mobile-features/discover
+pnpm test
+```
+
+Tests live in `src/__tests__/`. Key files:
+
+- `PostCard.test.tsx` — renders correctly with and without photos, liked/unliked state
+- `CategoryFilter.test.tsx` — filter strip selects correct category
+- `CreatePostForm.test.tsx` — validation, media limit, submit flow
+
+### E2E (Maestro)
+
+```bash
+maestro test mobile-features/discover/maestro/create-post.yaml
+maestro test mobile-features/discover/maestro/like-comment.yaml
+```
+
+The e2e flows require `OTP_SENDER=fixed` and a seeded test account.

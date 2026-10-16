@@ -1,3 +1,7 @@
+export { PerformanceMonitor, type HttpSample, type CacheSample, type HttpStats, type CacheStats } from './performance-monitor';
+export { AlertManager, type AlertThreshold, type AlertEvent, type AlertSeverity, type AlertWebhookConfig } from './alert-manager';
+export { TraceContext, type TraceData } from './trace-context';
+
 import { pino } from 'pino';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
