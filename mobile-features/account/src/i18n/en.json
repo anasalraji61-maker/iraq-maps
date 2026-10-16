@@ -516,5 +516,29 @@
     "tip3": "You can block users who harass you immediately.",
     "tip4": "Your password is private — we will never ask for it.",
     "tip5": "Review your privacy settings regularly to ensure the right level of protection."
+  },
+  "savedAddresses": {
+    "title": "Saved Addresses",
+    "home": "Home",
+    "work": "Work",
+    "other": "Other",
+    "default": "Default",
+    "setDefault": "Set as Default",
+    "mapView": "View on Map",
+    "share": "Share",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete Address",
+    "deleteConfirm": "Delete address \"{name}\"?",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "addAddress": "+ Add Address",
+    "empty": "No saved addresses",
+    "emptyBody": "Save your favourite addresses to find them quickly",
+    "close": "Close",
+    "editTitle": "Edit Address",
+    "typeLabel": "Address Type",
+    "nameLabel": "Address Name",
+    "namePlaceholder": "e.g. Parents Home"
   }
 }
