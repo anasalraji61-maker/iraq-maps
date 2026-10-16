@@ -287,7 +287,17 @@
     "progressA11y": "شريط التقدم",
     "counter": "{current} / {total}",
     "muteVideo": "كتم الصوت",
-    "unmuteVideo": "تشغيل الصوت"
+    "unmuteVideo": "تشغيل الصوت",
+    "replyPlaceholder": "أرسل ردًّا...",
+    "replySend": "إرسال",
+    "replyError": "فشل إرسال الرد",
+    "report": "إبلاغ عن القصة",
+    "mute": "كتم قصص هذا المستخدم",
+    "muteConfirmTitle": "كتم القصص؟",
+    "shareTitle": "مشاركة القصة",
+    "viewers": "من شاهد",
+    "viewersTitle": "المشاهدون",
+    "viewersEmpty": "لم يشاهد أحد هذه القصة بعد"
   },
   "events": {
     "title": "الفعاليات",
@@ -486,5 +496,66 @@
       "real_estate": "عقارات",
       "other": "أخرى"
     }
+  },
+  "editor": {
+    "title": "محرر القصة",
+    "pickPrompt": "اختر صورة أو فيديو للبدء",
+    "camera": "الكاميرا",
+    "textTool": "نص",
+    "drawTool": "رسم",
+    "stickerTool": "ملصقات",
+    "locationTool": "موقع",
+    "mentionTool": "إشارة",
+    "hashtagTool": "وسم",
+    "musicTool": "موسيقى",
+    "musicComingSoon": "الموسيقى قادمة قريباً",
+    "textPlaceholder": "أضف نصاً...",
+    "addText": "إضافة",
+    "stickerPanelTitle": "ملصقات عراقية",
+    "removeOverlay": "حذف هذا العنصر؟",
+    "clearDraw": "مسح جميع الرسومات؟",
+    "clear": "مسح",
+    "undo": "تراجع",
+    "saveToDevice": "حفظ في الجهاز",
+    "publish": "نشر القصة",
+    "savedToDevice": "تم الحفظ في مكتبة الصور",
+    "saveError": "فشل الحفظ",
+    "permissionDenied": "يلزم الإذن بالوصول إلى مكتبة الصور",
+    "mentionTitle": "إشارة إلى مستخدم",
+    "mentionPlaceholder": "@اسم_المستخدم",
+    "hashtagTitle": "إضافة وسم",
+    "hashtagPlaceholder": "#وسم",
+    "locationTitle": "إضافة موقع",
+    "locationPlaceholder": "اسم المكان...",
+    "addTag": "إضافة"
+  },
+  "mediapicker": {
+    "title": "اختر وسائط",
+    "loadError": "فشل تحميل مكتبة الصور",
+    "permissionDenied": "يلزم الإذن بالوصول إلى مكتبة الصور",
+    "record": "تسجيل فيديو",
+    "next": "التالي ({n})",
+    "selected": "{n} / {max} محددة",
+    "maxReached": "يمكنك اختيار {max} عناصر كحد أقصى",
+    "videoTooLong": "الفيديو أطول من {max} ثانية",
+    "crop": "قص الصورة",
+    "cropDone": "تم",
+    "filter": {
+      "none": "بدون",
+      "warm": "دافئ",
+      "cool": "بارد",
+      "vivid": "زاهي",
+      "fade": "خافت",
+      "noir": "كلاسيكي",
+      "golden": "ذهبي",
+      "dusk": "غسق"
+    }
+  },
+  "common": {
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "more": "المزيد",
+    "save": "حفظ"
   }
 }

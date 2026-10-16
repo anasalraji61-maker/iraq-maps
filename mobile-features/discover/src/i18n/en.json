@@ -287,7 +287,17 @@
     "progressA11y": "Story progress",
     "counter": "{current} / {total}",
     "muteVideo": "Mute",
-    "unmuteVideo": "Unmute"
+    "unmuteVideo": "Unmute",
+    "replyPlaceholder": "Send a reply...",
+    "replySend": "Send",
+    "replyError": "Failed to send reply",
+    "report": "Report story",
+    "mute": "Mute this user's stories",
+    "muteConfirmTitle": "Mute stories?",
+    "shareTitle": "Share story",
+    "viewers": "Viewers",
+    "viewersTitle": "Story viewers",
+    "viewersEmpty": "No one has viewed this story yet"
   },
   "events": {
     "title": "Events",
@@ -486,5 +496,66 @@
       "real_estate": "Real Estate",
       "other": "Other"
     }
+  },
+  "editor": {
+    "title": "Story Editor",
+    "pickPrompt": "Pick a photo or video to start",
+    "camera": "Camera",
+    "textTool": "Text",
+    "drawTool": "Draw",
+    "stickerTool": "Stickers",
+    "locationTool": "Location",
+    "mentionTool": "Mention",
+    "hashtagTool": "Hashtag",
+    "musicTool": "Music",
+    "musicComingSoon": "Music coming soon",
+    "textPlaceholder": "Add text...",
+    "addText": "Add",
+    "stickerPanelTitle": "Iraqi Stickers",
+    "removeOverlay": "Remove this element?",
+    "clearDraw": "Clear all drawing?",
+    "clear": "Clear",
+    "undo": "Undo",
+    "saveToDevice": "Save to device",
+    "publish": "Publish story",
+    "savedToDevice": "Saved to photo library",
+    "saveError": "Save failed",
+    "permissionDenied": "Permission needed to access photo library",
+    "mentionTitle": "Mention a user",
+    "mentionPlaceholder": "@username",
+    "hashtagTitle": "Add hashtag",
+    "hashtagPlaceholder": "#hashtag",
+    "locationTitle": "Add location",
+    "locationPlaceholder": "Place name...",
+    "addTag": "Add"
+  },
+  "mediapicker": {
+    "title": "Select Media",
+    "loadError": "Failed to load photo library",
+    "permissionDenied": "Permission needed to access photo library",
+    "record": "Record video",
+    "next": "Next ({n})",
+    "selected": "{n} / {max} selected",
+    "maxReached": "You can select up to {max} items",
+    "videoTooLong": "Video is longer than {max}s",
+    "crop": "Crop photo",
+    "cropDone": "Done",
+    "filter": {
+      "none": "None",
+      "warm": "Warm",
+      "cool": "Cool",
+      "vivid": "Vivid",
+      "fade": "Fade",
+      "noir": "Noir",
+      "golden": "Golden",
+      "dusk": "Dusk"
+    }
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "more": "More",
+    "save": "Save"
   }
 }

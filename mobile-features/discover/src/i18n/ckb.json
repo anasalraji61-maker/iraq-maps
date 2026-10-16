@@ -287,7 +287,17 @@
     "progressA11y": "ئامێری پێشکەوتنی چیرۆک",
     "counter": "{current} / {total}",
     "muteVideo": "بێدەنگکردن",
-    "unmuteVideo": "دەنگکردنەوە"
+    "unmuteVideo": "دەنگکردنەوە",
+    "replyPlaceholder": "وەڵامێک بنێرە...",
+    "replySend": "نێردن",
+    "replyError": "نێردنی وەڵام سەرنەکەوت",
+    "report": "ڕاپۆرتکردنی چیرۆک",
+    "mute": "بێدەنگکردنی چیرۆکەکانی ئەم بەکارهێنەرە",
+    "muteConfirmTitle": "چیرۆکەکان بێدەنگ بکەیت؟",
+    "shareTitle": "هاوبەشکردنی چیرۆک",
+    "viewers": "کێ بینیوێتی",
+    "viewersTitle": "بینەرەکان",
+    "viewersEmpty": "هێشتا کەس ئەم چیرۆکە نەبینیوە"
   },
   "events": {
     "title": "ڕووداوەکان",
@@ -486,5 +496,66 @@
       "real_estate": "خانوو",
       "other": "هیتر"
     }
+  },
+  "editor": {
+    "title": "دەستکاری چیرۆک",
+    "pickPrompt": "وێنە یان ڤیدیۆ هەڵبژێرە بۆ دەستپێکردن",
+    "camera": "کامێرا",
+    "textTool": "نووسین",
+    "drawTool": "وێنەکێشان",
+    "stickerTool": "ستیکەر",
+    "locationTool": "شوێن",
+    "mentionTool": "ئاماژە",
+    "hashtagTool": "هاشتاگ",
+    "musicTool": "موزیک",
+    "musicComingSoon": "موزیک بەم زووانە دێت",
+    "textPlaceholder": "نووسینێک زیاد بکە...",
+    "addText": "زیادکردن",
+    "stickerPanelTitle": "ستیکەری عێراقی",
+    "removeOverlay": "ئەم بابەتە بسڕەوە؟",
+    "clearDraw": "هەموو وێنەکێشانەکان بسڕەوە؟",
+    "clear": "پاككردنەوە",
+    "undo": "گەڕاندنەوە",
+    "saveToDevice": "پاشەکەوتکردن لە ئامێر",
+    "publish": "بڵاوکردنەوەی چیرۆک",
+    "savedToDevice": "پاشەکەوتکرا لە پەڕتووکخانەی وێنەکان",
+    "saveError": "پاشەکەوتکردن سەرنەکەوت",
+    "permissionDenied": "مۆڵەت پێویستە بۆ دەستڕاگەیشتن بە پەڕتووکخانەی وێنەکان",
+    "mentionTitle": "ئاماژە بە بەکارهێنەر",
+    "mentionPlaceholder": "@ناوی_بەکارهێنەر",
+    "hashtagTitle": "هاشتاگ زیاد بکە",
+    "hashtagPlaceholder": "#هاشتاگ",
+    "locationTitle": "شوێن زیاد بکە",
+    "locationPlaceholder": "ناوی شوێن...",
+    "addTag": "زیادکردن"
+  },
+  "mediapicker": {
+    "title": "میدیا هەڵبژێرە",
+    "loadError": "بارکردنی پەڕتووکخانەی وێنەکان سەرنەکەوت",
+    "permissionDenied": "مۆڵەت پێویستە بۆ دەستڕاگەیشتن بە پەڕتووکخانەی وێنەکان",
+    "record": "تۆمارکردنی ڤیدیۆ",
+    "next": "دواتر ({n})",
+    "selected": "{n} / {max} هەڵبژێردرا",
+    "maxReached": "دەتوانیت زۆرترین {max} بابەت هەڵبژێریت",
+    "videoTooLong": "ڤیدیۆکە درێژتر لە {max} چرکەیە",
+    "crop": "بڕینی وێنە",
+    "cropDone": "تەواوبوو",
+    "filter": {
+      "none": "بەبێ فلتەر",
+      "warm": "گەرم",
+      "cool": "سارد",
+      "vivid": "درەخشاو",
+      "fade": "سوور",
+      "noir": "کلاسیکی",
+      "golden": "زێرین",
+      "dusk": "ئێوارە"
+    }
+  },
+  "common": {
+    "back": "گەڕانەوە",
+    "cancel": "هەڵوەشاندنەوە",
+    "delete": "سڕینەوە",
+    "more": "زیاتر",
+    "save": "پاشەکەوتکردن"
   }
 }
