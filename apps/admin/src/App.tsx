@@ -24,6 +24,8 @@ import { AdminEventsPage } from './pages/AdminEventsPage';
 import { AdminIncidentsPage } from './pages/AdminIncidentsPage';
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { AdminMessagesPage } from './pages/AdminMessagesPage';
+import { AdminModerationQueue } from './pages/AdminModerationQueue';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -125,6 +127,12 @@ function NavBar() {
       </NavLink>
       <NavLink to="/admin-settings" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         Settings
+      </NavLink>
+      <NavLink to="/messages" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Messages
+      </NavLink>
+      <NavLink to="/mod-queue" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        Mod Queue
       </NavLink>
       <button
         onClick={logout}
@@ -339,6 +347,22 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AdminSettingsPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <AuthGate>
+                <Layout><AdminMessagesPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/mod-queue"
+            element={
+              <AuthGate>
+                <Layout><AdminModerationQueue /></Layout>
               </AuthGate>
             }
           />
