@@ -1,698 +1,462 @@
-# Mobile App Architecture
+# Iraq Smart Maps — Mobile Architecture
 
-> Stack: React Native + Expo (Expo Router) + MapLibre Native  
-> Package: `apps/mobile` + `mobile-features/*`
+> Version: 1.0 · Last updated: 2026-10-16
+> Platform: Android (primary). iOS later. React Native + Expo SDK.
 
 ---
 
 ## Table of Contents
 
-1. [Package Structure](#1-package-structure)
-2. [Feature Package Pattern](#2-feature-package-pattern)
-3. [Navigation Structure (Expo Router)](#3-navigation-structure-expo-router)
-4. [State Management](#4-state-management)
-5. [API Client Usage](#5-api-client-usage)
-6. [Internationalisation and RTL](#6-internationalisation-and-rtl)
-7. [Testing Approach](#7-testing-approach)
-8. [Adding a New Feature — Step-by-step Guide](#8-adding-a-new-feature--step-by-step-guide)
-9. [Map Integration](#9-map-integration)
-10. [Offline and Low-connectivity Handling](#10-offline-and-low-connectivity-handling)
+1. [Feature Package Structure](#1-feature-package-structure)
+2. [Navigation Graph](#2-navigation-graph)
+3. [State Management](#3-state-management)
+4. [Offline Strategy](#4-offline-strategy)
+5. [Real-Time Integration](#5-real-time-integration)
+6. [Deep Linking Schema](#6-deep-linking-schema)
+7. [Push Notification Flow](#7-push-notification-flow)
+8. [Analytics Tracking](#8-analytics-tracking)
+9. [i18n Strategy](#9-i18n-strategy)
+10. [RTL Considerations](#10-rtl-considerations)
 
 ---
 
-## 1. Package Structure
+## 1. Feature Package Structure
+
+The mobile app is split into two layers:
 
 ```
-apps/mobile/                      ← Expo composition root (owns nothing but wiring)
-  app/                            ← Expo Router route files (one-liners)
-    (tabs)/
-      index.tsx                   ← re-exports MapScreen from feature-map
-      discover.tsx                ← re-exports DiscoverScreen
-      messages.tsx                ← re-exports MessagesScreen
-      activity.tsx                ← re-exports ActivityScreen
-      account.tsx                 ← re-exports AccountScreen
-    place/
-      [id].tsx                    ← re-exports PlaceScreen from feature-map
-    assistant.tsx                 ← re-exports AssistantScreen
-    provider/
-      register.tsx
-      dashboard.tsx
-  src/
-    shell/                        ← owned exclusively by the mobile-shell agent
-      _layout.tsx                 ← root layout: i18n provider, auth gate, tab bar
-      tabs.tsx                    ← tab bar configuration (icons, labels)
-      AuthGate.tsx                ← redirects unauthenticated users to /auth
-      DevSettings.tsx             ← dev-only overlay (API URL, mock toggles)
-      providers.tsx               ← React context providers (query client, theme)
-  app.json / app.config.ts
-  metro.config.js
-
-mobile-features/                  ← one package per user-facing feature
-  map/                            ← @iraq-maps/feature-map
-  navigation/                     ← @iraq-maps/feature-navigation
-  account/                        ← @iraq-maps/feature-account
-  provider/                       ← @iraq-maps/feature-provider
-  messages/                       ← @iraq-maps/feature-messages
-  assistant/                      ← @iraq-maps/feature-assistant
-  discover/                       ← @iraq-maps/feature-discover
-  activity/                       ← @iraq-maps/feature-activity
-  tour3d/                         ← @iraq-maps/feature-tour3d (later phase)
-
-packages/
-  mobile-kit/                     ← session hooks, API client, typed route links
-  map-kit/                        ← MapLibre wrapper, style, attribution
-  ui/                             ← design system (RTL, Arabic fonts, colours)
-  i18n/                           ← translations ar/ckb/en + Arabic normalizer
-  contracts/                      ← shared zod schemas and ts-rest contract
-  api-client/                     ← typed fetch client generated from contracts
+apps/mobile/           ← Expo shell (routing, tabs, auth gate, dev settings)
+mobile-features/       ← Feature packages (each is an @iraq-maps/feature-<x> workspace)
+packages/              ← Shared infrastructure (ui, map-kit, mobile-kit, api-client, i18n)
 ```
 
-### Ownership Rules
+### Shell (apps/mobile)
 
-- `apps/mobile/app/**` — one-line re-exports only. The agent that owns the route's feature writes the screen component; `mobile-shell` writes the route file.
-- `apps/mobile/src/shell/**` — owned by `mobile-shell`. No feature package imports from `shell`.
-- `mobile-features/X/**` — owned by the agent assigned to feature X. A feature never imports from another feature.
-- `packages/*` — shared; changes go through a contract request (`docs/contract-requests/`).
+```
+apps/mobile/
+├── app/                     ← Expo Router file-system routes (one-line re-exports)
+│   ├── (tabs)/
+│   │   ├── index.tsx        → re-export from mobile-features/map
+│   │   ├── discover.tsx     → re-export from mobile-features/discover
+│   │   ├── messages.tsx     → re-export from mobile-features/messages
+│   │   ├── activity.tsx     → re-export from mobile-features/activity
+│   │   └── account.tsx      → re-export from mobile-features/account
+│   ├── auth/
+│   │   ├── phone.tsx        → OTP phone entry
+│   │   └── verify.tsx       → OTP code entry
+│   ├── place/[id].tsx       → Place detail sheet
+│   ├── provider/[id].tsx    → Provider profile
+│   ├── post/[id].tsx        → Discover post detail
+│   ├── navigation/index.tsx → Turn-by-turn navigation
+│   └── assistant/index.tsx  → AI assistant chat
+│
+├── src/shell/
+│   ├── AuthGate.tsx         ← Renders children only when authenticated
+│   ├── TabBar.tsx           ← Custom Arabic tab bar (RTL order)
+│   ├── RootLayout.tsx       ← QueryClientProvider, ThemeProvider, I18nProvider
+│   └── DevSettings.tsx      ← API URL toggle, language switch (dev builds only)
+│
+└── test/                    ← Jest + RNTL shell-level tests
+```
+
+### Feature Packages
+
+Each `mobile-features/<name>/` is an independent workspace package. Features never import each other.
+
+| Package                          | Tab / Entry      | Provides                                           |
+|----------------------------------|------------------|----------------------------------------------------|
+| `@iraq-maps/feature-map`         | Home tab         | MapLibre map, place markers, search bar, place sheet |
+| `@iraq-maps/feature-navigation`  | Pushed from map  | Turn-by-turn nav, route overlay, maneuver list     |
+| `@iraq-maps/feature-discover`    | Discover tab     | Feed, compose post, like/comment, follow           |
+| `@iraq-maps/feature-messages`    | Messages tab     | Inquiry list, inquiry detail, send/reply           |
+| `@iraq-maps/feature-activity`    | Activity tab     | Activity feed, unread badge                        |
+| `@iraq-maps/feature-account`     | Account tab      | Profile, settings, privacy, logout, delete account |
+| `@iraq-maps/feature-assistant`   | Pushed from map  | AI chat UI, streaming messages, place cards        |
+| `@iraq-maps/feature-provider`    | Account tab child| Provider registration, dashboard, inbox            |
+| `@iraq-maps/feature-tour3d`      | Reserved         | 3D tour viewer (future)                            |
+
+### Shared Packages (mobile-relevant)
+
+| Package                    | Purpose                                                            |
+|----------------------------|--------------------------------------------------------------------|
+| `@iraq-maps/ui`            | Design system: colors, typography, spacing, shared components      |
+| `@iraq-maps/map-kit`       | MapLibre wrapper, layer helpers, tile source config, Arabic glyphs |
+| `@iraq-maps/mobile-kit`    | Hooks: useLocation, useImagePicker, useDeepLink, usePushToken      |
+| `@iraq-maps/api-client`    | @tanstack/react-query wrappers for all ts-rest contract endpoints   |
+| `@iraq-maps/i18n`          | Translations (ar/ckb/en), useTranslation hook, RTL utilities       |
 
 ---
 
-## 2. Feature Package Pattern
+## 2. Navigation Graph
 
-Every feature in `mobile-features/` follows the same structure:
-
-```
-mobile-features/my-feature/
-  src/
-    index.ts              ← public surface: exports screens, hooks, and types only
-    screens/
-      MyScreen.tsx        ← the main screen component
-    components/
-      MyCard.tsx          ← private components (not exported from index)
-    hooks/
-      useMyData.ts        ← data-fetching and business logic hooks
-    i18n/
-      ar.json             ← Arabic strings (always required)
-      ckb.json            ← Kurdish Sorani strings
-      en.json             ← English strings
-    __tests__/
-      MyScreen.test.tsx
-  package.json            ← "name": "@iraq-maps/feature-my-feature"
-  tsconfig.json           ← extends packages/tooling/tsconfig.base.json
-  jest.config.js
-  README.md
-```
-
-### The Index Rule
-
-`src/index.ts` is the **only** export point. `apps/mobile/app/**` imports from the package name:
-
-```typescript
-// apps/mobile/app/(tabs)/my-tab.tsx
-export { MyScreen as default } from '@iraq-maps/feature-my-feature';
-```
-
-Internal components (`components/`, `hooks/`) are never imported by anything outside the package.
-
-### Package.json
-
-```json
-{
-  "name": "@iraq-maps/feature-my-feature",
-  "version": "0.0.0",
-  "private": true,
-  "main": "src/index.ts",
-  "dependencies": {
-    "@iraq-maps/contracts": "*",
-    "@iraq-maps/mobile-kit": "*",
-    "@iraq-maps/ui": "*",
-    "@iraq-maps/i18n": "*"
-  }
-}
-```
-
-Dependencies a feature package **must not** have:
-- Another `@iraq-maps/feature-*` package (cross-feature coupling is forbidden)
-- `apps/mobile` or `apps/api` (circular)
-- `modules/*` (backend-only)
-
----
-
-## 3. Navigation Structure (Expo Router)
-
-The app uses **Expo Router v3** (file-based routing). The file tree maps directly to URLs:
+Expo Router uses a file-system-based router. The structure below maps files to screens.
 
 ```
-/                          → (tabs)/index.tsx         → MapScreen
-/discover                  → (tabs)/discover.tsx       → DiscoverScreen
-/messages                  → (tabs)/messages.tsx       → MessagesScreen
-/activity                  → (tabs)/activity.tsx       → ActivityScreen
-/account                   → (tabs)/account.tsx        → AccountScreen
-/place/[id]                → place/[id].tsx            → PlaceScreen
-/assistant                 → assistant.tsx             → AssistantScreen
-/provider/register         → provider/register.tsx     → ProviderRegisterScreen
-/provider/dashboard        → provider/dashboard.tsx    → ProviderDashboardScreen
-/auth                      → auth.tsx                  → AuthScreen (OTP flow)
-```
+/                         → Redirect to /(tabs)
+                          (AuthGate: if not authenticated → /auth/phone)
 
-### Tab Bar
+/(tabs)/                  ← Bottom tab navigator
+│
+├── index (Map)           ← Default tab
+│   ├── Press marker → /place/[id]         (modal sheet)
+│   ├── Press navigate → /navigation       (full screen)
+│   ├── Press AI chat → /assistant         (modal)
+│   └── Press search result → /place/[id]
+│
+├── discover              ← Discover feed
+│   ├── Press post → /post/[id]            (push)
+│   ├── Press place tag → /place/[id]      (modal)
+│   └── Press + (FAB) → /discover/compose  (modal)
+│
+├── messages              ← Inquiry inbox (users)
+│   └── Press inquiry → /messages/[id]     (push)
+│
+├── activity              ← Activity / notifications feed
+│   ├── Press like notif → /post/[id]
+│   ├── Press comment notif → /post/[id]#comment-[cid]
+│   └── Press inquiry notif → /messages/[id]
+│
+└── account               ← User profile & settings
+    ├── If provider role → /provider/dashboard
+    ├── Press settings → /account/settings (push)
+    ├── Press language → /account/language (push)
+    ├── Press privacy → /account/privacy   (push)
+    └── Press delete account (modal confirm)
 
-The five tabs are defined in `apps/mobile/src/shell/tabs.tsx`:
+/auth/
+├── phone                 ← Phone number entry (unauthenticated)
+└── verify                ← OTP code entry
 
-| Tab       | Icon         | Arabic label | Route        |
-|-----------|--------------|--------------|--------------|
-| Map       | map-outline  | الخريطة      | `/`          |
-| Discover  | compass      | اكتشف        | `/discover`  |
-| Messages  | chat-bubble  | رسائل        | `/messages`  |
-| Activity  | clock        | النشاط       | `/activity`  |
-| Account   | person       | حسابي        | `/account`   |
+/place/[id]               ← Place detail (MapLibre Bottom Sheet)
+│   ├── Press "Send message" → /messages/compose?placeId=[id]
+│   ├── Press "Navigate" → /navigation?destId=[id]
+│   ├── Press "Ask AI" → /assistant?context=place:[id]
+│   └── Press photos → /place/[id]/photos (lightbox)
 
-### Navigation from a Feature Package
+/navigation               ← Turn-by-turn (full screen, status bar overlay)
 
-Features use typed route links from `packages/mobile-kit`:
+/assistant                ← AI chat (modal, full screen on small phones)
+│   └── Press place card in chat → /place/[id]
 
-```typescript
-import { useRouter } from 'expo-router';
+/post/[id]                ← Post detail
+│   ├── Comments list
+│   └── Press place tag → /place/[id]
 
-// In a component
-const router = useRouter();
-router.push(`/place/${placeId}`);
-router.push('/assistant');
-```
+/provider/
+├── register              ← Multi-step provider registration
+├── dashboard             ← Provider overview (stats, quick actions)
+└── inbox/
+    └── [inquiryId]       ← Provider inbox detail
 
-For deep links that pass data, use Expo Router's `params`:
-
-```typescript
-// Navigating to PlaceScreen with a pre-focused place
-router.push({ pathname: '/place/[id]', params: { id: placeId } });
-```
-
-### Auth Gate
-
-`src/shell/AuthGate.tsx` wraps the tab layout. It reads the session from `useSession()` (mobile-kit). If
-there is no valid access token, it renders the auth flow at `/auth` instead of the tabs.
-
----
-
-## 4. State Management
-
-The app uses **hooks only** — no Redux, no Zustand, no global state library. Each feature manages its own
-state locally.
-
-### Data Fetching
-
-Use the typed API client from `packages/api-client` wrapped in a custom hook. The client is built on `fetch`
-with automatic token attachment and refresh.
-
-```typescript
-// mobile-features/places/src/hooks/usePlaceDetails.ts
-import { apiClient } from '@iraq-maps/mobile-kit';
-
-export function usePlaceDetails(placeId: string) {
-  const [data, setData] = useState<PlaceDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    apiClient.places.get({ params: { id: placeId } })
-      .then(res => {
-        if (cancelled) return;
-        if (res.status === 200) setData(res.body);
-        else setError(res.body.code ?? 'unknown_error');
-      })
-      .catch(() => { if (!cancelled) setError('network_error'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, [placeId]);
-
-  return { data, loading, error };
-}
-```
-
-### Session
-
-`packages/mobile-kit` exports `useSession()`:
-
-```typescript
-type Session = {
-  user: Me | null;
-  accessToken: string | null;
-  isAuthenticated: boolean;
-  login: (tokens: TokenPair, user: Me) => void;
-  logout: () => void;
-};
-
-const { user, isAuthenticated, logout } = useSession();
-```
-
-Tokens are stored in `expo-secure-store` (encrypted). The access token is kept in memory only; the refresh
-token is persisted.
-
-### Form State
-
-Local `useState` for forms. No controlled-input abstractions — keep it simple. Example:
-
-```typescript
-const [phone, setPhone] = useState('');
-const [submitting, setSubmitting] = useState(false);
-
-async function handleSubmit() {
-  setSubmitting(true);
-  try {
-    const res = await apiClient.auth.requestOtp({ body: { phone, locale: 'ar' } });
-    if (res.status === 202) router.push('/auth/verify');
-  } finally {
-    setSubmitting(false);
-  }
-}
-```
-
-### Pagination
-
-Use the cursor pattern with an accumulating array:
-
-```typescript
-const [items, setItems] = useState<Inquiry[]>([]);
-const [cursor, setCursor] = useState<string | undefined>();
-const [loadingMore, setLoadingMore] = useState(false);
-
-async function loadMore() {
-  setLoadingMore(true);
-  const res = await apiClient.messaging.listInquiries({ query: { cursor } });
-  if (res.status === 200) {
-    setItems(prev => [...prev, ...res.body.items]);
-    setCursor(res.body.nextCursor ?? undefined);
-  }
-  setLoadingMore(false);
-}
+/messages/
+├── compose               ← New inquiry form
+└── [inquiryId]           ← Inquiry thread detail
 ```
 
 ---
 
-## 5. API Client Usage
+## 3. State Management
 
-The typed client is in `packages/api-client` and is generated from the `@iraq-maps/contracts` ts-rest
-router. It is the **only** way to call the backend from a feature package.
+### Server State: @tanstack/react-query (via @iraq-maps/api-client)
 
-### Initialisation
-
-The client is initialised in `packages/mobile-kit/src/client.ts` with the base URL from
-`EXPO_PUBLIC_API_URL`. Do not instantiate it again in a feature package.
+All remote data is managed through React Query. The `api-client` package wraps every ts-rest
+endpoint in a typed query/mutation hook.
 
 ```typescript
-import { apiClient } from '@iraq-maps/mobile-kit';
+// Example from api-client
+export const usePlaceSearch = (params: PlaceSearchParams) =>
+  useQuery({
+    queryKey: ['places', 'search', params],
+    queryFn: () => apiClient.places.search(params),
+    staleTime: 5 * 60 * 1000,          // 5 minutes
+    gcTime: 30 * 60 * 1000,            // 30 minutes
+    enabled: params.q.length >= 2,
+  });
+
+export const useSendInquiry = () =>
+  useMutation({
+    mutationFn: (body: SendInquiryBody) => apiClient.messaging.sendInquiry(body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['messages'] }),
+  });
 ```
 
-### Making a Request
+### Cache invalidation strategy
 
-```typescript
-const res = await apiClient.places.search({
-  query: {
-    q: 'مطعم',
-    city: 'baghdad',
-    near: '44.40,33.34',
-    lang: 'ar',
-    limit: 20,
-  },
-});
+- Place search: invalidated manually, stale-while-revalidate for UX smoothness
+- Feed: invalidated on pull-to-refresh + after like/comment mutations
+- Inbox: invalidated on push notification received (via background fetch)
+- My profile: invalidated on PATCH /v1/me success
 
-if (res.status === 200) {
-  console.log(res.body.items);
-}
-```
+### Client / UI State: React useState + Context
 
-### Error Handling
+- Auth state: `AuthContext` (token pair, user object, isAuthenticated)
+- Map state: `MapContext` (viewport, selected place, active route)
+- Compose state: local `useState` in PostCompose screen
+- Navigation state: `NavigationContext` (active route, current step index)
 
-The client uses ts-rest's discriminated union on `status`:
+No global client state manager (Redux/Zustand) is used. Feature-local state stays local.
 
-```typescript
-const res = await apiClient.auth.verifyOtp({
-  body: { phone, code },
-});
+### Persistent State: AsyncStorage
 
-switch (res.status) {
-  case 200:
-    login(res.body, res.body.user);
-    break;
-  case 401:
-    setError(t(`error.${res.body.code}`));
-    break;
-  case 429:
-    setError(t('error.rate_limited'));
-    break;
-}
-```
+Used only for per-device conveniences, never for shared state:
 
-### Token Refresh
-
-Token refresh is handled automatically inside `packages/mobile-kit/src/client.ts`. When a 401 is received
-it:
-
-1. Tries `POST /v1/auth/refresh` with the stored refresh token.
-2. If successful, stores the new tokens and retries the original request once.
-3. If the refresh fails, calls `session.logout()` and the auth gate redirects to `/auth`.
+| Key                      | Value                           | Purpose                          |
+|--------------------------|---------------------------------|----------------------------------|
+| `auth:tokens`            | `{ accessToken, refreshToken }` | Persist login across app restarts|
+| `auth:user`              | `Me` object                     | Show cached profile on cold start|
+| `map:lastViewport`       | `{ lat, lng, zoom }`            | Restore map position on reopen   |
+| `app:language`           | `'ar' | 'ckb' | 'en'`          | Persist language selection        |
+| `app:onboardingDone`     | `boolean`                       | Skip onboarding on re-open       |
 
 ---
 
-## 6. Internationalisation and RTL
+## 4. Offline Strategy
 
-### Adding a String
+Per ADR-0012, the app is designed for Iraqi network conditions: frequent drops, slow 3G, and
+intermittent 4G. The strategy is "offline-tolerant" (not fully offline-first, which would require
+a local DB like SQLite/WatermelonDB — deferred to a later phase).
 
-1. Add the Arabic string to `src/i18n/ar.json` in the feature package.
-2. Add the same key with an English translation to `src/i18n/en.json`.
-3. Add Kurdish Sorani to `ckb.json` if available (can be the Arabic value initially).
+### What works offline
 
-```json
-// ar.json
-{
-  "search": {
-    "placeholder": "ابحث عن مطعم أو مكان...",
-    "noResults": "لا توجد نتائج لـ «{{query}}»"
-  }
-}
-```
+| Feature             | Offline behaviour                                       |
+|---------------------|---------------------------------------------------------|
+| Map rendering       | MapLibre caches vector tiles in device storage (256 MB) |
+| Last searched places| React Query cache persisted via AsyncStorage            |
+| Last viewed routes  | Cached in React Query (staleTime 2 min, gcTime 10 min)  |
+| User profile        | Shows cached Me object from AsyncStorage                |
+| AI chat threads     | Shows cached thread history (no new messages)           |
+| Discover feed       | Shows last loaded feed; no new posts until reconnect    |
+| Pending actions     | None queued currently (future: offline queue for likes) |
 
-4. Use `useTranslation` from `@iraq-maps/i18n` to read the string:
+### What requires connectivity
 
-```typescript
-import { useTranslation } from '@iraq-maps/i18n';
+- Place search (live PostGIS query)
+- Sending inquiries / replies
+- New AI assistant messages
+- Photo uploads
+- New post creation
+- OTP login
 
-export function SearchBar() {
-  const { t } = useTranslation('feature-map'); // namespace = package name
-  return <TextInput placeholder={t('search.placeholder')} />;
-}
-```
+### Error handling
 
-5. Register the namespace in the feature's `src/i18n/index.ts`:
-
-```typescript
-import ar from './ar.json';
-import ckb from './ckb.json';
-import en from './en.json';
-
-export const ns = 'feature-map' as const;
-export const resources = { ar, ckb, en };
-```
-
-6. The shell's i18n initialiser picks this up automatically from the feature's package metadata.
-
-### RTL Layout
-
-The app defaults to **RTL** because the primary language is Arabic. `@iraq-maps/ui` provides RTL-aware
-layout primitives:
-
-```typescript
-import { Row, Stack, Spacer } from '@iraq-maps/ui';
-
-// Row reverses children order in RTL automatically
-<Row>
-  <Icon name="search" />
-  <TextInput />
-</Row>
-```
-
-Rules:
-- Use `Row` and `Stack` from `@iraq-maps/ui`, not `View` with `flexDirection`.
-- Never hardcode `paddingLeft` / `paddingRight` — use `paddingStart` / `paddingEnd` (or `ps`/`pe` shorthand from the design system).
-- Icons that carry directional meaning (arrows, chevrons) must be mirrored in RTL. Use the `Flippable` wrapper:
-
-```typescript
-import { Flippable } from '@iraq-maps/ui';
-<Flippable><ChevronRight /></Flippable>
-```
-
-### Arabic Text Normalization
-
-Arabic text from user input (search, compose) must be normalized before sending to the API:
-
-```typescript
-import { normalizeArabic } from '@iraq-maps/i18n';
-
-const normalized = normalizeArabic(rawInput);
-// handles hamza, alef maddah, teh marbuta, tatweel, etc.
-```
-
-This normalizer is also applied server-side in `packages/i18n/src/normalize`, so search is consistent.
+When an API call fails with a network error, React Query retries automatically (3×, exponential
+backoff). After exhausting retries, the UI shows an Arabic error banner:
+"تعذّر الاتصال بالخادم. يرجى التحقق من الاتصال."
 
 ---
 
-## 7. Testing Approach
+## 5. Real-Time Integration
 
-### Unit Tests (Jest + RNTL)
+Current MVP uses polling + push notifications (WebSocket planned for post-MVP).
 
-Every feature package runs Jest with React Native Testing Library. Config lives in
-`mobile-features/X/jest.config.js`:
+### Polling intervals
 
-```javascript
-// jest.config.js
-module.exports = {
-  preset: 'jest-expo',
-  setupFilesAfterFramework: ['<rootDir>/../../packages/testing/src/rntl-setup.ts'],
-  moduleNameMapper: {
-    '^@iraq-maps/(.*)$': '<rootDir>/../../packages/$1/src/index.ts',
-  },
-};
-```
+| Data                       | Interval               | Condition                     |
+|----------------------------|------------------------|-------------------------------|
+| Activity feed unread count | Every 30s              | App in foreground, authenticated|
+| Provider inbox badge       | Every 60s              | User has provider role        |
+| Active inquiry status      | On screen focus        | User has open inquiries       |
 
-Write tests alongside the component:
+### Push notifications → state update
 
-```typescript
-// src/__tests__/SearchBar.test.tsx
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { SearchBar } from '../components/SearchBar';
-
-it('debounces search and calls onSearch after 300ms', async () => {
-  jest.useFakeTimers();
-  const onSearch = jest.fn();
-  const { getByPlaceholderText } = render(<SearchBar onSearch={onSearch} />);
-
-  fireEvent.changeText(getByPlaceholderText('ابحث...'), 'مطعم');
-  expect(onSearch).not.toHaveBeenCalled();
-
-  jest.advanceTimersByTime(300);
-  await waitFor(() => expect(onSearch).toHaveBeenCalledWith('مطعم'));
-});
-```
-
-### API Mocking
-
-Use the fake implementations from `packages/testing`:
+When a push notification arrives (FCM), the app:
+1. Receives notification in background via `expo-notifications`
+2. On tap: Expo Router deep links to the relevant screen
+3. On foreground arrival: `queryClient.invalidateQueries` for the affected query
 
 ```typescript
-import { FakeApiClient } from '@iraq-maps/testing';
-
-const client = FakeApiClient.create({
-  places: { search: jest.fn().mockResolvedValue({ status: 200, body: { items: [] } }) }
-});
-```
-
-### E2E Tests (Maestro)
-
-Maestro flows live in `mobile-features/X/maestro/`. Run them with the Maestro CLI against a dev build:
-
-```bash
-maestro test mobile-features/map/maestro/search.yaml
-```
-
-Example flow:
-
-```yaml
-# mobile-features/map/maestro/search.yaml
-appId: app.iraqmaps.dev
----
-- launchApp
-- tapOn: "ابحث..."
-- inputText: "مطعم"
-- assertVisible: "مطعم الزوراء"
-- tapOn: "مطعم الزوراء"
-- assertVisible: "الكرادة"
-```
-
----
-
-## 8. Adding a New Feature — Step-by-step Guide
-
-Follow these steps whenever you need a new tab or screen.
-
-### Step 1: Create the package
-
-```bash
-mkdir -p mobile-features/my-feature/src/{screens,components,hooks,i18n,__tests__}
-```
-
-Create `package.json`:
-
-```json
-{
-  "name": "@iraq-maps/feature-my-feature",
-  "version": "0.0.0",
-  "private": true,
-  "main": "src/index.ts",
-  "dependencies": {
-    "@iraq-maps/contracts": "*",
-    "@iraq-maps/mobile-kit": "*",
-    "@iraq-maps/ui": "*",
-    "@iraq-maps/i18n": "*"
-  }
-}
-```
-
-Create `tsconfig.json`:
-
-```json
-{
-  "extends": "../../packages/tooling/tsconfig.base.json",
-  "compilerOptions": { "baseUrl": "." },
-  "include": ["src"]
-}
-```
-
-### Step 2: Define the contracts
-
-If your feature needs new API endpoints, create a contract in `packages/contracts/src/my-feature.ts` and
-export it from `packages/contracts/src/index.ts`. Then add the router to the ts-rest `apiContract` in
-`packages/contracts/src/http.ts` via a contract request if you do not own that file.
-
-### Step 3: Write the screen component
-
-```typescript
-// src/screens/MyScreen.tsx
-import React from 'react';
-import { View, Text } from 'react-native';
-import { useTranslation } from '@iraq-maps/i18n';
-
-export function MyScreen() {
-  const { t } = useTranslation('feature-my-feature');
-  return (
-    <View>
-      <Text>{t('title')}</Text>
-    </View>
-  );
-}
-```
-
-### Step 4: Export from index
-
-```typescript
-// src/index.ts
-export { MyScreen } from './screens/MyScreen';
-export type { MyScreenProps } from './screens/MyScreen';
-```
-
-### Step 5: Add the route file
-
-In `apps/mobile/app/` (submit a request to `mobile-shell` if you do not own that path):
-
-```typescript
-// apps/mobile/app/(tabs)/my-tab.tsx
-export { MyScreen as default } from '@iraq-maps/feature-my-feature';
-```
-
-### Step 6: Register the tab (if it is a new tab)
-
-In `apps/mobile/src/shell/tabs.tsx`, add the tab configuration object.
-
-### Step 7: Add i18n strings
-
-Create `src/i18n/ar.json`, `ckb.json`, and `en.json`. Register the namespace in `src/i18n/index.ts`.
-
-### Step 8: Write tests
-
-Add at least one test per screen and one per non-trivial hook. Run `pnpm turbo run test --filter=@iraq-maps/feature-my-feature` to verify.
-
-### Step 9: Write the README
-
-Create `mobile-features/my-feature/README.md` documenting the screens, hooks, ports consumed, and i18n
-namespaces.
-
----
-
-## 9. Map Integration
-
-The map component lives in `packages/map-kit`. Feature packages use it through `@iraq-maps/map-kit`:
-
-```typescript
-import { MapCanvas, useMapRef } from '@iraq-maps/map-kit';
-
-export function MapScreen() {
-  const mapRef = useMapRef();
-
-  return (
-    <MapCanvas
-      ref={mapRef}
-      cityDescriptor={city}
-      onCameraChanged={(camera) => {
-        // center is [lng, lat]
-        setMapCenter(camera.center);
-      }}
-      onPlacePress={(placeId) => {
-        router.push(`/place/${placeId}`);
-      }}
-    />
-  );
-}
-```
-
-### Attribution
-
-`MapCanvas` always renders the OSM attribution overlay. You must never hide or obscure it. This is a
-hard rule from CLAUDE.md (data licensing). The attribution text is sourced from the `CityDescriptor.attribution`
-field.
-
-### Adding a Layer
-
-To add a custom overlay (e.g. incidents pins):
-
-```typescript
-import { MapCanvas, SymbolLayer, GeoJsonSource } from '@iraq-maps/map-kit';
-
-<MapCanvas ...>
-  <GeoJsonSource id="incidents" data={incidentsGeoJson}>
-    <SymbolLayer id="incident-pins" sourceId="incidents" style={incidentStyle} />
-  </GeoJsonSource>
-</MapCanvas>
-```
-
----
-
-## 10. Offline and Low-connectivity Handling
-
-Iraq has intermittent connectivity. The app must degrade gracefully.
-
-### Network Error Handling
-
-All hooks that call the API must handle `network_error` state and show an offline banner:
-
-```typescript
-import { useNetworkStatus } from '@iraq-maps/mobile-kit';
-
-const { isOnline } = useNetworkStatus();
-
-if (!isOnline) return <OfflineBanner />;
-```
-
-### Map Tiles
-
-PMTiles are served from CDN. The MapLibre SDK caches tiles on disk automatically. Users in good coverage
-areas will have the city cached after their first session. Do not ship tile data in the app bundle.
-
-### Partial Results
-
-When the API is slow, show stale cached data with a timestamp: "آخر تحديث قبل 5 دقائق". Never show an empty
-screen when cached data exists.
-
-### Request Cancellation
-
-Always cancel in-flight requests when the component unmounts or the query changes:
-
-```typescript
+// mobile-features/activity/src/usePushSync.ts
 useEffect(() => {
-  const controller = new AbortController();
-  apiClient.places.search({ query: params, fetchOptions: { signal: controller.signal } })
-    .then(res => { if (res.status === 200) setResults(res.body.items); });
-  return () => controller.abort();
-}, [params]);
+  const sub = Notifications.addNotificationResponseReceivedListener(response => {
+    const { type, refId } = response.notification.request.content.data;
+    if (type === 'inquiry_reply') {
+      queryClient.invalidateQueries({ queryKey: ['messages', refId] });
+      router.push(`/messages/${refId}`);
+    }
+    if (type === 'post_liked') {
+      queryClient.invalidateQueries({ queryKey: ['activity'] });
+    }
+  });
+  return () => sub.remove();
+}, []);
 ```
+
+---
+
+## 6. Deep Linking Schema
+
+App scheme: `iraqmaps://`
+Web fallback: `https://iraqsmartmaps.app/` (defined by `APP_BASE_URL`)
+
+| Deep link URL                      | Opens                           |
+|------------------------------------|---------------------------------|
+| `iraqmaps://place/<placeId>`       | Place detail sheet              |
+| `iraqmaps://provider/<providerId>` | Provider profile page           |
+| `iraqmaps://post/<postId>`         | Discover post detail            |
+| `iraqmaps://messages/<inquiryId>`  | Inquiry thread                  |
+| `iraqmaps://nav?dest=<lat>,<lng>`  | Navigation to coordinates       |
+| `iraqmaps://assistant?q=<query>`   | AI assistant with pre-fill      |
+
+Deep links are handled in `apps/mobile/src/shell/` via Expo Router's built-in deep link
+support. Unauthenticated users who tap a deep link are shown the OTP login screen first;
+the intended route is stored in navigation state and resumed after successful login.
+
+---
+
+## 7. Push Notification Flow
+
+```
+1. App starts → mobile-kit/usePushToken.ts
+     ├─ Requests notification permissions (expo-notifications)
+     ├─ Gets FCM device token
+     └─ POST /v1/notifications/register { token, platform: 'android' }
+
+2. Backend stores token in notifications.device_tokens
+
+3. User receives a message reply (example):
+     ├─ Provider submits reply → messaging.reply.received.v1 event
+     ├─ NotificationsWorker picks up event from BullMQ
+     ├─ Looks up device token for recipient user
+     ├─ Calls PushSender.send(token, { title: "رد جديد", body, data })
+     └─ FCM delivers to device
+
+4. Device receives notification:
+     ├─ If app backgrounded: system notification shown, tap → deep link
+     └─ If app foregrounded: in-app banner, React Query invalidation
+
+5. Token refresh:
+     ├─ FCM may issue a new token (rotation)
+     ├─ App detects via onTokenRefresh listener
+     └─ Re-registers new token via PATCH /v1/notifications/register
+```
+
+Notification channels (Android):
+- `messages`: High priority (heads-up), vibrate + sound
+- `activity`: Default priority, no heads-up
+- `system`: Low priority, silent
+
+---
+
+## 8. Analytics Tracking
+
+Currently in-house only (no third-party analytics SDK in the app to avoid GDPR/data-residency
+concerns). The admin metrics endpoint (`/v1/admin/metrics`) provides aggregate numbers.
+
+Events tracked server-side (logged as structured JSON via Pino):
+- Authentication events (login, register, logout)
+- Place searches (query, city, result count — no user ID in prod logs)
+- Route requests (distance bucket, mode)
+- Assistant usage (message count, tool calls — no content)
+- Inquiry sends (place count — no message content)
+- Post creates, likes (count only)
+
+No client-side event tracking SDK is installed. User-level analytics is deferred to a later phase.
+
+---
+
+## 9. i18n Strategy
+
+Package: `packages/i18n`
+React hook: `useTranslation()` from `@iraq-maps/i18n`
+
+### Language priority
+
+```
+1. User preference (stored in AsyncStorage 'app:language' + PATCH /v1/me)
+2. Device OS locale
+3. Default: Arabic ('ar')
+```
+
+### Locale files
+
+```
+packages/i18n/src/locales/
+├── ar.json      ← Primary (all keys must be present here)
+├── ckb.json     ← Kurdish Sorani (subset; falls back to ar)
+└── en.json      ← English (subset; falls back to ar)
+```
+
+### Arabic numeral formatting (ADR-0013)
+
+Numbers displayed to users (distances, prices, ratings) use Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩)
+when locale is `ar` or `ckb`. The `@iraq-maps/i18n` package exports a `formatNumber(n, locale)`
+utility that handles this consistently. English locale uses Western digits.
+
+### Translation keys
+
+Keys are dot-separated namespaced strings. Namespace = feature name.
+
+```json
+{
+  "map.searchPlaceholder": "ابحث عن مطعم، متجر...",
+  "place.navigate": "ابدأ التنقل",
+  "place.sendMessage": "راسل هذا المكان",
+  "messages.noInquiries": "لا توجد رسائل بعد",
+  "assistant.dailyLimitReached": "وصلت إلى الحد اليومي للرسائل"
+}
+```
+
+### Pluralization
+
+Using `intl-messageformat` for proper Arabic plural rules (Arabic has 6 plural forms):
+
+```typescript
+i18n.t('places.count', { count: 42 })
+// → "٤٢ مكانًا" (Arabic Indic numerals + correct plural form)
+```
+
+---
+
+## 10. RTL Considerations
+
+Per ADR-0011 (RTL-first design), all UI is built for RTL by default. English/Kurdish Sorani fall
+back to the same RTL layout.
+
+### React Native RTL setup
+
+```typescript
+// apps/mobile/src/shell/RootLayout.tsx
+import { I18nManager } from 'react-native';
+I18nManager.forceRTL(true);  // Set once at startup; requires reload
+```
+
+### Layout rules
+
+| Concern                    | Solution                                                     |
+|----------------------------|--------------------------------------------------------------|
+| Flex direction             | All rows use `flexDirection: 'row'`; RN flips for RTL        |
+| Absolute positioning       | Use `start`/`end` (logical properties) not `left`/`right`    |
+| Icons with direction       | Arrow icons mirrored via `scaleX: -1` transform for RTL      |
+| Text alignment             | Default `textAlign: 'auto'` (follows locale)                 |
+| Map UI overlay             | Search bar, FAB, attribution placed on RTL-aware edges       |
+| Bottom tab bar             | Tab order reversed for RTL (Map ← Activity ← Messages ← Discover ← Account) |
+| Navigation header          | Back arrow flipped; title on right in RTL                    |
+| Swipe gestures             | Drawer opens from right; swipe-back works in RTL             |
+
+### MapLibre RTL text
+
+Arabic text labels on the map require `maplibre-gl-rtl-text` plugin. Loaded in `@iraq-maps/map-kit`:
+
+```typescript
+import MapLibreGL from '@maplibre/maplibre-react-native';
+MapLibreGL.setRTLTextPlugin(
+  'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.3.0/mapbox-gl-rtl-text.min.js',
+  false
+);
+```
+
+For offline / controlled builds, the RTL text plugin is bundled locally in `apps/mobile/assets/`.
+
+### Component audit checklist (from ADR-0011)
+
+- [ ] No hardcoded `left`/`right` in StyleSheet (use `start`/`end`)
+- [ ] All icon buttons have `accessibilityLabel` in Arabic
+- [ ] Input fields: `textAlign: 'right'` only for Arabic-only fields (phone, price)
+- [ ] Number inputs use `keyboardType: 'number-pad'` not `'phone-pad'`
+- [ ] Long press menus appear on the correct side
+- [ ] Skeleton loaders animate in RTL direction
+
+---
+
+*End of Mobile Architecture. For the full navigation contract see `apps/mobile/app/`.
+For deep link web fallback pages see `site/`.*
