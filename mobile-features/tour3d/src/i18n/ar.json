@@ -73,5 +73,102 @@
     "bridge": "جسر",
     "neighborhood": "حي",
     "other": "أخرى"
+  },
+  "city": {
+    "baghdad": "بغداد",
+    "erbil": "أربيل",
+    "basra": "البصرة",
+    "mosul": "الموصل",
+    "najaf": "النجف",
+    "karbala": "كربلاء",
+    "sulaymaniyah": "السليمانية",
+    "ur": "أور"
+  },
+  "audio": {
+    "languageAr": "العربية",
+    "languageCkb": "کوردی",
+    "languageEn": "English"
+  },
+  "icon": {
+    "close": "✕",
+    "check": "✓",
+    "retry": "↺",
+    "badge3d": "3D",
+    "badge360": "360°",
+    "speed1x": "1×",
+    "altPrefix": "↑",
+    "altSuffix": "م",
+    "warning": "⚠️"
+  },
+  "explore": {
+    "title": "استكشف الجولات",
+    "subtitle": "جولات ثلاثية الأبعاد لأشهر المعالم العراقية",
+    "featuredTitle": "جولات مميزة",
+    "featuredSubtitle": "اختارها فريقنا بعناية",
+    "recentTitle": "شاهدتها مؤخراً",
+    "allToursTitle": "جميع الجولات",
+    "allCities": "كل المدن",
+    "assetCount": "{count} مشهد",
+    "viewCount": "{count} مشاهدة",
+    "offlineAvailable": "متاح بلا إنترنت",
+    "downloadTour": "تنزيل للاستخدام بلا إنترنت",
+    "cancelDownload": "إلغاء التنزيل",
+    "downloading": "جاري التنزيل",
+    "offlineUse": "للاستخدام بلا إنترنت",
+    "downloadError": "فشل التنزيل، اضغط للمحاولة",
+    "tapToRetry": "اضغط لإعادة المحاولة",
+    "deleteOfflineTour": "حذف النسخة المحفوظة",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "annotation": {
+    "dragHint": "حرّك الشاشة لاستكشاف المشهد",
+    "filterAll": "الكل",
+    "typeHistorical": "تاريخي",
+    "typeCurrent": "معلومة",
+    "typeFunFact": "معلومة طريفة",
+    "close": "إغلاق",
+    "share": "مشاركة",
+    "navigateToPlace": "انتقل إلى الموقع",
+    "audioGuide": "الدليل الصوتي",
+    "audioPlay": "تشغيل",
+    "audioPause": "إيقاف مؤقت",
+    "audioMute": "كتم الصوت",
+    "audioUnmute": "إلغاء الكتم",
+    "audioRewind": "رجوع 10 ثوانٍ",
+    "audioForward": "تقديم 10 ثوانٍ",
+    "audioSpeed": "سرعة التشغيل",
+    "annotationCount": "{count} معلم",
+    "tapToLearnMore": "اضغط لمعرفة المزيد",
+    "historicalDesc": "هذا المعلم التاريخي يحمل إرثاً ثقافياً غنياً يمتد لآلاف السنين. كان مركزاً حضارياً مهماً في عصره.",
+    "mosqueDesc": "مسجد يجسّد الروح الإسلامية بأبهى صورها، ويستقطب المصلين والزوار من شتى الأنحاء.",
+    "currentDesc": "معلومة قيّمة تضيف بُعداً معرفياً لزيارتك لهذا المكان.",
+    "placeDesc": "موقع بارز يستحق التوقف والاستمتاع بتفاصيله الجميلة.",
+    "foodDesc": "وجهة طعام شهيرة تعكس الطابع الأصيل للمطبخ المحلي.",
+    "photoDesc": "موقع مثالي للتقاط أجمل الصور التذكارية.",
+    "shopDesc": "محطة تسوق تعرض أجود المنتجات المحلية والتقليدية.",
+    "funFactDesc": "هل تعلم؟ هذه المعلومة الطريفة ستجعل زيارتك أكثر متعة وإثارة.",
+    "iconType": {
+      "info": "معلومة",
+      "place": "موقع",
+      "photo": "صورة",
+      "food": "طعام",
+      "mosque": "مسجد",
+      "historic": "تاريخي",
+      "shop": "متجر"
+    }
+  },
+  "progress": {
+    "label": "تقدم الجولة",
+    "remaining": "{count} محطة متبقية"
+  },
+  "route": {
+    "title": "مسارات الجولات",
+    "loading": "جاري تحميل المسارات...",
+    "empty": "لا توجد مسارات متاحة",
+    "loadError": "فشل تحميل المسارات",
+    "retry": "إعادة المحاولة",
+    "stops": "{count} محطة",
+    "viewCount": "{count} مشاهدة"
   }
 }

@@ -722,5 +722,28 @@
     "categoryReviews": "المراجعات",
     "categoryPlaces": "الأماكن",
     "categorySafety": "السلامة"
+  },
+  "mentions": {
+    "title": "الإشارات",
+    "typePost": "منشور",
+    "typeReview": "مراجعة",
+    "typeComment": "تعليق",
+    "filterAll": "الكل",
+    "filterPosts": "المنشورات",
+    "filterReviews": "المراجعات",
+    "filterComments": "التعليقات",
+    "clearAll": "مسح الكل",
+    "clearTitle": "مسح كل الإشارات",
+    "clearBody": "هل تريد مسح جميع الإشارات؟",
+    "clearConfirm": "مسح الكل",
+    "clearError": "فشل المسح، حاول مجدداً",
+    "reply": "رد",
+    "replyTo": "رد على {name}",
+    "replyPlaceholder": "اكتب ردك هنا...",
+    "send": "إرسال",
+    "cancel": "إلغاء",
+    "emptyTitle": "لا توجد إشارات",
+    "emptyBody": "ستظهر هنا عندما يُشير إليك أحد في منشور أو تعليق أو مراجعة"
   }
+
 }

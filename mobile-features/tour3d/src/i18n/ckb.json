@@ -63,6 +63,32 @@
     "markerLabel": "گەشتی سێ ئەندازەیی",
     "tapToOpen": "بکە بۆ کردنەوەی گەشت"
   },
+  "city": {
+    "baghdad": "بەغدا",
+    "erbil": "هەولێر",
+    "basra": "بەسرە",
+    "mosul": "موسڵ",
+    "najaf": "نەجەف",
+    "karbala": "کەربەلا",
+    "sulaymaniyah": "سلێمانی",
+    "ur": "ئور"
+  },
+  "audio": {
+    "languageAr": "عەرەبی",
+    "languageCkb": "کوردی",
+    "languageEn": "ئینگلیزی"
+  },
+  "icon": {
+    "close": "✕",
+    "check": "✓",
+    "retry": "↺",
+    "badge3d": "3D",
+    "badge360": "360°",
+    "speed1x": "1×",
+    "altPrefix": "↑",
+    "altSuffix": "م",
+    "warning": "⚠️"
+  },
   "category": {
     "heritage": "میراتی مێژووی",
     "mosque": "مزگەوت",
@@ -73,5 +99,76 @@
     "bridge": "پرد",
     "neighborhood": "نیشتەجێبوون",
     "other": "ئەوتریش"
+  },
+  "explore": {
+    "title": "گەشتەکان بگەڕێ",
+    "subtitle": "گەشتی سێ ئەندازەیی بۆ بناغەکانی عێراق",
+    "featuredTitle": "گەشتە تایبەتەکان",
+    "featuredSubtitle": "هەڵبژاردراوی تیمەکەمان",
+    "recentTitle": "دواتر بینیوتە",
+    "allToursTitle": "هەموو گەشتەکان",
+    "allCities": "هەموو شارەکان",
+    "assetCount": "{count} دیمەن",
+    "viewCount": "{count} بینین",
+    "offlineAvailable": "بێ ئینتەرنێت بەردەستە",
+    "downloadTour": "داگرتن بۆ بەکارهێنانی بێ ئینتەرنێت",
+    "cancelDownload": "هەڵوەشاندنەوەی داگرتن",
+    "downloading": "داگرتن",
+    "offlineUse": "بۆ بەکارهێنانی بێ ئینتەرنێت",
+    "downloadError": "داگرتن سەرنەکەوت",
+    "tapToRetry": "بکە بۆ دووبارە هەوڵدانەوە",
+    "deleteOfflineTour": "سڕینەوەی گەشتی پاشکەوتکراو",
+    "cancel": "هەڵوەشاندنەوە",
+    "delete": "سڕینەوە"
+  },
+  "annotation": {
+    "dragHint": "پەردەکە بکێشە بۆ گەڕانی دیمەنەکە",
+    "filterAll": "هەموو",
+    "typeHistorical": "مێژووی",
+    "typeCurrent": "زانیاری",
+    "typeFunFact": "زانیاری سەرنجڕاکێش",
+    "close": "داخستن",
+    "share": "هاوبەشکردن",
+    "navigateToPlace": "بچۆ بۆ شوێنی ڕاستەقینە",
+    "audioGuide": "ڕێنمایی دەنگی",
+    "audioPlay": "لێدان",
+    "audioPause": "وەستاندن",
+    "audioMute": "بێدەنگکردن",
+    "audioUnmute": "کردنەوەی دەنگ",
+    "audioRewind": "گەڕانەوە ١٠ چرکە",
+    "audioForward": "پێشکەوتن ١٠ چرکە",
+    "audioSpeed": "خێرایی لێدان",
+    "annotationCount": "{count} نیشانە",
+    "tapToLearnMore": "بکە بۆ زانیاری زیاتر",
+    "historicalDesc": "ئەم شوێنە مێژووییە خاوەنی میراتێکی کولتووری بەتواناە کە بەر لە هەزاران ساڵ کێشەی هەیە.",
+    "mosqueDesc": "جامێکە کە ڕۆحی ئیسلامی بە جوانترین شێوەی خۆی دەگرێتەوە.",
+    "currentDesc": "زانیاریێکی بەارزانە کە ئاستی زانستی سەردانی ئەم شوێنەت زیادە دەکات.",
+    "placeDesc": "شوێنێکی بەناوبانگ کە هێندە دەبێت لەسەر بوەستیت.",
+    "foodDesc": "شوێنێکی خواردن کە تامی خواردنی خۆجێی دەردەخات.",
+    "photoDesc": "شوێنێکی گونجاو بۆ وێنەی یادگاری.",
+    "shopDesc": "شوێنێکی کڕین کە باشترین بەرهەمە ناوخۆییەکان پێشکەش دەکات.",
+    "funFactDesc": "دەزانی؟ ئەم زانیاری سەرنجڕاکێشە سەردانەکەت زیاتر دەخەمڵێنێت.",
+    "iconType": {
+      "info": "زانیاری",
+      "place": "شوێن",
+      "photo": "وێنە",
+      "food": "خواردن",
+      "mosque": "مزگەوت",
+      "historic": "مێژووی",
+      "shop": "دووکان"
+    }
+  },
+  "progress": {
+    "label": "پێشکەوتنی گەشت",
+    "remaining": "{count} وێستگە ماوە"
+  },
+  "route": {
+    "title": "ڕێگاکانی گەشت",
+    "loading": "ڕێگاکان بار دەکرێن...",
+    "empty": "هیچ ڕێگایەک بەردەست نییە",
+    "loadError": "بارکردنی ڕێگاکان سەرنەکەوت",
+    "retry": "دووبارە هەوڵبدەرەوە",
+    "stops": "{count} وێستگە",
+    "viewCount": "{count} بینین"
   }
 }

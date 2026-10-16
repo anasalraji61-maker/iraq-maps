@@ -11,6 +11,21 @@ import { UserPreferencesService } from './preferences';
 export { IdentityAuthGuard, type AuthenticatedRequest } from './http';
 export { writeAdminAudit, type AdminAction, type TargetType } from './audit';
 export { UserPreferencesService, UserPrefsSchema, type UserPrefs } from './preferences';
+export {
+  ReferralService,
+  referralCodes,
+  referrals,
+  checkins,
+  userActivity,
+  type CheckinType,
+  type Visibility,
+  type ActivityType,
+  type ReferralStats,
+  type ReferredFriend,
+  type CheckinRecord,
+  type ActivityRecord,
+  type Pagination,
+} from './referral';
 import { Otp, phoneVerification } from './otp';
 import { otpDelivery } from './senders';
 import { Sessions } from './sessions';

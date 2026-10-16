@@ -722,5 +722,27 @@
     "categoryReviews": "پێداچوونەوەکان",
     "categoryPlaces": "شوێنەکان",
     "categorySafety": "سەلامەتی"
+  },
+  "mentions": {
+    "title": "ئاماژەکان",
+    "typePost": "پۆست",
+    "typeReview": "پێداچوونەوە",
+    "typeComment": "لێدوان",
+    "filterAll": "هەموو",
+    "filterPosts": "پۆستەکان",
+    "filterReviews": "پێداچوونەوەکان",
+    "filterComments": "لێدوانەکان",
+    "clearAll": "سڕینەوەی هەموو",
+    "clearTitle": "سڕینەوەی هەموو ئاماژەکان",
+    "clearBody": "دەتەوێ هەموو ئاماژەکان بسڕیتەوە؟",
+    "clearConfirm": "سڕینەوەی هەموو",
+    "clearError": "هەڵە ڕوودا",
+    "reply": "وەڵام",
+    "replyTo": "وەڵامدانەوە بۆ {name}",
+    "replyPlaceholder": "وەڵامت لێرە بنووسە...",
+    "send": "ناردن",
+    "cancel": "هەڵوەشاندنەوە",
+    "emptyTitle": "ئاماژە نیە",
+    "emptyBody": "کاتێک کەسێک ئاماژەت پێدات ئێرە دەرکەوێت"
   }
 }

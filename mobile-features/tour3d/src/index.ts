@@ -1,8 +1,17 @@
 export { Tour3DListScreen } from './screens/Tour3DListScreen';
 export { Tour3DViewerScreen } from './screens/Tour3DViewerScreen';
 export { Tour3DMapScreen } from './screens/Tour3DMapScreen';
+export { Tour3DExploreScreen } from './screens/Tour3DExploreScreen';
+export { Tour3DAnnotationScreen } from './screens/Tour3DAnnotationScreen';
 export { TourCard } from './components/TourCard';
 export { TourAnnotationMarker } from './components/TourAnnotationMarker';
 export { Tour3DControls } from './components/Tour3DControls';
 export { VirtualTourProgress } from './components/VirtualTourProgress';
+export { TourProgressBar } from './components/TourProgressBar';
+export { TourAudioPlayer } from './components/TourAudioPlayer';
+export type { AudioTrack, AudioLanguage } from './components/TourAudioPlayer';
+export { TourAnnotationCard } from './components/TourAnnotationCard';
+export type { TourAnnotationCardProps, AnnotationCardLanguage } from './components/TourAnnotationCard';
+export { TourDownloadButton } from './components/TourDownloadButton';
+export type { TourDownloadButtonProps } from './components/TourDownloadButton';
 export { useTour3DClient } from './client';

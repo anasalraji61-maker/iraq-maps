@@ -722,5 +722,27 @@
     "categoryReviews": "Reviews",
     "categoryPlaces": "Places",
     "categorySafety": "Safety"
+  },
+  "mentions": {
+    "title": "Mentions",
+    "typePost": "Post",
+    "typeReview": "Review",
+    "typeComment": "Comment",
+    "filterAll": "All",
+    "filterPosts": "Posts",
+    "filterReviews": "Reviews",
+    "filterComments": "Comments",
+    "clearAll": "Clear all",
+    "clearTitle": "Clear all mentions",
+    "clearBody": "Remove all mentions?",
+    "clearConfirm": "Clear all",
+    "clearError": "Failed to clear",
+    "reply": "Reply",
+    "replyTo": "Reply to {name}",
+    "replyPlaceholder": "Write your reply...",
+    "send": "Send",
+    "cancel": "Cancel",
+    "emptyTitle": "No mentions yet",
+    "emptyBody": "You will appear here when someone tags you"
   }
 }

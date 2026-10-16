@@ -169,6 +169,83 @@ class SimpleCache<T> {
 // Service
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Tour route types
+// ---------------------------------------------------------------------------
+
+export interface TourRouteRow {
+  id: string;
+  name_ar: string;
+  name_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  scene_ids: string[];
+  city: string;
+  category: string;
+  cover_photo: string | null;
+  view_count: number;
+  created_at: Date;
+}
+
+export interface TourRatingRow {
+  user_id: string;
+  tour_id: string;
+  rating: number;
+  created_at: Date;
+}
+
+export interface TourRoute {
+  id: string;
+  nameAr: string;
+  nameEn: string | null;
+  descriptionAr: string | null;
+  descriptionEn: string | null;
+  sceneIds: string[];
+  city: string;
+  category: string;
+  coverPhoto: string | null;
+  viewCount: number;
+  createdAt: string;
+}
+
+function rowToRoute(row: TourRouteRow): TourRoute {
+  return {
+    id: row.id,
+    nameAr: row.name_ar,
+    nameEn: row.name_en,
+    descriptionAr: row.description_ar,
+    descriptionEn: row.description_en,
+    sceneIds: row.scene_ids ?? [],
+    city: row.city,
+    category: row.category,
+    coverPhoto: row.cover_photo,
+    viewCount: Number(row.view_count),
+    createdAt: row.created_at.toISOString(),
+  };
+}
+
+export interface CreateTourRouteData {
+  nameAr: string;
+  nameEn?: string;
+  descriptionAr?: string;
+  descriptionEn?: string;
+  sceneIds: string[];
+  city: string;
+  category: string;
+  coverPhoto?: string;
+}
+
+export interface ListTourRoutesFilters {
+  city?: string;
+  category?: string;
+  limit?: number;
+}
+
+export interface DownloadTourData {
+  route: TourRoute;
+  scenes: Tour3DSceneDetail[];
+}
+
 export interface ListScenesFilters {
   city?: string;
   category?: string;
@@ -520,6 +597,162 @@ export class Tour3DService {
 
   // ---------------------------------------------------------------------------
   // Private helpers
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Tour routes
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a curated multi-scene tour route.
+   */
+  async createTourRoute(data: CreateTourRouteData): Promise<TourRoute> {
+    const insertSql = sql`
+      INSERT INTO tour3d.tour_route (
+        name_ar, name_en, description_ar, description_en,
+        scene_ids, city, category, cover_photo
+      ) VALUES (
+        ${data.nameAr},
+        ${data.nameEn ?? null},
+        ${data.descriptionAr ?? null},
+        ${data.descriptionEn ?? null},
+        ${JSON.stringify(data.sceneIds)}::jsonb,
+        ${data.city},
+        ${data.category},
+        ${data.coverPhoto ?? null}
+      )
+      RETURNING id, name_ar, name_en, description_ar, description_en,
+                scene_ids, city, category, cover_photo, view_count, created_at
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.db.execute(insertSql as any);
+    const rows = extractRows<TourRouteRow>(result);
+    const row = rows[0];
+    if (!row) throw new Error('tour3d: tour_route insert returned no rows');
+    return rowToRoute(row);
+  }
+
+  /**
+   * Browse curated tour routes with optional city/category filter.
+   */
+  async getTourRoutes(filters: ListTourRoutesFilters): Promise<TourRoute[]> {
+    const limit = Math.min(filters.limit ?? 20, 50);
+
+    let cityClause = sql`TRUE`;
+    if (filters.city) {
+      cityClause = sql`city = ${filters.city}`;
+    }
+
+    let categoryClause = sql`TRUE`;
+    if (filters.category) {
+      categoryClause = sql`category = ${filters.category}`;
+    }
+
+    const querySql = sql`
+      SELECT id, name_ar, name_en, description_ar, description_en,
+             scene_ids, city, category, cover_photo, view_count, created_at
+      FROM tour3d.tour_route
+      WHERE ${cityClause} AND ${categoryClause}
+      ORDER BY view_count DESC, created_at DESC
+      LIMIT ${limit}
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.db.execute(querySql as any);
+    return extractRows<TourRouteRow>(result).map(rowToRoute);
+  }
+
+  /**
+   * Get all scene details for a tour route (for offline caching).
+   * Returns null if the route does not exist.
+   */
+  async downloadTourData(tourId: string): Promise<DownloadTourData | null> {
+    const routeSql = sql`
+      SELECT id, name_ar, name_en, description_ar, description_en,
+             scene_ids, city, category, cover_photo, view_count, created_at
+      FROM tour3d.tour_route
+      WHERE id = ${tourId}::uuid
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const routeResult = await this.db.execute(routeSql as any);
+    const routeRows = extractRows<TourRouteRow>(routeResult);
+    if (!routeRows[0]) return null;
+
+    const route = rowToRoute(routeRows[0]);
+
+    // Fetch all scenes in parallel (up to the first 20 for safety)
+    const sceneIds = route.sceneIds.slice(0, 20);
+    const scenes = await Promise.all(
+      sceneIds.map((id) => this.getScene(id).catch(() => null)),
+    );
+
+    return {
+      route,
+      scenes: scenes.filter((s): s is Tour3DSceneDetail => s !== null),
+    };
+  }
+
+  /**
+   * Increment the view count for a tour route.
+   */
+  async incrementTourRouteViews(routeId: string): Promise<boolean> {
+    const updateSql = sql`
+      UPDATE tour3d.tour_route
+      SET view_count = view_count + 1
+      WHERE id = ${routeId}::uuid
+      RETURNING id
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.db.execute(updateSql as any);
+    const rows = extractRows<{ id: string }>(result);
+    return !!rows[0];
+  }
+
+  /**
+   * Get the average rating for a tour route.
+   * Returns null if no ratings exist.
+   */
+  async getRating(tourId: string): Promise<{ average: number; count: number } | null> {
+    const ratingSql = sql`
+      SELECT
+        AVG(rating)::numeric(3,2) AS average,
+        COUNT(*)::int AS count
+      FROM tour3d.tour_rating
+      WHERE tour_id = ${tourId}::uuid
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.db.execute(ratingSql as any);
+    const rows = extractRows<{ average: string | null; count: number }>(result);
+    const row = rows[0];
+    if (!row || row.average === null || row.count === 0) return null;
+    return { average: parseFloat(row.average), count: Number(row.count) };
+  }
+
+  /**
+   * Submit or update a rating for a tour route (1–5 stars).
+   * Returns the new average.
+   */
+  async rateTour(
+    userId: string,
+    tourId: string,
+    rating: number,
+  ): Promise<{ average: number; count: number }> {
+    const clampedRating = Math.max(1, Math.min(5, Math.round(rating)));
+
+    const upsertSql = sql`
+      INSERT INTO tour3d.tour_rating (user_id, tour_id, rating)
+      VALUES (${userId}::uuid, ${tourId}::uuid, ${clampedRating})
+      ON CONFLICT (user_id, tour_id)
+      DO UPDATE SET rating = EXCLUDED.rating, created_at = now()
+    `;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await this.db.execute(upsertSql as any);
+
+    const newRating = await this.getRating(tourId);
+    return newRating ?? { average: clampedRating, count: 1 };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private helpers (continued)
   // ---------------------------------------------------------------------------
 
   private async _fetchAssets(sceneId: string, offset: number, limit: number): Promise<Tour3DAsset[]> {

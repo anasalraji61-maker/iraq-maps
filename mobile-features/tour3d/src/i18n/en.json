@@ -63,6 +63,32 @@
     "markerLabel": "3D Tour",
     "tapToOpen": "Tap to open tour"
   },
+  "city": {
+    "baghdad": "Baghdad",
+    "erbil": "Erbil",
+    "basra": "Basra",
+    "mosul": "Mosul",
+    "najaf": "Najaf",
+    "karbala": "Karbala",
+    "sulaymaniyah": "Sulaymaniyah",
+    "ur": "Ur"
+  },
+  "audio": {
+    "languageAr": "Arabic",
+    "languageCkb": "Kurdish",
+    "languageEn": "English"
+  },
+  "icon": {
+    "close": "✕",
+    "check": "✓",
+    "retry": "↺",
+    "badge3d": "3D",
+    "badge360": "360°",
+    "speed1x": "1×",
+    "altPrefix": "↑",
+    "altSuffix": "m",
+    "warning": "⚠️"
+  },
   "category": {
     "heritage": "Heritage",
     "mosque": "Mosque",
@@ -73,5 +99,76 @@
     "bridge": "Bridge",
     "neighborhood": "Neighborhood",
     "other": "Other"
+  },
+  "explore": {
+    "title": "Explore Tours",
+    "subtitle": "3D tours of Iraq's most famous landmarks",
+    "featuredTitle": "Featured Tours",
+    "featuredSubtitle": "Handpicked by our team",
+    "recentTitle": "Recently Viewed",
+    "allToursTitle": "All Tours",
+    "allCities": "All Cities",
+    "assetCount": "{count} scenes",
+    "viewCount": "{count} views",
+    "offlineAvailable": "Available offline",
+    "downloadTour": "Download for offline use",
+    "cancelDownload": "Cancel download",
+    "downloading": "Downloading",
+    "offlineUse": "for offline use",
+    "downloadError": "Download failed, tap to retry",
+    "tapToRetry": "Tap to retry",
+    "deleteOfflineTour": "Delete saved tour",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "annotation": {
+    "dragHint": "Drag to explore the scene",
+    "filterAll": "All",
+    "typeHistorical": "Historical",
+    "typeCurrent": "Info",
+    "typeFunFact": "Fun Fact",
+    "close": "Close",
+    "share": "Share",
+    "navigateToPlace": "Go to real location",
+    "audioGuide": "Audio guide",
+    "audioPlay": "Play",
+    "audioPause": "Pause",
+    "audioMute": "Mute",
+    "audioUnmute": "Unmute",
+    "audioRewind": "Rewind 10s",
+    "audioForward": "Forward 10s",
+    "audioSpeed": "Playback speed",
+    "annotationCount": "{count} landmarks",
+    "tapToLearnMore": "Tap to learn more",
+    "historicalDesc": "This historic landmark carries a rich cultural heritage stretching back thousands of years, once a vital civilisation hub.",
+    "mosqueDesc": "A mosque that embodies the Islamic spirit in its finest form, drawing worshippers and visitors from far and wide.",
+    "currentDesc": "A valuable piece of information that adds a knowledge dimension to your visit.",
+    "placeDesc": "A notable location worth pausing to appreciate its beautiful details.",
+    "foodDesc": "A popular food destination reflecting the authentic flavour of the local cuisine.",
+    "photoDesc": "An ideal spot to capture the most memorable photographs.",
+    "shopDesc": "A shopping stop showcasing the finest local and traditional products.",
+    "funFactDesc": "Did you know? This fun fact will make your visit even more enjoyable and exciting.",
+    "iconType": {
+      "info": "Info",
+      "place": "Place",
+      "photo": "Photo",
+      "food": "Food",
+      "mosque": "Mosque",
+      "historic": "Historic",
+      "shop": "Shop"
+    }
+  },
+  "progress": {
+    "label": "Tour progress",
+    "remaining": "{count} stops remaining"
+  },
+  "route": {
+    "title": "Tour Routes",
+    "loading": "Loading routes...",
+    "empty": "No routes available",
+    "loadError": "Failed to load routes",
+    "retry": "Retry",
+    "stops": "{count} stops",
+    "viewCount": "{count} views"
   }
 }
