@@ -539,7 +539,7 @@ describe('FakeChallengesService – stats and admin', () => {
 
   it('adminUpdateChallenge can update status', () => {
     const c = activeChallenge(svc);
-    svc.adminUpdateChallenge(c.id, { status: 'paused' });
+    svc.adminUpdateChallenge(c.id, { status: 'draft' });
     // paused doesn't appear in active list
     const list = svc.listActiveChallenges();
     expect(list.some((x) => x.id === c.id)).toBe(false);

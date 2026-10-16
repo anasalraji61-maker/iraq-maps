@@ -276,8 +276,6 @@ describe('FakePromotionsService – expired promotion', () => {
   it('redeeming an expired promotion (by endsAt) throws PROMOTION_EXPIRED', () => {
     const promo = activePromotion(svc);
     // Simulate redemption after endsAt
-    const future = new Date(Date.now() + 48 * 3_600_000); // 48 hours from now
-
     // Artificially set endsAt to 1ms ago
     svc.expirePromotion(promo.id);
 
@@ -347,9 +345,9 @@ describe('FakePromotionsService – happy hour', () => {
       titleAr: 'عرض الساعة السعيدة',
       titleEn: 'Happy Hour Deal',
       type: 'happy_hour',
-      startsAt: pastDate(48),
-      endsAt: futureDate(48),
-      happyHour: { dayOfWeek: testNow.getDay(), startHour: testNow.getHours(), endHour: testNow.getHours() + 2 },
+      startsAt: new Date('2025-09-01T00:00:00Z'),
+      endsAt: new Date('2025-09-30T00:00:00Z'),
+      happyHour: { dayOfWeek: testNow.getUTCDay(), startHour: testNow.getUTCHours(), endHour: testNow.getUTCHours() + 2 },
     });
 
     expect(() => svc.redeemPromotion(uid('hh-1'), promo.id, { now: testNow })).not.toThrow();
@@ -364,9 +362,9 @@ describe('FakePromotionsService – happy hour', () => {
       titleAr: 'عرض الساعة السعيدة',
       titleEn: 'Happy Hour Deal',
       type: 'happy_hour',
-      startsAt: pastDate(48),
-      endsAt: futureDate(48),
-      happyHour: { dayOfWeek: testNow.getDay(), startHour: 14, endHour: 16 },
+      startsAt: new Date('2025-09-01T00:00:00Z'),
+      endsAt: new Date('2025-09-30T00:00:00Z'),
+      happyHour: { dayOfWeek: testNow.getUTCDay(), startHour: 14, endHour: 16 },
     });
 
     expect(() => svc.redeemPromotion(uid('hh-2'), promo.id, { now: testNow })).toThrow();
@@ -386,8 +384,8 @@ describe('FakePromotionsService – happy hour', () => {
       titleAr: 'عرض الساعة السعيدة',
       titleEn: 'Happy Hour Deal',
       type: 'happy_hour',
-      startsAt: pastDate(48),
-      endsAt: futureDate(48),
+      startsAt: new Date('2025-09-01T00:00:00Z'),
+      endsAt: new Date('2025-09-30T00:00:00Z'),
       happyHour: { dayOfWeek: 3, startHour: 14, endHour: 16 }, // Wednesday only
     });
 
@@ -407,8 +405,8 @@ describe('FakePromotionsService – happy hour', () => {
       titleAr: 'test',
       titleEn: 'test',
       type: 'happy_hour',
-      startsAt: pastDate(48),
-      endsAt: futureDate(48),
+      startsAt: new Date('2025-09-01T00:00:00Z'),
+      endsAt: new Date('2025-09-30T00:00:00Z'),
       happyHour: { dayOfWeek: 3, startHour: 14, endHour: 17 },
     });
 
@@ -423,8 +421,8 @@ describe('FakePromotionsService – happy hour', () => {
       titleAr: 'test',
       titleEn: 'test',
       type: 'happy_hour',
-      startsAt: pastDate(48),
-      endsAt: futureDate(48),
+      startsAt: new Date('2025-09-01T00:00:00Z'),
+      endsAt: new Date('2025-09-30T00:00:00Z'),
       happyHour: { dayOfWeek: 3, startHour: 14, endHour: 17 },
     });
 

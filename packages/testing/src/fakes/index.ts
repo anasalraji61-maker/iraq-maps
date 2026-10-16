@@ -7,3 +7,5 @@ export * from './fake-moderation-service';
 export * from './fake-appointments-service';
 export * from './fake-reputation-service';
 export * from './fake-listings-service';
+export * from './fake-challenges-service';
+export * from './fake-promotions-service';

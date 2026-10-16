@@ -137,6 +137,9 @@ importers:
       '@iraq-maps/adapter-storage-s3':
         specifier: workspace:*
         version: link:../../adapters/storage-s3
+      '@iraq-maps/appointments':
+        specifier: workspace:*
+        version: link:../../modules/appointments
       '@iraq-maps/assistant':
         specifier: workspace:*
         version: link:../../modules/assistant
@@ -167,6 +170,9 @@ importers:
       '@iraq-maps/job-kit':
         specifier: workspace:*
         version: link:../../packages/job-kit
+      '@iraq-maps/listings':
+        specifier: workspace:*
+        version: link:../../modules/listings
       '@iraq-maps/location-share':
         specifier: workspace:*
         version: link:../../modules/location-share
@@ -903,6 +909,9 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@iraq-maps/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       '@nestjs/core':
         specifier: ^11.2.7
         version: 11.2.7(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -937,6 +946,16 @@ importers:
       '@nestjs/core':
         specifier: ^11.2.7
         version: 11.2.7(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
+
+  modules/challenges:
+    dependencies:
+      '@iraq-maps/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+    devDependencies:
+      '@iraq-maps/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
 
   modules/discover:
     dependencies:
@@ -1328,6 +1347,16 @@ importers:
         specifier: ^4.23.15
         version: 4.23.15
 
+  modules/promotions:
+    dependencies:
+      '@iraq-maps/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+    devDependencies:
+      '@iraq-maps/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+
   modules/providers:
     dependencies:
       '@iraq-maps/contracts':
@@ -1374,6 +1403,9 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@iraq-maps/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       '@nestjs/core':
         specifier: ^11.2.7
         version: 11.2.7(@nestjs/common@11.2.7(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)

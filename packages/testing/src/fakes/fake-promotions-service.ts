@@ -165,7 +165,8 @@ export class FakePromotionsService {
     if (now < promotion.startsAt) {
       throw Object.assign(new Error('Promotion has not started yet'), { code: 'NOT_STARTED' });
     }
-    if (promotion.status !== 'active') {
+    // Block paused, cancelled, and expired (set explicitly via expirePromotion).
+    if (promotion.status === 'paused' || promotion.status === 'cancelled' || promotion.status === 'expired') {
       throw Object.assign(
         new Error(`Promotion is not active: ${promotion.status}`),
         { code: 'PROMOTION_NOT_ACTIVE' },
@@ -175,8 +176,8 @@ export class FakePromotionsService {
     // Happy hour check
     if (promotion.happyHour) {
       const { dayOfWeek, startHour, endHour } = promotion.happyHour;
-      const day = now.getDay();
-      const hour = now.getHours();
+      const day = now.getUTCDay();
+      const hour = now.getUTCHours();
       if (day !== dayOfWeek || hour < startHour || hour >= endHour) {
         throw Object.assign(
           new Error(`Promotion only available on day ${dayOfWeek} between ${startHour}:00–${endHour}:00`),
@@ -290,7 +291,7 @@ export class FakePromotionsService {
     const promotion = this.promotions.get(promotionId);
     if (!promotion || !promotion.happyHour) return true; // no restriction → always OK
     const { dayOfWeek, startHour, endHour } = promotion.happyHour;
-    return now.getDay() === dayOfWeek && now.getHours() >= startHour && now.getHours() < endHour;
+    return now.getUTCDay() === dayOfWeek && now.getUTCHours() >= startHour && now.getUTCHours() < endHour;
   }
 
   // ─── Admin ────────────────────────────────────────────────────────────────
