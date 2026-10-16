@@ -22,6 +22,8 @@ import { moderationModule, moderationMigrationsDir } from '@iraq-maps/moderation
 import { paymentsModule, paymentsMigrationsDir } from '@iraq-maps/payments';
 import { socialModule, socialMigrationsDir } from '@iraq-maps/social';
 import { SearchModule, searchMigrationsDir } from '@iraq-maps/search';
+import { reviewsModule, reviewsMigrationsDir } from '@iraq-maps/reviews';
+import { geocodingModule } from '@iraq-maps/geocoding';
 import { createS3StorageFromEnv } from '@iraq-maps/adapter-storage-s3';
 import { sql } from 'drizzle-orm';
 import {
@@ -64,6 +66,7 @@ export const moduleMigrations = [
   { schema: 'payments', migrationsDir: paymentsMigrationsDir },
   { schema: 'social', migrationsDir: socialMigrationsDir },
   { schema: 'search', migrationsDir: searchMigrationsDir },
+  { schema: 'reviews', migrationsDir: reviewsMigrationsDir },
 ];
 
 export const apiConfig = (env?: Record<string, string | undefined>) =>
@@ -295,6 +298,8 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
         paymentsModule({ db }),
         socialModule({ db, eventBus: bus }),
         SearchModule.register({ db, cache: redis }),
+        reviewsModule({ db }),
+        geocodingModule(),
       ],
       controllers: [HealthController, ...(opts.controllers ?? [])],
       providers: [
@@ -618,7 +623,161 @@ export async function createApp(opts: CreateAppOptions = {}): Promise<NestFastif
     return reply.status(200).send({ queues: result });
   });
 
+  // ── Open Graph meta endpoints ─────────────────────────────────────────────
+  // These are public (no auth guard) and return HTML with OG meta tags so that
+  // messaging apps and social platforms can generate rich link previews.
+  // Content-Security-Policy is overridden per-response to allow HTML rendering.
+
+  const ogHtml = (title: string, description: string, imageUrl: string, url: string) => `<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<meta property="og:title" content="${escapeHtml(title)}">
+<meta property="og:description" content="${escapeHtml(description)}">
+<meta property="og:image" content="${escapeHtml(imageUrl)}">
+<meta property="og:url" content="${escapeHtml(url)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="خرائط العراق الذكية">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escapeHtml(title)}">
+<meta name="twitter:description" content="${escapeHtml(description)}">
+<meta name="twitter:image" content="${escapeHtml(imageUrl)}">
+<meta http-equiv="refresh" content="0;url=${escapeHtml(url)}">
+</head>
+<body>
+<p>جارٍ التوجيه…</p>
+</body>
+</html>`;
+
+  const OG_IMAGE_BASE = process.env['OG_IMAGE_BASE_URL'] ?? 'https://iraqsmartmaps.app/og-images';
+  const APP_BASE = process.env['APP_BASE_URL'] ?? 'https://iraqsmartmaps.app';
+
+  const sendOgHtml = (reply: FastifyReply, html: string) =>
+    reply
+      .status(200)
+      .header('content-type', 'text/html; charset=utf-8')
+      .header('cache-control', 'public, max-age=60, stale-while-revalidate=300')
+      // Override the strict JSON-API CSP for these HTML pages.
+      .header('content-security-policy', "default-src 'none'; style-src 'unsafe-inline'; img-src https:; form-action 'none'; frame-ancestors 'none'; base-uri 'none'")
+      .send(html);
+
+  // GET /og/place/:id
+  fastify.get('/og/place/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!isValidOgId(id)) {
+      return reply.status(400).send(problem(400, 'invalid_request', 'Invalid id'));
+    }
+    let title = 'مكان على خرائط العراق';
+    let description = 'اكتشف هذا المكان على خرائط العراق الذكية';
+    try {
+      const row = await db.execute(
+        sql`SELECT name_ar, name_en, category FROM places.place WHERE id = ${id} LIMIT 1`,
+      );
+      if (row.rows.length > 0) {
+        const r = row.rows[0] as { name_ar?: string; name_en?: string; category?: string };
+        title = r.name_ar ?? r.name_en ?? title;
+        if (r.category) description = `${r.category} · ${description}`;
+      }
+    } catch { /* non-fatal — return generic OG */ }
+    const imageUrl = `${OG_IMAGE_BASE}/place/${encodeURIComponent(id)}.jpg`;
+    const url = `${APP_BASE}/place/${encodeURIComponent(id)}`;
+    return sendOgHtml(reply, ogHtml(title, description, imageUrl, url));
+  });
+
+  // GET /og/post/:id
+  fastify.get('/og/post/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!isValidOgId(id)) {
+      return reply.status(400).send(problem(400, 'invalid_request', 'Invalid id'));
+    }
+    let title = 'منشور على خرائط العراق';
+    let description = 'اطّلع على هذا المنشور في تطبيق خرائط العراق الذكية';
+    try {
+      const row = await db.execute(
+        sql`SELECT body, author_id FROM discover.post WHERE id = ${id} LIMIT 1`,
+      );
+      if (row.rows.length > 0) {
+        const r = row.rows[0] as { body?: string; author_id?: string };
+        const body = r.body ?? '';
+        description = body.length > 120 ? body.slice(0, 117) + '…' : body;
+      }
+    } catch { /* non-fatal */ }
+    const imageUrl = `${OG_IMAGE_BASE}/post/${encodeURIComponent(id)}.jpg`;
+    const url = `${APP_BASE}/post/${encodeURIComponent(id)}`;
+    return sendOgHtml(reply, ogHtml(title, description, imageUrl, url));
+  });
+
+  // GET /og/user/:id
+  fastify.get('/og/user/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!isValidOgId(id)) {
+      return reply.status(400).send(problem(400, 'invalid_request', 'Invalid id'));
+    }
+    let title = 'مستخدم على خرائط العراق';
+    let description = 'اطّلع على ملف هذا المستخدم في تطبيق خرائط العراق الذكية';
+    try {
+      const row = await db.execute(
+        sql`SELECT name FROM identity.users WHERE id = ${id} LIMIT 1`,
+      );
+      if (row.rows.length > 0) {
+        const r = row.rows[0] as { name?: string };
+        if (r.name) {
+          title = r.name;
+          description = `الملف الشخصي لـ ${r.name} على خرائط العراق`;
+        }
+      }
+    } catch { /* non-fatal */ }
+    const imageUrl = `${OG_IMAGE_BASE}/user/${encodeURIComponent(id)}.jpg`;
+    const url = `${APP_BASE}/user/${encodeURIComponent(id)}`;
+    return sendOgHtml(reply, ogHtml(title, description, imageUrl, url));
+  });
+
+  // GET /og/event/:id
+  fastify.get('/og/event/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!isValidOgId(id)) {
+      return reply.status(400).send(problem(400, 'invalid_request', 'Invalid id'));
+    }
+    let title = 'فعالية على خرائط العراق';
+    let description = 'اطّلع على تفاصيل هذه الفعالية في تطبيق خرائط العراق الذكية';
+    try {
+      const row = await db.execute(
+        sql`SELECT title_ar, title_en, starts_at FROM discover.event WHERE id = ${id} LIMIT 1`,
+      );
+      if (row.rows.length > 0) {
+        const r = row.rows[0] as { title_ar?: string; title_en?: string; starts_at?: Date };
+        title = r.title_ar ?? r.title_en ?? title;
+        if (r.starts_at) {
+          const dateStr = new Date(r.starts_at).toLocaleDateString('ar-IQ', { day: 'numeric', month: 'long', year: 'numeric' });
+          description = `${title} · ${dateStr}`;
+        }
+      }
+    } catch { /* non-fatal */ }
+    const imageUrl = `${OG_IMAGE_BASE}/event/${encodeURIComponent(id)}.jpg`;
+    const url = `${APP_BASE}/event/${encodeURIComponent(id)}`;
+    return sendOgHtml(reply, ogHtml(title, description, imageUrl, url));
+  });
+
   await app.init();
   await fastify.ready();
   return app;
+}
+
+// ── OG helpers ────────────────────────────────────────────────────────────────
+
+/** Escape HTML special chars for safe embedding in attribute values and text nodes. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+/** Allow only safe ID chars (UUID / alphanumeric slug). Max 128 chars. */
+function isValidOgId(id: string): boolean {
+  return typeof id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(id);
 }

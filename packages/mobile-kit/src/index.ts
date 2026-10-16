@@ -148,6 +148,7 @@ export {
   ShareManager,
   shareManager,
   ShareCard,
+  type ShareCardLabels,
   type SharePayload,
   type SharePlaceInput,
   type SharePostInput,

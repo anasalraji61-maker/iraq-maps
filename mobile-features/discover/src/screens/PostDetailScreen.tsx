@@ -1,5 +1,5 @@
 import { type DiscoverPostType } from '@iraq-maps/contracts';
-import { useApi, useSession } from '@iraq-maps/mobile-kit';
+import { useApi, useSession, shareManager, ShareCard, type ShareCardData, type ShareCardLabels } from '@iraq-maps/mobile-kit';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import * as Clipboard from 'expo-clipboard';
@@ -8,6 +8,7 @@ import {
   FlatList,
   I18nManager,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -289,6 +290,375 @@ function PostBody({ post, mediaUrls, onHashtagPress, isOwn, onMorePress, onRepor
 }
 
 
+// ─── Author card ─────────────────────────────────────────────────────────────
+
+interface AuthorCardProps {
+  authorId: string;
+  onFollow?: () => void;
+  isFollowing?: boolean;
+  onViewProfile: () => void;
+}
+
+function AuthorCard({ authorId, isFollowing = false, onFollow, onViewProfile }: AuthorCardProps): ReactElement {
+  return (
+    <View style={authorStyles.card} accessibilityRole="none" accessibilityLabel={t('postDetail.authorTitle')}>
+      <Text style={authorStyles.sectionTitle}>{t('postDetail.authorTitle')}</Text>
+      <View style={authorStyles.row}>
+        <Pressable onPress={onViewProfile} accessibilityRole="button" accessibilityLabel={authorId}>
+          <View style={authorStyles.avatar}>
+            <Text style={authorStyles.avatarText} allowFontScaling={false}>
+              {authorId.slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+        </Pressable>
+        <Pressable style={authorStyles.nameBlock} onPress={onViewProfile} accessibilityRole="button">
+          <Text style={authorStyles.authorId} numberOfLines={1}>{authorId.slice(0, 8)}</Text>
+          <Text style={authorStyles.authorSub} numberOfLines={1}>@{authorId.slice(0, 12)}</Text>
+        </Pressable>
+        {onFollow != null && (
+          <Pressable
+            style={[authorStyles.followBtn, isFollowing && authorStyles.followBtnActive]}
+            onPress={onFollow}
+            accessibilityRole="button"
+            accessibilityLabel={isFollowing ? t('postDetail.authorFollowingBtn') : t('postDetail.authorFollowBtn')}
+          >
+            <Text style={[authorStyles.followBtnText, isFollowing && authorStyles.followBtnTextActive]}>
+              {isFollowing ? t('postDetail.authorFollowingBtn') : t('postDetail.authorFollowBtn')}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const authorStyles = StyleSheet.create({
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  sectionTitle: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+  nameBlock: { flex: 1, gap: 2 },
+  authorId: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary },
+  authorSub: { fontSize: 12, color: COLORS.textMuted },
+  followBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: COLORS.primary },
+  followBtnActive: { backgroundColor: COLORS.primary },
+  followBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.primary },
+  followBtnTextActive: { color: '#FFF' },
+});
+
+// ─── App download banner ──────────────────────────────────────────────────────
+
+function AppDownloadBanner(): ReactElement {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return <></>;
+  return (
+    <View style={bannerStyles.banner} accessibilityRole="none" accessibilityLabel={t('postDetail.downloadBannerTitle')}>
+      <View style={bannerStyles.content}>
+        <View style={bannerStyles.iconContainer}>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <Text style={bannerStyles.icon} allowFontScaling={false}>🗺️</Text>
+        </View>
+        <View style={bannerStyles.textBlock}>
+          <Text style={bannerStyles.title}>{t('postDetail.downloadBannerTitle')}</Text>
+          <Text style={bannerStyles.body} numberOfLines={2}>{t('postDetail.downloadBannerBody')}</Text>
+        </View>
+      </View>
+      <View style={bannerStyles.actions}>
+        <Pressable
+          style={bannerStyles.downloadBtn}
+          onPress={() => {
+            // Deep link to app stores — stub
+            const url = Platform.OS === 'ios'
+              ? 'https://apps.apple.com/app/iraq-smart-maps'
+              : 'https://play.google.com/store/apps/details?id=app.iraqsmartmaps';
+            void Linking.openURL(url).catch(() => {});
+          }}
+          accessibilityRole="link"
+          accessibilityLabel={t('postDetail.downloadBannerBtn')}
+        >
+          <Text style={bannerStyles.downloadBtnText}>{t('postDetail.downloadBannerBtn')}</Text>
+        </Pressable>
+        <Pressable
+          style={bannerStyles.dismissBtn}
+          onPress={() => setDismissed(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('postDetail.dismissA11y')}
+        >
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <Text style={bannerStyles.dismissText} allowFontScaling={false}>✕</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const bannerStyles = StyleSheet.create({
+  banner: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  content: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
+  iconContainer: {
+    width: 44, height: 44, borderRadius: 10,
+    backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  icon: { fontSize: 22 },
+  textBlock: { flex: 1, gap: 2 },
+  title: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
+  body: { fontSize: 12, color: COLORS.textSecondary },
+  actions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  downloadBtn: {
+    flex: 1, backgroundColor: COLORS.primary,
+    borderRadius: 8, paddingVertical: 9, alignItems: 'center',
+  },
+  downloadBtnText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
+  dismissBtn: { padding: 8 },
+  dismissText: { fontSize: 14, color: COLORS.textMuted },
+});
+
+// ─── Related posts ────────────────────────────────────────────────────────────
+
+interface RelatedPostsProps {
+  currentPostId: string;
+  onPostPress: (postId: string) => void;
+  apiClient: ReturnType<typeof useDiscoverClient>;
+}
+
+function RelatedPosts({ currentPostId, onPostPress, apiClient }: RelatedPostsProps): ReactElement {
+  const [posts, setPosts] = useState<DiscoverPostType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    void apiClient
+      .listFeed({ query: { limit: 5 } })
+      .then((res) => {
+        if (res.status === 200) {
+          setPosts(res.body.items.filter((p) => p.id !== currentPostId).slice(0, 4));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [currentPostId, apiClient]);
+
+  if (loading) {
+    return (
+      <View style={relatedStyles.container}>
+        <Text style={relatedStyles.sectionTitle}>{t('postDetail.relatedTitle')}</Text>
+        {[1, 2].map((k) => (
+          <View key={k} style={relatedStyles.skeletonCard}>
+            <View style={relatedStyles.skeletonAvatar} />
+            <View style={{ flex: 1, gap: 6 }}>
+              <View style={relatedStyles.skeletonLine} />
+              <View style={[relatedStyles.skeletonLine, { width: '60%' }]} />
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  if (posts.length === 0) {
+    return <></>;
+  }
+
+  return (
+    <View style={relatedStyles.container} accessibilityRole="none" accessibilityLabel={t('postDetail.relatedTitle')}>
+      <Text style={relatedStyles.sectionTitle}>{t('postDetail.relatedTitle')}</Text>
+      {posts.map((p) => (
+        <Pressable
+          key={p.id}
+          style={({ pressed }) => [relatedStyles.card, pressed && relatedStyles.cardPressed]}
+          onPress={() => onPostPress(p.id)}
+          accessibilityRole="button"
+          accessibilityLabel={p.body.slice(0, 60)}
+        >
+          <View style={relatedStyles.cardAvatar}>
+            <Text style={relatedStyles.cardAvatarText} allowFontScaling={false}>
+              {p.authorId.slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={relatedStyles.cardAuthor} numberOfLines={1}>{p.authorId.slice(0, 8)}</Text>
+            <Text style={relatedStyles.cardBody} numberOfLines={2}>{p.body}</Text>
+            <Text style={relatedStyles.cardMeta}>{formatRelativeTime(p.createdAt)}</Text>
+          </View>
+          <View style={[relatedStyles.typeBadge, { backgroundColor: getTypeBadgeColors(p.type).bg }]}>
+            <Text style={[relatedStyles.typeText, { color: getTypeBadgeColors(p.type).text }]}>{p.type}</Text>
+          </View>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+const relatedStyles = StyleSheet.create({
+  container: { marginBottom: 12 },
+  sectionTitle: { fontSize: 13, fontWeight: '700', color: COLORS.textSecondary, marginBottom: 8, paddingHorizontal: 4 },
+  card: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: '#FFF', borderRadius: 10, padding: 12, marginBottom: 8,
+    elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 3, shadowOffset: { width: 0, height: 1 },
+  },
+  cardPressed: { backgroundColor: '#F3F4F6' },
+  cardAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
+  cardAvatarText: { color: '#FFF', fontSize: 13, fontWeight: '700' },
+  cardAuthor: { fontSize: 13, fontWeight: '600', color: COLORS.textPrimary },
+  cardBody: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 18 },
+  cardMeta: { fontSize: 11, color: COLORS.textMuted },
+  typeBadge: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  typeText: { fontSize: 11, fontWeight: '600' },
+  skeletonCard: { flexDirection: 'row', gap: 10, padding: 12, marginBottom: 8, backgroundColor: '#FFF', borderRadius: 10 },
+  skeletonAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E5E7EB' },
+  skeletonLine: { height: 12, borderRadius: 6, backgroundColor: '#E5E7EB', width: '80%' },
+});
+
+// ─── Share sheet (post) ───────────────────────────────────────────────────────
+
+interface PostShareSheetProps {
+  visible: boolean;
+  onClose: () => void;
+  post: DiscoverPostType;
+}
+
+function PostShareSheet({ visible, onClose, post }: PostShareSheetProps): ReactElement {
+  const [cardVisible, setCardVisible] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+
+  const payload = shareManager.sharePost({
+    id: post.id,
+    authorName: post.authorId.slice(0, 12),
+    bodyPreview: post.body,
+  });
+
+  const cardData: ShareCardData = shareManager.sharePostCard({
+    id: post.id,
+    authorName: post.authorId.slice(0, 12),
+    bodyPreview: post.body,
+  });
+
+  const cardLabels: ShareCardLabels = {
+    brandName: t('postDetail.cardBrandName'),
+    footerTagline: t('postDetail.cardFooterTagline'),
+    exportA11y: t('postDetail.cardExportA11y'),
+    exportBtn: t('postDetail.cardExportBtn'),
+    typeLabels: {
+      place: t('postDetail.cardTypePlace'),
+      post: t('postDetail.cardTypePost'),
+      route: t('postDetail.cardTypeRoute'),
+      event: t('postDetail.cardTypeEvent'),
+      profile: t('postDetail.cardTypeProfile'),
+    },
+  };
+
+  const handleCopy = async () => {
+    try {
+      await Clipboard.setStringAsync(payload.url);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch { /* copy failed — show no feedback */ }
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} accessibilityViewIsModal>
+      <Pressable style={shareSheetStyles.backdrop} onPress={onClose} />
+      <View style={shareSheetStyles.sheet}>
+        <View style={shareSheetStyles.handleBar} />
+        <Text style={shareSheetStyles.sheetTitle}>{t('postDetail.shareSheetTitle')}</Text>
+        <View style={shareSheetStyles.actions}>
+          {/* eslint-disable i18next/no-literal-string */}
+          {([
+            { id: 'wa', icon: '💬', label: t('postDetail.whatsapp'), onPress: () => {
+              const url = `whatsapp://send?text=${encodeURIComponent(payload.message)}`;
+              void Linking.openURL(url).catch(() => Share.share({ message: payload.message }));
+            }},
+            { id: 'tg', icon: '✈️', label: t('postDetail.telegram'), onPress: () => {
+              const url = `tg://msg?text=${encodeURIComponent(payload.message)}`;
+              void Linking.openURL(url).catch(() => Share.share({ message: payload.message }));
+            }},
+            { id: 'copy', icon: copyFeedback ? '✅' : '🔗', label: copyFeedback ? t('postDetail.copied') : t('postDetail.copyLink'), onPress: handleCopy },
+            { id: 'more', icon: '⋯', label: t('postDetail.moreOptions'), onPress: () => Share.share({ message: payload.message, title: payload.title }) },
+          ] as Array<{ id: string; icon: string; label: string; onPress: () => void | Promise<void> }>).map((a) => (
+            <Pressable
+              key={a.id}
+              style={({ pressed }) => [shareSheetStyles.actionItem, pressed && shareSheetStyles.actionItemPressed]}
+              onPress={() => void a.onPress()}
+              accessibilityRole="button"
+              accessibilityLabel={a.label}
+            >
+              <View style={shareSheetStyles.actionIconBg}>
+                <Text style={shareSheetStyles.actionIcon} allowFontScaling={false}>{a.icon}</Text>
+              </View>
+              <Text style={shareSheetStyles.actionLabel}>{a.label}</Text>
+            </Pressable>
+          ))}
+          {/* eslint-enable i18next/no-literal-string */}
+        </View>
+
+        <Pressable
+          style={shareSheetStyles.cardToggle}
+          onPress={() => setCardVisible((v) => !v)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: cardVisible }}
+        >
+          <Text style={shareSheetStyles.cardToggleLabel}>{t('postDetail.shareCard')}</Text>
+          {/* eslint-disable-next-line i18next/no-literal-string */}
+          <Text style={shareSheetStyles.cardToggleChevron} allowFontScaling={false}>{cardVisible ? '▲' : '▼'}</Text>
+        </Pressable>
+
+        {cardVisible && (
+          <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
+            <ShareCard data={cardData} labels={cardLabels} testID="post-share-card" />
+          </View>
+        )}
+
+        <Pressable style={shareSheetStyles.cancelBtn} onPress={onClose} accessibilityRole="button">
+          <Text style={shareSheetStyles.cancelText}>{t('postDetail.cancel')}</Text>
+        </Pressable>
+      </View>
+    </Modal>
+  );
+}
+
+const shareSheetStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: {
+    backgroundColor: '#FFF', borderTopStartRadius: 20, borderTopEndRadius: 20,
+    maxHeight: '85%', overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 8,
+  },
+  handleBar: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#D1D5DB', alignSelf: 'center', marginTop: 10 },
+  sheetTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 },
+  actions: { flexDirection: 'row', paddingHorizontal: 12, gap: 8, paddingBottom: 12 },
+  actionItem: { flex: 1, alignItems: 'center', gap: 6, padding: 8, borderRadius: 10, backgroundColor: '#F9FAFB' },
+  actionItemPressed: { backgroundColor: '#EEF2FF' },
+  actionIconBg: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  actionIcon: { fontSize: 20 },
+  actionLabel: { fontSize: 11, color: COLORS.textPrimary, fontWeight: '500', textAlign: 'center' },
+  cardToggle: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, backgroundColor: '#F9FAFB' },
+  cardToggleLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: COLORS.textPrimary },
+  cardToggleChevron: { fontSize: 11, color: COLORS.textMuted },
+  cancelBtn: { marginHorizontal: 16, marginBottom: 24, marginTop: 4, paddingVertical: 13, borderRadius: 12, backgroundColor: '#F3F4F6', alignItems: 'center' },
+  cancelText: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary },
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function PostDetailScreen(): ReactElement {
   const { postId, postJson } = useLocalSearchParams<{ postId: string; postJson?: string }>();
   const api = useDiscoverClient();
@@ -314,6 +684,8 @@ export function PostDetailScreen(): ReactElement {
   const [commentText, setCommentText] = useState('');
   const [sending, setSending] = useState(false);
   const [mediaUrls, setMediaUrls] = useState<Readonly<Record<string, string>>>({});
+  const [shareVisible, setShareVisible] = useState(false);
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
   const fetchingAssetIds = useRef(new Set<string>());
   const listRef = useRef<FlatList>(null);
 
@@ -533,6 +905,35 @@ export function PostDetailScreen(): ReactElement {
         ListHeaderComponent={
           <>
             <PostBody post={post} mediaUrls={mediaUrls} onHashtagPress={handleHashtagPress} isOwn={currentUserId === post.authorId} onMorePress={handleMorePress} onReportPress={handleReportPress} />
+
+            {/* Share button row */}
+            <Pressable
+              style={extraStyles.sharePostBtn}
+              onPress={() => setShareVisible(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('postDetail.sharePostBtn')}
+            >
+              <Text style={extraStyles.sharePostBtnText}>{'📤 ' + t('postDetail.sharePostBtn')}</Text>
+            </Pressable>
+
+            {/* Author card */}
+            <AuthorCard
+              authorId={post.authorId}
+              isFollowing={isFollowingAuthor}
+              onFollow={() => setIsFollowingAuthor((v) => !v)}
+              onViewProfile={() => router.push({ pathname: '/discover/user/[id]', params: { id: post.authorId } })}
+            />
+
+            {/* App download banner (visible to non-signed-in users) */}
+            {!currentUserId && <AppDownloadBanner />}
+
+            {/* Related posts */}
+            <RelatedPosts
+              currentPostId={post.id}
+              apiClient={api}
+              onPostPress={(id) => router.push({ pathname: '/discover/post/[id]', params: { postId: id } })}
+            />
+
             {sectionHeader}
           </>
         }
@@ -552,6 +953,13 @@ export function PostDetailScreen(): ReactElement {
         t={t}
       />
     </KeyboardAvoidingView>
+    {post && (
+      <PostShareSheet
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        post={post}
+      />
+    )}
     <Modal
       visible={editVisible} animationType="slide" transparent onRequestClose={() => setEditVisible(false)}>
       <View style={styles.editOverlay}>
@@ -662,4 +1070,22 @@ const styles = StyleSheet.create({
   editCancelBtn: {},
   editSaveBtn: { backgroundColor: COLORS.primary },
   editSaveBtnDisabled: { backgroundColor: COLORS.border },
+});
+
+const extraStyles = StyleSheet.create({
+  sharePostBtn: {
+    marginHorizontal: 0,
+    marginBottom: 10,
+    paddingVertical: 11,
+    borderRadius: 10,
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+    alignItems: 'center',
+  },
+  sharePostBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3730A3',
+  },
 });
