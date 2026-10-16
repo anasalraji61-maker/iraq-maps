@@ -132,6 +132,11 @@ export const api = {
     return !!getToken();
   },
 
+  /** Returns the configured admin key (from env var), for direct fetch calls. */
+  getAdminKey(): string {
+    return ADMIN_KEY;
+  },
+
   async requestOtp(phone: string): Promise<void> {
     await request<void>('/v1/admin/auth/otp/request', {
       method: 'POST',

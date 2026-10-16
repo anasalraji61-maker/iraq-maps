@@ -17,6 +17,8 @@ import { AdminUsersPage } from './pages/AdminUsersPage';
 import { AdminPlacesPage } from './pages/AdminPlacesPage';
 import { AdminSystemPage } from './pages/AdminSystemPage';
 import { AdminChallengesPage } from './pages/AdminChallengesPage';
+import { AdminProviderVerificationPage } from './pages/AdminProviderVerificationPage';
+import { AdminModerationPage } from './pages/AdminModerationPage';
 
 const navStyle: React.CSSProperties = {
   display: 'flex',
@@ -97,6 +99,12 @@ function NavBar() {
       </NavLink>
       <NavLink to="/admin-challenges" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
         Challenges
+      </NavLink>
+      <NavLink to="/provider-verification" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        التوثيق+
+      </NavLink>
+      <NavLink to="/moderation" style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}>
+        المشرف
       </NavLink>
       <button
         onClick={logout}
@@ -255,6 +263,22 @@ export function App() {
             element={
               <AuthGate>
                 <Layout><AdminChallengesPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/moderation"
+            element={
+              <AuthGate>
+                <Layout><AdminModerationPage /></Layout>
+              </AuthGate>
+            }
+          />
+          <Route
+            path="/provider-verification"
+            element={
+              <AuthGate>
+                <Layout><AdminProviderVerificationPage /></Layout>
               </AuthGate>
             }
           />
