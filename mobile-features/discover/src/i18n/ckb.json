@@ -162,7 +162,17 @@
     "reportError": "ناتوانرێ ڕاپۆرت بنێردرێت. دووبارە هەوڵبدەرەوە.",
     "deleteCommentTitle": "سڕینەوەی کۆمێنت",
     "deleteCommentMsg": "دەتەوێت ئەم کۆمێنتە بسڕیتەوە؟ ئەمە پووچەڵناکرێتەوە.",
-    "views": "{n} بینراو"
+    "views": "{n} بینراو",
+    "relatedTitle": "پۆستی پەیوەندیدار",
+    "relatedEmpty": "هیچ پۆستی پەیوەندیداری نییە",
+    "authorTitle": "دەربارەی نووسەر",
+    "authorFollowBtn": "شوێنکەوتن",
+    "authorFollowingBtn": "شوێنیتەوە",
+    "downloadBannerTitle": "ئەپەکە بگرە",
+    "downloadBannerBody": "عێراق بگەڕێ لەگەڵ نەخشەی ئەمینی عێراق",
+    "downloadBannerBtn": "داگرتن",
+    "sharePostBtn": "بەشکردنی پۆست",
+    "shareSheetTitle": "بەشکردنی پۆست"
   },
   "userPosts": {
     "title": "پۆستەکانی بەکارهێنەر",
@@ -195,7 +205,17 @@
   "hashtag": {
     "empty": "هیچ پۆستێک بە تاگی {tag} نییە",
     "title": "پۆستەکانی تاگ",
-    "postCount": "{n} پۆست"
+    "postCount": "{n} پۆست",
+    "related": "هاشتاگی پەیوەندیدار",
+    "follow": "شوێنکەوتنی هاشتاگ",
+    "unfollow": "هەڵweşandنەوەی شوێنکەوتن",
+    "following": "دەیشوێنکەوی",
+    "tab": {
+      "top": "باشترین",
+      "recent": "نوێترین"
+    },
+    "viewGrid": "نیشاندانی گریدی",
+    "viewList": "نیشاندانی لیستی"
   },
   "pin": {
     "pin": "پیننەرەکردنی پۆست",
@@ -320,7 +340,7 @@
     "create": "ڕووداو دروست بکە",
     "empty": "هیچ ڕووداوێک نییە",
     "loadError": "هەڵەی بارکردنی ڕووداوەکان",
-    "rsvp": "تۆمارکردن",
+    "rsvp": "RSVP",
     "cancelRsvp": "هەڵweşandنەوەی تۆمار",
     "attending": "دەچیت",
     "attendees": "{count} بەشداربێر",
@@ -347,7 +367,15 @@
       "entertainment": "ئەگەرمەند",
       "social": "کۆمەڵایەتی",
       "other": "هیتر"
-    }
+    },
+    "myEmpty": "هێشتا تۆمارت نەکردووە لە هیچ ڕووداوێکدا",
+    "tab": {
+      "upcoming": "داهاتوو",
+      "my": "ڕووداوەکانم"
+    },
+    "rsvpGoing": "دەچم",
+    "rsvpMaybe": "شاید",
+    "distance": "{val} {unit}"
   },
   "challenges": {
     "title": "ئەرکەکان",
@@ -572,7 +600,9 @@
     "cancel": "هەڵوەشاندنەوە",
     "delete": "سڕینەوە",
     "more": "زیاتر",
-    "save": "پاشەکەوتکردن"
+    "save": "پاشەکەوتکردن",
+    "previous": "پێشوو",
+    "next": "دواتر"
   },
   "leaderboard": {
     "title": "تەختەی پێشەنگان",
@@ -623,7 +653,8 @@
     "city": {
       "baghdad": "بەغدا",
       "erbil": "هەولێر",
-      "basra": "بەسرە"
+      "basra": "بەسرە",
+      "mosul": "موسڵ"
     },
     "refresh": "نوێکردنەوە",
     "seeAll": "هەموویان ببینە",
@@ -632,7 +663,12 @@
     "growth": "+{pct}% ئەم هەفتەیە",
     "postsCount": "{n} پۆست",
     "viewCount": "{n} بینین",
-    "noData": "ئێستا هیچ داتایەکی دەستپێشخەر نییە"
+    "noData": "ئێستا هیچ داتایەکی دەستپێشخەر نییە",
+    "timeRange": {
+      "today": "ئەمڕۆ",
+      "week": "ئەم هەفتەیە",
+      "month": "ئەم مانگەیە"
+    }
   },
   "explore": {
     "title": "گەڕان",
@@ -645,5 +681,30 @@
     "empty": "هیچ ناوەرۆکێک نییە",
     "errorMsg": "شکستی هات لە بارکردنی ناوەرۆک",
     "retry": "دووبارە هەوڵدان"
+  },
+  "repLeaderboard": {
+    "title": "لیستی باشترینان",
+    "periodWeek": "ئەم هەفتەیە",
+    "periodMonth": "ئەم مانگە",
+    "periodAllTime": "هەموو کات",
+    "cityBaghdad": "بەغدا",
+    "cityBasra": "بەسرە",
+    "cityMosul": "مووسڵ",
+    "cityErbil": "ھەولێر",
+    "podiumFirst": "یەکەم شوێن",
+    "podiumSecond": "دووەم شوێن",
+    "podiumThird": "سێیەم شوێن",
+    "rank": "#{rank}",
+    "points": "{count} خاڵ",
+    "myRank": "ئاستی من",
+    "myRankValue": "شوێن {rank}",
+    "notRanked": "نییە لە لیستدا",
+    "empty": "داتایەک نییە بۆ ئەم شار و ماوەیە",
+    "errorMsg": "نەتوانرا لیستی باشترینان بارکرێت",
+    "retry": "دووبارە هەوڵدان",
+    "categoryOverall": "هەموو",
+    "categoryReviews": "پێداچوونەوەکان",
+    "categoryPlaces": "شوێنەکان",
+    "categorySafety": "سەلامەتی"
   }
 }

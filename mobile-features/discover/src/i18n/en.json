@@ -162,7 +162,17 @@
     "reportError": "Could not send report. Please try again.",
     "deleteCommentTitle": "Delete comment",
     "deleteCommentMsg": "Delete this comment? This cannot be undone.",
-    "views": "{n} view"
+    "views": "{n} view",
+    "relatedTitle": "Related posts",
+    "relatedEmpty": "No related posts",
+    "authorTitle": "About the author",
+    "authorFollowBtn": "Follow",
+    "authorFollowingBtn": "Following",
+    "downloadBannerTitle": "Get the app",
+    "downloadBannerBody": "Explore Iraq with Iraq Smart Maps",
+    "downloadBannerBtn": "Download",
+    "sharePostBtn": "Share post",
+    "shareSheetTitle": "Share Post"
   },
   "userPosts": {
     "title": "User Posts",
@@ -195,7 +205,17 @@
   "hashtag": {
     "empty": "No posts with tag {tag}",
     "title": "Hashtag posts",
-    "postCount": "{n} posts"
+    "postCount": "{n} posts",
+    "related": "Related hashtags",
+    "follow": "Follow hashtag",
+    "unfollow": "Unfollow hashtag",
+    "following": "Following hashtag",
+    "tab": {
+      "top": "Top",
+      "recent": "Recent"
+    },
+    "viewGrid": "Grid view",
+    "viewList": "List view"
   },
   "pin": {
     "pin": "Pin post",
@@ -347,7 +367,15 @@
       "entertainment": "Entertainment",
       "social": "Social",
       "other": "Other"
-    }
+    },
+    "myEmpty": "You have not RSVPed to any events yet",
+    "tab": {
+      "upcoming": "Upcoming",
+      "my": "My events"
+    },
+    "rsvpGoing": "Going",
+    "rsvpMaybe": "Maybe",
+    "distance": "{val} {unit}"
   },
   "challenges": {
     "title": "Challenges",
@@ -572,7 +600,9 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "more": "More",
-    "save": "Save"
+    "save": "Save",
+    "previous": "Previous",
+    "next": "Next"
   },
   "leaderboard": {
     "title": "Community Leaderboard",
@@ -623,7 +653,8 @@
     "city": {
       "baghdad": "Baghdad",
       "erbil": "Erbil",
-      "basra": "Basra"
+      "basra": "Basra",
+      "mosul": "Mosul"
     },
     "refresh": "Refresh",
     "seeAll": "See all",
@@ -632,7 +663,12 @@
     "growth": "+{pct}% this week",
     "postsCount": "{n} posts",
     "viewCount": "{n} views",
-    "noData": "No trending data right now"
+    "noData": "No trending data right now",
+    "timeRange": {
+      "today": "Today",
+      "week": "This week",
+      "month": "This month"
+    }
   },
   "explore": {
     "title": "Explore",
@@ -645,5 +681,30 @@
     "empty": "No content to display",
     "errorMsg": "Failed to load content",
     "retry": "Retry"
+  },
+  "repLeaderboard": {
+    "title": "Leaderboard",
+    "periodWeek": "This Week",
+    "periodMonth": "This Month",
+    "periodAllTime": "All Time",
+    "cityBaghdad": "Baghdad",
+    "cityBasra": "Basra",
+    "cityMosul": "Mosul",
+    "cityErbil": "Erbil",
+    "podiumFirst": "1st Place",
+    "podiumSecond": "2nd Place",
+    "podiumThird": "3rd Place",
+    "rank": "#{rank}",
+    "points": "{count} pts",
+    "myRank": "My Rank",
+    "myRankValue": "#{rank}",
+    "notRanked": "Not Ranked",
+    "empty": "No data for this city and period",
+    "errorMsg": "Failed to load leaderboard",
+    "retry": "Retry",
+    "categoryOverall": "Overall",
+    "categoryReviews": "Reviews",
+    "categoryPlaces": "Places",
+    "categorySafety": "Safety"
   }
 }

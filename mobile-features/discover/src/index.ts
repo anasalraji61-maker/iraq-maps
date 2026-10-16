@@ -1,4 +1,7 @@
 export { DiscoverFeedScreen } from './screens/DiscoverFeedScreen';
+export { HashtagScreen } from './screens/HashtagScreen';
+export { EventCard } from './components/EventCard';
+export type { EventCardProps, RsvpStatus } from './components/EventCard';
 // Social features
 export { EventsScreen } from './screens/EventsScreen';
 export { EventDetailScreen } from './screens/EventDetailScreen';

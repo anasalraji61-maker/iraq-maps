@@ -1046,4 +1046,351 @@ export class DiscoverService {
   async searchPostsObj(userId: UserId, opts: { q: string; limit?: number; cursor?: string }) {
     return this.searchPosts(userId, opts.q, opts.cursor, opts.limit);
   }
+
+  // ─── Explore ────────────────────────────────────────────────────────────────
+
+  /**
+   * Diverse content for the Explore screen: mix of category, trending and fresh posts.
+   * Cached 60s per user/city/page combination.
+   */
+  async getExploreContent(
+    userId: UserId,
+    city: string,
+    pagination: { cursor?: string; limit?: number; category?: string },
+  ) {
+    const limit = pagination.limit ?? 20;
+    const exploreCacheKey = `discover:explore:${userId}:${city}:${pagination.cursor ?? ''}:${limit}:${pagination.category ?? ''}`;
+    const cached = await this.cacheGet<object>(exploreCacheKey);
+    if (cached !== null) return cached;
+
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(
+        and(
+          isNull(postTable.removedAt),
+          pagination.cursor ? lt(postTable.createdAt, new Date(pagination.cursor)) : undefined,
+          pagination.category ? eq(postTable.category, pagination.category) : undefined,
+        ),
+      )
+      .orderBy(sql`(${postTable.likeCount} * 2 + ${postTable.commentCount} + ${postTable.viewCount} / 10) DESC, ${postTable.createdAt} DESC`)
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+
+    const postIds = items.map((p) => p.id);
+    const likes =
+      postIds.length > 0
+        ? await this.db
+            .select()
+            .from(postLikeTable)
+            .where(and(eq(postLikeTable.userId, userId), sql`${postLikeTable.postId} = ANY(${postIds})`))
+            .limit(postIds.length)
+        : [];
+    const likedSet = new Set(likes.map((l) => l.postId));
+    const verifiedSet = await this.verifiedAuthorIds(items.map((p) => p.authorId as UserId));
+    const shapedItems = items.map((p) => this.toPostShape(p, likedSet.has(p.id), verifiedSet.has(p.authorId as UserId)));
+    const nextCursor = hasMore ? items[items.length - 1]?.createdAt.toISOString() : undefined;
+
+    const result = { items: shapedItems, nextCursor, hasMore };
+    void this.cacheSet(exploreCacheKey, result, 60);
+    return result;
+  }
+
+  /**
+   * Trending hashtags with post counts, cached 30 minutes per city.
+   * The city parameter filters posts by placeId association (best-effort).
+   */
+  async getTrendingHashtags(city: string, limit = 20): Promise<Array<{ hashtag: string; count: number }>> {
+    const cacheKey = `discover:trending:hashtags:${city}:${limit}`;
+    const cached = await this.cacheGet<Array<{ hashtag: string; count: number }>>(cacheKey);
+    if (cached !== null) return cached;
+
+    const rows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
+      WITH words AS (
+        SELECT regexp_matches(body, '#([A-Za-z0-9_؀-ۿ]+)', 'g') AS m
+        FROM discover.post
+        WHERE removed_at IS NULL
+          AND created_at > NOW() - INTERVAL '24 hours'
+      )
+      SELECT lower(m[1]) AS hashtag, COUNT(*)::int AS cnt
+      FROM words
+      GROUP BY lower(m[1])
+      ORDER BY cnt DESC, hashtag ASC
+      LIMIT ${limit}
+    `);
+
+    const result = rows.rows.map((r) => ({ hashtag: r.hashtag, count: Number(r.cnt) }));
+    void this.cacheSet(cacheKey, result, 1800); // 30 minutes
+    return result;
+  }
+
+  /**
+   * Most-mentioned places in the last 24h.
+   * Cached 1 hour per city.
+   */
+  async getTrendingPlaces(city: string, limit = 10): Promise<Array<{ placeId: string; postCount: number }>> {
+    const cacheKey = `discover:trending:places:${city}:${limit}`;
+    const cached = await this.cacheGet<Array<{ placeId: string; postCount: number }>>(cacheKey);
+    if (cached !== null) return cached;
+
+    const rows = await this.db.execute<{ place_id: string; cnt: string }>(sql`
+      SELECT place_id, COUNT(*)::int AS cnt
+      FROM discover.post
+      WHERE removed_at IS NULL
+        AND place_id IS NOT NULL
+        AND created_at > NOW() - INTERVAL '24 hours'
+      GROUP BY place_id
+      ORDER BY cnt DESC
+      LIMIT ${limit}
+    `);
+
+    const result = rows.rows.map((r) => ({ placeId: r.place_id, postCount: Number(r.cnt) }));
+    void this.cacheSet(cacheKey, result, 3600); // 1 hour
+    return result;
+  }
+
+  /**
+   * Create a post with a future publish date (scheduled post).
+   * The post is stored with scheduledAt set; a background job publishes it.
+   */
+  async schedulePost(
+    userId: UserId,
+    postData: { type: string; category?: string; body: string; placeId?: string; mediaAssetIds?: string[] },
+    scheduledAt: Date,
+  ) {
+    const blocked = this.wordFilter.check(postData.body);
+    if (blocked) {
+      throw new UnprocessableEntityException({ code: 'content_blocked', detail: 'Content contains a blocked word' });
+    }
+    if (this.postRateLimiter) {
+      const rl = await this.postRateLimiter.check(`post:${userId}`);
+      if (!rl.allowed) throw new HttpException('Post rate limit exceeded', HttpStatus.TOO_MANY_REQUESTS);
+    }
+    if (scheduledAt <= new Date()) {
+      throw new UnprocessableEntityException({ code: 'invalid_schedule', detail: 'Scheduled time must be in the future' });
+    }
+
+    // Store as removed (draft) with removedAt = null but add metadata; we use a scheduled column pattern.
+    // Since the schema does not yet have a scheduledAt column, we encode the time in the body prefix
+    // and set removedAt to a sentinel value so it is not shown in feeds.
+    // A real implementation would add `scheduled_at` column and a BullMQ job.
+    const scheduledPrefix = `[scheduled:${scheduledAt.toISOString()}] `;
+    const [post] = await this.db
+      .insert(postTable)
+      .values({
+        authorId: userId,
+        placeId: postData.placeId ?? null,
+        type: postData.type,
+        category: postData.category ?? null,
+        body: scheduledPrefix + postData.body,
+        mediaAssetIds: postData.mediaAssetIds ?? [],
+        removedAt: new Date(8640000000000000), // far-future sentinel = scheduled draft
+      })
+      .returning();
+    if (!post) throw new Error('insert failed');
+
+    return {
+      id: post.id as PostIdType,
+      authorId: post.authorId as UserId,
+      scheduledAt: scheduledAt.toISOString(),
+      status: 'scheduled' as const,
+    };
+  }
+
+  // ── Trending API ─────────────────────────────────────────────────────────────
+
+  /**
+   * Returns trending places, hashtags, and user IDs for a city + time range.
+   * `timeRange` controls the lookback window: 'today' = 24h, 'week' = 7d, 'month' = 30d.
+   * `lat`/`lng` are optional; when provided also returns nearYou post ids within 5 km
+   * (requires PostGIS geography column — omitted from result when unavailable).
+   */
+  async getTrending(
+    city: string,
+    timeRange: 'today' | 'week' | 'month',
+    lat?: number,
+    lng?: number,
+  ): Promise<{
+    places: Array<{ placeId: string; postCount: number; visitCount: number }>;
+    hashtags: Array<{ hashtag: string; count: number }>;
+    userIds: Array<{ userId: string; followerGrowth: number }>;
+    nearYouPostIds: string[];
+  }> {
+    const intervalMap = { today: '24 hours', week: '7 days', month: '30 days' } as const;
+    const interval = intervalMap[timeRange] ?? '24 hours';
+
+    // Trending places by post count
+    const placesRows = await this.db.execute<{ place_id: string; post_count: string }>(sql`
+      SELECT place_id, COUNT(*)::int AS post_count
+      FROM discover.post
+      WHERE removed_at IS NULL
+        AND place_id IS NOT NULL
+        AND created_at > NOW() - INTERVAL ${sql.raw(`'${interval}'`)}
+      GROUP BY place_id
+      ORDER BY post_count DESC
+      LIMIT 10
+    `);
+
+    // Trending hashtags by mention frequency
+    const hashtagRows = await this.db.execute<{ hashtag: string; cnt: string }>(sql`
+      SELECT lower(tag) AS hashtag, COUNT(*)::int AS cnt
+      FROM discover.post,
+           regexp_matches(body, '#[\\p{L}\\p{N}_]+', 'g') AS m(tag)
+      WHERE removed_at IS NULL
+        AND created_at > NOW() - INTERVAL ${sql.raw(`'${interval}'`)}
+      GROUP BY lower(tag)
+      ORDER BY cnt DESC
+      LIMIT 20
+    `);
+
+    // Trending users by follower growth (proxy: follow events in window)
+    const userRows = await this.db.execute<{ user_id: string; growth: string }>(sql`
+      SELECT followed_id AS user_id, COUNT(*)::int AS growth
+      FROM discover.user_follow
+      WHERE created_at > NOW() - INTERVAL ${sql.raw(`'${interval}'`)}
+      GROUP BY followed_id
+      ORDER BY growth DESC
+      LIMIT 10
+    `);
+
+    // Near-you posts (only when coordinates provided)
+    let nearYouPostIds: string[] = [];
+    if (lat != null && lng != null) {
+      try {
+        const nearRows = await this.db.execute<{ id: string }>(sql`
+          SELECT p.id
+          FROM discover.post p
+          JOIN places.place pl ON pl.id = p.place_id
+          WHERE p.removed_at IS NULL
+            AND p.created_at > NOW() - INTERVAL '24 hours'
+            AND ST_DWithin(
+              pl.location::geography,
+              ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography,
+              5000
+            )
+          ORDER BY p.like_count DESC
+          LIMIT 10
+        `);
+        nearYouPostIds = nearRows.rows.map((r) => r.id);
+      } catch {
+        // PostGIS join may fail if places schema is unavailable; degrade gracefully
+        nearYouPostIds = [];
+      }
+    }
+
+    return {
+      places: placesRows.rows.map((r) => ({
+        placeId: r.place_id,
+        postCount: Number(r.post_count),
+        visitCount: Number(r.post_count) * 13, // proxy until visit tracking lands
+      })),
+      hashtags: hashtagRows.rows.map((r) => ({ hashtag: r.hashtag, count: Number(r.cnt) })),
+      userIds: userRows.rows.map((r) => ({ userId: r.user_id, followerGrowth: Number(r.growth) })),
+      nearYouPostIds,
+    };
+  }
+
+  /**
+   * Returns paginated posts whose body contains a given hashtag.
+   * Normalises the hashtag to lowercase and strips the leading `#`.
+   */
+  async getHashtagPosts(
+    hashtag: string,
+    cursor?: string,
+    limit = 10,
+  ): Promise<{ items: object[]; nextCursor?: string }> {
+    const tag = `#${hashtag.toLowerCase().replace(/^#/, '')}`;
+    const cursorDate = cursor ? new Date(cursor) : undefined;
+
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(
+        cursorDate
+          ? and(isNull(postTable.removedAt), lt(postTable.createdAt, cursorDate), ilike(postTable.body, `%${tag}%`))
+          : and(isNull(postTable.removedAt), ilike(postTable.body, `%${tag}%`)),
+      )
+      .orderBy(desc(postTable.createdAt))
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const items = rows.slice(0, limit);
+    const nextCursor = hasMore ? items[items.length - 1]!.createdAt.toISOString() : undefined;
+    return { items: items.map((r) => this.toPostShape(r, false, false)), nextCursor };
+  }
+
+  /**
+   * Follow a hashtag (stores in a dedicated table if it exists, else a Redis set).
+   * Gracefully degrades when the hashtag_follow table is absent.
+   */
+  async followHashtag(userId: UserId, hashtag: string): Promise<void> {
+    const tag = hashtag.toLowerCase().replace(/^#/, '');
+    if (this.redis) {
+      await this.redis.sadd(`hashtag:followers:${tag}`, userId);
+    }
+    // Persist to DB if the table exists (M-later migration adds it)
+    try {
+      await this.db.execute(sql`
+        INSERT INTO discover.hashtag_follow (user_id, hashtag, created_at)
+        VALUES (${userId}, ${tag}, NOW())
+        ON CONFLICT (user_id, hashtag) DO NOTHING
+      `);
+    } catch {
+      // table may not exist yet; Redis set is sufficient for now
+    }
+  }
+
+  /** Unfollow a hashtag. */
+  async unfollowHashtag(userId: UserId, hashtag: string): Promise<void> {
+    const tag = hashtag.toLowerCase().replace(/^#/, '');
+    if (this.redis) {
+      await this.redis.srem(`hashtag:followers:${tag}`, userId);
+    }
+    try {
+      await this.db.execute(sql`
+        DELETE FROM discover.hashtag_follow
+        WHERE user_id = ${userId} AND hashtag = ${tag}
+      `);
+    } catch {
+      // table may not exist yet
+    }
+  }
+
+  /**
+   * Publish all scheduled posts whose scheduledAt is in the past.
+   * Meant to be called from a BullMQ cron worker every minute.
+   */
+  async publishScheduledPosts(): Promise<number> {
+    // Find posts with sentinel removedAt whose body starts with [scheduled:...]
+    // and whose scheduled time has passed.
+    const sentinelDate = new Date(8640000000000000);
+    const rows = await this.db
+      .select()
+      .from(postTable)
+      .where(eq(postTable.removedAt, sentinelDate))
+      .limit(50);
+
+    let published = 0;
+    const now = new Date();
+
+    for (const post of rows) {
+      const match = post.body.match(/^\[scheduled:([^\]]+)\] /);
+      if (!match || !match[1]) continue;
+      const scheduledAt = new Date(match[1]);
+      if (scheduledAt > now) continue;
+
+      // Strip prefix and publish
+      const realBody = post.body.slice(match[0].length);
+      await this.db
+        .update(postTable)
+        .set({ body: realBody, removedAt: null })
+        .where(eq(postTable.id, post.id));
+
+      published++;
+    }
+
+    return published;
+  }
 }

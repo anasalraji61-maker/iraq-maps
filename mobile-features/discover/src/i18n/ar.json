@@ -162,7 +162,17 @@
     "reportError": "تعذّر إرسال البلاغ. حاول مرة أخرى.",
     "deleteCommentTitle": "حذف التعليق",
     "deleteCommentMsg": "هل تريد حذف هذا التعليق؟ لا يمكن التراجع عن هذا.",
-    "views": "{n} مشاهدة"
+    "views": "{n} مشاهدة",
+    "relatedTitle": "منشورات ذات صلة",
+    "relatedEmpty": "لا توجد منشورات ذات صلة",
+    "authorTitle": "عن الكاتب",
+    "authorFollowBtn": "متابعة",
+    "authorFollowingBtn": "تتابعه",
+    "downloadBannerTitle": "احصل على التطبيق",
+    "downloadBannerBody": "استكشف العراق مع خرائط العراق الذكية",
+    "downloadBannerBtn": "تنزيل",
+    "sharePostBtn": "مشاركة المنشور",
+    "shareSheetTitle": "مشاركة المنشور"
   },
   "userPosts": {
     "title": "منشورات المستخدم",
@@ -195,7 +205,17 @@
   "hashtag": {
     "empty": "لا توجد منشورات تحمل الوسم {tag}",
     "title": "منشورات الوسم",
-    "postCount": "{n} منشور"
+    "postCount": "{n} منشور",
+    "related": "وسوم ذات صلة",
+    "follow": "متابعة الوسم",
+    "unfollow": "إلغاء متابعة الوسم",
+    "following": "تتابع هذا الوسم",
+    "tab": {
+      "top": "الأكثر إعجاباً",
+      "recent": "الأحدث"
+    },
+    "viewGrid": "عرض شبكي",
+    "viewList": "عرض قائمة"
   },
   "pin": {
     "pin": "تثبيت المنشور",
@@ -347,7 +367,15 @@
       "entertainment": "ترفيهي",
       "social": "اجتماعي",
       "other": "أخرى"
-    }
+    },
+    "myEmpty": "لم تسجّل حضورك في أي فعالية بعد",
+    "tab": {
+      "upcoming": "القادمة",
+      "my": "فعالياتي"
+    },
+    "rsvpGoing": "سأحضر",
+    "rsvpMaybe": "ربما",
+    "distance": "{val} {unit}"
   },
   "challenges": {
     "title": "التحديات",
@@ -572,7 +600,9 @@
     "cancel": "إلغاء",
     "delete": "حذف",
     "more": "المزيد",
-    "save": "حفظ"
+    "save": "حفظ",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "leaderboard": {
     "title": "لوحة المتصدرين",
@@ -623,7 +653,8 @@
     "city": {
       "baghdad": "بغداد",
       "erbil": "أربيل",
-      "basra": "البصرة"
+      "basra": "البصرة",
+      "mosul": "الموصل"
     },
     "refresh": "تحديث",
     "seeAll": "عرض الكل",
@@ -632,7 +663,12 @@
     "growth": "+{pct}% هذا الأسبوع",
     "postsCount": "{n} منشور",
     "viewCount": "{n} مشاهدة",
-    "noData": "لا توجد بيانات رائجة حالياً"
+    "noData": "لا توجد بيانات رائجة حالياً",
+    "timeRange": {
+      "today": "اليوم",
+      "week": "هذا الأسبوع",
+      "month": "هذا الشهر"
+    }
   },
   "explore": {
     "title": "استكشف",
@@ -645,5 +681,30 @@
     "empty": "لا يوجد محتوى لعرضه",
     "errorMsg": "فشل تحميل المحتوى",
     "retry": "إعادة المحاولة"
+  },
+  "repLeaderboard": {
+    "title": "لوحة الشرف",
+    "periodWeek": "هذا الأسبوع",
+    "periodMonth": "هذا الشهر",
+    "periodAllTime": "كل الأوقات",
+    "cityBaghdad": "بغداد",
+    "cityBasra": "البصرة",
+    "cityMosul": "الموصل",
+    "cityErbil": "أربيل",
+    "podiumFirst": "المركز الأول",
+    "podiumSecond": "المركز الثاني",
+    "podiumThird": "المركز الثالث",
+    "rank": "#{rank}",
+    "points": "{count} نقطة",
+    "myRank": "ترتيبي",
+    "myRankValue": "المركز {rank}",
+    "notRanked": "غير مصنَّف",
+    "empty": "لا توجد بيانات لهذه المدينة والفترة",
+    "errorMsg": "تعذّر تحميل لوحة الشرف",
+    "retry": "إعادة المحاولة",
+    "categoryOverall": "الكل",
+    "categoryReviews": "المراجعات",
+    "categoryPlaces": "الأماكن",
+    "categorySafety": "السلامة"
   }
 }
