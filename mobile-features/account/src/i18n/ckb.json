@@ -379,6 +379,24 @@
       "sports": "وەرزش",
       "nature": "سروشت",
       "business": "بازرگانی"
+    },
+    "city": {
+      "title": "شارەکەت",
+      "baghdad": "بەغدا",
+      "erbil": "هەولێر",
+      "basra": "بەسرە",
+      "mosul": "مووسڵ",
+      "other": "تر"
+    },
+    "privacy": {
+      "title": "ڕێکخستنەکانی تایبەتمەندی",
+      "body": "هەر کاتێک دەتوانیت ئەمانە بگۆڕیت",
+      "profilePublic": "پرۆفایلی گشتی",
+      "profilePublicDesc": "هەموو کەس دەتوانێت زانیاریەکانت ببینێت",
+      "activityVisible": "چالاکی بەخراوە",
+      "activityVisibleDesc": "شوێنکەوتووەکان پۆستەکانت و هەڵسەنگاندنەکانت دەبینن",
+      "locationSharing": "هاوبەشکردنی شوێن",
+      "locationSharingDesc": "شوێنەکەت بە پەیوەندیدارەکان هاوبەش بکە"
     }
   },
   "changePassword": {
@@ -755,5 +773,40 @@
     "emailDigestSub": "کورتەی هەفتانەی ئاگادارکردنەوەکانت",
     "saveSuccess": "ڕێکخستنەکان پاشەکەوت کران",
     "saveError": "پاشەکەوتکردن سەرکەوتوو نەبوو"
+  },
+  "trustedContacts": {
+    "screenTitle": "پەیوەندییە متمانەپێکراوەکان",
+    "backBtn": "گەرانەوە",
+    "tabContacts": "پەیوەندییەکانم",
+    "tabRequests": "داواکارییەکان",
+    "tabHistory": "مێژوو",
+    "contactsEmpty": "هیچ پەیوەندییەکی متمانەپێکراو نییە",
+    "contactsEmptySub": "کەسانێک زیاد بکە کە متمانەت پێیانە بۆ هاوبەشکردنی شوێنت لە کاتی ئامادەکارییدا",
+    "addContactBtn": "زیادکردنی پەیوەندی",
+    "addContactTitle": "زیادکردنی پەیوەندییەکی متمانەپێکراو",
+    "addContactPlaceholder": "ناوی بەکارهێنەر یان ژمارەی مۆبایل",
+    "addContactNote": "ئەم کەسە داواکارییەکی پەسەندکردن وەردەگرێت. شوێنت تەنها دواتر هاوبەش دەکرێت.",
+    "consentNote": "ڕازیم بە هاوبەشکردنی شوێنم لەگەڵ ئەم پەیوەندییە لە کاتی ئامادەکاریدا",
+    "addBtn": "زیادکردن",
+    "cancelBtn": "هەڵوەشاندنەوە",
+    "removeContact": "لابردن",
+    "removeConfirmTitle": "لابردنی پەیوەندی",
+    "removeConfirmBody": "دەتەوێت {name} لە پەیوەندییە متمانەپێکراوەکانت لابەیت؟",
+    "acceptedLabel": "پەسەندکراو",
+    "pendingLabel": "چاوەڕوانە",
+    "rejectedLabel": "ڕەتکراوەتەوە",
+    "activeShareLabel": "ئێستا شوێن هاوبەش دەکات",
+    "requestsEmpty": "هیچ داواکارییەکی چاوەڕوانی نییە",
+    "incomingTitle": "داواکارییە هاتووەکان",
+    "acceptBtn": "پەسەندکردن",
+    "rejectBtn": "ڕەتکردنەوە",
+    "historyEmpty": "مێژوو نییە",
+    "historyAlertSent": "ئاگادارکردنی ئامادەکاری نێردرا",
+    "historyLocationShared": "شوێن هاوبەشکرا",
+    "ago": "لەمەوپێش {time}",
+    "errorTitle": "هەڵە",
+    "errorMsg": "هەڵەیەکی مستەقیم ڕوویدا. دووبارە هەوڵبدەوە.",
+    "retry": "دووبارە هەوڵدان",
+    "close": "داخستن"
   }
 }

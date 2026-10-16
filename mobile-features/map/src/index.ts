@@ -52,3 +52,28 @@ export { ListingDetailScreen } from './screens/ListingDetailScreen';
 export { ListingsScreen } from './screens/ListingsScreen';
 export { default as PlaceCheckinScreen } from './screens/PlaceCheckinScreen';
 export { EventMarker, type EventMarkerItem, type EventMarkerProps } from './components/EventMarker';
+/** Navigation state machine and progress UI */
+export {
+  useMapNavigation,
+  navigationReducer,
+  makeInitialState,
+  decodePolyline6,
+  haversineM,
+  nearestRoutePoint,
+  estimateRemainingSeconds,
+  remainingDistanceM,
+  routeCorridorBBox,
+  quickPOIAlongRoute,
+  activeManeuverIndex,
+  OFF_ROUTE_THRESHOLD_M,
+  ARRIVAL_THRESHOLD_M,
+  ETA_REFRESH_MS,
+  type NavigationState,
+  type NavigationStatus,
+  type NavigationAction,
+  type UseMapNavigationReturn,
+  type POIAlongRouteRequest,
+  type POIAlongRouteCandidate,
+} from './navigation/MapNavigation';
+export { RouteProgressBar, type RouteProgressBarProps } from './navigation/RouteProgressBar';
+export { SafetyScreen } from './screens/SafetyScreen';

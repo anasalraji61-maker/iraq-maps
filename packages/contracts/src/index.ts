@@ -32,3 +32,4 @@ export * from './promotions';
 export * from './business-analytics';
 export * from './stories';
 export * from './discovery'; // M-discovery
+export * from './safety'; // safety incidents, trusted contacts, emergency

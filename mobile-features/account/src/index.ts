@@ -28,3 +28,5 @@ export type { MapSettings, MapStyle, DefaultCity, DistanceUnit, DefaultZoom } fr
 export type { NavigationSettings, TransportMode, NavNightMode, VoiceLocale, VoiceVolume } from './NavigationSettingsScreen';
 export { default as ActivityFeedScreen } from './screens/ActivityFeedScreen';
 export { default as ReferralScreen } from './screens/ReferralScreen';
+export { SafetyScreen } from './SafetyScreen';
+export { TrustedContactsScreen } from './TrustedContactsScreen';

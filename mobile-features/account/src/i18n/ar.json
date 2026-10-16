@@ -379,6 +379,24 @@
       "sports": "الرياضة",
       "nature": "الطبيعة",
       "business": "الأعمال"
+    },
+    "city": {
+      "title": "مدينتك",
+      "baghdad": "بغداد",
+      "erbil": "أربيل",
+      "basra": "البصرة",
+      "mosul": "الموصل",
+      "other": "أخرى"
+    },
+    "privacy": {
+      "title": "إعدادات الخصوصية",
+      "body": "يمكنك تغيير هذه الإعدادات في أي وقت",
+      "profilePublic": "الملف الشخصي عام",
+      "profilePublicDesc": "يستطيع الجميع رؤية معلوماتك",
+      "activityVisible": "النشاط مرئي",
+      "activityVisibleDesc": "يرى متابعوك منشوراتك وتقييماتك",
+      "locationSharing": "مشاركة الموقع",
+      "locationSharingDesc": "شارك موقعك مع جهات الاتصال"
     }
   },
   "changePassword": {
@@ -755,5 +773,40 @@
     "emailDigestSub": "ملخص أسبوعي بإشعاراتك وتحديثاتك",
     "saveSuccess": "تم حفظ التفضيلات",
     "saveError": "فشل الحفظ، حاول مجدداً"
+  },
+  "trustedContacts": {
+    "screenTitle": "جهات الاتصال الموثوقة",
+    "backBtn": "رجوع",
+    "tabContacts": "جهاتي",
+    "tabRequests": "الطلبات",
+    "tabHistory": "السجل",
+    "contactsEmpty": "لا توجد جهات اتصال موثوقة",
+    "contactsEmptySub": "أضف أشخاصاً تثق بهم لمشاركة موقعك معهم في حالات الطوارئ",
+    "addContactBtn": "إضافة جهة اتصال",
+    "addContactTitle": "إضافة جهة اتصال موثوقة",
+    "addContactPlaceholder": "اسم المستخدم أو رقم الهاتف",
+    "addContactNote": "سيتلقى هذا الشخص طلب موافقة. لن يتم مشاركة موقعك إلا بعد قبوله.",
+    "consentNote": "أوافق على مشاركة موقعي مع هذه الجهة في حالات الطوارئ",
+    "addBtn": "إضافة",
+    "cancelBtn": "إلغاء",
+    "removeContact": "إزالة",
+    "removeConfirmTitle": "إزالة جهة الاتصال",
+    "removeConfirmBody": "هل تريد إزالة {name} من جهات الاتصال الموثوقة؟",
+    "acceptedLabel": "مقبول",
+    "pendingLabel": "في الانتظار",
+    "rejectedLabel": "مرفوض",
+    "activeShareLabel": "يشارك الموقع الآن",
+    "requestsEmpty": "لا توجد طلبات معلقة",
+    "incomingTitle": "طلبات واردة",
+    "acceptBtn": "قبول",
+    "rejectBtn": "رفض",
+    "historyEmpty": "لا يوجد سجل",
+    "historyAlertSent": "تم إرسال تنبيه طوارئ",
+    "historyLocationShared": "تمت مشاركة الموقع",
+    "ago": "منذ {time}",
+    "errorTitle": "خطأ",
+    "errorMsg": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+    "retry": "إعادة المحاولة",
+    "close": "إغلاق"
   }
 }

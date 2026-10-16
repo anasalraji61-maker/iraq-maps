@@ -379,6 +379,24 @@
       "sports": "Sports",
       "nature": "Nature",
       "business": "Business"
+    },
+    "city": {
+      "title": "Your city",
+      "baghdad": "Baghdad",
+      "erbil": "Erbil",
+      "basra": "Basra",
+      "mosul": "Mosul",
+      "other": "Other"
+    },
+    "privacy": {
+      "title": "Privacy settings",
+      "body": "You can change these at any time",
+      "profilePublic": "Public profile",
+      "profilePublicDesc": "Everyone can see your profile information",
+      "activityVisible": "Visible activity",
+      "activityVisibleDesc": "Followers see your posts and reviews",
+      "locationSharing": "Location sharing",
+      "locationSharingDesc": "Share your location with contacts"
     }
   },
   "changePassword": {
@@ -755,5 +773,40 @@
     "emailDigestSub": "A weekly summary of your notifications and updates",
     "saveSuccess": "Preferences saved",
     "saveError": "Failed to save, please try again"
+  },
+  "trustedContacts": {
+    "screenTitle": "Trusted Contacts",
+    "backBtn": "Back",
+    "tabContacts": "My Contacts",
+    "tabRequests": "Requests",
+    "tabHistory": "History",
+    "contactsEmpty": "No trusted contacts yet",
+    "contactsEmptySub": "Add people you trust to share your location with during emergencies",
+    "addContactBtn": "Add Contact",
+    "addContactTitle": "Add Trusted Contact",
+    "addContactPlaceholder": "Username or phone number",
+    "addContactNote": "This person will receive a consent request. Your location won't be shared until they accept.",
+    "consentNote": "I agree to share my location with this contact during emergencies",
+    "addBtn": "Add",
+    "cancelBtn": "Cancel",
+    "removeContact": "Remove",
+    "removeConfirmTitle": "Remove Contact",
+    "removeConfirmBody": "Remove {name} from your trusted contacts?",
+    "acceptedLabel": "Accepted",
+    "pendingLabel": "Pending",
+    "rejectedLabel": "Rejected",
+    "activeShareLabel": "Sharing location now",
+    "requestsEmpty": "No pending requests",
+    "incomingTitle": "Incoming Requests",
+    "acceptBtn": "Accept",
+    "rejectBtn": "Reject",
+    "historyEmpty": "No history yet",
+    "historyAlertSent": "Emergency alert sent",
+    "historyLocationShared": "Location shared",
+    "ago": "{time} ago",
+    "errorTitle": "Error",
+    "errorMsg": "An unexpected error occurred. Please try again.",
+    "retry": "Retry",
+    "close": "Close"
   }
 }
