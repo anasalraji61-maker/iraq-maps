@@ -1,0 +1,206 @@
+# Navigation flow:
+# Login → search a place → open place card → request directions → route preview
+# → start navigation → follow-along UI visible → recenter → stop navigation.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+#   baghdad-mini fixture must be loaded (geo-services/pipeline/tests/fixtures/baghdad-mini)
+# Env vars:
+#   PHONE     Default: random.
+#   OTP_CODE  Default: 123456.
+#   SEARCH_Q  Place query. Default: قلعه (matches n102 in baghdad-mini fixture).
+appId: iq.iraqmaps.app
+name: navigation-flow
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  SEARCH_Q: ${SEARCH_Q || 'قلعه'}
+---
+
+# ── 1. Launch and login ───────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: سائق الاختبار
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 20000
+- takeScreenshot: nav-01-logged-in
+
+# ── 2. Open map tab ───────────────────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- takeScreenshot: nav-02-map-loaded
+
+# ── 3. Search for destination ────────────────────────────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: ${SEARCH_Q}
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: nav-03-search-results
+
+# ── 4. Tap the first result to open place card ────────────────────────────────
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: place.card
+    timeout: 15000
+- assertVisible:
+    id: place.card
+- assertVisible:
+    id: place.name
+- takeScreenshot: nav-04-place-card
+
+# ── 5. Verify OSM source is shown ────────────────────────────────────────────
+- assertVisible:
+    id: place.source
+
+# ── 6. Tap Directions button ─────────────────────────────────────────────────
+- tapOn:
+    id: navigation.directions
+- extendedWaitUntil:
+    visible:
+      id: navigation.preview
+    timeout: 20000
+- assertVisible:
+    id: navigation.preview
+- takeScreenshot: nav-05-route-preview
+
+# ── 7. Route preview shows duration and distance ─────────────────────────────
+- assertVisible:
+    id: navigation.duration
+- assertVisible:
+    id: navigation.distance
+
+# ── 8. Alternative routes panel (if available) ───────────────────────────────
+- assertVisible:
+    id: navigation.startButton
+
+# ── 9. Start navigation ───────────────────────────────────────────────────────
+- tapOn:
+    id: navigation.startButton
+- extendedWaitUntil:
+    visible:
+      id: navigation.active
+    timeout: 20000
+- assertVisible:
+    id: navigation.active
+- takeScreenshot: nav-06-navigation-started
+
+# ── 10. Navigation HUD elements are present ───────────────────────────────────
+- assertVisible:
+    id: navigation.nextManeuver
+- assertVisible:
+    id: navigation.distanceToNext
+- assertVisible:
+    id: navigation.stopButton
+
+# ── 11. Recenter button visible ───────────────────────────────────────────────
+- assertVisible:
+    id: navigation.recenter
+
+# ── 12. Tap recenter ─────────────────────────────────────────────────────────
+- tapOn:
+    id: navigation.recenter
+- takeScreenshot: nav-07-recentered
+
+# ── 13. Speed display is present ─────────────────────────────────────────────
+- assertVisible:
+    id: navigation.speed
+
+# ── 14. Stop navigation ──────────────────────────────────────────────────────
+- tapOn:
+    id: navigation.stopButton
+- extendedWaitUntil:
+    visible:
+      id: navigation.stopConfirm
+    timeout: 10000
+- tapOn:
+    id: navigation.stopConfirm
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 15000
+- assertVisible:
+    id: map.view
+- takeScreenshot: nav-08-navigation-stopped
+
+# ── 15. Map is still visible after stopping ───────────────────────────────────
+- assertVisible:
+    id: map.view
+- assertNotVisible:
+    id: navigation.active
+
+# ── 16. Search bar is accessible again ───────────────────────────────────────
+- assertVisible:
+    id: map.search.input
+
+# ── 17. Can search again after stopping navigation ───────────────────────────
+- tapOn:
+    id: map.search.input
+- inputText: قلعة
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- assertVisible:
+    id: map.search.result
+- takeScreenshot: nav-09-search-after-nav
+
+# ── 18. Back to map (dismiss search) ─────────────────────────────────────────
+- tapOn:
+    id: map.search.clear
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 10000
+- assertVisible:
+    id: map.view
+- takeScreenshot: nav-10-map-clean

@@ -1,0 +1,207 @@
+# Discover feed flow:
+# Login → Discover tab → create a post → post appears in feed → like a post →
+# comment on a post → delete own post.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+# Env vars:
+#   PHONE    Default: random.
+#   OTP_CODE Default: 123456.
+#   POST_TEXT Post body text. Default: Arabic sample.
+appId: iq.iraqmaps.app
+name: discover-post
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  POST_TEXT: ${POST_TEXT || 'هذا المكان رائع جداً، أنصح الجميع بزيارته!'}
+---
+
+# ── 1. Launch and login ───────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: مستخدم ديسكفر
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 20000
+- takeScreenshot: discover-01-logged-in
+
+# ── 2. Navigate to Discover tab ──────────────────────────────────────────────
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 20000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: discover-02-feed-loaded
+
+# ── 3. Scroll to confirm feed is scrollable ──────────────────────────────────
+- scroll
+
+# ── 4. Tap create post button ────────────────────────────────────────────────
+- tapOn:
+    id: discover.create.post
+- extendedWaitUntil:
+    visible:
+      id: discover.post.input
+    timeout: 15000
+- assertVisible:
+    id: discover.post.input
+- takeScreenshot: discover-03-create-post-screen
+
+# ── 5. Enter post text ────────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.input
+- inputText: ${POST_TEXT}
+- hideKeyboard
+- assertVisible:
+    text: ${POST_TEXT}
+- takeScreenshot: discover-04-post-text-entered
+
+# ── 6. Submit post ────────────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.submit
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 25000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: discover-05-post-submitted
+
+# ── 7. Verify new post appears in feed ───────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      text: ${POST_TEXT}
+    timeout: 10000
+- assertVisible:
+    text: ${POST_TEXT}
+- takeScreenshot: discover-06-post-in-feed
+
+# ── 8. Like the new post ─────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.like
+- extendedWaitUntil:
+    visible:
+      id: discover.post.liked
+    timeout: 10000
+- assertVisible:
+    id: discover.post.liked
+- takeScreenshot: discover-07-post-liked
+
+# ── 9. Verify like count incremented ─────────────────────────────────────────
+- assertVisible:
+    id: discover.post.likeCount
+
+# ── 10. Tap to open post detail ───────────────────────────────────────────────
+- tapOn:
+    text: ${POST_TEXT}
+- extendedWaitUntil:
+    visible:
+      id: discover.post.detail
+    timeout: 15000
+- assertVisible:
+    id: discover.post.detail
+- takeScreenshot: discover-08-post-detail
+
+# ── 11. Add a comment ─────────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.commentInput
+- inputText: تعليق اختباري على هذا المنشور الرائع
+- hideKeyboard
+- tapOn:
+    id: discover.post.commentSubmit
+- extendedWaitUntil:
+    visible:
+      text: تعليق اختباري على هذا المنشور الرائع
+    timeout: 15000
+- assertVisible:
+    text: تعليق اختباري على هذا المنشور الرائع
+- takeScreenshot: discover-09-comment-added
+
+# ── 12. Go back to feed ───────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.detail.back
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 10000
+- assertVisible:
+    id: discover.feed
+
+# ── 13. Long-press own post to access actions ─────────────────────────────────
+- longPressOn:
+    text: ${POST_TEXT}
+- extendedWaitUntil:
+    visible:
+      id: discover.post.actions
+    timeout: 10000
+- assertVisible:
+    id: discover.post.actions
+- takeScreenshot: discover-10-post-actions
+
+# ── 14. Delete post ───────────────────────────────────────────────────────────
+- tapOn:
+    id: discover.post.delete
+- extendedWaitUntil:
+    visible:
+      id: discover.post.deleteConfirm
+    timeout: 10000
+- tapOn:
+    id: discover.post.deleteConfirm
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 15000
+- takeScreenshot: discover-11-post-deleted
+
+# ── 15. Verify deleted post no longer in feed ────────────────────────────────
+- assertNotVisible:
+    text: ${POST_TEXT}
+- takeScreenshot: discover-12-post-gone
+
+# ── 16. Return to map tab to verify no regression ────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 20000
+- assertVisible:
+    id: map.view
+- takeScreenshot: discover-13-map-ok

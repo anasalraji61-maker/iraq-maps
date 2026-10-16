@@ -1,0 +1,192 @@
+# Provider registration flow:
+# Login → navigate to account → register as provider → fill business details → submit.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed
+# Env vars:
+#   PHONE      Iraqi mobile number. Default: random.
+#   OTP_CODE   Default: 123456.
+#   BIZ_NAME   Business display name. Default: مطعم الاختبار.
+#   BIZ_PHONE  Business phone. Default: same as PHONE.
+appId: iq.iraqmaps.app
+name: provider-registration
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  BIZ_NAME: ${BIZ_NAME || 'مطعم الاختبار'}
+  BIZ_PHONE: ${BIZ_PHONE || PHONE}
+---
+
+# ── 1. Launch and login ───────────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+- tapOn:
+    id: tab.account
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- tapOn:
+    id: auth.name.input
+- inputText: صاحب المطعم
+- hideKeyboard
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      id: tab.map
+    timeout: 20000
+- takeScreenshot: provider-01-logged-in
+
+# ── 2. Navigate to provider registration ─────────────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.menu
+    timeout: 10000
+- assertVisible:
+    id: account.menu
+- takeScreenshot: provider-02-account-menu
+
+# ── 3. Find and tap "Register as Provider" option ────────────────────────────
+- tapOn:
+    id: account.providerRegister
+- extendedWaitUntil:
+    visible:
+      id: provider.register.form
+    timeout: 15000
+- assertVisible:
+    id: provider.register.form
+- takeScreenshot: provider-03-registration-form
+
+# ── 4. Fill business name ─────────────────────────────────────────────────────
+- tapOn:
+    id: provider.register.businessName
+- inputText: ${BIZ_NAME}
+- hideKeyboard
+- assertVisible:
+    text: ${BIZ_NAME}
+
+# ── 5. Fill business phone ────────────────────────────────────────────────────
+- tapOn:
+    id: provider.register.phone
+- clearText
+- inputText: ${BIZ_PHONE}
+- hideKeyboard
+
+# ── 6. Select business category ───────────────────────────────────────────────
+- tapOn:
+    id: provider.register.category
+- extendedWaitUntil:
+    visible:
+      id: provider.register.categoryList
+    timeout: 10000
+- tapOn:
+    id: provider.register.category.food
+- extendedWaitUntil:
+    visible:
+      id: provider.register.form
+    timeout: 10000
+- takeScreenshot: provider-04-category-selected
+
+# ── 7. Select the linked place (search) ──────────────────────────────────────
+- tapOn:
+    id: provider.register.placeSearch
+- extendedWaitUntil:
+    visible:
+      id: map.search.input
+    timeout: 15000
+- tapOn:
+    id: map.search.input
+- inputText: قلعه
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
+      id: map.search.result
+    timeout: 15000
+- tapOn:
+    id: map.search.result
+- extendedWaitUntil:
+    visible:
+      id: provider.register.form
+    timeout: 10000
+- takeScreenshot: provider-05-place-linked
+
+# ── 8. Accept terms ───────────────────────────────────────────────────────────
+- tapOn:
+    id: provider.register.acceptTerms
+- assertVisible:
+    id: provider.register.submit
+
+# ── 9. Submit registration ────────────────────────────────────────────────────
+- tapOn:
+    id: provider.register.submit
+- extendedWaitUntil:
+    visible:
+      id: provider.register.success
+    timeout: 30000
+- assertVisible:
+    id: provider.register.success
+- takeScreenshot: provider-06-registration-submitted
+
+# ── 10. Verify pending status on account screen ───────────────────────────────
+- tapOn:
+    id: provider.register.done
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.providerStatus
+    timeout: 10000
+- assertVisible:
+    id: account.providerStatus
+- takeScreenshot: provider-07-pending-status
+
+# ── 11. Provider inbox tab is now accessible ─────────────────────────────────
+- assertVisible:
+    id: provider.inbox
+
+# ── 12. Opt-out option is available ──────────────────────────────────────────
+- tapOn:
+    id: provider.inbox
+- extendedWaitUntil:
+    visible:
+      id: provider.inbox.empty
+    timeout: 10000
+- assertVisible:
+    id: provider.inbox.empty
+- takeScreenshot: provider-08-inbox-empty
+
+# ── 13. Settings button in inbox ─────────────────────────────────────────────
+- assertVisible:
+    id: provider.inbox.settings
+
+# ── 14. End of registration flow ─────────────────────────────────────────────
+- tapOn:
+    id: tab.map
+- assertVisible:
+    id: map.view
+- takeScreenshot: provider-09-back-to-map

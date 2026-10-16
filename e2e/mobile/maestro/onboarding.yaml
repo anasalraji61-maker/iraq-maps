@@ -1,0 +1,187 @@
+# Onboarding flow: install app → phone login → OTP → name entry → home tabs visible.
+#
+# Prerequisites:
+#   APP_ENV=e2e, OTP_SENDER=fixed, OTP_FIXED_CODE matches OTP_CODE env var.
+# Env vars:
+#   PHONE     Iraqi mobile number (07xxxxxxxxx). Default: random 077xxxxxxxx.
+#   OTP_CODE  Must match OTP_FIXED_CODE on the server. Default: 123456.
+#   NAME      Display name. Default: مستخدم جديد.
+appId: iq.iraqmaps.app
+name: onboarding
+env:
+  PHONE: ${PHONE || '077' + Math.floor(10000000 + Math.random() * 90000000)}
+  OTP_CODE: ${OTP_CODE || '123456'}
+  NAME: ${NAME || 'مستخدم جديد'}
+---
+
+# ── 1. Launch with clean state ────────────────────────────────────────────────
+- launchApp:
+    clearState: true
+
+# ── 2. Account tab is visible (unauthenticated state) ─────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      id: account.signIn
+    timeout: 15000
+- assertVisible:
+    id: account.signIn
+- takeScreenshot: onboarding-01-sign-in-button
+
+# ── 3. Open phone entry screen ────────────────────────────────────────────────
+- tapOn:
+    id: account.signIn
+- extendedWaitUntil:
+    visible:
+      id: auth.phone.input
+    timeout: 15000
+- assertVisible:
+    id: auth.phone.input
+- takeScreenshot: onboarding-02-phone-screen
+
+# ── 4. Enter phone number ─────────────────────────────────────────────────────
+- tapOn:
+    id: auth.phone.input
+- inputText: ${PHONE}
+- hideKeyboard
+- assertVisible:
+    id: auth.phone.submit
+
+# ── 5. Submit phone and wait for OTP screen ───────────────────────────────────
+- tapOn:
+    id: auth.phone.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.otp.input
+    timeout: 20000
+- assertVisible:
+    id: auth.otp.input
+- takeScreenshot: onboarding-03-otp-screen
+
+# ── 6. Enter OTP code ─────────────────────────────────────────────────────────
+- tapOn:
+    id: auth.otp.input
+- inputText: ${OTP_CODE}
+- hideKeyboard
+
+# ── 7. Submit OTP and wait for name screen ────────────────────────────────────
+- tapOn:
+    id: auth.otp.submit
+- extendedWaitUntil:
+    visible:
+      id: auth.name.input
+    timeout: 20000
+- assertVisible:
+    id: auth.name.input
+- takeScreenshot: onboarding-04-name-screen
+
+# ── 8. Enter display name ─────────────────────────────────────────────────────
+- tapOn:
+    id: auth.name.input
+- inputText: ${NAME}
+- hideKeyboard
+- assertVisible:
+    id: auth.name.submit
+
+# ── 9. Submit name and wait for authenticated state ───────────────────────────
+- tapOn:
+    id: auth.name.submit
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 20000
+- takeScreenshot: onboarding-05-authenticated
+
+# ── 10. Verify all main tabs are present ──────────────────────────────────────
+- assertVisible:
+    id: tab.map
+- assertVisible:
+    id: tab.discover
+- assertVisible:
+    id: tab.messages
+- assertVisible:
+    id: tab.activity
+- assertVisible:
+    id: tab.account
+- takeScreenshot: onboarding-06-tabs-visible
+
+# ── 11. Tap map tab and verify map loads ──────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.view
+    timeout: 30000
+- assertVisible:
+    id: map.view
+- takeScreenshot: onboarding-07-map-loaded
+
+# ── 12. Verify OSM attribution is shown ──────────────────────────────────────
+- assertVisible:
+    id: map.attribution
+
+# ── 13. Account tab shows user name after login ───────────────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 10000
+- assertVisible:
+    text: ${NAME}
+- takeScreenshot: onboarding-08-account-shows-name
+
+# ── 14. Sign out button is available ──────────────────────────────────────────
+- assertVisible:
+    id: account.signOut
+
+# ── 15. Search bar is accessible from map ────────────────────────────────────
+- tapOn:
+    id: tab.map
+- extendedWaitUntil:
+    visible:
+      id: map.search.input
+    timeout: 15000
+- assertVisible:
+    id: map.search.input
+- takeScreenshot: onboarding-09-search-accessible
+
+# ── 16. Notifications / activity tab shows empty state ───────────────────────
+- tapOn:
+    id: tab.activity
+- extendedWaitUntil:
+    visible:
+      text: نشاطي
+    timeout: 10000
+- takeScreenshot: onboarding-10-activity-empty
+
+# ── 17. Messages tab shows empty inbox ──────────────────────────────────────
+- tapOn:
+    id: tab.messages
+- extendedWaitUntil:
+    visible:
+      id: messaging.inbox
+    timeout: 10000
+- takeScreenshot: onboarding-11-messages-empty
+
+# ── 18. Discover tab renders ─────────────────────────────────────────────────
+- tapOn:
+    id: tab.discover
+- extendedWaitUntil:
+    visible:
+      id: discover.feed
+    timeout: 15000
+- assertVisible:
+    id: discover.feed
+- takeScreenshot: onboarding-12-discover-feed
+
+# ── 19. RTL layout check: Arabic text is right-aligned ───────────────────────
+- tapOn:
+    id: tab.account
+- extendedWaitUntil:
+    visible:
+      text: ${NAME}
+    timeout: 10000
+# No automated RTL assertion in Maestro; screenshot reviewed manually.
+- takeScreenshot: onboarding-13-rtl-check
