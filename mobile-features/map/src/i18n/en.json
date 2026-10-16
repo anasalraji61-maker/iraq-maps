@@ -430,7 +430,7 @@
     "mapView": "عرض الخريطة"
   },
   "compass": {
-    "label": "Reset to north"
+    "label": "Reset bearing"
   },
   "geofence": {
     "entered": "You entered {name}",
@@ -1011,9 +1011,6 @@
     "dropped": "Pin dropped",
     "dismiss": "Remove pin"
   },
-  "compass": {
-    "label": "Reset bearing"
-  },
   "scalebar": {
     "km": "{n} km",
     "m": "{n} m"
@@ -1050,5 +1047,34 @@
     "expiresMinutes": "Expires in {n}m",
     "expiresHours": "Expires in {n}h",
     "expiresDays": "Expires in {n}d"
+  },
+  "photoGallery": {
+    "title": "Place Photos",
+    "addPhoto": "Add Photo",
+    "grid": "Grid",
+    "list": "List",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortPopular": "Most Viewed",
+    "filterAll": "All",
+    "filterInterior": "Interior",
+    "filterExterior": "Exterior",
+    "filterFood": "Food",
+    "filterAtmosphere": "Atmosphere",
+    "community": "Community",
+    "official": "Official",
+    "photoCount": "{count} photos",
+    "loading": "Loading...",
+    "error": "Failed to load photos",
+    "retry": "Retry",
+    "share": "Share",
+    "download": "Download",
+    "close": "Close",
+    "photo": "Photo",
+    "empty": "No photos yet for this place.",
+    "uploadPermissionDenied": "Media library access denied",
+    "uploadSuccess": "Photo uploaded successfully",
+    "uploadFailed": "Failed to upload photo",
+    "uploadTooLarge": "Photo exceeds the 10 MB limit"
   }
 }

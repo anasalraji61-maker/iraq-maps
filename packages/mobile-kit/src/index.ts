@@ -143,6 +143,28 @@ export {
   type OgResourceType,
 } from './deeplink';
 
+/** @public media helpers: image picker, video player, photo gallery */
+export {
+  pickImages,
+  pickSingleImage,
+  pickMultipleImages,
+  reprocessImage,
+  validateImageSize,
+  requestCameraPermission,
+  requestMediaLibraryPermission,
+  checkPermissions,
+  MAX_PHOTOS,
+  MAX_BYTES,
+  TARGET_BYTES,
+  type PickedImage,
+  type PickSource,
+  type PickOptions,
+  type PickResult,
+  type PermissionResult,
+} from './media/ImagePicker';
+export { VideoPlayer, type PlaybackState, type PlaybackRate, type VideoPlayerOptions } from './media/VideoPlayer';
+export { PhotoGallery, type GalleryPhoto, type PhotoGalleryProps } from './media/PhotoGallery';
+
 /** @public share utilities and branded share card */
 export {
   ShareManager,

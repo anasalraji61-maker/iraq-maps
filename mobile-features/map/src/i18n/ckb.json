@@ -430,7 +430,7 @@
     "mapView": "عرض الخريطة"
   },
   "compass": {
-    "label": "گەڕانەوە بۆ باکووری"
+    "label": "ڕێکخستنەوەی ئاراستە"
   },
   "geofence": {
     "entered": "تۆ چوویتە ناو {name}",
@@ -1011,9 +1011,6 @@
     "dropped": "پین دانرا",
     "dismiss": "لابردنی پین"
   },
-  "compass": {
-    "label": "ڕێکخستنەوەی ئاراستە"
-  },
   "scalebar": {
     "km": "{n} کیلۆ",
     "m": "{n} م"
@@ -1050,5 +1047,34 @@
     "expiresMinutes": "لە {n} خولەک دەبەسێت",
     "expiresHours": "لە {n} کاتژمێر دەبەسێت",
     "expiresDays": "لە {n} ڕۆژ دەبەسێت"
+  },
+  "photoGallery": {
+    "title": "وێنەکانی شوێن",
+    "addPhoto": "زیادکردنی وێنە",
+    "grid": "تەختە",
+    "list": "لیست",
+    "sortNewest": "نوێترین",
+    "sortOldest": "کۆنترین",
+    "sortPopular": "بینراوترین",
+    "filterAll": "هەموو",
+    "filterInterior": "ناوەوە",
+    "filterExterior": "دەرەوە",
+    "filterFood": "خواردن",
+    "filterAtmosphere": "ژینگە",
+    "community": "کۆمەڵگا",
+    "official": "فەرمی",
+    "photoCount": "{count} وێنە",
+    "loading": "بارکردن...",
+    "error": "کێشەی بارکردنی وێنەکان",
+    "retry": "دووبارەکەرەوە",
+    "share": "هاوبەشکردن",
+    "download": "دابەزاندن",
+    "close": "داخستن",
+    "photo": "وێنە",
+    "empty": "هیچ وێنەیەک بۆ ئەم شوێنە نییە.",
+    "uploadPermissionDenied": "دەستگەیشتن بە کتێبخانەی وێنەکان ڕەتکرایەوە",
+    "uploadSuccess": "وێنەکە بە سەرکەوتوویی بارکرا",
+    "uploadFailed": "بارکردنی وێنەکە سەرنەکەوت",
+    "uploadTooLarge": "قەبارەی وێنەکە زیاترە لە ئەوەی ڕێپێدراو (١٠ میغابایت)"
   }
 }
