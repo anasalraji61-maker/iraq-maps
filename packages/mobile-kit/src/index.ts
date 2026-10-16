@@ -165,6 +165,35 @@ export {
 export { VideoPlayer, type PlaybackState, type PlaybackRate, type VideoPlayerOptions } from './media/VideoPlayer';
 export { PhotoGallery, type GalleryPhoto, type PhotoGalleryProps } from './media/PhotoGallery';
 
+/** @public accessibility manager: screen reader, contrast, font scale */
+export { AccessibilityManager, type A11yState, type A11yListener } from './accessibility/AccessibilityManager';
+
+/** @public accessibility wrapper component */
+export {
+  AccessibilityWrapper,
+  type AccessibilityWrapperProps,
+  type WrapperRole,
+} from './accessibility/AccessibilityWrapper';
+
+/** @public form accessibility helpers */
+export {
+  textFieldProps,
+  searchFieldProps,
+  passwordFieldProps,
+  buttonProps,
+  checkboxProps,
+  radioProps,
+  switchProps,
+  sliderProps,
+  pickerProps,
+  groupProps,
+  errorLabel,
+  buildLabel,
+  type FieldConfig,
+  type FieldGroup,
+  type FormFieldProps,
+} from './accessibility/FormAccessibility';
+
 /** @public share utilities and branded share card */
 export {
   ShareManager,

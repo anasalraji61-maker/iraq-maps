@@ -122,7 +122,26 @@
     "speedLimit": "الحد الأقصى للسرعة: {speed} كم/ساعة",
     "trafficDelay": "تأخير مروري: {minutes} دقيقة",
     "alternativeRoute": "مسار بديل",
-    "shareTrip": "مشاركة الرحلة"
+    "shareTrip": "مشاركة الرحلة",
+    "removeStop": "وەستگە لابببە",
+    "roadType": {
+      "motorway": "ئۆتۆستراد",
+      "unpaved": "ڕێگای ناهەموار",
+      "residential": "کۆلانی نیشتەجێبوون",
+      "secondary": "ڕێگای دووهەمین",
+      "primary": "ڕێگای سەرەکی"
+    },
+    "startFromHere": "لە ئێرەوە دەستپێبکە",
+    "estimatedCost": "ئەندازەکراوی تێچوون: {amount}",
+    "estimatedFuel": "ئەندازەکراوی سووتەمەنی: {amount} لیتر",
+    "voiceGuidanceOn": "ڕێنیشاندانی دەنگی چالاکە",
+    "voiceGuidance": "ڕێنیشاندانی دەنگی",
+    "voiceGuidanceOff": "ڕێنیشاندانی دەنگی ناچالاکە",
+    "reorderStops": "ڕیزبەندیی وەستگەکان",
+    "waypointAdded": "وەستگە زیادکرا",
+    "previewRoute": "پێشبینینی ڕێگا",
+    "multiStop": "ڕێگای چەند وەستگەیی",
+    "addStop": "وەستگە زیادبکە"
   },
   "moderation": {
     "report": {
@@ -204,129 +223,315 @@
     "recordingIndicator": "جارٍ التسجيل…"
   },
   "provider": {
-    "registration": {
-      "title": "تسجيل النشاط التجاري",
-      "subtitle": "أضف نشاطك التجاري على خريطة العراق",
-      "step": "الخطوة {current} من {total}",
-      "steps": {
-        "basicInfo": "المعلومات الأساسية",
-        "location": "الموقع",
-        "contact": "بيانات التواصل",
-        "photos": "الصور",
-        "hours": "أوقات العمل",
-        "review": "المراجعة والإرسال"
+    "dashboard": {
+      "title": "لوحة تحكم النشاط التجاري",
+      "welcome": "أهلاً، {name}",
+      "overview": "نظرة عامة",
+      "todayStats": "إحصائيات اليوم",
+      "weekStats": "إحصائيات هذا الأسبوع",
+      "profileViews": "{count} مشاهدة للملف",
+      "profileViewsChange": "{pct}٪ مقارنة بالأسبوع الماضي",
+      "messagesReceived": "{count} رسالة واردة",
+      "appointmentsToday": "{count} موعد اليوم",
+      "newCustomers": "{count} عميل جديد",
+      "revenue": "الإيرادات: {amount}",
+      "quickActions": "إجراءات سريعة",
+      "editProfile": "تعديل الملف الشخصي",
+      "addPromotion": "إضافة عرض",
+      "viewMessages": "عرض الرسائل",
+      "viewAppointments": "عرض المواعيد",
+      "recentActivity": "النشاط الأخير",
+      "noActivity": "لا يوجد نشاط أخير",
+      "performance": {
+        "title": "الأداء",
+        "impressions": "الظهورات",
+        "clicks": "النقرات",
+        "saves": "الحفظ",
+        "directions": "طلبات الاتجاهات",
+        "calls": "المكالمات",
+        "messages": "الرسائل",
+        "conversionRate": "معدل التحويل: {pct}٪"
       },
-      "fields": {
-        "name": "اسم النشاط التجاري",
-        "namePlaceholder": "مثال: مطعم بغداد",
-        "category": "التصنيف",
-        "categoryPlaceholder": "اختر تصنيفاً",
-        "description": "وصف النشاط",
-        "descriptionPlaceholder": "صف خدماتك ومنتجاتك…",
-        "phone": "رقم الهاتف",
-        "phonePlaceholder": "+964 7XX XXX XXXX",
-        "whatsapp": "رقم الواتساب",
-        "website": "الموقع الإلكتروني",
-        "address": "العنوان التفصيلي",
-        "addressPlaceholder": "الحي، الشارع، رقم المبنى",
-        "city": "المدينة",
-        "neighborhood": "الحي",
-        "latitude": "خط العرض",
-        "longitude": "خط الطول",
-        "priceRange": "نطاق الأسعار",
-        "instagram": "حساب إنستغرام",
-        "facebook": "صفحة فيسبوك"
-      },
-      "location": {
-        "title": "تحديد الموقع",
-        "instruction": "اسحب الدبوس لتحديد موقع نشاطك التجاري بدقة",
-        "useCurrentLocation": "استخدم موقعي الحالي",
-        "searchAddress": "ابحث عن العنوان",
-        "pinPlaced": "تم تحديد الموقع"
-      },
-      "hours": {
-        "title": "أوقات العمل",
-        "open": "مفتوح",
-        "closed": "مغلق",
-        "open24h": "مفتوح 24 ساعة",
-        "from": "من",
-        "to": "إلى",
-        "days": {
-          "saturday": "السبت",
-          "sunday": "الأحد",
-          "monday": "الاثنين",
-          "tuesday": "الثلاثاء",
-          "wednesday": "الأربعاء",
-          "thursday": "الخميس",
-          "friday": "الجمعة"
-        }
-      },
-      "photos": {
-        "title": "صور النشاط التجاري",
-        "addPhoto": "إضافة صورة",
-        "coverPhoto": "صورة الغلاف",
-        "minRequired": "مطلوب صورة واحدة على الأقل",
-        "maxAllowed": "الحد الأقصى {max} صور",
-        "uploadHint": "اضغط لإضافة صور من معرض الصور أو الكاميرا"
-      },
-      "review": {
-        "title": "مراجعة المعلومات",
-        "subtitle": "تأكد من صحة المعلومات قبل الإرسال",
-        "editSection": "تعديل"
-      },
-      "submit": "إرسال طلب التسجيل",
-      "submitting": "جارٍ الإرسال…",
-      "submitted": "تم إرسال طلبك",
-      "submittedBody": "سيراجع فريقنا طلبك خلال 24-48 ساعة وسيتم إشعارك بالنتيجة.",
-      "draft": {
-        "saved": "تم حفظ المسودة",
-        "restore": "استمرار التسجيل",
-        "discard": "تجاهل المسودة"
-      },
-      "validation": {
-        "nameRequired": "يرجى إدخال اسم النشاط التجاري",
-        "categoryRequired": "يرجى اختيار التصنيف",
-        "phoneRequired": "يرجى إدخال رقم الهاتف",
-        "locationRequired": "يرجى تحديد الموقع على الخريطة",
-        "photoRequired": "يرجى إضافة صورة واحدة على الأقل"
+      "rating": {
+        "title": "التقييمات",
+        "average": "متوسط التقييم",
+        "total": "{count} تقييم",
+        "breakdown": "تفصيل التقييمات",
+        "respond": "الرد على التقييم",
+        "responded": "تم الرد",
+        "pending": "في انتظار الرد"
       }
     },
-    "verification": {
-      "title": "حالة التوثيق",
-      "pending": {
-        "title": "طلبك قيد المراجعة",
-        "body": "يراجع فريقنا معلوماتك. ستتلقى إشعاراً خلال 24-48 ساعة.",
-        "estimatedTime": "الوقت المقدر: {hours} ساعة"
+    "customers": {
+      "title": "العملاء",
+      "subtitle": "إدارة علاقات العملاء",
+      "total": "{count} عميل",
+      "new": "عملاء جدد",
+      "returning": "عملاء عائدون",
+      "loyal": "عملاء مخلصون",
+      "atRisk": "عملاء في خطر",
+      "search": "البحث في العملاء…",
+      "filter": {
+        "all": "الكل",
+        "new": "جديد",
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "vip": "VIP"
       },
-      "approved": {
-        "title": "تم توثيق نشاطك التجاري",
-        "body": "أصبح نشاطك التجاري ظاهراً على الخريطة. يمكنك الآن إدارة ملفك.",
-        "badge": "موثّق"
+      "profile": {
+        "title": "ملف العميل",
+        "totalVisits": "{count} زيارة",
+        "totalSpent": "إجمالي الإنفاق: {amount}",
+        "lastVisit": "آخر زيارة: {date}",
+        "firstVisit": "أول زيارة: {date}",
+        "preferredService": "الخدمة المفضلة",
+        "notes": "ملاحظات",
+        "addNote": "إضافة ملاحظة"
       },
-      "rejected": {
-        "title": "لم يتم القبول",
-        "body": "لم نتمكن من توثيق نشاطك التجاري. السبب: {reason}",
-        "resubmit": "إعادة التقديم",
-        "reasons": {
-          "duplicateListing": "نشاط تجاري مكرر",
-          "invalidPhone": "رقم هاتف غير صالح",
-          "locationMismatch": "الموقع لا يتطابق مع العنوان",
-          "insufficientPhotos": "الصور غير كافية أو منخفضة الجودة",
-          "inappropriateContent": "محتوى غير ملائم",
-          "other": "سبب آخر"
+      "message": "إرسال رسالة",
+      "messageAll": "رسالة جماعية",
+      "export": "تصدير البيانات",
+      "empty": "لا يوجد عملاء بعد",
+      "loadError": "فشل تحميل بيانات العملاء"
+    },
+    "pricing": {
+      "title": "إدارة الأسعار",
+      "subtitle": "حدّث أسعار خدماتك ومنتجاتك",
+      "services": "الخدمات",
+      "products": "المنتجات",
+      "addService": "إضافة خدمة",
+      "addProduct": "إضافة منتج",
+      "editPrice": "تعديل السعر",
+      "serviceName": "اسم الخدمة",
+      "serviceNamePlaceholder": "مثال: قص الشعر",
+      "price": "السعر",
+      "pricePlaceholder": "أدخل السعر",
+      "duration": "المدة",
+      "durationPlaceholder": "مثال: ٣٠ دقيقة",
+      "description": "الوصف",
+      "available": "متاح",
+      "unavailable": "غير متاح",
+      "priceHistory": "سجل الأسعار",
+      "lastUpdated": "آخر تحديث: {date}",
+      "bulkUpdate": "تحديث جماعي",
+      "priceRange": {
+        "budget": "اقتصادي (أقل من ٥,٠٠٠ د.ع.)",
+        "mid": "متوسط (٥,٠٠٠–٢٠,٠٠٠ د.ع.)",
+        "premium": "مميز (أكثر من ٢٠,٠٠٠ د.ع.)"
+      },
+      "empty": "لم تُحدد أسعار بعد",
+      "saveSuccess": "تم حفظ الأسعار",
+      "saveError": "فشل حفظ الأسعار"
+    },
+    "settings": {
+      "title": "إعدادات النشاط التجاري",
+      "general": "عام",
+      "notifications": "الإشعارات",
+      "privacy": "الخصوصية",
+      "integrations": "التكاملات",
+      "billing": "الفوترة",
+      "language": "اللغة",
+      "timezone": "المنطقة الزمنية",
+      "currency": "العملة",
+      "autoReply": {
+        "title": "الرد التلقائي",
+        "enabled": "مفعّل",
+        "disabled": "معطّل",
+        "message": "رسالة الرد التلقائي",
+        "messagePlaceholder": "شكراً للتواصل معنا. سنرد عليك قريباً…",
+        "schedule": "جدول الرد التلقائي",
+        "outsideHours": "خارج ساعات العمل فقط",
+        "always": "دائماً"
+      },
+      "notificationPreferences": {
+        "newMessage": "رسالة جديدة",
+        "newAppointment": "موعد جديد",
+        "newReview": "تقييم جديد",
+        "appointmentReminder": "تذكير بالمواعيد",
+        "weeklyReport": "تقرير أسبوعي",
+        "promotionExpiry": "انتهاء العرض"
+      },
+      "team": {
+        "title": "أعضاء الفريق",
+        "addMember": "إضافة عضو",
+        "roles": {
+          "owner": "المالك",
+          "manager": "المدير",
+          "staff": "الموظف"
+        },
+        "invite": "دعوة عضو",
+        "remove": "إزالة عضو",
+        "removeConfirm": "إزالة {name} من الفريق؟"
+      },
+      "saveSuccess": "تم حفظ الإعدادات",
+      "saveError": "فشل حفظ الإعدادات"
+    },
+    "growth": {
+      "title": "النمو والتسويق",
+      "subtitle": "وسّع قاعدة عملائك",
+      "overview": {
+        "title": "نظرة عامة على النمو",
+        "currentPeriod": "الفترة الحالية",
+        "previousPeriod": "الفترة السابقة",
+        "growth": "نمو: {pct}٪",
+        "decline": "تراجع: {pct}٪"
+      },
+      "campaigns": {
+        "title": "الحملات التسويقية",
+        "create": "إنشاء حملة",
+        "active": "الحملات النشطة",
+        "past": "الحملات السابقة",
+        "reach": "الوصول: {count}",
+        "budget": "الميزانية: {amount}",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "status": {
+          "draft": "مسودة",
+          "active": "نشطة",
+          "paused": "موقوفة",
+          "completed": "مكتملة"
         }
       },
+      "insights": {
+        "title": "الرؤى والتحليلات",
+        "topKeywords": "أبرز كلمات البحث",
+        "customerDemographics": "ديموغرافيا العملاء",
+        "peakHours": "أوقات الذروة",
+        "busyDays": "أكثر الأيام ازدحاماً",
+        "competitorAnalysis": "تحليل المنافسين"
+      },
+      "tools": {
+        "title": "أدوات النمو",
+        "shareProfile": "مشاركة الملف الشخصي",
+        "getQrCode": "الحصول على رمز QR",
+        "referral": "برنامج الإحالة",
+        "loyaltyProgram": "برنامج الولاء",
+        "socialMedia": "ربط وسائل التواصل الاجتماعي"
+      }
+    },
+    "registration": {
+      "hours": {
+        "days": {
+          "monday": "دووشەممە",
+          "saturday": "شەممە",
+          "wednesday": "چوارشەممە",
+          "tuesday": "سێشەممە",
+          "thursday": "پێنجشەممە",
+          "friday": "هەینی",
+          "sunday": "یەکشەممە"
+        },
+        "from": "لە",
+        "title": "کاتەکانی کار",
+        "to": "بۆ",
+        "open": "کراوە",
+        "closed": "داخراوە",
+        "open24h": "٢٤ کاتژمێر کراوە"
+      },
+      "fields": {
+        "longitude": "درێژی",
+        "whatsapp": "ژمارەی واتساپ",
+        "descriptionPlaceholder": "خزمەتگوزارییەکانت و بەرهەمەکانت وەسف بکە…",
+        "addressPlaceholder": "گەڕەک، کۆلان، ژمارەی بینا",
+        "description": "وەسف",
+        "category": "پۆل",
+        "categoryPlaceholder": "پۆلێک هەڵبژێرە",
+        "facebook": "پەڕەی فەیسبووک",
+        "name": "ناوی کارووبار",
+        "address": "ناونیشانی تەواو",
+        "neighborhood": "گەڕەک",
+        "city": "شار",
+        "latitude": "پانی",
+        "priceRange": "مەودای نرخ",
+        "phonePlaceholder": "+964 7XX XXX XXXX",
+        "instagram": "ئەژمارەی ئینستاگرام",
+        "namePlaceholder": "نموونە: چێشتخانەی بەغداد",
+        "website": "ماڵپەڕ",
+        "phone": "ژمارەی تەلەفۆن"
+      },
+      "validation": {
+        "photoRequired": "تکایە لانیکم یەک وێنە زیادبکە",
+        "categoryRequired": "تکایە پۆلێک هەڵبژێرە",
+        "phoneRequired": "تکایە ژمارەی تەلەفۆن بنووسە",
+        "locationRequired": "تکایە شوێن لەسەر نەخشەکە دیاری بکە",
+        "nameRequired": "تکایە ناوی کارووبار بنووسە"
+      },
+      "photos": {
+        "uploadHint": "بیکرە بۆ زیادکردنی وێنەکان لە گالەری یان کامێراوە",
+        "maxAllowed": "زۆرترین {max} وێنە",
+        "title": "وێنەکانی کارووبار",
+        "addPhoto": "زیادکردنی وێنە",
+        "minRequired": "لانیکم یەک وێنە پێویستە",
+        "coverPhoto": "وێنەی سەرپۆش"
+      },
+      "steps": {
+        "photos": "وێنەکان",
+        "review": "پشکنین و ناردن",
+        "location": "شوێن",
+        "contact": "زانیارییەکانی پەیوەندی",
+        "basicInfo": "زانیارییە بنچینەییەکان",
+        "hours": "کاتەکانی کار"
+      },
+      "title": "تۆمارکردنی کارووبار",
+      "draft": {
+        "saved": "پیشەنووس پاشەکەوتکرا",
+        "discard": "دەرهێنانی پیشەنووس",
+        "restore": "بەردەوامبوونی تۆمارکردن"
+      },
+      "subtitle": "کارووبارەکەت بزیادکە لە نەخشەی عێراق",
+      "submitting": "دەنێردرێت…",
+      "location": {
+        "searchAddress": "بگەڕێ بۆ ناونیشان",
+        "useCurrentLocation": "شوێنی ئێستام بەکاربهێنە",
+        "title": "دیاریکردنی شوێن",
+        "pinPlaced": "شوێن دیاریکرا",
+        "instruction": "پیناکە بکێشە بۆ دیاریکردنی شوێنی کارووبارەکەت بە درستی"
+      },
+      "review": {
+        "editSection": "دەستکاری",
+        "title": "پشکنینی زانیارییەکان",
+        "subtitle": "پێش ناردن دڵنیابە لەدروستبوونی زانیارییەکان"
+      },
+      "step": "هەنگاوی {current} لە {total}",
+      "submit": "ناردنی داواکاری تۆمارکردن",
+      "submitted": "داواکاریەکەت نێردرا",
+      "submittedBody": "تیمەکەمان داواکاریەکەت لە ماوەی ٢٤-٤٨ کاتژمێردا پشکنین دەکات و ئاگادارت دەکاتەوە."
+    },
+    "verification": {
+      "pending": {
+        "estimatedTime": "کاتی هەڵسەنگاندراو: {hours} کاتژمێر",
+        "body": "تیمەکەمان زانیارییەکانت دەپشکنێت. لە ماوەی ٢٤-٤٨ کاتژمێردا ئاگادارت دەکاتەوە.",
+        "title": "داواکاریەکەت لەژێر پشکنینەوەیە"
+      },
       "suspended": {
-        "title": "تم تعليق النشاط التجاري",
-        "body": "تم تعليق نشاطك التجاري بسبب: {reason}",
-        "appeal": "تقديم اعتراض"
+        "title": "کارووبار هاوکاتیکردرا",
+        "body": "کارووبارەکەت بەهۆی ئەمەوە هاوکاتیکرا: {reason}",
+        "appeal": "ناردنی پێچەوانە"
+      },
+      "rejected": {
+        "reasons": {
+          "locationMismatch": "شوێن لەگەڵ ناونیشان نایەک",
+          "duplicateListing": "تۆمارکردنی دووبارە",
+          "inappropriateContent": "ناوەرۆکی نەگونجاو",
+          "invalidPhone": "ژمارەی تەلەفۆنی نادروست",
+          "other": "هۆیەکی تر",
+          "insufficientPhotos": "وێنەی نەبەس یان کەم کوالیتی"
+        },
+        "body": "نەمانتوانی کارووبارەکەت پشتڕاست بکەینەوە. هۆکار: {reason}",
+        "title": "قبووڵنەکرا",
+        "resubmit": "دووبارە ناردن"
       },
       "badge": {
-        "verified": "موثّق",
-        "unverified": "غير موثّق",
-        "pending": "قيد المراجعة",
-        "premium": "مميّز"
-      }
+        "pending": "لەژێر پشکنینەوە",
+        "verified": "پشتڕاستکراوە",
+        "premium": "پریمیۆم",
+        "unverified": "پشتڕاستنەکراوە"
+      },
+      "approved": {
+        "body": "کارووبارەکەت ئێستا لەسەر نەخشەکە دیارە. دەتوانیت پرۆفایلەکەت بەڕێوە ببەیت.",
+        "title": "کارووبارەکەت پشتڕاستکراوەتەوە",
+        "badge": "پشتڕاستکراوە"
+      },
+      "title": "دۆخی پشتڕاستکردنەوە"
     }
   },
   "offline": {
@@ -896,5 +1101,403 @@
     "export": "تصدير البيانات",
     "empty": "لا توجد بيانات كافية بعد",
     "loadError": "فشل تحميل الإحصائيات"
+  },
+  "safety": {
+    "title": "السلامة",
+    "subtitle": "ابقَ بأمان أثناء تنقلاتك",
+    "shareLocation": {
+      "title": "مشاركة الموقع",
+      "subtitle": "شارك موقعك مع جهات الاتصال الموثوقة",
+      "start": "بدء المشاركة",
+      "stop": "إيقاف المشاركة",
+      "sharing": "تتم مشاركة الموقع مع {count} جهات اتصال",
+      "duration": "تتم المشاركة لمدة {time}",
+      "selectDuration": "اختر مدة المشاركة",
+      "durations": {
+        "thirtyMin": "٣٠ دقيقة",
+        "oneHour": "ساعة واحدة",
+        "twoHours": "ساعتان",
+        "untilStop": "حتى الإيقاف اليدوي"
+      },
+      "whoCanSee": "من يستطيع رؤية موقعك",
+      "noContacts": "لا توجد جهات اتصال موثوقة بعد"
+    },
+    "sos": {
+      "title": "نداء الاستغاثة SOS",
+      "subtitle": "اضغط مطولاً لإرسال تنبيه طوارئ",
+      "hold": "اضغط مطولاً للإرسال",
+      "sending": "جارٍ إرسال تنبيه الطوارئ…",
+      "sent": "تم إرسال تنبيه الطوارئ",
+      "cancelled": "تم إلغاء نداء الاستغاثة",
+      "countdown": "سيُرسَل خلال {seconds} ثانية",
+      "alertContacts": "تم إخطار {count} جهة اتصال",
+      "callEmergency": "الاتصال بخدمات الطوارئ",
+      "emergencyNumber": "رقم الطوارئ: {number}"
+    },
+    "trustedContacts": {
+      "title": "جهات الاتصال الموثوقة",
+      "subtitle": "أشخاص تثق بهم في حالات الطوارئ",
+      "add": "إضافة جهة اتصال",
+      "remove": "إزالة جهة الاتصال",
+      "removeConfirm": "إزالة {name} من جهات الاتصال الموثوقة؟",
+      "invite": "دعوة {name} لتثبيت التطبيق",
+      "maxReached": "وصلت للحد الأقصى من جهات الاتصال الموثوقة",
+      "empty": "لم تُضَف جهات اتصال موثوقة بعد",
+      "searchContacts": "البحث في جهات الاتصال…",
+      "permissions": {
+        "title": "يحتاج التطبيق إلى الوصول لجهات الاتصال",
+        "allow": "سماح",
+        "deny": "رفض"
+      }
+    },
+    "safetyCheck": {
+      "title": "التحقق من السلامة",
+      "areYouSafe": "هل أنت بأمان؟",
+      "imSafe": "أنا بأمان",
+      "needHelp": "أحتاج مساعدة",
+      "autoAlert": "لم يرد. جارٍ إخطار جهات الاتصال الموثوقة.",
+      "checkIn": "تسجيل الوصول",
+      "nextCheck": "الفحص التالي بعد {time}"
+    },
+    "dangerZones": {
+      "title": "المناطق التحذيرية",
+      "enteringZone": "أنت تدخل منطقة تحذيرية",
+      "zoneName": "المنطقة: {name}",
+      "zoneReason": "السبب: {reason}",
+      "dismiss": "تجاهل التحذير",
+      "getInfo": "معرفة المزيد"
+    },
+    "map": {
+      "safeRoutes": "الطرق الآمنة",
+      "avoidArea": "تجنب هذه المنطقة",
+      "safetyRating": "تقييم الأمان: {rating}",
+      "wellLit": "إنارة جيدة",
+      "crowded": "منطقة مزدحمة",
+      "isolated": "منطقة معزولة",
+      "reportIncident": "الإبلاغ عن حادث"
+    }
+  },
+  "checkins": {
+    "title": "تسجيل الحضور",
+    "subtitle": "سجّل حضورك واكسب نقاطاً",
+    "checkIn": "تسجيل الحضور",
+    "checkOut": "تسجيل المغادرة",
+    "checkedIn": "تم تسجيل حضورك في {place}",
+    "alreadyCheckedIn": "لقد سجلت حضورك هنا مسبقاً",
+    "tooFar": "أنت بعيد جداً عن هذا المكان",
+    "cooldown": "يمكنك تسجيل الحضور مجدداً بعد {time}",
+    "streak": {
+      "title": "سلسلة تسجيل الحضور",
+      "current": "السلسلة الحالية: {n} أيام",
+      "best": "أفضل سلسلة: {n} أيام",
+      "broken": "انقطعت السلسلة. ابدأ من جديد!",
+      "keepGoing": "رائع! واصل السلسلة"
+    },
+    "bonus": {
+      "firstVisit": "مكافأة الزيارة الأولى: {points} نقطة",
+      "regularVisitor": "مكافأة الزائر المنتظم: {points} نقطة",
+      "weekendBonus": "مكافأة عطلة نهاية الأسبوع: {points} نقطة",
+      "nightOwl": "مكافأة سهر الليل: {points} نقطة",
+      "earlyBird": "مكافأة الباكر: {points} نقطة",
+      "mayor": "أنت عمدة هذا المكان!",
+      "mayorBonus": "مكافأة العمدة: {points} نقطة"
+    },
+    "history": {
+      "title": "سجل الحضور",
+      "today": "اليوم",
+      "thisWeek": "هذا الأسبوع",
+      "thisMonth": "هذا الشهر",
+      "total": "إجمالي الزيارات: {count}",
+      "empty": "لا يوجد سجل حضور بعد"
+    },
+    "nearby": {
+      "title": "الأماكن القريبة لتسجيل الحضور",
+      "distance": "على بعد {distance}",
+      "points": "اكسب {points} نقطة"
+    },
+    "leaderboard": {
+      "title": "أبرز المستخدمين بتسجيل الحضور",
+      "atPlace": "في {place}",
+      "thisMonth": "هذا الشهر",
+      "allTime": "كل الأوقات"
+    }
+  },
+  "wallet": {
+    "title": "المحفظة",
+    "subtitle": "إدارة رصيدك ومعاملاتك",
+    "balance": "الرصيد",
+    "currentBalance": "الرصيد الحالي: {amount}",
+    "points": {
+      "title": "نقاطي",
+      "total": "{n} نقطة",
+      "value": "تساوي {amount}",
+      "expires": "تنتهي {n} نقطة في {date}",
+      "earn": "كسب نقاط",
+      "redeem": "استبدال نقاط",
+      "history": "سجل النقاط"
+    },
+    "topUp": {
+      "title": "إعادة الشحن",
+      "selectAmount": "اختر المبلغ",
+      "customAmount": "مبلغ مخصص",
+      "amountPlaceholder": "أدخل المبلغ",
+      "methods": {
+        "title": "طريقة الشحن",
+        "bankCard": "بطاقة بنكية",
+        "bankTransfer": "تحويل بنكي",
+        "agent": "عبر الوكيل",
+        "crypto": "عملة رقمية"
+      },
+      "confirm": "تأكيد الشحن",
+      "success": "تم شحن {amount} بنجاح",
+      "failed": "فشل الشحن"
+    },
+    "transfer": {
+      "title": "تحويل الرصيد",
+      "recipient": "المستلم",
+      "recipientPlaceholder": "البحث عن مستخدم…",
+      "amount": "المبلغ",
+      "note": "ملاحظة (اختياري)",
+      "notePlaceholder": "سبب التحويل…",
+      "fee": "رسوم التحويل: {amount}",
+      "confirm": "تأكيد التحويل",
+      "success": "تم تحويل {amount} إلى {name}",
+      "failed": "فشل التحويل"
+    },
+    "transactions": {
+      "title": "المعاملات",
+      "empty": "لا توجد معاملات بعد",
+      "types": {
+        "topUp": "إعادة الشحن",
+        "payment": "دفع",
+        "transfer": "تحويل",
+        "refund": "استرداد",
+        "bonus": "مكافأة",
+        "reward": "جائزة"
+      },
+      "status": {
+        "pending": "جارٍ المعالجة",
+        "completed": "مكتمل",
+        "failed": "فشل",
+        "cancelled": "ملغى"
+      },
+      "filter": {
+        "all": "الكل",
+        "credit": "رصيد وارد",
+        "debit": "رصيد صادر"
+      }
+    },
+    "security": {
+      "title": "أمان المحفظة",
+      "pin": "رمز PIN",
+      "changePin": "تغيير الرمز",
+      "biometric": "تسجيل الدخول بالبيومترية",
+      "twoFactor": "التحقق بخطوتين",
+      "transactionLimit": "الحد اليومي للمعاملات: {amount}",
+      "lockAfter": "القفل بعد عدم النشاط"
+    }
+  },
+  "crowding": {
+    "title": "الازدحام",
+    "subtitle": "اعرف مدى ازدحام الأماكن",
+    "levels": {
+      "empty": "خالٍ",
+      "quiet": "هادئ",
+      "moderate": "معتدل",
+      "busy": "مزدحم",
+      "veryBusy": "مزدحم جداً",
+      "atCapacity": "ممتلئ"
+    },
+    "currentLevel": "مستوى الازدحام الحالي: {level}",
+    "bestTime": "أفضل وقت للزيارة: {time}",
+    "prediction": {
+      "title": "توقع الازدحام",
+      "todayPeak": "ذروة اليوم: {time}",
+      "weekdayPeak": "ذروة أيام الأسبوع: {time}",
+      "weekendPeak": "ذروة عطلة نهاية الأسبوع: {time}",
+      "leastBusy": "أوقات أقل ازدحاماً"
+    },
+    "report": {
+      "title": "الإبلاغ عن الازدحام",
+      "currentLevel": "مستوى الازدحام الحالي",
+      "submit": "إرسال التقرير",
+      "submitted": "شكراً على تقريرك",
+      "confidence": "الثقة: {pct}٪",
+      "source": "المصدر: تقارير المستخدمين",
+      "observedAt": "رُصد في: {time}"
+    },
+    "map": {
+      "title": "خريطة الازدحام",
+      "heatmap": "خريطة الحرارة",
+      "realTime": "بيانات فورية",
+      "historical": "بيانات تاريخية",
+      "legend": {
+        "low": "منخفض",
+        "medium": "متوسط",
+        "high": "مرتفع"
+      }
+    },
+    "notifications": {
+      "crowdAlert": "تنبيه ازدحام في {place}",
+      "clearedUp": "تراجع الازدحام في {place}"
+    }
+  },
+  "badges": {
+    "title": "الشارات والإنجازات",
+    "subtitle": "اجمع الشارات وأثبت خبرتك",
+    "earned": "الشارات المكتسبة",
+    "available": "الشارات المتاحة",
+    "locked": "الشارات المقفلة",
+    "new": "شارة جديدة!",
+    "categories": {
+      "explorer": "المستكشف",
+      "contributor": "المساهم",
+      "social": "الاجتماعي",
+      "foodie": "محب الطعام",
+      "traveler": "المسافر",
+      "local": "المحلي",
+      "reviewer": "المراجع",
+      "photographer": "المصور",
+      "helper": "المساعد",
+      "special": "خاص"
+    },
+    "detail": {
+      "title": "تفاصيل الشارة",
+      "howToEarn": "كيفية الاكتساب",
+      "progress": "التقدم: {current} من {required}",
+      "earnedOn": "اكتُسبت في {date}",
+      "rarity": {
+        "common": "شائع",
+        "uncommon": "غير شائع",
+        "rare": "نادر",
+        "epic": "ملحمي",
+        "legendary": "أسطوري"
+      }
+    },
+    "showcase": {
+      "title": "عرض الشارات",
+      "select": "اختر الشارات للعرض",
+      "maxSelected": "الحد الأقصى {max} شارات",
+      "save": "حفظ الاختيار"
+    },
+    "specific": {
+      "firstCheckin": "أول تسجيل حضور",
+      "explorer10": "زيارة ١٠ أماكن مختلفة",
+      "reviewer": "كتابة ٥ تقييمات",
+      "photoPro": "رفع ٢٠ صورة",
+      "socialButterfly": "متابعة ٥٠ مستخدماً",
+      "helpfulHand": "الإجابة على ١٠ أسئلة",
+      "weekStreak7": "الحفاظ على سلسلة ٧ أيام",
+      "nightExplorer": "زيارة الأماكن بعد الساعة ١٠ مساءً",
+      "earlyBird": "زيارة الأماكن قبل الساعة ٨ صباحاً",
+      "localHero": "إضافة ١٠ أماكن للخريطة",
+      "mayor": "أصبحت عمدة مكان ما"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "أهلاً بك في نقشة العراق",
+      "subtitle": "دليلك الذكي لاستكشاف العراق",
+      "getStarted": "ابدأ الآن",
+      "signIn": "لديك حساب؟ تسجيل الدخول"
+    },
+    "slides": {
+      "map": {
+        "title": "استكشف مدينتك",
+        "body": "خريطة تفاعلية باللغتين العربية والكردية، تغطي آلاف الأماكن في أرجاء العراق."
+      },
+      "assistant": {
+        "title": "مساعدك الذكي",
+        "body": "اسأل عن أي مكان أو خدمة بالعربية والكردية واحصل على إجابات فورية."
+      },
+      "community": {
+        "title": "مجتمع محلي حقيقي",
+        "body": "شارك تجاربك وقيّم الأماكن وساعد الآخرين في اكتشاف أفضل ما في مدينتك."
+      },
+      "providers": {
+        "title": "للتجار وأصحاب الأعمال",
+        "body": "سجّل نشاطك التجاري وتواصل مع العملاء بكل سهولة."
+      }
+    },
+    "permissions": {
+      "title": "الأذونات المطلوبة",
+      "subtitle": "نحتاج هذه الأذونات لنوفر لك أفضل تجربة",
+      "location": {
+        "title": "الوصول إلى الموقع",
+        "reason": "لعرض الأماكن القريبة وإرشادك بدقة"
+      },
+      "notifications": {
+        "title": "الإشعارات",
+        "reason": "لإخطارك بالعروض القريبة والتحديثات المهمة"
+      },
+      "camera": {
+        "title": "الكاميرا",
+        "reason": "لالتقاط الصور ورفع صور الأماكن والمنتجات"
+      },
+      "allow": "سماح",
+      "skip": "تخطي",
+      "later": "لاحقاً"
+    },
+    "language": {
+      "title": "اختر لغتك",
+      "subtitle": "يمكنك تغيير ذلك لاحقاً في الإعدادات",
+      "arabic": "العربية",
+      "kurdish": "کوردی سۆرانی",
+      "english": "English"
+    },
+    "profile": {
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "اختياري — يمكنك تخطي هذه الخطوة",
+      "name": "الاسم",
+      "namePlaceholder": "اسمك",
+      "city": "مدينتك",
+      "cityPlaceholder": "اختر مدينتك",
+      "interests": {
+        "title": "اهتماماتك",
+        "food": "الطعام والمطاعم",
+        "shopping": "التسوق",
+        "travel": "السفر والاستكشاف",
+        "sports": "الرياضة",
+        "culture": "الثقافة والتراث",
+        "entertainment": "الترفيه"
+      }
+    },
+    "complete": {
+      "title": "كل شيء جاهز!",
+      "subtitle": "استمتع باستكشاف العراق",
+      "exploreMap": "استكشف الخريطة",
+      "viewProfile": "عرض ملفك الشخصي"
+    }
+  },
+  "map": {
+    "safety": {
+      "title": "سلامة الخريطة",
+      "safeArea": "منطقة آمنة",
+      "warningArea": "منطقة تحذيرية",
+      "dangerArea": "منطقة خطرة",
+      "checkpointNearby": "نقطة تفتيش قريبة",
+      "floodRisk": "خطر الفيضانات",
+      "roadClosed": "الطريق مغلق",
+      "reportHazard": "الإبلاغ عن خطر",
+      "hazardReported": "تم الإبلاغ عن الخطر",
+      "safetyLegend": "دليل مؤشرات السلامة",
+      "updatedAt": "محدّث في {time}"
+    }
+  },
+  "account": {
+    "trustedContacts": {
+      "title": "جهات الاتصال الموثوقة",
+      "subtitle": "أشخاص يمكنهم استقبال تنبيهات الطوارئ",
+      "manage": "إدارة جهات الاتصال",
+      "add": "إضافة جهة اتصال",
+      "added": "تمت إضافة {name}",
+      "removed": "تمت إزالة {name}",
+      "max": "الحد الأقصى {max} جهات اتصال",
+      "notifyOn": {
+        "sos": "عند SOS",
+        "shareLocation": "عند مشاركة الموقع",
+        "safetyCheck": "عند التحقق من السلامة"
+      }
+    }
   }
 }

@@ -85,6 +85,41 @@ export function formatNumber(value: number, options?: Intl.NumberFormatOptions):
 
 registerNamespace('common', { ar, ckb, en });
 
+/** @public RTL layout helpers for Arabic and Kurdish Sorani interfaces */
+export {
+  isRtlLocale,
+  rtlRow,
+  mirrorValue,
+  rtlTextAlign,
+  getTextAlign,
+  rtlSelectStyle,
+  rtlIconName,
+  wrapBidi,
+  isArabicScript,
+  flipStyleForRtl,
+  directionAttr,
+} from './rtl-helpers';
+
+/** @public Kurdish Sorani (ckb) linguistic helpers */
+export {
+  KURDISH_SOLAR_MONTHS,
+  KURDISH_GREGORIAN_MONTHS,
+  KURDISH_WEEKDAYS,
+  KURDISH_WEEKDAYS_SHORT,
+  KURDISH_GREETINGS,
+  toKurdishNumerals,
+  fromKurdishNumerals,
+  formatKurdishNumber,
+  formatKurdishIqd,
+  kurdishPluralCategory,
+  getKurdishGreeting,
+  normalizeKurdish,
+  toKurdishOrdinal,
+  formatKurdishDate,
+  formatKurdishTime,
+  formatKurdishRelativeTime,
+} from './kurdish-sorani';
+
 /** @public validate that all locale JSON files have the same keys and {param} sets */
 export {
   validateLocales,

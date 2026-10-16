@@ -122,7 +122,26 @@
     "speedLimit": "Speed limit: {speed} km/h",
     "trafficDelay": "Traffic delay: {minutes} min",
     "alternativeRoute": "Alternative route",
-    "shareTrip": "Share trip"
+    "shareTrip": "Share trip",
+    "removeStop": "وەستگە لابببە",
+    "roadType": {
+      "motorway": "ئۆتۆستراد",
+      "unpaved": "ڕێگای ناهەموار",
+      "residential": "کۆلانی نیشتەجێبوون",
+      "secondary": "ڕێگای دووهەمین",
+      "primary": "ڕێگای سەرەکی"
+    },
+    "startFromHere": "لە ئێرەوە دەستپێبکە",
+    "estimatedCost": "ئەندازەکراوی تێچوون: {amount}",
+    "estimatedFuel": "ئەندازەکراوی سووتەمەنی: {amount} لیتر",
+    "voiceGuidanceOn": "ڕێنیشاندانی دەنگی چالاکە",
+    "voiceGuidance": "ڕێنیشاندانی دەنگی",
+    "voiceGuidanceOff": "ڕێنیشاندانی دەنگی ناچالاکە",
+    "reorderStops": "ڕیزبەندیی وەستگەکان",
+    "waypointAdded": "وەستگە زیادکرا",
+    "previewRoute": "پێشبینینی ڕێگا",
+    "multiStop": "ڕێگای چەند وەستگەیی",
+    "addStop": "وەستگە زیادبکە"
   },
   "moderation": {
     "report": {
@@ -204,129 +223,315 @@
     "recordingIndicator": "Recording…"
   },
   "provider": {
-    "registration": {
-      "title": "Register your business",
-      "subtitle": "Add your business to the Iraq Maps",
-      "step": "Step {current} of {total}",
-      "steps": {
-        "basicInfo": "Basic info",
-        "location": "Location",
-        "contact": "Contact details",
-        "photos": "Photos",
-        "hours": "Business hours",
-        "review": "Review and submit"
+    "dashboard": {
+      "title": "Business Dashboard",
+      "welcome": "Welcome, {name}",
+      "overview": "Overview",
+      "todayStats": "Today's stats",
+      "weekStats": "This week's stats",
+      "profileViews": "{count} profile views",
+      "profileViewsChange": "{pct}% vs last week",
+      "messagesReceived": "{count} messages received",
+      "appointmentsToday": "{count} appointments today",
+      "newCustomers": "{count} new customers",
+      "revenue": "Revenue: {amount}",
+      "quickActions": "Quick actions",
+      "editProfile": "Edit profile",
+      "addPromotion": "Add promotion",
+      "viewMessages": "View messages",
+      "viewAppointments": "View appointments",
+      "recentActivity": "Recent activity",
+      "noActivity": "No recent activity",
+      "performance": {
+        "title": "Performance",
+        "impressions": "Impressions",
+        "clicks": "Clicks",
+        "saves": "Saves",
+        "directions": "Directions requests",
+        "calls": "Calls",
+        "messages": "Messages",
+        "conversionRate": "Conversion rate: {pct}%"
       },
-      "fields": {
-        "name": "Business name",
-        "namePlaceholder": "e.g. Baghdad Restaurant",
-        "category": "Category",
-        "categoryPlaceholder": "Select a category",
-        "description": "Description",
-        "descriptionPlaceholder": "Describe your services and products…",
-        "phone": "Phone number",
-        "phonePlaceholder": "+964 7XX XXX XXXX",
-        "whatsapp": "WhatsApp number",
-        "website": "Website",
-        "address": "Address",
-        "addressPlaceholder": "Neighborhood, street, building number",
-        "city": "City",
-        "neighborhood": "Neighborhood",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "priceRange": "Price range",
-        "instagram": "Instagram handle",
-        "facebook": "Facebook page"
-      },
-      "location": {
-        "title": "Set location",
-        "instruction": "Drag the pin to mark your exact location",
-        "useCurrentLocation": "Use my current location",
-        "searchAddress": "Search for address",
-        "pinPlaced": "Location set"
-      },
-      "hours": {
-        "title": "Business hours",
-        "open": "Open",
-        "closed": "Closed",
-        "open24h": "Open 24 hours",
-        "from": "From",
-        "to": "To",
-        "days": {
-          "saturday": "Saturday",
-          "sunday": "Sunday",
-          "monday": "Monday",
-          "tuesday": "Tuesday",
-          "wednesday": "Wednesday",
-          "thursday": "Thursday",
-          "friday": "Friday"
-        }
-      },
-      "photos": {
-        "title": "Business photos",
-        "addPhoto": "Add photo",
-        "coverPhoto": "Cover photo",
-        "minRequired": "At least one photo is required",
-        "maxAllowed": "Maximum {max} photos",
-        "uploadHint": "Tap to add photos from gallery or camera"
-      },
-      "review": {
-        "title": "Review your info",
-        "subtitle": "Make sure everything is correct before submitting",
-        "editSection": "Edit"
-      },
-      "submit": "Submit registration",
-      "submitting": "Submitting…",
-      "submitted": "Request submitted",
-      "submittedBody": "Our team will review your request within 24-48 hours and notify you of the outcome.",
-      "draft": {
-        "saved": "Draft saved",
-        "restore": "Continue registration",
-        "discard": "Discard draft"
-      },
-      "validation": {
-        "nameRequired": "Please enter a business name",
-        "categoryRequired": "Please select a category",
-        "phoneRequired": "Please enter a phone number",
-        "locationRequired": "Please set a location on the map",
-        "photoRequired": "Please add at least one photo"
+      "rating": {
+        "title": "Reviews",
+        "average": "Average rating",
+        "total": "{count} reviews",
+        "breakdown": "Rating breakdown",
+        "respond": "Respond to review",
+        "responded": "Responded",
+        "pending": "Awaiting response"
       }
     },
-    "verification": {
-      "title": "Verification status",
-      "pending": {
-        "title": "Your request is under review",
-        "body": "Our team is reviewing your information. You'll receive a notification within 24-48 hours.",
-        "estimatedTime": "Estimated time: {hours} hours"
+    "customers": {
+      "title": "Customers",
+      "subtitle": "Manage customer relationships",
+      "total": "{count} customers",
+      "new": "New customers",
+      "returning": "Returning customers",
+      "loyal": "Loyal customers",
+      "atRisk": "At-risk customers",
+      "search": "Search customers…",
+      "filter": {
+        "all": "All",
+        "new": "New",
+        "active": "Active",
+        "inactive": "Inactive",
+        "vip": "VIP"
       },
-      "approved": {
-        "title": "Your business is verified",
-        "body": "Your business is now visible on the map. You can manage your profile.",
-        "badge": "Verified"
+      "profile": {
+        "title": "Customer profile",
+        "totalVisits": "{count} visits",
+        "totalSpent": "Total spent: {amount}",
+        "lastVisit": "Last visit: {date}",
+        "firstVisit": "First visit: {date}",
+        "preferredService": "Preferred service",
+        "notes": "Notes",
+        "addNote": "Add note"
       },
-      "rejected": {
-        "title": "Not approved",
-        "body": "We couldn't verify your business. Reason: {reason}",
-        "resubmit": "Resubmit",
-        "reasons": {
-          "duplicateListing": "Duplicate listing",
-          "invalidPhone": "Invalid phone number",
-          "locationMismatch": "Location doesn't match address",
-          "insufficientPhotos": "Insufficient or low-quality photos",
-          "inappropriateContent": "Inappropriate content",
-          "other": "Other reason"
+      "message": "Send message",
+      "messageAll": "Broadcast message",
+      "export": "Export data",
+      "empty": "No customers yet",
+      "loadError": "Failed to load customer data"
+    },
+    "pricing": {
+      "title": "Pricing management",
+      "subtitle": "Update your service and product prices",
+      "services": "Services",
+      "products": "Products",
+      "addService": "Add service",
+      "addProduct": "Add product",
+      "editPrice": "Edit price",
+      "serviceName": "Service name",
+      "serviceNamePlaceholder": "e.g. Haircut",
+      "price": "Price",
+      "pricePlaceholder": "Enter price",
+      "duration": "Duration",
+      "durationPlaceholder": "e.g. 30 minutes",
+      "description": "Description",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "priceHistory": "Price history",
+      "lastUpdated": "Last updated: {date}",
+      "bulkUpdate": "Bulk update",
+      "priceRange": {
+        "budget": "Budget (under 5,000 IQD)",
+        "mid": "Mid-range (5,000–20,000 IQD)",
+        "premium": "Premium (over 20,000 IQD)"
+      },
+      "empty": "No prices set",
+      "saveSuccess": "Prices saved",
+      "saveError": "Failed to save prices"
+    },
+    "settings": {
+      "title": "Business settings",
+      "general": "General",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "integrations": "Integrations",
+      "billing": "Billing",
+      "language": "Language",
+      "timezone": "Timezone",
+      "currency": "Currency",
+      "autoReply": {
+        "title": "Auto-reply",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "message": "Auto-reply message",
+        "messagePlaceholder": "Thank you for reaching out. We'll reply shortly…",
+        "schedule": "Auto-reply schedule",
+        "outsideHours": "Outside business hours only",
+        "always": "Always"
+      },
+      "notificationPreferences": {
+        "newMessage": "New message",
+        "newAppointment": "New appointment",
+        "newReview": "New review",
+        "appointmentReminder": "Appointment reminders",
+        "weeklyReport": "Weekly report",
+        "promotionExpiry": "Promotion expiry"
+      },
+      "team": {
+        "title": "Team members",
+        "addMember": "Add member",
+        "roles": {
+          "owner": "Owner",
+          "manager": "Manager",
+          "staff": "Staff"
+        },
+        "invite": "Invite member",
+        "remove": "Remove member",
+        "removeConfirm": "Remove {name} from the team?"
+      },
+      "saveSuccess": "Settings saved",
+      "saveError": "Failed to save settings"
+    },
+    "growth": {
+      "title": "Growth and marketing",
+      "subtitle": "Expand your customer base",
+      "overview": {
+        "title": "Growth overview",
+        "currentPeriod": "Current period",
+        "previousPeriod": "Previous period",
+        "growth": "Growth: {pct}%",
+        "decline": "Decline: {pct}%"
+      },
+      "campaigns": {
+        "title": "Marketing campaigns",
+        "create": "Create campaign",
+        "active": "Active campaigns",
+        "past": "Past campaigns",
+        "reach": "Reach: {count}",
+        "budget": "Budget: {amount}",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "status": {
+          "draft": "Draft",
+          "active": "Active",
+          "paused": "Paused",
+          "completed": "Completed"
         }
       },
+      "insights": {
+        "title": "Insights and analytics",
+        "topKeywords": "Top search keywords",
+        "customerDemographics": "Customer demographics",
+        "peakHours": "Peak hours",
+        "busyDays": "Busiest days",
+        "competitorAnalysis": "Competitor analysis"
+      },
+      "tools": {
+        "title": "Growth tools",
+        "shareProfile": "Share profile",
+        "getQrCode": "Get QR code",
+        "referral": "Referral program",
+        "loyaltyProgram": "Loyalty program",
+        "socialMedia": "Connect social media"
+      }
+    },
+    "registration": {
+      "hours": {
+        "days": {
+          "monday": "دووشەممە",
+          "saturday": "شەممە",
+          "wednesday": "چوارشەممە",
+          "tuesday": "سێشەممە",
+          "thursday": "پێنجشەممە",
+          "friday": "هەینی",
+          "sunday": "یەکشەممە"
+        },
+        "from": "لە",
+        "title": "کاتەکانی کار",
+        "to": "بۆ",
+        "open": "کراوە",
+        "closed": "داخراوە",
+        "open24h": "٢٤ کاتژمێر کراوە"
+      },
+      "fields": {
+        "longitude": "درێژی",
+        "whatsapp": "ژمارەی واتساپ",
+        "descriptionPlaceholder": "خزمەتگوزارییەکانت و بەرهەمەکانت وەسف بکە…",
+        "addressPlaceholder": "گەڕەک، کۆلان، ژمارەی بینا",
+        "description": "وەسف",
+        "category": "پۆل",
+        "categoryPlaceholder": "پۆلێک هەڵبژێرە",
+        "facebook": "پەڕەی فەیسبووک",
+        "name": "ناوی کارووبار",
+        "address": "ناونیشانی تەواو",
+        "neighborhood": "گەڕەک",
+        "city": "شار",
+        "latitude": "پانی",
+        "priceRange": "مەودای نرخ",
+        "phonePlaceholder": "+964 7XX XXX XXXX",
+        "instagram": "ئەژمارەی ئینستاگرام",
+        "namePlaceholder": "نموونە: چێشتخانەی بەغداد",
+        "website": "ماڵپەڕ",
+        "phone": "ژمارەی تەلەفۆن"
+      },
+      "validation": {
+        "photoRequired": "تکایە لانیکم یەک وێنە زیادبکە",
+        "categoryRequired": "تکایە پۆلێک هەڵبژێرە",
+        "phoneRequired": "تکایە ژمارەی تەلەفۆن بنووسە",
+        "locationRequired": "تکایە شوێن لەسەر نەخشەکە دیاری بکە",
+        "nameRequired": "تکایە ناوی کارووبار بنووسە"
+      },
+      "photos": {
+        "uploadHint": "بیکرە بۆ زیادکردنی وێنەکان لە گالەری یان کامێراوە",
+        "maxAllowed": "زۆرترین {max} وێنە",
+        "title": "وێنەکانی کارووبار",
+        "addPhoto": "زیادکردنی وێنە",
+        "minRequired": "لانیکم یەک وێنە پێویستە",
+        "coverPhoto": "وێنەی سەرپۆش"
+      },
+      "steps": {
+        "photos": "وێنەکان",
+        "review": "پشکنین و ناردن",
+        "location": "شوێن",
+        "contact": "زانیارییەکانی پەیوەندی",
+        "basicInfo": "زانیارییە بنچینەییەکان",
+        "hours": "کاتەکانی کار"
+      },
+      "title": "تۆمارکردنی کارووبار",
+      "draft": {
+        "saved": "پیشەنووس پاشەکەوتکرا",
+        "discard": "دەرهێنانی پیشەنووس",
+        "restore": "بەردەوامبوونی تۆمارکردن"
+      },
+      "subtitle": "کارووبارەکەت بزیادکە لە نەخشەی عێراق",
+      "submitting": "دەنێردرێت…",
+      "location": {
+        "searchAddress": "بگەڕێ بۆ ناونیشان",
+        "useCurrentLocation": "شوێنی ئێستام بەکاربهێنە",
+        "title": "دیاریکردنی شوێن",
+        "pinPlaced": "شوێن دیاریکرا",
+        "instruction": "پیناکە بکێشە بۆ دیاریکردنی شوێنی کارووبارەکەت بە درستی"
+      },
+      "review": {
+        "editSection": "دەستکاری",
+        "title": "پشکنینی زانیارییەکان",
+        "subtitle": "پێش ناردن دڵنیابە لەدروستبوونی زانیارییەکان"
+      },
+      "step": "هەنگاوی {current} لە {total}",
+      "submit": "ناردنی داواکاری تۆمارکردن",
+      "submitted": "داواکاریەکەت نێردرا",
+      "submittedBody": "تیمەکەمان داواکاریەکەت لە ماوەی ٢٤-٤٨ کاتژمێردا پشکنین دەکات و ئاگادارت دەکاتەوە."
+    },
+    "verification": {
+      "pending": {
+        "estimatedTime": "کاتی هەڵسەنگاندراو: {hours} کاتژمێر",
+        "body": "تیمەکەمان زانیارییەکانت دەپشکنێت. لە ماوەی ٢٤-٤٨ کاتژمێردا ئاگادارت دەکاتەوە.",
+        "title": "داواکاریەکەت لەژێر پشکنینەوەیە"
+      },
       "suspended": {
-        "title": "Business suspended",
-        "body": "Your business has been suspended due to: {reason}",
-        "appeal": "Submit appeal"
+        "title": "کارووبار هاوکاتیکردرا",
+        "body": "کارووبارەکەت بەهۆی ئەمەوە هاوکاتیکرا: {reason}",
+        "appeal": "ناردنی پێچەوانە"
+      },
+      "rejected": {
+        "reasons": {
+          "locationMismatch": "شوێن لەگەڵ ناونیشان نایەک",
+          "duplicateListing": "تۆمارکردنی دووبارە",
+          "inappropriateContent": "ناوەرۆکی نەگونجاو",
+          "invalidPhone": "ژمارەی تەلەفۆنی نادروست",
+          "other": "هۆیەکی تر",
+          "insufficientPhotos": "وێنەی نەبەس یان کەم کوالیتی"
+        },
+        "body": "نەمانتوانی کارووبارەکەت پشتڕاست بکەینەوە. هۆکار: {reason}",
+        "title": "قبووڵنەکرا",
+        "resubmit": "دووبارە ناردن"
       },
       "badge": {
-        "verified": "Verified",
-        "unverified": "Unverified",
-        "pending": "Under review",
-        "premium": "Premium"
-      }
+        "pending": "لەژێر پشکنینەوە",
+        "verified": "پشتڕاستکراوە",
+        "premium": "پریمیۆم",
+        "unverified": "پشتڕاستنەکراوە"
+      },
+      "approved": {
+        "body": "کارووبارەکەت ئێستا لەسەر نەخشەکە دیارە. دەتوانیت پرۆفایلەکەت بەڕێوە ببەیت.",
+        "title": "کارووبارەکەت پشتڕاستکراوەتەوە",
+        "badge": "پشتڕاستکراوە"
+      },
+      "title": "دۆخی پشتڕاستکردنەوە"
     }
   },
   "offline": {
@@ -896,5 +1101,403 @@
     "export": "Export data",
     "empty": "Not enough data yet",
     "loadError": "Failed to load analytics"
+  },
+  "safety": {
+    "title": "Safety",
+    "subtitle": "Stay safe while you travel",
+    "shareLocation": {
+      "title": "Share location",
+      "subtitle": "Share your location with trusted contacts",
+      "start": "Start sharing",
+      "stop": "Stop sharing",
+      "sharing": "Sharing location with {count} contacts",
+      "duration": "Sharing for {time}",
+      "selectDuration": "Select sharing duration",
+      "durations": {
+        "thirtyMin": "30 minutes",
+        "oneHour": "1 hour",
+        "twoHours": "2 hours",
+        "untilStop": "Until manually stopped"
+      },
+      "whoCanSee": "Who can see your location",
+      "noContacts": "No trusted contacts yet"
+    },
+    "sos": {
+      "title": "SOS Emergency",
+      "subtitle": "Hold to send an emergency alert",
+      "hold": "Hold to send",
+      "sending": "Sending emergency alert…",
+      "sent": "Emergency alert sent",
+      "cancelled": "Emergency cancelled",
+      "countdown": "Sending in {seconds} seconds",
+      "alertContacts": "{count} contacts notified",
+      "callEmergency": "Call emergency services",
+      "emergencyNumber": "Emergency number: {number}"
+    },
+    "trustedContacts": {
+      "title": "Trusted contacts",
+      "subtitle": "People you trust in emergencies",
+      "add": "Add contact",
+      "remove": "Remove contact",
+      "removeConfirm": "Remove {name} from trusted contacts?",
+      "invite": "Invite {name} to install the app",
+      "maxReached": "Maximum trusted contacts reached",
+      "empty": "No trusted contacts added yet",
+      "searchContacts": "Search contacts…",
+      "permissions": {
+        "title": "The app needs contacts access",
+        "allow": "Allow",
+        "deny": "Deny"
+      }
+    },
+    "safetyCheck": {
+      "title": "Safety check",
+      "areYouSafe": "Are you safe?",
+      "imSafe": "I'm safe",
+      "needHelp": "I need help",
+      "autoAlert": "No response. Notifying trusted contacts.",
+      "checkIn": "Check in",
+      "nextCheck": "Next check in {time}"
+    },
+    "dangerZones": {
+      "title": "Warning zones",
+      "enteringZone": "You are entering a warning zone",
+      "zoneName": "Zone: {name}",
+      "zoneReason": "Reason: {reason}",
+      "dismiss": "Dismiss warning",
+      "getInfo": "Learn more"
+    },
+    "map": {
+      "safeRoutes": "Safe routes",
+      "avoidArea": "Avoid this area",
+      "safetyRating": "Safety rating: {rating}",
+      "wellLit": "Well lit",
+      "crowded": "Crowded area",
+      "isolated": "Isolated area",
+      "reportIncident": "Report incident"
+    }
+  },
+  "checkins": {
+    "title": "Check-ins",
+    "subtitle": "Check in and earn points",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "checkedIn": "Checked in at {place}",
+    "alreadyCheckedIn": "You've already checked in here",
+    "tooFar": "You are too far from this place",
+    "cooldown": "You can check in again in {time}",
+    "streak": {
+      "title": "Check-in streak",
+      "current": "Current streak: {n} days",
+      "best": "Best streak: {n} days",
+      "broken": "Streak broken. Start again!",
+      "keepGoing": "Great! Keep the streak going"
+    },
+    "bonus": {
+      "firstVisit": "First visit bonus: {points} points",
+      "regularVisitor": "Regular visitor bonus: {points} points",
+      "weekendBonus": "Weekend bonus: {points} points",
+      "nightOwl": "Night owl bonus: {points} points",
+      "earlyBird": "Early bird bonus: {points} points",
+      "mayor": "You are the mayor of this place!",
+      "mayorBonus": "Mayor bonus: {points} points"
+    },
+    "history": {
+      "title": "Check-in history",
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "total": "Total visits: {count}",
+      "empty": "No check-in history yet"
+    },
+    "nearby": {
+      "title": "Nearby places to check in",
+      "distance": "{distance} away",
+      "points": "Earn {points} points"
+    },
+    "leaderboard": {
+      "title": "Top check-in users",
+      "atPlace": "At {place}",
+      "thisMonth": "This month",
+      "allTime": "All time"
+    }
+  },
+  "wallet": {
+    "title": "Wallet",
+    "subtitle": "Manage your balance and transactions",
+    "balance": "Balance",
+    "currentBalance": "Current balance: {amount}",
+    "points": {
+      "title": "My points",
+      "total": "{n} points",
+      "value": "Worth {amount}",
+      "expires": "{n} points expire on {date}",
+      "earn": "Earn points",
+      "redeem": "Redeem points",
+      "history": "Points history"
+    },
+    "topUp": {
+      "title": "Top up",
+      "selectAmount": "Select amount",
+      "customAmount": "Custom amount",
+      "amountPlaceholder": "Enter amount",
+      "methods": {
+        "title": "Top-up method",
+        "bankCard": "Bank card",
+        "bankTransfer": "Bank transfer",
+        "agent": "Via agent",
+        "crypto": "Cryptocurrency"
+      },
+      "confirm": "Confirm top-up",
+      "success": "Successfully topped up {amount}",
+      "failed": "Top-up failed"
+    },
+    "transfer": {
+      "title": "Transfer balance",
+      "recipient": "Recipient",
+      "recipientPlaceholder": "Search user…",
+      "amount": "Amount",
+      "note": "Note (optional)",
+      "notePlaceholder": "Reason for transfer…",
+      "fee": "Transfer fee: {amount}",
+      "confirm": "Confirm transfer",
+      "success": "Transferred {amount} to {name}",
+      "failed": "Transfer failed"
+    },
+    "transactions": {
+      "title": "Transactions",
+      "empty": "No transactions yet",
+      "types": {
+        "topUp": "Top-up",
+        "payment": "Payment",
+        "transfer": "Transfer",
+        "refund": "Refund",
+        "bonus": "Bonus",
+        "reward": "Reward"
+      },
+      "status": {
+        "pending": "Processing",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "filter": {
+        "all": "All",
+        "credit": "Credits",
+        "debit": "Debits"
+      }
+    },
+    "security": {
+      "title": "Wallet security",
+      "pin": "PIN",
+      "changePin": "Change PIN",
+      "biometric": "Biometric login",
+      "twoFactor": "Two-factor authentication",
+      "transactionLimit": "Daily transaction limit: {amount}",
+      "lockAfter": "Lock after inactivity"
+    }
+  },
+  "crowding": {
+    "title": "Crowding",
+    "subtitle": "Find out how busy places are",
+    "levels": {
+      "empty": "Empty",
+      "quiet": "Quiet",
+      "moderate": "Moderate",
+      "busy": "Busy",
+      "veryBusy": "Very busy",
+      "atCapacity": "At capacity"
+    },
+    "currentLevel": "Current crowding: {level}",
+    "bestTime": "Best time to visit: {time}",
+    "prediction": {
+      "title": "Crowding forecast",
+      "todayPeak": "Today's peak: {time}",
+      "weekdayPeak": "Weekday peak: {time}",
+      "weekendPeak": "Weekend peak: {time}",
+      "leastBusy": "Least busy times"
+    },
+    "report": {
+      "title": "Report crowding",
+      "currentLevel": "Current crowding level",
+      "submit": "Submit report",
+      "submitted": "Thank you for your report",
+      "confidence": "Confidence: {pct}%",
+      "source": "Source: User reports",
+      "observedAt": "Observed at: {time}"
+    },
+    "map": {
+      "title": "Crowding map",
+      "heatmap": "Heatmap",
+      "realTime": "Real-time data",
+      "historical": "Historical data",
+      "legend": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      }
+    },
+    "notifications": {
+      "crowdAlert": "Crowding alert at {place}",
+      "clearedUp": "Crowd cleared at {place}"
+    }
+  },
+  "badges": {
+    "title": "Badges and achievements",
+    "subtitle": "Collect badges and prove your expertise",
+    "earned": "Earned badges",
+    "available": "Available badges",
+    "locked": "Locked badges",
+    "new": "New badge earned!",
+    "categories": {
+      "explorer": "Explorer",
+      "contributor": "Contributor",
+      "social": "Social",
+      "foodie": "Foodie",
+      "traveler": "Traveler",
+      "local": "Local",
+      "reviewer": "Reviewer",
+      "photographer": "Photographer",
+      "helper": "Helper",
+      "special": "Special"
+    },
+    "detail": {
+      "title": "Badge details",
+      "howToEarn": "How to earn",
+      "progress": "Progress: {current} of {required}",
+      "earnedOn": "Earned on {date}",
+      "rarity": {
+        "common": "Common",
+        "uncommon": "Uncommon",
+        "rare": "Rare",
+        "epic": "Epic",
+        "legendary": "Legendary"
+      }
+    },
+    "showcase": {
+      "title": "Badge showcase",
+      "select": "Select badges to display",
+      "maxSelected": "Maximum {max} badges",
+      "save": "Save selection"
+    },
+    "specific": {
+      "firstCheckin": "First check-in",
+      "explorer10": "Visited 10 different places",
+      "reviewer": "Wrote 5 reviews",
+      "photoPro": "Uploaded 20 photos",
+      "socialButterfly": "Followed 50 users",
+      "helpfulHand": "Answered 10 questions",
+      "weekStreak7": "Maintained a 7-day streak",
+      "nightExplorer": "Visited places after 10 PM",
+      "earlyBird": "Visited places before 8 AM",
+      "localHero": "Added 10 places to the map",
+      "mayor": "Became mayor of a place"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Iraq Maps",
+      "subtitle": "Your smart guide to exploring Iraq",
+      "getStarted": "Get started",
+      "signIn": "Already have an account? Sign in"
+    },
+    "slides": {
+      "map": {
+        "title": "Explore your city",
+        "body": "An interactive map in Arabic and Kurdish, covering thousands of places across Iraq."
+      },
+      "assistant": {
+        "title": "Your AI assistant",
+        "body": "Ask about any place or service in Arabic and Kurdish and get instant answers."
+      },
+      "community": {
+        "title": "Real local community",
+        "body": "Share your experiences, rate places, and help others discover the best of your city."
+      },
+      "providers": {
+        "title": "For businesses",
+        "body": "Register your business and connect with customers easily."
+      }
+    },
+    "permissions": {
+      "title": "Required permissions",
+      "subtitle": "We need these permissions for the best experience",
+      "location": {
+        "title": "Location access",
+        "reason": "To show nearby places and guide you accurately"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "reason": "To notify you about nearby offers and important updates"
+      },
+      "camera": {
+        "title": "Camera",
+        "reason": "To capture and upload photos of places and products"
+      },
+      "allow": "Allow",
+      "skip": "Skip",
+      "later": "Later"
+    },
+    "language": {
+      "title": "Choose your language",
+      "subtitle": "You can change this later in settings",
+      "arabic": "العربية",
+      "kurdish": "کوردی سۆرانی",
+      "english": "English"
+    },
+    "profile": {
+      "title": "Complete your profile",
+      "subtitle": "Optional — you can skip this step",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "city": "Your city",
+      "cityPlaceholder": "Select your city",
+      "interests": {
+        "title": "Your interests",
+        "food": "Food and restaurants",
+        "shopping": "Shopping",
+        "travel": "Travel and exploration",
+        "sports": "Sports",
+        "culture": "Culture and heritage",
+        "entertainment": "Entertainment"
+      }
+    },
+    "complete": {
+      "title": "You're all set!",
+      "subtitle": "Enjoy exploring Iraq",
+      "exploreMap": "Explore the map",
+      "viewProfile": "View your profile"
+    }
+  },
+  "map": {
+    "safety": {
+      "title": "Map safety",
+      "safeArea": "Safe area",
+      "warningArea": "Warning area",
+      "dangerArea": "Danger area",
+      "checkpointNearby": "Checkpoint nearby",
+      "floodRisk": "Flood risk",
+      "roadClosed": "Road closed",
+      "reportHazard": "Report hazard",
+      "hazardReported": "Hazard reported",
+      "safetyLegend": "Safety indicator guide",
+      "updatedAt": "Updated at {time}"
+    }
+  },
+  "account": {
+    "trustedContacts": {
+      "title": "Trusted contacts",
+      "subtitle": "People who can receive your emergency alerts",
+      "manage": "Manage contacts",
+      "add": "Add contact",
+      "added": "{name} added",
+      "removed": "{name} removed",
+      "max": "Maximum {max} contacts",
+      "notifyOn": {
+        "sos": "On SOS",
+        "shareLocation": "On location share",
+        "safetyCheck": "On safety check"
+      }
+    }
   }
 }
