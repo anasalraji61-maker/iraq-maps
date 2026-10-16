@@ -40,3 +40,4 @@ export { CustomerManagementScreen } from './screens/CustomerManagementScreen';
 export { PricingScreen } from './screens/PricingScreen';
 export { ProviderSettingsScreen } from './screens/ProviderSettingsScreen';
 export { GrowthTipsScreen } from './screens/GrowthTipsScreen';
+export { default as PaymentQRScreen } from './screens/PaymentQRScreen';

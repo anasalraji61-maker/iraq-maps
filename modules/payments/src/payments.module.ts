@@ -2,6 +2,7 @@ import type { Db } from '@iraq-maps/db-kit';
 import { Module, type DynamicModule } from '@nestjs/common';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
+import { QrService } from './qr.service';
 
 export interface PaymentsModuleOptions {
   db: Db;
@@ -20,8 +21,9 @@ export function paymentsModule(opts: PaymentsModuleOptions): DynamicModule {
     providers: [
       { provide: 'PAYMENTS_DB', useValue: opts.db },
       PaymentsService,
+      QrService,
     ],
-    exports: [PaymentsService],
+    exports: [PaymentsService, QrService],
   };
 }
 

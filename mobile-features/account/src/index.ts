@@ -30,3 +30,4 @@ export { default as ActivityFeedScreen } from './screens/ActivityFeedScreen';
 export { default as ReferralScreen } from './screens/ReferralScreen';
 export { SafetyScreen } from './SafetyScreen';
 export { TrustedContactsScreen } from './TrustedContactsScreen';
+export { default as WalletScreen } from './screens/WalletScreen';
