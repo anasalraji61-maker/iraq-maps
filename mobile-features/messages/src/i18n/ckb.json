@@ -135,6 +135,16 @@
     "makeAdmin": "بکە بەڕێوەبەر",
     "removeMember": "لابردن"
   },
+  "realtime": {
+    "connecting": "پەیوەندی دەکرێت...",
+    "reconnecting": "دووبارە پەیوەندی دەکرێت...",
+    "offline": "ئۆفلاین",
+    "lastSeen": "دواین بینین {time}",
+    "typingOne": "دەنووسێت...",
+    "typingMany": "چەند کەسێک دەنووسن...",
+    "messageFailed": "نەیگەیشت",
+    "retryMessage": "دووبارە هەوڵ بدە"
+  },
   "conversation": {
     "copy": "کۆپی",
     "deleteForEveryone": "بۆ هەموو بسڕەوە",

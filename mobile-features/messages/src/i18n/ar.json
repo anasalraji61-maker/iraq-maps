@@ -135,6 +135,16 @@
     "makeAdmin": "جعل مشرفاً",
     "removeMember": "إزالة"
   },
+  "realtime": {
+    "connecting": "جاري الاتصال...",
+    "reconnecting": "إعادة الاتصال...",
+    "offline": "غير متصل",
+    "lastSeen": "آخر ظهور {time}",
+    "typingOne": "يكتب...",
+    "typingMany": "عدة أشخاص يكتبون...",
+    "messageFailed": "فشل الإرسال",
+    "retryMessage": "إعادة المحاولة"
+  },
   "conversation": {
     "copy": "نسخ",
     "deleteForEveryone": "حذف للجميع",

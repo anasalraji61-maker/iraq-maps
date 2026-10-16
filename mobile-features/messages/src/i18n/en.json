@@ -135,6 +135,16 @@
     "makeAdmin": "Make admin",
     "removeMember": "Remove"
   },
+  "realtime": {
+    "connecting": "Connecting...",
+    "reconnecting": "Reconnecting...",
+    "offline": "Offline",
+    "lastSeen": "Last seen {time}",
+    "typingOne": "Typing...",
+    "typingMany": "Several people are typing...",
+    "messageFailed": "Failed to send",
+    "retryMessage": "Retry"
+  },
   "conversation": {
     "copy": "Copy",
     "deleteForEveryone": "Delete for everyone",

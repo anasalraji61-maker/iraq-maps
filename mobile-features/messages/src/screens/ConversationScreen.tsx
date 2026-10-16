@@ -37,6 +37,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRealtimeMessages, useOnlineStatus } from '@iraq-maps/mobile-kit';
 import {
   MessageBubble,
   type ChatMessage,
@@ -456,57 +457,73 @@ export function ConversationScreen(): ReactElement {
     participantId?: string;
   }>();
 
-  // Mock current user id
+  // Mock current user id (replaced by session hook in future)
   const MY_ID = 'current-user';
   const OTHER_ID = participantId ?? 'other-user';
   const displayName = participantName ?? t('conversation.unknown');
 
+  // ── Real-time messages ────────────────────────────────────────────────────
+  const initialMessages = useMemo(
+    () => makeMockMessages(PAGE_SIZE, MY_ID, OTHER_ID) as unknown as import('@iraq-maps/mobile-kit').Message[],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const {
+    messages: rtMessages,
+    sendMessage: rtSendMessage,
+    typing: rtTyping,
+    startTyping,
+    stopTyping,
+    isSending: rtIsSending,
+    status: wsStatus,
+  } = useRealtimeMessages({
+    conversationId: conversationId ?? '',
+    currentUserId: MY_ID,
+    recipientId: OTHER_ID,
+    initialMessages,
+  });
+
+  // ── Real-time online status ───────────────────────────────────────────────
+  const { isOnline: participantOnline } = useOnlineStatus(OTHER_ID);
+
+  // ── Adapt RT messages to ChatMessage shape ────────────────────────────────
+  const messages = useMemo(
+    () => rtMessages as unknown as ChatMessage[],
+    [rtMessages],
+  );
+
   // ── State ────────────────────────────────────────────────────────────────
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [text, setText] = useState('');
-  const [sending, setSending] = useState(false);
   const [replyTo, setReplyTo] = useState<ReplyPreviewData | null>(null);
-  const [typingVisible, setTypingVisible] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchIndex, setSearchIndex] = useState(0);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [showReadReceipts] = useState(true); // from user prefs (stub)
+  // Local deletion overrides (messages deleted client-side before server confirmation)
+  const [deletedForMe, setDeletedForMe] = useState<Set<string>>(new Set());
+  const [deletedForEveryone, setDeletedForEveryone] = useState<Set<string>>(new Set());
+
+  // Typing indicator: show when rtTyping has any user OR when WS-driven
+  const typingVisible = rtTyping.length > 0;
 
   const listRef = useRef<FlatList<ChatMessage>>(null);
-  const _typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Read-receipts hook ──────────────────────────────────────────────────
   const _readAt = useReadAt(conversationId ?? '');
 
-  // ── Initial load ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    const mock = makeMockMessages(PAGE_SIZE, MY_ID, OTHER_ID);
-    setMessages(mock);
-    setLoading(false);
-
-    // Simulate other user typing after 2 s
-    const t1 = setTimeout(() => setTypingVisible(true), 2000);
-    const t2 = setTimeout(() => setTypingVisible(false), 5000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [conversationId]);
-
   // ── Load older messages ───────────────────────────────────────────────────
   const loadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    // Simulate network delay
     setTimeout(() => {
-      setMessages((prev) => [
-        ...makeMockMessages(PAGE_SIZE, MY_ID, OTHER_ID),
-        ...prev,
-      ]);
-      setHasMore(false); // only one more page in mock
+      setHasMore(false);
       setLoadingMore(false);
     }, 800);
   }, [loadingMore, hasMore]);
@@ -514,45 +531,28 @@ export function ConversationScreen(): ReactElement {
   // ── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(() => {
     const trimmed = text.trim();
-    if (!trimmed || sending) return;
-    setSending(true);
+    if (!trimmed || rtIsSending) return;
+    rtSendMessage(
+      trimmed,
+      'text',
+      replyTo ? { messageId: replyTo.messageId, senderName: replyTo.senderName, snippet: replyTo.snippet } : undefined,
+    );
     setText('');
-
-    const outgoing: ChatMessage = {
-      id: `msg-out-${Date.now()}`,
-      senderId: MY_ID,
-      type: 'text',
-      text: trimmed,
-      status: 'sending',
-      createdAt: new Date().toISOString(),
-      replyTo: replyTo
-        ? { messageId: replyTo.messageId, senderName: replyTo.senderName, snippet: replyTo.snippet }
-        : undefined,
-    };
     setReplyTo(null);
-    setMessages((prev) => [...prev, outgoing]);
-
+    stopTyping();
     // Scroll to bottom
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 60);
+  }, [text, rtIsSending, rtSendMessage, replyTo, stopTyping]);
 
-    // Simulate network
-    setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === outgoing.id ? { ...m, status: 'sent' as MessageStatus } : m,
-        ),
-      );
-      setSending(false);
-    }, 600);
-
-    setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === outgoing.id ? { ...m, status: 'delivered' as MessageStatus } : m,
-        ),
-      );
-    }, 1200);
-  }, [text, sending, replyTo]);
+  // ── Handle text changes (start/stop typing) ───────────────────────────────
+  const handleTextChange = useCallback((v: string) => {
+    setText(v);
+    if (v.length > 0) {
+      startTyping();
+    } else {
+      stopTyping();
+    }
+  }, [startTyping, stopTyping]);
 
   // ── Search ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -610,17 +610,9 @@ export function ConversationScreen(): ReactElement {
     },
     onDelete: (msg, forEveryone) => {
       if (forEveryone) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === msg.id ? { ...m, deletedForEveryone: true } : m,
-          ),
-        );
+        setDeletedForEveryone((prev) => new Set([...prev, msg.id]));
       } else {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === msg.id ? { ...m, deletedForMe: true } : m,
-          ),
-        );
+        setDeletedForMe((prev) => new Set([...prev, msg.id]));
       }
     },
     onImagePress: (url) => setLightboxUrl(url),
@@ -636,10 +628,15 @@ export function ConversationScreen(): ReactElement {
   const renderItem = useCallback(
     ({ item }: { item: ChatMessage }) => {
       const isHighlighted = searchResults[searchIndex] === item.id;
+      const withOverrides: ChatMessage = {
+        ...item,
+        deletedForMe: item.deletedForMe ?? deletedForMe.has(item.id),
+        deletedForEveryone: item.deletedForEveryone ?? deletedForEveryone.has(item.id),
+      };
       return (
         <View style={isHighlighted ? styles.highlighted : undefined}>
           <MessageBubble
-            message={item}
+            message={withOverrides}
             isOwn={item.senderId === MY_ID}
             showReadReceipts={showReadReceipts}
             callbacks={bubbleCallbacks}
@@ -647,7 +644,7 @@ export function ConversationScreen(): ReactElement {
         </View>
       );
     },
-    [bubbleCallbacks, showReadReceipts, searchResults, searchIndex],
+    [bubbleCallbacks, showReadReceipts, searchResults, searchIndex, deletedForMe, deletedForEveryone],
   );
 
   const keyExtractor = useCallback((item: ChatMessage) => item.id, []);
@@ -681,10 +678,21 @@ export function ConversationScreen(): ReactElement {
         <ConversationHeader
           name={displayName}
           avatarInitial={displayName.charAt(0).toUpperCase()}
-          isOnline={false}
+          isOnline={participantOnline}
           onSearchPress={() => setShowSearch((v) => !v)}
           onBack={() => { /* expo-router back */ }}
         />
+
+        {/* WS connection status banner */}
+        {(wsStatus === 'reconnecting' || wsStatus === 'disconnected') ? (
+          <View style={styles.wsBanner}>
+            <Text style={styles.wsBannerText}>
+              {wsStatus === 'reconnecting'
+                ? t('realtime.reconnecting')
+                : t('realtime.offline')}
+            </Text>
+          </View>
+        ) : null}
 
         {showSearch ? (
           <SearchBar
@@ -727,10 +735,10 @@ export function ConversationScreen(): ReactElement {
 
         <ComposeBar
           value={text}
-          onChange={setText}
+          onChange={handleTextChange}
           onSend={handleSend}
           onAttachPress={() => { /* attachment picker stub */ }}
-          sending={sending}
+          sending={rtIsSending}
           replyTo={replyTo}
           onCancelReply={() => setReplyTo(null)}
         />
@@ -764,5 +772,16 @@ const styles = StyleSheet.create({
   highlighted: {
     backgroundColor: 'rgba(255, 235, 59, 0.25)',
     borderRadius: 8,
+  },
+  wsBanner: {
+    backgroundColor: '#FF6F00',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  wsBannerText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

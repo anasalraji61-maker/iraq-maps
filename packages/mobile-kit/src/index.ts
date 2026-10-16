@@ -57,3 +57,40 @@ export { WsStatusIndicator, type WsStatusIndicatorProps } from './ws-status-indi
 
 /** @public unified accessibility hook (screen reader, font scale, contrast, reduce motion) */
 export { useAccessibility, type AccessibilityState } from './hooks/useAccessibility';
+
+/** @public realtime WebSocket singleton manager */
+export {
+  RealtimeManager,
+  type ConnectionState,
+  type RealtimeEvent,
+  type RealtimeEventType,
+  type RealtimeHandler,
+  type ConnectionStateHandler,
+  type UnsubscribeFn,
+} from './websocket/RealtimeManager';
+
+/** @public real-time messages hook */
+export {
+  useRealtimeMessages,
+  type Message,
+  type MessageStatus,
+  type MessageType,
+  type UseRealtimeMessagesOptions,
+  type UseRealtimeMessagesReturn,
+} from './hooks/useRealtimeMessages';
+
+/** @public real-time notifications hook */
+export {
+  useRealtimeNotifications,
+  type Notification,
+  type NotificationType,
+  type UseRealtimeNotificationsOptions,
+  type UseRealtimeNotificationsReturn,
+} from './hooks/useRealtimeNotifications';
+
+/** @public online/offline status hook */
+export {
+  useOnlineStatus,
+  type UseOnlineStatusReturn,
+  type UseOnlineStatusOptions,
+} from './hooks/useOnlineStatus';
