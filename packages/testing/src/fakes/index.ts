@@ -12,3 +12,6 @@ export * from './fake-reputation-service';
 export * from './fake-listings-service';
 export * from './fake-challenges-service';
 export * from './fake-promotions-service';
+export * from './FakeSafetyService';
+export * from './FakeDiscoveryService';
+export * from './FakeGroupMessagingService';
