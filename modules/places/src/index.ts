@@ -34,6 +34,18 @@ const SOURCES = ['TILES_SOURCE', 'GLYPHS_SOURCE'] as const;
 class PlacesModule {}
 
 export { registerProviderPlaceHandler } from './provider-place';
+export {
+  importPlacesFromOSM,
+  deduplicatePlaces,
+  getOSMPlace,
+  updateFromOSM,
+  type OsmImportRecord,
+  type OsmImportResult,
+  type DeduplicateOptions,
+  type DeduplicateResult,
+  type OsmUpdatePayload,
+  type UpdateResult,
+} from './osm-import';
 
 /** Nest module serving citiesContract and placesContract, and providing PortTokens.PlacesQueryPort.
  * @public frozen stub (M1) */

@@ -42,5 +42,23 @@
 | **Access** | Anonymous public S3 (us-west-2), no credentials required |
 | **Verified** | 2026-10-13 |
 
+## خط استيراد الأماكن من OSM (geo-services/osm-pipeline)
+
+| الحقل | القيمة |
+|---|---|
+| **المصدر** | OpenStreetMap عبر Overpass API أو Geofabrik Iraq PBF extract |
+| **الترخيص** | ODbL 1.0 — share-alike على قاعدة البيانات المشتقة |
+| **نص الإسناد المطلوب** | `Map data © OpenStreetMap contributors` — يُعرض دائماً في التطبيق |
+| **البيانات المستخدمة** | أماكن (amenity / shop / tourism / leisure / office / healthcare)، شوارع (highway)، مناطق (boundary=administrative, place=suburb/quarter/neighbourhood) داخل صندوق العراق: 29.0–37.5 °N، 38.5–48.8 °E |
+| **جدول الكتابة** | `places.osm_features` فقط — لا يُدمج أبداً مع `places.provider_features` (بيانات المستخدمين) |
+| **أداة الاستيراد** | `geo-services/osm-pipeline/src/run-import.ts` (TypeScript) + `geo-services/pipeline/` (Python, الخط الأصلي) |
+| **التحقق الأخير** | 2026-10-16 |
+
+### ملاحظات الامتثال (ODbL)
+- بيانات OSM تُخزَّن في جداول منفصلة عن بيانات المستخدمين والمزودين.
+- أي استعلام يدمج البيانات بطريقة تُنشئ قاعدة بيانات مشتقة يخضع لشرط share-alike.
+- الإسناد `© OpenStreetMap contributors` يُعرض في الخريطة في جميع الأوقات.
+- معرّفات OSM (n…/w…/r…) محفوظة في `osm_features.id` للتتبع والتحديث.
+
 ## ممنوع
 Esri World Imagery · Google Maps/Earth · Bing Maps · Mapbox Satellite · `tile.openstreetmap.org` (سياسة الاستخدام) · أي محتوى مسحوب (scraped) من Instagram أو Facebook.

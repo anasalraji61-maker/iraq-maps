@@ -1,0 +1,19 @@
+{
+  "name": "@iraq-maps/osm-pipeline",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TypeScript OSM places import pipeline for Iraq. Parses Overpass JSON, maps tags to PlaceCategories, validates Iraq bbox, and writes places.ndjson ready for modules/places importFiles().",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "import": "node --experimental-vm-modules dist/run-import.js",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
