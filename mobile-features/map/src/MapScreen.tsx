@@ -1,5 +1,6 @@
 import { Locale, pickName, testIDs, type CityDescriptor, type LngLat, type PlaceId, type PlaceSummary } from '@iraq-maps/contracts';
 import { PlaceMarkerSheet } from './components/PlaceMarkerSheet';
+import { ContextMenu, type ContextMenuCoords } from './components/ContextMenu';
 import { formatIraqiAddress } from '@iraq-maps/geo';
 import { getLocale, t as globalT } from '@iraq-maps/i18n';
 import { MapCanvas, SatelliteDisclaimer, type MapCamera } from '@iraq-maps/map-kit';
@@ -7,10 +8,10 @@ import { href, savedPlaces, useApi, useApiBaseUrl, useNetworkStatus } from '@ira
 import { Banner, Button, IconButton, ListItem, PlaceSummaryCard, Screen, Sheet, Text, TextField, tokens } from '@iraq-maps/ui';
 import * as Location from 'expo-location';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { useRecentSearches } from './hooks/useRecentSearches';
 import { useGeofence, type GeofenceZone } from './hooks/useGeofence';
-import { Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
+import { Animated, Clipboard, Pressable, SectionList, StyleSheet, Text as RNText, useWindowDimensions, View } from 'react-native';
 
 /** Maps place category to a representative emoji icon. */
 const CATEGORY_ICONS: Record<string, string> = {
@@ -99,6 +100,14 @@ export function MapScreen(): ReactElement {
   );
 }
 
+/** Compute a human-readable scale bar value for the current zoom. */
+function scaleBarLabel(zoom: number): string {
+  // Rough approximation: at zoom 15 the visible width is ~2 km; halves/doubles each zoom level.
+  const approxKm = 2048 / Math.pow(2, zoom - 1);
+  if (approxKm >= 1) return t('scalebar.km', { n: Math.round(approxKm) });
+  return t('scalebar.m', { n: Math.round(approxKm * 1000) });
+}
+
 function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: string }) {
   const api = useApi();
   const apiBaseUrl = useApiBaseUrl();
@@ -108,6 +117,7 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [choosingLang, setChoosingLang] = useState(false);
   // No camera until locate-me: MapCanvas opens on the city bbox.
   const [camera, setCamera] = useState<MapCamera>();
+  const [currentZoom, setCurrentZoom] = useState(13);
   const [located, setLocated] = useState(false);
   const [focusBanner, setFocusBanner] = useState<string>();
   // Search ranks near the last place the map settled on (a pan, or locate-me), the city centre at first.
@@ -135,12 +145,38 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   const [offlineCached, setOfflineCached] = useState(false);
   /** Track user's last known position for geofencing. */
   const [userPosition, setUserPosition] = useState<LngLat | null>(null);
+  /** Dropped pin via long-press. */
+  const [droppedPin, setDroppedPin] = useState<ContextMenuCoords | null>(null);
+  const [pinAddress, setPinAddress] = useState<string>();
+  const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  /** Pulsing dot animation for My Location FAB. */
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const pulseOpacity = useRef(new Animated.Value(0.5)).current;
   // Feature 6: geofencing alerts — notify on entering mock zones
   const geofenceZones = useMemo(() => getMockGeofenceZones(), []);
   const handleGeofenceEnter = useCallback((zone: GeofenceZone) => {
     setGeofenceAlert(t('geofence.entered', { name: zone.name }));
   }, []);
   useGeofence({ zones: geofenceZones, userPosition, onEnter: handleGeofenceEnter });
+
+  // Pulse animation for My Location FAB when located.
+  useEffect(() => {
+    if (!located) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(pulseAnim, { toValue: 1.5, duration: 800, useNativeDriver: true }),
+          Animated.timing(pulseOpacity, { toValue: 0, duration: 800, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(pulseAnim, { toValue: 1, duration: 0, useNativeDriver: true }),
+          Animated.timing(pulseOpacity, { toValue: 0.5, duration: 0, useNativeDriver: true }),
+        ]),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [located, pulseAnim, pulseOpacity]);
 
   // Check offline coverage when the map centre changes.
   useEffect(() => {
@@ -252,6 +288,73 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
     setSearchPanelOpen(true);
   };
 
+  /** Handle a long-press on the map canvas — drop a pin and show the context menu. */
+  const handleMapLongPress = useCallback(
+    async (coords: { latitude: number; longitude: number }) => {
+      const pinCoords: ContextMenuCoords = { latitude: coords.latitude, longitude: coords.longitude };
+      setDroppedPin(pinCoords);
+      setPinAddress(undefined);
+      setContextMenuVisible(true);
+      // Reverse-geocode to get a label for the pin.
+      try {
+        const point: LngLat = [coords.longitude, coords.latitude];
+        const res = await api.places.nearby({
+          query: { city: city.id, near: point.map((v) => v.toFixed(6)).join(','), radiusM: 150, limit: 3 },
+        });
+        if (res.status === 200) {
+          const items = res.body.items;
+          const area = items.find((p) => p.kind === 'area');
+          const street = items.find((p) => p.kind === 'street');
+          const addr = formatIraqiAddress({
+            street: street ? pickName(street.names, mapLang) : undefined,
+            neighborhood: area ? pickName(area.names, mapLang) : undefined,
+          });
+          if (addr) setPinAddress(addr);
+        }
+      } catch {
+        // best-effort address
+      }
+    },
+    [api, city.id, mapLang],
+  );
+
+  const handleContextDirectionsTo = useCallback(
+    (coords: ContextMenuCoords) => {
+      // Navigate to route-preview with lat/lng query params (no placeId for drop-pin coords)
+      router.push(`/route/pin?lat=${coords.latitude.toFixed(6)}&lng=${coords.longitude.toFixed(6)}` as Parameters<typeof router.push>[0]);
+    },
+    [router],
+  );
+
+  const handleContextDirectionsFrom = useCallback(
+    (coords: ContextMenuCoords) => {
+      // Navigate to route-preview with origin lat/lng query params
+      router.push(`/route/pin?fromLat=${coords.latitude.toFixed(6)}&fromLng=${coords.longitude.toFixed(6)}` as Parameters<typeof router.push>[0]);
+    },
+    [router],
+  );
+
+  const handleContextWhatsHere = useCallback(
+    (coords: ContextMenuCoords) => {
+      const msg = `${t('contextMenu.whatsHere')} ${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`;
+      router.push(`/assistant?initialMessage=${encodeURIComponent(msg)}`);
+    },
+    [router],
+  );
+
+  const handleContextAddPlace = useCallback(
+    (coords: ContextMenuCoords) => {
+      // Navigate to provider registration with lat/lng prefilled
+      router.push(`/provider/register?lat=${coords.latitude.toFixed(6)}&lng=${coords.longitude.toFixed(6)}` as Parameters<typeof router.push>[0]);
+    },
+    [router],
+  );
+
+  const handleCopyCoords = useCallback(() => {
+    if (!droppedPin) return;
+    Clipboard.setString(`${droppedPin.latitude.toFixed(6)}, ${droppedPin.longitude.toFixed(6)}`);
+  }, [droppedPin]);
+
   const locate = async () => {
     setLocateError(undefined);
     try {
@@ -288,7 +391,19 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
   return (
     <View style={styles.fill}>
       <View style={StyleSheet.absoluteFill}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={() => setSearchPanelOpen(false)} accessibilityLabel="" importantForAccessibility="no">
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => setSearchPanelOpen(false)}
+          onLongPress={(e) => {
+            // Long-press drops a pin at the approximate map center; precise coords require
+            // a MapLibre hitTest which is not yet exposed via MapCanvasProps. Use near as
+            // the best available coordinate until a hitTest port is added.
+            if (near) handleMapLongPress({ latitude: near[1], longitude: near[0] });
+          }}
+          delayLongPress={500}
+          accessibilityLabel=""
+          importantForAccessibility="no"
+        >
           {/* TODO: PMTiles offline caching - tiles are served from TILES_SOURCE */}
           <MapCanvas
             city={city}
@@ -298,7 +413,10 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
             markers={markers}
             onMarkerPress={openFromMarker}
             showUserLocation={located}
-            onCameraChanged={setNear}
+            onCameraChanged={(lngLat, zoom) => {
+              setNear(lngLat);
+              setCurrentZoom(zoom);
+            }}
             baseLayer={baseLayer}
           />
         </Pressable>
@@ -308,6 +426,68 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
       {/* Incident markers overlay – absolute over the map canvas */}
       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
         <IncidentMarkers incidents={incidents} />
+      </View>
+
+      {/* ── Scale bar (bottom-start, above attribution) ── */}
+      <View style={styles.scaleBar} pointerEvents="none">
+        <View style={styles.scaleBarLine} />
+        <RNText style={styles.scaleBarText}>{scaleBarLabel(currentZoom)}</RNText>
+      </View>
+
+      {/* ── OSM attribution — ODbL requirement, always visible ── */}
+      <View style={styles.osmAttribution} pointerEvents="none">
+        <RNText style={styles.osmAttributionText}>{t('attribution.osm')}</RNText>
+      </View>
+
+      {/* ── Dropped pin indicator ── */}
+      {droppedPin && !contextMenuVisible ? (
+        <Pressable
+          style={styles.droppedPinDismiss}
+          onPress={() => { setDroppedPin(null); setPinAddress(undefined); }}
+          accessibilityRole="button"
+          accessibilityLabel={t('pin.dismiss')}
+        >
+          <RNText style={styles.droppedPinDismissText}>✕ {t('pin.dismiss')}</RNText>
+        </Pressable>
+      ) : null}
+
+      {/* ── Coordinate display (tap to copy) ── */}
+      {droppedPin ? (
+        <Pressable
+          style={styles.coordDisplay}
+          onPress={handleCopyCoords}
+          accessibilityRole="button"
+          accessibilityLabel={t('contextMenu.copyCoords')}
+        >
+          <RNText style={styles.coordText}>
+            {`${droppedPin.latitude.toFixed(5)}, ${droppedPin.longitude.toFixed(5)}`}
+          </RNText>
+        </Pressable>
+      ) : null}
+
+      {/* ── My Location FAB with pulsing dot ── */}
+      <View style={styles.myLocationFab}>
+        {located ? (
+          <Animated.View
+            style={[
+              styles.locationPulse,
+              {
+                transform: [{ scale: pulseAnim }],
+                opacity: pulseOpacity,
+              },
+            ]}
+            pointerEvents="none"
+          />
+        ) : null}
+        <Pressable
+          style={({ pressed }) => [styles.locationFabBtn, pressed && styles.locationFabBtnPressed]}
+          onPress={locate}
+          accessibilityRole="button"
+          accessibilityLabel={t('locationFab.label')}
+          testID="map.myLocation.fab"
+        >
+          <RNText style={styles.locationFabIcon}>{located ? '📍' : '🔍'}</RNText>
+        </Pressable>
       </View>
       {!isOnline && (
         <View style={styles.offlineBanner} testID="offline-banner" accessibilityRole="alert">
@@ -563,6 +743,18 @@ function CityMap({ city, focusPlaceId }: { city: CityDescriptor; focusPlaceId?: 
           />
         ))}
       </Sheet>
+      {/* ── Dropped-pin context menu ── */}
+      <ContextMenu
+        visible={contextMenuVisible}
+        coords={droppedPin}
+        address={pinAddress}
+        onDirectionsTo={handleContextDirectionsTo}
+        onDirectionsFrom={handleContextDirectionsFrom}
+        onAddPlace={handleContextAddPlace}
+        onWhatsHere={handleContextWhatsHere}
+        onDismiss={() => setContextMenuVisible(false)}
+      />
+
       {sheetPlace ? (
         <PlaceMarkerSheet
           place={sheetPlace}
@@ -660,4 +852,103 @@ const styles = StyleSheet.create({
   geofenceAlert: { position: 'absolute', top: 80, start: space.m, end: space.m, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1D4ED8', paddingVertical: space.s, paddingHorizontal: space.m, borderRadius: 8, elevation: 8, gap: space.s },
   geofenceAlertText: { flex: 1, color: '#fff', fontSize: 14, fontWeight: '600' },
   geofenceAlertDismiss: { color: '#93C5FD', fontSize: 13, fontWeight: '600' },
+  // Scale bar — bottom-start corner
+  scaleBar: {
+    position: 'absolute',
+    bottom: 32,
+    start: space.m,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  scaleBarLine: {
+    width: 60,
+    height: 3,
+    backgroundColor: '#1F2937',
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: '#fff',
+  },
+  scaleBarText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#1F2937',
+    textShadowColor: '#fff',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  // OSM attribution — always visible at very bottom start
+  osmAttribution: {
+    position: 'absolute',
+    bottom: 8,
+    start: space.m,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  osmAttributionText: { fontSize: 10, color: '#374151' },
+  // Dropped pin dismiss pill
+  droppedPinDismiss: {
+    position: 'absolute',
+    bottom: 80,
+    alignSelf: 'center',
+    start: 0,
+    end: 0,
+    marginHorizontal: space.xl,
+    backgroundColor: '#1F2937',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    alignItems: 'center',
+    elevation: 6,
+  },
+  droppedPinDismissText: { color: '#fff', fontSize: 13, fontWeight: '600' },
+  // Coordinate display pill — tappable to copy
+  coordDisplay: {
+    position: 'absolute',
+    bottom: 120,
+    alignSelf: 'center',
+    start: 0,
+    end: 0,
+    marginHorizontal: space.xl * 2,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  coordText: { color: '#F9FAFB', fontSize: 12, fontFamily: 'monospace' },
+  // My Location FAB
+  myLocationFab: {
+    position: 'absolute',
+    end: space.m,
+    bottom: 120,
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locationPulse: {
+    position: 'absolute',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#2563EB',
+  },
+  locationFabBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  locationFabBtnPressed: { opacity: 0.85 },
+  locationFabIcon: { fontSize: 24 },
 });

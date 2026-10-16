@@ -196,5 +196,19 @@
     "issueReported": "ڕاپۆرت کرا — سوپاس",
     "rateSaved": "هەڵسەنگاندن پاشەکەوت کرا",
     "shareText": "{km} کم لە {duration}دا گەیشتین بە خەریتەی عێراق"
+  },
+  "alerts": {
+    "speedCamera": "کامێرای خێرایی لە {dist}",
+    "policeCheckpoint": "پۆستی پۆلیس لە {dist}",
+    "policeCheckpointTitle": "پۆستی پۆلیس",
+    "speedCameraTitle": "کامێرای خێرایی",
+    "dismiss": "داخستن",
+    "rerouting": "دووبارە حیسابکردنی ڕێگا…",
+    "reroutingTitle": "دەرەوەی ڕێگا",
+    "followMode": "دۆخی شوێنکەوتن",
+    "nightMode": "دۆخی شەو",
+    "lockScreenTitle": "پێچەوانەی داهاتوو",
+    "handsFree": "دەستی ئازاد",
+    "handsFreeVoice": "کنترۆلی دەنگ"
   }
 }

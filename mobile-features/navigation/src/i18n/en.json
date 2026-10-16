@@ -196,5 +196,19 @@
     "issueReported": "Reported — thanks",
     "rateSaved": "Rating saved",
     "shareText": "Covered {km} km in {duration} with Iraq Maps"
+  },
+  "alerts": {
+    "speedCamera": "Speed camera in {dist}",
+    "policeCheckpoint": "Checkpoint in {dist}",
+    "policeCheckpointTitle": "Police Checkpoint",
+    "speedCameraTitle": "Speed Camera",
+    "dismiss": "Dismiss",
+    "rerouting": "Recalculating route…",
+    "reroutingTitle": "Off Route",
+    "followMode": "Follow Mode",
+    "nightMode": "Night Mode",
+    "lockScreenTitle": "Next Turn",
+    "handsFree": "Hands-Free",
+    "handsFreeVoice": "Voice Control"
   }
 }

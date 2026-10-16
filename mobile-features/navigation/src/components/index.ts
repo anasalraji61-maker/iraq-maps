@@ -8,3 +8,5 @@ export { RouteCompare } from './RouteCompare';
 export type { RouteCompareProps, RouteOption, RouteTag } from './RouteCompare';
 export { TripSummary } from './TripSummary';
 export type { TripSummaryProps, TripSummaryTrip } from './TripSummary';
+export { RouteAlternatives } from './RouteAlternatives';
+export type { RouteAlternative, RouteAlternativesProps, RouteVariantId } from './RouteAlternatives';

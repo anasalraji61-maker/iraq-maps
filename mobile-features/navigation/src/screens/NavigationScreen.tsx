@@ -16,8 +16,8 @@ import type { CityDescriptor, ManeuverModifier, ManeuverType } from '@iraq-maps/
 import { navigationTestIDs } from '@iraq-maps/contracts';
 import { MapCanvas } from '@iraq-maps/map-kit';
 import { Banner, Button, Screen, Text, tokens } from '@iraq-maps/ui';
-import { useMemo, useState, type ReactElement } from 'react';
-import { StyleSheet, Text as RNText, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
+import { Animated, Easing, StyleSheet, Text as RNText, TouchableOpacity, useColorScheme, View } from 'react-native';
 import type { Lane } from '../components/LaneGuidance';
 import { LaneGuidance } from '../components/LaneGuidance';
 import { ManeuverArrow } from '../components/ManeuverArrow';
@@ -106,6 +106,247 @@ const DAY: NavPalette = {
   etaBg: '#F9FAFB',
 };
 
+// ─── Alert types ─────────────────────────────────────────────────────────────
+
+export interface SpeedCameraAlert {
+  distanceM: number;
+  limitKmh: number;
+}
+
+export interface PoliceCheckpointAlert {
+  distanceM: number;
+}
+
+// ─── Speed camera alert banner ────────────────────────────────────────────────
+
+interface SpeedCameraAlertProps {
+  alert: SpeedCameraAlert;
+  palette: typeof DAY;
+  onDismiss: () => void;
+}
+
+function SpeedCameraAlertBanner({ alert, palette, onDismiss }: SpeedCameraAlertProps): ReactElement {
+  const flashAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(flashAnim, { toValue: 0.3, duration: 400, useNativeDriver: true }),
+        Animated.timing(flashAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [flashAnim]);
+
+  const distLabel = alert.distanceM < 1000
+    ? t('active.distM', { n: Math.round(alert.distanceM) })
+    : t('active.distKm', { n: (alert.distanceM / 1000).toFixed(1) });
+
+  return (
+    <Animated.View
+      style={[alertStyles.banner, alertStyles.bannerCamera, { opacity: flashAnim }]}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="assertive"
+      testID="nav.speedCamera"
+    >
+      <RNText style={alertStyles.alertEmoji}>📷</RNText>
+      <View style={alertStyles.alertBody}>
+        <RNText style={alertStyles.alertTitle}>{t('alerts.speedCameraTitle')}</RNText>
+        <RNText style={alertStyles.alertSub}>
+          {t('alerts.speedCamera', { dist: distLabel })}
+          {` · ${alert.limitKmh} كم/س`}
+        </RNText>
+      </View>
+      <TouchableOpacity
+        onPress={onDismiss}
+        accessibilityRole="button"
+        accessibilityLabel={t('alerts.dismiss')}
+        style={alertStyles.dismissBtn}
+      >
+        <RNText style={alertStyles.dismissText}>✕</RNText>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+// ─── Police checkpoint warning ────────────────────────────────────────────────
+
+interface PoliceCheckpointAlertProps {
+  alert: PoliceCheckpointAlert;
+  palette: typeof DAY;
+  onDismiss: () => void;
+}
+
+function PoliceCheckpointAlertBanner({ alert, onDismiss }: PoliceCheckpointAlertProps): ReactElement {
+  const slideAnim = useRef(new Animated.Value(-80)).current;
+
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 60,
+      friction: 9,
+    }).start();
+  }, [slideAnim]);
+
+  const distLabel = alert.distanceM < 1000
+    ? t('active.distM', { n: Math.round(alert.distanceM) })
+    : t('active.distKm', { n: (alert.distanceM / 1000).toFixed(1) });
+
+  return (
+    <Animated.View
+      style={[alertStyles.banner, alertStyles.bannerPolice, { transform: [{ translateY: slideAnim }] }]}
+      accessibilityRole="alert"
+      testID="nav.policeCheckpoint"
+    >
+      <RNText style={alertStyles.alertEmoji}>🚔</RNText>
+      <View style={alertStyles.alertBody}>
+        <RNText style={alertStyles.alertTitle}>{t('alerts.policeCheckpointTitle')}</RNText>
+        <RNText style={alertStyles.alertSub}>{t('alerts.policeCheckpoint', { dist: distLabel })}</RNText>
+      </View>
+      <TouchableOpacity
+        onPress={onDismiss}
+        accessibilityRole="button"
+        accessibilityLabel={t('alerts.dismiss')}
+        style={alertStyles.dismissBtn}
+      >
+        <RNText style={alertStyles.dismissText}>✕</RNText>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+const alertStyles = StyleSheet.create({
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: tokens.space.s,
+    marginVertical: 2,
+    borderRadius: 12,
+    paddingVertical: tokens.space.s,
+    paddingHorizontal: tokens.space.m,
+    gap: tokens.space.s,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  bannerCamera: { backgroundColor: '#FEF3C7', borderWidth: 2, borderColor: '#F59E0B' },
+  bannerPolice: { backgroundColor: '#EFF6FF', borderWidth: 2, borderColor: '#3B82F6' },
+  alertEmoji: { fontSize: 26 },
+  alertBody: { flex: 1, gap: 2 },
+  alertTitle: { fontSize: 14, fontWeight: '700', color: '#1F2937' },
+  alertSub: { fontSize: 12, color: '#6B7280' },
+  dismissBtn: { padding: 4 },
+  dismissText: { fontSize: 16, color: '#9CA3AF', fontWeight: '700' },
+});
+
+// ─── Rerouting animation overlay ──────────────────────────────────────────────
+
+function ReroutingOverlay({ palette }: { palette: typeof DAY }): ReactElement {
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ),
+    ]).start();
+    return () => {
+      rotateAnim.stopAnimation();
+      fadeAnim.stopAnimation();
+    };
+  }, [rotateAnim, fadeAnim]);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  return (
+    <Animated.View
+      style={[rerouteStyles.overlay, { backgroundColor: palette.surface, opacity: fadeAnim }]}
+      accessibilityRole="progressbar"
+      testID="nav.rerouting-overlay"
+    >
+      <Animated.Text style={[rerouteStyles.spinner, { transform: [{ rotate: spin }] }]}>
+        🔄
+      </Animated.Text>
+      <RNText style={[rerouteStyles.label, { color: palette.text }]}>
+        {t('alerts.rerouting')}
+      </RNText>
+    </Animated.View>
+  );
+}
+
+const rerouteStyles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    start: 0,
+    end: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.space.m,
+    zIndex: 50,
+  },
+  spinner: { fontSize: 48 },
+  label: { fontSize: 18, fontWeight: '700', writingDirection: 'rtl' },
+});
+
+// ─── Lock screen view ─────────────────────────────────────────────────────────
+
+interface LockScreenViewProps {
+  instruction: string;
+  distanceM: number;
+  palette: typeof DAY;
+}
+
+function LockScreenView({ instruction, distanceM, palette }: LockScreenViewProps): ReactElement {
+  const distLabel = distanceM < 1000
+    ? t('active.distM', { n: Math.round(distanceM) })
+    : t('active.distKm', { n: (distanceM / 1000).toFixed(1) });
+
+  return (
+    <View style={[lockStyles.container, { backgroundColor: palette.bg }]}>
+      <RNText style={[lockStyles.title, { color: palette.text }]} accessibilityRole="header">
+        {t('alerts.lockScreenTitle')}
+      </RNText>
+      <RNText style={[lockStyles.instruction, { color: palette.primary }]}>
+        {instruction}
+      </RNText>
+      <RNText style={[lockStyles.distance, { color: palette.textMuted }]}>
+        {distLabel}
+      </RNText>
+    </View>
+  );
+}
+
+const lockStyles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0, start: 0, end: 0, bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.space.l,
+    zIndex: 100,
+    paddingHorizontal: tokens.space.xl,
+  },
+  title: { fontSize: 20, fontWeight: '600', opacity: 0.7 },
+  instruction: { fontSize: 42, fontWeight: '900', textAlign: 'center' },
+  distance: { fontSize: 28, fontWeight: '700' },
+});
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface NavigationScreenProps extends NavigationState {
@@ -129,6 +370,14 @@ export interface NavigationScreenProps extends NavigationState {
   lanes?: Lane[];
   /** Called when user wants to search for services along the route. */
   onSearchAlong?: () => void;
+  /** Speed camera ahead. */
+  speedCameraAlert?: SpeedCameraAlert | null;
+  /** Police checkpoint ahead. */
+  policeCheckpointAlert?: PoliceCheckpointAlert | null;
+  /** Current GPS heading in degrees (0 = north). */
+  currentHeadingDeg?: number | null;
+  /** Sunset time: when to auto-switch to night palette. */
+  sunsetTime?: Date | null;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -343,10 +592,35 @@ export function NavigationScreen({
   destinationName,
   lanes,
   onSearchAlong,
+  speedCameraAlert: speedCameraAlertProp = null,
+  policeCheckpointAlert: policeCheckpointAlertProp = null,
+  currentHeadingDeg,
+  sunsetTime,
 }: NavigationScreenProps): ReactElement {
   const [showSavedRoutes, setShowSavedRoutes] = useState(false);
+  const [dismissedCamera, setDismissedCamera] = useState(false);
+  const [dismissedPolice, setDismissedPolice] = useState(false);
+  const [lockScreen, setLockScreen] = useState(false);
+  const [followMode, setFollowMode] = useState(true);
   const colorScheme = useColorScheme();
-  const palette = colorScheme === 'dark' ? NIGHT : DAY;
+
+  // Auto night mode: switch to NIGHT palette at sunset time.
+  const isAfterSunset = useMemo(() => {
+    if (sunsetTime == null) return false;
+    return Date.now() > sunsetTime.getTime();
+  }, [sunsetTime]);
+
+  const palette = (colorScheme === 'dark' || isAfterSunset) ? NIGHT : DAY;
+
+  // Reset camera dismiss when a new alert comes in.
+  useEffect(() => { setDismissedCamera(false); }, [speedCameraAlertProp?.distanceM]);
+  useEffect(() => { setDismissedPolice(false); }, [policeCheckpointAlertProp?.distanceM]);
+
+  const showCameraAlert = speedCameraAlertProp != null && !dismissedCamera;
+  const showPoliceAlert = policeCheckpointAlertProp != null && !dismissedPolice;
+
+  const toggleFollowMode = useCallback(() => setFollowMode((v) => !v), []);
+  const toggleLockScreen = useCallback(() => setLockScreen((v) => !v), []);
 
   const routeProp = useMemo(
     () => (routePolyline6 != null ? { polyline6: routePolyline6 } : undefined),
@@ -386,14 +660,44 @@ export function NavigationScreen({
             lang={(lang ?? 'ar') as 'ar' | 'en' | 'ckb'}
             route={routeProp}
             showUserLocation
-            followUser
+            followUser={followMode}
           />
         </View>
       ) : null}
 
-      {/* ── Rerouting banner ── */}
+      {/* ── Rerouting overlay animation ── */}
+      {isRerouting ? <ReroutingOverlay palette={palette} /> : null}
+
+      {/* ── Rerouting banner (fallback when overlay not used) ── */}
       {isRerouting ? (
         <Banner kind="info" message={t('active.rerouting')} testID={navigationTestIDs.active.reroute} />
+      ) : null}
+
+      {/* ── Speed camera alert ── */}
+      {showCameraAlert && speedCameraAlertProp != null ? (
+        <SpeedCameraAlertBanner
+          alert={speedCameraAlertProp}
+          palette={palette}
+          onDismiss={() => setDismissedCamera(true)}
+        />
+      ) : null}
+
+      {/* ── Police checkpoint alert ── */}
+      {showPoliceAlert && policeCheckpointAlertProp != null ? (
+        <PoliceCheckpointAlertBanner
+          alert={policeCheckpointAlertProp}
+          palette={palette}
+          onDismiss={() => setDismissedPolice(true)}
+        />
+      ) : null}
+
+      {/* ── Lock screen (big text night driving view) ── */}
+      {lockScreen && currentInstruction != null ? (
+        <LockScreenView
+          instruction={currentInstruction}
+          distanceM={distanceToManeuver}
+          palette={palette}
+        />
       ) : null}
 
       {/* ── Off-route banner ── */}
@@ -491,6 +795,45 @@ export function NavigationScreen({
           </RNText>
         </TouchableOpacity>
 
+        {/* Follow mode toggle */}
+        <TouchableOpacity
+          style={[navStyles.actionBtn, followMode && navStyles.actionBtnActive]}
+          onPress={toggleFollowMode}
+          accessibilityRole="button"
+          accessibilityLabel={t('alerts.followMode')}
+          testID="nav.followMode"
+        >
+          <RNText style={[navStyles.actionBtnLabel, { color: followMode ? '#2563EB' : palette.text }]}>
+            {followMode ? '🧭' : '🗺️'} {t('alerts.followMode')}
+          </RNText>
+        </TouchableOpacity>
+
+        {/* Lock screen toggle */}
+        <TouchableOpacity
+          style={[navStyles.actionBtn, lockScreen && navStyles.actionBtnActive]}
+          onPress={toggleLockScreen}
+          accessibilityRole="button"
+          accessibilityLabel={t('alerts.lockScreenTitle')}
+          testID="nav.lockScreen"
+        >
+          <RNText style={[navStyles.actionBtnLabel, { color: palette.text }]}>
+            🔒
+          </RNText>
+        </TouchableOpacity>
+
+        {/* Hands-free stub */}
+        <TouchableOpacity
+          style={navStyles.actionBtn}
+          onPress={() => { /* voice commands stub — wired in a later milestone */ }}
+          accessibilityRole="button"
+          accessibilityLabel={t('alerts.handsFreeVoice')}
+          testID="nav.handsFree"
+        >
+          <RNText style={[navStyles.actionBtnLabel, { color: palette.text }]}>
+            🎙️
+          </RNText>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={[navStyles.actionBtn, navStyles.stopBtn]}
           onPress={onStop}
@@ -560,6 +903,7 @@ const navStyles = StyleSheet.create({
     alignItems: 'center',
   },
   actionBtnLabel: { fontSize: 12, fontWeight: '500' },
+  actionBtnActive: { backgroundColor: '#EFF6FF', borderWidth: 1, borderColor: '#BFDBFE' },
   stopBtn: { backgroundColor: '#FEE2E2' },
   stopBtnLabel: { color: '#DC2626', fontSize: 12, fontWeight: '700' },
 });

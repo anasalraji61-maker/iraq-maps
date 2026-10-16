@@ -196,5 +196,19 @@
     "issueReported": "تم الإبلاغ، شكراً",
     "rateSaved": "تم حفظ التقييم",
     "shareText": "قطعت {km} كم خلال {duration} عبر تطبيق خرائط العراق"
+  },
+  "alerts": {
+    "speedCamera": "كاميرا سرعة بعد {dist}",
+    "policeCheckpoint": "نقطة تفتيش بعد {dist}",
+    "policeCheckpointTitle": "نقطة تفتيش",
+    "speedCameraTitle": "كاميرا سرعة",
+    "dismiss": "إغلاق",
+    "rerouting": "إعادة حساب المسار…",
+    "reroutingTitle": "خارج المسار",
+    "followMode": "وضع المتابعة",
+    "nightMode": "الوضع الليلي",
+    "lockScreenTitle": "الاتجاه التالي",
+    "handsFree": "وضع اليدين الحرتين",
+    "handsFreeVoice": "التحكم الصوتي"
   }
 }
