@@ -16,6 +16,7 @@ export const availableRoutes = (): RouteName[] => [
   'accountMapSettings',
   'accountNavSettings',
   'accountSafety',
+  'accountSafety',
   'accountTheme',
   'accountSavedPlaces',
   'authPhone',

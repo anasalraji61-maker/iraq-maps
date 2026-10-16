@@ -9,19 +9,58 @@
       "subtitle": "Discover places, navigate smartly, and connect with businesses",
       "start": "Get started"
     },
-    "location": {
-      "title": "Your location",
-      "body": "We need your permission to access your location to show nearby places",
-      "allow": "Allow",
-      "skip": "Skip"
-    },
     "language": {
       "title": "Choose your language",
+      "subtitle": "You can change this later in Settings",
       "next": "Next",
       "ar": "العربية",
       "ckb": "کوردی",
       "en": "English"
-    }
+    },
+    "city": {
+      "title": "Where are you?",
+      "subtitle": "We show you nearby places and local events",
+      "baghdad": "Baghdad",
+      "erbil": "Erbil",
+      "basra": "Basra",
+      "mosul": "Mosul",
+      "other": "Other city",
+      "skip": "Skip"
+    },
+    "purpose": {
+      "title": "What do you want to do?",
+      "subtitle": "We tailor your experience based on your interests",
+      "discover": "Discover places",
+      "navigate": "Navigation",
+      "business": "Find services",
+      "discoverDesc": "Restaurants, museums, entertainment",
+      "navigateDesc": "Maps, routes, turn-by-turn",
+      "businessDesc": "Shops, services, businesses"
+    },
+    "notifications": {
+      "title": "Stay informed",
+      "subtitle": "We send you alerts about nearby places and new offers",
+      "allow": "Allow notifications",
+      "skip": "Not now"
+    },
+    "location": {
+      "title": "Your location",
+      "body": "We need your permission to show nearby places and guide you",
+      "allow": "Allow access",
+      "skip": "Skip"
+    },
+    "done": {
+      "title": "You are ready!",
+      "subtitle": "Explore Iraq Smart Maps",
+      "mapHint": "🗺️ Browse the interactive map",
+      "discoverHint": "✨ Explore community posts",
+      "messagesHint": "💬 Contact businesses",
+      "assistantHint": "🤖 Ask our AI assistant",
+      "start": "Start exploring"
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back"
   },
   "error": {
     "unexpected": "An unexpected error occurred",
@@ -31,23 +70,6 @@
   "network": {
     "offline": "No internet connection",
     "restored": "Connection restored"
-  },
-  "tour": {
-    "next": "Next",
-    "done": "Get started",
-    "skip": "Skip",
-    "like": {
-      "title": "Like something?",
-      "body": "Tap the heart to save posts you enjoy"
-    },
-    "search": {
-      "title": "Search easily",
-      "body": "Find places, businesses and users"
-    },
-    "newPost": {
-      "title": "Share your moments",
-      "body": "Post photos and videos with your community"
-    }
   },
   "tour": {
     "next": "Next",
